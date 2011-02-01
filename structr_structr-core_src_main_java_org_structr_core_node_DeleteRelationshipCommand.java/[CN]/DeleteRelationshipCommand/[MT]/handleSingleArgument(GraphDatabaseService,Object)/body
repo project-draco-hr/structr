@@ -1,0 +1,19 @@
+{
+  if (argument instanceof Long) {
+    long id=((Long)argument).longValue();
+    Relationship rel=graphDb.getRelationshipById(id);
+    if (rel != null) {
+      rel.delete();
+    }
+  }
+ else   if (argument instanceof StructrRelationship) {
+    StructrRelationship rel=(StructrRelationship)argument;
+    rel.getRelationship().delete();
+  }
+ else   if (argument instanceof Relationship) {
+    Relationship rel=(Relationship)argument;
+    rel.delete();
+  }
+  setExitCode(exitCode.SUCCESS);
+  return null;
+}

@@ -1,0 +1,81 @@
+{
+  Column iconCol=new Column("iconSrc"){
+    @Override public void renderTableData(    Object row,    HtmlStringBuffer buffer,    Context context,    int rowIndex){
+      if (getMessageFormat() == null && getFormat() != null) {
+        Locale locale=context.getLocale();
+        setMessageFormat(new MessageFormat(getFormat(),locale));
+      }
+      buffer.elementStart("td");
+      if (getRenderId()) {
+        buffer.appendAttribute("id",getId() + "_" + rowIndex);
+      }
+      buffer.appendAttribute("class",getDataClass());
+      if (getTitleProperty() != null) {
+        Object titleValue=getProperty(getTitleProperty(),row);
+        buffer.appendAttributeEscaped("title",titleValue);
+      }
+      if (hasAttributes()) {
+        buffer.appendAttributes(getAttributes());
+      }
+      if (hasDataStyles()) {
+        buffer.appendStyleAttributes(getDataStyles());
+      }
+      buffer.appendAttribute("width",getWidth());
+      buffer.closeTag();
+      buffer.elementStart("img");
+      buffer.appendAttribute("src",getContext().getRequest().getContextPath() + getProperty(row));
+      buffer.elementEnd("img");
+      buffer.elementEnd("td");
+    }
+  }
+;
+  iconCol.setHeaderTitle("Icon");
+  nodeTable.addColumn(iconCol);
+  Column typeCol=new Column("key"){
+    @Override public void renderTableData(    Object row,    HtmlStringBuffer buffer,    Context context,    int rowIndex){
+      if (getMessageFormat() == null && getFormat() != null) {
+        Locale locale=context.getLocale();
+        setMessageFormat(new MessageFormat(getFormat(),locale));
+      }
+      buffer.elementStart("td");
+      if (getRenderId()) {
+        buffer.appendAttribute("id",getId() + "_" + rowIndex);
+      }
+      buffer.appendAttribute("class",getDataClass());
+      if (getTitleProperty() != null) {
+        Object titleValue=getProperty(getTitleProperty(),row);
+        buffer.appendAttributeEscaped("title",titleValue);
+      }
+      if (hasAttributes()) {
+        buffer.appendAttributes(getAttributes());
+      }
+      if (hasDataStyles()) {
+        buffer.appendStyleAttributes(getDataStyles());
+      }
+      buffer.appendAttribute("width",getWidth());
+      buffer.closeTag();
+      buffer.elementStart("img");
+      buffer.appendAttribute("src",getContext().getRequest().getContextPath() + getProperty(row));
+      buffer.elementEnd("img");
+      createNodeLink=new ActionLink("createNodeLink",(String)getProperty(row),this,"onCreateNodeClick");
+      createNodeLink.render(buffer);
+      buffer.elementEnd("td");
+    }
+  }
+;
+  typeCol.setHeaderTitle("Type");
+  nodeTable.addColumn(typeCol);
+  nodeTable.setDataProvider(new DataProvider(){
+    @Override public List<NodeType> getData(){
+      Map<String,Class> entities=(Map<String,Class>)Services.createCommand(GetEntitiesCommand.class).execute();
+      List<NodeType> list=new ArrayList<NodeType>();
+      for (      Entry<String,Class> entry : entities.entrySet()) {
+        String n=entry.getKey();
+        Class c=entry.getValue();
+        list.add(new NodeType(n,c));
+      }
+      return list;
+    }
+  }
+);
+}

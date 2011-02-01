@@ -1,0 +1,27 @@
+{
+  String modulesConfPath=Services.getFilePath(Path.Base,MODULES_CONF);
+  Properties ret=new Properties();
+  if (modulesConfPath != null) {
+    File modulesConfFile=new File(modulesConfPath);
+    if (modulesConfFile.exists()) {
+      try {
+        FileInputStream fis=new FileInputStream(modulesConfFile);
+        ret.load(fis);
+        fis.close();
+      }
+ catch (      IOException ioex) {
+        logger.log(Level.WARNING,"Could not read {0}: {1}",new Object[]{MODULES_CONF,ioex});
+      }
+    }
+ else {
+      logger.log(Level.INFO,"{0} does not exist, creating it..",MODULES_CONF);
+      try {
+        modulesConfFile.createNewFile();
+      }
+ catch (      IOException ioex) {
+        logger.log(Level.WARNING,"Could not create {0}: {1}",new Object[]{MODULES_CONF,ioex});
+      }
+    }
+  }
+  return (ret);
+}

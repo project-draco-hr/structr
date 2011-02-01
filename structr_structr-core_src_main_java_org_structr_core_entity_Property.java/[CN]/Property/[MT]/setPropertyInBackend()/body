@@ -1,0 +1,16 @@
+{
+  Command transaction=Services.createCommand(TransactionCommand.class);
+  transaction.execute(new StructrTransaction(){
+    @Override public Object execute() throws Throwable {
+      if (key.equals(StructrNode.CREATED_DATE_KEY) || key.equals(StructrNode.LAST_MODIFIED_DATE_KEY)) {
+        Date d=(Date)value;
+        dbNode.setProperty(key,d.getTime());
+      }
+ else {
+        dbNode.setProperty(key,value);
+      }
+      return (null);
+    }
+  }
+);
+}

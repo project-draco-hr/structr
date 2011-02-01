@@ -1,0 +1,57 @@
+{
+  StructrNode p=(StructrNode)parentNode.getValue();
+  if (!(p instanceof Link)) {
+    List<StructrNode> nodes=new ArrayList<StructrNode>();
+    Command nodeFactory=Services.createCommand(NodeFactoryCommand.class);
+    Command relCommand=Services.createCommand(NodeRelationshipsCommand.class);
+    List<StructrRelationship> rels=(List<StructrRelationship>)relCommand.execute(nodeToAdd,RelType.HAS_CHILD,Direction.OUTGOING);
+    if (rels.size() > 1000) {
+      logger.log(Level.WARNING,"Node has many relationships: {0}",rels.size());
+    }
+    int counter=0;
+    for (    StructrRelationship r : rels) {
+      StructrNode subNode=r.getEndNode();
+      if (isSuperUser || (subNode.isVisible() && subNode.readAllowed(user))) {
+        StructrNode s=(StructrNode)nodeFactory.execute(subNode);
+        nodes.add(s);
+      }
+      counter++;
+      if (counter > 1000) {
+        logger.log(Level.SEVERE,"This node has too many relationships, displaying only the first 1000");
+        break;
+      }
+    }
+    nodeFactory=Services.createCommand(LinkNodeFactoryCommand.class);
+    rels=(List<StructrRelationship>)relCommand.execute(nodeToAdd,RelType.LINK,Direction.OUTGOING);
+    for (    StructrRelationship r : rels) {
+      StructrNode subNode=r.getEndNode();
+      if (isSuperUser || (subNode.isVisible() && subNode.readAllowed(user))) {
+        StructrNode s=(StructrNode)nodeFactory.execute(subNode);
+        nodes.add(s);
+      }
+    }
+    if (!(nodes.isEmpty())) {
+      Collections.sort(nodes,new Comparator<StructrNode>(){
+        @Override public int compare(        StructrNode nodeOne,        StructrNode nodeTwo){
+          return nodeOne.getPosition().compareTo(nodeTwo.getPosition());
+        }
+      }
+);
+      for (      StructrNode s : nodes) {
+        TreeNode newNode=addTreeNode(s,parentNode);
+        List<TreeNode> expandedNodes=nodeTree.getExpandedNodes(true);
+        if (openNodes.contains(newNode) || expandedNodes.contains(newNode)) {
+          nodeTree.expand(newNode);
+          addItems(newNode,s);
+        }
+ else {
+          if (s.hasChildren()) {
+            DummyNode dummyNode=new DummyNode();
+            addTreeNode(dummyNode,newNode);
+          }
+        }
+        newNode.setChildrenSupported(true);
+      }
+    }
+  }
+}

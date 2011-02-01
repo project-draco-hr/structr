@@ -1,0 +1,24 @@
+{
+  Neo4jSpatialDataStore n4jstore=new Neo4jSpatialDataStore(graphDb);
+  SimpleFeatureSource featureSource=null;
+  try {
+    featureSource=n4jstore.getFeatureSource(layerName);
+    SpatialDatabaseService spatialService=new SpatialDatabaseService(graphDb);
+    Layer layer=spatialService.getLayer(layerName);
+    SpatialIndexReader spatialIndex=layer.getIndex();
+    Search searchQuery=new SearchIntersectWindow(envelope);
+    spatialIndex.executeSearch(searchQuery);
+    List<SpatialDatabaseRecord> results=searchQuery.getResults();
+    List<Filter> filterList=new ArrayList<Filter>();
+    for (    SpatialDatabaseRecord r : results) {
+      filterList.add(CQL.toFilter("NAME like '" + StringEscapeUtils.escapeSql((String)r.getProperty("NAME")) + "'"));
+    }
+    Filter filter=filterFactory.or(filterList);
+    Query query=new Query(layerName,filter);
+    return featureSource.getFeatures(query);
+  }
+ catch (  Throwable t) {
+    logger.log(Level.SEVERE,"Could not get intersection features",t);
+  }
+  return null;
+}

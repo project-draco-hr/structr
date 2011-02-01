@@ -1,0 +1,36 @@
+{
+  int counter=0;
+  for (  Node n : graphDb.getAllNodes()) {
+    long id=n.getId();
+    if (!n.hasRelationship(Direction.OUTGOING)) {
+      boolean nameMatches=false;
+      if (n.hasProperty("name") && n.getProperty("name").equals(nameAttr)) {
+        nameMatches=true;
+      }
+      boolean typeMatches=false;
+      if (n.hasProperty("type") && n.getProperty("type").equals(typeAttr)) {
+        typeMatches=true;
+      }
+      if (nameMatches && typeMatches) {
+        if (!test) {
+          for (          Relationship r : n.getRelationships()) {
+            r.delete();
+          }
+          n.delete();
+          System.out.println("Node " + id + " had no outgoing relationships, deleted.");
+        }
+ else {
+          System.out.println("Empty node " + id + " without outgoing relationships detected. Remove -t flag to delete");
+        }
+      }
+    }
+    counter++;
+    if (counter % 100 == 0) {
+      tx.success();
+      tx.finish();
+      tx=graphDb.beginTx();
+      System.out.println("##### Committed to database after " + counter + " nodes.");
+    }
+  }
+  System.out.println("Processed " + counter + " nodes.");
+}

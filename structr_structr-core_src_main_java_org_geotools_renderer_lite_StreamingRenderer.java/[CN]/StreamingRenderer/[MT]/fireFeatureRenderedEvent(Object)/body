@@ -1,0 +1,15 @@
+{
+  if (!(feature instanceof SimpleFeature)) {
+    if (feature instanceof Feature) {
+      LOGGER.log(Level.FINE,"Skipping non simple feature rendering notification");
+    }
+    return;
+  }
+  if (renderListeners.size() > 0) {
+    RenderListener listener;
+    for (int i=0; i < renderListeners.size(); i++) {
+      listener=renderListeners.get(i);
+      listener.featureRenderer((SimpleFeature)feature);
+    }
+  }
+}

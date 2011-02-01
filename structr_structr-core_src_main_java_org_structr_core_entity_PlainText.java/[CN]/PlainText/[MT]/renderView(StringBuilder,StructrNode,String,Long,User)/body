@@ -1,0 +1,25 @@
+{
+  if (editNodeId != null && getId() == editNodeId.longValue()) {
+    renderEditFrame(out,editUrl);
+  }
+ else {
+    if (isVisible()) {
+      String html=getContent();
+      if (html != null && html.length() > 0) {
+        Template t=startNode.getTemplate(user);
+        if (t != null && t.getCallingNode() != null) {
+          StringWriter content=new StringWriter();
+          replaceByFreeMarker(html,content,startNode,editUrl,editNodeId,user);
+          String test=content.toString();
+          StringBuilder content2=new StringBuilder(test);
+          replaceBySubnodes(content2,startNode,editUrl,editNodeId,user);
+          String test2=content2.toString();
+          out.append(test2);
+        }
+ else {
+          out.append(getContent());
+        }
+      }
+    }
+  }
+}

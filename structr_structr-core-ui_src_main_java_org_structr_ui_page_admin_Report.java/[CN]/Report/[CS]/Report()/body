@@ -1,0 +1,53 @@
+{
+  super();
+  csvSeparatorChar.add(new Option(","));
+  csvSeparatorChar.add(new Option(";"));
+  csvSeparatorChar.add(new Option("|"));
+  csvSeparatorChar.add(new Option("#"));
+  csvQuoteChar.add(new Option("\""));
+  csvQuoteChar.add(new Option("'"));
+  csvQuoteChar.add(new Option(""));
+  csvEscapeChar.add(new Option(""));
+  csvEscapeChar.add(new Option("\""));
+  csvEscapeChar.add(new Option("\\"));
+  csvEscapeChar.add(new Option("\\\\"));
+  csvEscapeChar.add(new Option("'"));
+  reportForm.add(csvSeparatorChar);
+  reportForm.add(csvQuoteChar);
+  reportForm.add(csvEscapeChar);
+  ClickUtils.bind(resultTypeSelect);
+  reportForm.add(resultTypeSelect);
+  String resultTypeFromRequest=resultTypeSelect.getValue();
+  resultTypeSelect.restoreState(getContext());
+  String resultTypeFromSession=resultTypeSelect.getValue();
+  String resultType;
+  if (resultTypeFromRequest != null && !(resultTypeFromRequest.equals(resultTypeFromSession))) {
+    resultType=resultTypeFromRequest;
+    ClickUtils.bind(resultTypeSelect);
+  }
+ else {
+    resultType=resultTypeFromSession;
+  }
+  reportTable.setSortable(true);
+  reportTable.setShowBanner(true);
+  reportTable.setPageSize(DEFAULT_PAGESIZE);
+  reportTable.setClass(Table.CLASS_SIMPLE);
+  populateTypeSelectField();
+  ClickUtils.bind(reset);
+  if (!(reset.isClicked())) {
+    if (resultType != null && !(resultType.isEmpty())) {
+      createDynamicFields(resultType);
+    }
+ else {
+      restoreState();
+    }
+  }
+  propertyFields.setColumns(2);
+  reportForm.add(propertyFields);
+  reportForm.add(submit);
+  reportForm.add(reset);
+  addControl(reportForm);
+  addControl(reportPanel);
+  addControl(reportTable);
+  addControl(resultTypeSelect);
+}

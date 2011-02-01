@@ -1,0 +1,27 @@
+{
+  if (destinationFile.exists()) {
+    return;
+  }
+  if (inputStream != null) {
+    destinationFile.getParentFile().mkdirs();
+    FileOutputStream fos=null;
+    try {
+      fos=new FileOutputStream(destinationFile);
+      byte[] buffer=new byte[1024];
+      while (true) {
+        int length=inputStream.read(buffer);
+        if (length < 0) {
+          break;
+        }
+        fos.write(buffer,0,length);
+      }
+    }
+  finally {
+      if (fos != null) {
+        fos.flush();
+        fos.close();
+      }
+      inputStream.close();
+    }
+  }
+}

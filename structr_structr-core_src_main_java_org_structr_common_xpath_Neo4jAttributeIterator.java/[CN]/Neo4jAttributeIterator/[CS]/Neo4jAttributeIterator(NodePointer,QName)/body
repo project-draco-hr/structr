@@ -1,0 +1,23 @@
+{
+  this.parent=parent;
+  this.name=name;
+  this.node=(Node)parent.getNode();
+  String lname=name.toString();
+  if ("id".equals(name.toString())) {
+    attributes=new Object[1];
+    attributes[0]=node.getId();
+  }
+ else   if (!("*".equals(lname))) {
+    if (node.hasProperty(lname)) {
+      attributes=new Object[1];
+      attributes[0]=node.getProperty(lname);
+    }
+  }
+ else {
+    List properties=new LinkedList();
+    for (    String key : node.getPropertyKeys()) {
+      properties.add(node.getProperty(key));
+    }
+    this.attributes=properties.toArray();
+  }
+}

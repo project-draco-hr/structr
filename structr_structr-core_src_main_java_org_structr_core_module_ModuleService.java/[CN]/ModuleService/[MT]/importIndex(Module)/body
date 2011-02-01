@@ -1,0 +1,83 @@
+{
+  String modulePath=module.getModulePath();
+  JarFile jarFile=new JarFile(modulePath);
+  Set<String> classes=module.getClasses();
+  for (  final String className : classes) {
+    try {
+      String sourcePath=className.replaceAll("[\\.]+","/").concat(".class");
+      String destinationFile=createResourceFileName(servletContext,"WEB-INF/classes",sourcePath);
+      ZipEntry entry=jarFile.getEntry(sourcePath);
+      if (entry != null) {
+        InputStream inputStream=jarFile.getInputStream(entry);
+        if (inputStream != null) {
+          deployFile(inputStream,new File(destinationFile));
+        }
+ else {
+          logger.log(Level.WARNING,"Invalid input stream: {0}",sourcePath);
+        }
+      }
+ else {
+        logger.log(Level.WARNING,"Invalid entry: {0}",sourcePath);
+      }
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"error deploying class {0}: {1}",new Object[]{className,t});
+    }
+  }
+  Set<String> properties=module.getProperties();
+  for (  final String propertiesName : properties) {
+    try {
+      String sourcePath=propertiesName.replaceAll("[\\.]+","/").concat(".properties");
+      String destinationFile=createResourceFileName(servletContext,"WEB-INF/classes",sourcePath);
+      ZipEntry entry=jarFile.getEntry(sourcePath);
+      if (entry != null) {
+        InputStream inputStream=jarFile.getInputStream(entry);
+        if (inputStream != null) {
+          deployFile(inputStream,new File(destinationFile));
+        }
+ else {
+          logger.log(Level.WARNING,"Invalid input stream: {0}",sourcePath);
+        }
+      }
+ else {
+        logger.log(Level.WARNING,"Invalid entry: {0}",sourcePath);
+      }
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"error deploying properties file {0}: {1}",new Object[]{propertiesName,t});
+    }
+  }
+  for (  final String className : classes) {
+    try {
+      Class clazz=Class.forName(className);
+      if (StructrNode.class.isAssignableFrom(clazz)) {
+        String simpleName=clazz.getSimpleName();
+        String fullName=clazz.getName();
+        entityClassCache.put(simpleName,clazz);
+        entityPackages.add(fullName.substring(0,fullName.lastIndexOf(".")));
+      }
+      if (structrPagePredicate.evaluate(clazz)) {
+        String fullName=clazz.getName();
+        String packageName=fullName.substring(0,fullName.lastIndexOf("."));
+        pagePackages.add(packageName);
+        String parentPackage=packageName.substring(0,packageName.lastIndexOf("."));
+        pagePackages.add(parentPackage);
+      }
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"error instantiating class {0}: {1}",new Object[]{className,t});
+    }
+  }
+  Set<String> resources=module.getResources();
+  for (  String resource : resources) {
+    String destinationPath=createResourceFileName(servletContext,resource);
+    try {
+      ZipEntry entry=jarFile.getEntry(resource);
+      InputStream inputStream=jarFile.getInputStream(entry);
+      File destinationFile=new File(destinationPath);
+      deployFile(inputStream,destinationFile);
+    }
+ catch (    Throwable t) {
+    }
+  }
+}

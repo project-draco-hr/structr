@@ -1,0 +1,25 @@
+{
+  List<Class> pageClassList=new ArrayList<Class>();
+  pageClassList.add(pageClass);
+  Class parentClass=pageClass.getSuperclass();
+  while (parentClass != null) {
+    if (parentClass.isAssignableFrom(Page.class)) {
+      break;
+    }
+    pageClassList.add(parentClass);
+    parentClass=parentClass.getSuperclass();
+  }
+  Collections.reverse(pageClassList);
+  Map<String,Field> fieldMap=new TreeMap<String,Field>();
+  for (  Class aPageClass : pageClassList) {
+    for (    Field field : aPageClass.getDeclaredFields()) {
+      if (field.getAnnotation(Bindable.class) != null) {
+        fieldMap.put(field.getName(),field);
+        if (!Modifier.isPublic(field.getModifiers())) {
+          field.setAccessible(true);
+        }
+      }
+    }
+  }
+  return fieldMap;
+}

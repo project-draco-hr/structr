@@ -1,0 +1,20 @@
+{
+  StructrNode nodeForPage;
+  if (n != null) {
+    if (n instanceof Link) {
+      nodeForPage=((Link)n).getStructrNode();
+    }
+ else {
+      nodeForPage=n;
+    }
+    for (    Class<? extends Page> c : getPageClassList()) {
+      String nodeSimpleClassName=nodeForPage.getClass().getSimpleName();
+      String pageSimpleClassName=c.getSimpleName();
+      if (prefix.concat(nodeSimpleClassName).equals(pageSimpleClassName)) {
+        return c;
+      }
+    }
+    System.out.println("No " + prefix + " page found for "+ n.getType());
+  }
+  return null;
+}

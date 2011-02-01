@@ -1,0 +1,18 @@
+{
+  GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
+  List<Property> ret=null;
+  if (parameters.length > 0) {
+    ret=new LinkedList<Property>();
+    for (    Object argument : parameters) {
+      if (argument instanceof StructrNode) {
+        StructrNode structrNode=(StructrNode)argument;
+        Node node=graphDb.getNodeById(structrNode.getId());
+        for (        String key : node.getPropertyKeys()) {
+          Property p=new Property(node,key);
+          ret.add(p);
+        }
+      }
+    }
+  }
+  return (ret);
+}

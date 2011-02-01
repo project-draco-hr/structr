@@ -1,0 +1,73 @@
+{
+  super.onRender();
+  if (node != null) {
+    editVisibilityForm.copyFrom(node);
+    editVisibilityForm.add(new HiddenField(NODE_ID_KEY,nodeId != null ? nodeId : ""));
+    editVisibilityForm.add(new HiddenField(RENDER_MODE_KEY,renderMode != null ? renderMode : ""));
+    editVisibilityForm.add(new HiddenField(RETURN_URL_KEY,returnUrl != null ? returnUrl : ""));
+    editPropertiesForm.copyFrom(node);
+    editPropertiesForm.add(new HiddenField(NODE_ID_KEY,nodeId != null ? nodeId : ""));
+    editPropertiesForm.add(new HiddenField(RENDER_MODE_KEY,renderMode != null ? renderMode : ""));
+    editPropertiesForm.add(new HiddenField(RETURN_URL_KEY,returnUrl != null ? returnUrl : ""));
+    deleteRelationshipLink.setParameter(NODE_ID_KEY,nodeId);
+    securityForm.copyFrom(node);
+    securityForm.add(new HiddenField(NODE_ID_KEY,nodeId != null ? nodeId : ""));
+    securityForm.add(new HiddenField(RENDER_MODE_KEY,renderMode != null ? renderMode : ""));
+    securityForm.add(new HiddenField(RETURN_URL_KEY,returnUrl != null ? returnUrl : ""));
+    childNodesTable.setDataProvider(new DataProvider(){
+      @Override public List<StructrNode> getData(){
+        List<StructrNode> result=new ArrayList<StructrNode>();
+        result.addAll(node.getSortedDirectChildAndLinkNodes(user));
+        return result;
+      }
+    }
+);
+    titlesTable.setDataProvider(new DataProvider(){
+      @Override public List<Title> getData(){
+        return node.getTitles();
+      }
+    }
+);
+    incomingRelationshipsTable.setDataProvider(new DataProvider(){
+      @Override public List<StructrRelationship> getData(){
+        return node.getIncomingRelationships();
+      }
+    }
+);
+    outgoingRelationshipsTable.setDataProvider(new DataProvider(){
+      @Override public List<StructrRelationship> getData(){
+        return node.getOutgoingRelationships();
+      }
+    }
+);
+    userSelect.setDataProvider(new DataProvider(){
+      @Override public List<Option> getData(){
+        List<Option> optionList=new ArrayList<Option>();
+        List<User> users=getAllUsers();
+        if (users != null) {
+          for (          User u : users) {
+            Option o=new Option(u.getName());
+            optionList.add(o);
+          }
+        }
+        return optionList;
+      }
+    }
+);
+    securityTable.setDataProvider(new DataProvider(){
+      @Override public List<StructrRelationship> getData(){
+        List<StructrRelationship> rels=node.getIncomingRelationships();
+        List<StructrRelationship> result=new ArrayList<StructrRelationship>();
+        for (        StructrRelationship r : rels) {
+          RelationshipType rt=r.getRelType();
+          boolean isSecurityRel=rt.equals(RelType.SECURITY);
+          if (isSecurityRel) {
+            result.add(r);
+          }
+        }
+        return result;
+      }
+    }
+);
+  }
+}

@@ -1,0 +1,68 @@
+{
+  List pagesList=ClickUtils.getChildren(rootElm,"pages");
+  if (pagesList.isEmpty()) {
+    String msg="required configuration 'pages' element missing.";
+    throw new RuntimeException(msg);
+  }
+  List templates=getTemplateFiles();
+  for (int i=0; i < pagesList.size(); i++) {
+    Element pagesElm=(Element)pagesList.get(i);
+    boolean automap=true;
+    String automapStr=pagesElm.getAttribute("automapping");
+    if (StringUtils.isBlank(automapStr)) {
+      automapStr="true";
+    }
+    if ("true".equalsIgnoreCase(automapStr)) {
+      automap=true;
+    }
+ else     if ("false".equalsIgnoreCase(automapStr)) {
+      automap=false;
+    }
+ else {
+      String msg="Invalid pages automapping attribute: " + automapStr;
+      throw new RuntimeException(msg);
+    }
+    String autobindingStr=pagesElm.getAttribute("autobinding");
+    if (StringUtils.isBlank(autobindingStr)) {
+      autobinding=AutoBinding.DEFAULT;
+    }
+ else {
+      if ("annotation".equalsIgnoreCase(autobindingStr)) {
+        autobinding=AutoBinding.ANNOTATION;
+      }
+ else       if ("public".equalsIgnoreCase(autobindingStr)) {
+        autobinding=AutoBinding.DEFAULT;
+      }
+ else       if ("default".equalsIgnoreCase(autobindingStr)) {
+        autobinding=AutoBinding.DEFAULT;
+      }
+ else       if ("none".equalsIgnoreCase(autobindingStr)) {
+        autobinding=AutoBinding.NONE;
+      }
+ else       if ("true".equalsIgnoreCase(autobindingStr)) {
+        autobinding=AutoBinding.DEFAULT;
+      }
+ else       if ("false".equalsIgnoreCase(autobindingStr)) {
+        autobinding=AutoBinding.NONE;
+      }
+ else {
+        String msg="Invalid pages autobinding attribute: " + autobindingStr;
+        throw new RuntimeException(msg);
+      }
+    }
+    String pagesPackage=pagesElm.getAttribute("package");
+    if (StringUtils.isBlank(pagesPackage)) {
+      pagesPackage="";
+    }
+    pagesPackage=pagesPackage.trim();
+    if (pagesPackage.endsWith(".") && pagesPackage.length() > 1) {
+      pagesPackage=pagesPackage.substring(0,pagesPackage.length() - 2);
+    }
+    pagePackages.add(pagesPackage);
+    buildManualPageMapping(pagesElm,pagesPackage);
+    if (automap) {
+      buildAutoPageMapping(pagesElm,pagesPackage,templates);
+    }
+  }
+  buildClassMap();
+}

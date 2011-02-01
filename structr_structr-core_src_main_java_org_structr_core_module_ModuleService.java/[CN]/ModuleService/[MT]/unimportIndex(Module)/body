@@ -1,0 +1,31 @@
+{
+  Set<String> resources=module.getResources();
+  for (  String resource : resources) {
+    String destinationPath=createResourceFileName(servletContext,resource);
+    undeployFile(resource,destinationPath);
+  }
+  Set<String> properties=module.getProperties();
+  for (  String propertyName : properties) {
+    String destinationPath=createResourceFileName(servletContext,propertyName);
+    undeployFile(propertyName,destinationPath);
+  }
+  Set<String> classes=module.getClasses();
+  for (  String className : classes) {
+    try {
+      Class clazz=Class.forName(className);
+      if (StructrNode.class.isAssignableFrom(clazz)) {
+        String simpleName=clazz.getSimpleName();
+        String fullName=clazz.getName();
+        entityClassCache.remove(simpleName);
+        entityPackages.remove(fullName.substring(0,fullName.lastIndexOf(".")));
+      }
+ else       if (structrPagePredicate != null && structrPagePredicate.evaluate(clazz)) {
+        String fullName=clazz.getName();
+        pagePackages.remove(fullName.substring(0,fullName.lastIndexOf(".")));
+      }
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"error instantiating class {0}: {1}",new Object[]{className,t});
+    }
+  }
+}

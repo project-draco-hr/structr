@@ -1,0 +1,38 @@
+{
+  super.onRender();
+  if (node != null) {
+    title=node.getName() + " (" + node.getId()+ ") ["+ Services.getApplicationTitle()+ "]";
+  }
+  TreeNode treeNode=null;
+  if (nodeId != null) {
+    treeNode=nodeTree.find(nodeId);
+  }
+  Long intId=0L;
+  StructrNode n=null;
+  if (treeNode != null) {
+    if (!(treeNode.isRoot())) {
+      n=(StructrNode)treeNode.getValue();
+      intId=n.getId();
+      editPropertiesLink.setParameter(NODE_ID_KEY,intId);
+      editPropertiesLink.setImageSrc("/images/table-edit.png");
+      editPropertiesLink.setAttribute("id","editProps_" + intId);
+      editPropertiesLink.setRenderLabelAndImage(true);
+    }
+  }
+ else   if ("0".equals(getNodeId())) {
+    logger.log(Level.FINE,"Root node accessed");
+  }
+ else {
+    okMsg="";
+    logger.log(Level.FINE,"Node {0} not contained in node tree",getNodeId());
+  }
+  if (writeAllowed) {
+    propertiesTable.setDataProvider(new DataProvider(){
+      @Override public List<Property> getData(){
+        return getProperties();
+      }
+    }
+);
+  }
+  storeExpandedTreeNodesInSession();
+}

@@ -1,0 +1,21 @@
+{
+  if (LOGGER.isLoggable(Level.FINEST)) {
+    LOGGER.finest("drawing Image @" + x + ","+ y);
+  }
+  AffineTransform markAT=new AffineTransform();
+  markAT.translate(x,y);
+  markAT.rotate(rotation);
+  markAT.translate(-image.getWidth() / 2.0,-image.getHeight() / 2.0);
+  graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,opacity));
+  Object interpolation=graphics.getRenderingHint(RenderingHints.KEY_INTERPOLATION);
+  if (interpolation == null) {
+    interpolation=RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR;
+  }
+  try {
+    graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION,RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+    graphics.drawRenderedImage(image,markAT);
+  }
+  finally {
+    graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION,interpolation);
+  }
+}

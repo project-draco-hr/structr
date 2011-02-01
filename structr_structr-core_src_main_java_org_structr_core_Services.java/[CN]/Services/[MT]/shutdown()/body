@@ -1,0 +1,14 @@
+{
+  logger.log(Level.INFO,"Shutting down service layer");
+  for (Iterator<Service> it=serviceCache.values().iterator(); it.hasNext(); ) {
+    Service service=it.next();
+    if (service instanceof RunnableService) {
+      RunnableService runnableService=(RunnableService)service;
+      runnableService.stopService();
+    }
+    service.shutdown();
+  }
+  serviceCache.clear();
+  serviceClassCache.clear();
+  logger.log(Level.INFO,"Finished shutdown of service layer");
+}

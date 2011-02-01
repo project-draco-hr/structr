@@ -1,0 +1,16 @@
+{
+  Command search=Services.createCommand(SearchNodeCommand.class);
+  allNodes=(List<StructrNode>)search.execute(null,null,true,false,new SearchAttribute("name","*",SearchOperator.OR));
+  if (allNodes == null) {
+    return;
+  }
+  for (  StructrNode s : allNodes) {
+    String type=s.getType();
+    long value=0L;
+    if (nodesHistogram.containsKey(type)) {
+      value=(Long)nodesHistogram.get(type);
+    }
+    value++;
+    nodesHistogram.put(type,value);
+  }
+}

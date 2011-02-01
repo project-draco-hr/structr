@@ -1,0 +1,34 @@
+{
+  GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
+  Node node=null;
+  Node newParentNode=null;
+  long id=0;
+  long newParentId=0;
+switch (parameters.length) {
+case 2:
+    if (parameters[0] instanceof Long) {
+      id=((Long)parameters[0]).longValue();
+    }
+ else     if (parameters[0] instanceof StructrNode) {
+      id=((StructrNode)parameters[0]).getId();
+    }
+ else     if (parameters[0] instanceof String) {
+      id=Long.parseLong((String)parameters[0]);
+    }
+  node=graphDb.getNodeById(id);
+if (parameters[1] instanceof Long) {
+  newParentId=((Long)parameters[1]).longValue();
+}
+ else if (parameters[1] instanceof StructrNode) {
+  newParentId=((StructrNode)parameters[1]).getId();
+}
+ else if (parameters[1] instanceof String) {
+  newParentId=Long.parseLong((String)parameters[1]);
+}
+newParentNode=graphDb.getNodeById(newParentId);
+break;
+default :
+break;
+}
+return doMoveNode(node,newParentNode);
+}

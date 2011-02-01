@@ -1,0 +1,28 @@
+{
+  if (LOGGER.isLoggable(Level.FINE)) {
+    LOGGER.fine("creating rules for scale denominator - " + NumberFormat.getNumberInstance().format(scaleDenominator));
+  }
+  ArrayList<LiteFeatureTypeStyle> result=new ArrayList<LiteFeatureTypeStyle>();
+  LiteFeatureTypeStyle lfts;
+  for (  FeatureTypeStyle fts : featureStyles) {
+    if (isFeatureTypeStyleActive(ftype,fts)) {
+      List[] splittedRules=splitRules(fts);
+      List ruleList=splittedRules[0];
+      List elseRuleList=splittedRules[1];
+      if ((ruleList.size() == 0) && (elseRuleList.size() == 0)) {
+        continue;
+      }
+      if (result.size() == 0 || !isOptimizedFTSRenderingEnabled()) {
+        lfts=new LiteFeatureTypeStyle(graphics,ruleList,elseRuleList);
+      }
+ else {
+        lfts=new LiteFeatureTypeStyle(new DelayedBackbufferGraphic(graphics,screenSize),ruleList,elseRuleList);
+      }
+      if (screenMapEnabled(lfts)) {
+        lfts.screenMap=new ScreenMap(screenSize.x,screenSize.y,screenSize.width,screenSize.height);
+      }
+      result.add(lfts);
+    }
+  }
+  return result;
+}

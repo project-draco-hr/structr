@@ -1,0 +1,12 @@
+{
+  super.onRender();
+  Command findNode=Services.createCommand(FindNodeCommand.class);
+  Command nodeFactory=Services.createCommand(LinkNodeFactoryCommand.class);
+  node=(Link)nodeFactory.execute((StructrNode)findNode.execute(user,getNodeId()));
+  externalViewUrl=node.getNodeURL(user,contextPath);
+  localViewUrl=getContext().getRequest().getContextPath().concat("/view".concat(node.getNodePath(user)));
+  StructrNode linkedNode=((Link)node).getStructrNode();
+  StringBuilder out=new StringBuilder();
+  linkedNode.renderView(out,node,null,null,user);
+  rendition=out.toString();
+}

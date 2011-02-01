@@ -1,0 +1,16 @@
+{
+  try {
+    registerShutdownHook();
+    if (graphDb == null) {
+      System.out.print("Starting database ...");
+      graphDb=new EmbeddedGraphDatabase(dbPath);
+      System.out.println("done.");
+    }
+    if (graphDb != null) {
+      index=new LuceneFulltextIndexService(graphDb);
+    }
+  }
+ catch (  Exception e) {
+    System.err.print("Could not connect establish database session: " + e.getMessage());
+  }
+}

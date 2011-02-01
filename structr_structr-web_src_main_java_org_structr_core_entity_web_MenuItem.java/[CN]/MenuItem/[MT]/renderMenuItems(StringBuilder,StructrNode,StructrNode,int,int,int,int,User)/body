@@ -1,0 +1,56 @@
+{
+  StructrNode menuItemNode=currentNode;
+  if (currentDepth > maxDepth) {
+    return;
+  }
+  currentDepth++;
+  List<StructrNode> menuItems=menuItemNode.getSortedMenuItems(user);
+  String cssClass="";
+  if (menuItemNode != this) {
+    if (currentPos == 0) {
+      cssClass=" first";
+      out.append("<ul>");
+    }
+    if (currentPos == numberOfSubnodes - 1) {
+      cssClass=" last";
+    }
+    if (menuItemNode instanceof MenuItem) {
+      Page linkedPage=((MenuItem)menuItemNode).getLinkedPage();
+      if (linkedPage != null) {
+        menuItemNode=linkedPage;
+      }
+    }
+    if (menuItemNode.equals(startNode)) {
+      cssClass+=" current";
+    }
+    if (menuItemNode.isVisible()) {
+      String relativeNodePath=menuItemNode.getNodePath(user,startNode).replace("&","%26");
+      if (!(cssClass.isEmpty())) {
+        cssClass=" class=\"" + cssClass + "\"";
+      }
+      out.append("<li").append(cssClass).append(">");
+      out.append("<span>" + "<a href=\"").append(relativeNodePath).append("\">");
+      out.append(currentNode.getName());
+    }
+  }
+  if (currentNode.isVisible()) {
+    int sub=menuItems.size();
+    int pos=0;
+    for (    StructrNode s : menuItems) {
+      renderMenuItems(out,startNode,s,currentDepth,pos,sub,maxDepth,user);
+      pos++;
+    }
+    if (currentNode != this) {
+      out.append("</a>").append("</span>\n");
+      out.append("</li>");
+      if (currentPos == numberOfSubnodes - 1) {
+        cssClass=" last";
+      }
+    }
+  }
+  if (currentNode != this) {
+    if (currentPos == numberOfSubnodes - 1) {
+      out.append("</ul>");
+    }
+  }
+}

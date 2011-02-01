@@ -1,0 +1,30 @@
+{
+  StringBuilder out=new StringBuilder();
+  StringBuilder scriptContent=new StringBuilder();
+  if (parameters != null && parameters.length == 1) {
+    Object o=parameters[0];
+    if (o instanceof String) {
+      scriptContent.append((String)o);
+      if (scriptContent != null && scriptContent.length() > 0) {
+        Global global=new Global();
+        Context cx=ContextFactory.getGlobal().enterContext();
+        global.init(cx);
+        cx.setOptimizationLevel(-1);
+        Scriptable scope=cx.initStandardObjects(global);
+        try {
+          Object wrappedOut=Context.javaToJS(out,scope);
+          ScriptableObject.putProperty(scope,"out",wrappedOut);
+          Object result=cx.evaluateString(scope,scriptContent.toString(),"ScriptCommand",1,null);
+          logger.log(Level.INFO,Context.toString(result));
+        }
+ catch (        Throwable t) {
+          logger.log(Level.SEVERE,"Error evaluating script",t);
+        }
+ finally {
+          Context.exit();
+        }
+      }
+    }
+  }
+  return out.toString();
+}

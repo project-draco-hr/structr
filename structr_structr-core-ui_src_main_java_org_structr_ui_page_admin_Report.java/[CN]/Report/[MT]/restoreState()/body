@@ -1,0 +1,35 @@
+{
+  Context context=getContext();
+  if (context.hasSessionAttribute(REPORT_RESULTS_KEY)) {
+    reportForm.add(resultTypeSelect);
+    reportResults=(List<StructrNode>)context.getSessionAttribute(REPORT_RESULTS_KEY);
+    resultTypeSelect.restoreState(context);
+    columns=(List<Column>)context.getSessionAttribute(REPORT_COLUMNS_KEY);
+    if (columns != null) {
+      for (      Column c : columns) {
+        reportTable.addColumn(c);
+        String fieldName=c.getName();
+        TextField field=new TextField(fieldName);
+        propertyFields.add(field);
+        Checkbox checkbox=new Checkbox(checkBoxName(fieldName),"");
+        propertyFields.add(checkbox);
+      }
+    }
+ else {
+      columns=new ArrayList<Column>();
+    }
+    reportForm.add(propertyFields);
+    reportForm.restoreState(context);
+    if (columns != null) {
+      for (      Column c : columns) {
+        String fieldName=c.getName();
+        String fieldValue=reportForm.getFieldValue(fieldName);
+        searchAttributes.add(new SearchAttribute(fieldName,fieldValue,SearchOperator.AND));
+      }
+    }
+ else {
+      columns=new ArrayList<Column>();
+    }
+    reportTable.restoreState(context);
+  }
+}

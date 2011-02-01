@@ -1,0 +1,19 @@
+{
+  if (editNodeId != null && getId() == editNodeId.longValue()) {
+    renderEditFrame(out,editUrl);
+  }
+ else {
+    if (isVisible()) {
+      if (this instanceof WebNode) {
+        WebNode webNode=(WebNode)this;
+        HomePage homepage=webNode.getHomePage(user);
+        if (homepage == null) {
+          out.append("No home page found for ").append(getName());
+        }
+ else {
+          homepage.renderView(out,this,editUrl,editNodeId,user);
+        }
+      }
+    }
+  }
+}

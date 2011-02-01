@@ -1,0 +1,22 @@
+{
+  PageInterceptor listener=null;
+  if (pageInterceptor == null || !applicationScope) {
+    try {
+      listener=interceptorClass.newInstance();
+      Map ognlContext=new HashMap();
+      for (      Property property : properties) {
+        PropertyUtils.setValueOgnl(listener,property.getName(),property.getValue(),ognlContext);
+      }
+    }
+ catch (    Exception e) {
+      throw new RuntimeException(e);
+    }
+    if (applicationScope) {
+      pageInterceptor=listener;
+    }
+  }
+ else {
+    listener=pageInterceptor;
+  }
+  return listener;
+}

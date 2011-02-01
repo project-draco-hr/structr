@@ -1,0 +1,23 @@
+{
+  excludesList.clear();
+  for (Iterator i=ClickUtils.getChildren(pagesElm,"excludes").iterator(); i.hasNext(); ) {
+    excludesList.add(new StructrConfigService.ExcludesElm((Element)i.next()));
+  }
+  if (logService.isDebugEnabled()) {
+    logService.debug("automapped pages:");
+  }
+  for (int i=0; i < templates.size(); i++) {
+    String pagePath=(String)templates.get(i);
+    if (!pageByPathMap.containsKey(pagePath)) {
+      Class pageClass=getPageClass(pagePath,pagesPackage);
+      if (pageClass != null) {
+        StructrConfigService.PageElm page=new StructrConfigService.PageElm(pagePath,pageClass,commonHeaders,autobinding);
+        pageByPathMap.put(page.getPath(),page);
+        if (logService.isDebugEnabled()) {
+          String msg=pagePath + " -> " + pageClass.getName();
+          logService.debug(msg);
+        }
+      }
+    }
+  }
+}

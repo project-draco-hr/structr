@@ -1,0 +1,34 @@
+{
+  Rectangle2D bounds=(Rectangle2D)getLabelBounds().clone();
+  int haloRadius=Math.round(labelItem.getTextStyle().getHaloFill() != null ? labelItem.getTextStyle().getHaloRadius() : 0);
+  bounds.add(bounds.getMinX() - haloRadius,bounds.getMinY() - haloRadius);
+  bounds.add(bounds.getMaxX() + haloRadius,bounds.getMaxY() + haloRadius);
+  if (labelItem.getTextStyle().getGraphic() != null) {
+    Rectangle2D area=labelItem.getTextStyle().getGraphicDimensions();
+    Rectangle2D shieldBounds;
+    int[] margin=labelItem.getGraphicMargin();
+    GraphicResize mode=labelItem.getGraphicsResize();
+    if (mode == GraphicResize.STRETCH) {
+      shieldBounds=applyMargins(margin,bounds);
+    }
+ else     if (mode == GraphicResize.PROPORTIONAL) {
+      double factor=1;
+      if (bounds.getWidth() > bounds.getHeight()) {
+        factor=bounds.getWidth() / area.getWidth();
+      }
+ else {
+        factor=bounds.getHeight() / area.getHeight();
+      }
+      double width=area.getWidth() * factor;
+      double height=area.getHeight() * factor;
+      shieldBounds=new Rectangle2D.Double(width / 2 + bounds.getMinX() - bounds.getWidth() / 2,height / 2 + bounds.getMinY() - bounds.getHeight() / 2,width,height);
+      shieldBounds=applyMargins(margin,shieldBounds);
+    }
+ else {
+      shieldBounds=new Rectangle2D.Double(-area.getWidth() / 2 + bounds.getMinX() - bounds.getWidth() / 2,-area.getHeight() / 2 + bounds.getMinY() - bounds.getHeight() / 2,area.getWidth(),area.getHeight());
+    }
+    bounds=bounds.createUnion(shieldBounds);
+  }
+  normalizeBounds(bounds);
+  return bounds;
+}

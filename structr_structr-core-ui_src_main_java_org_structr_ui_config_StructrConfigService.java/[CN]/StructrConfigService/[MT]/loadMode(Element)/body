@@ -1,0 +1,44 @@
+{
+  Element modeElm=ClickUtils.getChild(rootElm,"mode");
+  String modeValue="development";
+  if (modeElm != null) {
+    if (StringUtils.isNotBlank(modeElm.getAttribute("value"))) {
+      modeValue=modeElm.getAttribute("value");
+    }
+  }
+  modeValue=System.getProperty("click.mode",modeValue);
+  if (modeValue.equalsIgnoreCase("production")) {
+    mode=PRODUCTION;
+  }
+ else   if (modeValue.equalsIgnoreCase("profile")) {
+    mode=PROFILE;
+  }
+ else   if (modeValue.equalsIgnoreCase("development")) {
+    mode=DEVELOPMENT;
+  }
+ else   if (modeValue.equalsIgnoreCase("debug")) {
+    mode=DEBUG;
+  }
+ else   if (modeValue.equalsIgnoreCase("trace")) {
+    mode=TRACE;
+  }
+ else {
+    logService.error("invalid application mode: '" + modeValue + "' - defaulted to '"+ MODE_VALUES[DEBUG]+ "'");
+    mode=DEBUG;
+  }
+  if (logService instanceof ConsoleLogService) {
+    int logLevel=ConsoleLogService.INFO_LEVEL;
+    if (mode == PRODUCTION) {
+      logLevel=ConsoleLogService.WARN_LEVEL;
+    }
+ else     if (mode == DEVELOPMENT) {
+    }
+ else     if (mode == DEBUG) {
+      logLevel=ConsoleLogService.DEBUG_LEVEL;
+    }
+ else     if (mode == TRACE) {
+      logLevel=ConsoleLogService.TRACE_LEVEL;
+    }
+    ((ConsoleLogService)logService).setLevel(logLevel);
+  }
+}

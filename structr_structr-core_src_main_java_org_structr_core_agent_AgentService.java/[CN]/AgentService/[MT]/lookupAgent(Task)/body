@@ -1,0 +1,32 @@
+{
+  Class taskClass=task.getClass();
+  Agent agent=null;
+  Class agentClass=agentClassCache.get(taskClass);
+  if (agentClass == null) {
+    Set<Class> agentClasses=ClasspathEntityLocator.locateEntitiesByType(Agent.class);
+    for (    Class supportedAgentClass : agentClasses) {
+      try {
+        Agent supportedAgent=(Agent)supportedAgentClass.newInstance();
+        Class supportedTaskClass=supportedAgent.getSupportedTaskType();
+        if (supportedTaskClass.equals(taskClass)) {
+          agentClass=supportedAgentClass;
+        }
+        agentClassCache.put(supportedTaskClass,supportedAgentClass);
+      }
+ catch (      IllegalAccessException iaex) {
+      }
+catch (      InstantiationException itex) {
+      }
+    }
+  }
+  if (agentClass != null) {
+    try {
+      agent=(Agent)agentClass.newInstance();
+    }
+ catch (    IllegalAccessException iaex) {
+    }
+catch (    InstantiationException itex) {
+    }
+  }
+  return (agent);
+}

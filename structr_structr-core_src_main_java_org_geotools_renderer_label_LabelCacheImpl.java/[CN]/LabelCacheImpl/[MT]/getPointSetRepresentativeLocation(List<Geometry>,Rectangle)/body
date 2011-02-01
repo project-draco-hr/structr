@@ -1,0 +1,18 @@
+{
+  ArrayList<Point> pts=new ArrayList<Point>();
+  for (  Geometry g : geoms) {
+    if (!((g instanceof Point) || (g instanceof MultiPoint)))     g=g.getCentroid();
+    if (g instanceof Point) {
+      Point point=(Point)g;
+      if (displayArea.contains(point.getX(),point.getY()))       pts.add(point);
+    }
+ else     if (g instanceof MultiPoint) {
+      for (int t=0; t < g.getNumGeometries(); t++) {
+        Point gg=(Point)g.getGeometryN(t);
+        if (displayArea.contains(gg.getX(),gg.getY()))         pts.add(gg);
+      }
+    }
+  }
+  if (pts.size() == 0)   return null;
+  return (Point)pts.get(0);
+}

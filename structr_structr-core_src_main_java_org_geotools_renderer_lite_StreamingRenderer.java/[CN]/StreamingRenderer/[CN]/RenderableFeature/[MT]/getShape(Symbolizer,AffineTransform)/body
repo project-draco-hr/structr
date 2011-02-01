@@ -1,0 +1,61 @@
+{
+  Geometry g=findGeometry(content,symbolizer);
+  if (g == null) {
+    return null;
+  }
+  try {
+    if (screenMap != null && !(symbolizer instanceof PointSymbolizer) && !(g instanceof Point)) {
+      Envelope env=g.getEnvelopeInternal();
+      if (screenMap.canSimplify(env)) {
+        if (screenMap.checkAndSet(env)) {
+          return null;
+        }
+ else {
+          g=screenMap.getSimplifiedShape(env.getMinX(),env.getMinY(),env.getMaxX(),env.getMaxY(),g.getFactory(),g.getClass());
+        }
+      }
+    }
+    SymbolizerAssociation sa=(SymbolizerAssociation)symbolizerAssociationHT.get(symbolizer);
+    MathTransform2D crsTransform=null;
+    MathTransform2D atTransform=null;
+    MathTransform2D fullTransform=null;
+    if (sa == null) {
+      sa=new SymbolizerAssociation();
+      sa.crs=(findGeometryCS(layer,content,symbolizer));
+      try {
+        crsTransform=buildTransform(sa.crs,destinationCrs);
+        atTransform=(MathTransform2D)ProjectiveTransform.create(worldToScreenTransform);
+        fullTransform=buildFullTransform(sa.crs,destinationCrs,at);
+      }
+ catch (      Exception e) {
+        LOGGER.log(Level.WARNING,e.getLocalizedMessage(),e);
+      }
+      sa.xform=fullTransform;
+      sa.crsxform=crsTransform;
+      sa.axform=atTransform;
+      symbolizerAssociationHT.put(symbolizer,sa);
+    }
+    if (symbolizer instanceof PointSymbolizer) {
+      if (!clone && g.getFactory().getCoordinateSequenceFactory() instanceof LiteCoordinateSequenceFactory) {
+        getTransformedShape(g,sa);
+        return getTransformedShape(RendererUtilities.getCentroid(g),null);
+      }
+ else {
+        return getTransformedShape(RendererUtilities.getCentroid(g),sa);
+      }
+    }
+ else {
+      return getTransformedShape(g,sa);
+    }
+  }
+ catch (  TransformException te) {
+    LOGGER.log(Level.FINE,te.getLocalizedMessage(),te);
+    fireErrorEvent(te);
+    return null;
+  }
+catch (  AssertionError ae) {
+    LOGGER.log(Level.FINE,ae.getLocalizedMessage(),ae);
+    fireErrorEvent(ae);
+    return null;
+  }
+}

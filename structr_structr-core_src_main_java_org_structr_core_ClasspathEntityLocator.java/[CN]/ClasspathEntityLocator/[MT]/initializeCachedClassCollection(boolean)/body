@@ -1,0 +1,29 @@
+{
+  initializeCachedClassNameCollection(forceReload);
+  if (cachedClassCollection == null || forceReload) {
+    if (cachedClassCollection != null) {
+      cachedClassCollection.clear();
+    }
+ else {
+      cachedClassCollection=new HashSet<Class>();
+    }
+  }
+ else {
+    return;
+  }
+  ClassLoader classLoader=ClasspathEntityLocator.class.getClassLoader();
+  for (  String className : cachedClassNameCollection) {
+    String[] parts=className.split("[\\.]+");
+    Class classCandidate=null;
+    for (int startIndex=parts.length - 2; (classCandidate == null && startIndex >= 0); startIndex--) {
+      String fullClassName=concatClassName(parts,startIndex);
+      try {
+        classCandidate=Class.forName(fullClassName,false,classLoader);
+        cachedClassCollection.add(classCandidate);
+      }
+ catch (      Throwable t) {
+        classCandidate=null;
+      }
+    }
+  }
+}

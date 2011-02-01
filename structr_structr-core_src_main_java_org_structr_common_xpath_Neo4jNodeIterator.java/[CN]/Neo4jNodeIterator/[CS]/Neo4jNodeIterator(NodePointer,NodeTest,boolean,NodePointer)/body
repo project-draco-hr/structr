@@ -1,0 +1,38 @@
+{
+  this.parent=parent;
+  if (parent != null) {
+    long t0=System.currentTimeMillis();
+    Node node=null;
+    if (startWith != null) {
+      node=(Node)startWith.getNode();
+    }
+ else {
+      node=(Node)parent.getNode();
+    }
+    String testString="";
+    if (nodeTest instanceof NodeTypeTest) {
+      testString="type:" + ((NodeTypeTest)nodeTest).toString();
+    }
+ else     if (nodeTest instanceof NodeNameTest) {
+      testString="name:" + ((NodeNameTest)nodeTest).getNodeName().toString();
+    }
+ else {
+      testString=nodeTest.toString();
+    }
+    logger.log(Level.FINE,"Starting traversal from node: {0} ({1}), test for {2}",new Object[]{node.getProperty("name"),node.getId(),testString});
+    TraversalDescription descr=Traversal.description().breadthFirst().relationships(RelType.HAS_CHILD,Direction.OUTGOING).relationships(RelType.LINK,Direction.OUTGOING).evaluator(Evaluators.toDepth(0)).filter(getPredicateForTest(nodeTest));
+    long t2=System.currentTimeMillis();
+    try {
+      Traverser traverser=descr.traverse(node);
+      Set<Node> nodeSet=new HashSet<Node>();
+      for (      Node n : traverser.nodes()) {
+        nodeSet.add(n);
+      }
+      nodes=nodeSet.toArray(new Node[0]);
+      logger.log(Level.FINE,"Got node set with {0} entries in {1} ms",new Object[]{nodes.length,t2 - t0});
+    }
+ catch (    Throwable t) {
+      logger.log(Level.SEVERE,"Error while traversing: {0}",t.getMessage());
+    }
+  }
+}

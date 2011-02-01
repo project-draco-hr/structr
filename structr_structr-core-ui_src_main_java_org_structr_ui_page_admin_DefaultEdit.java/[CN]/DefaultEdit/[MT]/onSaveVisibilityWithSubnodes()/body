@@ -1,0 +1,32 @@
+{
+  if (editVisibilityForm.isValid()) {
+    final Command transactionCommand=Services.createCommand(TransactionCommand.class);
+    transactionCommand.execute(new StructrTransaction(){
+      @Override public Object execute() throws Throwable {
+        StructrNode root=getNodeByIdOrPath(getNodeId());
+        List<StructrNode> childNodes=root.getDirectChildren(RelType.HAS_CHILD,user);
+        childNodes.add(root);
+        for (        StructrNode s : childNodes) {
+          if (editVisibilityForm.isValid()) {
+            editVisibilityForm.copyTo(s,true);
+            transactionCommand.setExitCode(Command.exitCode.SUCCESS);
+          }
+ else {
+            transactionCommand.setExitCode(Command.exitCode.FAILURE);
+            transactionCommand.setErrorMessage("Visibility form is invalid");
+          }
+        }
+        return (null);
+      }
+    }
+);
+    okMsg="Node visibility parameter successfully saved.";
+    Map<String,String> parameters=new HashMap<String,String>();
+    parameters.put(NODE_ID_KEY,nodeId.toString());
+    setRedirect(getPath(),parameters);
+    return false;
+  }
+ else {
+    return true;
+  }
+}

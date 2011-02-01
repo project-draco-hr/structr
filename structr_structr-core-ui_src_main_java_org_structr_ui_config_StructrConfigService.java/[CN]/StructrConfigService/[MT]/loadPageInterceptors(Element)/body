@@ -1,0 +1,18 @@
+{
+  List<Element> interceptorList=ClickUtils.getChildren(rootElm,"page-interceptor");
+  for (  Element interceptorElm : interceptorList) {
+    String classname=interceptorElm.getAttribute("classname");
+    String scopeValue=interceptorElm.getAttribute("scope");
+    boolean applicationScope="application".equalsIgnoreCase(scopeValue);
+    Class interceptorClass=ClickUtils.classForName(classname);
+    Map propertyMap=loadPropertyMap(interceptorElm);
+    List<Property> propertyList=new ArrayList<Property>();
+    for (Iterator i=propertyMap.keySet().iterator(); i.hasNext(); ) {
+      String name=i.next().toString();
+      String value=propertyMap.get(name).toString();
+      propertyList.add(new Property(name,value));
+    }
+    PageInterceptorConfig pageInterceptorConfig=new PageInterceptorConfig(interceptorClass,applicationScope,propertyList);
+    pageInterceptorConfigList.add(pageInterceptorConfig);
+  }
+}

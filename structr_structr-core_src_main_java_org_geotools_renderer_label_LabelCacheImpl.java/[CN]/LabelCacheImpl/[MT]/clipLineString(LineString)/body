@@ -1,0 +1,24 @@
+{
+  Geometry clip=line;
+  line.geometryChanged();
+  if (clipper.getBounds().contains(line.getEnvelopeInternal())) {
+    LineString[] lns=new LineString[1];
+    lns[0]=(LineString)clip;
+    return line.getFactory().createMultiLineString(lns);
+  }
+  try {
+    Geometry g=clipper.clip(line,false);
+    if (g == null) {
+      return null;
+    }
+ else     if (g instanceof LineString) {
+      return line.getFactory().createMultiLineString(new LineString[]{(LineString)g});
+    }
+ else {
+      return (MultiLineString)g;
+    }
+  }
+ catch (  Exception e) {
+    return line.getFactory().createMultiLineString(new LineString[]{line});
+  }
+}

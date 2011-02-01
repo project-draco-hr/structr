@@ -1,0 +1,25 @@
+{
+  Element fileUploadServiceElm=ClickUtils.getChild(rootElm,"file-upload-service");
+  if (fileUploadServiceElm != null) {
+    Class fileUploadServiceClass=CommonsFileUploadService.class;
+    String classname=fileUploadServiceElm.getAttribute("classname");
+    if (StringUtils.isNotBlank(classname)) {
+      fileUploadServiceClass=ClickUtils.classForName(classname);
+    }
+    fileUploadService=(FileUploadService)fileUploadServiceClass.newInstance();
+    Map propertyMap=loadPropertyMap(fileUploadServiceElm);
+    for (Iterator i=propertyMap.keySet().iterator(); i.hasNext(); ) {
+      String name=i.next().toString();
+      String value=propertyMap.get(name).toString();
+      Ognl.setValue(name,fileUploadService,value);
+    }
+  }
+ else {
+    fileUploadService=new CommonsFileUploadService();
+  }
+  if (getLogService().isDebugEnabled()) {
+    String msg="initializing FileLoadService: " + fileUploadService.getClass().getName();
+    getLogService().debug(msg);
+  }
+  fileUploadService.onInit(servletContext);
+}

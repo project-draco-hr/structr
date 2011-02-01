@@ -1,0 +1,105 @@
+{
+  final LabelCacheItem labelItem=painter.getLabel();
+  List<LineString> lines=(List<LineString>)getLineSetRepresentativeLocation(labelItem.getGeoms(),displayArea,labelItem.removeGroupOverlaps());
+  if (lines == null || lines.size() == 0)   return false;
+  if (!labelItem.labelAllGroup() && lines.size() > 1) {
+    lines=Collections.singletonList(lines.get(0));
+  }
+  final Rectangle2D textBounds=painter.getFullLabelBounds();
+  final double step=painter.getAscent() > 2 ? painter.getAscent() : 2;
+  int space=labelItem.getSpaceAround();
+  int haloRadius=Math.round(labelItem.getTextStyle().getHaloFill() != null ? labelItem.getTextStyle().getHaloRadius() : 0);
+  int extraSpace=space + haloRadius;
+  int labelDistance=labelItem.getRepeat();
+  int minDistance=labelItem.getMinGroupDistance();
+  LabelIndex groupLabels=new LabelIndex();
+  double labelOffset=labelItem.getMaxDisplacement();
+  boolean allowOverruns=labelItem.allowOverruns();
+  double maxAngleDelta=labelItem.getMaxAngleDelta();
+  int labelCount=0;
+  for (  LineString line : lines) {
+    if (labelItem.isFollowLineEnabled())     line=decimateLineString(line,step);
+    final double lineStringLength=line.getLength();
+    if ((!allowOverruns || labelItem.isFollowLineEnabled()) && line.getLength() < textBounds.getWidth())     return labelCount > 0;
+    double[] labelPositions;
+    if (labelDistance > 0 && labelDistance < lineStringLength / 2) {
+      labelPositions=new double[(int)(lineStringLength / labelDistance)];
+      labelPositions[0]=lineStringLength / 2;
+      double offset=labelDistance;
+      for (int i=1; i < labelPositions.length; i++) {
+        labelPositions[i]=labelPositions[i - 1] + offset;
+        double signum=Math.signum(offset);
+        offset=-1 * signum * (Math.abs(offset) + labelDistance);
+      }
+    }
+ else {
+      labelPositions=new double[1];
+      labelPositions[0]=lineStringLength / 2;
+    }
+    LineStringCursor cursor=new LineStringCursor(line);
+    AffineTransform tx=new AffineTransform();
+    for (int i=0; i < labelPositions.length; i++) {
+      cursor.moveTo(labelPositions[i]);
+      Coordinate centroid=cursor.getCurrentPosition();
+      double currOffset=0;
+      boolean painted=false;
+      while (Math.abs(currOffset) <= labelOffset * 2 && !painted) {
+        tx.setToIdentity();
+        Rectangle2D labelEnvelope;
+        double maxAngleChange=0;
+        double startOrdinate=cursor.getCurrentOrdinate() - textBounds.getWidth() / 2;
+        double endOrdinate=cursor.getCurrentOrdinate() + textBounds.getWidth() / 2;
+        if (labelItem.followLineEnabled) {
+          maxAngleChange=cursor.getMaxAngleChange(startOrdinate,endOrdinate);
+          if (maxAngleChange < MIN_CURVED_DELTA) {
+            setupLineTransform(painter,cursor,centroid,tx,true);
+            labelEnvelope=tx.createTransformedShape(textBounds).getBounds2D();
+          }
+ else {
+            labelEnvelope=getCurvedLabelBounds(cursor,startOrdinate,endOrdinate,textBounds.getHeight() / 2);
+          }
+        }
+ else {
+          setupLineTransform(painter,cursor,centroid,tx,false);
+          labelEnvelope=tx.createTransformedShape(textBounds).getBounds2D();
+        }
+        if (displayArea.contains(labelEnvelope) && !(labelItem.isConflictResolutionEnabled() && paintedBounds.labelsWithinDistance(labelEnvelope,extraSpace)) && !groupLabels.labelsWithinDistance(labelEnvelope,minDistance)) {
+          if (labelItem.isFollowLineEnabled()) {
+            if ((startOrdinate > 0 && endOrdinate <= cursor.getLineStringLength())) {
+              if (maxAngleChange < maxAngleDelta) {
+                if (maxAngleChange < MIN_CURVED_DELTA)                 painter.paintStraightLabel(tx);
+ else {
+                  painter.paintCurvedLabel(cursor);
+                }
+                painted=true;
+              }
+            }
+          }
+ else {
+            if ((allowOverruns || (startOrdinate > 0 && endOrdinate <= cursor.getLineStringLength()))) {
+              painter.paintStraightLabel(tx);
+              painted=true;
+            }
+          }
+        }
+        if (painted) {
+          labelCount++;
+          groupLabels.addLabel(labelItem,labelEnvelope);
+          if (labelItem.isConflictResolutionEnabled())           paintedBounds.addLabel(labelItem,labelEnvelope);
+        }
+ else {
+          double signum=Math.signum(currOffset);
+          if (signum == 0) {
+            currOffset=step;
+          }
+ else {
+            currOffset=-1 * signum * (Math.abs(currOffset) + step);
+          }
+          cursor.moveRelative(currOffset);
+          cursor.getCurrentPosition(centroid);
+        }
+      }
+    }
+  }
+  return labelCount > 0;
+}

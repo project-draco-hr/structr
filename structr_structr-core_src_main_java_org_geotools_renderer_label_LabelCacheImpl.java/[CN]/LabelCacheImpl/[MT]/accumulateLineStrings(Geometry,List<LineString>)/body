@@ -1,0 +1,30 @@
+{
+  if (!((g instanceof LineString) || (g instanceof MultiLineString) || (g instanceof Polygon)|| (g instanceof MultiPolygon)))   return 0;
+  if ((g instanceof Polygon) || (g instanceof MultiPolygon)) {
+    g=g.getBoundary();
+    if (!((g instanceof LineString) || (g instanceof MultiLineString)))     return 0;
+  }
+  if (g instanceof LineString) {
+    if (g.getLength() != 0) {
+      lines.add((LineString)g);
+      return 1;
+    }
+ else {
+      return 0;
+    }
+  }
+ else   if (g instanceof MultiLineString) {
+    for (int t=0; t < g.getNumGeometries(); t++) {
+      LineString gg=(LineString)g.getGeometryN(t);
+      lines.add(gg);
+    }
+    return g.getNumGeometries();
+  }
+ else {
+    int count=0;
+    for (int t=0; t < g.getNumGeometries(); t++) {
+      count+=accumulateLineStrings(g.getGeometryN(t),lines);
+    }
+    return count;
+  }
+}

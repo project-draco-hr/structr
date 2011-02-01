@@ -1,0 +1,105 @@
+{
+  if (graphics == null || paintArea == null) {
+    LOGGER.severe("renderer passed null arguments");
+    throw new NullPointerException("renderer passed null arguments");
+  }
+ else   if (mapArea == null && paintArea == null) {
+    LOGGER.severe("renderer passed null arguments");
+    throw new NullPointerException("renderer passed null arguments");
+  }
+ else   if (mapArea == null) {
+    LOGGER.severe("renderer passed null arguments");
+    throw new NullPointerException("renderer passed null arguments");
+  }
+ else   if (worldToScreen == null) {
+    worldToScreen=RendererUtilities.worldToScreenTransform(mapArea,paintArea);
+    if (worldToScreen == null) {
+      return;
+    }
+  }
+  destinationCrs=mapArea.getCoordinateReferenceSystem();
+  mapExtent=new ReferencedEnvelope(mapArea);
+  this.screenSize=paintArea;
+  this.worldToScreenTransform=worldToScreen;
+  error=0;
+  if (java2dHints != null) {
+    graphics.setRenderingHints(java2dHints);
+  }
+  renderingStopRequested=false;
+  graphics.setClip(paintArea);
+  if (concatTransforms) {
+    AffineTransform atg=graphics.getTransform();
+    atg.concatenate(worldToScreenTransform);
+    worldToScreenTransform=atg;
+    graphics.setTransform(worldToScreenTransform);
+  }
+  scaleDenominator=computeScale(mapArea,paintArea,worldToScreenTransform,rendererHints);
+  if (LOGGER.isLoggable(Level.FINE)) {
+    LOGGER.fine("Computed scale denominator: " + scaleDenominator);
+  }
+  int buffer=getRenderingBuffer();
+  originalMapExtent=mapExtent;
+  if (buffer > 0) {
+    mapExtent=new ReferencedEnvelope(expandEnvelope(mapExtent,worldToScreen,buffer),mapExtent.getCoordinateReferenceSystem());
+  }
+  if (isAdvancedProjectionHandlingEnabled()) {
+    projectionHandler=ProjectionHandlerFinder.getHandler(mapExtent);
+  }
+  requests=new ArrayBlockingQueue<RenderingRequest>(10000);
+  PainterThread painterThread=new PainterThread(requests);
+  ExecutorService localThreadPool=threadPool;
+  boolean userProvidedPool=false;
+  if (localThreadPool == null) {
+    localThreadPool=Executors.newSingleThreadExecutor();
+    userProvidedPool=true;
+  }
+  Future painterFuture=localThreadPool.submit(painterThread);
+  try {
+    final MapLayer[] layers=context.getLayers();
+    labelCache.start();
+    if (labelCache instanceof LabelCacheImpl) {
+      ((LabelCacheImpl)labelCache).setLabelRenderingMode(LabelRenderingMode.valueOf(getTextRenderingMethod()));
+    }
+    final int layersNumber=layers.length;
+    MapLayer currLayer;
+    for (int i=0; i < layersNumber; i++) {
+      currLayer=layers[i];
+      if (!currLayer.isVisible()) {
+        continue;
+      }
+      if (renderingStopRequested) {
+        return;
+      }
+      labelCache.startLayer(i + "");
+      try {
+        processStylers(graphics,currLayer,worldToScreenTransform,destinationCrs,mapExtent,screenSize,i + "");
+      }
+ catch (      Throwable t) {
+        fireErrorEvent(t);
+      }
+      labelCache.endLayer(i + "",graphics,screenSize);
+    }
+  }
+  finally {
+    try {
+      requests.put(new EndRequest());
+      painterFuture.get();
+    }
+ catch (    Exception e) {
+      painterFuture.cancel(true);
+      fireErrorEvent(e);
+    }
+ finally {
+      if (userProvidedPool) {
+        localThreadPool.shutdown();
+      }
+    }
+  }
+  labelCache.end(graphics,paintArea);
+  if (LOGGER.isLoggable(Level.FINE)) {
+    LOGGER.fine(new StringBuffer("Style cache hit ratio: ").append(styleFactory.getHitRatio()).append(" , hits ").append(styleFactory.getHits()).append(", requests ").append(styleFactory.getRequests()).toString());
+  }
+  if (error > 0) {
+    LOGGER.warning(new StringBuffer("Number of Errors during paint(Graphics2D, AffineTransform) = ").append(error).toString());
+  }
+}

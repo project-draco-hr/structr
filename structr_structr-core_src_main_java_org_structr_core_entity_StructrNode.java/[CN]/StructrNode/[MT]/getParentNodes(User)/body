@@ -1,0 +1,12 @@
+{
+  List<StructrNode> nodes=new ArrayList<StructrNode>();
+  Command nodeFactory=Services.createCommand(NodeFactoryCommand.class);
+  List<StructrRelationship> rels=getIncomingChildRelationships();
+  for (  StructrRelationship r : rels) {
+    StructrNode s=(StructrNode)nodeFactory.execute(r.getStartNode());
+    if (s.readAllowed(user)) {
+      nodes.add(s);
+    }
+  }
+  return nodes;
+}

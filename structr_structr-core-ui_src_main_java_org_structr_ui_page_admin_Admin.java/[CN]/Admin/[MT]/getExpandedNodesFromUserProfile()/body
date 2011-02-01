@@ -1,0 +1,31 @@
+{
+  long[] expandedNodesArray=null;
+  if (user != null && !(user instanceof SuperUser)) {
+    try {
+      expandedNodesArray=(long[])user.getProperty(EXPANDED_NODES_KEY);
+    }
+ catch (    Exception e) {
+      logger.log(Level.WARNING,"Could not load expanded nodes as long[]\n{0}",e.getMessage());
+      Object expandedNodesProperty=user.getProperty(EXPANDED_NODES_KEY);
+      if (expandedNodesProperty != null) {
+        if (expandedNodesProperty instanceof String[]) {
+          String[] nodeIds=(String[])expandedNodesProperty;
+          expandedNodesArray=new long[nodeIds.length];
+          for (int i=0; i < nodeIds.length; i++) {
+            expandedNodesArray[i]=Long.parseLong(nodeIds[i]);
+          }
+          storeExpandedNodesInUserProfile(expandedNodesArray);
+        }
+ else         if (expandedNodesProperty instanceof Long[]) {
+          Long[] nodeIds=(Long[])expandedNodesProperty;
+          expandedNodesArray=new long[nodeIds.length];
+          for (int i=0; i < nodeIds.length; i++) {
+            expandedNodesArray[i]=nodeIds[i].longValue();
+          }
+          storeExpandedNodesInUserProfile(expandedNodesArray);
+        }
+      }
+    }
+  }
+  return expandedNodesArray;
+}

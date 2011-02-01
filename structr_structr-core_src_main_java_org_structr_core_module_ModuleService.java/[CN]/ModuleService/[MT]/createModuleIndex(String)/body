@@ -1,0 +1,42 @@
+{
+  String modulePath=createModuleFileName(moduleName);
+  String indexPath=createIndexFileName(moduleName);
+  File moduleFile=new File(modulePath);
+  File indexFile=new File(indexPath);
+  ClickModule ret=new ClickModule(modulePath);
+  Set<String> classes=ret.getClasses();
+  Set<String> properties=ret.getProperties();
+  Set<String> resources=ret.getResources();
+  JarFile jarFile=new JarFile(moduleFile);
+  for (Enumeration<JarEntry> entries=jarFile.entries(); entries.hasMoreElements(); ) {
+    JarEntry entry=entries.nextElement();
+    String entryName=entry.getName();
+    if (entryName.toLowerCase().startsWith("meta-inf/")) {
+      continue;
+    }
+ else     if (entryName.endsWith(".class")) {
+      String fileEntry=entry.getName().replaceAll("[/]+",".");
+      classes.add(fileEntry.substring(0,fileEntry.length() - 6));
+    }
+ else     if (entryName.endsWith(".properties")) {
+      String fileEntry=entry.getName().replaceAll("[/]+",".");
+      properties.add(fileEntry.substring(0,fileEntry.length() - 11));
+    }
+ else {
+      if (!entryName.endsWith("/")) {
+        resources.add(entryName);
+      }
+    }
+  }
+  try {
+    indexFile.getParentFile().mkdirs();
+    ObjectOutputStream ois=new ObjectOutputStream(new FileOutputStream(indexFile));
+    ois.writeObject(ret);
+    ois.flush();
+    ois.close();
+  }
+ catch (  Throwable t) {
+    logger.log(Level.WARNING,"Unable to write module index from {0}: {1}",new Object[]{indexPath,t});
+  }
+  return (ret);
+}

@@ -1,0 +1,25 @@
+{
+  GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
+  List<StructrRelationship> result=null;
+  if (parameters.length == 3) {
+    Object arg0=parameters[0];
+    Object arg1=parameters[1];
+    Object arg2=parameters[2];
+    StructrNode sNode=(StructrNode)arg0;
+    Direction dir=(Direction)arg2;
+    result=new ArrayList<StructrRelationship>();
+    Node node=graphDb.getNodeById(sNode.getId());
+    Iterable<Relationship> rels;
+    if (arg1 != null) {
+      RelationshipType relType=(RelationshipType)arg1;
+      rels=node.getRelationships(relType,dir);
+    }
+ else {
+      rels=node.getRelationships(dir);
+    }
+    for (    Relationship r : rels) {
+      result.add(new StructrRelationship(r));
+    }
+  }
+  return result;
+}

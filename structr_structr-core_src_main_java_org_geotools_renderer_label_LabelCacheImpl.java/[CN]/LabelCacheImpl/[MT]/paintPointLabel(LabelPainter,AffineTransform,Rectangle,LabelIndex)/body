@@ -1,0 +1,45 @@
+{
+  LabelCacheItem labelItem=painter.getLabel();
+  Point point=getPointSetRepresentativeLocation(labelItem.getGeoms(),displayArea);
+  if (point == null)   return false;
+  TextStyle2D ts=labelItem.getTextStyle();
+  final double step=painter.getAscent() > 2 ? painter.getAscent() : 2;
+  double radius=Math.sqrt(ts.getDisplacementX() * ts.getDisplacementX() + ts.getDisplacementY() * ts.getDisplacementY());
+  AffineTransform tx=new AffineTransform(tempTransform);
+  if (paintPointLabelInternal(painter,tx,displayArea,glyphs,labelItem,point,ts))   return true;
+  TextStyle2D cloned=new TextStyle2D(ts);
+  int startAngle=getClosestStandardAngle(ts.getDisplacementX(),ts.getDisplacementY());
+  int angle=startAngle;
+  while (radius <= labelItem.maxDisplacement) {
+    for (int offset=45; offset <= 360; offset=offset + 45) {
+      double dx=radius * Math.cos(Math.toRadians(angle));
+      double dy=radius * Math.sin(Math.toRadians(angle));
+      double[] anchorPointCandidates;
+      int normAngle=angle % 360;
+      if (normAngle < 0)       normAngle=360 + normAngle;
+      if (normAngle < 90 || normAngle > 270) {
+        anchorPointCandidates=RIGHT_ANCHOR_CANDIDATES;
+      }
+ else       if (normAngle > 90 && normAngle < 270) {
+        anchorPointCandidates=LEFT_ANCHOR_CANDIDATES;
+      }
+ else {
+        anchorPointCandidates=MID_ANCHOR_CANDIDATES;
+      }
+      for (int i=0; i < anchorPointCandidates.length; i+=2) {
+        double ax=anchorPointCandidates[i];
+        double ay=anchorPointCandidates[i + 1];
+        cloned.setAnchorX(ax);
+        cloned.setAnchorY(ay);
+        cloned.setDisplacementX(dx);
+        cloned.setDisplacementY(dy);
+        tx=new AffineTransform(tempTransform);
+        if (paintPointLabelInternal(painter,tx,displayArea,glyphs,labelItem,point,cloned))         return true;
+      }
+      if (angle <= startAngle)       angle=angle + offset;
+ else       angle=angle - offset;
+    }
+    radius+=step;
+  }
+  return false;
+}

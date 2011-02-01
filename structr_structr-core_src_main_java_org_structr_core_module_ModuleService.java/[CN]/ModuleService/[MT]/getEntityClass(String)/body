@@ -1,0 +1,20 @@
+{
+  Class ret=null;
+  if (name != null && name.length() > 0) {
+    ret=entityClassCache.get(name);
+    if (ret == null) {
+      for (      String possiblePath : entityPackages) {
+        if (possiblePath != null) {
+          try {
+            Class nodeClass=Class.forName(possiblePath + "." + name);
+            entityClassCache.put(name,nodeClass);
+            break;
+          }
+ catch (          ClassNotFoundException ex) {
+          }
+        }
+      }
+    }
+  }
+  return (ret);
+}

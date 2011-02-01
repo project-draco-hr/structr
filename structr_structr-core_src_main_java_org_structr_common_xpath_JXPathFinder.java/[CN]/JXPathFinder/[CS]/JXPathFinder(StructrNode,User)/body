@@ -1,0 +1,13 @@
+{
+  this.currentNode=currentNode;
+  Command graphDbCommand=Services.createCommand(GraphDatabaseCommand.class);
+  this.db=(GraphDatabaseService)graphDbCommand.execute();
+  if (context == null) {
+    Node rootNode=db.getReferenceNode();
+    context=JXPathContextReferenceImpl.newContext(rootNode);
+    if (currentNode != null && !(currentNode.isRootNode())) {
+      Pointer currentNodePointer=context.getPointer(currentNode.getNodeXPath(user));
+      context=context.getRelativeContext(currentNodePointer);
+    }
+  }
+}

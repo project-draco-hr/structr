@@ -1,0 +1,34 @@
+{
+  try {
+    final int maxFilters=getMaxFiltersToSendToDatastore();
+    final List<Filter> filtersToDS=new ArrayList<Filter>();
+    for (    LiteFeatureTypeStyle style : styles) {
+      if (style.elseRules.length > 0) {
+        return;
+      }
+      for (      Rule r : style.ruleList) {
+        if (r.getFilter() == null) {
+          return;
+        }
+        filtersToDS.add(r.getFilter());
+      }
+    }
+    if (filtersToDS.size() > maxFilters) {
+      return;
+    }
+    org.opengis.filter.Filter ruleFiltersCombined;
+    if (filtersToDS.size() == 1) {
+      ruleFiltersCombined=(Filter)filtersToDS.get(0);
+    }
+ else {
+      ruleFiltersCombined=filterFactory.or(filtersToDS);
+    }
+    ruleFiltersCombined=filterFactory.and(q.getFilter(),ruleFiltersCombined);
+    q.setFilter(ruleFiltersCombined);
+  }
+ catch (  Exception e) {
+    if (LOGGER.isLoggable(Level.WARNING)) {
+      LOGGER.log(Level.SEVERE,"Could not send rules to datastore due to: " + e.getLocalizedMessage(),e);
+    }
+  }
+}

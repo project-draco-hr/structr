@@ -1,0 +1,57 @@
+{
+  List<StructrRelationship> thumbnailRelationships=getRelationships(RelType.THUMBNAIL,Direction.OUTGOING);
+  Image thumbnail=null;
+  final Image originalImage=this;
+  if (thumbnailRelationships != null && !(thumbnailRelationships.isEmpty())) {
+    for (    StructrRelationship r : thumbnailRelationships) {
+      Integer w=(Integer)r.getProperty(Image.WIDTH_KEY);
+      Integer h=(Integer)r.getProperty(Image.HEIGHT_KEY);
+      if (w != null && h != null) {
+        if ((w == maxWidth && h <= maxHeight) || (w <= maxWidth && h == maxHeight)) {
+          thumbnail=(Image)r.getEndNode();
+          if (!(originalImage.getLastModifiedDate().after(thumbnail.getLastModifiedDate()))) {
+            return thumbnail;
+          }
+        }
+      }
+    }
+  }
+  logger.log(Level.INFO,"Creating thumbnail for {0}",getName());
+  Command transactionCommand=Services.createCommand(TransactionCommand.class);
+  thumbnail=(Image)transactionCommand.execute(new StructrTransaction(){
+    @Override public Object execute() throws Throwable {
+      Command createNode=Services.createCommand(CreateNodeCommand.class);
+      Command createRel=Services.createCommand(CreateRelationshipCommand.class);
+      Command findNode=Services.createCommand(FindNodeCommand.class);
+      NodeAttribute typeAttr=new NodeAttribute(StructrNode.TYPE_KEY,Image.class.getSimpleName());
+      NodeAttribute nameAttr=new NodeAttribute(Image.NAME_KEY,originalImage.getName() + "_thumb");
+      StructrNode newNode=(StructrNode)createNode.execute(user,typeAttr,nameAttr);
+      if (newNode != null) {
+        Image tn=(Image)findNode.execute(user,newNode.getId());
+        StructrRelationship thumbnailRelationship=(StructrRelationship)createRel.execute(originalImage,tn,RelType.THUMBNAIL);
+        String relativeFilePath=tn.getId() + "_" + System.currentTimeMillis();
+        String path=Services.getFilesPath() + "/" + relativeFilePath;
+        java.io.File imageFile=new java.io.File(path);
+        Thumbnail thumbnailData=ImageHelper.getThumbnailByteArray(originalImage,maxWidth,maxHeight);
+        try {
+          FileUtils.writeByteArrayToFile(imageFile,thumbnailData.getBytes());
+        }
+ catch (        IOException ex) {
+          logger.log(Level.SEVERE,"Could not write thumbnail data to file",ex);
+          return null;
+        }
+        long size=imageFile.length();
+        tn.setSize(size);
+        thumbnailRelationship.setProperty(Image.WIDTH_KEY,thumbnailData.getWidth());
+        thumbnailRelationship.setProperty(Image.HEIGHT_KEY,thumbnailData.getHeight());
+        tn.setRelativeFilePath(relativeFilePath);
+        return tn;
+      }
+ else {
+        return null;
+      }
+    }
+  }
+);
+  return thumbnail;
+}

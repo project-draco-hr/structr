@@ -1,0 +1,22 @@
+{
+  Object time=getProperty(key);
+  if (time != null) {
+    if (time instanceof Long) {
+      return new Date((Long)time);
+    }
+ else     if (time instanceof String) {
+      try {
+        return new Date(Long.parseLong((String)time));
+      }
+ catch (      NumberFormatException nfe) {
+        logger.log(Level.FINE,"Can''t parse String {0} to a Date.",time);
+        return null;
+      }
+    }
+ else {
+      logger.log(Level.FINE,"Date property is not null, but type is neither Long nor String, returning null");
+      return null;
+    }
+  }
+  return null;
+}

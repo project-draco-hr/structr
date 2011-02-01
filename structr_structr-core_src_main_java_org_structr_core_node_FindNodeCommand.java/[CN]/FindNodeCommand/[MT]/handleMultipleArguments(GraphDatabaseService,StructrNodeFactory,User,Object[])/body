@@ -1,0 +1,16 @@
+{
+  Object result=null;
+  if (parameters[1] instanceof StructrNode && parameters[2] instanceof XPath) {
+    StructrNode currentNode=(StructrNode)parameters[1];
+    XPath xpath=(XPath)parameters[2];
+    String path=xpath.getXPath();
+    if (path.startsWith("/"))     currentNode=nodeFactory.createNode(graphDb.getReferenceNode());
+    if (path.endsWith("*")) {
+      result=TreeHelper.getNodesByPath(currentNode,path,true,user);
+    }
+ else {
+      result=TreeHelper.getNodeByPath(currentNode,path,true,user);
+    }
+  }
+  return result;
+}

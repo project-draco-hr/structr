@@ -1,0 +1,18 @@
+{
+  Command transactionCommand=Services.createCommand(TransactionCommand.class);
+  transactionCommand.execute(new StructrTransaction(){
+    @Override public Object execute() throws Throwable {
+      StructrNode s=getNodeByIdOrPath(getNodeId());
+      if (editContentForm.isValid()) {
+        editContentForm.copyTo(s);
+      }
+      okMsg="Save action successful!";
+      return (null);
+    }
+  }
+);
+  Map<String,String> parameters=new HashMap<String,String>();
+  parameters.put(NODE_ID_KEY,nodeId.toString());
+  setRedirect(this.getPath(),parameters);
+  return false;
+}

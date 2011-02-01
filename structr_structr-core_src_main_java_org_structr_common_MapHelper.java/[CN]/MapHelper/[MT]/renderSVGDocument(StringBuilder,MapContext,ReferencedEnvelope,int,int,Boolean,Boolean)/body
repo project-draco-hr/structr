@@ -1,0 +1,64 @@
+{
+  DocumentBuilderFactory dbf=DocumentBuilderFactory.newInstance();
+  try {
+    DocumentBuilder db=dbf.newDocumentBuilder();
+    Document document=db.getDOMImplementation().createDocument("http://www.w3.org/2000/svg","svg",null);
+    SVGGeneratorContext context=SVGGeneratorContext.createDefault(document);
+    SVGGraphics2D g=new SVGGraphics2D(context,false){
+      /** 
+ * Strokes the outline of a <code>Shape</code> using the settings of the
+ * current <code>Graphics2D</code> context.  The rendering attributes
+ * applied include the <code>Clip</code>, <code>Transform</code>,
+ * <code>Paint</code>, <code>Composite</code> and
+ * <code>Stroke</code> attributes.
+ * @param s the <code>Shape</code> to be rendered
+ * @see #setStroke(Stroke)
+ * @see #setPaint(Paint)
+ * @see java.awt.Graphics#setColor
+ * @see #setTransform(AffineTransform)
+ * @see #setClip(Shape)
+ * @see #setComposite(java.awt.Composite)
+ */
+      @Override public void draw(      Shape s){
+        Map<String,Object> customMetadata=((MetaDataShape)s).getCustomMetadata();
+        Stroke stroke=gc.getStroke();
+        if (stroke instanceof BasicStroke) {
+          Element svgShape=shapeConverter.toSVG(s);
+          if (customMetadata != null && !(customMetadata.isEmpty())) {
+            for (            Map.Entry<String,Object> entry : customMetadata.entrySet()) {
+              svgShape.setAttribute(entry.getKey(),entry.getValue().toString());
+            }
+          }
+          if (svgShape != null) {
+            domGroupManager.addElement(svgShape,DOMGroupManager.DRAW);
+          }
+        }
+ else {
+          Shape strokedShape=stroke.createStrokedShape(s);
+          fill(strokedShape);
+        }
+      }
+    }
+;
+    context.setEmbeddedFontsOn(false);
+    g.setSVGCanvasSize(new Dimension(canvasX,canvasY));
+    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
+    Rectangle rect=new Rectangle(g.getSVGCanvasSize());
+    StreamingRenderer renderer=new StreamingRenderer();
+    renderer.setContext(mapContext);
+    HashMap rendererParams=new HashMap();
+    rendererParams.put(StreamingRenderer.OPTIMIZED_DATA_LOADING_KEY,Boolean.TRUE);
+    rendererParams.put(StreamingRenderer.OPTIMIZE_FTS_RENDERING_KEY,optimizeFtsRendering);
+    rendererParams.put(StreamingRenderer.LINE_WIDTH_OPTIMIZATION_KEY,lineWidthOptimization);
+    rendererParams.put(StreamingRenderer.TEXT_RENDERING_KEY,StreamingRenderer.TEXT_RENDERING_STRING);
+    renderer.setRendererHints(rendererParams);
+    renderer.paint(g,rect,envelope);
+    StringWriter sw=new StringWriter();
+    g.stream(sw);
+    out.append(sw.getBuffer());
+    sw.flush();
+  }
+ catch (  Throwable t) {
+    logger.log(Level.SEVERE,"Error creating SVG document",t);
+  }
+}

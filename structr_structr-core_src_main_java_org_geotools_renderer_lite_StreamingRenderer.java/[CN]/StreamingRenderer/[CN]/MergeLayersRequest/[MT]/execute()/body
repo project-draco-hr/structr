@@ -1,0 +1,13 @@
+{
+  graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER));
+  for (int t=0; t < fts_array.length; t++) {
+    final Graphics2D ftsGraphics=fts_array[t].graphics;
+    if (ftsGraphics instanceof DelayedBackbufferGraphic) {
+      final BufferedImage image=((DelayedBackbufferGraphic)ftsGraphics).image;
+      if (image != null) {
+        graphics.drawImage(image,0,0,null);
+        ftsGraphics.dispose();
+      }
+    }
+  }
+}

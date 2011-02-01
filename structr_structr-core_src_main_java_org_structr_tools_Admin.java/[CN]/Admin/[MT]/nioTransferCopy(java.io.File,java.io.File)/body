@@ -1,0 +1,20 @@
+{
+  FileChannel in=null;
+  FileChannel out=null;
+  try {
+    in=new FileInputStream(source).getChannel();
+    out=new FileOutputStream(target).getChannel();
+    long size=in.size();
+    long transferred=in.transferTo(0,size,out);
+    while (transferred != size) {
+      transferred+=in.transferTo(transferred,size - transferred,out);
+    }
+  }
+ catch (  IOException e) {
+    e.printStackTrace();
+  }
+ finally {
+    close(in);
+    close(out);
+  }
+}

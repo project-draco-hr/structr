@@ -1,0 +1,29 @@
+{
+  List<RenderingRequest> rl=new ArrayList<RenderingRequest>(100);
+  boolean done=false;
+  while (!done) {
+    try {
+      rl.clear();
+      int count=requests.drainTo(rl,100);
+      if (count == 0) {
+        rl.add(requests.take());
+        count=1;
+      }
+      for (int i=0; i < count; i++) {
+        RenderingRequest request=rl.get(i);
+        rl.set(i,null);
+        if (request instanceof EndRequest || renderingStopRequested) {
+          done=true;
+        }
+ else {
+          request.execute();
+        }
+      }
+    }
+ catch (    InterruptedException e) {
+      if (renderingStopRequested) {
+        done=true;
+      }
+    }
+  }
+}

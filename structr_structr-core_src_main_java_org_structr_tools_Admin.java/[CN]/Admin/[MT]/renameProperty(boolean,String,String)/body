@@ -1,0 +1,15 @@
+{
+  for (  Node n : Traversal.description().breadthFirst().relationships(RelType.HAS_CHILD,Direction.OUTGOING).prune(Traversal.pruneAfterDepth(999)).traverse(graphDb.getReferenceNode()).nodes()) {
+    System.out.println("Node " + n + " found.");
+    if (n.hasProperty(oldPropertyName)) {
+      if (!test) {
+        n.setProperty(newPropertyName,n.getProperty(oldPropertyName));
+        n.removeProperty(oldPropertyName);
+        System.out.println("Property " + oldPropertyName + " successfully renamed to "+ newPropertyName+ " on node "+ n.getId());
+      }
+ else {
+        System.out.println("Without test switch, property " + oldPropertyName + " would have been renamed to "+ newPropertyName+ " on node "+ n.getId());
+      }
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  if (!activeLayers.isEmpty()) {
+    throw new IllegalStateException(activeLayers + " are layers that started rendering but have not completed," + " stop() or endLayer() must be called before end() is called");
+  }
+  LabelIndex glyphs=new LabelIndex();
+  glyphs.reserveArea(reserved);
+  displayArea=new Rectangle(displayArea);
+  displayArea.width-=1;
+  displayArea.height-=1;
+  clipper=new GeometryClipper(new Envelope(displayArea.getMinX(),displayArea.getMaxX(),displayArea.getMinY(),displayArea.getMaxY()));
+  List<LabelCacheItem> items;
+  if (needsOrdering) {
+    items=orderedLabels();
+  }
+ else {
+    items=getActiveLabels();
+  }
+  LabelPainter painter=new LabelPainter(graphics,labelRenderingMode);
+  for (  LabelCacheItem labelItem : items) {
+    if (stop)     return;
+    painter.setLabel(labelItem);
+    try {
+      AffineTransform tempTransform=new AffineTransform();
+      Geometry geom=labelItem.getGeometry();
+      if ((geom instanceof Point) || (geom instanceof MultiPoint))       paintPointLabel(painter,tempTransform,displayArea,glyphs);
+ else       if (((geom instanceof LineString) && !(geom instanceof LinearRing)) || (geom instanceof MultiLineString))       paintLineLabels(painter,tempTransform,displayArea,glyphs);
+ else       if (geom instanceof Polygon || geom instanceof MultiPolygon || geom instanceof LinearRing)       paintPolygonLabel(painter,tempTransform,displayArea,glyphs);
+    }
+ catch (    Exception e) {
+      System.out.println("Issues painting " + labelItem.getLabel());
+      e.printStackTrace();
+    }
+  }
+}

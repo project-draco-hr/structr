@@ -1,0 +1,29 @@
+{
+  GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
+  if (graphDb != null && parameters.length == 3) {
+    Object arg0=parameters[0];
+    Object arg1=parameters[1];
+    Object arg2=parameters[2];
+    RelationshipType relType=null;
+    if (arg2 instanceof String) {
+      relType=DynamicRelationshipType.withName((String)arg2);
+    }
+ else     if (arg2 instanceof RelationshipType) {
+      relType=(RelationshipType)arg2;
+    }
+ else {
+      throw new UnsupportedArgumentError("Wrong argument type(s).");
+    }
+    if (arg0 instanceof StructrNode && arg1 instanceof StructrNode) {
+      StructrNode startNode=(StructrNode)arg0;
+      StructrNode endNode=(StructrNode)arg1;
+      Node node1=graphDb.getNodeById(startNode.getId());
+      Node node2=graphDb.getNodeById(endNode.getId());
+      return new StructrRelationship(node1.createRelationshipTo(node2,relType));
+    }
+ else {
+      throw new UnsupportedArgumentError("Wrong argument type(s).");
+    }
+  }
+  return (null);
+}

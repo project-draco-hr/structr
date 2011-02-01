@@ -1,0 +1,21 @@
+{
+  InputStream is=null;
+  try {
+    is=url.openStream();
+    if (is.read(buffer,0,JAR_MAGIC.length) != JAR_MAGIC.length) {
+      return false;
+    }
+    if (Arrays.equals(buffer,JAR_MAGIC)) {
+      if (logService.isInfoEnabled()) {
+        logService.info("found jar: " + url);
+      }
+      return true;
+    }
+  }
+ catch (  Exception e) {
+  }
+ finally {
+    ClickUtils.close(is);
+  }
+  return false;
+}

@@ -1,0 +1,119 @@
+{
+  FeatureCollection<FeatureType,Feature> results=null;
+  Query query=new Query(Query.ALL);
+  Query definitionQuery;
+  final int length;
+  Filter filter=null;
+  if (getRenderingBuffer() == 0) {
+    int buffer=findRenderingBuffer(styles);
+    if (buffer > 0) {
+      mapArea=expandEnvelope(mapArea,worldToScreenTransform,buffer);
+      LOGGER.fine("Expanding rendering area by " + buffer + " pixels to consider stroke width");
+    }
+  }
+  String[] attributes;
+  if (styles == null) {
+    attributes=null;
+  }
+ else {
+    attributes=findStyleAttributes(styles,schema);
+  }
+  ReferencedEnvelope envelope=new ReferencedEnvelope(mapArea,mapCRS);
+  if (isOptimizedDataLoadingEnabled()) {
+    try {
+      List<ReferencedEnvelope> envelopes;
+      if (projectionHandler != null) {
+        projectionHandler.setRenderingEnvelope(envelope);
+        envelopes=projectionHandler.getQueryEnvelopes(featCrs);
+      }
+ else {
+        if (mapCRS != null && featCrs != null && !CRS.equalsIgnoreMetadata(featCrs,mapCRS)) {
+          envelopes=Collections.singletonList(envelope.transform(featCrs,true,10));
+        }
+ else {
+          envelopes=Collections.singletonList(envelope);
+        }
+      }
+      if (LOGGER.isLoggable(Level.FINE)) {
+        LOGGER.fine("Querying layer " + schema.getName() + " with bbox: "+ envelope);
+      }
+      filter=createBBoxFilters(schema,attributes,envelopes);
+      query=new Query(schema.getName().getLocalPart());
+      query.setFilter(filter);
+      query.setPropertyNames(attributes);
+      processRuleForQuery(styles,query);
+    }
+ catch (    Exception e) {
+      fireErrorEvent(new Exception("Error transforming bbox",e));
+      canTransform=false;
+      query=new Query(schema.getName().getLocalPart());
+      query.setPropertyNames(attributes);
+      Envelope bounds=source.getBounds();
+      if (bounds != null && envelope.intersects(bounds)) {
+        LOGGER.log(Level.WARNING,"Got a tranform exception while trying to de-project the current " + "envelope, bboxs intersect therefore using envelope)",e);
+        filter=null;
+        filter=createBBoxFilters(schema,attributes,Collections.singletonList(envelope));
+        query.setFilter(filter);
+      }
+ else {
+        LOGGER.log(Level.WARNING,"Got a tranform exception while trying to de-project the current " + "envelope, falling back on full data loading (no bbox query)",e);
+        query.setFilter(Filter.INCLUDE);
+      }
+      processRuleForQuery(styles,query);
+    }
+  }
+  definitionQuery=currLayer.getQuery();
+  if (definitionQuery != Query.ALL) {
+    if (query == Query.ALL) {
+      query=new Query(definitionQuery);
+    }
+ else {
+      query=new Query(DataUtilities.mixQueries(definitionQuery,query,"liteRenderer"));
+    }
+  }
+  query.setCoordinateSystem(featCrs);
+  LiteCoordinateSequenceFactory csFactory=new LiteCoordinateSequenceFactory();
+  GeometryFactory gFactory=new SimpleGeometryFactory(csFactory);
+  Hints hints=new Hints(Hints.JTS_COORDINATE_SEQUENCE_FACTORY,csFactory);
+  hints.put(Hints.JTS_GEOMETRY_FACTORY,gFactory);
+  hints.put(Hints.FEATURE_2D,Boolean.TRUE);
+  try {
+    CoordinateReferenceSystem crs=getNativeCRS(schema,Arrays.asList(attributes));
+    if (crs != null) {
+      Set<RenderingHints.Key> fsHints=source.getSupportedHints();
+      MathTransform mt=buildFullTransform(crs,mapCRS,worldToScreenTransform);
+      double[] spans=Decimator.computeGeneralizationDistances(mt.inverse(),screenSize,generalizationDistance);
+      double distance=spans[0] < spans[1] ? spans[0] : spans[1];
+      for (      LiteFeatureTypeStyle fts : styles) {
+        if (fts.screenMap != null) {
+          fts.screenMap.setTransform(mt);
+          fts.screenMap.setSpans(spans[0],spans[1]);
+          if (fsHints.contains(Hints.SCREENMAP)) {
+            hints.put(Hints.SCREENMAP,fts.screenMap);
+            fts.screenMap=null;
+          }
+        }
+      }
+      if (fsHints.contains(Hints.GEOMETRY_SIMPLIFICATION)) {
+        hints.put(Hints.GEOMETRY_SIMPLIFICATION,distance);
+        inMemoryGeneralization=false;
+      }
+ else       if (fsHints.contains(Hints.GEOMETRY_DISTANCE)) {
+        hints.put(Hints.GEOMETRY_DISTANCE,distance);
+      }
+    }
+  }
+ catch (  Exception e) {
+    LOGGER.log(Level.INFO,"Error computing the generalization hints",e);
+  }
+  if (query.getHints() == null) {
+    query.setHints(hints);
+  }
+ else {
+    query.getHints().putAll(hints);
+  }
+  SimplifyingFilterVisitor simplifier=new SimplifyingFilterVisitor();
+  Filter simplifiedFilter=(Filter)query.getFilter().accept(simplifier,null);
+  query.setFilter(simplifiedFilter);
+  return source.getFeatures(query);
+}

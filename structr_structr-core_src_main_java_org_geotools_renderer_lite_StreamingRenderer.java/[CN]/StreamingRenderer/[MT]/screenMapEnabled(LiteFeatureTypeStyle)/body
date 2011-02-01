@@ -1,0 +1,13 @@
+{
+  if (generalizationDistance == 0.0) {
+    return false;
+  }
+  OpacityFinder finder=new OpacityFinder(new Class[]{PointSymbolizer.class,LineSymbolizer.class,PolygonSymbolizer.class});
+  for (  Rule r : lfts.ruleList) {
+    r.accept(finder);
+  }
+  for (  Rule r : lfts.elseRules) {
+    r.accept(finder);
+  }
+  return !finder.hasOpacity;
+}

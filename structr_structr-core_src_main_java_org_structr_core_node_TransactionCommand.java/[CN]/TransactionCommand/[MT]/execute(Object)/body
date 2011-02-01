@@ -1,0 +1,35 @@
+{
+  Object ret=null;
+  GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
+  if (parameters.length > 0 && parameters[0] instanceof StructrTransaction) {
+    StructrTransaction transaction=(StructrTransaction)parameters[0];
+    Transaction tx=graphDb.beginTx();
+    try {
+      ret=transaction.execute();
+      tx.success();
+    }
+ catch (    Throwable t) {
+      t.printStackTrace();
+      tx.failure();
+    }
+ finally {
+      tx.finish();
+    }
+  }
+ else   if (parameters.length > 0 && parameters[0] instanceof BatchTransaction) {
+    BatchTransaction transaction=(BatchTransaction)parameters[0];
+    Transaction tx=graphDb.beginTx();
+    try {
+      ret=transaction.execute(tx);
+      tx.success();
+    }
+ catch (    Throwable t) {
+      t.printStackTrace();
+      tx.failure();
+    }
+ finally {
+      tx.finish();
+    }
+  }
+  return ret;
+}

@@ -1,0 +1,14 @@
+{
+  ServletContext servletContext=this.getContext().getServletContext();
+  try {
+    Services.createCommand(ReloadModulesCommand.class).execute();
+    StructrConfigService newConfigService=new StructrConfigService();
+    newConfigService.onInit(servletContext);
+synchronized (servletContext) {
+      servletContext.setAttribute(ConfigService.CONTEXT_NAME,newConfigService);
+    }
+  }
+ catch (  Throwable t) {
+  }
+  return redirect();
+}

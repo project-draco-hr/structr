@@ -1,0 +1,14 @@
+{
+  Node node=null;
+  for (  Node n : Traversal.description().depthFirst().relationships(RelType.HAS_CHILD,Direction.OUTGOING).traverse(parentNode).nodes()) {
+    if (n.hasProperty("type") && n.getProperty("type").equals(type) && n.hasProperty("name")&& n.getProperty("name").equals(name)) {
+      node=n;
+      break;
+    }
+  }
+  if (node == null) {
+    node=createNode(type,name,parentNode);
+  }
+  linkNode(node,toNode,RelType.LINK);
+  return node;
+}

@@ -1,0 +1,37 @@
+{
+  final LiteFeatureTypeStyle[] fts_array=(LiteFeatureTypeStyle[])lfts.toArray(new LiteFeatureTypeStyle[lfts.size()]);
+  for (  LiteFeatureTypeStyle liteFeatureTypeStyle : fts_array) {
+    Iterator iterator=null;
+    if (collection != null) {
+      iterator=collection.iterator();
+    }
+    if (features != null) {
+      iterator=features.iterator();
+    }
+    if (iterator == null) {
+      return;
+    }
+    try {
+      boolean clone=isCloningRequired(currLayer,fts_array);
+      RenderableFeature rf=new RenderableFeature(currLayer,clone);
+      while (iterator.hasNext() && !renderingStopRequested) {
+        try {
+          rf.setFeature(iterator.next());
+          process(rf,liteFeatureTypeStyle,scaleRange,at,destinationCrs,layerId);
+        }
+ catch (        Throwable tr) {
+          fireErrorEvent(tr);
+        }
+      }
+    }
+  finally {
+      if (collection instanceof FeatureCollection) {
+        FeatureCollection resource=(FeatureCollection)collection;
+        resource.close(iterator);
+      }
+ else       if (features != null) {
+        features.close(iterator);
+      }
+    }
+  }
+}

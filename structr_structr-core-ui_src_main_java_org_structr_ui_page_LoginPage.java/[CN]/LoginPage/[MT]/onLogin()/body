@@ -1,0 +1,71 @@
+{
+  if (loginForm.isValid()) {
+    String userValue=loginForm.getFieldValue(USERNAME_KEY);
+    String passwordValue=loginForm.getFieldValue(PASSWORD_KEY);
+    if (SUPERUSER_KEY.equals(userValue) && SUPERADMIN_PASSWORD_KEY.equals(passwordValue)) {
+      logger.log(Level.INFO,"############# Logged in as superadmin! ############");
+      userName=SUPERUSER_KEY;
+      isSuperUser=true;
+      user=new SuperUser();
+      getContext().getRequest().getSession().setAttribute(USERNAME_KEY,userValue);
+      Services.initialize();
+      setRedirect("/admin/maintenance.htm");
+    }
+ else {
+      Services.initialize();
+      Command findUser=Services.createCommand(FindUserCommand.class);
+      user=(User)findUser.execute(userValue);
+      if (user == null) {
+        logger.log(Level.INFO,"No user found for name {0}",user);
+        errorMsg="Wrong username or password, or user is blocked. Check caps lock. Note: Username is case sensitive!";
+        return true;
+      }
+      if (user.isBlocked()) {
+        logger.log(Level.INFO,"User {0} is blocked",user);
+        errorMsg="Wrong username or password, or user is blocked. Check caps lock. Note: Username is case sensitive!";
+        return true;
+      }
+      if (passwordValue == null) {
+        logger.log(Level.INFO,"Password for user {0} is null",user);
+        errorMsg="You should enter a password.";
+        return true;
+      }
+      String encryptedPasswordValue=DigestUtils.sha512Hex(passwordValue);
+      if (!encryptedPasswordValue.equals(user.getProperty(PASSWORD_KEY))) {
+        logger.log(Level.INFO,"Wrong password for user {0}",user);
+        errorMsg="Wrong username or password, or user is blocked. Check caps lock. Note: Username is case sensitive!";
+        return true;
+      }
+      userName=userValue;
+      getContext().getRequest().getSession().setAttribute(USERNAME_KEY,userValue);
+      String startNodeId=getNodeId();
+      if (startNodeId == null) {
+        startNodeId=restoreLastVisitedNodeFromUserProfile();
+        nodeId=startNodeId;
+      }
+      StructrNode startNode=getNodeByIdOrPath(startNodeId);
+      Class<? extends Page> targetPage=getRedirectPage((startNode),this);
+      if (targetPage == null) {
+        targetPage=DefaultView.class;
+      }
+      Map<String,String> parameters=new HashMap<String,String>();
+      parameters.put(NODE_ID_KEY,String.valueOf(getNodeId()));
+      Class<? extends Page> editPage=getEditPageClass(getNodeByIdOrPath(nodeId));
+      setRedirect(editPage,parameters);
+      long[] expandedNodesArray=getExpandedNodesFromUserProfile();
+      if (expandedNodesArray != null && expandedNodesArray.length > 0) {
+        openNodes=new ArrayList<TreeNode>();
+        Command findNode=Services.createCommand(FindNodeCommand.class);
+        for (        Long s : expandedNodesArray) {
+          StructrNode n=(StructrNode)findNode.execute(user,s);
+          if (n != null) {
+            openNodes.add(new TreeNode(n,String.valueOf(n.getId())));
+          }
+        }
+        getContext().getSession().setAttribute(EXPANDED_NODES_KEY,openNodes);
+      }
+    }
+    return false;
+  }
+  return true;
+}

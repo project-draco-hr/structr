@@ -1,0 +1,27 @@
+{
+  if (nodeId != null) {
+    if (nodeId instanceof String) {
+      String nodeIdString=(String)nodeId;
+      try {
+        if (nodeIdString.startsWith("/")) {
+          return TreeHelper.getNodeByPath(getRootNode(),nodeIdString,true,user);
+        }
+        return getNodeById(Long.parseLong((String)nodeId));
+      }
+ catch (      Exception e) {
+        logger.log(Level.SEVERE,"Could not handle nodeId {0}",nodeId);
+        return null;
+      }
+    }
+ else     if (nodeId instanceof Long) {
+      return getNodeById((Long)nodeId);
+    }
+ else {
+      logger.log(Level.SEVERE,"Node requested by unknown object: {0}",nodeId);
+      return null;
+    }
+  }
+ else {
+    return null;
+  }
+}

@@ -1,0 +1,30 @@
+{
+  int counter=0;
+  for (  Node n : graphDb.getAllNodes()) {
+    long id=n.getId();
+    String name="";
+    if (n.hasProperty("name")) {
+      name=(String)n.getProperty("name");
+    }
+    String type="";
+    if (n.hasProperty("type")) {
+      type=(String)n.getProperty("type");
+    }
+    System.out.println("(" + counter + ") Node id: "+ id+ ", name: "+ name+ ", type: "+ type);
+    for (    Relationship r : n.getRelationships()) {
+      Node startNode=r.getStartNode();
+      Node endNode=r.getEndNode();
+      String startNodeName="";
+      if (startNode.hasProperty("name")) {
+        startNodeName=(String)startNode.getProperty("name");
+      }
+      String endNodeName="";
+      if (endNode.hasProperty("name")) {
+        endNodeName=(String)endNode.getProperty("name");
+      }
+      System.out.println(startNodeName + "(" + startNode.getId()+ ") --- "+ r.getType().name()+ "("+ r.getId()+ ") ---> "+ endNodeName+ "("+ endNode.getId()+ ")");
+    }
+    counter++;
+  }
+  System.out.println("Processed " + counter + " nodes.");
+}

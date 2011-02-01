@@ -1,0 +1,95 @@
+{
+  GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
+  IndexService index=(LuceneFulltextIndexService)arguments.get("index");
+  StructrNodeFactory nodeFactory=(StructrNodeFactory)arguments.get("nodeFactory");
+  List<StructrNode> result=null;
+  if (graphDb != null) {
+    if (parameters == null || parameters.length != 5) {
+      logger.log(Level.WARNING,"Exactly 5 parameters are required for advanced search.");
+      return null;
+    }
+    User user=null;
+    if (parameters[1] instanceof User) {
+      user=(User)parameters[1];
+    }
+    boolean includeHidden=false;
+    if (parameters[2] instanceof Boolean) {
+      includeHidden=(Boolean)parameters[2];
+    }
+    boolean publicOnly=false;
+    if (parameters[3] instanceof Boolean) {
+      publicOnly=(Boolean)parameters[3];
+    }
+    List<SearchAttribute> searchAttrs=new ArrayList<SearchAttribute>();
+    if (parameters[4] instanceof List) {
+      searchAttrs=(List<SearchAttribute>)parameters[4];
+    }
+    for (int i=4; i < parameters.length; i++) {
+      Object o=parameters[i];
+      if (o instanceof SearchAttribute) {
+        searchAttrs.add((SearchAttribute)o);
+      }
+    }
+    if (searchAttrs.isEmpty()) {
+      result=new ArrayList<StructrNode>();
+    }
+ else {
+      List<StructrNode> intermediateResult=new ArrayList<StructrNode>();
+      for (      SearchAttribute attr : searchAttrs) {
+        String key=attr.getKey();
+        Object value=attr.getValue();
+        SearchOperator op=attr.getSearchOperator();
+        Iterable<Node> nodes=null;
+        try {
+          String stringValue=null;
+          boolean isString=false;
+          if (value instanceof String) {
+            isString=true;
+            stringValue=(String)value;
+          }
+          if (stringValue != null && stringValue.length() > 1 && stringValue.startsWith(SearchAttribute.WILDCARD)) {
+            stringValue=stringValue.substring(1);
+          }
+          boolean indexHits=false;
+          boolean wildcardHits=false;
+          if (StringUtils.isNotBlank(key) && (value != null && (!isString || StringUtils.isNotBlank(stringValue)))) {
+            if (SearchAttribute.WILDCARD.equals(value)) {
+              nodes=graphDb.getAllNodes();
+              wildcardHits=(nodes != null && nodes.iterator().hasNext());
+            }
+ else {
+              if (isString) {
+                nodes=index.getNodes(attr.getKey(),stringValue);
+              }
+ else {
+                nodes=index.getNodes(attr.getKey(),attr.getValue());
+              }
+              indexHits=(nodes != null && nodes.iterator().hasNext());
+            }
+          }
+          if (op.equals(SearchOperator.AND) && !indexHits && !wildcardHits) {
+            return null;
+          }
+        }
+ catch (        Throwable t) {
+          logger.log(Level.WARNING,"Search error",t);
+        }
+        List<StructrNode> singleResult=nodeFactory.createNodes(nodes);
+        if (op.equals(SearchOperator.OR)) {
+          intermediateResult=ListUtils.sum(intermediateResult,singleResult);
+        }
+ else {
+          if (intermediateResult.isEmpty()) {
+            intermediateResult=singleResult;
+          }
+          List<StructrNode> intersectionResult=ListUtils.intersection(intermediateResult,singleResult);
+          intermediateResult=intersectionResult;
+        }
+      }
+      result=new ArrayList(intermediateResult);
+    }
+    Collections.sort(result);
+    return result;
+  }
+  return null;
+}

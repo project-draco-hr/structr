@@ -1,0 +1,28 @@
+{
+  agentService.notifyAgentStart(this);
+  do {
+    Task task=null;
+synchronized (taskQueue) {
+      task=taskQueue.poll();
+    }
+    if (task != null) {
+      lastStartTime=System.nanoTime();
+      ReturnValue ret=processTask(task);
+switch (ret) {
+case Success:
+case Abort:
+        break;
+case Retry:
+      break;
+  }
+  long endTime=System.nanoTime();
+  averageExecutionTime+=endTime;
+  averageExecutionTime/=2;
+}
+ else {
+  agentService.notifyAgentStop(this);
+  acceptingTasks.set(false);
+}
+}
+ while (acceptingTasks.get());
+}

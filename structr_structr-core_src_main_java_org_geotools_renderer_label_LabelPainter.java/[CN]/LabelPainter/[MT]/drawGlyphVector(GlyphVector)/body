@@ -1,0 +1,23 @@
+{
+  java.awt.Shape outline=gv.getOutline();
+  if (labelItem.getTextStyle().getHaloFill() != null) {
+    configureHalo();
+    graphics.draw(outline);
+  }
+  configureLabelStyle();
+  if (labelRenderingMode == LabelRenderingMode.STRING) {
+    graphics.drawString(labelItem.getLabel(),0,0);
+  }
+ else   if (labelRenderingMode == LabelRenderingMode.OUTLINE) {
+    graphics.fill(outline);
+  }
+ else {
+    AffineTransform tx=graphics.getTransform();
+    if (Math.abs(tx.getShearX()) >= EPS || Math.abs(tx.getShearY()) > EPS) {
+      graphics.fill(outline);
+    }
+ else {
+      graphics.drawString(labelItem.getLabel(),0,0);
+    }
+  }
+}

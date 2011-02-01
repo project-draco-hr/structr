@@ -1,0 +1,42 @@
+{
+  GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
+  if (graphDb != null) {
+    long id=0;
+    Node node=null;
+    String key=null;
+    Object value=null;
+switch (parameters.length) {
+case 1:
+      if (parameters[0] instanceof Long) {
+        id=((Long)parameters[0]).longValue();
+      }
+ else       if (parameters[0] instanceof String) {
+        id=Long.parseLong((String)parameters[0]);
+      }
+    node=graphDb.getNodeById(id);
+  indexNode(node);
+break;
+case 3:
+if (parameters[0] instanceof Long) {
+id=((Long)parameters[0]).longValue();
+}
+ else if (parameters[0] instanceof String) {
+id=Long.parseLong((String)parameters[0]);
+}
+node=graphDb.getNodeById(id);
+if (parameters[1] instanceof String) {
+key=(String)parameters[1];
+}
+value=parameters[2];
+index(node,key,value);
+break;
+default :
+if (parameters.length != 3) {
+logger.log(Level.SEVERE,"The index property command takes 1 or 3 parameter");
+return null;
+}
+break;
+}
+}
+return null;
+}

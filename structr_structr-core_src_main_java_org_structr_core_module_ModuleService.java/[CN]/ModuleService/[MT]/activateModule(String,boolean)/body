@@ -1,0 +1,29 @@
+{
+  boolean success=true;
+  try {
+    Module module=loadModule(moduleName,recreateIndex);
+    if (module != null) {
+      importIndex(module);
+    }
+ else {
+      logger.log(Level.WARNING,"Module was null!");
+    }
+  }
+ catch (  IOException ioex) {
+    logger.log(Level.WARNING,"Error loading module {0}: {1}",new Object[]{moduleName,ioex});
+    success=false;
+  }
+  Properties modulesConf=getModulesConf();
+  if (modulesConf != null) {
+    if (success) {
+      modulesConf.setProperty(moduleName,"active");
+    }
+ else {
+      modulesConf.setProperty(moduleName,"inactive");
+    }
+    saveModulesConf(modulesConf);
+  }
+ else {
+    logger.log(Level.WARNING,"Could not write {0}",MODULES_CONF);
+  }
+}

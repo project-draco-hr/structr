@@ -1,0 +1,35 @@
+{
+  Geometry clip=poly;
+  poly.geometryChanged();
+  if (displayGeomEnv.contains(poly.getEnvelopeInternal())) {
+    Polygon[] polys=new Polygon[1];
+    polys[0]=(Polygon)clip;
+    return poly.getFactory().createMultiPolygon(polys);
+  }
+  try {
+    clip=clipper.clip(poly,false);
+  }
+ catch (  Exception e) {
+    clip=poly;
+  }
+  if (clip instanceof MultiPolygon)   return (MultiPolygon)clip;
+  if (clip instanceof Polygon) {
+    Polygon[] polys=new Polygon[1];
+    polys[0]=(Polygon)clip;
+    return poly.getFactory().createMultiPolygon(polys);
+  }
+  if (clip instanceof Point)   return null;
+  if (clip instanceof MultiPoint)   return null;
+  if (clip instanceof LineString)   return null;
+  if (clip instanceof MultiLineString)   return null;
+  if (clip == null)   return null;
+  GeometryCollection gc=(GeometryCollection)clip;
+  List<Polygon> polys=new ArrayList<Polygon>();
+  Geometry g;
+  for (int t=0; t < gc.getNumGeometries(); t++) {
+    g=gc.getGeometryN(t);
+    if (g instanceof Polygon)     polys.add((Polygon)g);
+  }
+  if (polys.size() == 0)   return null;
+  return poly.getFactory().createMultiPolygon((Polygon[])polys.toArray(new Polygon[1]));
+}

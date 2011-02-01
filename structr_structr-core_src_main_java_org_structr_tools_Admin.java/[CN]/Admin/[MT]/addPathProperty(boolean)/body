@@ -1,0 +1,20 @@
+{
+  Traverser traverser=graphDb.getReferenceNode().traverse(Order.BREADTH_FIRST,StopEvaluator.END_OF_GRAPH,ReturnableEvaluator.ALL,RelType.HAS_CHILD,Direction.OUTGOING);
+  for (  Node n : traverser.getAllNodes()) {
+    System.out.println("Node " + n + " found.");
+    if (n.hasProperty("url")) {
+      String url=(String)n.getProperty("url");
+      System.out.println("URL value: " + url);
+      char backslash='\\';
+      int l=url.lastIndexOf(backslash);
+      if (l < 0) {
+        l=url.lastIndexOf("/");
+      }
+      String path=url.substring(l + 1,url.length());
+      System.out.println("Path: " + path);
+      if (!test) {
+        n.setProperty("relativeFilePath",path);
+      }
+    }
+  }
+}

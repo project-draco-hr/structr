@@ -1,0 +1,106 @@
+{
+  super();
+  searchFields.setColumns(5);
+  searchFields.add(searchTextField);
+  searchFields.add(new Label("in","in"));
+  searchFields.add(inNameCheckbox);
+  searchFields.add(inTitleCheckbox);
+  searchFields.add(inContentCheckbox);
+  searchOpSelect.add(new Option(SearchOperator.OR));
+  searchOpSelect.add(new Option(SearchOperator.AND));
+  searchFields.add(searchOpSelect);
+  advancedSearchForm.setActionURL(advancedSearchForm.getActionURL().concat("#search-tab"));
+  advancedSearchForm.add(searchFields);
+  advancedSearchForm.add(new Submit("search","Search",this,"onAdvancedSearch"));
+  advancedSearchForm.add(new Submit("reset","Reset Form",this,"onReset"));
+  Column actionColumnNodes=new Column("Actions");
+  actionColumnNodes.setTextAlign("center");
+  actionColumnNodes.setDecorator(new LinkDecorator(searchResultsTable,new PageLink(),StructrNode.NODE_ID_KEY){
+    @Override protected void renderActionLink(    HtmlStringBuffer buffer,    AbstractLink link,    Context context,    Object row,    Object value){
+      StructrNode n=(StructrNode)row;
+      link=new PageLink(StructrNode.NODE_ID_KEY,getEditPageClass(n)){
+        @Override public String getHref(){
+          if (getPageClass() == null) {
+            throw new IllegalStateException("target pageClass is not defined");
+          }
+          Context context=getContext();
+          HtmlStringBuffer buffer=new HtmlStringBuffer();
+          buffer.append(context.getRequest().getContextPath());
+          String pagePath=context.getPagePath(getPageClass());
+          if (pagePath != null && pagePath.endsWith(".jsp")) {
+            pagePath=StringUtils.replace(pagePath,".jsp",".htm");
+          }
+          buffer.append(pagePath);
+          if (hasParameters()) {
+            buffer.append("?");
+            renderParameters(buffer,getParameters(),context);
+          }
+          return context.getResponse().encodeURL(buffer.toString());
+        }
+      }
+;
+      link.setParameter(NODE_ID_KEY,n.getId());
+      link.setImageSrc("/images/table-edit.png");
+      super.renderActionLink(buffer,link,context,row,value);
+    }
+  }
+);
+  Column typeColumn=new Column(StructrNode.TYPE_KEY);
+  LinkDecorator iconDec=new LinkDecorator(searchResultsTable,new PageLink(),StructrNode.NODE_ID_KEY){
+    @Override protected void renderActionLink(    HtmlStringBuffer buffer,    AbstractLink link,    Context context,    Object row,    Object value){
+      StructrNode n=(StructrNode)row;
+      link=new PageLink(StructrNode.NODE_ID_KEY,getEditPageClass(n));
+      link.setParameter(NODE_ID_KEY,n.getId());
+      link.setImageSrc(n.getIconSrc());
+      super.renderActionLink(buffer,link,context,row,value);
+    }
+  }
+;
+  typeColumn.setDecorator(iconDec);
+  searchResultsTable.addColumn(typeColumn);
+  Column nameColumn=new Column(StructrNode.NAME_KEY);
+  LinkDecorator nameDec=new LinkDecorator(searchResultsTable,new PageLink(),"id"){
+    @Override protected void renderActionLink(    HtmlStringBuffer buffer,    AbstractLink link,    Context context,    Object row,    Object value){
+      StructrNode n=(StructrNode)row;
+      PageLink pageLink=new PageLink("id",getEditPageClass(n)){
+        @Override public String getHref(){
+          if (getPageClass() == null) {
+            throw new IllegalStateException("target pageClass is not defined");
+          }
+          Context context=getContext();
+          HtmlStringBuffer buffer=new HtmlStringBuffer();
+          buffer.append(context.getRequest().getContextPath());
+          String pagePath=context.getPagePath(getPageClass());
+          if (pagePath != null && pagePath.endsWith(".jsp")) {
+            pagePath=StringUtils.replace(pagePath,".jsp",".htm");
+          }
+          buffer.append(pagePath);
+          if (hasParameters()) {
+            buffer.append("?");
+            renderParameters(buffer,getParameters(),context);
+          }
+          return context.getResponse().encodeURL(buffer.toString());
+        }
+      }
+;
+      pageLink.setParameter(NODE_ID_KEY,n.getId());
+      pageLink.setLabel(n.getName());
+      super.renderActionLink(buffer,pageLink,context,row,value);
+    }
+  }
+;
+  nameColumn.setDecorator(nameDec);
+  searchResultsTable.addColumn(nameColumn);
+  searchResultsTable.addColumn(new Column(StructrNode.LAST_MODIFIED_DATE_KEY));
+  searchResultsTable.addColumn(new Column(StructrNode.OWNER_KEY));
+  searchResultsTable.addColumn(new Column(StructrNode.CREATED_BY_KEY));
+  searchResultsTable.addColumn(new Column(StructrNode.CREATED_DATE_KEY));
+  searchResultsTable.addColumn(new Column(StructrNode.POSITION_KEY));
+  searchResultsTable.addColumn(new Column(StructrNode.PUBLIC_KEY));
+  searchResultsTable.addColumn(actionColumnNodes);
+  searchResultsTable.setSortable(true);
+  searchResultsTable.setShowBanner(true);
+  searchResultsTable.setPageSize(DEFAULT_PAGESIZE);
+  searchResultsTable.getControlLink().setParameter(StructrNode.NODE_ID_KEY,getNodeId());
+  searchResultsTable.setClass(Table.CLASS_SIMPLE);
+}

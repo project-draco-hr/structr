@@ -1,0 +1,16 @@
+{
+  logger.log(Level.FINE,"Creating service ",serviceClass.getName());
+  Service service=(Service)serviceClass.newInstance();
+  logger.log(Level.FINEST,"Initializing service ",serviceClass.getName());
+  service.initialize(context);
+  if (service instanceof RunnableService) {
+    logger.log(Level.FINER,"Starting RunnableService instance ",serviceClass.getName());
+    RunnableService runnableService=(RunnableService)service;
+    runnableService.startService();
+    serviceCache.put(serviceClass,service);
+  }
+ else   if (service instanceof SingletonService) {
+    serviceCache.put(serviceClass,service);
+  }
+  return service;
+}

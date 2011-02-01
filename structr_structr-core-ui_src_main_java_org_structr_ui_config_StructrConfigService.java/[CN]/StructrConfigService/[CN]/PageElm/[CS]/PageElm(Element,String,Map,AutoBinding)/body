@@ -1,0 +1,47 @@
+{
+  Map aggregationMap=new HashMap(commonHeaders);
+  Map pageHeaders=loadHeadersMap(element);
+  aggregationMap.putAll(pageHeaders);
+  headers=Collections.unmodifiableMap(aggregationMap);
+  String pathValue=element.getAttribute("path");
+  if (pathValue.charAt(0) != '/') {
+    path="/" + pathValue;
+  }
+ else {
+    path=pathValue;
+  }
+  String classname=element.getAttribute("classname");
+  if (classname == null) {
+    String msg="No classname defined for page path " + path;
+    throw new RuntimeException(msg);
+  }
+  Class tmpPageClass=null;
+  String classnameFound=null;
+  try {
+    tmpPageClass=ClickUtils.classForName(classname);
+    classnameFound=classname;
+  }
+ catch (  ClassNotFoundException cnfe) {
+    if (pagesPackage.trim().length() > 0) {
+      String prefixedClassname=pagesPackage + "." + classname;
+      try {
+        tmpPageClass=ClickUtils.classForName(prefixedClassname);
+        classnameFound=prefixedClassname;
+      }
+ catch (      ClassNotFoundException cnfe2) {
+        String msg="No class was found for the Page classname: '" + classname + "'.";
+        throw new RuntimeException(msg,cnfe);
+      }
+    }
+  }
+  pageClass=tmpPageClass;
+  if (!Page.class.isAssignableFrom(pageClass)) {
+    String msg="Page class '" + classnameFound + "' is not a subclass of org.apache.click.Page";
+    throw new RuntimeException(msg);
+  }
+  fieldArray=StructrConfigService.getBindablePageFields(pageClass,autobinding);
+  fields=new HashMap<String,Field>();
+  for (  Field field : fieldArray) {
+    fields.put(field.getName(),field);
+  }
+}

@@ -1,0 +1,27 @@
+{
+  Map headersMap=new HashMap();
+  List headerList=ClickUtils.getChildren(parentElm,"header");
+  for (int i=0, size=headerList.size(); i < size; i++) {
+    Element header=(Element)headerList.get(i);
+    String name=header.getAttribute("name");
+    String type=header.getAttribute("type");
+    String propertyValue=header.getAttribute("value");
+    Object value=null;
+    if ("".equals(type) || "String".equalsIgnoreCase(type)) {
+      value=propertyValue;
+    }
+ else     if ("Integer".equalsIgnoreCase(type)) {
+      value=Integer.valueOf(propertyValue);
+    }
+ else     if ("Date".equalsIgnoreCase(type)) {
+      value=new Date(Long.parseLong(propertyValue));
+    }
+ else {
+      value=null;
+      String message="Invalid property type [String|Integer|Date]: " + type;
+      throw new IllegalArgumentException(message);
+    }
+    headersMap.put(name,value);
+  }
+  return headersMap;
+}

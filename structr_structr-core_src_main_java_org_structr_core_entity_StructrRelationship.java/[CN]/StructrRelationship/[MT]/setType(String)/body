@@ -1,0 +1,18 @@
+{
+  if (type != null) {
+    Command transacted=Services.createCommand(TransactionCommand.class);
+    transacted.execute(new StructrTransaction(){
+      @Override public Object execute() throws Throwable {
+        Command deleteRel=Services.createCommand(DeleteRelationshipCommand.class);
+        Command createRel=Services.createCommand(CreateRelationshipCommand.class);
+        Command nodeFactory=Services.createCommand(NodeFactoryCommand.class);
+        StructrNode startNode=(StructrNode)nodeFactory.execute(getStartNode());
+        StructrNode endNode=(StructrNode)nodeFactory.execute(getEndNode());
+        deleteRel.execute(dbRelationship);
+        dbRelationship=((StructrRelationship)createRel.execute(type,startNode,endNode)).getRelationship();
+        return (null);
+      }
+    }
+);
+  }
+}

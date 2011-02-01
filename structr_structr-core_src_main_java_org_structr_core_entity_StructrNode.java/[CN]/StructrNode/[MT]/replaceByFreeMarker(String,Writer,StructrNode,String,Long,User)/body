@@ -1,0 +1,33 @@
+{
+  Configuration cfg=new Configuration();
+  try {
+    StructrNode callingNode=null;
+    if (getTemplate(user) != null) {
+      callingNode=template.getCallingNode();
+      Map root=new HashMap();
+      root.put("Template",this);
+      if (callingNode != null) {
+        root.put(callingNode.getType(),callingNode);
+      }
+      HttpServletRequest request=getRequest();
+      if (request != null) {
+        root.put("Request",new freemarker.ext.servlet.HttpRequestParametersHashModel(request));
+        String searchString=request.getParameter("search");
+        if (searchString != null && !(searchString.isEmpty())) {
+          Command search=Services.createCommand(SearchNodeCommand.class);
+          List<StructrNode> result=(List<StructrNode>)search.execute(null,null,false,true,new SearchAttribute(StructrNode.NAME_KEY,searchString,SearchOperator.OR),new SearchAttribute(StructrNode.TITLE_KEY,searchString,SearchOperator.OR),new SearchAttribute(PlainText.CONTENT_KEY,searchString,SearchOperator.OR));
+          root.put("SearchResults",result);
+        }
+      }
+      freemarker.template.Template t=new freemarker.template.Template(template.getName(),new StringReader(templateString),cfg);
+      t.process(root,out);
+    }
+ else {
+      out.write(templateString);
+      out.flush();
+    }
+  }
+ catch (  Throwable t) {
+    logger.log(Level.WARNING,"Error: {0}",t.getMessage());
+  }
+}

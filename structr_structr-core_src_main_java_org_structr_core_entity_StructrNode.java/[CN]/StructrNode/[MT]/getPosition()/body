@@ -1,0 +1,33 @@
+{
+  Object p=getProperty(POSITION_KEY);
+  Long pos;
+  if (p != null) {
+    if (p instanceof Long) {
+      return (Long)p;
+    }
+ else     if (p instanceof Integer) {
+      try {
+        pos=Long.parseLong(p.toString());
+        setPosition(pos);
+      }
+ catch (      NumberFormatException e) {
+        pos=getId();
+        return pos;
+      }
+    }
+ else     if (p instanceof String) {
+      try {
+        pos=Long.parseLong(((String)p));
+        setPosition(pos);
+      }
+ catch (      NumberFormatException e) {
+        pos=getId();
+        return pos;
+      }
+    }
+ else {
+      logger.log(Level.SEVERE,"Position property not stored as Integer or String: {0}",p.getClass().getName());
+    }
+  }
+  return getId();
+}

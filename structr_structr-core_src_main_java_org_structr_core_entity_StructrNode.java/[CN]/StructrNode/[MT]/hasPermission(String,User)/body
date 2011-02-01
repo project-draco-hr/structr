@@ -1,0 +1,17 @@
+{
+  if (user == null || permission == null) {
+    return false;
+  }
+  if (user instanceof SuperUser) {
+    return true;
+  }
+  if (this.equals(user)) {
+    return true;
+  }
+  StructrRelationship r=null;
+  r=getSecurityRelationship(user);
+  if (r != null && r.isAllowed(permission)) {
+    return true;
+  }
+  return false;
+}

@@ -1,0 +1,26 @@
+{
+  String dbPath=(String)context.get(Services.DATABASE_PATH_IDENTIFIER);
+  try {
+    logger.log(Level.INFO,"Initializing database ({0}) ...",dbPath);
+    Map<String,String> configuration=null;
+    try {
+      configuration=EmbeddedGraphDatabase.loadConfigurations(dbPath + "/neo4j.conf");
+      graphDb=new EmbeddedGraphDatabase(dbPath,configuration);
+    }
+ catch (    Throwable t) {
+      logger.log(Level.INFO,"Database config not found");
+      graphDb=new EmbeddedGraphDatabase(dbPath);
+    }
+    logger.log(Level.INFO,"Database ready.");
+    logger.log(Level.FINE,"Initializing index...");
+    index=new LuceneFulltextQueryIndexService(graphDb);
+    logger.log(Level.FINE,"Index ready.");
+    logger.log(Level.FINE,"Initializing node factory...");
+    nodeFactory=new StructrNodeFactory();
+    logger.log(Level.FINE,"Node factory ready.");
+  }
+ catch (  Exception e) {
+    logger.log(Level.SEVERE,"Database could not be initialized. {0}",e.getMessage());
+    e.printStackTrace(System.out);
+  }
+}

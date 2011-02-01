@@ -1,0 +1,45 @@
+{
+  List<Polygon> polys=new ArrayList<Polygon>();
+  Geometry displayGeometry=gf.toGeometry(toEnvelope(displayArea));
+  for (  Geometry g : geoms) {
+    if (!((g instanceof Polygon) || (g instanceof MultiPolygon)))     continue;
+    if (g instanceof Polygon) {
+      polys.add((Polygon)g);
+    }
+ else {
+      for (int t=0; t < g.getNumGeometries(); t++) {
+        Polygon gg=(Polygon)g.getGeometryN(t);
+        polys.add(gg);
+      }
+    }
+  }
+  if (polys.size() == 0)   return null;
+  List<Polygon> clippedPolys=new ArrayList<Polygon>();
+  Envelope displayGeomEnv=displayGeometry.getEnvelopeInternal();
+  for (  Polygon p : polys) {
+    MultiPolygon pp=clipPolygon(p,(Polygon)displayGeometry,displayGeomEnv);
+    if ((pp != null) && (!(pp.isEmpty()))) {
+      for (int t=0; t < pp.getNumGeometries(); t++)       clippedPolys.add((Polygon)pp.getGeometryN(t));
+    }
+  }
+  if (clippedPolys.size() == 0) {
+    return null;
+  }
+  double maxSize=-1;
+  Polygon maxPoly=null;
+  Polygon cpoly;
+  for (int t=0; t < clippedPolys.size(); t++) {
+    cpoly=(Polygon)clippedPolys.get(t);
+    final double area=cpoly.getArea();
+    if (area > maxSize) {
+      maxPoly=cpoly;
+      maxSize=area;
+    }
+  }
+  if (maxSize > 0) {
+    return maxPoly;
+  }
+ else {
+    return null;
+  }
+}

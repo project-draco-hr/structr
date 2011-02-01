@@ -1,0 +1,44 @@
+{
+  final StyleAttributeExtractor sae=new StyleAttributeExtractor();
+  LiteFeatureTypeStyle lfts;
+  Rule[] rules;
+  int rulesLength;
+  final int length=styles.length;
+  for (int t=0; t < length; t++) {
+    lfts=styles[t];
+    rules=lfts.elseRules;
+    rulesLength=rules.length;
+    for (int j=0; j < rulesLength; j++) {
+      sae.visit(rules[j]);
+    }
+    rules=lfts.ruleList;
+    rulesLength=rules.length;
+    for (int j=0; j < rulesLength; j++) {
+      sae.visit(rules[j]);
+    }
+  }
+  String[] ftsAttributes=sae.getAttributeNames();
+  List atts=new LinkedList(Arrays.asList(ftsAttributes));
+  Collection<PropertyDescriptor> attTypes=schema.getDescriptors();
+  String attName;
+  final int attTypesLength=attTypes.size();
+  for (  PropertyDescriptor pd : attTypes) {
+    attName=pd.getName().getLocalPart();
+    if ((attName.equalsIgnoreCase("grid")) && !atts.contains(attName) || (attName.equalsIgnoreCase("params")) && !atts.contains(attName)) {
+      atts.add(attName);
+      if (LOGGER.isLoggable(Level.FINE)) {
+        LOGGER.fine("added attribute " + attName);
+      }
+    }
+  }
+  try {
+    if (sae.getDefaultGeometryUsed() && (!atts.contains(schema.getGeometryDescriptor().getLocalName()))) {
+      atts.add(schema.getGeometryDescriptor().getLocalName());
+    }
+  }
+ catch (  Exception e) {
+  }
+  ftsAttributes=new String[atts.size()];
+  atts.toArray(ftsAttributes);
+  return ftsAttributes;
+}

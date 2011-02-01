@@ -1,0 +1,17 @@
+{
+  LOGGER.log(Level.SEVERE,t.getLocalizedMessage(),t);
+  if (renderListeners.size() > 0) {
+    Exception e;
+    if (t instanceof Exception) {
+      e=(Exception)t;
+    }
+ else {
+      e=new Exception(t);
+    }
+    RenderListener listener;
+    for (int i=0; i < renderListeners.size(); i++) {
+      listener=renderListeners.get(i);
+      listener.errorOccurred(e);
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  String path=getPackagePath(packageName);
+  try {
+    List<URL> urls=Collections.list(getClassLoader().getResources(path));
+    for (    URL url : urls) {
+      List<String> children=listClassResources(url,path);
+      for (      String child : children) {
+        addIfMatching(test,child);
+      }
+    }
+  }
+ catch (  IOException ioe) {
+    logService.error("could not read package: " + packageName + " -- "+ ioe);
+  }
+  return this;
+}

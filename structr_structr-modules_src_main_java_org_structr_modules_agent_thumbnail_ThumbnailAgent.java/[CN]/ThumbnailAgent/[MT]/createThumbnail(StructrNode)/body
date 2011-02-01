@@ -1,0 +1,30 @@
+{
+  String fileName=(String)node.getNode().getProperty("url");
+  String contentType=(String)node.getNode().getProperty("mimeType");
+  fileName=fileName.substring("file://".length());
+  File inputFile=new File(fileName);
+  File outputFile=new File(fileName.concat("_thumb"));
+  try {
+    long start=System.nanoTime();
+    BufferedImage source=ImageIO.read(inputFile);
+    int sourceWidth=source.getWidth();
+    int sourceHeight=source.getHeight();
+    int destWidth=80;
+    int destHeight=80;
+    BufferedImage dest=new BufferedImage(destWidth,destHeight,BufferedImage.TYPE_INT_RGB);
+    Graphics2D g=dest.createGraphics();
+    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
+    g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+    g.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING,RenderingHints.VALUE_COLOR_RENDER_QUALITY);
+    g.setRenderingHint(RenderingHints.KEY_RENDERING,RenderingHints.VALUE_RENDER_QUALITY);
+    AffineTransform transform=AffineTransform.getScaleInstance((double)destWidth / sourceWidth,(double)destWidth / sourceHeight);
+    g.drawRenderedImage(source,transform);
+    ImageIO.write(dest,contentType,outputFile);
+    long end=System.nanoTime();
+    long time=(end - start) / 1000000;
+    System.out.println("ThumbnailAgent: reading, scaling and writing took " + time + " ms");
+  }
+ catch (  Exception ex) {
+    ex.printStackTrace();
+  }
+}

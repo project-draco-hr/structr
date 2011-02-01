@@ -1,0 +1,22 @@
+{
+  Predicate<Path> ret=new Predicate<Path>(){
+    @Override public boolean accept(    Path path){
+      return (path.length() > 0);
+    }
+  }
+;
+  if (test instanceof NodeNameTest) {
+    NodeNameTest nameTest=(NodeNameTest)test;
+    QName name=nameTest.getNodeName();
+    final String shortName=name.getName();
+    final boolean isWildcard=nameTest.isWildcard();
+    ret=new Predicate<Path>(){
+      @Override public boolean accept(      Path path){
+        Node node=path.endNode();
+        return (node.hasProperty(StructrNode.TYPE_KEY) && (isWildcard || shortName.equals((String)node.getProperty(StructrNode.TYPE_KEY))));
+      }
+    }
+;
+  }
+  return (ret);
+}

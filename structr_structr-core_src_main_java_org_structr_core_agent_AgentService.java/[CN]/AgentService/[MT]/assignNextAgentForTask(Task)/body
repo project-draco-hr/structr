@@ -1,0 +1,20 @@
+{
+  Class taskClass=nextTask.getClass();
+  List<Agent> agents=getRunningAgentsForTask(taskClass);
+synchronized (agents) {
+    for (    Agent agent : agents) {
+      if (agent.assignTask(nextTask)) {
+        return;
+      }
+    }
+  }
+  Agent agent=createAgent(nextTask);
+  if (agent != null && agent.assignTask(nextTask)) {
+    agent.start();
+  }
+ else {
+synchronized (taskQueue) {
+      taskQueue.add(nextTask);
+    }
+  }
+}

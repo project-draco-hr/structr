@@ -1,0 +1,58 @@
+{
+  if (logService.isTraceEnabled()) {
+    logService.trace("find jar url: " + url);
+  }
+  try {
+    for (; ; ) {
+      url=new URL(url.getFile());
+      if (logService.isTraceEnabled()) {
+        logService.trace("inner url: " + url);
+      }
+    }
+  }
+ catch (  MalformedURLException e) {
+  }
+  StringBuilder jarUrl=new StringBuilder(url.toExternalForm());
+  int index=jarUrl.lastIndexOf(".jar");
+  if (index >= 0) {
+    jarUrl.setLength(index + 4);
+    if (logService.isTraceEnabled()) {
+      logService.trace("extracted jar url: " + jarUrl);
+    }
+  }
+ else {
+    if (logService.isTraceEnabled()) {
+      logService.trace("not a jar: " + jarUrl);
+    }
+    return null;
+  }
+  try {
+    URL testUrl=new URL(jarUrl.toString());
+    if (isJar(testUrl)) {
+      return testUrl;
+    }
+ else {
+      if (logService.isTraceEnabled()) {
+        logService.trace("not a jar: " + jarUrl);
+      }
+      jarUrl.replace(0,jarUrl.length(),testUrl.getFile());
+      File file=new File(ClickUtils.decodeURL(jarUrl.toString()));
+      if (file.exists()) {
+        if (logService.isTraceEnabled()) {
+          logService.trace("trying real file: " + file.getAbsolutePath());
+        }
+        testUrl=file.toURI().toURL();
+        if (isJar(testUrl)) {
+          return testUrl;
+        }
+      }
+    }
+  }
+ catch (  MalformedURLException e) {
+    logService.warn("invalid jar url: " + e.getMessage());
+  }
+  if (logService.isTraceEnabled()) {
+    logService.trace("not a jar: " + jarUrl);
+  }
+  return null;
+}

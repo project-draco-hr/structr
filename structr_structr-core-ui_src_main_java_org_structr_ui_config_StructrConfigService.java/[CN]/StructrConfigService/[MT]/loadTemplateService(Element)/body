@@ -1,0 +1,25 @@
+{
+  Element templateServiceElm=ClickUtils.getChild(rootElm,"template-service");
+  if (templateServiceElm != null) {
+    Class templateServiceClass=VelocityTemplateService.class;
+    String classname=templateServiceElm.getAttribute("classname");
+    if (StringUtils.isNotBlank(classname)) {
+      templateServiceClass=ClickUtils.classForName(classname);
+    }
+    templateService=(TemplateService)templateServiceClass.newInstance();
+    Map propertyMap=loadPropertyMap(templateServiceElm);
+    for (Iterator i=propertyMap.keySet().iterator(); i.hasNext(); ) {
+      String name=i.next().toString();
+      String value=propertyMap.get(name).toString();
+      Ognl.setValue(name,templateService,value);
+    }
+  }
+ else {
+    templateService=new VelocityTemplateService();
+  }
+  if (getLogService().isDebugEnabled()) {
+    String msg="initializing TemplateService: " + templateService.getClass().getName();
+    getLogService().debug(msg);
+  }
+  templateService.onInit(servletContext);
+}

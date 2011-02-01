@@ -1,0 +1,35 @@
+{
+  final Command transaction=Services.createCommand(TransactionCommand.class);
+  String localNodeId=deleteRelationshipLink.getParameter(NODE_ID_KEY);
+  final String relationshipId=deleteRelationshipLink.getValue();
+  final Map<String,String> parameters=new HashMap<String,String>();
+  if (relationshipId != null) {
+    final Long id=Long.parseLong(relationshipId);
+    transaction.execute(new StructrTransaction(){
+      @Override public Object execute() throws Throwable {
+        Command deleteRelationship=Services.createCommand(DeleteRelationshipCommand.class);
+        deleteRelationship.execute(id);
+        transaction.setErrorMessage(deleteRelationship.getErrorMessage());
+        transaction.setExitCode(deleteRelationship.getExitCode());
+        return (null);
+      }
+    }
+);
+    if (Command.exitCode.FAILURE.equals(transaction.getExitCode())) {
+      errorMsg=transaction.getErrorMessage();
+      parameters.put(ERROR_MSG_KEY,errorMsg);
+    }
+ else {
+      okMsg="Relationship successfully removed!";
+      parameters.put(OK_MSG_KEY,okMsg);
+    }
+  }
+ else {
+    errorMsg="No Relationship ID!";
+    parameters.put(ERROR_MSG_KEY,errorMsg);
+  }
+  parameters.put(NODE_ID_KEY,localNodeId);
+  parameters.put(RENDER_MODE_KEY,renderMode);
+  setRedirect(getRedirectPage(getNodeByIdOrPath(getNodeId()),this),parameters);
+  return false;
+}

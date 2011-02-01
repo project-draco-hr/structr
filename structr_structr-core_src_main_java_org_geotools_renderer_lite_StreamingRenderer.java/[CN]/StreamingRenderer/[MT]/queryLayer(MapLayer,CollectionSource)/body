@@ -1,0 +1,16 @@
+{
+  Collection results=null;
+  Query query=new Query(Query.ALL);
+  Query definitionQuery;
+  definitionQuery=currLayer.getQuery();
+  if (definitionQuery != Query.ALL) {
+    if (query == Query.ALL) {
+      query=new Query(definitionQuery);
+    }
+ else {
+      query=new Query(DataUtilities.mixQueries(definitionQuery,query,"liteRenderer"));
+    }
+  }
+  results=source.content(query.getFilter());
+  return results;
+}

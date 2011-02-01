@@ -1,0 +1,21 @@
+{
+  logger.log(Level.FINE,"Locating entites for type ",type.getName());
+  initializeCachedClassCollection(forceReload);
+  Set<Class> ret=entityCache.get(type);
+  if (ret == null) {
+    ret=new LinkedHashSet<Class>();
+    for (    Class classCandidate : cachedClassCollection) {
+      try {
+        if (classCandidate != null && !classCandidate.isInterface()) {
+          ret.add(classCandidate.asSubclass(type));
+          logger.log(Level.FINER,"Found valid entity for type ",type.getName());
+        }
+      }
+ catch (      Throwable t) {
+        classCandidate=null;
+      }
+    }
+    entityCache.put(type,ret);
+  }
+  return (ret);
+}

@@ -1,0 +1,24 @@
+{
+  String pattern=element.getAttribute("pattern");
+  if (StringUtils.isNotBlank(pattern)) {
+    StringTokenizer tokenizer=new StringTokenizer(pattern,", ");
+    while (tokenizer.hasMoreTokens()) {
+      String token=tokenizer.nextToken();
+      if (token.charAt(0) != '/') {
+        token="/" + token;
+      }
+      int index=token.lastIndexOf(".");
+      if (index != -1) {
+        token=token.substring(0,index);
+        fileSet.add(token);
+      }
+ else {
+        index=token.indexOf("*");
+        if (index != -1) {
+          token=token.substring(0,index);
+        }
+        pathSet.add(token);
+      }
+    }
+  }
+}

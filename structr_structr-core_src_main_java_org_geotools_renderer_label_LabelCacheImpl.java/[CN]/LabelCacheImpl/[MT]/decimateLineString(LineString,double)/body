@@ -1,0 +1,16 @@
+{
+  Coordinate[] inputCoordinates=line.getCoordinates();
+  List<Coordinate> simplified=new ArrayList<Coordinate>();
+  Coordinate prev=inputCoordinates[0];
+  simplified.add(prev);
+  for (int i=1; i < inputCoordinates.length; i++) {
+    Coordinate curr=inputCoordinates[i];
+    if ((Math.abs(curr.x - prev.x) > step) || (Math.abs(curr.y - prev.y)) > step) {
+      simplified.add(curr);
+      prev=curr;
+    }
+  }
+  if (simplified.size() == 1)   simplified.add(inputCoordinates[inputCoordinates.length - 1]);
+  Coordinate[] newCoords=(Coordinate[])simplified.toArray(new Coordinate[simplified.size()]);
+  return line.getFactory().createLineString(newCoords);
+}

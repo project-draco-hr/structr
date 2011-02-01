@@ -1,0 +1,12 @@
+{
+  List<StructrNode> menuItems=new ArrayList<StructrNode>();
+  menuItems.addAll(getDirectChildren(RelType.HAS_CHILD,"MenuItem",user));
+  menuItems.addAll(getDirectChildren(RelType.LINK,user));
+  Collections.sort(menuItems,new Comparator<StructrNode>(){
+    @Override public int compare(    StructrNode nodeOne,    StructrNode nodeTwo){
+      return nodeOne.getPosition().compareTo(nodeTwo.getPosition());
+    }
+  }
+);
+  return menuItems;
+}

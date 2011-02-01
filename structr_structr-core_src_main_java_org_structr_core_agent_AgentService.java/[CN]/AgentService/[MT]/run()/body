@@ -1,0 +1,19 @@
+{
+  System.out.println("AgentService.run(): started");
+  while (run) {
+    Task nextTask=null;
+synchronized (taskQueue) {
+      nextTask=taskQueue.poll();
+      if (nextTask != null) {
+        assignNextAgentForTask(nextTask);
+      }
+      try {
+        Thread.sleep(10);
+      }
+ catch (      Exception ex) {
+      }
+    }
+  }
+  System.out.println("AgentService.run(): stopped");
+  System.out.println("AgentService.run(): maxAgents was " + maxAgents);
+}

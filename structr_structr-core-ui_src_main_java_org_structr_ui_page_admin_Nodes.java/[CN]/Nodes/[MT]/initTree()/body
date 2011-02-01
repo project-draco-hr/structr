@@ -1,0 +1,44 @@
+{
+  nodeTree=new Tree(TREE_ID){
+    @Override public ActionLink getExpandLink(){
+      if (expandLink == null) {
+        expandLink=new SubmitLink();
+      }
+      expandLink.setParameter(NODE_ID_KEY,getNodeId());
+      return expandLink;
+    }
+    @Override protected void renderValue(    HtmlStringBuffer buf,    TreeNode node){
+      if (node != null) {
+        StructrNode n=(StructrNode)node.getValue();
+        if (n != null) {
+          String displayName=n.getName();
+          String label=ClickUtils.limitLength(displayName,30);
+          Long intId=n.getId();
+          if (label == null) {
+            label=intId.toString();
+          }
+          PageLink link=new PageLink(label,getRedirectPage(n,getPage()));
+          link.setParameter(NODE_ID_KEY,intId);
+          link.setAttribute("title",displayName + " (" + intId.toString()+ ")");
+          if (n instanceof Link) {
+            link.setParameter("isLink","1");
+            parentNodeId=node.getParent().getId();
+            link.setParameter(PARENT_NODE_ID_KEY,parentNodeId);
+          }
+          if (String.valueOf(n.getId()).equals(getNodeId())) {
+            label="<b class=\"active\">" + label + "</b>";
+          }
+          link.setLabel(label);
+          if (!n.isVisible()) {
+            link.addStyleClass("hidden");
+          }
+          if (n.isPublic()) {
+            link.addStyleClass("public");
+          }
+          buf.append(link);
+        }
+      }
+    }
+  }
+;
+}

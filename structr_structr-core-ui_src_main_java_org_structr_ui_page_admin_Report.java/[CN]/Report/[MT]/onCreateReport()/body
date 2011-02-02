@@ -1,10 +1,12 @@
 {
+  final String reportFileName=reportName.getValue() + ".csv";
   if (reportForm.isValid()) {
     Command search=Services.createCommand(SearchNodeCommand.class);
     reportResults=(List<StructrNode>)search.execute(null,user,true,false,searchAttributes);
     populateReportResultsTable();
     saveState();
   }
+  Map methodCache=new HashMap<Object,Object>();
   List<String[]> resultList=new ArrayList<String[]>();
   List<String> keys=new ArrayList<String>();
   for (  Column c : columns) {
@@ -17,15 +19,18 @@
   for (  StructrNode s : reportResults) {
     List<String> values=new ArrayList<String>();
     for (    Column c : columns) {
-      Object value=s.getProperty(c.getName());
+      Object value=PropertyUtils.getValue(s,c.getName(),methodCache);
       if (value != null) {
         values.add(value.toString());
+      }
+ else {
+        values.add("");
       }
     }
     String[] sa=values.toArray(new String[values.size()]);
     resultList.add(sa);
   }
-  File reportFile=new File("/tmp/report.csv");
+  final File reportFile=new File("/tmp/" + reportFileName);
   CSVWriter csvw=null;
   try {
     char sepChar;
@@ -53,6 +58,31 @@
     csvw.writeAll(resultList);
     csvw.flush();
     csvw.close();
+    StructrNode s=null;
+    Command transaction=Services.createCommand(TransactionCommand.class);
+    s=(StructrNode)transaction.execute(new StructrTransaction(){
+      @Override public Object execute() throws Throwable {
+        Command createNode=Services.createCommand(CreateNodeCommand.class);
+        Command createRel=Services.createCommand(CreateRelationshipCommand.class);
+        StructrNode newNode=(StructrNode)createNode.execute(new NodeAttribute(StructrNode.TYPE_KEY,File.class.getSimpleName()),user);
+        String relativeFilePath=newNode.getId() + "_" + System.currentTimeMillis();
+        String targetPath=FILES_PATH + "/" + relativeFilePath;
+        String fileUrl="file:///" + reportFile.getPath();
+        FileUtils.moveFile(reportFile,new File(targetPath));
+        Date now=new Date();
+        newNode.setProperty(StructrNode.NAME_KEY,reportFileName);
+        newNode.setProperty(StructrNode.CREATED_DATE_KEY,now);
+        newNode.setProperty(StructrNode.LAST_MODIFIED_DATE_KEY,now);
+        newNode.setProperty(org.structr.core.entity.File.CONTENT_TYPE_KEY,"text/csv");
+        newNode.setProperty(org.structr.core.entity.File.SIZE_KEY,String.valueOf(reportFile.length()));
+        newNode.setProperty(org.structr.core.entity.File.URL_KEY,fileUrl);
+        newNode.setProperty(org.structr.core.entity.File.RELATIVE_FILE_PATH_KEY,relativeFilePath);
+        StructrNode parentNode=user;
+        createRel.execute(parentNode,newNode,RelType.HAS_CHILD);
+        return newNode;
+      }
+    }
+);
   }
  catch (  IOException ex) {
     Logger.getLogger(Report.class.getName()).log(Level.SEVERE,null,ex);

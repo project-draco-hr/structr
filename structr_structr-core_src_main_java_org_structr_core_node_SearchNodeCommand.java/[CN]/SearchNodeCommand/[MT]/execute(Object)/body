@@ -2,11 +2,11 @@
   GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
   IndexService index=(LuceneFulltextIndexService)arguments.get("index");
   StructrNodeFactory nodeFactory=(StructrNodeFactory)arguments.get("nodeFactory");
-  List<StructrNode> result=null;
+  List<StructrNode> result=Collections.emptyList();
   if (graphDb != null) {
     if (parameters == null || parameters.length != 5) {
       logger.log(Level.WARNING,"Exactly 5 parameters are required for advanced search.");
-      return null;
+      return Collections.emptyList();
     }
     User user=null;
     if (parameters[1] instanceof User) {
@@ -46,6 +46,9 @@
           if (value instanceof String) {
             isString=true;
             stringValue=(String)value;
+            if (SearchAttribute.WILDCARD.equals(Search.unquoteExactMatch(stringValue))) {
+              value=Search.unquoteExactMatch(stringValue);
+            }
           }
           if (stringValue != null && stringValue.length() > 1 && stringValue.startsWith(SearchAttribute.WILDCARD)) {
             stringValue=stringValue.substring(1);
@@ -68,7 +71,7 @@
             }
           }
           if (op.equals(SearchOperator.AND) && !indexHits && !wildcardHits) {
-            return null;
+            return Collections.emptyList();
           }
         }
  catch (        Throwable t) {
@@ -78,11 +81,18 @@
         if (op.equals(SearchOperator.OR)) {
           intermediateResult=ListUtils.sum(intermediateResult,singleResult);
         }
- else {
+ else         if (op.equals(SearchOperator.AND)) {
           if (intermediateResult.isEmpty()) {
             intermediateResult=singleResult;
           }
           List<StructrNode> intersectionResult=ListUtils.intersection(intermediateResult,singleResult);
+          intermediateResult=intersectionResult;
+        }
+ else         if (op.equals(SearchOperator.AND_NOT)) {
+          if (intermediateResult.isEmpty()) {
+            intermediateResult=singleResult;
+          }
+          List<StructrNode> intersectionResult=ListUtils.subtract(intermediateResult,singleResult);
           intermediateResult=intersectionResult;
         }
       }
@@ -91,5 +101,5 @@
     Collections.sort(result);
     return result;
   }
-  return null;
+  return Collections.emptyList();
 }

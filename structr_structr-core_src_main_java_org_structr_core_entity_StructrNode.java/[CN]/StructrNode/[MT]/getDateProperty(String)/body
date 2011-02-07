@@ -1,20 +1,27 @@
 {
-  Object time=getProperty(key);
-  if (time != null) {
-    if (time instanceof Long) {
-      return new Date((Long)time);
+  Object propertyValue=getProperty(key);
+  if (propertyValue != null) {
+    if (propertyValue instanceof Long) {
+      return new Date((Long)propertyValue);
     }
- else     if (time instanceof String) {
+ else     if (propertyValue instanceof String) {
       try {
-        return new Date(Long.parseLong((String)time));
+        return new Date(Long.parseLong((String)propertyValue));
       }
  catch (      NumberFormatException nfe) {
-        logger.log(Level.FINE,"Can''t parse String {0} to a Date.",time);
+        try {
+          Date date=DateUtils.parseDate(((String)propertyValue),new String[]{"yyyymmdd","yyyymm","yyyy"});
+          return date;
+        }
+ catch (        ParseException ex2) {
+          logger.log(Level.WARNING,"Could not parse " + propertyValue + " to date",ex2);
+        }
+        logger.log(Level.WARNING,"Can''t parse String {0} to a Date.",propertyValue);
         return null;
       }
     }
  else {
-      logger.log(Level.FINE,"Date property is not null, but type is neither Long nor String, returning null");
+      logger.log(Level.WARNING,"Date property is not null, but type is neither Long nor String, returning null");
       return null;
     }
   }

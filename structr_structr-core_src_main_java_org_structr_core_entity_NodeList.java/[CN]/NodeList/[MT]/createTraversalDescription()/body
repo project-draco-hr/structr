@@ -1,0 +1,9 @@
+{
+  TraversalDescription ret=Traversal.description().depthFirst();
+  ret=ret.relationships(RelType.NEXT_LIST_ENTRY,Direction.OUTGOING);
+  ret=ret.evaluator(new ParentIdEvaluator());
+  for (  Evaluator evaluator : evaluators) {
+    ret=ret.evaluator(evaluator);
+  }
+  return (ret);
+}

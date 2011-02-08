@@ -1,3 +1,7 @@
 {
   logger.log(Level.FINE,"HTTP session destroyed, cleaning",se.getSession().getId());
+  HttpSession session=se.getSession();
+  long sessionId=(Long)session.getAttribute(SessionMonitor.SESSION_ID);
+  SessionMonitor.logActivity(sessionId,"Logout");
+  SessionMonitor.unregisterUser(sessionId,session.getServletContext());
 }

@@ -41,6 +41,9 @@
       getContext().getRequest().getSession().setAttribute(USERNAME_KEY,userValue);
       initFirstPage();
     }
+    sessionId=SessionMonitor.registerUser(user,getContext().getServletContext());
+    SessionMonitor.logActivity(sessionId,"User logged in");
+    getContext().getRequest().getSession().setAttribute(SessionMonitor.SESSION_ID,sessionId);
     return false;
   }
   return true;

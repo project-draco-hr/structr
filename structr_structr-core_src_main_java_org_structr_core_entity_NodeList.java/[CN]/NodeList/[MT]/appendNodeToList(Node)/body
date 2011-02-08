@@ -1,0 +1,14 @@
+{
+  boolean listWasModified=false;
+  if (toAdd != null && !isMember(toAdd)) {
+    Node rootNode=getNode();
+    Node lastNode=getRelatedNode(rootNode,RelType.LAST_LIST_ENTRY,Direction.OUTGOING);
+    if (lastNode != null) {
+      createRelationship(lastNode,toAdd,RelType.NEXT_LIST_ENTRY);
+      deleteRelationship(rootNode,RelType.LAST_LIST_ENTRY,Direction.OUTGOING);
+      createRelationship(rootNode,toAdd,RelType.LAST_LIST_ENTRY);
+      listWasModified=true;
+    }
+  }
+  return (listWasModified);
+}

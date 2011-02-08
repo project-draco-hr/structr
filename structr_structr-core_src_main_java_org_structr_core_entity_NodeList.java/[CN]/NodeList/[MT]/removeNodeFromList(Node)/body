@@ -1,0 +1,19 @@
+{
+  boolean listWasModified=false;
+  if (toRemove != null && isMember(toRemove)) {
+    Node rootNode=getNode();
+    Node previousNode=getRelatedNode(toRemove,RelType.NEXT_LIST_ENTRY,Direction.INCOMING);
+    Node nextNode=getRelatedNode(toRemove,RelType.NEXT_LIST_ENTRY,Direction.OUTGOING);
+    deleteRelationship(previousNode,RelType.NEXT_LIST_ENTRY,Direction.OUTGOING);
+    deleteRelationship(toRemove,RelType.NEXT_LIST_ENTRY,Direction.OUTGOING);
+    if (nextNode != null) {
+      createRelationship(previousNode,nextNode,RelType.NEXT_LIST_ENTRY);
+    }
+ else {
+      deleteRelationship(rootNode,RelType.LAST_LIST_ENTRY,Direction.OUTGOING);
+      createRelationship(rootNode,previousNode,RelType.LAST_LIST_ENTRY);
+    }
+    listWasModified=true;
+  }
+  return (listWasModified);
+}

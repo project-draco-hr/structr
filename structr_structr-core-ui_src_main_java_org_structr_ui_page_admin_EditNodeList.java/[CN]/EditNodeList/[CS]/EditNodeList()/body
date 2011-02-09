@@ -1,4 +1,14 @@
 {
-  fields.add(new ActionLink("test","Test",this,"onTestClick"));
+  fields.add(new ActionLink("add","Add node to list",this,"onAddClick"));
+  fields.add(new ActionLink("del","Delete last node from list",this,"onDelClick"));
+  NodeList list=(NodeList)Services.createCommand(TestNodeCommand.class).execute();
+  if (list != null) {
+    fields.add(new Label("label","Size: " + list.size()));
+    for (    StructrNode n : list) {
+      if (n != null) {
+        fields.add(new Label("label" + n.getId(),n.toString()));
+      }
+    }
+  }
   editPropertiesForm.add(fields);
 }

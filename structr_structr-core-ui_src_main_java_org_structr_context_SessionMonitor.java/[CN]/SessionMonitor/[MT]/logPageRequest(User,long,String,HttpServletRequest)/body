@@ -1,0 +1,15 @@
+{
+  if (request != null) {
+    final Command transactionCommand=Services.createCommand(TransactionCommand.class);
+    transactionCommand.execute(new StructrTransaction(){
+      @Override public Object execute() throws Throwable {
+        Command createNode=Services.createCommand(CreateNodeCommand.class);
+        Date now=new Date();
+        Activity activity=(Activity)createNode.execute(user,new NodeAttribute(StructrNode.TYPE_KEY,PageRequest.class.getSimpleName()),new NodeAttribute(PageRequest.REMOTE_ADDRESS_KEY,request.getRemoteAddr()),new NodeAttribute(PageRequest.REMOTE_HOST_KEY,request.getRemoteHost()),new NodeAttribute(PageRequest.START_TIMESTAMP_KEY,now),new NodeAttribute(PageRequest.END_TIMESTAMP_KEY,now));
+        getSession(sessionId).addActivity(activity);
+        return null;
+      }
+    }
+);
+  }
+}

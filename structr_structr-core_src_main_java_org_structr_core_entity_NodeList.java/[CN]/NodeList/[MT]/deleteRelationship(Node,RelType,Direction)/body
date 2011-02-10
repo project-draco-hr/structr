@@ -1,13 +1,24 @@
 {
   if (startNode != null) {
+    System.out.println("trying to delete relationship " + startNode.getId() + " -> "+ relationshipType);
     Iterable<Relationship> rels=startNode.getRelationships(relationshipType,direction);
     for (    Relationship rel : rels) {
       if (rel.hasProperty(PARENT_KEY)) {
         Object parent=rel.getProperty(PARENT_KEY);
         if (parent instanceof Long && ((Long)parent).equals(getNodeId())) {
+          System.out.println("deleting relationship!");
           rel.delete();
         }
+ else {
+          System.out.println("NOT deleting relationship, parent id mismatch!");
+        }
+      }
+ else {
+        System.out.println("NOT deleting relationship, no parent id found!");
       }
     }
+  }
+ else {
+    System.out.println("startNode was null!");
   }
 }

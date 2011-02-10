@@ -1,7 +1,15 @@
 {
-  boolean ret=false;
-  for (  Object node : c) {
-    ret|=remove((StructrNode)node);
+  Boolean returnValue=(Boolean)transaction.execute(new StructrTransaction(){
+    @Override public Object execute() throws Throwable {
+      boolean ret=false;
+      for (      Object obj : nodes) {
+        StructrNode structrNode=(StructrNode)obj;
+        Node node=structrNode.getNode();
+        ret|=removeNodeFromList(node);
+      }
+      return (ret);
+    }
   }
-  return (ret);
+);
+  return (returnValue.booleanValue());
 }

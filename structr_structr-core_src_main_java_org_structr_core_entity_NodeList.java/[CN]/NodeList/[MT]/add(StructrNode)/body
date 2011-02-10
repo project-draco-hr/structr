@@ -1,7 +1,12 @@
 {
-  boolean ret=false;
-  if (toAdd != null) {
-    ret=appendNodeToList(toAdd.getNode());
+  Boolean returnValue=(Boolean)transaction.execute(new StructrTransaction(){
+    @Override public Object execute() throws Throwable {
+      for (      Decorator<StructrNode> decorator : decorators) {
+        decorator.decorate(toAdd);
+      }
+      return (appendNodeToList(toAdd.getNode()));
+    }
   }
-  return (ret);
+);
+  return (returnValue.booleanValue());
 }

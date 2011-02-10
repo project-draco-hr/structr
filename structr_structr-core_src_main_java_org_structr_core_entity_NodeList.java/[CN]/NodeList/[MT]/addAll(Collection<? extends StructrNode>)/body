@@ -1,7 +1,13 @@
 {
-  boolean ret=false;
-  for (  StructrNode node : c) {
-    ret|=add(node);
+  Boolean returnValue=(Boolean)transaction.execute(new StructrTransaction(){
+    @Override public Object execute() throws Throwable {
+      boolean ret=false;
+      for (      StructrNode node : nodes) {
+        ret|=appendNodeToList(node.getNode());
+      }
+      return (ret);
+    }
   }
-  return (ret);
+);
+  return (returnValue.booleanValue());
 }

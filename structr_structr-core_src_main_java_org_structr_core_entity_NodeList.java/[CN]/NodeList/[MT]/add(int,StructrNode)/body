@@ -1,9 +1,21 @@
 {
-  int size=this.size();
-  if (index >= size) {
-    appendNodeToList(element.getNode());
+  final int size=this.size();
+  if (index < 0 || index > size) {
+    throw new ArrayIndexOutOfBoundsException();
   }
+  transaction.execute(new StructrTransaction(){
+    @Override public Object execute() throws Throwable {
+      for (      Decorator<StructrNode> decorator : decorators) {
+        decorator.decorate(toAdd);
+      }
+      if (index == size) {
+        appendNodeToList(toAdd.getNode());
+      }
  else {
-    insertNodeIntoList(index,element.getNode());
+        insertNodeIntoList(index,toAdd.getNode());
+      }
+      return (null);
+    }
   }
+);
 }

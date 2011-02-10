@@ -1,11 +1,12 @@
 {
-  System.out.println("removing node #" + index);
-  Node node=getNodeAt(index);
+  final Node node=getNodeAt(index);
   if (node != null) {
-    removeNodeFromList(node);
+    transaction.execute(new StructrTransaction(){
+      @Override public Object execute() throws Throwable {
+        return (removeNodeFromList(node));
+      }
+    }
+);
   }
- else {
-    System.out.println("node was null!");
-  }
-  return ((StructrNode)Services.createCommand(NodeFactoryCommand.class).execute(node));
+  return ((StructrNode)factory.execute(node));
 }

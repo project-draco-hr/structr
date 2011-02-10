@@ -1,3 +1,10 @@
 {
-  return (Evaluation.INCLUDE_AND_CONTINUE);
+  Relationship rel=path.endNode().getSingleRelationship(RelType.NEXT_LIST_ENTRY,Direction.INCOMING);
+  if (rel != null && rel.hasProperty(PARENT_KEY)) {
+    Object parent=rel.getProperty(PARENT_KEY);
+    if (parent instanceof Long && ((Long)parent).equals(getNodeId())) {
+      return (Evaluation.INCLUDE_AND_CONTINUE);
+    }
+  }
+  return (Evaluation.EXCLUDE_AND_CONTINUE);
 }

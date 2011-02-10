@@ -4,6 +4,22 @@
     return;
   }
   sessionsTable.setDataProvider(new DataProvider(){
+    @Override public List<Activity> getData(){
+      List<Activity> result=new ArrayList<Activity>();
+      Command searchNode=Services.createCommand(SearchNodeCommand.class);
+      List<StructrNode> searchResult=(List<StructrNode>)searchNode.execute(null,null,true,false,Search.andExactType(PageRequest.class.getSimpleName()));
+      if (searchResult != null) {
+        for (        StructrNode s : searchResult) {
+          Activity a=new Activity();
+          a.init(s);
+          result.add(a);
+        }
+      }
+      return result;
+    }
+  }
+);
+  sessionsTable.setDataProvider(new DataProvider(){
     @Override public List<Session> getData(){
       return (List<Session>)SessionMonitor.getSessions();
     }

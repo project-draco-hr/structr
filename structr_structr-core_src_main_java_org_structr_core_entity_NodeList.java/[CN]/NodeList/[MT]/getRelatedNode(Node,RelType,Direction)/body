@@ -5,7 +5,12 @@
       if (rel.hasProperty(PARENT_KEY)) {
         Object parent=rel.getProperty(PARENT_KEY);
         if (parent instanceof Long && ((Long)parent).equals(getNodeId())) {
-          return (rel.getEndNode());
+          if (direction.equals(Direction.INCOMING)) {
+            return (rel.getStartNode());
+          }
+ else {
+            return (rel.getEndNode());
+          }
         }
       }
     }

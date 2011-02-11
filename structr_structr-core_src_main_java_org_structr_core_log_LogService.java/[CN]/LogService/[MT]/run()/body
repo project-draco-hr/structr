@@ -1,0 +1,25 @@
+{
+  logger.log(Level.INFO,"Starting LogService");
+  while (run || !queue.isEmpty()) {
+    logger.log(Level.FINER,"Checking queue..");
+    if (!queue.isEmpty() && ((queue.size() > threshold) || !run)) {
+      while (!queue.isEmpty()) {
+        Object o=queue.poll();
+        if (o != null && o instanceof Activity) {
+          Activity activity=(Activity)o;
+          User owner=activity.getOwnerNode();
+          LogNodeList userLog=getUserLog(owner);
+          userLog.add(activity);
+          LogNodeList globalLog=getGlobalLog();
+          globalLog.add(activity);
+        }
+        Thread.yield();
+      }
+    }
+    try {
+      Thread.sleep(interval);
+    }
+ catch (    Throwable t) {
+    }
+  }
+}

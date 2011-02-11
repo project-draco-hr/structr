@@ -1,5 +1,6 @@
 {
   logger.log(Level.INFO,"Starting LogService");
+  getGlobalLog();
   while (run || !queue.isEmpty()) {
     logger.log(Level.FINER,"Checking queue..");
     if (!queue.isEmpty() && ((queue.size() > threshold) || !run)) {
@@ -8,10 +9,10 @@
         if (o != null && o instanceof Activity) {
           Activity activity=(Activity)o;
           User owner=activity.getOwnerNode();
-          LogNodeList userLog=getUserLog(owner);
-          userLog.add(activity);
           LogNodeList globalLog=getGlobalLog();
           globalLog.add(activity);
+          LogNodeList userLog=getUserLog(owner);
+          userLog.add(activity);
         }
         Thread.yield();
       }

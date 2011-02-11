@@ -12,14 +12,11 @@
         StructrNode n=(StructrNode)node.getValue();
         if (n != null) {
           String displayName=n.getName();
+          Long intId=n.getId();
           if (displayName == null) {
-            displayName=NULL_NAME;
+            displayName=intId.toString();
           }
           String label=ClickUtils.limitLength(displayName,30);
-          Long intId=n.getId();
-          if (label == null) {
-            label=intId.toString();
-          }
           PageLink link=new PageLink(label,getRedirectPage(n,getPage()));
           link.setParameter(NODE_ID_KEY,intId);
           link.setAttribute("title",displayName + " (" + intId.toString()+ ")");

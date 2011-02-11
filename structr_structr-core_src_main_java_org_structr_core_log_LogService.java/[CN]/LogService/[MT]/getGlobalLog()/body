@@ -1,11 +1,18 @@
 {
   if (globalLogNodeList == null) {
-    Command createNode=Services.createCommand(CreateNodeCommand.class);
-    Command createRel=Services.createCommand(CreateRelationshipCommand.class);
-    StructrNode s=(StructrNode)createNode.execute(new NodeAttribute(StructrNode.TYPE_KEY,LogNodeList.class.getSimpleName()),new NodeAttribute(StructrNode.NAME_KEY,"Global Activity Log"));
-    globalLogNodeList=new LogNodeList<Activity>();
-    globalLogNodeList.init(s);
-    createRel.execute(globalLogNodeList,RelType.HAS_CHILD);
+    globalLogNodeList=(LogNodeList)Services.createCommand(TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws Throwable {
+        LogNodeList ret=null;
+        Command createNode=Services.createCommand(CreateNodeCommand.class);
+        Command createRel=Services.createCommand(CreateRelationshipCommand.class);
+        StructrNode s=(StructrNode)createNode.execute(new NodeAttribute(StructrNode.TYPE_KEY,LogNodeList.class.getSimpleName()),new NodeAttribute(StructrNode.NAME_KEY,"Global Activity Log"));
+        ret=new LogNodeList<Activity>();
+        ret.init(s);
+        createRel.execute(ret,RelType.HAS_CHILD);
+        return (ret);
+      }
+    }
+);
   }
   return (globalLogNodeList);
 }

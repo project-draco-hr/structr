@@ -8,10 +8,11 @@
         Object o=queue.poll();
         if (o != null && o instanceof Activity) {
           Activity activity=(Activity)o;
-          User owner=activity.getOwnerNode();
+          User user=activity.getUser();
+          activity.commit(new SuperUser());
           LogNodeList globalLog=getGlobalLog();
           globalLog.add(activity);
-          LogNodeList userLog=getUserLog(owner);
+          LogNodeList userLog=getUserLog(user);
           userLog.add(activity);
         }
         Thread.yield();

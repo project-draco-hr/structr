@@ -1,31 +1,36 @@
 {
-  Object oldValue=getProperty(key);
-  if ((value == null && oldValue == null) || (value != null && oldValue != null && value.equals(oldValue))) {
-    return;
+  if (isDirty) {
+    properties.put(key,value);
   }
-  Command transactionCommand=Services.createCommand(TransactionCommand.class);
-  transactionCommand.execute(new StructrTransaction(){
-    @Override public Object execute() throws Throwable {
-      if (value == null) {
-        dbNode.removeProperty(key);
-      }
  else {
-        if (!key.equals(StructrNode.LAST_MODIFIED_DATE_KEY)) {
-          if (value instanceof Date) {
-            dbNode.setProperty(key,((Date)value).getTime());
-          }
- else {
-            dbNode.setProperty(key,value);
-            dbNode.setProperty(StructrNode.LAST_MODIFIED_DATE_KEY,(new Date()).getTime());
-          }
-        }
- else {
-          logger.log(Level.FINE,"Tried to set lastModifiedDate explicitely (action was denied)");
-        }
-      }
-      Command indexProperty=Services.createCommand(IndexNodeCommand.class);
-      return indexProperty.execute(getId(),key,value);
+    Object oldValue=getProperty(key);
+    if ((value == null && oldValue == null) || (value != null && oldValue != null && value.equals(oldValue))) {
+      return;
     }
-  }
+    Command transactionCommand=Services.createCommand(TransactionCommand.class);
+    transactionCommand.execute(new StructrTransaction(){
+      @Override public Object execute() throws Throwable {
+        if (value == null) {
+          dbNode.removeProperty(key);
+        }
+ else {
+          if (!key.equals(StructrNode.LAST_MODIFIED_DATE_KEY)) {
+            if (value instanceof Date) {
+              dbNode.setProperty(key,((Date)value).getTime());
+            }
+ else {
+              dbNode.setProperty(key,value);
+              dbNode.setProperty(StructrNode.LAST_MODIFIED_DATE_KEY,(new Date()).getTime());
+            }
+          }
+ else {
+            logger.log(Level.FINE,"Tried to set lastModifiedDate explicitely (action was denied)");
+          }
+        }
+        Command indexProperty=Services.createCommand(IndexNodeCommand.class);
+        return indexProperty.execute(getId(),key,value);
+      }
+    }
 );
+  }
 }

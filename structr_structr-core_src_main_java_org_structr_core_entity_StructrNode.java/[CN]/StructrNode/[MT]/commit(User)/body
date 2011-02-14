@@ -1,0 +1,17 @@
+{
+  isDirty=false;
+  Command transactionCommand=Services.createCommand(TransactionCommand.class);
+  transactionCommand.execute(new StructrTransaction(){
+    @Override public Object execute() throws Throwable {
+      Command createNode=Services.createCommand(CreateNodeCommand.class);
+      StructrNode s=(StructrNode)createNode.execute(user);
+      init(s);
+      Set<String> keys=properties.keySet();
+      for (      String key : keys) {
+        setProperty(key,properties.get(key));
+      }
+      return null;
+    }
+  }
+);
+}

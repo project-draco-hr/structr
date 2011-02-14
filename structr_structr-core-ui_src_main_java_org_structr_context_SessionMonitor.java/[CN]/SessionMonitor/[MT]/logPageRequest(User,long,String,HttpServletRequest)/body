@@ -1,18 +1,20 @@
 {
   if (request != null) {
-    final Command transactionCommand=Services.createCommand(TransactionCommand.class);
-    transactionCommand.execute(new StructrTransaction(){
-      @Override public Object execute() throws Throwable {
-        Command createNode=Services.createCommand(CreateNodeCommand.class);
-        Date now=new Date();
-        StructrNode s=(StructrNode)createNode.execute(user,new NodeAttribute(StructrNode.TYPE_KEY,PageRequest.class.getSimpleName()),new NodeAttribute(StructrNode.NAME_KEY,user.getName() + ":" + action+ ":"+ now),new NodeAttribute(PageRequest.URI_KEY,request.getRequestURI()),new NodeAttribute(PageRequest.REMOTE_ADDRESS_KEY,request.getRemoteAddr()),new NodeAttribute(PageRequest.REMOTE_HOST_KEY,request.getRemoteHost()),new NodeAttribute(Activity.SESSION_ID_KEY,sessionId),new NodeAttribute(Activity.START_TIMESTAMP_KEY,now),new NodeAttribute(Activity.END_TIMESTAMP_KEY,now));
-        Activity activity=new Activity();
-        activity.init(s);
-        getSession(sessionId).setLastActivity(activity);
-        Services.createCommand(LogCommand.class).execute(activity);
-        return null;
-      }
-    }
-);
+    long t0=System.currentTimeMillis();
+    Date now=new Date();
+    PageRequest pageRequest=new PageRequest();
+    pageRequest.setProperty(StructrNode.TYPE_KEY,PageRequest.class.getSimpleName());
+    pageRequest.setProperty(StructrNode.NAME_KEY,"Action: " + action + ", Date: "+ now);
+    pageRequest.setProperty(PageRequest.URI_KEY,request.getRequestURI());
+    pageRequest.setProperty(PageRequest.REMOTE_ADDRESS_KEY,request.getRemoteAddr());
+    pageRequest.setProperty(PageRequest.REMOTE_HOST_KEY,request.getRemoteHost());
+    pageRequest.setProperty(Activity.SESSION_ID_KEY,sessionId);
+    pageRequest.setProperty(Activity.START_TIMESTAMP_KEY,now);
+    pageRequest.setProperty(Activity.END_TIMESTAMP_KEY,now);
+    pageRequest.setUser(user);
+    getSession(sessionId).setLastActivity(pageRequest);
+    Services.createCommand(LogCommand.class).execute(pageRequest);
+    long t6=System.currentTimeMillis();
+    System.out.println("logPageRequest without transaction: " + (t6 - t0) + " ms");
   }
 }

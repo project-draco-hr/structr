@@ -6,9 +6,13 @@
   activitiesTable.setDataProvider(new DataProvider(){
     @Override public List<Activity> getData(){
       List<Activity> result=new ArrayList<Activity>();
-      LogNodeList globalLog=(LogNodeList)Services.createCommand(GetGlobalLogCommand.class).execute();
+      LogNodeList<StructrNode> globalLog=(LogNodeList<StructrNode>)Services.createCommand(GetGlobalLogCommand.class).execute();
       if (globalLog != null) {
-        return globalLog;
+        for (        StructrNode s : globalLog) {
+          Activity a=new Activity();
+          a.init(s);
+          result.add(a);
+        }
       }
       return result;
     }

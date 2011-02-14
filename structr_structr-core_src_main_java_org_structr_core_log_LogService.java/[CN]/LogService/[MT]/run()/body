@@ -1,27 +1,37 @@
 {
-  logger.log(Level.INFO,"Starting LogService");
-  getGlobalLog();
-  while (run || !queue.isEmpty()) {
-    logger.log(Level.FINER,"Checking queue..");
-    if (!queue.isEmpty() && ((queue.size() > threshold) || !run)) {
-      while (!queue.isEmpty()) {
-        Object o=queue.poll();
-        if (o != null && o instanceof Activity) {
-          Activity activity=(Activity)o;
-          User user=activity.getUser();
-          activity.commit(new SuperUser());
-          LogNodeList globalLog=getGlobalLog();
-          globalLog.add(activity);
-          LogNodeList userLog=getUserLog(user);
-          userLog.add(activity);
+  try {
+    logger.log(Level.INFO,"Starting LogService");
+    getGlobalLog();
+    while (run || !queue.isEmpty()) {
+      logger.log(Level.FINER,"Checking queue..");
+      if (!queue.isEmpty() && ((queue.size() > threshold) || !run)) {
+        System.out.println("+++ LogService active ... +++");
+        while (!queue.isEmpty()) {
+          Object o=queue.poll();
+          if (o != null && o instanceof Activity) {
+            Activity activity=(Activity)o;
+            User user=activity.getUser();
+            activity.commit(new SuperUser());
+            LogNodeList globalLog=getGlobalLog();
+            globalLog.add(activity);
+            System.out.println("Added activity " + activity.getId() + " to global log.");
+            LogNodeList userLog=getUserLog(user);
+            userLog.add(activity);
+            System.out.println("Added activity " + activity.getId() + " to "+ user.getName()+ "'s log.");
+          }
+          Thread.yield();
         }
-        Thread.yield();
+        System.out.println("+++ LogService inactive. +++");
+      }
+      try {
+        Thread.sleep(interval);
+      }
+ catch (      Throwable t) {
+        t.printStackTrace(System.out);
       }
     }
-    try {
-      Thread.sleep(interval);
-    }
- catch (    Throwable t) {
-    }
+  }
+ catch (  Throwable t) {
+    t.printStackTrace(System.out);
   }
 }

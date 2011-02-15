@@ -9,9 +9,16 @@
       LogNodeList<StructrNode> globalLog=(LogNodeList<StructrNode>)Services.createCommand(GetGlobalLogCommand.class).execute();
       if (globalLog != null) {
         for (        StructrNode s : globalLog) {
-          Activity a=new Activity();
-          a.init(s);
-          result.add(a);
+          if (s instanceof PageRequest) {
+            PageRequest p=new PageRequest();
+            p.init(s);
+            result.add(p);
+          }
+ else {
+            Activity a=new Activity();
+            a.init(s);
+            result.add(a);
+          }
         }
       }
       return result;

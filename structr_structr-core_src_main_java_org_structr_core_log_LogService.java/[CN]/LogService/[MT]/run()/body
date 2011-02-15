@@ -5,7 +5,7 @@
     while (run || !queue.isEmpty()) {
       logger.log(Level.FINER,"Checking queue..");
       if (!queue.isEmpty() && ((queue.size() > threshold) || !run)) {
-        System.out.println("+++ LogService active ... +++");
+        logger.log(Level.FINEST,"+++ LogService active ... +++");
         while (!queue.isEmpty()) {
           Object o=queue.poll();
           if (o != null && o instanceof Activity) {
@@ -14,14 +14,14 @@
             activity.commit(user);
             LogNodeList globalLog=getGlobalLog();
             globalLog.add(activity);
-            System.out.println("Added activity " + activity.getId() + " to global log.");
+            logger.log(Level.FINEST,"Added activity {0} to global log.",activity.getId());
             LogNodeList userLog=getUserLog(user);
             userLog.add(activity);
-            System.out.println("Added activity " + activity.getId() + " to "+ user.getName()+ "'s log.");
+            logger.log(Level.FINEST,"Added activity {0} to {1}''s log.",new Object[]{activity.getId(),user.getName()});
           }
           Thread.yield();
         }
-        System.out.println("+++ LogService inactive. +++");
+        logger.log(Level.FINEST,"+++ LogService inactive. +++");
       }
       try {
         Thread.sleep(interval);

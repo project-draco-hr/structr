@@ -1,10 +1,10 @@
 {
-  if (securityRelationship == null) {
-    for (    StructrRelationship r : getRelationships(RelType.SECURITY,Direction.INCOMING)) {
-      if (user.equals(r.getStartNode())) {
-        securityRelationship=r;
-      }
-    }
+  long userId=user.getId();
+  if (securityRelationships == null) {
+    securityRelationships=new HashMap<Long,StructrRelationship>();
   }
-  return securityRelationship;
+  if (!(securityRelationships.containsKey(userId))) {
+    populateSecurityRelationshipCacheMap();
+  }
+  return securityRelationships.get(userId);
 }

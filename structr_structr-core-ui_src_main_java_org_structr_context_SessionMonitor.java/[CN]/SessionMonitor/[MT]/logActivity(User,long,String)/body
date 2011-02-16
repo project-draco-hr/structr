@@ -1,20 +1,14 @@
 {
-  final Command transactionCommand=Services.createCommand(TransactionCommand.class);
-  transactionCommand.execute(new StructrTransaction(){
-    @Override public Object execute() throws Throwable {
-      Command createNode=Services.createCommand(CreateNodeCommand.class);
-      Date now=new Date();
-      Activity activity=new Activity();
-      activity.setProperty(StructrNode.TYPE_KEY,Activity.class.getSimpleName());
-      activity.setProperty(StructrNode.NAME_KEY,"User: " + user.getName() + ", Action: "+ action+ ", Date: "+ now);
-      activity.setProperty(Activity.SESSION_ID_KEY,sessionId);
-      activity.setProperty(Activity.START_TIMESTAMP_KEY,now);
-      activity.setProperty(Activity.END_TIMESTAMP_KEY,now);
-      activity.setUser(user);
-      getSession(sessionId).setLastActivity(activity);
-      Services.createCommand(LogCommand.class).execute(activity);
-      return null;
-    }
+  Date now=new Date();
+  Activity activity=new Activity();
+  activity.setProperty(StructrNode.TYPE_KEY,Activity.class.getSimpleName());
+  if (user != null) {
+    activity.setProperty(StructrNode.NAME_KEY,"User: " + user.getName() + ", Action: "+ action+ ", Date: "+ now);
   }
-);
+  activity.setProperty(Activity.SESSION_ID_KEY,sessionId);
+  activity.setProperty(Activity.START_TIMESTAMP_KEY,now);
+  activity.setProperty(Activity.END_TIMESTAMP_KEY,now);
+  activity.setUser(user);
+  getSession(sessionId).setLastActivity(activity);
+  Services.createCommand(LogCommand.class).execute(activity);
 }

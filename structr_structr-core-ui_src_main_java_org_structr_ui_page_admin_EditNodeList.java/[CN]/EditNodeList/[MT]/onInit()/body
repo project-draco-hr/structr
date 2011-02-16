@@ -1,0 +1,21 @@
+{
+  super.onInit();
+  if (node != null) {
+    childNodesTable.getControlLink().setParameter(StructrNode.NODE_ID_KEY,getNodeId());
+    nodeList=(NodeList<StructrNode>)node;
+    StructrNode firstNode=nodeList.getFirstNode();
+    Field[] fields=firstNode.getClass().getFields();
+    for (    Field f : fields) {
+      String fieldName;
+      try {
+        fieldName=(String)f.get(firstNode);
+        Column col;
+        col=new Column(fieldName);
+        childNodesTable.addColumn(col);
+      }
+ catch (      IllegalAccessException ex) {
+        logger.log(Level.SEVERE,null,ex);
+      }
+    }
+  }
+}

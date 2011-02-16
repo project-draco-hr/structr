@@ -7,7 +7,13 @@
     node=nodeFactory.createNode(graphDb.createNode());
     Date now=new Date();
     for (    Object o : parameters) {
-      if (o instanceof NodeAttribute) {
+      if (o instanceof List) {
+        List<NodeAttribute> attrs=(List<NodeAttribute>)o;
+        for (        NodeAttribute attr : attrs) {
+          node.setProperty(attr.getKey(),attr.getValue());
+        }
+      }
+ else       if (o instanceof NodeAttribute) {
         NodeAttribute attr=(NodeAttribute)o;
         node.setProperty(attr.getKey(),attr.getValue());
       }

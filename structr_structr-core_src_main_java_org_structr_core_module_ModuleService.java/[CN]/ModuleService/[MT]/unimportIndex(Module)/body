@@ -13,14 +13,17 @@
   for (  String className : classes) {
     try {
       Class clazz=Class.forName(className);
+      String simpleName=clazz.getSimpleName();
+      String fullName=clazz.getName();
       if (StructrNode.class.isAssignableFrom(clazz)) {
-        String simpleName=clazz.getSimpleName();
-        String fullName=clazz.getName();
         entityClassCache.remove(simpleName);
         entityPackages.remove(fullName.substring(0,fullName.lastIndexOf(".")));
       }
+ else       if (Agent.class.isAssignableFrom(clazz)) {
+        agentClassCache.remove(simpleName);
+        agentPackages.remove(fullName.substring(0,fullName.lastIndexOf(".")));
+      }
  else       if (structrPagePredicate != null && structrPagePredicate.evaluate(clazz)) {
-        String fullName=clazz.getName();
         pagePackages.remove(fullName.substring(0,fullName.lastIndexOf(".")));
       }
     }

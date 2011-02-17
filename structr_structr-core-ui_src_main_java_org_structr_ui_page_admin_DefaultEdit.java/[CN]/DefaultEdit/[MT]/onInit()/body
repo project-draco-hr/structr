@@ -1,28 +1,29 @@
 {
   super.onInit();
-  FieldSet nodeInfo=new FieldSet("Node Information");
-  nodeInfo.setColumns(3);
-  nodeInfo.add(new TextField(StructrNode.TYPE_KEY,true));
-  nodeInfo.add(new TextField(StructrNode.NAME_KEY,true));
-  nodeInfo.add(new IntegerField(StructrNode.POSITION_KEY));
+  FieldSet nodePropertiesFields=new FieldSet("Node Properties");
+  nodePropertiesFields.setColumns(3);
+  nodePropertiesFields.add(new TextField(StructrNode.TYPE_KEY,true));
+  nodePropertiesFields.add(new TextField(StructrNode.NAME_KEY,true));
+  nodePropertiesFields.add(new IntegerField(StructrNode.POSITION_KEY));
   TextField createdBy=new TextField(StructrNode.CREATED_BY_KEY);
   createdBy.setReadonly(true);
-  nodeInfo.add(createdBy);
+  nodePropertiesFields.add(createdBy);
   DateField createdDate=new DateField(StructrNode.CREATED_DATE_KEY);
   createdDate.setFormatPattern(dateFormat.toPattern());
   createdDate.setShowTime(true);
   createdDate.setReadonly(true);
-  nodeInfo.add(createdDate);
+  nodePropertiesFields.add(createdDate);
   DateField lastModifiedDate=new DateField(StructrNode.LAST_MODIFIED_DATE_KEY);
   lastModifiedDate.setFormatPattern(dateFormat.toPattern());
   lastModifiedDate.setShowTime(true);
   lastModifiedDate.setReadonly(true);
-  nodeInfo.add(lastModifiedDate);
+  nodePropertiesFields.add(lastModifiedDate);
   titlesTable.addColumn(new Column(StructrNode.TITLE_KEY,"Title"));
   titlesTable.addColumn(new Column(Title.LOCALE_KEY,"Locale"));
   titlesTable.setClass(Table.CLASS_SIMPLE);
-  nodeInfo.add(titlesTable);
-  editPropertiesForm.add(nodeInfo);
+  nodePropertiesFields.add(titlesTable);
+  editPropertiesForm.add(nodePropertiesFields);
+  addControl(editPropertiesForm);
   FieldSet visibilityFields=new FieldSet("Visibility");
   visibilityFields.setColumns(2);
   DateField visibilityStartDate=new DateField(StructrNode.VISIBILITY_START_DATE_KEY);
@@ -42,19 +43,22 @@
   editVisibilityForm.add(new HiddenField(RENDER_MODE_KEY,renderMode != null ? renderMode : ""));
   editVisibilityForm.setActionURL(editVisibilityForm.getActionURL().concat("#visibility-tab"));
   if (editVisibilityAllowed) {
-    editVisibilityForm.add(new Submit("saveVisibility"," Save Visibility ",this,"onSaveVisibility"));
-    editVisibilityForm.add(new Submit("saveVisibilityRecursively"," Save Visibility (including direct children) ",this,"onSaveVisibilityWithSubnodes"));
-    editVisibilityForm.add(new Submit("cancel"," Cancel ",this,"onCancel"));
+    visibilityFields.add(new Submit("saveVisibility"," Save Visibility ",this,"onSaveVisibility"));
+    visibilityFields.add(new Submit("saveVisibilityRecursively"," Save Visibility (including direct children) ",this,"onSaveVisibilityWithSubnodes"));
+    visibilityFields.add(new Submit("cancel"," Cancel ",this,"onCancel"));
   }
+  addControl(editVisibilityForm);
   editVisibilityPanel=new Panel("editVisibilityPanel","/panel/edit-visibility-panel.htm");
+  addControl(editVisibilityPanel);
   editPropertiesForm.add(new HiddenField(NODE_ID_KEY,nodeId != null ? nodeId : ""));
   editPropertiesForm.add(new HiddenField(RENDER_MODE_KEY,renderMode != null ? renderMode : ""));
   editPropertiesForm.setActionURL(editPropertiesForm.getActionURL().concat("#properties-tab"));
   if (editPropertiesAllowed) {
-    editPropertiesForm.add(new Submit("saveProperties"," Save Properties ",this,"onSaveProperties"));
-    editPropertiesForm.add(new Submit("cancel"," Cancel ",this,"onCancel"));
+    nodePropertiesFields.add(new Submit("saveProperties"," Save Properties ",this,"onSaveProperties"));
+    nodePropertiesFields.add(new Submit("cancel"," Cancel ",this,"onCancel"));
   }
   editPropertiesPanel=new Panel("editPropertiesPanel","/panel/edit-properties-panel.htm");
+  addControl(editPropertiesPanel);
   Column nameColumn, typeColumn;
   PageLink viewRelLink=new PageLink("viewRel",DefaultEdit.class);
   LinkDecorator nameDec, iconDec;
@@ -132,7 +136,9 @@
     childNodesTable.setPageSize(DEFAULT_PAGESIZE);
     childNodesTable.getControlLink().setParameter(StructrNode.NODE_ID_KEY,getNodeId());
     childNodesTable.setClass(Table.CLASS_SIMPLE);
+    addControl(childNodesTable);
     editChildNodesPanel=new Panel("editChildNodesPanel","/panel/edit-child-nodes-panel.htm");
+    addControl(editChildNodesPanel);
   }
   if (removeRelationshipAllowed) {
     deleteRelationshipLink.setImageSrc("/images/delete.png");
@@ -185,6 +191,7 @@
     incomingRelationshipsTable.setPageSize(DEFAULT_PAGESIZE);
     incomingRelationshipsTable.getControlLink().setParameter(StructrNode.NODE_ID_KEY,getNodeId());
     incomingRelationshipsTable.setClass(Table.CLASS_SIMPLE);
+    addControl(incomingRelationshipsTable);
     Column actionColumnOut=new Column("Action");
     actionColumnOut.setTextAlign("center");
     AbstractLink[] linksOut=new AbstractLink[]{deleteRelationshipLink};
@@ -231,7 +238,9 @@
     outgoingRelationshipsTable.setPageSize(DEFAULT_PAGESIZE);
     outgoingRelationshipsTable.getControlLink().setParameter(StructrNode.NODE_ID_KEY,getNodeId());
     outgoingRelationshipsTable.setClass(Table.CLASS_SIMPLE);
+    addControl(outgoingRelationshipsTable);
     editRelationshipsPanel=new Panel("editRelationshipsPanel","/panel/edit-relationships-panel.htm");
+    addControl(editRelationshipsPanel);
   }
   if (accessControlAllowed) {
     nameColumn=new Column(StructrNode.NAME_KEY);
@@ -285,7 +294,9 @@
     securityForm.add(new HiddenField(NODE_ID_KEY,nodeId != null ? nodeId : ""));
     securityForm.add(new HiddenField(RENDER_MODE_KEY,renderMode != null ? renderMode : ""));
     securityForm.setActionURL(securityForm.getActionURL().concat("#security-tab"));
+    addControl(securityForm);
     editSecurityPanel=new Panel("editSecurityPanel","/panel/edit-security-panel.htm");
+    addControl(editSecurityPanel);
   }
   if (!(editPropertiesAllowed)) {
     List<Field> propertyFields=editPropertiesForm.getFieldList();

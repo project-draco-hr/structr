@@ -1,0 +1,14 @@
+{
+  if (csvNode == null) {
+    return true;
+  }
+  if (editContentForm.isValid()) {
+    String className=nodeTypeField.getValue();
+    if (className == null) {
+      return true;
+    }
+    Class nodeClass=(Class)Services.createCommand(GetEntityClassCommand.class).execute(className);
+    Services.createCommand(ProcessTaskCommand.class).execute(new ConversionTask(user,csvNode,nodeClass));
+  }
+  return false;
+}

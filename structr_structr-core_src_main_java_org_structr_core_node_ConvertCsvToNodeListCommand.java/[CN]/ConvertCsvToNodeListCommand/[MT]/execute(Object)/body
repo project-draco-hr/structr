@@ -49,15 +49,18 @@
       }
       col++;
     }
-    List<String[]> lines=reader.readAll();
-    final List<NodeAttribute> attrList=new ArrayList<NodeAttribute>();
+    for (    Entry<Integer,String> entry : fieldIndex.entrySet()) {
+      Integer i=entry.getKey();
+      String v=entry.getValue();
+      System.out.println("v: " + v + ", i: "+ i);
+    }
     final User userCopy=user;
     final StructrNode sourceNodeCopy=sourceNode;
     final Command transactionCommand=Services.createCommand(TransactionCommand.class);
+    final Command createNode=Services.createCommand(CreateNodeCommand.class);
+    final Command createRel=Services.createCommand(CreateRelationshipCommand.class);
     final NodeList<StructrNode> nodeListNode=(NodeList<StructrNode>)transactionCommand.execute(new StructrTransaction(){
       @Override public Object execute() throws Throwable {
-        Command createNode=Services.createCommand(CreateNodeCommand.class);
-        Command createRel=Services.createCommand(CreateRelationshipCommand.class);
         NodeList<StructrNode> result=new NodeList<StructrNode>();
         StructrNode s=(StructrNode)createNode.execute(userCopy,new NodeAttribute(StructrNode.TYPE_KEY,NodeList.class.getSimpleName()),new NodeAttribute(StructrNode.NAME_KEY,sourceNodeCopy.getName() + " List"));
         result.init(s);
@@ -66,28 +69,39 @@
       }
     }
 );
-    NodeAttribute typeAttr=new NodeAttribute(StructrNode.TYPE_KEY,targetClass.getSimpleName());
-    attrList.add(typeAttr);
-    for (    String[] line : lines) {
-      for (int i=0; i < col; i++) {
-        String csvValue=line[i];
-        NodeAttribute attr=new NodeAttribute(fieldIndex.get(i),csvValue);
-        attrList.add(attr);
-        logger.log(Level.FINEST,"Created node attribute {0}={1}",new Object[]{attr.getKey(),attr.getValue()});
+    final List<List<NodeAttribute>> creationList=new LinkedList<List<NodeAttribute>>();
+    String targetClassName=targetClass.getSimpleName();
+    String[] line=null;
+    do {
+      try {
+        line=reader.readNext();
       }
-      StructrNode newNode=(StructrNode)transactionCommand.execute(new StructrTransaction(){
-        @Override public Object execute() throws Throwable {
-          Command createNode=Services.createCommand(CreateNodeCommand.class);
-          StructrNode newNode=(StructrNode)createNode.execute(userCopy,attrList);
-          transactionCommand.setExitCode(createNode.getExitCode());
-          transactionCommand.setErrorMessage(createNode.getErrorMessage());
-          return newNode;
+ catch (      Throwable t) {
+      }
+      if (line != null) {
+        List<NodeAttribute> nodeAttributes=new LinkedList<NodeAttribute>();
+        nodeAttributes.add(new NodeAttribute(StructrNode.TYPE_KEY,targetClassName));
+        for (int i=0; i < col; i++) {
+          String csvValue=line[i];
+          String key=fieldIndex.get(i);
+          nodeAttributes.add(new NodeAttribute(key,csvValue));
         }
+        creationList.add(nodeAttributes);
       }
-);
-      nodeListNode.add(newNode);
-      logger.log(Level.INFO,"Node {0} added to node list",newNode.getId());
     }
+ while (line != null);
+    reader.close();
+    transactionCommand.execute(new StructrTransaction(){
+      @Override public Object execute() throws Throwable {
+        List<StructrNode> nodesToAdd=new LinkedList<StructrNode>();
+        for (        List<NodeAttribute> attrList : creationList) {
+          nodesToAdd.add((StructrNode)createNode.execute(attrList));
+        }
+        nodeListNode.addAll(nodesToAdd);
+        return (null);
+      }
+    }
+);
     return nodeListNode;
   }
  catch (  Throwable t) {

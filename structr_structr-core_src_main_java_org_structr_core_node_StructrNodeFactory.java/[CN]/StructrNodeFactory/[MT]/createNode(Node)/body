@@ -1,18 +1,4 @@
 {
   String nodeType=node.hasProperty(StructrNode.TYPE_KEY) ? (String)node.getProperty(StructrNode.TYPE_KEY) : "";
-  Class nodeClass=(Class)Services.createCommand(GetEntityClassCommand.class).execute(nodeType);
-  StructrNode ret=null;
-  if (nodeClass != null) {
-    try {
-      ret=(StructrNode)nodeClass.newInstance();
-    }
- catch (    Throwable t) {
-      ret=null;
-    }
-  }
-  if (ret == null) {
-    ret=new EmptyNode();
-  }
-  ret.init(node);
-  return (ret);
+  return createNode(node,nodeType);
 }

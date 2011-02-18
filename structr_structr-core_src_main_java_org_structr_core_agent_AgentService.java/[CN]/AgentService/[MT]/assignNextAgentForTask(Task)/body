@@ -4,15 +4,24 @@
 synchronized (agents) {
     for (    Agent agent : agents) {
       if (agent.assignTask(nextTask)) {
+        logger.log(Level.INFO,"Task assigned to agent {0}",agent.getName());
         return;
       }
     }
   }
-  Agent agent=createAgent(nextTask);
-  if (agent != null && agent.assignTask(nextTask)) {
-    agent.start();
+  if (agents.size() < maxAgents) {
+    Agent agent=createAgent(nextTask);
+    if (agent != null && agent.assignTask(nextTask)) {
+      agent.start();
+    }
+ else {
+synchronized (taskQueue) {
+        taskQueue.add(nextTask);
+      }
+    }
   }
  else {
+    logger.log(Level.FINE,"Overall agents limit readed, re-queueing task");
 synchronized (taskQueue) {
       taskQueue.add(nextTask);
     }

@@ -1,7 +1,12 @@
 {
-  logger.log(Level.FINE,"HTTP session destroyed, cleaning",se.getSession().getId());
   HttpSession session=se.getSession();
-  long sessionId=(Long)session.getAttribute(SessionMonitor.SESSION_ID);
-  SessionMonitor.logActivity(new SuperUser(),sessionId,"Logout");
-  SessionMonitor.unregisterUser(sessionId,session.getServletContext());
+  if (session != null) {
+    String servletSessionId=se.getSession().getId();
+    logger.log(Level.FINE,"HTTP session destroyed, cleaning ",servletSessionId);
+    Long sessionId=(Long)session.getAttribute(SessionMonitor.SESSION_ID);
+    if (sessionId != null) {
+      SessionMonitor.logActivity(new SuperUser(),sessionId,"Logout");
+      SessionMonitor.unregisterUser(sessionId,session.getServletContext());
+    }
+  }
 }

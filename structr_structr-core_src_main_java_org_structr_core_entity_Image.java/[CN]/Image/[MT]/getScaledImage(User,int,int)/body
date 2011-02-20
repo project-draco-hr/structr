@@ -1,5 +1,5 @@
 {
-  List<StructrRelationship> thumbnailRelationships=getRelationships(RelType.THUMBNAIL,Direction.OUTGOING);
+  thumbnailRelationships=getThumbnailRelationships();
   Image thumbnail=null;
   final Image originalImage=this;
   int origWidth=originalImage.getWidth();
@@ -25,8 +25,8 @@
       Command createNode=Services.createCommand(CreateNodeCommand.class);
       Command createRel=Services.createCommand(CreateRelationshipCommand.class);
       NodeAttribute typeAttr=new NodeAttribute(StructrNode.TYPE_KEY,Image.class.getSimpleName());
-      NodeAttribute nameAttr=new NodeAttribute(Image.NAME_KEY,originalImage.getName() + "_thumb");
-      Image thumbnail=(Image)createNode.execute(user,typeAttr,nameAttr);
+      NodeAttribute contentTypeAttr=new NodeAttribute(Image.CONTENT_TYPE_KEY,originalImage.getContentType());
+      Image thumbnail=(Image)createNode.execute(user,typeAttr,contentTypeAttr,false);
       if (thumbnail != null) {
         StructrRelationship thumbnailRelationship=(StructrRelationship)createRel.execute(originalImage,thumbnail,RelType.THUMBNAIL);
         String relativeFilePath=thumbnail.getId() + "_" + System.currentTimeMillis();

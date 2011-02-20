@@ -1,12 +1,12 @@
 {
   super.onRender();
-  Image previewImage=image.getScaledImage(user,PREVIEW_WIDTH,PREVIEW_HEIGHT);
-  if (previewImage != null) {
-    externalPreviewViewUrl=previewImage.getNodeURL(user,contextPath);
-    localPreviewViewUrl=contextPath + "/view.htm?nodeId=" + previewImage.getId();
+  Image previewImage;
+  if (image.getWidth() <= PREVIEW_WIDTH && image.getHeight() <= PREVIEW_HEIGHT) {
+    previewImage=image;
   }
  else {
-    externalPreviewViewUrl=contextPath + image.getIconSrc();
-    localPreviewViewUrl=contextPath + image.getIconSrc();
+    previewImage=image.getScaledImage(user,PREVIEW_WIDTH,PREVIEW_HEIGHT);
   }
+  externalPreviewViewUrl=previewImage.getNodeURL(user,contextPath);
+  localPreviewViewUrl=contextPath + "/view.htm?nodeId=" + previewImage.getId();
 }

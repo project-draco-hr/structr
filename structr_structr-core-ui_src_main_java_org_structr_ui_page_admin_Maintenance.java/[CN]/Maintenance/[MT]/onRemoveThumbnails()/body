@@ -1,14 +1,14 @@
 {
-  Command searchNode=Services.createCommand(SearchNodeCommand.class);
-  final List<StructrNode> images=(List<StructrNode>)searchNode.execute(null,null,true,false,new SearchAttribute(StructrNode.TYPE_KEY,Image.class.getSimpleName(),SearchOperator.OR));
   final Command transactionCommand=Services.createCommand(TransactionCommand.class);
   transactionCommand.execute(new StructrTransaction(){
     @Override public Object execute() throws Throwable {
+      Command searchNode=Services.createCommand(SearchNodeCommand.class);
+      List<StructrNode> images=(List<StructrNode>)searchNode.execute(null,null,true,false,new SearchAttribute(StructrNode.TYPE_KEY,Image.class.getSimpleName(),SearchOperator.AND));
       Command deleteNode=Services.createCommand(DeleteNodeCommand.class);
       Command deleteRel=Services.createCommand(DeleteRelationshipCommand.class);
       for (      StructrNode s : images) {
-        if (s.hasRelationship(RelType.THUMBNAIL,Direction.OUTGOING)) {
-          List<StructrRelationship> rels=(List<StructrRelationship>)s.getRelationships(RelType.THUMBNAIL,Direction.OUTGOING);
+        if (s.hasRelationship(RelType.THUMBNAIL,Direction.INCOMING)) {
+          List<StructrRelationship> rels=(List<StructrRelationship>)s.getRelationships(RelType.THUMBNAIL,Direction.INCOMING);
           for (          StructrRelationship r : rels) {
             StructrNode t=r.getEndNode();
             deleteRel.execute(r,new SuperUser());

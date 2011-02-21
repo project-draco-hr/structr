@@ -14,7 +14,7 @@
         root.put("Request",new freemarker.ext.servlet.HttpRequestParametersHashModel(request));
         String searchString=request.getParameter("search");
         if (searchString != null && !(searchString.isEmpty())) {
-          Command search=Services.createCommand(SearchNodeCommand.class);
+          Command search=Services.command(SearchNodeCommand.class);
           List<StructrNode> result=(List<StructrNode>)search.execute(null,null,false,true,new SearchAttribute(StructrNode.NAME_KEY,searchString,SearchOperator.OR),new SearchAttribute(StructrNode.TITLE_KEY,searchString,SearchOperator.OR),new SearchAttribute(PlainText.CONTENT_KEY,searchString,SearchOperator.OR));
           root.put("SearchResults",result);
         }

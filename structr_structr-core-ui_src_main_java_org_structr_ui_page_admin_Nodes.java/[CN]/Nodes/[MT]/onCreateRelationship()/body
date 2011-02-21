@@ -2,11 +2,11 @@
   if (newRelationshipForm.isValid()) {
     final String endNodeId=newRelationshipForm.getFieldValue(END_NODE_ID_KEY);
     final String relType=newRelationshipForm.getFieldValue(REL_TYPE_KEY);
-    Command transactionCommand=Services.createCommand(TransactionCommand.class);
+    Command transactionCommand=Services.command(TransactionCommand.class);
     transactionCommand.execute(new StructrTransaction(){
       @Override public Object execute() throws Throwable {
-        Command findNode=Services.createCommand(FindNodeCommand.class);
-        Command createRel=Services.createCommand(CreateRelationshipCommand.class);
+        Command findNode=Services.command(FindNodeCommand.class);
+        Command createRel=Services.command(CreateRelationshipCommand.class);
         StructrNode startNode=node;
         StructrNode endNode=(StructrNode)findNode.execute(user,Long.parseLong(endNodeId));
         createRel.execute(startNode,endNode,relType);

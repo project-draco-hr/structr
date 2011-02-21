@@ -1,0 +1,55 @@
+{
+  final Command transactionCommand=Services.command(TransactionCommand.class);
+  Long numberOfImages=(Long)transactionCommand.execute(new StructrTransaction(){
+    @Override public Object execute() throws Throwable {
+      Long numberOfImages=0L;
+      List<Image> images=new LinkedList<Image>();
+      List<StructrNode> allNodes=getAllNodes();
+      for (      StructrNode s : allNodes) {
+        if (s instanceof Image) {
+          images.add((Image)s);
+        }
+      }
+      int width=0;
+      int height=0;
+      String format=null;
+      for (      Image imageNode : images) {
+        String relativeFilePath=imageNode.getRelativeFilePath();
+        if (relativeFilePath != null) {
+          String filePath=Services.getFilePath(Path.Files,relativeFilePath);
+          java.io.File fileOnDisk=new java.io.File(filePath);
+          ImageInputStream iis=ImageIO.createImageInputStream(fileOnDisk);
+          Iterator<ImageReader> readers=ImageIO.getImageReaders(iis);
+          if (readers.hasNext()) {
+            try {
+              ImageReader reader=readers.next();
+              reader.setInput(iis,true);
+              width=reader.getWidth(0);
+              height=reader.getHeight(0);
+              format=reader.getFormatName();
+              imageNode.setWidth(width);
+              imageNode.setHeight(height);
+              if (format != null) {
+                format="image/" + format.toLowerCase();
+                imageNode.setContentType(format);
+              }
+              numberOfImages++;
+            }
+ catch (            Throwable ignore) {
+            }
+ finally {
+              if (iis != null) {
+                iis.close();
+              }
+            }
+          }
+          logger.log(Level.INFO,"Image node {0} (x,y, format): {1}, {2}, {3}",new Object[]{imageNode.getId(),width,height,format});
+        }
+      }
+      return numberOfImages;
+    }
+  }
+);
+  okMsg="Image dimensions successfully set on " + numberOfImages + " image nodes";
+  return false;
+}

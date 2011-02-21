@@ -1,25 +1,28 @@
 {
-  final Command transactionCommand=Services.createCommand(TransactionCommand.class);
-  transactionCommand.execute(new StructrTransaction(){
+  Long numberOfRemovedThumbnails=(Long)Services.command(TransactionCommand.class).execute(new StructrTransaction(){
     @Override public Object execute() throws Throwable {
-      Command searchNode=Services.createCommand(SearchNodeCommand.class);
-      List<StructrNode> images=(List<StructrNode>)searchNode.execute(null,null,true,false,new SearchAttribute(StructrNode.TYPE_KEY,Image.class.getSimpleName(),SearchOperator.AND));
-      Command deleteNode=Services.createCommand(DeleteNodeCommand.class);
-      Command deleteRel=Services.createCommand(DeleteRelationshipCommand.class);
-      for (      StructrNode s : images) {
-        if (s.hasRelationship(RelType.THUMBNAIL,Direction.INCOMING)) {
-          List<StructrRelationship> rels=(List<StructrRelationship>)s.getRelationships(RelType.THUMBNAIL,Direction.INCOMING);
-          for (          StructrRelationship r : rels) {
-            StructrNode t=r.getEndNode();
-            deleteRel.execute(r,new SuperUser());
-            deleteNode.execute(t,new SuperUser());
-          }
+      Long numberOfThumbnails=0L;
+      List<Image> images=new LinkedList<Image>();
+      for (      StructrNode s : getAllNodes()) {
+        if (s instanceof Image) {
+          images.add((Image)s);
         }
       }
-      return null;
+      Command deleteNode=Services.command(DeleteNodeCommand.class);
+      Command deleteRel=Services.command(DeleteRelationshipCommand.class);
+      for (      Image image : images) {
+        List<StructrRelationship> rels=(List<StructrRelationship>)image.getThumbnailRelationships();
+        for (        StructrRelationship r : rels) {
+          StructrNode t=r.getEndNode();
+          deleteRel.execute(r);
+          deleteNode.execute(t,new SuperUser());
+          numberOfThumbnails++;
+        }
+      }
+      return numberOfThumbnails;
     }
   }
 );
-  okMsg="Thumbnails successfully removed.";
+  okMsg=numberOfRemovedThumbnails + " thumbnails successfully removed.";
   return false;
 }

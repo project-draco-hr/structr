@@ -5,15 +5,15 @@
     final List<String> selectedValues=allowed.getSelectedValues();
     final boolean rec=recursive.isChecked();
     node=getNodeByIdOrPath(nodeId);
-    Command transaction=Services.createCommand(TransactionCommand.class);
+    Command transaction=Services.command(TransactionCommand.class);
     transaction.execute(new StructrTransaction(){
       @Override public Object execute() throws Throwable {
-        Command findUser=Services.createCommand(FindUserCommand.class);
+        Command findUser=Services.command(FindUserCommand.class);
         User selectedUser=(User)findUser.execute(selectedUserName);
         if (selectedUser != null) {
           List<StructrNode> nodes=new ArrayList<StructrNode>();
           if (rec) {
-            Command findNode=Services.createCommand(FindNodeCommand.class);
+            Command findNode=Services.command(FindNodeCommand.class);
             List<StructrNode> result=(List<StructrNode>)findNode.execute(user,node);
             for (            StructrNode s : result) {
               if (user instanceof SuperUser || s.accessControlAllowed(user)) {
@@ -30,14 +30,14 @@
             }
             StructrRelationship r=n.getSecurityRelationship(selectedUser);
             if (r == null) {
-              Command createRel=Services.createCommand(CreateRelationshipCommand.class);
+              Command createRel=Services.command(CreateRelationshipCommand.class);
               r=(StructrRelationship)createRel.execute(selectedUser,n,RelType.SECURITY);
             }
             if (selectedValues != null && selectedValues.size() > 0) {
               r.setAllowed(selectedValues);
             }
  else {
-              Command deleteRel=Services.createCommand(DeleteRelationshipCommand.class);
+              Command deleteRel=Services.command(DeleteRelationshipCommand.class);
               deleteRel.execute(r);
             }
           }

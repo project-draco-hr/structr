@@ -6,7 +6,7 @@
   activitiesTable.setDataProvider(new DataProvider(){
     @Override public List<Activity> getData(){
       List<Activity> result=new ArrayList<Activity>();
-      LogNodeList<StructrNode> globalLog=(LogNodeList<StructrNode>)Services.createCommand(GetGlobalLogCommand.class).execute();
+      LogNodeList<StructrNode> globalLog=(LogNodeList<StructrNode>)Services.command(GetGlobalLogCommand.class).execute();
       if (globalLog != null) {
         for (        StructrNode s : globalLog) {
           if (s instanceof PageRequest) {
@@ -27,9 +27,14 @@
     }
   }
 );
-  agentsTable.setDataProvider(new DataProvider(){
-    @Override public List<Service> getData(){
-      return Services.getAgents();
+  taskQueueTable.setDataProvider(new DataProvider(){
+    @Override public List<Task> getData(){
+      List<Task> taskList=new LinkedList<Task>();
+      Queue<Task> queue=(Queue<Task>)Services.command(ListTasksCommand.class).execute();
+      for (      Task t : queue) {
+        taskList.add(t);
+      }
+      return taskList;
     }
   }
 );
@@ -42,7 +47,7 @@
   initValuesTable.setDataProvider(new DataProvider(){
     @Override public List<Map.Entry<String,Object>> getData(){
       List<Map.Entry<String,Object>> params=new ArrayList<Map.Entry<String,Object>>();
-      Set<String> entityPackages=((Set<String>)Services.createCommand(GetEntityPackagesCommand.class).execute());
+      Set<String> entityPackages=((Set<String>)Services.command(GetEntityPackagesCommand.class).execute());
       params.add(new AbstractMap.SimpleEntry<String,Object>("Configuration File Path",Services.getConfigFilePath()));
       params.add(new AbstractMap.SimpleEntry<String,Object>("Application Title",Services.getApplicationTitle()));
       params.add(new AbstractMap.SimpleEntry<String,Object>("Database Path",Services.getDatabasePath()));
@@ -72,7 +77,7 @@
 );
   modulesTable.setDataProvider(new DataProvider(){
     @Override public Set<String> getData(){
-      Command listModules=Services.createCommand(ListModulesCommand.class);
+      Command listModules=Services.command(ListModulesCommand.class);
       return (Set<String>)listModules.execute();
     }
   }
@@ -80,7 +85,7 @@
   registeredClassesTable.setDataProvider(new DataProvider(){
     @Override public Set<NodeClassEntry> getData(){
       SortedSet<NodeClassEntry> nodeClassList=new TreeSet<NodeClassEntry>();
-      Map<String,Class> entities=(Map<String,Class>)Services.createCommand(GetEntitiesCommand.class).execute();
+      Map<String,Class> entities=(Map<String,Class>)Services.command(GetEntitiesCommand.class).execute();
       for (      Entry<String,Class> entry : entities.entrySet()) {
         String n=entry.getKey();
         Class c=entry.getValue();
@@ -95,7 +100,7 @@
 );
   allNodesTable.setDataProvider(new DataProvider(){
     @Override public List<StructrNode> getData(){
-      return allNodes;
+      return getAllNodes();
     }
   }
 );

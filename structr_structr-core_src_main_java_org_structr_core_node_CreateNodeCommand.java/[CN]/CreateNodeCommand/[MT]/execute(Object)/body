@@ -6,7 +6,7 @@
   boolean updateIndex=true;
   if (graphDb != null) {
     Date now=new Date();
-    Command createRel=Services.createCommand(CreateRelationshipCommand.class);
+    Command createRel=Services.command(CreateRelationshipCommand.class);
     List<NodeAttribute> attrs=new LinkedList<NodeAttribute>();
     for (    Object o : parameters) {
       if (o instanceof List) {
@@ -47,7 +47,7 @@
     node.setProperty(StructrNode.CREATED_DATE_KEY,now);
     node.setProperty(StructrNode.LAST_MODIFIED_DATE_KEY,now);
     if (updateIndex) {
-      Services.createCommand(IndexNodeCommand.class).execute(node.getId());
+      Services.command(IndexNodeCommand.class).execute(node.getId());
       logger.log(Level.FINE,"Node {0} indexed.",node.getId());
     }
   }

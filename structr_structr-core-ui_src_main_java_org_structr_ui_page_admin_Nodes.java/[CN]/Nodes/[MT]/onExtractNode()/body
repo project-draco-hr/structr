@@ -8,12 +8,12 @@
  else {
       targetNodeId=getNodeId();
     }
-    Command findNode=Services.createCommand(FindNodeCommand.class);
+    Command findNode=Services.command(FindNodeCommand.class);
     final StructrNode targetNode=(StructrNode)findNode.execute(user,targetNodeId);
-    final Command transactionCommand=Services.createCommand(TransactionCommand.class);
+    final Command transactionCommand=Services.command(TransactionCommand.class);
     transactionCommand.execute(new StructrTransaction(){
       @Override public Object execute() throws Throwable {
-        Command extractFile=Services.createCommand(ExtractFileCommand.class);
+        Command extractFile=Services.command(ExtractFileCommand.class);
         extractFile.execute(getNodeId(),targetNode,user);
         transactionCommand.setExitCode(extractFile.getExitCode());
         transactionCommand.setErrorMessage(extractFile.getErrorMessage());

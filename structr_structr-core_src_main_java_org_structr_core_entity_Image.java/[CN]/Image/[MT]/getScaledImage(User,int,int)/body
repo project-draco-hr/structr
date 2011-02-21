@@ -19,11 +19,11 @@
     }
   }
   logger.log(Level.INFO,"Creating thumbnail for {0}",getName());
-  Command transactionCommand=Services.createCommand(TransactionCommand.class);
+  Command transactionCommand=Services.command(TransactionCommand.class);
   thumbnail=(Image)transactionCommand.execute(new StructrTransaction(){
     @Override public Object execute() throws Throwable {
-      Command createNode=Services.createCommand(CreateNodeCommand.class);
-      Command createRel=Services.createCommand(CreateRelationshipCommand.class);
+      Command createNode=Services.command(CreateNodeCommand.class);
+      Command createRel=Services.command(CreateRelationshipCommand.class);
       NodeAttribute typeAttr=new NodeAttribute(StructrNode.TYPE_KEY,Image.class.getSimpleName());
       NodeAttribute contentTypeAttr=new NodeAttribute(Image.CONTENT_TYPE_KEY,originalImage.getContentType());
       Image thumbnail=(Image)createNode.execute(user,typeAttr,contentTypeAttr,false);
@@ -47,7 +47,7 @@
         thumbnailRelationship.setProperty(Image.WIDTH_KEY,tnWidth);
         thumbnailRelationship.setProperty(Image.HEIGHT_KEY,tnHeight);
         thumbnail.setRelativeFilePath(relativeFilePath);
-        thumbnail.setName(thumbnail.getName() + "_" + tnWidth+ "x"+ tnHeight);
+        thumbnail.setName(originalImage.getName() + "_thumb_" + tnWidth+ "x"+ tnHeight);
         return thumbnail;
       }
  else {

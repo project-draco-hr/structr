@@ -1,5 +1,5 @@
 {
-  final Command transaction=Services.createCommand(TransactionCommand.class);
+  final Command transaction=Services.command(TransactionCommand.class);
   String localNodeId=deleteRelationshipLink.getParameter(NODE_ID_KEY);
   final String relationshipId=deleteRelationshipLink.getValue();
   final Map<String,String> parameters=new HashMap<String,String>();
@@ -7,7 +7,7 @@
     final Long id=Long.parseLong(relationshipId);
     transaction.execute(new StructrTransaction(){
       @Override public Object execute() throws Throwable {
-        Command deleteRelationship=Services.createCommand(DeleteRelationshipCommand.class);
+        Command deleteRelationship=Services.command(DeleteRelationshipCommand.class);
         deleteRelationship.execute(id);
         transaction.setErrorMessage(deleteRelationship.getErrorMessage());
         transaction.setExitCode(deleteRelationship.getExitCode());

@@ -1,9 +1,9 @@
 {
   if (globalLogNodeList == null) {
-    globalLogNodeList=(LogNodeList)Services.createCommand(TransactionCommand.class).execute(new StructrTransaction(){
+    globalLogNodeList=(LogNodeList)Services.command(TransactionCommand.class).execute(new StructrTransaction(){
       @Override public Object execute() throws Throwable {
-        GraphDatabaseService graphDb=(GraphDatabaseService)Services.createCommand(GraphDatabaseCommand.class).execute();
-        Command factory=Services.createCommand(NodeFactoryCommand.class);
+        GraphDatabaseService graphDb=(GraphDatabaseService)Services.command(GraphDatabaseCommand.class).execute();
+        Command factory=Services.command(NodeFactoryCommand.class);
         LogNodeList ret=null;
         if (graphDb != null) {
           StructrNode rootNode=(StructrNode)factory.execute(graphDb.getReferenceNode());
@@ -14,8 +14,8 @@
               }
             }
           }
-          Command createNode=Services.createCommand(CreateNodeCommand.class);
-          Command createRel=Services.createCommand(CreateRelationshipCommand.class);
+          Command createNode=Services.command(CreateNodeCommand.class);
+          Command createRel=Services.command(CreateRelationshipCommand.class);
           ret=(LogNodeList<Activity>)createNode.execute(new NodeAttribute(StructrNode.TYPE_KEY,LogNodeList.class.getSimpleName()),new NodeAttribute(StructrNode.NAME_KEY,"Global Activity Log"));
           createRel.execute(rootNode,ret,RelType.HAS_CHILD);
         }

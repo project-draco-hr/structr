@@ -15,7 +15,7 @@
     }
     if (o instanceof Long) {
       csvNodeId=(Long)o;
-      sourceNode=(StructrNode)Services.createCommand(FindNodeCommand.class).execute(new SuperUser(),csvNodeId);
+      sourceNode=(StructrNode)Services.command(FindNodeCommand.class).execute(new SuperUser(),csvNodeId);
       if (sourceNode instanceof CsvFile) {
         csvFileNode=(CsvFile)sourceNode;
         filePath=Services.getFilesPath() + "/" + csvFileNode.getRelativeFilePath();
@@ -51,9 +51,9 @@
     }
     final User userCopy=user;
     final StructrNode sourceNodeCopy=sourceNode;
-    final Command transactionCommand=Services.createCommand(TransactionCommand.class);
-    final Command createNode=Services.createCommand(CreateNodeCommand.class);
-    final Command createRel=Services.createCommand(CreateRelationshipCommand.class);
+    final Command transactionCommand=Services.command(TransactionCommand.class);
+    final Command createNode=Services.command(CreateNodeCommand.class);
+    final Command createRel=Services.command(CreateRelationshipCommand.class);
     final NodeList<StructrNode> nodeListNode=(NodeList<StructrNode>)transactionCommand.execute(new StructrTransaction(){
       @Override public Object execute() throws Throwable {
         NodeList<StructrNode> result=(NodeList)createNode.execute(userCopy,new NodeAttribute(StructrNode.TYPE_KEY,NodeList.class.getSimpleName()),new NodeAttribute(StructrNode.NAME_KEY,sourceNodeCopy.getName() + " List"));

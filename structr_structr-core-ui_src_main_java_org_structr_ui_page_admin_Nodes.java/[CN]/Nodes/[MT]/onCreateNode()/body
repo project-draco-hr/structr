@@ -1,11 +1,11 @@
 {
   StructrNode s=null;
   if (newNodeForm.isValid()) {
-    Command transactionCommand=Services.createCommand(TransactionCommand.class);
+    Command transactionCommand=Services.command(TransactionCommand.class);
     s=(StructrNode)transactionCommand.execute(new StructrTransaction(){
       @Override public Object execute() throws Throwable {
-        Command createNode=Services.createCommand(CreateNodeCommand.class);
-        Command createRel=Services.createCommand(CreateRelationshipCommand.class);
+        Command createNode=Services.command(CreateNodeCommand.class);
+        Command createRel=Services.command(CreateRelationshipCommand.class);
         StructrNode parentNode=node;
         StructrNode newNode=(StructrNode)createNode.execute(user);
         newNodeForm.copyTo(newNode);
@@ -19,7 +19,7 @@
     if (s != null) {
       okMsg="New " + s.getType() + " node "+ s.getName()+ " has been created.";
     }
-    Command findNode=Services.createCommand(FindNodeCommand.class);
+    Command findNode=Services.command(FindNodeCommand.class);
     StructrNode n=(StructrNode)findNode.execute(user,s.getId());
     Map<String,String> parameters=new HashMap<String,String>();
     parameters.put(NODE_ID_KEY,String.valueOf(n.getId()));

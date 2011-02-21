@@ -2,12 +2,12 @@
   List<StructrNode> nodes=new ArrayList<StructrNode>();
   Command nodeFactory=null;
   if (relType.equals(RelType.LINK)) {
-    nodeFactory=Services.createCommand(LinkNodeFactoryCommand.class);
+    nodeFactory=Services.command(LinkNodeFactoryCommand.class);
   }
  else {
-    nodeFactory=Services.createCommand(NodeFactoryCommand.class);
+    nodeFactory=Services.command(NodeFactoryCommand.class);
   }
-  Command relsCommand=Services.createCommand(NodeRelationshipsCommand.class);
+  Command relsCommand=Services.command(NodeRelationshipsCommand.class);
   List<StructrRelationship> rels=(List<StructrRelationship>)relsCommand.execute(this,relType,Direction.OUTGOING);
   for (  StructrRelationship r : rels) {
     StructrNode s=(StructrNode)nodeFactory.execute(r.getEndNode());

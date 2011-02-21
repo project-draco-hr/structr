@@ -7,7 +7,7 @@
     if ((value == null && oldValue == null) || (value != null && oldValue != null && value.equals(oldValue))) {
       return;
     }
-    Command transactionCommand=Services.createCommand(TransactionCommand.class);
+    Command transactionCommand=Services.command(TransactionCommand.class);
     transactionCommand.execute(new StructrTransaction(){
       @Override public Object execute() throws Throwable {
         if (value == null) {
@@ -28,7 +28,7 @@
           }
         }
         if (updateIndex) {
-          Services.createCommand(IndexNodeCommand.class).execute(getId(),key,value);
+          Services.command(IndexNodeCommand.class).execute(getId(),key,value);
         }
         return null;
       }

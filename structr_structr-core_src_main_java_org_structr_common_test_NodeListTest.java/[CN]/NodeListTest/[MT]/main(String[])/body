@@ -1,7 +1,7 @@
 {
   StandaloneTestHelper.prepareStandaloneTest("/tmp/structr-test/");
-  final GraphDatabaseService graphDb=(GraphDatabaseService)Services.createCommand(GraphDatabaseCommand.class).execute();
-  final Command factory=Services.createCommand(NodeFactoryCommand.class);
+  final GraphDatabaseService graphDb=(GraphDatabaseService)Services.command(GraphDatabaseCommand.class).execute();
+  final Command factory=Services.command(NodeFactoryCommand.class);
   NodeList<StructrNode> nodeList=null;
   for (  Node node : graphDb.getAllNodes()) {
     StructrNode n=(StructrNode)factory.execute(node);
@@ -11,7 +11,7 @@
     }
   }
   if (nodeList == null) {
-    nodeList=(NodeList)Services.createCommand(TransactionCommand.class).execute(new StructrTransaction(){
+    nodeList=(NodeList)Services.command(TransactionCommand.class).execute(new StructrTransaction(){
       @Override public Object execute() throws Throwable {
         Node node=graphDb.createNode();
         node.setProperty(StructrNode.TYPE_KEY,"NodeList");
@@ -52,7 +52,7 @@
           }
           if (count == -1)           count=3;
           final int finalCount=count;
-          Services.createCommand(TransactionCommand.class).execute(new StructrTransaction(){
+          Services.command(TransactionCommand.class).execute(new StructrTransaction(){
             @Override public Object execute() throws Throwable {
               for (int i=0; i < finalCount; i++) {
                 StructrNode node=new PlainText();
@@ -69,7 +69,7 @@
         }
  else         if (line.startsWith("add")) {
           final StructrNode node=new PlainText();
-          Services.createCommand(TransactionCommand.class).execute(new StructrTransaction(){
+          Services.command(TransactionCommand.class).execute(new StructrTransaction(){
             @Override public Object execute() throws Throwable {
               node.init(graphDb.createNode());
               node.setProperty(StructrNode.TYPE_KEY,"PlainText");

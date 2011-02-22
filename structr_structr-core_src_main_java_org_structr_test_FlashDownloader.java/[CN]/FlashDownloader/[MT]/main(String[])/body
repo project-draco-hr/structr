@@ -1,0 +1,14 @@
+{
+  StandaloneTestHelper.prepareStandaloneTest("/opt/structr/structr-tfs2");
+  final StructrNode adminNode=(StructrNode)Services.command(FindUserCommand.class).execute("admin");
+  final String urlString="http://www.incahacienda.com/flash/photo_home.swf";
+  final String flashObjectName=urlString.substring(urlString.lastIndexOf("/") + 1);
+  Services.command(TransactionCommand.class).execute(new StructrTransaction(){
+    @Override public Object execute() throws Throwable {
+      Folder parentFolder=(Folder)Services.command(CreateNodeCommand.class).execute(new SuperUser(),new NodeAttribute(StructrNode.NAME_KEY,"_ " + flashObjectName + "_"+ System.currentTimeMillis()),new NodeAttribute(StructrNode.TYPE_KEY,Folder.class.getSimpleName()),false);
+      Services.command(CreateRelationshipCommand.class).execute(adminNode,parentFolder,RelType.HAS_CHILD);
+      return Services.command(SaveImagesFromFlashUrl.class).execute(new SuperUser(),urlString,parentFolder);
+    }
+  }
+);
+}

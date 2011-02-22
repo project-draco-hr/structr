@@ -6,6 +6,8 @@
     if (source != null) {
       int sourceWidth=source.getWidth();
       int sourceHeight=source.getHeight();
+      originalImage.setWidth(sourceWidth);
+      originalImage.setHeight(sourceHeight);
       float scaleX=1.0f * sourceWidth / maxWidth;
       float scaleY=1.0f * sourceHeight / maxHeight;
       float scale=Math.max(scaleX,scaleY);
@@ -16,10 +18,10 @@
         tn.setHeight(destHeight);
         ResampleOp resampleOp=new ResampleOp(destWidth,destHeight);
         BufferedImage dest=resampleOp.filter(source,null);
-        ImageIO.write(dest,"png",baos);
+        ImageIO.write(dest,Thumbnail.FORMAT,baos);
       }
  else {
-        ImageIO.write(source,"png",baos);
+        ImageIO.write(source,Thumbnail.FORMAT,baos);
       }
     }
  else {

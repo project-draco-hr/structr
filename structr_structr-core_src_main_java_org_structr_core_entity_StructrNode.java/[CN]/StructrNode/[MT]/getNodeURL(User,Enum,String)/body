@@ -7,14 +7,16 @@
     StructrNode node=(StructrNode)nodeFactory.execute(this);
     while (node != null && node.getId() > 0) {
       String urlPart=node.getUrlPart();
-      if (urlPart.startsWith("http://")) {
-        site=urlPart;
-      }
- else       if (urlPart.endsWith("/")) {
-        domain=urlPart;
-      }
+      if (urlPart != null) {
+        if (urlPart.startsWith("http://")) {
+          site=urlPart;
+        }
+ else         if (urlPart.endsWith("/")) {
+          domain=urlPart;
+        }
  else {
-        path=node.getUrlPart() + (!("".equals(path)) ? "/" + path : "");
+          path=node.getUrlPart() + (!("".equals(path)) ? "/" + path : "");
+        }
       }
       node=node.getParentNode(user);
     }

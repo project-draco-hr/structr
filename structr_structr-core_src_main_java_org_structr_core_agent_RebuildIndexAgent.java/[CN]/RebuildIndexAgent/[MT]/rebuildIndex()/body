@@ -1,10 +1,17 @@
 {
-  long nodes=0;
-  Command indexer=Services.command(IndexNodeCommand.class);
-  List<StructrNode> allNodes=(List<StructrNode>)Services.command(GetAllNodes.class).execute();
-  for (  StructrNode s : allNodes) {
-    indexer.execute(s);
-    nodes++;
+  Command transactionCommand=Services.command(TransactionCommand.class);
+  Long nodes=(Long)transactionCommand.execute(new StructrTransaction(){
+    @Override public Object execute() throws Throwable {
+      long nodes=0;
+      Command indexer=Services.command(IndexNodeCommand.class);
+      List<StructrNode> allNodes=(List<StructrNode>)Services.command(GetAllNodes.class).execute();
+      for (      StructrNode s : allNodes) {
+        indexer.execute(s);
+        nodes++;
+      }
+      return nodes;
+    }
   }
+);
   return nodes;
 }

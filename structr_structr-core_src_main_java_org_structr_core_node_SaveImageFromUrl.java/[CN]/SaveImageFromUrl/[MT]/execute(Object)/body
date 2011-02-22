@@ -1,0 +1,36 @@
+{
+  User user=null;
+  String urlString=null;
+  StructrNode parentNode=null;
+  Image imageNode=null;
+switch (parameters.length) {
+case 1:
+    if (parameters[0] instanceof Image) {
+      imageNode=(Image)parameters[0];
+    }
+  break;
+case 3:
+if (parameters[0] instanceof User) {
+  user=(User)parameters[0];
+}
+if (parameters[1] instanceof String) {
+urlString=(String)parameters[1];
+}
+if (parameters[2] instanceof StructrNode) {
+parentNode=(StructrNode)parameters[2];
+}
+break;
+default :
+throw new UnsupportedArgumentError("Wrong number of arguments");
+}
+if (imageNode != null) {
+refreshImageFromUrl(imageNode);
+}
+ else if (user != null && urlString != null && parentNode != null) {
+Image newImageNode=(Image)Services.command(CreateNodeCommand.class).execute(user,new NodeAttribute(StructrNode.TYPE_KEY,Image.class.getSimpleName()),new NodeAttribute(Image.URL_KEY,urlString),true);
+Services.command(CreateRelationshipCommand.class).execute(parentNode,newImageNode,RelType.HAS_CHILD);
+refreshImageFromUrl(newImageNode);
+return newImageNode;
+}
+return null;
+}

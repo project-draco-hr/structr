@@ -25,32 +25,35 @@
       Command createNode=Services.command(CreateNodeCommand.class);
       Command createRel=Services.command(CreateRelationshipCommand.class);
       NodeAttribute typeAttr=new NodeAttribute(StructrNode.TYPE_KEY,Image.class.getSimpleName());
-      NodeAttribute contentTypeAttr=new NodeAttribute(Image.CONTENT_TYPE_KEY,originalImage.getContentType());
-      Image thumbnail=(Image)createNode.execute(user,typeAttr,contentTypeAttr,false);
-      if (thumbnail != null) {
-        StructrRelationship thumbnailRelationship=(StructrRelationship)createRel.execute(originalImage,thumbnail,RelType.THUMBNAIL);
-        String relativeFilePath=thumbnail.getId() + "_" + System.currentTimeMillis();
-        String path=Services.getFilesPath() + "/" + relativeFilePath;
-        java.io.File imageFile=new java.io.File(path);
-        Thumbnail thumbnailData=ImageHelper.getThumbnailByteArray(originalImage,maxWidth,maxHeight);
-        try {
-          FileUtils.writeByteArrayToFile(imageFile,thumbnailData.getBytes());
+      NodeAttribute contentTypeAttr=new NodeAttribute(Image.CONTENT_TYPE_KEY,"image/" + Thumbnail.FORMAT);
+      Thumbnail thumbnailData=ImageHelper.createThumbnail(originalImage,maxWidth,maxHeight);
+      if (thumbnailData != null) {
+        Image thumbnail=(Image)createNode.execute(user,typeAttr,contentTypeAttr,false);
+        if (thumbnail != null) {
+          StructrRelationship thumbnailRelationship=(StructrRelationship)createRel.execute(originalImage,thumbnail,RelType.THUMBNAIL);
+          String relativeFilePath=thumbnail.getId() + "_" + System.currentTimeMillis();
+          String path=Services.getFilesPath() + "/" + relativeFilePath;
+          java.io.File imageFile=new java.io.File(path);
+          try {
+            FileUtils.writeByteArrayToFile(imageFile,thumbnailData.getBytes());
+          }
+ catch (          IOException ex) {
+            logger.log(Level.SEVERE,"Could not write thumbnail data to file",ex);
+            return null;
+          }
+          long size=imageFile.length();
+          thumbnail.setSize(size);
+          int tnWidth=thumbnailData.getWidth();
+          int tnHeight=thumbnailData.getHeight();
+          thumbnailRelationship.setProperty(Image.WIDTH_KEY,tnWidth);
+          thumbnailRelationship.setProperty(Image.HEIGHT_KEY,tnHeight);
+          thumbnail.setRelativeFilePath(relativeFilePath);
+          thumbnail.setName(originalImage.getName() + "_thumb_" + tnWidth+ "x"+ tnHeight);
         }
- catch (        IOException ex) {
-          logger.log(Level.SEVERE,"Could not write thumbnail data to file",ex);
-          return null;
-        }
-        long size=imageFile.length();
-        thumbnail.setSize(size);
-        int tnWidth=thumbnailData.getWidth();
-        int tnHeight=thumbnailData.getHeight();
-        thumbnailRelationship.setProperty(Image.WIDTH_KEY,tnWidth);
-        thumbnailRelationship.setProperty(Image.HEIGHT_KEY,tnHeight);
-        thumbnail.setRelativeFilePath(relativeFilePath);
-        thumbnail.setName(originalImage.getName() + "_thumb_" + tnWidth+ "x"+ tnHeight);
         return thumbnail;
       }
  else {
+        logger.log(Level.WARNING,"Could not create thumbnail for image {0} ({1})",new Object[]{getName(),getId()});
         return null;
       }
     }

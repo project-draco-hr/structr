@@ -1,7 +1,10 @@
 {
-  IndexService index=(LuceneFulltextIndexService)arguments.get("index");
-  index.removeIndex(node,key);
-  if (value != null && node.hasProperty(key)) {
-    index.index(node,key,node.getProperty(key));
+  if (value == null) {
+    return;
   }
+  Index<Node> index=(Index<Node>)arguments.get("index");
+  if (node.hasProperty(key)) {
+    index.remove(node,key,node.getProperty(key));
+  }
+  index.add(node,key,value);
 }

@@ -1,8 +1,10 @@
 {
   GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
+  index=(Index<Node>)arguments.get("index");
   if (graphDb != null) {
     long id=0;
     Node node=null;
+    StructrNode structrNode=null;
     String key=null;
     Object value=null;
 switch (parameters.length) {
@@ -13,29 +15,33 @@ case 1:
  else       if (parameters[0] instanceof String) {
         id=Long.parseLong((String)parameters[0]);
       }
+ else       if (parameters[0] instanceof StructrNode) {
+        structrNode=(StructrNode)parameters[0];
+        id=structrNode.getId();
+      }
     node=graphDb.getNodeById(id);
   indexNode(node);
 break;
-case 3:
+case 2:
 if (parameters[0] instanceof Long) {
 id=((Long)parameters[0]).longValue();
 }
  else if (parameters[0] instanceof String) {
 id=Long.parseLong((String)parameters[0]);
 }
+ else if (parameters[0] instanceof StructrNode) {
+structrNode=(StructrNode)parameters[0];
+id=structrNode.getId();
+}
 node=graphDb.getNodeById(id);
 if (parameters[1] instanceof String) {
 key=(String)parameters[1];
 }
-value=parameters[2];
-index(node,key,value);
+index(node,key);
 break;
 default :
-if (parameters.length != 3) {
-logger.log(Level.SEVERE,"The index property command takes 1 or 3 parameter");
+logger.log(Level.SEVERE,"Wrong number of parameters for the index property command");
 return null;
-}
-break;
 }
 }
 return null;

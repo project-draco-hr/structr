@@ -11,7 +11,7 @@
   if (reportResults == null) {
     return false;
   }
-  for (  StructrNode s : reportResults) {
+  for (  AbstractNode s : reportResults) {
     List<String> values=new ArrayList<String>();
     for (    Column c : columns) {
       Object value=PropertyUtils.getValue(s,c.getName(),methodCache);
@@ -53,26 +53,26 @@
     csvw.writeAll(resultList);
     csvw.flush();
     csvw.close();
-    StructrNode s=null;
+    AbstractNode s=null;
     Command transaction=Services.command(TransactionCommand.class);
-    s=(StructrNode)transaction.execute(new StructrTransaction(){
+    s=(AbstractNode)transaction.execute(new StructrTransaction(){
       @Override public Object execute() throws Throwable {
         Command createNode=Services.command(CreateNodeCommand.class);
         Command createRel=Services.command(CreateRelationshipCommand.class);
-        StructrNode newNode=(StructrNode)createNode.execute(new NodeAttribute(StructrNode.TYPE_KEY,File.class.getSimpleName()),user);
+        AbstractNode newNode=(AbstractNode)createNode.execute(new NodeAttribute(AbstractNode.TYPE_KEY,File.class.getSimpleName()),user);
         String relativeFilePath=newNode.getId() + "_" + System.currentTimeMillis();
         String targetPath=FILES_PATH + "/" + relativeFilePath;
         String fileUrl="file:///" + reportFile.getPath();
         FileUtils.moveFile(reportFile,new File(targetPath));
         Date now=new Date();
-        newNode.setProperty(StructrNode.NAME_KEY,reportFileName);
-        newNode.setProperty(StructrNode.CREATED_DATE_KEY,now);
-        newNode.setProperty(StructrNode.LAST_MODIFIED_DATE_KEY,now);
+        newNode.setProperty(AbstractNode.NAME_KEY,reportFileName);
+        newNode.setProperty(AbstractNode.CREATED_DATE_KEY,now);
+        newNode.setProperty(AbstractNode.LAST_MODIFIED_DATE_KEY,now);
         newNode.setProperty(org.structr.core.entity.File.CONTENT_TYPE_KEY,"text/csv");
         newNode.setProperty(org.structr.core.entity.File.SIZE_KEY,String.valueOf(reportFile.length()));
         newNode.setProperty(org.structr.core.entity.File.URL_KEY,fileUrl);
         newNode.setProperty(org.structr.core.entity.File.RELATIVE_FILE_PATH_KEY,relativeFilePath);
-        StructrNode parentNode=user;
+        AbstractNode parentNode=user;
         createRel.execute(parentNode,newNode,RelType.HAS_CHILD);
         return newNode;
       }

@@ -2,15 +2,15 @@
   GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
   Index<Node> index=(Index<Node>)arguments.get("index");
   StructrNodeFactory nodeFactory=(StructrNodeFactory)arguments.get("nodeFactory");
-  List<StructrNode> result=Collections.emptyList();
+  List<AbstractNode> result=Collections.emptyList();
   if (graphDb != null) {
     if (parameters == null || parameters.length != 5) {
       logger.log(Level.WARNING,"Exactly 5 parameters are required for advanced search.");
       return Collections.emptyList();
     }
-    StructrNode topNode=null;
-    if (parameters[0] instanceof StructrNode) {
-      topNode=(StructrNode)parameters[0];
+    AbstractNode topNode=null;
+    if (parameters[0] instanceof AbstractNode) {
+      topNode=(AbstractNode)parameters[0];
     }
     User user=null;
     if (parameters[1] instanceof User) {
@@ -39,16 +39,16 @@
         result=topNode.getAllChildren(user);
       }
  else {
-        result=new LinkedList<StructrNode>();
+        result=new LinkedList<AbstractNode>();
       }
     }
  else {
-      List<StructrNode> intermediateResult;
+      List<AbstractNode> intermediateResult;
       if (topNode != null) {
         intermediateResult=topNode.getAllChildren(user);
       }
  else {
-        intermediateResult=new LinkedList<StructrNode>();
+        intermediateResult=new LinkedList<AbstractNode>();
       }
       for (      SearchAttribute attr : searchAttrs) {
         String key=attr.getKey();
@@ -92,7 +92,7 @@
  catch (        Throwable t) {
           logger.log(Level.WARNING,"Search error",t);
         }
-        List<StructrNode> singleResult=nodeFactory.createNodes(nodes);
+        List<AbstractNode> singleResult=nodeFactory.createNodes(nodes);
         if (op.equals(SearchOperator.OR)) {
           intermediateResult=ListUtils.sum(intermediateResult,singleResult);
         }
@@ -100,14 +100,14 @@
           if (intermediateResult.isEmpty()) {
             intermediateResult=singleResult;
           }
-          List<StructrNode> intersectionResult=ListUtils.intersection(intermediateResult,singleResult);
+          List<AbstractNode> intersectionResult=ListUtils.intersection(intermediateResult,singleResult);
           intermediateResult=intersectionResult;
         }
  else         if (op.equals(SearchOperator.AND_NOT)) {
           if (intermediateResult.isEmpty()) {
             intermediateResult=singleResult;
           }
-          List<StructrNode> intersectionResult=ListUtils.subtract(intermediateResult,singleResult);
+          List<AbstractNode> intersectionResult=ListUtils.subtract(intermediateResult,singleResult);
           intermediateResult=intersectionResult;
         }
       }

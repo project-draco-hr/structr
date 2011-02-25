@@ -1,7 +1,7 @@
 {
   GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
   StructrNodeFactory nodeFactory=(StructrNodeFactory)arguments.get("nodeFactory");
-  StructrNode node=null;
+  AbstractNode node=null;
   User user=null;
   boolean updateIndex=true;
   if (graphDb != null) {
@@ -25,14 +25,14 @@
     }
     String nodeType=null;
     for (    NodeAttribute attr : attrs) {
-      if (StructrNode.TYPE_KEY.equals(attr.getKey())) {
+      if (AbstractNode.TYPE_KEY.equals(attr.getKey())) {
         nodeType=(String)attr.getValue();
       }
     }
     node=nodeFactory.createNode(graphDb.createNode(),nodeType);
     logger.log(Level.FINE,"Node {0} created",node.getId());
     for (    NodeAttribute attr : attrs) {
-      node.setProperty(attr.getKey(),attr.getValue());
+      node.setProperty(attr.getKey(),attr.getValue(),false);
       logger.log(Level.FINEST,"Set node attribute {0} to {1}",new Object[]{attr.getKey(),attr.getValue()});
     }
     attrs.clear();
@@ -42,10 +42,10 @@
       StructrRelationship securityRel=(StructrRelationship)createRel.execute(user,node,RelType.SECURITY);
       securityRel.setAllowed(Arrays.asList(StructrRelationship.ALL_PERMISSIONS));
       logger.log(Level.FINEST,"All permissions given to user {0}",user.getName());
-      node.setProperty(StructrNode.CREATED_BY_KEY,user.getRealName() + " (" + user.getName()+ ")");
+      node.setProperty(AbstractNode.CREATED_BY_KEY,user.getRealName() + " (" + user.getName()+ ")",false);
     }
-    node.setProperty(StructrNode.CREATED_DATE_KEY,now);
-    node.setProperty(StructrNode.LAST_MODIFIED_DATE_KEY,now);
+    node.setProperty(AbstractNode.CREATED_DATE_KEY,now,false);
+    node.setProperty(AbstractNode.LAST_MODIFIED_DATE_KEY,now,false);
     if (updateIndex) {
       Services.command(IndexNodeCommand.class).execute(node);
       logger.log(Level.FINE,"Node {0} indexed.",node.getId());

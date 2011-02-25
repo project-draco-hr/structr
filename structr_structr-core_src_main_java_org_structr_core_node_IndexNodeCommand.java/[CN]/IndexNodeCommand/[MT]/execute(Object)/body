@@ -4,9 +4,8 @@
   if (graphDb != null) {
     long id=0;
     Node node=null;
-    StructrNode structrNode=null;
+    AbstractNode structrNode=null;
     String key=null;
-    Object value=null;
 switch (parameters.length) {
 case 1:
       if (parameters[0] instanceof Long) {
@@ -15,8 +14,8 @@ case 1:
  else       if (parameters[0] instanceof String) {
         id=Long.parseLong((String)parameters[0]);
       }
- else       if (parameters[0] instanceof StructrNode) {
-        structrNode=(StructrNode)parameters[0];
+ else       if (parameters[0] instanceof AbstractNode) {
+        structrNode=(AbstractNode)parameters[0];
         id=structrNode.getId();
       }
     node=graphDb.getNodeById(id);
@@ -29,18 +28,18 @@ id=((Long)parameters[0]).longValue();
  else if (parameters[0] instanceof String) {
 id=Long.parseLong((String)parameters[0]);
 }
- else if (parameters[0] instanceof StructrNode) {
-structrNode=(StructrNode)parameters[0];
+ else if (parameters[0] instanceof AbstractNode) {
+structrNode=(AbstractNode)parameters[0];
 id=structrNode.getId();
 }
 node=graphDb.getNodeById(id);
 if (parameters[1] instanceof String) {
 key=(String)parameters[1];
 }
-index(node,key);
+indexProperty(node,key);
 break;
 default :
-logger.log(Level.SEVERE,"Wrong number of parameters for the index property command");
+logger.log(Level.SEVERE,"Wrong number of parameters for the index property command: {0}",parameters);
 return null;
 }
 }

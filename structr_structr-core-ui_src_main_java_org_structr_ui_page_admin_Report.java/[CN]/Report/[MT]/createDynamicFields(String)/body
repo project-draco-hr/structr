@@ -1,11 +1,11 @@
 {
-  searchAttributes.add(new SearchAttribute(StructrNode.TYPE_KEY,resultType,SearchOperator.AND));
-  Class<StructrNode> c=(Class<StructrNode>)Services.command(GetEntityClassCommand.class).execute(resultType);
+  searchAttributes.add(new SearchAttribute(AbstractNode.TYPE_KEY,resultType,SearchOperator.AND));
+  Class<AbstractNode> c=(Class<AbstractNode>)Services.command(GetEntityClassCommand.class).execute(resultType);
   if (c != null) {
     java.lang.reflect.Field[] fields=c.getFields();
-    StructrNode o=new EmptyNode();
+    AbstractNode o=new EmptyNode();
     try {
-      o=(StructrNode)c.newInstance();
+      o=(AbstractNode)c.newInstance();
     }
  catch (    Throwable t) {
       logger.log(Level.SEVERE,null,t);
@@ -15,7 +15,7 @@
         String fieldName=null;
         try {
           fieldName=(String)f.get(o);
-          if (StructrNode.TYPE_KEY.equals(fieldName)) {
+          if (AbstractNode.TYPE_KEY.equals(fieldName)) {
             continue;
           }
           TextField text=new TextField(fieldName);

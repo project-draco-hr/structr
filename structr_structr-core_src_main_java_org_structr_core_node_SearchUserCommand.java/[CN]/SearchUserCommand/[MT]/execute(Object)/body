@@ -7,8 +7,8 @@ switch (parameters.length) {
 case 1:
       if (parameters[0] instanceof String) {
         String userName=(String)parameters[0];
-        for (        Node n : index.getNodes(StructrNode.NAME_KEY,userName)) {
-          StructrNode s=(StructrNode)findNode.execute(n);
+        for (        Node n : index.getNodes(AbstractNode.NAME_KEY,userName)) {
+          AbstractNode s=(AbstractNode)findNode.execute(n);
           if (s.getType().equals("User")) {
             return s;
           }
@@ -19,9 +19,9 @@ case 2:
   if (parameters[0] instanceof String && parameters[1] instanceof String) {
     String userName=(String)parameters[0];
     String rootNodePath=(String)parameters[1];
-    List<StructrNode> nodes=(List<StructrNode>)findNode.execute(new XPath(rootNodePath));
+    List<AbstractNode> nodes=(List<AbstractNode>)findNode.execute(new XPath(rootNodePath));
     if (nodes != null && nodes.size() > 0) {
-      StructrNode r=nodes.get(0);
+      AbstractNode r=nodes.get(0);
       Node startNode=null;
       if (r != null) {
         startNode=r.getNode();
@@ -29,7 +29,7 @@ case 2:
           startNode=graphDb.getReferenceNode();
         }
         for (        Node n : getSubnodes(startNode)) {
-          StructrNode s=(StructrNode)findNode.execute(n);
+          AbstractNode s=(AbstractNode)findNode.execute(n);
           if (s.getType().equals("User") && userName.equals(s.getName())) {
             return s;
           }

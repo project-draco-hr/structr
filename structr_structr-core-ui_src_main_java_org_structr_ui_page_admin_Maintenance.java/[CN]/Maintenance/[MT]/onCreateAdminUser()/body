@@ -4,8 +4,8 @@
     @Override public Object execute() throws Throwable {
       Command createNode=Services.command(CreateNodeCommand.class);
       Command createRel=Services.command(CreateRelationshipCommand.class);
-      User adminUser=(User)createNode.execute(new NodeAttribute(StructrNode.TYPE_KEY,User.class.getSimpleName()),new NodeAttribute(StructrNode.NAME_KEY,"admin"),new SuperUser());
-      StructrNode rootNode=getRootNode();
+      User adminUser=(User)createNode.execute(new NodeAttribute(AbstractNode.TYPE_KEY,User.class.getSimpleName()),new NodeAttribute(AbstractNode.NAME_KEY,"admin"),new SuperUser());
+      AbstractNode rootNode=getRootNode();
       createRel.execute(rootNode,adminUser,RelType.HAS_CHILD);
       String password=RandomStringUtils.randomAlphanumeric(8);
       user.setPassword(password);

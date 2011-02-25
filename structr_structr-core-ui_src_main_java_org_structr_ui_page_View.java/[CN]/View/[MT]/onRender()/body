@@ -1,5 +1,5 @@
 {
-  StructrNode s=getNodeByIdOrPath(getNodeId());
+  AbstractNode s=getNodeByIdOrPath(getNodeId());
   if (s == null) {
     logger.log(Level.FINE,"Node {0} not found",getNodeId());
     getContext().getResponse().setStatus(HttpServletResponse.SC_NOT_FOUND);
@@ -23,7 +23,7 @@
     String contentType=s.getContentType();
     String editUrl=null;
     if (editNodeId != null) {
-      StructrNode editNode=getNodeByIdOrPath(editNodeId);
+      AbstractNode editNode=getNodeByIdOrPath(editNodeId);
       editUrl=getContext().getRequest().getContextPath().concat(getContext().getPagePath(getEditPageClass(editNode))).concat("?").concat(NODE_ID_KEY).concat("=").concat(editNodeId.toString()).concat("&").concat(RENDER_MODE_KEY).concat("=").concat(INLINE_MODE);
     }
     if (s instanceof File || s instanceof Image || (s instanceof PlainText && !("text/html".equals(contentType)))) {

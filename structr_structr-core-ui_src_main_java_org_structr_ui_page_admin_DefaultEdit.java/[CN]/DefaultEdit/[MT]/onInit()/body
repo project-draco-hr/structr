@@ -2,23 +2,23 @@
   super.onInit();
   FieldSet nodePropertiesFields=new FieldSet("Node Properties");
   nodePropertiesFields.setColumns(3);
-  nodePropertiesFields.add(new TextField(StructrNode.TYPE_KEY,true));
-  nodePropertiesFields.add(new TextField(StructrNode.NAME_KEY,true));
-  nodePropertiesFields.add(new IntegerField(StructrNode.POSITION_KEY));
-  TextField createdBy=new TextField(StructrNode.CREATED_BY_KEY);
+  nodePropertiesFields.add(new TextField(AbstractNode.TYPE_KEY,true));
+  nodePropertiesFields.add(new TextField(AbstractNode.NAME_KEY,true));
+  nodePropertiesFields.add(new IntegerField(AbstractNode.POSITION_KEY));
+  TextField createdBy=new TextField(AbstractNode.CREATED_BY_KEY);
   createdBy.setReadonly(true);
   nodePropertiesFields.add(createdBy);
-  DateField createdDate=new DateField(StructrNode.CREATED_DATE_KEY);
+  DateField createdDate=new DateField(AbstractNode.CREATED_DATE_KEY);
   createdDate.setFormatPattern(dateFormat.toPattern());
   createdDate.setShowTime(true);
   createdDate.setReadonly(true);
   nodePropertiesFields.add(createdDate);
-  DateField lastModifiedDate=new DateField(StructrNode.LAST_MODIFIED_DATE_KEY);
+  DateField lastModifiedDate=new DateField(AbstractNode.LAST_MODIFIED_DATE_KEY);
   lastModifiedDate.setFormatPattern(dateFormat.toPattern());
   lastModifiedDate.setShowTime(true);
   lastModifiedDate.setReadonly(true);
   nodePropertiesFields.add(lastModifiedDate);
-  titlesTable.addColumn(new Column(StructrNode.TITLE_KEY,"Title"));
+  titlesTable.addColumn(new Column(AbstractNode.TITLE_KEY,"Title"));
   titlesTable.addColumn(new Column(Title.LOCALE_KEY,"Locale"));
   titlesTable.setClass(Table.CLASS_SIMPLE);
   nodePropertiesFields.add(titlesTable);
@@ -26,17 +26,17 @@
   addControl(editPropertiesForm);
   FieldSet visibilityFields=new FieldSet("Visibility");
   visibilityFields.setColumns(2);
-  DateField visibilityStartDate=new DateField(StructrNode.VISIBILITY_START_DATE_KEY);
+  DateField visibilityStartDate=new DateField(AbstractNode.VISIBILITY_START_DATE_KEY);
   visibilityStartDate.setFormatPattern(dateFormat.toPattern());
   visibilityStartDate.setShowTime(true);
   visibilityFields.add(visibilityStartDate);
-  DateField visibilityEndDate=new DateField(StructrNode.VISIBILITY_END_DATE_KEY);
+  DateField visibilityEndDate=new DateField(AbstractNode.VISIBILITY_END_DATE_KEY);
   visibilityEndDate.setFormatPattern(dateFormat.toPattern());
   visibilityEndDate.setShowTime(true);
   visibilityFields.add(visibilityEndDate);
-  Checkbox hidden=new Checkbox(StructrNode.HIDDEN_KEY);
+  Checkbox hidden=new Checkbox(AbstractNode.HIDDEN_KEY);
   visibilityFields.add(hidden);
-  Checkbox publicCheckbox=new Checkbox(StructrNode.PUBLIC_KEY);
+  Checkbox publicCheckbox=new Checkbox(AbstractNode.PUBLIC_KEY);
   visibilityFields.add(publicCheckbox);
   editVisibilityForm.add(visibilityFields);
   editVisibilityForm.add(new HiddenField(NODE_ID_KEY,nodeId != null ? nodeId : ""));
@@ -65,10 +65,10 @@
   if (node != null && node.hasChildren()) {
     Column actionColumnNodes=new Column("Actions");
     actionColumnNodes.setTextAlign("center");
-    actionColumnNodes.setDecorator(new LinkDecorator(childNodesTable,new PageLink(),StructrNode.NODE_ID_KEY){
+    actionColumnNodes.setDecorator(new LinkDecorator(childNodesTable,new PageLink(),AbstractNode.NODE_ID_KEY){
       @Override protected void renderActionLink(      HtmlStringBuffer buffer,      AbstractLink link,      Context context,      Object row,      Object value){
-        StructrNode n=(StructrNode)row;
-        link=new PageLink(StructrNode.NODE_ID_KEY,getEditPageClass(n)){
+        AbstractNode n=(AbstractNode)row;
+        link=new PageLink(AbstractNode.NODE_ID_KEY,getEditPageClass(n)){
           @Override public String getHref(){
             return super.getHref().concat("#properties-tab");
           }
@@ -80,11 +80,11 @@
       }
     }
 );
-    typeColumn=new Column(StructrNode.TYPE_KEY);
-    iconDec=new LinkDecorator(childNodesTable,new PageLink(),StructrNode.NODE_ID_KEY){
+    typeColumn=new Column(AbstractNode.TYPE_KEY);
+    iconDec=new LinkDecorator(childNodesTable,new PageLink(),AbstractNode.NODE_ID_KEY){
       @Override protected void renderActionLink(      HtmlStringBuffer buffer,      AbstractLink link,      Context context,      Object row,      Object value){
-        StructrNode n=(StructrNode)row;
-        link=new PageLink(StructrNode.NODE_ID_KEY,getEditPageClass(n));
+        AbstractNode n=(AbstractNode)row;
+        link=new PageLink(AbstractNode.NODE_ID_KEY,getEditPageClass(n));
         link.setParameter(NODE_ID_KEY,n.getId());
         boolean hasThumbnail=false;
         if (n instanceof Image) {
@@ -106,10 +106,10 @@
 ;
     typeColumn.setDecorator(iconDec);
     childNodesTable.addColumn(typeColumn);
-    nameColumn=new Column(StructrNode.NAME_KEY);
+    nameColumn=new Column(AbstractNode.NAME_KEY);
     nameDec=new LinkDecorator(childNodesTable,viewRelLink,"id"){
       @Override protected void renderActionLink(      HtmlStringBuffer buffer,      AbstractLink link,      Context context,      Object row,      Object value){
-        StructrNode n=(StructrNode)row;
+        AbstractNode n=(AbstractNode)row;
         PageLink pageLink=new PageLink("id",getEditPageClass(n)){
           @Override public String getHref(){
             return super.getHref().concat("#childnodes-tab");
@@ -124,17 +124,17 @@
 ;
     nameColumn.setDecorator(nameDec);
     childNodesTable.addColumn(nameColumn);
-    childNodesTable.addColumn(new Column(StructrNode.LAST_MODIFIED_DATE_KEY));
-    childNodesTable.addColumn(new Column(StructrNode.OWNER_KEY));
-    childNodesTable.addColumn(new Column(StructrNode.CREATED_BY_KEY));
-    childNodesTable.addColumn(new Column(StructrNode.CREATED_DATE_KEY));
-    childNodesTable.addColumn(new Column(StructrNode.POSITION_KEY));
-    childNodesTable.addColumn(new Column(StructrNode.PUBLIC_KEY));
+    childNodesTable.addColumn(new Column(AbstractNode.LAST_MODIFIED_DATE_KEY));
+    childNodesTable.addColumn(new Column(AbstractNode.OWNER_KEY));
+    childNodesTable.addColumn(new Column(AbstractNode.CREATED_BY_KEY));
+    childNodesTable.addColumn(new Column(AbstractNode.CREATED_DATE_KEY));
+    childNodesTable.addColumn(new Column(AbstractNode.POSITION_KEY));
+    childNodesTable.addColumn(new Column(AbstractNode.PUBLIC_KEY));
     childNodesTable.addColumn(actionColumnNodes);
     childNodesTable.setSortable(true);
     childNodesTable.setShowBanner(true);
     childNodesTable.setPageSize(DEFAULT_PAGESIZE);
-    childNodesTable.getControlLink().setParameter(StructrNode.NODE_ID_KEY,getNodeId());
+    childNodesTable.getControlLink().setParameter(AbstractNode.NODE_ID_KEY,getNodeId());
     childNodesTable.setClass(Table.CLASS_SIMPLE);
     addControl(childNodesTable);
     editChildNodesPanel=new Panel("editChildNodesPanel","/panel/edit-child-nodes-panel.htm");
@@ -143,19 +143,19 @@
   if (removeRelationshipAllowed) {
     deleteRelationshipLink.setImageSrc("/images/delete.png");
     deleteRelationshipLink.setTitle("Delete relationship");
-    deleteRelationshipLink.setAttribute("onclick","return window.confirm('Please confirm delete', value);");
+    deleteRelationshipLink.setAttribute("onclick","return window.confirm('Do you really want to delete this relationship?');");
     addControl(deleteRelationshipLink);
     Column actionColumnIn=new Column("Action");
     actionColumnIn.setTextAlign("center");
     AbstractLink[] linksIn=new AbstractLink[]{deleteRelationshipLink};
     actionColumnIn.setDecorator(new LinkDecorator(incomingRelationshipsTable,linksIn,RELATIONSHIP_ID_KEY));
     actionColumnIn.setSortable(false);
-    typeColumn=new Column(StructrNode.TYPE_KEY);
+    typeColumn=new Column(AbstractNode.TYPE_KEY);
     viewRelLink=new PageLink("view",DefaultEdit.class);
     iconDec=new LinkDecorator(incomingRelationshipsTable,viewRelLink,"id"){
       @Override protected void renderActionLink(      HtmlStringBuffer buffer,      AbstractLink link,      Context context,      Object row,      Object value){
         StructrRelationship r=(StructrRelationship)row;
-        StructrNode startNode=r.getStartNode();
+        AbstractNode startNode=r.getStartNode();
         link=new PageLink("id",getEditPageClass(startNode));
         link.setParameter(NODE_ID_KEY,startNode.getId());
         link.setImageSrc(startNode.getIconSrc());
@@ -165,11 +165,11 @@
 ;
     typeColumn.setDecorator(iconDec);
     incomingRelationshipsTable.addColumn(typeColumn);
-    nameColumn=new Column(StructrNode.NAME_KEY);
+    nameColumn=new Column(AbstractNode.NAME_KEY);
     nameDec=new LinkDecorator(incomingRelationshipsTable,viewRelLink,"id"){
       @Override protected void renderActionLink(      HtmlStringBuffer buffer,      AbstractLink link,      Context context,      Object row,      Object value){
         StructrRelationship r=(StructrRelationship)row;
-        StructrNode startNode=r.getStartNode();
+        AbstractNode startNode=r.getStartNode();
         PageLink pageLink=new PageLink("id",getEditPageClass(startNode)){
           @Override public String getHref(){
             return super.getHref().concat("#relationships-tab");
@@ -190,7 +190,7 @@
     incomingRelationshipsTable.addColumn(new Column(REL_TYPE_KEY));
     incomingRelationshipsTable.addColumn(actionColumnIn);
     incomingRelationshipsTable.setPageSize(DEFAULT_PAGESIZE);
-    incomingRelationshipsTable.getControlLink().setParameter(StructrNode.NODE_ID_KEY,getNodeId());
+    incomingRelationshipsTable.getControlLink().setParameter(AbstractNode.NODE_ID_KEY,getNodeId());
     incomingRelationshipsTable.setClass(Table.CLASS_SIMPLE);
     addControl(incomingRelationshipsTable);
     Column actionColumnOut=new Column("Action");
@@ -198,11 +198,11 @@
     AbstractLink[] linksOut=new AbstractLink[]{deleteRelationshipLink};
     actionColumnOut.setDecorator(new LinkDecorator(outgoingRelationshipsTable,linksOut,RELATIONSHIP_ID_KEY));
     actionColumnOut.setSortable(false);
-    typeColumn=new Column(StructrNode.TYPE_KEY);
+    typeColumn=new Column(AbstractNode.TYPE_KEY);
     iconDec=new LinkDecorator(outgoingRelationshipsTable,viewRelLink,"id"){
       @Override protected void renderActionLink(      HtmlStringBuffer buffer,      AbstractLink link,      Context context,      Object row,      Object value){
         StructrRelationship r=(StructrRelationship)row;
-        StructrNode endNode=r.getEndNode();
+        AbstractNode endNode=r.getEndNode();
         link=new PageLink("id",getEditPageClass(endNode));
         link.setParameter(NODE_ID_KEY,endNode.getId());
         link.setImageSrc(endNode.getIconSrc());
@@ -212,11 +212,11 @@
 ;
     typeColumn.setDecorator(iconDec);
     outgoingRelationshipsTable.addColumn(typeColumn);
-    nameColumn=new Column(StructrNode.NAME_KEY);
+    nameColumn=new Column(AbstractNode.NAME_KEY);
     nameDec=new LinkDecorator(outgoingRelationshipsTable,viewRelLink,"id"){
       @Override protected void renderActionLink(      HtmlStringBuffer buffer,      AbstractLink link,      Context context,      Object row,      Object value){
         StructrRelationship r=(StructrRelationship)row;
-        StructrNode endNode=r.getEndNode();
+        AbstractNode endNode=r.getEndNode();
         PageLink pageLink=new PageLink("id",getEditPageClass(endNode)){
           @Override public String getHref(){
             return super.getHref().concat("#relationships-tab");
@@ -237,18 +237,18 @@
     outgoingRelationshipsTable.addColumn(new Column(REL_TYPE_KEY));
     outgoingRelationshipsTable.addColumn(actionColumnOut);
     outgoingRelationshipsTable.setPageSize(DEFAULT_PAGESIZE);
-    outgoingRelationshipsTable.getControlLink().setParameter(StructrNode.NODE_ID_KEY,getNodeId());
+    outgoingRelationshipsTable.getControlLink().setParameter(AbstractNode.NODE_ID_KEY,getNodeId());
     outgoingRelationshipsTable.setClass(Table.CLASS_SIMPLE);
     addControl(outgoingRelationshipsTable);
     editRelationshipsPanel=new Panel("editRelationshipsPanel","/panel/edit-relationships-panel.htm");
     addControl(editRelationshipsPanel);
   }
   if (accessControlAllowed) {
-    nameColumn=new Column(StructrNode.NAME_KEY);
+    nameColumn=new Column(AbstractNode.NAME_KEY);
     nameDec=new LinkDecorator(securityTable,viewRelLink,"id"){
       @Override protected void renderActionLink(      HtmlStringBuffer buffer,      AbstractLink link,      Context context,      Object row,      Object value){
         StructrRelationship r=(StructrRelationship)row;
-        StructrNode startNode=r.getStartNode();
+        AbstractNode startNode=r.getStartNode();
         PageLink pageLink=new PageLink("id",getEditPageClass(startNode)){
           @Override public String getHref(){
             return super.getHref().concat("#security-tab");

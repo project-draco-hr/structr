@@ -1,0 +1,107 @@
+{
+  if (node != null) {
+    if (!(node instanceof File)) {
+      setExitCode(Command.exitCode.FAILURE);
+      setErrorMessage("Could not extract content of node" + node.getId());
+      logger.log(Level.WARNING,getErrorMessage());
+      return;
+    }
+    File archiveNode=(File)node;
+    BufferedInputStream in=new BufferedInputStream(archiveNode.getInputStream());
+    ArchiveInputStream input=null;
+    try {
+      input=new ArchiveStreamFactory().createArchiveInputStream(in);
+      if (input != null) {
+        Command createNode=Services.command(CreateNodeCommand.class);
+        Command createRel=Services.command(CreateRelationshipCommand.class);
+        Map<String,AbstractNode> createdPaths=new HashMap<String,AbstractNode>();
+        try {
+          ArchiveEntry ae=input.getNextEntry();
+          do {
+            String name=ae.getName();
+            long size=ae.getSize();
+            boolean isDirectory=ae.isDirectory();
+            if (!isDirectory) {
+              if (name.indexOf("/") > 0) {
+                AbstractNode parentNode=targetNode;
+                String[] pathElements=name.split(PATH_SEPARATOR);
+                int count=0;
+                for (                String p : pathElements) {
+                  NodeAttribute typeAttr;
+                  if (count < pathElements.length - 1) {
+                    typeAttr=new NodeAttribute(AbstractNode.TYPE_KEY,"Folder");
+                  }
+ else {
+                    String contentType=getContentTypeFromFilename(ae.getName());
+                    if (contentType != null && contentType.startsWith("image")) {
+                      typeAttr=new NodeAttribute(AbstractNode.TYPE_KEY,Image.class.getSimpleName());
+                    }
+ else {
+                      typeAttr=new NodeAttribute(AbstractNode.TYPE_KEY,File.class.getSimpleName());
+                    }
+                  }
+                  StringBuilder path=new StringBuilder();
+                  for (int i=0; i <= count; i++) {
+                    path.append(pathElements[i]).append(PATH_SEPARATOR);
+                  }
+                  if (!(createdPaths.containsKey(path.toString()))) {
+                    AbstractNode childNode=(AbstractNode)createNode.execute(new NodeAttribute(AbstractNode.NAME_KEY,p),typeAttr,user);
+                    if (childNode.getType().equals("File")) {
+                      writeFile(childNode,input);
+                    }
+                    createRel.execute(parentNode,childNode,RelType.HAS_CHILD);
+                    parentNode=childNode;
+                    createdPaths.put(path.toString(),parentNode);
+                  }
+ else {
+                    parentNode=(AbstractNode)createdPaths.get(path.toString());
+                  }
+                  count++;
+                }
+              }
+ else {
+                NodeAttribute typeAttr=new NodeAttribute(AbstractNode.TYPE_KEY,"File");
+                NodeAttribute sizeAttr=new NodeAttribute(File.SIZE_KEY,size);
+                NodeAttribute nameAttr=new NodeAttribute(AbstractNode.NAME_KEY,name);
+                AbstractNode fileNode=(AbstractNode)createNode.execute(nameAttr,typeAttr,sizeAttr,user);
+                createRel.execute(RelType.HAS_CHILD,targetNode,fileNode);
+                writeFile(fileNode,input);
+              }
+            }
+            ae=input.getNextEntry();
+          }
+ while (ae != null);
+        }
+ catch (        IOException e) {
+          setErrorMessage("Could not read from archive stream");
+          setExitCode(Command.exitCode.FAILURE);
+          logger.log(Level.WARNING,getErrorMessage().concat(": {0}"),e.getMessage());
+          return;
+        }
+      }
+    }
+ catch (    ArchiveException e) {
+      setErrorMessage("Unknown Archive format");
+      setExitCode(Command.exitCode.FAILURE);
+      logger.log(Level.WARNING,getErrorMessage().concat(": {0}"),e.getMessage());
+      return;
+    }
+ finally {
+      try {
+        if (input != null) {
+          input.close();
+        }
+      }
+ catch (      IOException e) {
+        logger.log(Level.WARNING,"Exception while closing input stream: " + e.getMessage());
+      }
+    }
+  }
+ else {
+    setErrorMessage("Node to extract was null");
+    setExitCode(Command.exitCode.FAILURE);
+    logger.log(Level.WARNING,getErrorMessage());
+    return;
+  }
+  setExitCode(Command.exitCode.SUCCESS);
+}

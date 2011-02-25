@@ -1,6 +1,6 @@
 {
   LogNodeList<Activity> activityList;
-  for (  StructrNode s : user.getDirectChildNodes(user)) {
+  for (  AbstractNode s : user.getDirectChildNodes(user)) {
     if (s instanceof LogNodeList) {
       activityList=(LogNodeList)s;
       return activityList;
@@ -8,7 +8,7 @@
   }
   Command createNode=Services.command(CreateNodeCommand.class);
   Command createRel=Services.command(CreateRelationshipCommand.class);
-  activityList=(LogNodeList<Activity>)createNode.execute(user,new NodeAttribute(StructrNode.TYPE_KEY,LogNodeList.class.getSimpleName()),new NodeAttribute(StructrNode.NAME_KEY,user.getName() + "'s Activity Log"));
+  activityList=(LogNodeList<Activity>)createNode.execute(user,new NodeAttribute(AbstractNode.TYPE_KEY,LogNodeList.class.getSimpleName()),new NodeAttribute(AbstractNode.NAME_KEY,user.getName() + "'s Activity Log"));
   createRel.execute(user,activityList,RelType.HAS_CHILD);
   return activityList;
 }

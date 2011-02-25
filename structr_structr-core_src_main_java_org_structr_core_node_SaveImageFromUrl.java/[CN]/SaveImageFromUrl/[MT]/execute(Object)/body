@@ -1,7 +1,7 @@
 {
   User user=null;
   String urlString=null;
-  StructrNode parentNode=null;
+  AbstractNode parentNode=null;
   Image imageNode=null;
 switch (parameters.length) {
 case 1:
@@ -16,8 +16,8 @@ if (parameters[0] instanceof User) {
 if (parameters[1] instanceof String) {
 urlString=(String)parameters[1];
 }
-if (parameters[2] instanceof StructrNode) {
-parentNode=(StructrNode)parameters[2];
+if (parameters[2] instanceof AbstractNode) {
+parentNode=(AbstractNode)parameters[2];
 }
 break;
 default :
@@ -27,7 +27,7 @@ if (imageNode != null) {
 refreshImageFromUrl(imageNode);
 }
  else if (user != null && urlString != null && parentNode != null) {
-Image newImageNode=(Image)Services.command(CreateNodeCommand.class).execute(user,new NodeAttribute(StructrNode.TYPE_KEY,Image.class.getSimpleName()),new NodeAttribute(Image.URL_KEY,urlString),true);
+Image newImageNode=(Image)Services.command(CreateNodeCommand.class).execute(user,new NodeAttribute(AbstractNode.TYPE_KEY,Image.class.getSimpleName()),new NodeAttribute(Image.URL_KEY,urlString),true);
 Services.command(CreateRelationshipCommand.class).execute(parentNode,newImageNode,RelType.HAS_CHILD);
 refreshImageFromUrl(newImageNode);
 return newImageNode;

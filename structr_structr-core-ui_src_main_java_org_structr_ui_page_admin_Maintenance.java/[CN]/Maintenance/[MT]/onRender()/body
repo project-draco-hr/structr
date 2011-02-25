@@ -1,14 +1,14 @@
 {
-  rootNodeLink.setParameter(StructrNode.NODE_ID_KEY,"0");
+  rootNodeLink.setParameter(AbstractNode.NODE_ID_KEY,"0");
   if (allNodes == null) {
     return;
   }
   activitiesTable.setDataProvider(new DataProvider(){
     @Override public List<Activity> getData(){
       List<Activity> result=new ArrayList<Activity>();
-      LogNodeList<StructrNode> globalLog=(LogNodeList<StructrNode>)Services.command(GetGlobalLogCommand.class).execute();
+      LogNodeList<AbstractNode> globalLog=(LogNodeList<AbstractNode>)Services.command(GetGlobalLogCommand.class).execute();
       if (globalLog != null) {
-        for (        StructrNode s : globalLog) {
+        for (        AbstractNode s : globalLog) {
           if (s instanceof PageRequest) {
             result.add((PageRequest)s);
           }
@@ -50,7 +50,7 @@
   runtimeValuesTable.setDataProvider(new DataProvider(){
     @Override public List<Map.Entry<String,Object>> getData(){
       List<Map.Entry<String,Object>> params=new ArrayList<Map.Entry<String,Object>>();
-      for (      StructrNode s : allNodes) {
+      for (      AbstractNode s : allNodes) {
         String type=s.getType();
         long value=0L;
         if (nodesHistogram.containsKey(type)) {
@@ -88,7 +88,7 @@
   }
 );
   allNodesTable.setDataProvider(new DataProvider(){
-    @Override public List<StructrNode> getData(){
+    @Override public List<AbstractNode> getData(){
       return getAllNodes();
     }
   }

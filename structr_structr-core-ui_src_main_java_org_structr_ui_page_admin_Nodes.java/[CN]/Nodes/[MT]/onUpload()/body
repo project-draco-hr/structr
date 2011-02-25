@@ -1,5 +1,5 @@
 {
-  StructrNode s=null;
+  AbstractNode s=null;
   if (uploadForm.isValid()) {
     List<Field> fieldList=(List<Field>)uploadForm.getFieldList();
     for (    Field f : fieldList) {
@@ -12,7 +12,7 @@
       final String mimeType=fileFromUpload.getContentType();
       if (name != null && !("".equals(name))) {
         Command transaction=Services.command(TransactionCommand.class);
-        s=(StructrNode)transaction.execute(new StructrTransaction(){
+        s=(AbstractNode)transaction.execute(new StructrTransaction(){
           @Override public Object execute() throws Throwable {
             Command createNode=Services.command(CreateNodeCommand.class);
             Command createRel=Services.command(CreateRelationshipCommand.class);
@@ -23,7 +23,7 @@
  else {
               mimeProperty="File";
             }
-            StructrNode newNode=(StructrNode)createNode.execute(new NodeAttribute(StructrNode.TYPE_KEY,mimeProperty),user);
+            AbstractNode newNode=(AbstractNode)createNode.execute(new NodeAttribute(AbstractNode.TYPE_KEY,mimeProperty),user);
             String relativeFilePath=newNode.getId() + "_" + System.currentTimeMillis();
             String path=FILES_PATH + "/" + relativeFilePath;
             long size=fileFromUpload.getSize();
@@ -37,14 +37,14 @@
               errorMsg="Error while write uploaded file(s) to disk: " + e.getStackTrace();
             }
             Date now=new Date();
-            newNode.setProperty(StructrNode.NAME_KEY,name);
-            newNode.setProperty(StructrNode.CREATED_DATE_KEY,now);
-            newNode.setProperty(StructrNode.LAST_MODIFIED_DATE_KEY,now);
+            newNode.setProperty(AbstractNode.NAME_KEY,name);
+            newNode.setProperty(AbstractNode.CREATED_DATE_KEY,now);
+            newNode.setProperty(AbstractNode.LAST_MODIFIED_DATE_KEY,now);
             newNode.setProperty(File.CONTENT_TYPE_KEY,mimeType);
             newNode.setProperty(File.SIZE_KEY,String.valueOf(size));
             newNode.setProperty(File.URL_KEY,fileUrl);
             newNode.setProperty(File.RELATIVE_FILE_PATH_KEY,relativeFilePath);
-            StructrNode parentNode=node;
+            AbstractNode parentNode=node;
             createRel.execute(parentNode,newNode,RelType.HAS_CHILD);
             newNodeForm.clearValues();
             addTreeNode(newNode,getCurrentTreeNode());

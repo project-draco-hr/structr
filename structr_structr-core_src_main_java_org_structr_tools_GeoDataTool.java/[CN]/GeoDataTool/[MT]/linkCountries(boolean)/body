@@ -13,15 +13,15 @@
   Iterable<Node> allNodes=graphDb.getAllNodes();
   Node countriesFolder=null;
   for (  Node n : allNodes) {
-    if (n.hasProperty(StructrNode.TYPE_KEY) && n.getProperty(StructrNode.TYPE_KEY).equals("Folder") && n.hasProperty(StructrNode.NAME_KEY)&& n.getProperty(StructrNode.NAME_KEY).equals("Countries")) {
+    if (n.hasProperty(AbstractNode.TYPE_KEY) && n.getProperty(AbstractNode.TYPE_KEY).equals("Folder") && n.hasProperty(AbstractNode.NAME_KEY)&& n.getProperty(AbstractNode.NAME_KEY).equals("Countries")) {
       countriesFolder=n;
     }
   }
   int regionCounter=0;
   for (  Node n : allNodes) {
-    if (n.hasProperty(StructrNode.TYPE_KEY) && n.getProperty(StructrNode.TYPE_KEY).equals("Region")) {
+    if (n.hasProperty(AbstractNode.TYPE_KEY) && n.getProperty(AbstractNode.TYPE_KEY).equals("Region")) {
       for (      String region : regionMap.keySet()) {
-        if (n.hasProperty(StructrNode.NAME_KEY) && n.getProperty(StructrNode.NAME_KEY).equals(region)) {
+        if (n.hasProperty(AbstractNode.NAME_KEY) && n.getProperty(AbstractNode.NAME_KEY).equals(region)) {
           nodeMap.put(region,n);
           break;
         }
@@ -37,7 +37,7 @@
       if (rels != null) {
         for (        Relationship r : rels) {
           Node endNode=r.getEndNode();
-          if (endNode.hasProperty(StructrNode.TYPE_KEY) && endNode.getProperty(StructrNode.TYPE_KEY).equals("Country")) {
+          if (endNode.hasProperty(AbstractNode.TYPE_KEY) && endNode.getProperty(AbstractNode.TYPE_KEY).equals("Country")) {
             r.delete();
           }
         }
@@ -46,7 +46,7 @@
       for (      String country : countries) {
         System.out.println("Processing country " + country);
         for (        Node n : allNodes) {
-          if (n.hasProperty(StructrNode.TYPE_KEY) && n.getProperty(StructrNode.TYPE_KEY).equals("Country") && n.hasProperty(StructrNode.NAME_KEY)&& n.getProperty(StructrNode.NAME_KEY).equals(country)) {
+          if (n.hasProperty(AbstractNode.TYPE_KEY) && n.getProperty(AbstractNode.TYPE_KEY).equals("Country") && n.hasProperty(AbstractNode.NAME_KEY)&& n.getProperty(AbstractNode.NAME_KEY).equals(country)) {
             if (!test) {
               regionNode.createRelationshipTo(n,RelType.LINK);
               System.out.println("Linked " + country + " to "+ region+ " node");

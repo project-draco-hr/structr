@@ -1,0 +1,17 @@
+{
+  if (node != null) {
+    Command createNode=Services.command(CreateNodeCommand.class);
+    Command createRel=Services.command(CreateRelationshipCommand.class);
+    AbstractNode newNode=(AbstractNode)createNode.execute(user);
+    for (    String key : node.getPropertyKeys()) {
+      if (!(key.equals(AbstractNode.CREATED_DATE_KEY))) {
+        newNode.setProperty(key,node.getProperty(key));
+      }
+    }
+    createRel.execute(targetNode,newNode,RelType.HAS_CHILD);
+  }
+ else {
+    logger.log(Level.WARNING,"Copy node to node {0} failed!",targetNode.getId());
+  }
+  return (null);
+}

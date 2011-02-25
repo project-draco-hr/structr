@@ -3,7 +3,7 @@
     @Override public Object execute() throws Throwable {
       Long numberOfThumbnails=0L;
       List<Image> images=new LinkedList<Image>();
-      for (      StructrNode s : getAllNodes()) {
+      for (      AbstractNode s : getAllNodes()) {
         if (s instanceof Image) {
           images.add((Image)s);
         }
@@ -13,7 +13,7 @@
       for (      Image image : images) {
         List<StructrRelationship> rels=(List<StructrRelationship>)image.getThumbnailRelationships();
         for (        StructrRelationship r : rels) {
-          StructrNode t=r.getEndNode();
+          AbstractNode t=r.getEndNode();
           deleteRel.execute(r);
           deleteNode.execute(t,new SuperUser());
           numberOfThumbnails++;

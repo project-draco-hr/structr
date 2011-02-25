@@ -2,10 +2,10 @@
   if (deleteNodeForm.isValid()) {
     final String parent=deleteNodeForm.getFieldValue(PARENT_NODE_ID_KEY);
     final String recursive=deleteNodeForm.getFieldValue(RECURSIVE_KEY);
-    StructrNode parentNode=null;
+    AbstractNode parentNode=null;
     try {
       final Command transactionCommand=Services.command(TransactionCommand.class);
-      parentNode=(StructrNode)transactionCommand.execute(new StructrTransaction(){
+      parentNode=(AbstractNode)transactionCommand.execute(new StructrTransaction(){
         @Override public Object execute() throws Throwable {
           Command deleteNode=Services.command(DeleteNodeCommand.class);
           Object result=deleteNode.execute(getNodeId(),parent,recursive,user);

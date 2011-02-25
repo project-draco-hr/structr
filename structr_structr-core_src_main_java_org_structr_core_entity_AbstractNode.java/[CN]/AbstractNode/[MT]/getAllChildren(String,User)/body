@@ -1,0 +1,11 @@
+{
+  List<AbstractNode> nodes=new ArrayList<AbstractNode>();
+  Command findNode=Services.command(FindNodeCommand.class);
+  List<AbstractNode> result=(List<AbstractNode>)findNode.execute(user,this);
+  for (  AbstractNode s : result) {
+    if (s.readAllowed(user) && (nodeType == null || nodeType.equals(s.getType()))) {
+      nodes.add(s);
+    }
+  }
+  return nodes;
+}

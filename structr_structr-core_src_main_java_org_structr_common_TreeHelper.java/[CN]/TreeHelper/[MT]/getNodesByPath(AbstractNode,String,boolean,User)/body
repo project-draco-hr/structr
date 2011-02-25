@@ -1,0 +1,34 @@
+{
+  AbstractNode currentNode=startNode;
+  String[] names=StringUtils.split(path,"/");
+  List<AbstractNode> children=null;
+  for (  String name : names) {
+    if ("..".equals(name)) {
+      currentNode=currentNode.getParentNode(user);
+      continue;
+    }
+    boolean foundName=false;
+    children=currentNode.getDirectChildNodes(user);
+    if (includeLinks) {
+      List<AbstractNode> links=currentNode.getLinkedNodes(user);
+      if (links != null) {
+        children.addAll(links);
+      }
+    }
+    if ("*".equals(name)) {
+      return children;
+    }
+    for (    AbstractNode child : children) {
+      if (name.equals(child.getName())) {
+        currentNode=child;
+        foundName=true;
+        break;
+      }
+    }
+    if (!foundName) {
+      logger.log(Level.WARNING,"Node not found at {0}",path);
+      return null;
+    }
+  }
+  return null;
+}

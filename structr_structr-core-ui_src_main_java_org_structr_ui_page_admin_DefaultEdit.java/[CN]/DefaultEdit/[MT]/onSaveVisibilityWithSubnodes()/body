@@ -3,10 +3,10 @@
     final Command transactionCommand=Services.command(TransactionCommand.class);
     transactionCommand.execute(new StructrTransaction(){
       @Override public Object execute() throws Throwable {
-        StructrNode root=getNodeByIdOrPath(getNodeId());
-        List<StructrNode> childNodes=root.getDirectChildren(RelType.HAS_CHILD,user);
+        AbstractNode root=getNodeByIdOrPath(getNodeId());
+        List<AbstractNode> childNodes=root.getDirectChildren(RelType.HAS_CHILD,user);
         childNodes.add(root);
-        for (        StructrNode s : childNodes) {
+        for (        AbstractNode s : childNodes) {
           if (editVisibilityForm.isValid()) {
             editVisibilityForm.copyTo(s,true);
             transactionCommand.setExitCode(Command.exitCode.SUCCESS);

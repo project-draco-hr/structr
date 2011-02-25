@@ -1,0 +1,68 @@
+{
+  List<AbstractNode> callingNodeSubnodes=null;
+  template=startNode.getTemplate(user);
+  AbstractNode callingNode=null;
+  if (template != null) {
+    callingNode=template.getCallingNode();
+    if (callingNode != null) {
+      callingNodeSubnodes=callingNode.getSortedDirectChildAndLinkNodes(user);
+    }
+  }
+  Command findNode=Services.command(FindNodeCommand.class);
+  int start=content.indexOf(NODE_KEY_PREFIX);
+  while (start > -1) {
+    int end=content.indexOf(NODE_KEY_SUFFIX,start + NODE_KEY_PREFIX.length());
+    if (end < 0) {
+      logger.log(Level.WARNING,"Node key suffix {0} not found in template {1}",new Object[]{NODE_KEY_SUFFIX,template.getName()});
+      break;
+    }
+    String key=content.substring(start + NODE_KEY_PREFIX.length(),end);
+    int indexOfComma=key.indexOf(",");
+    String templateKey=null;
+    if (indexOfComma > 0) {
+      String[] splitted=StringUtils.split(key,",");
+      key=splitted[0];
+      templateKey=splitted[1];
+    }
+    Template customTemplate=null;
+    if (templateKey != null && !(templateKey.isEmpty())) {
+      customTemplate=(Template)findNode.execute(user,this,new XPath(templateKey));
+    }
+    StringBuilder replacement=new StringBuilder();
+    if (callingNode != null && key.equals(CALLING_NODE_KEY)) {
+      for (      AbstractNode s : callingNodeSubnodes) {
+        s.setRequest(getRequest());
+        s.renderView(replacement,startNode,editUrl,editNodeId,user);
+      }
+    }
+ else {
+      Object result=findNode.execute(user,this,new XPath(key));
+      if (result instanceof List) {
+        List<AbstractNode> nodes=(List<AbstractNode>)result;
+        if (nodes != null) {
+          for (          AbstractNode s : nodes) {
+            if (customTemplate != null) {
+              s.setTemplate(customTemplate);
+            }
+            s.setRequest(getRequest());
+            s.renderView(replacement,startNode,editUrl,editNodeId,user);
+          }
+        }
+      }
+ else       if (result instanceof AbstractNode) {
+        AbstractNode s=(AbstractNode)result;
+        if (customTemplate != null) {
+          s.setTemplate(customTemplate);
+        }
+        s.setRequest(getRequest());
+        s.renderView(replacement,startNode,editUrl,editNodeId,user);
+      }
+ else {
+        replacement.append(result);
+      }
+    }
+    String replaceBy=replacement.toString();
+    content.replace(start,end + NODE_KEY_SUFFIX.length(),replaceBy);
+    start=content.indexOf(NODE_KEY_PREFIX,start + replaceBy.length() + 1);
+  }
+}

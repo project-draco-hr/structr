@@ -1,0 +1,72 @@
+{
+  GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
+  Index<Node> index=(Index<Node>)arguments.get("index");
+  StructrNodeFactory nodeFactory=(StructrNodeFactory)arguments.get("nodeFactory");
+  List<AbstractNode> result=Collections.emptyList();
+  if (graphDb != null) {
+    if (parameters == null || parameters.length != 5) {
+      logger.log(Level.WARNING,"Exactly 5 parameters are required for advanced search.");
+      return Collections.emptyList();
+    }
+    AbstractNode topNode=null;
+    if (parameters[0] instanceof AbstractNode) {
+      topNode=(AbstractNode)parameters[0];
+    }
+    User user=null;
+    if (parameters[1] instanceof User) {
+      user=(User)parameters[1];
+    }
+    boolean includeHidden=false;
+    if (parameters[2] instanceof Boolean) {
+      includeHidden=(Boolean)parameters[2];
+    }
+    boolean publicOnly=false;
+    if (parameters[3] instanceof Boolean) {
+      publicOnly=(Boolean)parameters[3];
+    }
+    List<SearchAttribute> searchAttrs=new ArrayList<SearchAttribute>();
+    if (parameters[4] instanceof List) {
+      searchAttrs=(List<SearchAttribute>)parameters[4];
+    }
+    for (int i=4; i < parameters.length; i++) {
+      Object o=parameters[i];
+      if (o instanceof SearchAttribute) {
+        searchAttrs.add((SearchAttribute)o);
+      }
+    }
+    if (searchAttrs.isEmpty()) {
+      if (topNode != null) {
+        result=topNode.getAllChildren(user);
+      }
+ else {
+        result=new LinkedList<AbstractNode>();
+      }
+    }
+ else {
+      String query="";
+      int a=0;
+      for (      SearchAttribute attr : searchAttrs) {
+        if (attr instanceof SearchAttributeGroup) {
+          SearchAttributeGroup attributeGroup=(SearchAttributeGroup)attr;
+          query+=" " + attributeGroup.getSearchOperator() + " ( ";
+          List<SearchAttribute> groupedAttributes=attributeGroup.getSearchAttributes();
+          int b=0;
+          for (          SearchAttribute groupedAttr : groupedAttributes) {
+            query+=toQueryString((SingleSearchAttribute)groupedAttr,b > 0);
+            b++;
+          }
+          query+=" ) ";
+        }
+ else         if (attr instanceof SingleSearchAttribute) {
+          query+=toQueryString((SingleSearchAttribute)attr,a > 0);
+          a++;
+        }
+      }
+      IndexHits hits=index.query(new QueryContext(query));
+      result=nodeFactory.createNodes(hits);
+    }
+    Collections.sort(result);
+    return result;
+  }
+  return Collections.emptyList();
+}

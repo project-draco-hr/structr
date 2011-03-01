@@ -1,5 +1,5 @@
 {
-  searchAttributes.add(new SearchAttribute(AbstractNode.TYPE_KEY,resultType,SearchOperator.AND));
+  searchAttributes.add(new SingleSearchAttribute(AbstractNode.TYPE_KEY,resultType,SearchOperator.AND));
   Class<AbstractNode> c=(Class<AbstractNode>)Services.command(GetEntityClassCommand.class).execute(resultType);
   if (c != null) {
     java.lang.reflect.Field[] fields=c.getFields();
@@ -26,7 +26,7 @@
           propertyFields.add(check);
           String fieldValue=reportForm.getFieldValue(fieldName);
           if (fieldValue != null && !(fieldValue.isEmpty())) {
-            searchAttributes.add(new SearchAttribute(fieldName,fieldValue,SearchOperator.AND));
+            searchAttributes.add(new SingleSearchAttribute(fieldName,fieldValue,SearchOperator.AND));
           }
           Field field=propertyFields.getField(checkBoxName(fieldName));
           Checkbox checkbox=null;

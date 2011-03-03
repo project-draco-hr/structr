@@ -2,7 +2,7 @@
   GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
   Index<Node> index=(Index<Node>)arguments.get("index");
   StructrNodeFactory nodeFactory=(StructrNodeFactory)arguments.get("nodeFactory");
-  List<AbstractNode> result=Collections.emptyList();
+  Set<AbstractNode> result=new TreeSet<AbstractNode>();
   if (graphDb != null) {
     if (parameters == null || parameters.length != 5) {
       logger.log(Level.WARNING,"Exactly 5 parameters are required for advanced search.");
@@ -35,8 +35,8 @@
       }
     }
     BooleanQuery query=new BooleanQuery();
-    String queryString="";
-    int a=0;
+    List<BooleanSearchAttribute> booleanAttributes=new LinkedList<BooleanSearchAttribute>();
+    String textualQueryString="";
     for (    SearchAttribute attr : searchAttrs) {
       if (attr instanceof SearchAttributeGroup) {
         SearchAttributeGroup attributeGroup=(SearchAttributeGroup)attr;
@@ -44,46 +44,79 @@
         String subQueryString="";
         if (!(groupedAttributes.isEmpty())) {
           BooleanQuery subQuery=new BooleanQuery();
-          String subQueryPrefix=(a > 0 ? " " + attributeGroup.getSearchOperator() : "") + " ( ";
-          int b=0;
+          String subQueryPrefix=(StringUtils.isBlank(textualQueryString) ? "" : attributeGroup.getSearchOperator()) + " ( ";
           for (          SearchAttribute groupedAttr : groupedAttributes) {
-            subQuery.add(toQuery((SingleSearchAttribute)groupedAttr),translateToBooleanClauseOccur(groupedAttr.getSearchOperator()));
-            subQueryString+=toQueryString((SingleSearchAttribute)groupedAttr,b > 0);
-            b++;
+            if (groupedAttr instanceof TextualSearchAttribute) {
+              subQuery.add(toQuery((TextualSearchAttribute)groupedAttr),translateToBooleanClauseOccur(groupedAttr.getSearchOperator()));
+              subQueryString+=toQueryString((TextualSearchAttribute)groupedAttr,StringUtils.isBlank(subQueryString));
+            }
           }
           query.add(subQuery,translateToBooleanClauseOccur(attributeGroup.getSearchOperator()));
           String subQuerySuffix=" ) ";
           if (StringUtils.isNotBlank(subQueryString)) {
-            queryString+=subQueryPrefix + subQueryString + subQuerySuffix;
+            textualQueryString+=subQueryPrefix + subQueryString + subQuerySuffix;
           }
         }
-        a++;
       }
- else       if (attr instanceof SingleSearchAttribute) {
-        query.add(toQuery((SingleSearchAttribute)attr),translateToBooleanClauseOccur(attr.getSearchOperator()));
-        queryString+=toQueryString((SingleSearchAttribute)attr,a > 0);
-        a++;
+ else       if (attr instanceof TextualSearchAttribute) {
+        query.add(toQuery((TextualSearchAttribute)attr),translateToBooleanClauseOccur(attr.getSearchOperator()));
+        textualQueryString+=toQueryString((TextualSearchAttribute)attr,StringUtils.isBlank(textualQueryString));
+      }
+ else       if (attr instanceof BooleanSearchAttribute) {
+        booleanAttributes.add((BooleanSearchAttribute)attr);
       }
     }
-    if (searchAttrs.isEmpty() || StringUtils.isBlank(queryString)) {
+    List<AbstractNode> intermediateResult;
+    if (searchAttrs.isEmpty() || StringUtils.isBlank(textualQueryString)) {
       if (topNode != null) {
-        result=topNode.getAllChildren(user);
-        Collections.sort(result);
-        return result;
+        intermediateResult=topNode.getAllChildren(user);
       }
  else {
-        return Collections.emptyList();
+        intermediateResult=new LinkedList<AbstractNode>();
       }
     }
-    long t0=System.currentTimeMillis();
-    logger.log(Level.INFO,"{0}",queryString);
-    IndexHits hits=index.query(new QueryContext(queryString));
-    long t1=System.currentTimeMillis();
-    logger.log(Level.INFO,"Querying index took {0} ms, {1} results retrieved.",new Object[]{t1 - t0,hits.size()});
-    result=nodeFactory.createNodes(hits,includeDeleted);
+ else {
+      long t0=System.currentTimeMillis();
+      logger.log(Level.INFO,"Textual Query String: {0}",textualQueryString);
+      IndexHits hits=index.query(new QueryContext(textualQueryString));
+      long t1=System.currentTimeMillis();
+      logger.log(Level.INFO,"Querying index took {0} ms, {1} results retrieved.",new Object[]{t1 - t0,hits.size()});
+      intermediateResult=nodeFactory.createNodes(hits,includeDeleted);
+      long t2=System.currentTimeMillis();
+      logger.log(Level.INFO,"Creating structr nodes took {0} ms, {1} nodes made.",new Object[]{t2 - t1,intermediateResult.size()});
+    }
     long t2=System.currentTimeMillis();
-    logger.log(Level.INFO,"Creating structr nodes took {0} ms, {1} nodes made.",new Object[]{t2 - t1,result.size()});
+    if (booleanAttributes.isEmpty()) {
+      result.addAll(intermediateResult);
+    }
+ else {
+      for (      AbstractNode node : intermediateResult) {
+        for (        BooleanSearchAttribute attr : booleanAttributes) {
+          String key=attr.getKey();
+          Boolean value=attr.getValue();
+          SearchOperator op=attr.getSearchOperator();
+          Object nodeValue=node.getProperty(key);
+          if (op.equals(SearchOperator.OR)) {
+            result.add(node);
+          }
+ else           if (op.equals(SearchOperator.AND)) {
+            if (nodeValue == null && value == null) {
+              result.add(node);
+            }
+            if (nodeValue != null && nodeValue.equals(value)) {
+              result.add(node);
+            }
+          }
+ else           if (op.equals(SearchOperator.NOT)) {
+            if (nodeValue != null && !(nodeValue.equals(value))) {
+              result.add(node);
+            }
+          }
+        }
+      }
+    }
+    long t3=System.currentTimeMillis();
+    logger.log(Level.INFO,"Filtering nodes took {0} ms. Result size now {1}.",new Object[]{t3 - t2,result.size()});
   }
-  Collections.sort(result);
-  return result;
+  return new LinkedList<AbstractNode>(result);
 }

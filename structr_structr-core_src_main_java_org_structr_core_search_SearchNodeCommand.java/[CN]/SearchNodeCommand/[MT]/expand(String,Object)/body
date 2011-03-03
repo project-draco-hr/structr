@@ -1,0 +1,22 @@
+{
+  if (StringUtils.isBlank(key)) {
+    return "";
+  }
+  String stringValue=null;
+  if (value instanceof String) {
+    stringValue=(String)value;
+    if (StringUtils.isBlank(stringValue)) {
+      return "";
+    }
+  }
+  if (stringValue == null || stringValue.startsWith("\"") || stringValue.startsWith("[") || stringValue.startsWith("NOT") || stringValue.startsWith("AND") || stringValue.startsWith("OR")) {
+    return " " + key + ":"+ value+ " ";
+  }
+  String result="( ";
+  String[] words=StringUtils.split(stringValue," ");
+  for (  String word : words) {
+    result+=" (" + key + ":"+ word+ "* OR "+ key+ ":\""+ word+ "\") OR ";
+  }
+  result+=key + ":\"" + value+ "\" ) ";
+  return result;
+}

@@ -5,7 +5,7 @@
   boolean valueIsNoStringAndNotNull=(value != null && !(value instanceof String));
   boolean valueIsNoBlankString=(value != null && value instanceof String && StringUtils.isNotBlank((String)value));
   if (StringUtils.isNotBlank(key) && (valueIsNoStringAndNotNull || valueIsNoBlankString)) {
-    return (isFirst ? " " + op + " " : "") + expand(key,value.toString());
+    return new TermQuery(new Term(key,value.toString()));
   }
-  return "";
+  return null;
 }

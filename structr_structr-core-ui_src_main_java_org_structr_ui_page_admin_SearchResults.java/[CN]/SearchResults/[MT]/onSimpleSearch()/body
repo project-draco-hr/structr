@@ -1,10 +1,9 @@
 {
   if (simpleSearchForm.isValid()) {
     String searchText=searchTextField.getValue();
-    Command search=Services.command(SearchNodeCommand.class);
     List<SearchAttribute> searchAttrs=new ArrayList<SearchAttribute>();
-    searchAttrs.add(Search.andExactName(searchText));
-    searchResults=(List<AbstractNode>)search.execute(null,user,true,false,searchAttrs);
+    searchAttrs.add(Search.andName(searchText));
+    searchResults=(List<AbstractNode>)Services.command(SearchNodeCommand.class).execute(user,null,true,false,searchAttrs);
     populateSearchResultsTable();
     setDefaults();
     saveState();

@@ -6,14 +6,14 @@
   if (graphDb != null) {
 switch (parameters.length) {
 case 0:
-      return (List<User>)searchNode.execute(null,null,true,false,new SingleSearchAttribute(AbstractNode.TYPE_KEY,User.class.getSimpleName(),SearchOperator.OR));
+      return (List<User>)searchNode.execute(null,null,false,false,Search.andExactType(User.class.getSimpleName()));
 case 1:
     if (parameters[0] instanceof String) {
       String userName=(String)parameters[0];
-      List<SingleSearchAttribute> searchAttrs=new ArrayList<SingleSearchAttribute>();
-      searchAttrs.add(new SingleSearchAttribute(AbstractNode.NAME_KEY,userName,SearchOperator.AND));
-      searchAttrs.add(new SingleSearchAttribute(AbstractNode.TYPE_KEY,User.class.getSimpleName(),SearchOperator.AND));
-      List<AbstractNode> usersFound=(List<AbstractNode>)searchNode.execute(null,null,true,false,searchAttrs);
+      List<SearchAttribute> searchAttrs=new ArrayList<SearchAttribute>();
+      searchAttrs.add(Search.andExactName(userName));
+      searchAttrs.add(Search.andExactType(User.class.getSimpleName()));
+      List<AbstractNode> usersFound=(List<AbstractNode>)searchNode.execute(null,null,false,false,searchAttrs);
       if (usersFound != null && usersFound.size() > 0) {
         return usersFound.get(0);
       }

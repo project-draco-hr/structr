@@ -8,17 +8,17 @@
       logger.log(Level.WARNING,"Exactly 5 parameters are required for advanced search.");
       return Collections.emptyList();
     }
-    AbstractNode topNode=null;
-    if (parameters[0] instanceof AbstractNode) {
-      topNode=(AbstractNode)parameters[0];
-    }
     User user=null;
-    if (parameters[1] instanceof User) {
-      user=(User)parameters[1];
+    if (parameters[0] instanceof User) {
+      user=(User)parameters[0];
     }
-    boolean includeHidden=false;
+    AbstractNode topNode=null;
+    if (parameters[1] instanceof AbstractNode) {
+      topNode=(AbstractNode)parameters[1];
+    }
+    boolean includeDeleted=false;
     if (parameters[2] instanceof Boolean) {
-      includeHidden=(Boolean)parameters[2];
+      includeDeleted=(Boolean)parameters[2];
     }
     boolean publicOnly=false;
     if (parameters[3] instanceof Boolean) {
@@ -34,39 +34,56 @@
         searchAttrs.add((SearchAttribute)o);
       }
     }
-    if (searchAttrs.isEmpty()) {
-      if (topNode != null) {
-        result=topNode.getAllChildren(user);
-      }
- else {
-        result=new LinkedList<AbstractNode>();
-      }
-    }
- else {
-      String query="";
-      int a=0;
-      for (      SearchAttribute attr : searchAttrs) {
-        if (attr instanceof SearchAttributeGroup) {
-          SearchAttributeGroup attributeGroup=(SearchAttributeGroup)attr;
-          query+=" " + attributeGroup.getSearchOperator() + " ( ";
-          List<SearchAttribute> groupedAttributes=attributeGroup.getSearchAttributes();
+    BooleanQuery query=new BooleanQuery();
+    String queryString="";
+    int a=0;
+    for (    SearchAttribute attr : searchAttrs) {
+      if (attr instanceof SearchAttributeGroup) {
+        SearchAttributeGroup attributeGroup=(SearchAttributeGroup)attr;
+        List<SearchAttribute> groupedAttributes=attributeGroup.getSearchAttributes();
+        String subQueryString="";
+        if (!(groupedAttributes.isEmpty())) {
+          BooleanQuery subQuery=new BooleanQuery();
+          String subQueryPrefix=(a > 0 ? " " + attributeGroup.getSearchOperator() : "") + " ( ";
           int b=0;
           for (          SearchAttribute groupedAttr : groupedAttributes) {
-            query+=toQueryString((SingleSearchAttribute)groupedAttr,b > 0);
+            subQuery.add(toQuery((SingleSearchAttribute)groupedAttr),translateToBooleanClauseOccur(groupedAttr.getSearchOperator()));
+            subQueryString+=toQueryString((SingleSearchAttribute)groupedAttr,b > 0);
             b++;
           }
-          query+=" ) ";
+          query.add(subQuery,translateToBooleanClauseOccur(attributeGroup.getSearchOperator()));
+          String subQuerySuffix=" ) ";
+          if (StringUtils.isNotBlank(subQueryString)) {
+            queryString+=subQueryPrefix + subQueryString + subQuerySuffix;
+          }
         }
- else         if (attr instanceof SingleSearchAttribute) {
-          query+=toQueryString((SingleSearchAttribute)attr,a > 0);
-          a++;
-        }
+        a++;
       }
-      IndexHits hits=index.query(new QueryContext(query));
-      result=nodeFactory.createNodes(hits);
+ else       if (attr instanceof SingleSearchAttribute) {
+        query.add(toQuery((SingleSearchAttribute)attr),translateToBooleanClauseOccur(attr.getSearchOperator()));
+        queryString+=toQueryString((SingleSearchAttribute)attr,a > 0);
+        a++;
+      }
     }
-    Collections.sort(result);
-    return result;
+    if (searchAttrs.isEmpty() || StringUtils.isBlank(queryString)) {
+      if (topNode != null) {
+        result=topNode.getAllChildren(user);
+        Collections.sort(result);
+        return result;
+      }
+ else {
+        return Collections.emptyList();
+      }
+    }
+    long t0=System.currentTimeMillis();
+    logger.log(Level.INFO,"{0}",queryString);
+    IndexHits hits=index.query(new QueryContext(queryString));
+    long t1=System.currentTimeMillis();
+    logger.log(Level.INFO,"Querying index took {0} ms, {1} results retrieved.",new Object[]{t1 - t0,hits.size()});
+    result=nodeFactory.createNodes(hits,includeDeleted);
+    long t2=System.currentTimeMillis();
+    logger.log(Level.INFO,"Creating structr nodes took {0} ms, {1} nodes made.",new Object[]{t2 - t1,result.size()});
   }
-  return Collections.emptyList();
+  Collections.sort(result);
+  return result;
 }

@@ -1,19 +1,25 @@
 {
+  setExitCode(exitCode.FAILURE);
+  Relationship rel=null;
   if (argument instanceof Long) {
     long id=((Long)argument).longValue();
-    Relationship rel=graphDb.getRelationshipById(id);
-    if (rel != null) {
-      rel.delete();
+    try {
+      rel=graphDb.getRelationshipById(id);
+    }
+ catch (    NotFoundException nfe) {
+      logger.log(Level.SEVERE,"Relationship {0} not found, unable to delete.",id);
     }
   }
  else   if (argument instanceof StructrRelationship) {
-    StructrRelationship rel=(StructrRelationship)argument;
-    rel.getRelationship().delete();
+    StructrRelationship r=(StructrRelationship)argument;
+    rel=r.getRelationship();
   }
  else   if (argument instanceof Relationship) {
-    Relationship rel=(Relationship)argument;
-    rel.delete();
+    rel=(Relationship)argument;
   }
-  setExitCode(exitCode.SUCCESS);
+  if (rel != null) {
+    rel.delete();
+    setExitCode(exitCode.SUCCESS);
+  }
   return null;
 }

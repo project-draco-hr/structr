@@ -1,0 +1,24 @@
+{
+  AbstractNode node=null;
+  String remoteHost=null;
+  Command findNode=Services.command(FindNodeCommand.class);
+switch (parameters.length) {
+case 0:
+    throw new UnsupportedArgumentError("No arguments supplied");
+case 2:
+  if (parameters[0] instanceof Long) {
+    long id=((Long)parameters[0]).longValue();
+    node=(AbstractNode)findNode.execute(null,id);
+  }
+ else   if (parameters[0] instanceof AbstractNode) {
+    node=((AbstractNode)parameters[0]);
+  }
+ else   if (parameters[0] instanceof String) {
+    long id=Long.parseLong((String)parameters[0]);
+    node=(AbstractNode)findNode.execute(null,id);
+  }
+pushNode(node,remoteHost);
+default :
+}
+return null;
+}

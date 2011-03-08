@@ -1,12 +1,12 @@
 {
-  Command transactionCommand=Services.command(TransactionCommand.class);
-  transactionCommand.execute(new StructrTransaction(){
+  Services.command(TransactionCommand.class).execute(new StructrTransaction(){
     @Override public Object execute() throws Throwable {
-      AbstractNode s=getNodeByIdOrPath(getNodeId());
-      if (editContentForm.isValid()) {
-        editContentForm.copyTo(s);
+      if (node != null) {
+        if (editContentForm.isValid()) {
+          editContentForm.copyTo(node);
+        }
       }
-      return (null);
+      return null;
     }
   }
 );

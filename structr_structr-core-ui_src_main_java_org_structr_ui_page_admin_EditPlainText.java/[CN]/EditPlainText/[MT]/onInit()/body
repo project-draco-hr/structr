@@ -1,0 +1,17 @@
+{
+  super.onInit();
+  if (node == null) {
+    return;
+  }
+  String contentType=node.getContentType();
+  if (contentType != null && contentType.indexOf('/') > 0) {
+    textType=contentType.split("/")[1];
+    addModel("textType",textType);
+  }
+  if (editContentForm.isValid()) {
+    editContentForm.copyFrom(node);
+  }
+  editContentForm.add(new HiddenField(NODE_ID_KEY,nodeId != null ? nodeId : ""));
+  editContentForm.add(new HiddenField(RENDER_MODE_KEY,renderMode != null ? renderMode : ""));
+  editContentForm.setActionURL(editPropertiesForm.getActionURL().concat("#content-tab"));
+}

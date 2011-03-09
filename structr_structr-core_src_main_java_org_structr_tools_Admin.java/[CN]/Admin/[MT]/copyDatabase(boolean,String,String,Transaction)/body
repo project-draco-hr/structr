@@ -2,7 +2,7 @@
   long t0=System.currentTimeMillis();
   System.out.print("Starting target database ...");
   EmbeddedGraphDatabase targetDb=new EmbeddedGraphDatabase(targetDbPath);
-  LuceneFulltextIndexService targetIndex=new LuceneFulltextIndexService(targetDb);
+  Index<Node> targetIndex=targetDb.index().forNodes("fulltextAllNodes",MapUtil.stringMap("provider","lucene","type","fulltext"));
   System.out.println("done.");
   String targetFilesPath=targetDbPath + "/files";
   System.out.print("Creating directory " + targetFilesPath + " ...");

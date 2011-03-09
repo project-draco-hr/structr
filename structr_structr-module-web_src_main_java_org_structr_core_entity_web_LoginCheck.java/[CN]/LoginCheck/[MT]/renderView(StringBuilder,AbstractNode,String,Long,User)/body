@@ -1,0 +1,81 @@
+{
+  String errorMsg;
+  if (editNodeId != null && getId() == editNodeId.longValue()) {
+    renderEditFrame(out,editUrl);
+  }
+ else {
+    HttpServletRequest request=getRequest();
+    if (request == null) {
+      return;
+    }
+    HttpSession session=request.getSession();
+    if (session == null) {
+      return;
+    }
+    Boolean sessionBlocked=(Boolean)session.getAttribute(SESSION_BLOCKED);
+    if (Boolean.TRUE.equals(sessionBlocked)) {
+      out.append("<div class=\"errorMsg\">").append("Too many login attempts, session is blocked!").append("</div>");
+      return;
+    }
+    String usernameFieldName=getUsernameFieldName() != null ? getUsernameFieldName() : defaultUsernameFieldName;
+    String passwordFieldName=getPasswordFieldName() != null ? getPasswordFieldName() : defaultPasswordFieldName;
+    int maxRetries=getMaxRetries() == 0 ? getMaxRetries() : defaultMaxRetries;
+    int delayThreshold=getDelayThreshold() == 0 ? getDelayThreshold() : defaultDelayThreshold;
+    int delayTime=getDelayTime() == 0 ? getDelayTime() : defaultDelayTime;
+    String username=request.getParameter(usernameFieldName);
+    String password=request.getParameter(passwordFieldName);
+    if (StringUtils.isEmpty(username)) {
+      out.append("<div class=\"errorMsg\">").append("You must enter a username").append("</div>");
+      return;
+    }
+    if (StringUtils.isEmpty(password)) {
+      out.append("<div class=\"errorMsg\">").append("You must enter a password").append("</div>");
+      return;
+    }
+    Integer retries=(Integer)session.getAttribute(NUMBER_OF_LOGIN_ATTEMPTS);
+    if (retries != null && retries > maxRetries) {
+      session.setAttribute(SESSION_BLOCKED,true);
+      out.append("<div class=\"errorMsg\">").append("Too many unsuccessful login attempts, your session is blocked now!").append("</div>");
+      return;
+    }
+ else     if (retries > delayThreshold) {
+      try {
+        Thread.sleep(delayTime * 1000);
+      }
+ catch (      InterruptedException ex) {
+        logger.log(Level.SEVERE,null,ex);
+      }
+    }
+ else     if (retries != null) {
+      session.setAttribute(NUMBER_OF_LOGIN_ATTEMPTS,retries++);
+    }
+ else {
+      session.setAttribute(NUMBER_OF_LOGIN_ATTEMPTS,1);
+    }
+    User loginUser=(User)Services.command(FindUserCommand.class).execute(username);
+    if (loginUser == null) {
+      out.append("<div class=\"errorMsg\">").append(LOGIN_FAILURE_TEXT).append("</div>");
+    }
+    if (user == null) {
+      logger.log(Level.INFO,"No user found for name {0}",user);
+      errorMsg="Wrong username or password, or user is blocked. Check caps lock. Note: Username is case sensitive!";
+      out.append("<div class=\"errorMsg\">").append(errorMsg).append("</div>");
+      return;
+    }
+    if (user.isBlocked()) {
+      logger.log(Level.INFO,"User {0} is blocked",user);
+      errorMsg="Wrong username or password, or user is blocked. Check caps lock. Note: Username is case sensitive!";
+      out.append("<div class=\"errorMsg\">").append(errorMsg).append("</div>");
+      return;
+    }
+    String encryptedPasswordValue=DigestUtils.sha512Hex(password);
+    if (!encryptedPasswordValue.equals(user.getPassword())) {
+      logger.log(Level.INFO,"Wrong password for user {0}",user);
+      errorMsg="Wrong username or password, or user is blocked. Check caps lock. Note: Username is case sensitive!";
+      out.append("<div class=\"errorMsg\">").append(errorMsg).append("</div>");
+      return;
+    }
+    session.setAttribute(USERNAME_KEY,username);
+    out.append("<div class=\"okMsg\">").append("Successfully logged in").append("</div>");
+  }
+}

@@ -1,0 +1,27 @@
+{
+  errors.add(errorMsg);
+  Integer retries=(Integer)session.getAttribute(NUMBER_OF_REGISTRATION_ATTEMPTS);
+  if (retries != null && retries > maxRetries) {
+    logger.log(Level.SEVERE,"More than {0} registration failures, session {1} is blocked",new Object[]{maxRetries,session.getId()});
+    session.setAttribute(SESSION_BLOCKED,true);
+    String message="<div class=\"errorMsg\">Too many unsuccessful registration attempts, your session is blocked for registration!</div>";
+    errors.add(message);
+  }
+ else   if (retries != null && retries > delayThreshold) {
+    logger.log(Level.INFO,"More than {0} registration failures, execution delayed by {1} seconds",new Object[]{delayThreshold,delayTime});
+    try {
+      Thread.sleep(delayTime * 1000);
+    }
+ catch (    InterruptedException ex) {
+      logger.log(Level.SEVERE,null,ex);
+    }
+    String message="<div class=\"errorMsg\">You had more than " + delayThreshold + " unsuccessful registration attempts, execution was delayed by "+ delayTime+ " seconds.</div>";
+    errors.add(message);
+  }
+ else   if (retries != null) {
+    session.setAttribute(NUMBER_OF_REGISTRATION_ATTEMPTS,retries + 1);
+  }
+ else {
+    session.setAttribute(NUMBER_OF_REGISTRATION_ATTEMPTS,1);
+  }
+}

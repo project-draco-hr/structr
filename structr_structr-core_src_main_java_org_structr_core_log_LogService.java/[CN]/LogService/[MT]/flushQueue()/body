@@ -1,0 +1,25 @@
+{
+  if (!queue.isEmpty() && ((queue.size() > threshold) || !run)) {
+    logger.log(Level.FINEST,"+++ LogService active ... +++");
+    while (!queue.isEmpty()) {
+      Object o=queue.poll();
+      if (o != null && o instanceof Activity) {
+        Activity activity=(Activity)o;
+        User user=activity.getUser();
+        activity.commit(user);
+        LogNodeList globalLog=getGlobalLog();
+        if (globalLog != null) {
+          globalLog.add(activity);
+          logger.log(Level.FINEST,"Added activity {0} to global log.",activity.getId());
+        }
+        LogNodeList userLog=getUserLog(activity.getOwnerNode());
+        if (userLog != null) {
+          userLog.add(activity);
+          logger.log(Level.FINEST,"Added activity {0} to {1}''s log.",new Object[]{activity.getId(),user.getName()});
+        }
+      }
+      Thread.yield();
+    }
+    logger.log(Level.FINEST,"+++ LogService inactive. +++");
+  }
+}

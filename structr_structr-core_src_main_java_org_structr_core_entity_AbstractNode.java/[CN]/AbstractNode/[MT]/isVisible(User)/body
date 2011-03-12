@@ -1,0 +1,22 @@
+{
+  if (isHidden()) {
+    return false;
+  }
+  if (user == null && !(isPublic())) {
+    return false;
+  }
+  if (!(isPublic()) && !(isVisibleForAuthenticatedUsers())) {
+    return false;
+  }
+  Date visStartDate=getVisibilityStartDate();
+  long effectiveStartDate=0L;
+  Date createdDate=getCreatedDate();
+  if (createdDate != null) {
+    effectiveStartDate=Math.max(createdDate.getTime(),0L);
+  }
+  visStartDate=(visStartDate == null ? new Date(effectiveStartDate) : visStartDate);
+  Date visEndDate=getVisibilityEndDate();
+  visEndDate=(visEndDate == null ? new Date(Long.MAX_VALUE) : visEndDate);
+  Date now=new Date();
+  return (now.after(visStartDate) && now.before(visEndDate));
+}

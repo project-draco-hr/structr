@@ -12,7 +12,8 @@
     if (session == null) {
       return;
     }
-    Boolean alreadyLoggedIn=session.getAttribute(USERNAME_KEY) != null;
+    String usernameFromSession=(String)session.getAttribute(USERNAME_KEY);
+    Boolean alreadyLoggedIn=usernameFromSession != null;
     if (alreadyLoggedIn) {
       return;
     }
@@ -21,13 +22,23 @@
       out.append("<div class=\"errorMsg\">").append("Too many login attempts, session is blocked for login").append("</div>");
       return;
     }
+    String submitButtonName=getSubmitButtonName() != null ? getSubmitButtonName() : defaultSubmitButtonName;
+    String antiRobotFieldName=getAntiRobotFieldName() != null ? getAntiRobotFieldName() : defaultAntiRobotFieldName;
     String usernameFieldName=getUsernameFieldName() != null ? getUsernameFieldName() : defaultUsernameFieldName;
     String passwordFieldName=getPasswordFieldName() != null ? getPasswordFieldName() : defaultPasswordFieldName;
-    int maxRetries=getMaxRetries() > 0 ? getMaxRetries() : defaultMaxRetries;
+    int maxRetries=getMaxErrors() > 0 ? getMaxErrors() : defaultMaxErrors;
     int delayThreshold=getDelayThreshold() > 0 ? getDelayThreshold() : defaultDelayThreshold;
     int delayTime=getDelayTime() > 0 ? getDelayTime() : defaultDelayTime;
     String username=request.getParameter(usernameFieldName);
     String password=request.getParameter(passwordFieldName);
+    String submitButton=request.getParameter(submitButtonName);
+    String antiRobot=request.getParameter(antiRobotFieldName);
+    if (StringUtils.isEmpty(submitButton)) {
+      return;
+    }
+    if (StringUtils.isNotEmpty(antiRobot)) {
+      return;
+    }
     if (StringUtils.isEmpty(username)) {
       out.append("<div class=\"errorMsg\">").append("You must enter a username").append("</div>");
       countLoginFailure(out,session,maxRetries,delayThreshold,delayTime);

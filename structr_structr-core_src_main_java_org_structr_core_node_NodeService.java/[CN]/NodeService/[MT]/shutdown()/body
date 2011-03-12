@@ -1,5 +1,9 @@
 {
   if (isRunning()) {
+    for (    RunnableService s : registeredServices) {
+      s.stopService();
+    }
+    waitFor(registeredServices.isEmpty());
     graphDb.shutdown();
     graphDb=null;
   }

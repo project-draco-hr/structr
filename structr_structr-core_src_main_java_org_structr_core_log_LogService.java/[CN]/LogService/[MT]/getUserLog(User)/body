@@ -2,16 +2,16 @@
   if (user == null || user instanceof SuperUser) {
     return null;
   }
-  LogNodeList ret=loggerCache.get(user);
-  if (ret == null) {
+  LogNodeList userLogNodeList=loggerCache.get(user);
+  if (userLogNodeList == null) {
     for (    AbstractNode s : user.getDirectChildNodes(user)) {
       if (s instanceof LogNodeList) {
-        ret=(LogNodeList)s;
-        loggerCache.put(user,ret);
-        return ret;
+        userLogNodeList=(LogNodeList)s;
+        loggerCache.put(user,userLogNodeList);
+        return userLogNodeList;
       }
     }
-    ret=(LogNodeList)Services.command(TransactionCommand.class).execute(new StructrTransaction(){
+    userLogNodeList=(LogNodeList)Services.command(TransactionCommand.class).execute(new StructrTransaction(){
       @Override public Object execute() throws Throwable {
         Command createNode=Services.command(CreateNodeCommand.class);
         Command createRel=Services.command(CreateRelationshipCommand.class);
@@ -21,7 +21,7 @@
       }
     }
 );
-    loggerCache.put(user,ret);
+    loggerCache.put(user,userLogNodeList);
   }
-  return (ret);
+  return userLogNodeList;
 }

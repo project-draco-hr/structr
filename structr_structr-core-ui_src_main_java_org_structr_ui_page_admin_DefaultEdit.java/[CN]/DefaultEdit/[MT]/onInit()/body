@@ -92,7 +92,7 @@
         boolean hasThumbnail=false;
         if (n instanceof Image) {
           Image image=(Image)n;
-          Image thumbnail=image.getScaledImage(user,100,100);
+          Image thumbnail=image.getScaledImage(100,100);
           if (thumbnail != null) {
             String thumbnailSrc="/view.htm?nodeId=" + thumbnail.getId();
             link.setImageSrc(thumbnailSrc);
@@ -302,6 +302,17 @@
     editSecurityPanel=new Panel("editSecurityPanel","/panel/edit-security-panel.htm");
     addControl(editSecurityPanel);
   }
+  FieldSet pushFields=new FieldSet("Push Nodes");
+  remoteHost=new TextField("remoteHost","Remote Host");
+  pushFields.add(remoteHost);
+  pushFields.add(new Submit("pushNodes","Push Nodes",this,"onPushNodes"));
+  cloudForm.add(pushFields);
+  cloudForm.add(new HiddenField(NODE_ID_KEY,nodeId != null ? nodeId : ""));
+  cloudForm.add(new HiddenField(RENDER_MODE_KEY,renderMode != null ? renderMode : ""));
+  cloudForm.setActionURL(cloudForm.getActionURL().concat("#cloud-tab"));
+  addControl(cloudForm);
+  cloudPanel=new Panel("cloudPanel","/panel/cloud-panel.htm");
+  addControl(cloudPanel);
   if (!(editPropertiesAllowed)) {
     List<Field> propertyFields=editPropertiesForm.getFieldList();
     for (    Field f : propertyFields) {

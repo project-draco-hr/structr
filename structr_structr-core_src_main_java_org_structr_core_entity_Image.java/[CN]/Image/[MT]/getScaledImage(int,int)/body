@@ -26,9 +26,12 @@
       Command createRel=Services.command(CreateRelationshipCommand.class);
       NodeAttribute typeAttr=new NodeAttribute(AbstractNode.TYPE_KEY,Image.class.getSimpleName());
       NodeAttribute contentTypeAttr=new NodeAttribute(Image.CONTENT_TYPE_KEY,"image/" + Thumbnail.FORMAT);
+      NodeAttribute isHiddenAttr=new NodeAttribute(AbstractNode.HIDDEN_KEY,originalImage.getHidden());
+      NodeAttribute isPublicAttr=new NodeAttribute(AbstractNode.PUBLIC_KEY,originalImage.getPublic());
+      NodeAttribute isVisibleForAuthenticatedUsersAttr=new NodeAttribute(AbstractNode.VISIBLE_FOR_AUTHENTICATED_USERS_KEY,originalImage.getVisibleForAuthenticatedUsers());
       Thumbnail thumbnailData=ImageHelper.createThumbnail(originalImage,maxWidth,maxHeight);
       if (thumbnailData != null) {
-        Image thumbnail=(Image)createNode.execute(user,typeAttr,contentTypeAttr,false);
+        Image thumbnail=(Image)createNode.execute(originalImage.getOwnerNode(),typeAttr,contentTypeAttr,isHiddenAttr,isPublicAttr,isVisibleForAuthenticatedUsersAttr,false);
         if (thumbnail != null) {
           StructrRelationship thumbnailRelationship=(StructrRelationship)createRel.execute(originalImage,thumbnail,RelType.THUMBNAIL);
           String relativeFilePath=thumbnail.getId() + "_" + System.currentTimeMillis();

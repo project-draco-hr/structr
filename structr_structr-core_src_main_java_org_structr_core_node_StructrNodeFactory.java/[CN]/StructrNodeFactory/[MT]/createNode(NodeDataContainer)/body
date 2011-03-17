@@ -19,5 +19,20 @@
     newNode=new EmptyNode();
   }
   newNode.init(data);
+  if (data instanceof FileNodeDataContainer) {
+    byte[] binaryContent=((FileNodeDataContainer)data).getBinaryContent();
+    File fileNode=(File)newNode;
+    String relativeFilePath=newNode.getId() + "_" + System.currentTimeMillis();
+    String path=Services.getFilesPath() + "/" + relativeFilePath;
+    long size=binaryContent.length;
+    java.io.File fileOnDisk=new java.io.File(path);
+    try {
+      FileUtils.writeByteArrayToFile(fileOnDisk,binaryContent);
+      fileNode.setSize(size);
+    }
+ catch (    Exception e) {
+      logger.log(Level.SEVERE,"Could not write file",e);
+    }
+  }
   return newNode;
 }

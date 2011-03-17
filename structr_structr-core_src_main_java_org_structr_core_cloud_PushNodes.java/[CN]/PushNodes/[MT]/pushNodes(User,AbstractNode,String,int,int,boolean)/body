@@ -1,15 +1,13 @@
 {
-  Client client=new Client();
-  client.start();
-  logger.log(Level.INFO,"KryoNet client started");
-  Kryo kryo=client.getKryo();
-  CloudService.registerClasses(kryo);
   List<DataContainer> transportSet=new LinkedList<DataContainer>();
   Set<RelationshipDataContainer> transportRelationships=new HashSet<RelationshipDataContainer>();
+  int maxSize=4096;
   if (recursive) {
     List<AbstractNode> nodes=node.getAllChildren(user);
     for (    AbstractNode n : nodes) {
-      transportSet.add(new NodeDataContainer(n));
+      NodeDataContainer container=new NodeDataContainer(n);
+      maxSize=Math.max(maxSize,container.getEstimatedSize());
+      transportSet.add(container);
       List<StructrRelationship> rels=n.getOutgoingRelationships();
       for (      StructrRelationship r : rels) {
         AbstractNode startNode=r.getStartNode();
@@ -24,14 +22,29 @@
  else {
     transportSet.add(new NodeDataContainer(node));
   }
+  Log.set(Log.LEVEL_DEBUG);
+  Client client=new Client(maxSize * 8,maxSize * 2);
+  client.start();
+  logger.log(Level.INFO,"KryoNet client started, buffer sizes {0}, {1}",new Object[]{maxSize * 8,maxSize * 2});
+  Kryo kryo=client.getKryo();
+  CloudService.registerClasses(kryo);
   try {
     client.connect(5000,remoteHost,remoteTcpPort,remoteUdpPort);
     logger.log(Level.INFO,"Connected to structr instance on {0} (tcp port: {1}, udp port: {2})",new Object[]{remoteHost,remoteTcpPort,remoteUdpPort});
-    client.sendTCP(transportSet);
-    logger.log(Level.INFO,"{0} nodes/relationships were sent",transportSet.size());
-    client.close();
+    int size=transportSet.size();
+    if (size < 16) {
+      client.sendTCP(transportSet);
+    }
+ else {
+      client.sendTCP(CloudService.BEGIN_TRANSACTION);
+      for (      DataContainer container : transportSet) {
+        client.sendTCP(container);
+      }
+      client.sendTCP(CloudService.END_TRANSACTION);
+    }
+    logger.log(Level.INFO,"Transport set with {0} nodes/relationships was sent",transportSet.size());
   }
  catch (  IOException ex) {
-    logger.log(Level.SEVERE,"Error while sending node to remote instance",ex);
+    logger.log(Level.SEVERE,"Error while sending nodes to remote instance",ex);
   }
 }

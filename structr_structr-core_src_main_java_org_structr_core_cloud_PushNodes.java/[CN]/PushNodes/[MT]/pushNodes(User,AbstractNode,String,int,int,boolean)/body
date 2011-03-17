@@ -1,0 +1,37 @@
+{
+  Client client=new Client();
+  client.start();
+  logger.log(Level.INFO,"KryoNet client started");
+  Kryo kryo=client.getKryo();
+  CloudService.registerClasses(kryo);
+  List<DataContainer> transportSet=new LinkedList<DataContainer>();
+  Set<RelationshipDataContainer> transportRelationships=new HashSet<RelationshipDataContainer>();
+  if (recursive) {
+    List<AbstractNode> nodes=node.getAllChildren(user);
+    for (    AbstractNode n : nodes) {
+      transportSet.add(new NodeDataContainer(n));
+      List<StructrRelationship> rels=n.getOutgoingRelationships();
+      for (      StructrRelationship r : rels) {
+        AbstractNode startNode=r.getStartNode();
+        AbstractNode endNode=r.getEndNode();
+        if (nodes.contains(startNode) && nodes.contains(endNode)) {
+          transportRelationships.add(new RelationshipDataContainer(r));
+        }
+      }
+    }
+    transportSet.addAll(transportRelationships);
+  }
+ else {
+    transportSet.add(new NodeDataContainer(node));
+  }
+  try {
+    client.connect(5000,remoteHost,remoteTcpPort,remoteUdpPort);
+    logger.log(Level.INFO,"Connected to structr instance on {0} (tcp port: {1}, udp port: {2})",new Object[]{remoteHost,remoteTcpPort,remoteUdpPort});
+    client.sendTCP(transportSet);
+    logger.log(Level.INFO,"{0} nodes/relationships were sent",transportSet.size());
+    client.close();
+  }
+ catch (  IOException ex) {
+    logger.log(Level.SEVERE,"Error while sending node to remote instance",ex);
+  }
+}

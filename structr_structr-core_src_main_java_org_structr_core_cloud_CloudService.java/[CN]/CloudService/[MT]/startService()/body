@@ -1,0 +1,78 @@
+{
+  server=new Server();
+  server.start();
+  Kryo kryo=server.getKryo();
+  registerClasses(kryo);
+  logger.log(Level.INFO,"KryoNet server started");
+  try {
+    server.bind(tcpPort,udpPort);
+    server.addListener(new Listener(){
+      @Override public void received(      Connection connection,      Object object){
+        logger.log(Level.INFO,"Received object {0}",object);
+        final AbstractNode rootNode=(AbstractNode)Services.command(FindNodeCommand.class).execute(new SuperUser(),0L);
+        if (object instanceof NodeDataContainer) {
+          NodeDataContainer receivedNodeData=(NodeDataContainer)object;
+          final AbstractNode localNode=(AbstractNode)Services.command(NodeFactoryCommand.class).execute(receivedNodeData);
+          Command transactionCommand=Services.command(TransactionCommand.class);
+          transactionCommand.execute(new StructrTransaction(){
+            @Override public Object execute() throws Throwable {
+              localNode.commit(new SuperUser());
+              logger.log(Level.INFO,"New node {0} created from remote data",localNode.getIdString());
+              Services.command(CreateRelationshipCommand.class).execute(rootNode,localNode,RelType.HAS_CHILD);
+              Services.command(IndexNodeCommand.class).execute(localNode);
+              return null;
+            }
+          }
+);
+          connection.sendTCP("Node data received");
+        }
+ else         if (object instanceof List) {
+          final List<DataContainer> dataContainers=(List<DataContainer>)object;
+          Command transactionCommand=Services.command(TransactionCommand.class);
+          transactionCommand.execute(new StructrTransaction(){
+            @Override public Object execute() throws Throwable {
+              Map<Long,Long> idMap=new HashMap<Long,Long>();
+              Command findNode=Services.command(FindNodeCommand.class);
+              Command createRel=Services.command(CreateRelationshipCommand.class);
+              boolean linkFirstNode=true;
+              for (              DataContainer receivedData : dataContainers) {
+                if (receivedData instanceof NodeDataContainer) {
+                  NodeDataContainer receivedNodeData=(NodeDataContainer)receivedData;
+                  AbstractNode localNode=(AbstractNode)Services.command(NodeFactoryCommand.class).execute(receivedNodeData);
+                  localNode.commit(null);
+                  if (linkFirstNode) {
+                    createRel.execute(rootNode,localNode,RelType.HAS_CHILD);
+                    linkFirstNode=false;
+                    logger.log(Level.INFO,"First node {0} linked to root node",localNode.getIdString());
+                  }
+                  idMap.put(receivedNodeData.getSourceNodeId(),localNode.getId());
+                  logger.log(Level.INFO,"New node {0} created from remote data",localNode.getIdString());
+                }
+ else                 if (receivedData instanceof RelationshipDataContainer) {
+                  RelationshipDataContainer receivedRelationshipData=(RelationshipDataContainer)receivedData;
+                  long sourceStartNodeId=receivedRelationshipData.getSourceStartNodeId();
+                  long sourceEndNodeId=receivedRelationshipData.getSourceEndNodeId();
+                  long targetStartNodeId=idMap.get(sourceStartNodeId);
+                  long targetEndNodeId=idMap.get(sourceEndNodeId);
+                  AbstractNode targetStartNode=(AbstractNode)findNode.execute(new SuperUser(),targetStartNodeId);
+                  AbstractNode targetEndNode=(AbstractNode)findNode.execute(new SuperUser(),targetEndNodeId);
+                  String name=receivedRelationshipData.getName();
+                  StructrRelationship newRelationship=(StructrRelationship)createRel.execute(targetStartNode,targetEndNode,name);
+                  logger.log(Level.INFO,"New {3} relationship {0} created from remote data between {1} and {2}",new Object[]{newRelationship.getId(),targetStartNodeId,targetEndNodeId,name});
+                }
+              }
+              return null;
+            }
+          }
+);
+          connection.sendTCP("Node data received");
+        }
+      }
+    }
+);
+    logger.log(Level.INFO,"KryoNet server listening on TCP port {0} and UDP port {1}",new Object[]{tcpPort,udpPort});
+  }
+ catch (  IOException ex) {
+    logger.log(Level.SEVERE,"KryoNet server could not bind to TCP port " + tcpPort + " or UDP port "+ udpPort,ex);
+  }
+}

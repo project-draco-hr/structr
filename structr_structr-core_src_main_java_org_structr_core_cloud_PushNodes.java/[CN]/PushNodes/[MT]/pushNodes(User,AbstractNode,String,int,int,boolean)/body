@@ -5,7 +5,13 @@
   if (recursive) {
     List<AbstractNode> nodes=node.getAllChildren(user);
     for (    AbstractNode n : nodes) {
-      NodeDataContainer container=new NodeDataContainer(n);
+      DataContainer container;
+      if (n instanceof File) {
+        container=new FileNodeDataContainer(n);
+      }
+ else {
+        container=new NodeDataContainer(n);
+      }
       maxSize=Math.max(maxSize,container.getEstimatedSize());
       transportSet.add(container);
       List<StructrRelationship> rels=n.getOutgoingRelationships();

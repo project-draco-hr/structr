@@ -4,7 +4,10 @@
     File fileNode=(File)node;
     estimatedSize+=fileNode.getSize();
     try {
-      binaryContent=IOUtils.toByteArray(fileNode.getInputStream());
+      InputStream in=fileNode.getInputStream();
+      if (in != null) {
+        binaryContent=IOUtils.toByteArray(in);
+      }
     }
  catch (    IOException ex) {
       logger.log(Level.SEVERE,"Could not read file",ex);

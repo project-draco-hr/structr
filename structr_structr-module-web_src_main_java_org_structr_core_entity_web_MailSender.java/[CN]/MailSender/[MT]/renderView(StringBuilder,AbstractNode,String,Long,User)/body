@@ -1,0 +1,73 @@
+{
+  if (editNodeId != null && getId() == editNodeId.longValue()) {
+    renderEditFrame(out,editUrl);
+  }
+ else {
+    HttpServletRequest request=getRequest();
+    if (request == null) {
+      return;
+    }
+    HttpSession session=request.getSession();
+    if (session == null) {
+      return;
+    }
+    List<String> parameterNames=getParameterNamesAsList();
+    Map parameterMap=new HashMap<String,String>();
+    if (parameterNames != null) {
+      for (      String parameterName : parameterNames) {
+        String parameterValue=request.getParameter(parameterName);
+        parameterMap.put(parameterName,clean(parameterValue));
+      }
+    }
+    String submitButtonName=getSubmitButtonName() != null ? getSubmitButtonName() : defaultSubmitButtonName;
+    String antiRobotFieldName=getAntiRobotFieldName() != null ? getAntiRobotFieldName() : defaultAntiRobotFieldName;
+    String submitButton=request.getParameter(submitButtonName);
+    String antiRobot=request.getParameter(antiRobotFieldName);
+    if (StringUtils.isEmpty(submitButton)) {
+      return;
+    }
+    if (StringUtils.isNotEmpty(antiRobot)) {
+      return;
+    }
+    StringBuilder errorMsg=new StringBuilder();
+    StringBuilder errorStyle=new StringBuilder();
+    errorStyle.append("<style type=\"text/css\">");
+    List<String> mandatoryParameterNames=getMandatoryParameterNamesAsList();
+    if (mandatoryParameterNames != null) {
+      for (      String mandatoryParameterName : mandatoryParameterNames) {
+        if (StringUtils.isEmpty(request.getParameter(mandatoryParameterName))) {
+          errorMsg.append("<div class=\"errorMsg\">").append("Please fill out \"").append("<script type=\"text/javascript\">document.write(getLabel('").append(mandatoryParameterName).append("'));</script>\"").append("</div>");
+          errorStyle.append("input[name=").append(mandatoryParameterName).append("] { background-color: #ffc }\n");
+        }
+      }
+    }
+    errorStyle.append("</style>");
+    String to=replaceInContent(getToAddressTemplate(),parameterMap);
+    String toName=replaceInContent(getToNameTemplate(),parameterMap);
+    String from=replaceInContent(getFromAddressTemplate(),parameterMap);
+    String fromName=replaceInContent(getFromNameTemplate(),parameterMap);
+    String cc=replaceInContent(getCcAddressTemplate(),parameterMap);
+    String bcc=replaceInContent(getBccAddressTemplate(),parameterMap);
+    String subject=replaceInContent(getMailSubjectTemplate(),parameterMap);
+    String htmlContent=replaceInContent(getHtmlBodyTemplate(),parameterMap);
+    String textContent=null;
+    if (StringUtils.isNotEmpty(htmlContent)) {
+      textContent=Jsoup.parse(htmlContent).text();
+    }
+    if (errorMsg.length() == 0) {
+      try {
+        MailHelper.sendHtmlMail(from,fromName,to,toName,cc,bcc,from,subject,htmlContent,textContent);
+        out.append("<div class=\"okMsg\">").append("An e-mail with your invitation was send to ").append(to).append("</div>");
+        out.append("<div class=\"htmlMessage\">").append(htmlContent).append("</div>");
+      }
+ catch (      Exception e) {
+        logger.log(Level.SEVERE,"Error while sending e-mail",e);
+        errorMsg.append("<div class=\"errorMsg\">").append("Error while sending e-mail: ").append(e.getMessage()).append("</div>");
+      }
+    }
+    if (errorMsg.length() > 0) {
+      out.append(errorMsg).append(errorStyle);
+      return;
+    }
+  }
+}

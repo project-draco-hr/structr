@@ -161,7 +161,6 @@
       String message="<div class=\"errorMsg\">" + REGISTRATION_FAILURE_NOT_AGREED_TO_TERMS_OF_USE + "</div>";
       registerFailure(out,message,session,maxRetries,delayThreshold,delayTime);
     }
-    HtmlEmail mail=new HtmlEmail();
     StringBuilder content=new StringBuilder(HTML_HEADER);
     content.append(inlineCss);
     content.append("<p>An account was requested with the following personal data:</p>");
@@ -208,18 +207,15 @@
     content.append("<p>If you think that this registration request was not legitimate, please forward this message to ").append(senderAddress).append(".</p>");
     content.append("<p>If something is not working as expected, please forward this message to ").append(senderAddress).append(", together with a short description of the issue you had. Thank you.</p>");
     content.append(HTML_FOOTER);
-    mail.setCharset("utf-8");
-    mail.setHostName(Services.getSmtpHost());
-    mail.setSmtpPort(Integer.parseInt(Services.getSmtpPort()));
+    String to=email;
+    String toName=firstName + " " + lastName;
+    String from=senderAddress;
+    String fromName=senderName;
+    String subject="[structr] Account requested, please confirm your e-mail address";
+    String htmlContent=content.toString();
+    String textContent=Jsoup.parse(htmlContent).text();
     try {
-      mail.addTo(email,firstName + " " + lastName);
-      mail.setFrom(senderAddress,senderName);
-      mail.setBounceAddress(senderAddress);
-      mail.setSubject("[structr] Account requested, please confirm your e-mail address");
-      String contentString=content.toString();
-      mail.setHtmlMsg(contentString);
-      mail.setTextMsg(Jsoup.parse(contentString).text());
-      mail.send();
+      MailHelper.sendHtmlMail(from,fromName,to,toName,null,null,senderAddress,subject,htmlContent,textContent);
     }
  catch (    Exception e) {
       logger.log(Level.SEVERE,"Error while sending registration e-mail",e);

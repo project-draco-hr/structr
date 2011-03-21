@@ -4,7 +4,16 @@
   }
  else {
     if (isVisible(user)) {
-      renderSVGMap(out);
+      String cachedSVGMap=getSvgContent();
+      if (StringUtils.isBlank(cachedSVGMap)) {
+        StringBuilder cache=new StringBuilder();
+        renderSVGMap(cache);
+        setSvgContent(cache.toString());
+        out.append(cache);
+      }
+ else {
+        out.append(cachedSVGMap);
+      }
     }
   }
 }

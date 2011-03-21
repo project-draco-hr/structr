@@ -4,7 +4,21 @@
   MapContext mapContext=null;
   try {
     long t0=System.currentTimeMillis();
-    String featureName=getRequest() != null ? getRequest().getParameter("name") : null;
+    String featureName=null;
+    String staticFeatureName=getStaticFeatureName();
+    if (StringUtils.isNotBlank(staticFeatureName)) {
+      featureName=staticFeatureName;
+    }
+ else {
+      HttpServletRequest request=getRequest();
+      String featureNameParamName=getFeatureNameParamName();
+      if (featureNameParamName == null) {
+        featureNameParamName=defaultFeatureParamName;
+      }
+      if (request != null) {
+        featureName=request.getParameter(featureNameParamName);
+      }
+    }
     int cx=getCanvasX();
     int cy=getCanvasY();
     boolean auto=getAutoEnvelope();

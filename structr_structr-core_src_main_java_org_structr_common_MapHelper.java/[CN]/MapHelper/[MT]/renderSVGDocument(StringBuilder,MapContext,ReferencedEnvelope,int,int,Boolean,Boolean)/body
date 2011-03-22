@@ -20,7 +20,10 @@
  * @see #setComposite(java.awt.Composite)
  */
       @Override public void draw(      Shape s){
-        Map<String,Object> customMetadata=((MetaDataShape)s).getCustomMetadata();
+        Map<String,Object> customMetadata=null;
+        if (s instanceof MetaDataShape) {
+          customMetadata=((MetaDataShape)s).getCustomMetadata();
+        }
         Stroke stroke=gc.getStroke();
         if (stroke instanceof BasicStroke) {
           Element svgShape=shapeConverter.toSVG(s);

@@ -1,11 +1,13 @@
 {
   List<AbstractNode> callingNodeSubnodes=null;
+  List<AbstractNode> callingNodeSubnodesAndLinkedNodes=null;
   template=startNode.getTemplate(user);
   AbstractNode callingNode=null;
   if (template != null) {
     callingNode=template.getCallingNode();
     if (callingNode != null) {
-      callingNodeSubnodes=callingNode.getSortedDirectChildAndLinkNodes(user);
+      callingNodeSubnodesAndLinkedNodes=callingNode.getSortedDirectChildAndLinkNodes(user);
+      callingNodeSubnodes=callingNode.getSortedDirectChildNodes(user);
     }
   }
   Command findNode=Services.command(FindNodeCommand.class);
@@ -29,8 +31,14 @@
       customTemplate=(Template)findNode.execute(user,this,new XPath(templateKey));
     }
     StringBuilder replacement=new StringBuilder();
-    if (callingNode != null && key.equals(CALLING_NODE_KEY)) {
+    if (callingNode != null && key.equals(CALLING_NODE_SUBNODES_KEY)) {
       for (      AbstractNode s : callingNodeSubnodes) {
+        s.setRequest(getRequest());
+        s.renderView(replacement,startNode,editUrl,editNodeId,user);
+      }
+    }
+ else     if (callingNode != null && key.equals(CALLING_NODE_SUBNODES_AND_LINKED_NODES_KEY)) {
+      for (      AbstractNode s : callingNodeSubnodesAndLinkedNodes) {
         s.setRequest(getRequest());
         s.renderView(replacement,startNode,editUrl,editNodeId,user);
       }

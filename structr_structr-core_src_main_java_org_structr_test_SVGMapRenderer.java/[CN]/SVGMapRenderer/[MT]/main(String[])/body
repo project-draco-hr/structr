@@ -16,7 +16,7 @@
     }
     int cx=896;
     int cy=450;
-    boolean auto=false;
+    boolean auto=true;
     List<MapLayer> layers=new ArrayList<MapLayer>();
     MapLayer layer=null;
     ReferencedEnvelope envelope=null;
@@ -63,14 +63,14 @@
     }
     logger.log(Level.INFO,"{0} intersecting features found",features.size());
     Symbolizer polygonSymbolizer=MapHelper.createPolygonSymbolizer("#ffffff",1,1,"#d9d4ce",1);
-    Symbolizer textSymbolizer=MapHelper.createTextSymbolizer("Arial",16,"#ffffff",1);
+    Symbolizer textSymbolizer=MapHelper.createTextSymbolizer("Arial",16,"#ffffff",1,0.5,0.0,0.0,0.0);
     Rule rule=MapHelper.styleFactory.createRule();
     rule.symbolizers().add(polygonSymbolizer);
     rule.symbolizers().add(textSymbolizer);
     FeatureTypeStyle fts=MapHelper.styleFactory.createFeatureTypeStyle(new Rule[]{rule});
     Style style=MapHelper.styleFactory.createStyle();
     style.featureTypeStyles().add(fts);
-    final SimpleFeatureType TYPE=DataUtilities.createType("Location","location:Point," + "NAME:String," + "number:Integer");
+    final SimpleFeatureType TYPE=DataUtilities.createType("Location","geom:Point,NAME:String,name:String");
     SimpleFeatureBuilder featureBuilder=new SimpleFeatureBuilder(TYPE);
     SimpleFeatureCollection collection=FeatureCollections.newCollection();
     GeometryFactory geometryFactory=JTSFactoryFinder.getGeometryFactory(null);
@@ -78,21 +78,21 @@
     Point point=geometryFactory.createPoint(coord);
     featureBuilder.add(point);
     featureBuilder.add("Frankfurt");
-    featureBuilder.add(123);
+    featureBuilder.add("Frankfurt");
     SimpleFeature feature=featureBuilder.buildFeature(null);
     collection.add(feature);
-    Symbolizer cityTextSymbolizer=MapHelper.createTextSymbolizer("Arial",12,"#000000",1);
+    Symbolizer cityTextSym=MapHelper.createTextSymbolizer("Arial",13,"#000000",1.0,0.5,0.0,0.5,0.5);
+    Symbolizer cityPointSym=MapHelper.createPointSymbolizer("Circle",5,"#000000",1,"#000000",1.0);
     Rule rule2=MapHelper.styleFactory.createRule();
-    rule2.symbolizers().add(cityTextSymbolizer);
+    rule2.symbolizers().add(cityTextSym);
+    rule2.symbolizers().add(cityPointSym);
     FeatureTypeStyle fts2=MapHelper.styleFactory.createFeatureTypeStyle(new Rule[]{rule2});
     Style style2=MapHelper.styleFactory.createStyle();
     style2.featureTypeStyles().add(fts2);
     SimpleFeatureSource source=DataUtilities.source(collection);
     SimpleFeatureCollection cityFeatures=source.getFeatures();
-    Style pointStyle=SLD.createPointStyle("Circle",Color.yellow,Color.yellow,1,3);
-    pointStyle.featureTypeStyles().add(fts2);
     layers.add(new MapLayer(features,style));
-    layers.add(new MapLayer(cityFeatures,pointStyle));
+    layers.add(new MapLayer(cityFeatures,style2));
     mapContext=new DefaultMapContext(layers.toArray(new MapLayer[]{}));
     long t2=System.currentTimeMillis();
     MapHelper.renderSVGDocument(out,mapContext,envelope,cx,cy,true,true);

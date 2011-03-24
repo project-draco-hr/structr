@@ -1,0 +1,22 @@
+{
+  SimpleFeatureCollection collection=FeatureCollections.newCollection();
+  final SimpleFeatureType TYPE;
+  try {
+    TYPE=DataUtilities.createType("Location","location:Point," + "NAME:String," + "name:String,"+ "number:Integer");
+    SimpleFeatureBuilder featureBuilder=new SimpleFeatureBuilder(TYPE);
+    GeometryFactory geometryFactory=JTSFactoryFinder.getGeometryFactory(null);
+    for (    GeoObject obj : geoObjects) {
+      Coordinate coord=new Coordinate(obj.getLongitude(),obj.getLatitude());
+      Point point=geometryFactory.createPoint(coord);
+      featureBuilder.add(point);
+      featureBuilder.add(obj.getName());
+      featureBuilder.add(obj.getName());
+      SimpleFeature feature=featureBuilder.buildFeature(null);
+      collection.add(feature);
+    }
+  }
+ catch (  SchemaException ex) {
+    logger.log(Level.SEVERE,null,ex);
+  }
+  return collection;
+}

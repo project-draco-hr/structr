@@ -1,0 +1,37 @@
+{
+  final User user=this;
+  if (categoryName == null) {
+    logger.log(Level.SEVERE,"Empty category name!");
+    return null;
+  }
+  final AbstractNode object=(AbstractNode)Services.command(FindNodeCommand.class).execute(user,objectId);
+  if (object == null) {
+    logger.log(Level.SEVERE,"Object not found!");
+    return null;
+  }
+  Category cat=null;
+  List<AbstractNode> children=this.getDirectChildNodes(user);
+  for (  AbstractNode child : children) {
+    if (child instanceof Category && categoryName.equals(child.getName())) {
+      cat=(Category)child;
+    }
+  }
+  final Category category=cat;
+  final Command createRel=Services.command(CreateRelationshipCommand.class);
+  Services.command(TransactionCommand.class).execute(new StructrTransaction(){
+    Category cat=null;
+    @Override public Object execute(){
+      if (category == null) {
+        cat=(Category)Services.command(CreateNodeCommand.class).execute(user,new NodeAttribute(AbstractNode.NAME_KEY,categoryName),new NodeAttribute(AbstractNode.TYPE_KEY,Category.class.getSimpleName()),true);
+        createRel.execute(user,cat,RelType.HAS_CHILD,true);
+      }
+ else {
+        cat=category;
+      }
+      createRel.execute(cat,object,RelType.LINK,true);
+      return null;
+    }
+  }
+);
+  return object;
+}

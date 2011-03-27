@@ -16,12 +16,12 @@
     }
     int cx=896;
     int cy=450;
-    boolean auto=true;
+    boolean auto=false;
     List<MapLayer> layers=new ArrayList<MapLayer>();
     MapLayer layer=null;
     ReferencedEnvelope envelope=null;
     Neo4jSpatialDataStore n4jstore=new Neo4jSpatialDataStore(graphDb);
-    String layerName="t5s_geodata";
+    String layerName="world_regions";
     if (StringUtils.isEmpty(layerName)) {
       logger.log(Level.SEVERE,"No layer name!");
     }
@@ -35,7 +35,7 @@
       }
  else {
         List<Filter> filterList=new ArrayList<Filter>();
-        filterList.add(CQL.toFilter("NAME like '" + StringEscapeUtils.escapeSql(featureName) + "'"));
+        filterList.add(CQL.toFilter("NAME = '" + StringEscapeUtils.escapeSql(featureName) + "'"));
         Filter filter=MapHelper.featureFactory.or(filterList);
         Query query=new Query(layerName,filter);
         features=featureSource.getFeatures(query);
@@ -46,10 +46,10 @@
       }
     }
  else {
-      Double eminx=-15.0;
-      Double emaxx=20.0;
-      Double eminy=35.0;
-      Double emaxy=70.0;
+      Double eminx=-180.0;
+      Double emaxx=180.0;
+      Double eminy=-90.0;
+      Double emaxy=90.0;
       if (eminx != null && emaxx != null && eminy != null && emaxy != null) {
         envelope=new ReferencedEnvelope(eminx,emaxx,eminy,emaxy,null);
       }
@@ -62,7 +62,7 @@
       features=MapHelper.getIntersectingFeatures(graphDb,envelope,layerName);
     }
     logger.log(Level.INFO,"{0} intersecting features found",features.size());
-    Symbolizer polygonSymbolizer=MapHelper.createPolygonSymbolizer("#ffffff",1,1,"#d9d4ce",1);
+    Symbolizer polygonSymbolizer=MapHelper.createPolygonSymbolizer("#000000",1,1,"#d9d4ce",1);
     Symbolizer textSymbolizer=MapHelper.createTextSymbolizer("Arial",16,"#ffffff",1,0.5,0.0,0.0,0.0);
     Rule rule=MapHelper.styleFactory.createRule();
     rule.symbolizers().add(polygonSymbolizer);
@@ -77,7 +77,6 @@
     Coordinate coord=new Coordinate(8.4,50.6);
     Point point=geometryFactory.createPoint(coord);
     featureBuilder.add(point);
-    featureBuilder.add("Frankfurt");
     featureBuilder.add("Frankfurt");
     SimpleFeature feature=featureBuilder.buildFeature(null);
     collection.add(feature);

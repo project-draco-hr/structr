@@ -4,7 +4,15 @@
       String nodeIdString=(String)nodeId;
       try {
         if (nodeIdString.startsWith("/")) {
-          return TreeHelper.getNodeByPath(getRootNode(),nodeIdString,true,user);
+          AbstractNode byPathNode=TreeHelper.getNodeByPath(getRootNode(),nodeIdString,true,user);
+          if (byPathNode != null) {
+            return byPathNode;
+          }
+          String byNumber=StringUtils.remove(nodeIdString,"/");
+          AbstractNode byNumberNode=getNodeById(Long.parseLong(byNumber));
+          if (byNumberNode != null) {
+            return byNumberNode;
+          }
         }
         return getNodeById(Long.parseLong((String)nodeId));
       }

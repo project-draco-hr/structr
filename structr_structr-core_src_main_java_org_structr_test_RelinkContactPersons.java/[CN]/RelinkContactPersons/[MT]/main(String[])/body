@@ -1,50 +1,59 @@
 {
-  StandaloneTestHelper.prepareStandaloneTest("/opt/structr/structr-tfs2");
-  final AbstractNode adminNode=(AbstractNode)Services.command(FindUserCommand.class).execute("admin");
-  final String remoteServer="localhost";
-  List<AbstractNode> searchResult=(List<AbstractNode>)Services.command(SearchNodeCommand.class).execute(null,null,false,false,Search.andExactType("ContactPerson"));
-  System.out.println("Found " + searchResult.size() + " contact persons");
-  int i=0;
-  Command pushNodes=Services.command(PushNodes.class);
-  Command findNode=Services.command(FindNodeCommand.class);
-  String remoteHostValue="true5stars.com";
-  Integer tcpPort=54555;
-  Integer udpPort=57555;
-  boolean rec=false;
-  Command createRel=Services.command(CreateRelationshipCommand.class);
-  for (  AbstractNode node : searchResult) {
-    Object hotelGroupId=node.getProperty("tmpHotelGroupId");
-    if (hotelGroupId != null) {
-      Services.command(DeleteNodeCommand.class).execute(hotelGroupId,findNode.execute(null,0),true,new SuperUser());
-      System.out.println("Node " + hotelGroupId + " deleted");
+  try {
+    StandaloneTestHelper.prepareStandaloneTest("/opt/structr/t5s/db");
+    List<AbstractNode> searchResult=(List<AbstractNode>)Services.command(SearchNodeCommand.class).execute(null,null,false,false,Search.andExactType("ContactPerson"));
+    System.out.println("Found " + searchResult.size() + " contact persons");
+    int i=0;
+    Command pushNodes=Services.command(PushNodes.class);
+    Command findNode=Services.command(FindNodeCommand.class);
+    AbstractNode rootNode=(AbstractNode)findNode.execute(new SuperUser(),0L);
+    String remoteHostValue="true5stars.com";
+    Integer tcpPort=54555;
+    Integer udpPort=57555;
+    boolean rec=false;
+    Command createRel=Services.command(CreateRelationshipCommand.class);
+    Command delRel=Services.command(DeleteRelationshipCommand.class);
+    if (rootNode != null) {
+      for (      AbstractNode node : rootNode.getDirectChildNodes(new SuperUser())) {
+        Long hotelGroupId=node.getLongProperty("tmpHotelGroupId");
+        if (hotelGroupId != null) {
+          AbstractNode hotelGroup=(AbstractNode)findNode.execute(new SuperUser(),hotelGroupId);
+          createRel.execute(findNode.execute(new SuperUser(),712L),node,RelType.HAS_CHILD);
+          System.out.println("Node " + node.getId() + " linked to Contact Persons root node");
+          if (hotelGroup != null && hotelGroupId > 0L) {
+            createRel.execute(node,hotelGroup,RelType.LINK);
+            System.out.println("Node " + node.getId() + " linked to hotel group "+ hotelGroup.getName());
+          }
+ else {
+            System.out.println("Hotel Group " + hotelGroup + " not found!");
+          }
+        }
+      }
+      System.out.println(i + " contact persons without CHILD relationship");
     }
-    List<StructrRelationship> relsIn=node.getIncomingChildRelationships();
-    if (relsIn == null || relsIn.isEmpty()) {
-      System.out.println("Found node without incoming CHILD rel: " + node.getName() + ", id: "+ node.getId());
-      i++;
-      List<StructrRelationship> rels=node.getOutgoingRelationships();
-      for (      StructrRelationship r : rels) {
-        AbstractNode s=r.getStartNode();
-        AbstractNode e=r.getEndNode();
-        System.out.println("Found outgoing relationship: " + s.getName() + ", id: "+ s.getId()+ " ------------> "+ e.getName()+ ", id: "+ e.getId());
-        node.setProperty("tmpHotelGroupId",e.getId());
-        node.setProperty("tmpHotelGroupName",e.getName());
-        pushNodes.execute(new SuperUser(),node,remoteHostValue,tcpPort,udpPort,rec);
+    for (    StructrRelationship r : rootNode.getOutgoingChildRelationships()) {
+      if (r.getEndNode().getType().equals("ContactPerson")) {
+        delRel.execute(r);
       }
     }
+    try {
+      Thread.sleep(1000);
+    }
+ catch (    InterruptedException ex) {
+      Logger.getLogger(RelinkContactPersons.class.getName()).log(Level.SEVERE,null,ex);
+    }
+    StandaloneTestHelper.finishStandaloneTest();
+    try {
+      Thread.sleep(1000);
+    }
+ catch (    InterruptedException ex) {
+      Logger.getLogger(RelinkContactPersons.class.getName()).log(Level.SEVERE,null,ex);
+    }
   }
-  System.out.println(i + " contact persons without CHILD relationship");
-  try {
-    Thread.sleep(5000);
+ catch (  Exception e) {
+    Logger.getLogger(RelinkContactPersons.class.getName()).log(Level.SEVERE,null,e);
   }
- catch (  InterruptedException ex) {
-    Logger.getLogger(RelinkContactPersons.class.getName()).log(Level.SEVERE,null,ex);
-  }
-  StandaloneTestHelper.finishStandaloneTest();
-  try {
-    Thread.sleep(5000);
-  }
- catch (  InterruptedException ex) {
-    Logger.getLogger(RelinkContactPersons.class.getName()).log(Level.SEVERE,null,ex);
+ finally {
+    StandaloneTestHelper.finishStandaloneTest();
   }
 }

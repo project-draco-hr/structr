@@ -18,7 +18,15 @@
     rel=(Relationship)argument;
   }
   if (rel != null) {
-    rel.delete();
+    final Relationship relToDelete=rel;
+    final Command transactionCommand=Services.command(TransactionCommand.class);
+    transactionCommand.execute(new StructrTransaction(){
+      @Override public Object execute() throws Throwable {
+        relToDelete.delete();
+        return null;
+      }
+    }
+);
     setExitCode(exitCode.SUCCESS);
   }
   return null;

@@ -16,7 +16,7 @@
     securityForm.add(new HiddenField(RETURN_URL_KEY,returnUrl != null ? returnUrl : ""));
     childNodesTable.setDataProvider(new DataProvider(){
       @Override public List<AbstractNode> getData(){
-        List<AbstractNode> result=new ArrayList<AbstractNode>();
+        List<AbstractNode> result=new LinkedList<AbstractNode>();
         result.addAll(node.getSortedDirectChildAndLinkNodes(user));
         return result;
       }
@@ -42,7 +42,7 @@
 );
     userSelect.setDataProvider(new DataProvider(){
       @Override public List<Option> getData(){
-        List<Option> optionList=new ArrayList<Option>();
+        List<Option> optionList=new LinkedList<Option>();
         List<User> users=getAllUsers();
         if (users != null) {
           for (          User u : users) {
@@ -57,7 +57,7 @@
     securityTable.setDataProvider(new DataProvider(){
       @Override public List<StructrRelationship> getData(){
         List<StructrRelationship> rels=node.getIncomingRelationships();
-        List<StructrRelationship> result=new ArrayList<StructrRelationship>();
+        List<StructrRelationship> result=new LinkedList<StructrRelationship>();
         for (        StructrRelationship r : rels) {
           RelationshipType rt=r.getRelType();
           boolean isSecurityRel=rt.equals(RelType.SECURITY);

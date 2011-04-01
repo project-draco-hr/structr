@@ -2,7 +2,13 @@
   ByteArrayOutputStream baos=new ByteArrayOutputStream();
   try {
     long start=System.nanoTime();
-    BufferedImage source=ImageIO.read(originalImage.getInputStream());
+    BufferedImage source=null;
+    try {
+      source=ImageIO.read(originalImage.getInputStream());
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"Could not read original image {0} ({1})",new Object[]{originalImage.getName(),originalImage.getId()});
+    }
     if (source != null) {
       int sourceWidth=source.getWidth();
       int sourceHeight=source.getHeight();
@@ -25,7 +31,7 @@
       }
     }
  else {
-      logger.log(Level.SEVERE,"Thumbnail could not be created");
+      logger.log(Level.WARNING,"Thumbnail could not be created");
       return null;
     }
     long end=System.nanoTime();
@@ -35,7 +41,7 @@
     return tn;
   }
  catch (  Throwable t) {
-    logger.log(Level.SEVERE,"Error creating thumbnail",t);
+    logger.log(Level.WARNING,"Error creating thumbnail");
   }
   return null;
 }

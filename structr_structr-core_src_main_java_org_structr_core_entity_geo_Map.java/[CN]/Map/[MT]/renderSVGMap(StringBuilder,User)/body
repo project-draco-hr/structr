@@ -22,7 +22,7 @@
     int cx=getCanvasX();
     int cy=getCanvasY();
     boolean auto=getAutoEnvelope();
-    List<MapLayer> layers=new ArrayList<MapLayer>();
+    List<MapLayer> layers=new LinkedList<MapLayer>();
     MapLayer layer=null;
     ReferencedEnvelope envelope=null;
     String shapeFilePath=getShapeFile();
@@ -45,7 +45,7 @@
         envelope=featureSource.getBounds();
       }
  else {
-        List<Filter> filterList=new ArrayList<Filter>();
+        List<Filter> filterList=new LinkedList<Filter>();
         filterList.add(CQL.toFilter("NAME = '" + StringEscapeUtils.escapeSql(featureName) + "'"));
         Filter filter=MapHelper.featureFactory.or(filterList);
         Query query=new Query(layerName,filter);

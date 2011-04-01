@@ -2,8 +2,8 @@
   onPreviewReport();
   final String reportFileName=reportName.getValue() + ".csv";
   Map methodCache=new HashMap<Object,Object>();
-  List<String[]> resultList=new ArrayList<String[]>();
-  List<String> keys=new ArrayList<String>();
+  List<String[]> resultList=new LinkedList<String[]>();
+  List<String> keys=new LinkedList<String>();
   for (  Column c : columns) {
     keys.add(c.getName());
   }
@@ -12,7 +12,7 @@
     return false;
   }
   for (  AbstractNode s : reportResults) {
-    List<String> values=new ArrayList<String>();
+    List<String> values=new LinkedList<String>();
     for (    Column c : columns) {
       Object value=PropertyUtils.getValue(s,c.getName(),methodCache);
       if (value != null) {

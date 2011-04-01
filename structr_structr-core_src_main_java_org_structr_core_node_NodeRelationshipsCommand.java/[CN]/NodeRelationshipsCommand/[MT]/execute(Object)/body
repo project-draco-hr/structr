@@ -8,7 +8,14 @@
     AbstractNode sNode=(AbstractNode)arg0;
     RelationshipType relType=(RelationshipType)arg1;
     Direction dir=(Direction)arg2;
-    Node node=graphDb.getNodeById(sNode.getId());
+    Node node=null;
+    try {
+      node=graphDb.getNodeById(sNode.getId());
+    }
+ catch (    Exception e) {
+      logger.log(Level.WARNING,"Exception occured: ",e.getMessage());
+      return result;
+    }
     Iterable<Relationship> rels;
     if (arg1 != null) {
       rels=node.getRelationships(relType,dir);
@@ -21,7 +28,8 @@
         result.add(new StructrRelationship(r));
       }
     }
- catch (    InvalidRecordException ignore) {
+ catch (    RuntimeException e) {
+      logger.log(Level.WARNING,"Exception occured: ",e.getMessage());
     }
   }
   return result;

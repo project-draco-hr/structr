@@ -17,7 +17,7 @@
     int cx=896;
     int cy=450;
     boolean auto=false;
-    List<MapLayer> layers=new ArrayList<MapLayer>();
+    List<MapLayer> layers=new LinkedList<MapLayer>();
     MapLayer layer=null;
     ReferencedEnvelope envelope=null;
     Neo4jSpatialDataStore n4jstore=new Neo4jSpatialDataStore(graphDb);
@@ -34,7 +34,7 @@
         envelope=featureSource.getBounds();
       }
  else {
-        List<Filter> filterList=new ArrayList<Filter>();
+        List<Filter> filterList=new LinkedList<Filter>();
         filterList.add(CQL.toFilter("NAME = '" + StringEscapeUtils.escapeSql(featureName) + "'"));
         Filter filter=MapHelper.featureFactory.or(filterList);
         Query query=new Query(layerName,filter);

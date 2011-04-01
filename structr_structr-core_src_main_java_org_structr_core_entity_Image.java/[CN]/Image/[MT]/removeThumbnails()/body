@@ -1,0 +1,14 @@
+{
+  Command deleteRelationship=Services.command(DeleteRelationshipCommand.class);
+  Command deleteNode=Services.command(DeleteNodeCommand.class);
+  for (  StructrRelationship s : getThumbnailRelationships()) {
+    AbstractNode thumbnail=s.getEndNode();
+    if (((Image)thumbnail).equals(this)) {
+      logger.log(Level.SEVERE,"Attempted to remove me as thumbnail!!");
+      continue;
+    }
+    deleteRelationship.execute(s);
+    deleteNode.execute(thumbnail,new SuperUser());
+  }
+  thumbnailRelationships=null;
+}

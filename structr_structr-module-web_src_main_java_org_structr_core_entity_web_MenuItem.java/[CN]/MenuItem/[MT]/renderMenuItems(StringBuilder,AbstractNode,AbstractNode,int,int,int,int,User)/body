@@ -4,7 +4,13 @@
     return;
   }
   currentDepth++;
-  List<AbstractNode> menuItems=menuItemNode.getSortedMenuItems(user);
+  List<AbstractNode> menuItems=new LinkedList<AbstractNode>();
+  List<AbstractNode> allMenuItems=menuItemNode.getSortedMenuItems(user);
+  for (  AbstractNode n : allMenuItems) {
+    if (n.isVisible(user)) {
+      menuItems.add(n);
+    }
+  }
   String cssClass="";
   if (menuItemNode != this) {
     if (currentPos == 0) {

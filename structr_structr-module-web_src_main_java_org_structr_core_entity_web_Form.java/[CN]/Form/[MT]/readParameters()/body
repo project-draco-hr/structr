@@ -1,0 +1,17 @@
+{
+  HttpServletRequest request=getRequest();
+  if (request == null) {
+    return;
+  }
+  List<String> parameterNames=getParameterNamesAsList();
+  submitButtonName=getSubmitButtonName() != null ? getSubmitButtonName() : defaultSubmitButtonName;
+  antiRobotFieldName=getAntiRobotFieldName() != null ? getAntiRobotFieldName() : defaultAntiRobotFieldName;
+  parameterMap.put(submitButtonName,request.getParameter(submitButtonName));
+  parameterMap.put(antiRobotFieldName,request.getParameter(antiRobotFieldName));
+  if (parameterNames != null) {
+    for (    String parameterName : parameterNames) {
+      String parameterValue=request.getParameter(parameterName);
+      parameterMap.put(parameterName,clean(parameterValue));
+    }
+  }
+}

@@ -3,45 +3,8 @@
     renderEditFrame(out,editUrl);
   }
  else {
-    HttpServletRequest request=getRequest();
-    if (request == null) {
-      return;
-    }
-    HttpSession session=request.getSession();
-    if (session == null) {
-      return;
-    }
-    List<String> parameterNames=getParameterNamesAsList();
-    Map parameterMap=new HashMap<String,String>();
-    if (parameterNames != null) {
-      for (      String parameterName : parameterNames) {
-        String parameterValue=request.getParameter(parameterName);
-        parameterMap.put(parameterName,clean(parameterValue));
-      }
-    }
-    String submitButtonName=getSubmitButtonName() != null ? getSubmitButtonName() : defaultSubmitButtonName;
-    String antiRobotFieldName=getAntiRobotFieldName() != null ? getAntiRobotFieldName() : defaultAntiRobotFieldName;
-    String submitButton=request.getParameter(submitButtonName);
-    String antiRobot=request.getParameter(antiRobotFieldName);
-    if (StringUtils.isEmpty(submitButton)) {
-      return;
-    }
-    if (StringUtils.isNotEmpty(antiRobot)) {
-      return;
-    }
-    StringBuilder errorMsg=new StringBuilder();
-    StringBuilder errorStyle=new StringBuilder();
-    errorStyle.append("<style type=\"text/css\">");
-    List<String> mandatoryParameterNames=getMandatoryParameterNamesAsList();
-    if (mandatoryParameterNames != null) {
-      for (      String mandatoryParameterName : mandatoryParameterNames) {
-        if (StringUtils.isEmpty(request.getParameter(mandatoryParameterName))) {
-          errorMsg.append("<div class=\"errorMsg\">").append("Please fill out \"").append("<script type=\"text/javascript\">document.write(getLabel('").append(mandatoryParameterName).append("'));</script>\"").append("</div>");
-          errorStyle.append("input[name=").append(mandatoryParameterName).append("] { background-color: #ffc }\n");
-        }
-      }
-    }
-    errorStyle.append("</style>");
+    readParameters();
+    validateParameters();
     String to=replaceInContent(getToAddressTemplate(),parameterMap);
     String toName=replaceInContent(getToNameTemplate(),parameterMap);
     String from=replaceInContent(getFromAddressTemplate(),parameterMap);

@@ -1,0 +1,15 @@
+{
+  StandaloneTestHelper.prepareStandaloneTest("/opt/structr/t5s/db");
+  try {
+    Image image1=(Image)Services.command(FindNodeCommand.class).execute(new SuperUser(),8451L);
+    Thumbnail tn1=ImageHelper.createThumbnail(image1,160,90,false);
+    FileUtils.writeByteArrayToFile(new File("/tmp/8451_scale.jpg"),tn1.getBytes());
+    Image image2=(Image)Services.command(FindNodeCommand.class).execute(new SuperUser(),8451L);
+    Thumbnail tn2=ImageHelper.createThumbnail(image2,160,90,true);
+    FileUtils.writeByteArrayToFile(new File("/tmp/8451_crop.jpg"),tn2.getBytes());
+  }
+ catch (  IOException ex) {
+    Logger.getLogger(ThumbnailCreator.class.getName()).log(Level.SEVERE,null,ex);
+  }
+  StandaloneTestHelper.finishStandaloneTest();
+}

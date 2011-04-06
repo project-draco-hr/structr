@@ -11,7 +11,6 @@
           if (recursive) {
             Relationship parentRel=node.getSingleRelationship(RelType.HAS_CHILD,Direction.INCOMING);
             newParentNode=(AbstractNode)findNode.execute(user,parentRel.getStartNode().getId());
-            newParentNode=structrNode.getParentNode(user);
             parentRel.delete();
             for (            Path p : Traversal.description().breadthFirst().relationships(RelType.HAS_CHILD,Direction.OUTGOING).traverse(node)) {
               Node n=p.endNode();
@@ -67,9 +66,9 @@
  else {
         setExitCode(Command.exitCode.FAILURE);
         setErrorMessage("Node was null");
-        return null;
+        return newParentNode;
       }
-      return null;
+      return newParentNode;
     }
   }
 );

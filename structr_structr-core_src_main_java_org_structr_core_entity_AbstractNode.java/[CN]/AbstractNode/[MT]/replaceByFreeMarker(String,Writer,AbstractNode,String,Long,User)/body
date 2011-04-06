@@ -9,7 +9,6 @@
       if (callingNode != null) {
         root.put(callingNode.getType(),callingNode);
       }
-      HttpServletRequest request=getRequest();
       if (request != null) {
         root.put("Request",new freemarker.ext.servlet.HttpRequestParametersHashModel(request));
         String searchString=request.getParameter("search");
@@ -22,6 +21,7 @@
       if (user != null) {
         root.put("User",user);
       }
+      root.put("Helper",new TemplateHelper());
       freemarker.template.Template t=new freemarker.template.Template(template.getName(),new StringReader(templateString),cfg);
       t.process(root,out);
     }

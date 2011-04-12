@@ -2,6 +2,7 @@
   if (newRelationshipForm.isValid()) {
     final String endNodeId=newRelationshipForm.getFieldValue(END_NODE_ID_KEY);
     final String relType=newRelationshipForm.getFieldValue(REL_TYPE_KEY);
+    final String targetSlotName=newRelationshipForm.getFieldValue(TARGET_SLOT_NAME_KEY);
     Command transactionCommand=Services.command(TransactionCommand.class);
     transactionCommand.execute(new StructrTransaction(){
       @Override public Object execute() throws Throwable {
@@ -9,7 +10,8 @@
         Command createRel=Services.command(CreateRelationshipCommand.class);
         AbstractNode startNode=node;
         AbstractNode endNode=(AbstractNode)findNode.execute(user,Long.parseLong(endNodeId));
-        createRel.execute(startNode,endNode,relType);
+        StructrRelationship newRel=(StructrRelationship)createRel.execute(startNode,endNode,relType);
+        newRel.setProperty(TARGET_SLOT_NAME_KEY,targetSlotName);
         return (null);
       }
     }

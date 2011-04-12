@@ -1,0 +1,21 @@
+{
+  ActiveNode ret=null;
+  List<StructrRelationship> rels=getRelationships(RelType.SUBMIT,Direction.OUTGOING);
+  if (rels != null && rels.size() > 0) {
+    StructrRelationship rel=rels.get(0);
+    AbstractNode node=rel.getEndNode();
+    if (node != null && node instanceof ActiveNode) {
+      ret=(ActiveNode)node;
+    }
+  }
+  if (ret == null) {
+    List<AbstractNode> children=getDirectChildNodes(user);
+    for (    AbstractNode child : children) {
+      if (child instanceof ActiveNode) {
+        ret=(ActiveNode)child;
+        break;
+      }
+    }
+  }
+  return (ret);
+}

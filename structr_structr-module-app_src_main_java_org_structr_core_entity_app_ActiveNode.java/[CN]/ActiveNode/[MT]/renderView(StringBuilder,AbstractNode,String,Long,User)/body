@@ -1,5 +1,7 @@
 {
   String currentUrl=(String)StructrContext.getAttribute(StructrContext.CURRENT_NODE_PATH);
+  SessionValue<String> errorMessage=new SessionValue<String>("errorMessage");
+  SessionValue<String> okMessage=new SessionValue<String>("okMessage");
   String myNodeUrl=getNodePath(user);
   while (currentUrl.endsWith("/")) {
     currentUrl=currentUrl.substring(0,currentUrl.length() - 1);
@@ -19,7 +21,9 @@
             if (value != null) {
               values.put(name,value);
             }
-            slotsSuccessful&=(slot.isMandatory() && value != null);
+            boolean errorCondition=(slot.isMandatory() && value != null);
+            source.setErrorCondition(errorCondition);
+            slotsSuccessful&=errorCondition;
           }
         }
       }
@@ -27,9 +31,20 @@
     if (slotsSuccessful) {
       executionSuccessful=execute(out,startNode,editUrl,editNodeId,user);
     }
+    logger.log(Level.INFO,"slotsSuccessful: {0}, executionSuccessful: {1}",new Object[]{slotsSuccessful,executionSuccessful});
     if (executionSuccessful) {
+      AbstractNode successTarget=getSuccessTarget();
+      if (successTarget != null) {
+        okMessage.set(getSuccessMessage());
+        StructrContext.redirect(user,successTarget);
+      }
     }
  else {
+      AbstractNode failureTarget=getFailureTarget();
+      if (failureTarget != null) {
+        errorMessage.set(getFailureMessage());
+        StructrContext.redirect(user,failureTarget);
+      }
     }
   }
 }

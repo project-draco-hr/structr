@@ -1,0 +1,13 @@
+{
+  HttpServletResponse response=getResponse();
+  HttpServletRequest request=getRequest();
+  if (request != null && response != null) {
+    String redirectUrl=getAbsoluteNodePath(user,destination);
+    try {
+      response.sendRedirect(redirectUrl);
+    }
+ catch (    IOException ioex) {
+      logger.log(Level.WARNING,"Exception while trying to redirect to {0}: {1}",new Object[]{redirectUrl,ioex});
+    }
+  }
+}

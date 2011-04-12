@@ -1,9 +1,8 @@
 {
-  HttpServletRequest request=getRequest();
-  if (request != null) {
-    String myNodeUrl=getNodePath(user);
-    logger.log(Level.INFO,"myNodeUrl:         {0}",myNodeUrl);
-    logger.log(Level.INFO,"requestedNodePath: {0}",StructrContext.getAttribute(StructrContext.CURRENT_NODE_PATH));
+  String currentUrl=(String)StructrContext.getAttribute(StructrContext.CURRENT_NODE_PATH);
+  String myNodeUrl=getNodePath(user);
+  logger.log(Level.INFO,"Checking '{0}' and '{1}' for equality..",new Object[]{currentUrl,myNodeUrl});
+  if (myNodeUrl.equals(currentUrl)) {
     execute(out,startNode,editUrl,editNodeId,user);
   }
 }

@@ -5,20 +5,12 @@
  else {
     if (isVisible(user)) {
       String html=getContent();
-      if (html != null && html.length() > 0) {
-        Template t=startNode.getTemplate(user);
-        if (t != null && t.getCallingNode() != null) {
-          StringWriter content=new StringWriter();
-          replaceByFreeMarker(html,content,startNode,editUrl,editNodeId,user);
-          String test=content.toString();
-          StringBuilder content2=new StringBuilder(test);
-          replaceBySubnodes(content2,startNode,editUrl,editNodeId,user);
-          String test2=content2.toString();
-          out.append(test2);
-        }
- else {
-          out.append(getContent());
-        }
+      if (StringUtils.isNotBlank(html)) {
+        StringWriter content=new StringWriter();
+        replaceByFreeMarker(html,content,startNode,editUrl,editNodeId,user);
+        StringBuilder content2=new StringBuilder(content.toString());
+        replaceBySubnodes(content2,startNode,editUrl,editNodeId,user);
+        out.append(content2.toString());
       }
     }
   }

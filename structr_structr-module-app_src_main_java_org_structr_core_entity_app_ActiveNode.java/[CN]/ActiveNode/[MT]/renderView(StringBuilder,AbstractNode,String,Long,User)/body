@@ -5,6 +5,19 @@
     currentUrl=currentUrl.substring(0,currentUrl.length() - 1);
   }
   if (myNodeUrl.equals(currentUrl)) {
+    List<InteractiveNode> dataSources=getDataSources();
+    Map<String,Slot> slots=getSlots();
+    if (slots != null) {
+      for (      InteractiveNode source : dataSources) {
+        String name=source.getName();
+        if (slots.containsKey(name)) {
+          Slot slot=slots.get(name);
+          if (slot.getParameterType().equals(source.getParameterType())) {
+            values.put(name,source.getValue());
+          }
+        }
+      }
+    }
     execute(out,startNode,editUrl,editNodeId,user);
   }
 }

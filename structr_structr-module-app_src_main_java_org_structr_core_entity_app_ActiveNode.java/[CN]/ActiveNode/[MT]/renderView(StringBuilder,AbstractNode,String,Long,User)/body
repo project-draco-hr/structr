@@ -7,17 +7,29 @@
   if (myNodeUrl.equals(currentUrl)) {
     List<InteractiveNode> dataSources=getDataSources();
     Map<String,Slot> slots=getSlots();
+    boolean executionSuccessful=false;
+    boolean slotsSuccessful=true;
     if (slots != null) {
       for (      InteractiveNode source : dataSources) {
         String name=source.getMappedName();
         if (slots.containsKey(name)) {
           Slot slot=slots.get(name);
           if (slot.getParameterType().equals(source.getParameterType())) {
-            values.put(name,source.getValue());
+            Object value=source.getValue();
+            if (value != null) {
+              values.put(name,value);
+            }
+            slotsSuccessful&=(slot.isMandatory() && value != null);
           }
         }
       }
     }
-    execute(out,startNode,editUrl,editNodeId,user);
+    if (slotsSuccessful) {
+      executionSuccessful=execute(out,startNode,editUrl,editNodeId,user);
+    }
+    if (executionSuccessful) {
+    }
+ else {
+    }
   }
 }

@@ -1,7 +1,9 @@
 {
   String currentUrl=(String)StructrContext.getAttribute(StructrContext.CURRENT_NODE_PATH);
   String myNodeUrl=getNodePath(user);
-  logger.log(Level.INFO,"Checking '{0}' and '{1}' for equality..",new Object[]{currentUrl,myNodeUrl});
+  while (currentUrl.endsWith("/")) {
+    currentUrl=currentUrl.substring(0,currentUrl.length() - 1);
+  }
   if (myNodeUrl.equals(currentUrl)) {
     execute(out,startNode,editUrl,editNodeId,user);
   }

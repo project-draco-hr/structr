@@ -23,6 +23,15 @@
         root.put("User",user);
       }
       root.put("Helper",new TemplateHelper());
+      HttpSession session=StructrContext.getSession();
+      if (session != null) {
+        if (session.getAttribute("errorMessage") != null) {
+          root.put("ErrorMessage",session.getAttribute("errorMessage"));
+        }
+        if (session.getAttribute("errorMessage") != null) {
+          root.put("OkMessage",session.getAttribute("okMessage"));
+        }
+      }
       freemarker.template.Template t=new freemarker.template.Template(template.getName(),new StringReader(templateString),cfg);
       t.process(root,out);
     }

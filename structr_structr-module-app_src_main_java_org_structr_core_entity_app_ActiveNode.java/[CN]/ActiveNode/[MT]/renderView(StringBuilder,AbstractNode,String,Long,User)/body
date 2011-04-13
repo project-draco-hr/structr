@@ -1,7 +1,5 @@
 {
   String currentUrl=(String)StructrContext.getAttribute(StructrContext.CURRENT_NODE_PATH);
-  SessionValue<String> errorMessage=new SessionValue<String>("errorMessage");
-  SessionValue<String> okMessage=new SessionValue<String>("okMessage");
   String myNodeUrl=getNodePath(user);
   while (currentUrl.endsWith("/")) {
     currentUrl=currentUrl.substring(0,currentUrl.length() - 1);
@@ -18,31 +16,37 @@
           Slot slot=slots.get(name);
           if (slot.getParameterType().equals(source.getParameterType())) {
             Object value=source.getValue();
-            if (value != null) {
+            boolean accepted=slot.accepts(value);
+            if (accepted) {
               values.put(name,value);
             }
-            boolean errorCondition=(slot.isMandatory() && value != null);
+            boolean errorCondition=(slot.isMandatory() && accepted);
             source.setErrorCondition(errorCondition);
+            logger.log(Level.INFO,"sourceName: {0}, mappedName: {1}, value: {2}, mandatory: {3}, errorCondition: {4}",new Object[]{source.getName(),source.getMappedName(),value,slot.isMandatory(),errorCondition});
             slotsSuccessful&=errorCondition;
           }
+ else {
+            logger.log(Level.INFO,"Parameter type mismatch: expected {0}, found {1}",new Object[]{slot.getParameterType(),source.getParameterType()});
+          }
+        }
+ else {
+          logger.log(Level.INFO,"Slot not found {0}",name);
         }
       }
     }
     if (slotsSuccessful) {
       executionSuccessful=execute(out,startNode,editUrl,editNodeId,user);
     }
-    logger.log(Level.INFO,"slotsSuccessful: {0}, executionSuccessful: {1}",new Object[]{slotsSuccessful,executionSuccessful});
+    logger.log(Level.FINE,"slotsSuccessful: {0}, executionSuccessful: {1}",new Object[]{slotsSuccessful,executionSuccessful});
     if (executionSuccessful) {
       AbstractNode successTarget=getSuccessTarget();
       if (successTarget != null) {
-        okMessage.set(getSuccessMessage());
         StructrContext.redirect(user,successTarget);
       }
     }
  else {
       AbstractNode failureTarget=getFailureTarget();
       if (failureTarget != null) {
-        errorMessage.set(getFailureMessage());
         StructrContext.redirect(user,failureTarget);
       }
     }

@@ -1,4 +1,58 @@
 {
-  logger.log(Level.INFO,"login: {0}, password: {1}",new Object[]{getValue("login"),getValue("password")});
+  HttpSession session=StructrContext.getSession();
+  String usernameFromSession=getUserNameValue().get();
+  Boolean alreadyLoggedIn=usernameFromSession != null;
+  if (alreadyLoggedIn) {
+    return (false);
+  }
+  Boolean sessionBlocked=getSessionBlockedValue().get();
+  if (Boolean.TRUE.equals(sessionBlocked)) {
+    getErrorMessageValue().set("Too many login attempts, session is blocked for login");
+    return (false);
+  }
+  String username=(String)getValue(USERNAME_FIELD_NAME);
+  String password=(String)getValue(PASSWORD_FIELD_NAME);
+  String antiRobot=(String)getValue(ANTI_ROBOT_FIELD_NAME);
+  int maxRetries=getMaxErrors() == 0 ? DefaultMaxErrors : getMaxErrors();
+  int delayThreshold=getDelayThreshold() == 0 ? DefaultDelayThreshold : getDelayThreshold();
+  int delayTime=getDelayTime() == 0 ? DefaultDelayTime : getDelayTime();
+  if (StringUtils.isNotEmpty(antiRobot)) {
+    return (false);
+  }
+  if (StringUtils.isEmpty(username)) {
+    getErrorMessageValue().set("You must enter a username");
+    countLoginFailure(maxRetries,delayThreshold,delayTime);
+    return (false);
+  }
+  if (StringUtils.isEmpty(password)) {
+    getErrorMessageValue().set("You must enter a password");
+    countLoginFailure(maxRetries,delayThreshold,delayTime);
+    return (false);
+  }
+  User loginUser=(User)Services.command(FindUserCommand.class).execute(username);
+  getErrorMessageValue().set(LOGIN_FAILURE_TEXT);
+  if (loginUser == null) {
+    logger.log(Level.INFO,"No user found for name {0}",loginUser);
+    countLoginFailure(maxRetries,delayThreshold,delayTime);
+    return (false);
+  }
+  if (loginUser.isBlocked()) {
+    logger.log(Level.INFO,"User {0} is blocked",loginUser);
+    countLoginFailure(maxRetries,delayThreshold,delayTime);
+    return (false);
+  }
+  String encryptedPasswordValue=DigestUtils.sha512Hex(password);
+  if (!encryptedPasswordValue.equals(loginUser.getPassword())) {
+    logger.log(Level.INFO,"Wrong password for user {0}",loginUser);
+    countLoginFailure(maxRetries,delayThreshold,delayTime);
+    return (false);
+  }
+  getUserNameValue().set(loginUser.getName());
+  long sessionId=SessionMonitor.registerUserSession(user,session);
+  SessionMonitor.logActivity(user,sessionId,"Login");
+  session.setAttribute(SessionMonitor.SESSION_ID,sessionId);
+  getSessionBlockedValue().set(false);
+  getLoginAttemptsValue().set(0);
+  getOkMessageValue().set("Login successful.");
   return (true);
 }

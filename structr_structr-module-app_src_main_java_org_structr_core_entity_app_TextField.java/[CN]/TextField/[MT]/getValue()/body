@@ -2,8 +2,7 @@
   HttpServletRequest request=StructrContext.getRequest();
   String name=getName();
   String ret=null;
-  SessionValue<String> sessionValue=new SessionValue<String>("last_" + name);
-  String valueFromLastRequest=sessionValue.get();
+  String valueFromLastRequest=getLastValue().get();
   logger.log(Level.INFO,"Got " + "last_" + "{0}: {1}",new Object[]{name,valueFromLastRequest});
   if (request == null) {
     return valueFromLastRequest;
@@ -15,6 +14,7 @@
         return null;
       }
  else {
+        getLastValue().set(ret);
         return ret;
       }
     }

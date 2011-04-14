@@ -1,16 +1,14 @@
 {
-  String name=getName();
-  String label=getLabel();
-  Object value=getValue();
-  if (label != null) {
-    out.append("<div class=\"label\">").append(label).append("</div>");
+  if (editNodeId != null && getId() == editNodeId.longValue()) {
+    renderEditFrame(out,editUrl);
   }
-  out.append("<input");
-  if (errorMessage.get().length() > 0) {
-    out.append("class=\"error\")");
-  }
-  out.append(" type=\"text\" name=\"").append(name).append("\" value=\"").append(value != null ? value : "").append("\">");
-  if (errorMessage.get().length() > 0) {
-    out.append(errorMessage.get());
+ else {
+    if (hasTemplate(user)) {
+      template.setCallingNode(this);
+      template.renderView(out,startNode,editUrl,editNodeId,user);
+    }
+ else {
+      logger.log(Level.WARNING,"Encountered TextField without template: {0}",this);
+    }
   }
 }

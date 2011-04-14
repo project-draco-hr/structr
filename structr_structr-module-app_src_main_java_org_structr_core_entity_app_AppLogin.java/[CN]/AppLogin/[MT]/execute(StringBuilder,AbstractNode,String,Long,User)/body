@@ -3,7 +3,7 @@
   String usernameFromSession=getUserNameValue().get();
   Boolean alreadyLoggedIn=usernameFromSession != null;
   if (alreadyLoggedIn) {
-    return (false);
+    return (true);
   }
   Boolean sessionBlocked=getSessionBlockedValue().get();
   if (Boolean.TRUE.equals(sessionBlocked)) {
@@ -20,12 +20,12 @@
     return (false);
   }
   if (StringUtils.isEmpty(username)) {
-    getErrorMessageValue().set("You must enter a username");
+    setErrorValue(USERNAME_FIELD_NAME,"You must enter a username");
     countLoginFailure(maxRetries,delayThreshold,delayTime);
     return (false);
   }
   if (StringUtils.isEmpty(password)) {
-    getErrorMessageValue().set("You must enter a password");
+    setErrorValue(PASSWORD_FIELD_NAME,"You must enter a password");
     countLoginFailure(maxRetries,delayThreshold,delayTime);
     return (false);
   }
@@ -53,6 +53,7 @@
   session.setAttribute(SessionMonitor.SESSION_ID,sessionId);
   getSessionBlockedValue().set(false);
   getLoginAttemptsValue().set(0);
+  getErrorMessageValue().set(null);
   getOkMessageValue().set("Login successful.");
   return (true);
 }

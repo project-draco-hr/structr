@@ -1,10 +1,14 @@
 {
-  String name=getName();
-  String label=getLabel();
-  out.append("<input type=\"submit\"");
-  out.append(" name=\"").append(name).append("\"");
-  if (label != null) {
-    out.append(" value=\"").append(label).append("\"");
+  if (editNodeId != null && getId() == editNodeId.longValue()) {
+    renderEditFrame(out,editUrl);
   }
-  out.append(">");
+ else {
+    if (hasTemplate(user)) {
+      template.setCallingNode(this);
+      template.renderView(out,startNode,editUrl,editNodeId,user);
+    }
+ else {
+      logger.log(Level.WARNING,"Encountered TextField without template: {0}",this);
+    }
+  }
 }

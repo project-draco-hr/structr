@@ -1,5 +1,5 @@
 {
-  String currentUrl=(String)StructrContext.getAttribute(StructrContext.CURRENT_NODE_PATH);
+  String currentUrl=(String)SessionContext.getAttribute(SessionContext.CURRENT_NODE_PATH);
   String myNodeUrl=getNodePath(user);
   while (currentUrl.endsWith("/")) {
     currentUrl=currentUrl.substring(0,currentUrl.length() - 1);
@@ -42,13 +42,13 @@
     if (executionSuccessful) {
       AbstractNode successTarget=getSuccessTarget();
       if (successTarget != null) {
-        StructrContext.redirect(user,successTarget);
+        SessionContext.redirect(user,successTarget);
       }
     }
  else {
       AbstractNode failureTarget=getFailureTarget();
       if (failureTarget != null) {
-        StructrContext.redirect(user,failureTarget);
+        SessionContext.redirect(user,failureTarget);
       }
     }
   }

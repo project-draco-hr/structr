@@ -1,9 +1,14 @@
 {
-  HttpServletRequest request=StructrContext.getRequest();
+  HttpServletRequest request=SessionContext.getRequest();
+  String valueFromLastRequest=null;
   String name=getName();
   String ret=null;
-  String valueFromLastRequest=getLastValue().get();
-  logger.log(Level.INFO,"Got " + "last_" + "{0}: {1}",new Object[]{name,valueFromLastRequest});
+  if (SessionContext.isRedirected()) {
+    valueFromLastRequest=getLastValue().get();
+  }
+ else {
+    getLastValue().set(null);
+  }
   if (request == null) {
     return valueFromLastRequest;
   }

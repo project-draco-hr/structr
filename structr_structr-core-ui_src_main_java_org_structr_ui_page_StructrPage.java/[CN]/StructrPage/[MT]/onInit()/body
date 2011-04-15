@@ -1,8 +1,8 @@
 {
   super.onInit();
-  StructrContext.setRequest(getContext().getRequest());
-  StructrContext.setResponse(getContext().getResponse());
-  StructrContext.setAttribute(StructrContext.CURRENT_NODE_PATH,nodeId);
+  SessionContext.setRequest(getContext().getRequest());
+  SessionContext.setResponse(getContext().getResponse());
+  SessionContext.setAttribute(SessionContext.CURRENT_NODE_PATH,nodeId);
   if (user != null) {
     sessionId=(Long)getContext().getRequest().getSession().getAttribute(SessionMonitor.SESSION_ID);
     SessionMonitor.logPageRequest(user,sessionId,"Page Request",getContext().getRequest());
@@ -36,4 +36,5 @@
     addRelationshipAllowed=node.addRelationshipAllowed(user);
     removeRelationshipAllowed=node.removeRelationshipAllowed(user);
   }
+  SessionContext.onRequestStart();
 }

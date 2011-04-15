@@ -31,6 +31,9 @@
     String zipCodeFieldName=getZipCodeFieldName() != null ? getZipCodeFieldName() : RegistrationForm.defaultZipCodeFieldName;
     String cityFieldName=getCityFieldName() != null ? getCityFieldName() : RegistrationForm.defaultCityFieldName;
     String countryFieldName=getCountryFieldName() != null ? getCountryFieldName() : RegistrationForm.defaultCountryFieldName;
+    String stateFieldName=getStateFieldName() != null ? getStateFieldName() : RegistrationForm.defaultStateFieldName;
+    String birthdayFieldName=getBirthdayFieldName() != null ? getBirthdayFieldName() : RegistrationForm.defaultBirthdayFieldName;
+    String genderFieldName=getGenderFieldName() != null ? getGenderFieldName() : RegistrationForm.defaultGenderFieldName;
     String agreedToTermsOfUseFieldName=getAgreedToTermsOfUseFieldName() != null ? getAgreedToTermsOfUseFieldName() : RegistrationForm.defaultAgreedToTermsOfUseFieldName;
     String newsletterFieldName=getNewsletterFieldName() != null ? getNewsletterFieldName() : RegistrationForm.defaultNewsletterFieldName;
     String confirmationKeyFieldName=getConfirmationKeyFieldName() != null ? getConfirmationKeyFieldName() : RegistrationForm.defaultConfirmationKeyFieldName;
@@ -51,7 +54,10 @@
     final String street=request.getParameter(streetFieldName);
     final String zipCode=request.getParameter(zipCodeFieldName);
     final String city=request.getParameter(cityFieldName);
+    final String state=request.getParameter(stateFieldName);
     final String country=request.getParameter(countryFieldName);
+    final String birthday=request.getParameter(birthdayFieldName);
+    final String gender=request.getParameter(genderFieldName);
     String agreedToTermsOfUse=request.getParameter(agreedToTermsOfUseFieldName);
     final String newsletter=request.getParameter(newsletterFieldName);
     String confirmationKey=request.getParameter(confirmationKeyFieldName);
@@ -148,6 +154,18 @@
       String message="<div class=\"errorMsg\">" + REGISTRATION_FAILURE_PASSWORDS_DONT_MATCH + "</div>";
       registerFailure(out,message,session,maxRetries,delayThreshold,delayTime);
     }
+    Date parsedDate=null;
+    String parseErrorMsg=null;
+    try {
+      parsedDate=DateUtils.parseDate(birthday,new String[]{"MM.dd.yyyy"});
+    }
+ catch (    Exception e) {
+      parseErrorMsg=e.getLocalizedMessage();
+    }
+    if (parsedDate == null) {
+      String message="<div class=\"errorMsg\">" + REGISTRATION_FAILURE_INVALID_DATE + ": "+ parseErrorMsg+ "</div>";
+      registerFailure(out,message,session,maxRetries,delayThreshold,delayTime);
+    }
     String pattern="((?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{6,})";
     if (!(password.matches(pattern))) {
       String message="<div class=\"errorMsg\">" + REGISTRATION_FAILURE_WEAK_PASSWORD + "</div>";
@@ -226,6 +244,7 @@
       return;
     }
     final RegistrationCheck registrationCheckNode=this;
+    final Date birthdayDate=parsedDate;
     User newUser=(User)Services.command(TransactionCommand.class).execute(new StructrTransaction(){
       @Override public Object execute(){
         Command create=Services.command(CreateNodeCommand.class);
@@ -240,7 +259,7 @@
           assignedUser=userList.get(0);
         }
         searchAttrs.clear();
-        User newUser=(User)create.execute(assignedUser,new NodeAttribute(AbstractNode.NAME_KEY,username),new NodeAttribute(AbstractNode.TYPE_KEY,User.class.getSimpleName()),new NodeAttribute(Person.FIRST_NAME_KEY,firstName),new NodeAttribute(Person.LAST_NAME_KEY,lastName),new NodeAttribute(User.REAL_NAME_KEY,(firstName + " " + lastName)),new NodeAttribute(Person.STREET_KEY,street),new NodeAttribute(Person.ZIP_CODE_KEY,zipCode),new NodeAttribute(Person.CITY_KEY,city),new NodeAttribute(Person.COUNTRY_KEY,country),new NodeAttribute(Person.EMAIL_1_KEY,email),new NodeAttribute(Person.NEWSLETTER_KEY,StringUtils.isNotEmpty(newsletter)),new NodeAttribute(User.BLOCKED_KEY,true),new NodeAttribute(User.CONFIRMATION_KEY_KEY,confirmationKeyForMail));
+        User newUser=(User)create.execute(assignedUser,new NodeAttribute(AbstractNode.NAME_KEY,username),new NodeAttribute(AbstractNode.TYPE_KEY,User.class.getSimpleName()),new NodeAttribute(Person.FIRST_NAME_KEY,firstName),new NodeAttribute(Person.LAST_NAME_KEY,lastName),new NodeAttribute(User.REAL_NAME_KEY,(firstName + " " + lastName)),new NodeAttribute(Person.STREET_KEY,street),new NodeAttribute(Person.ZIP_CODE_KEY,zipCode),new NodeAttribute(Person.CITY_KEY,city),new NodeAttribute(Person.STATE_KEY,state),new NodeAttribute(Person.COUNTRY_KEY,country),new NodeAttribute(Person.GENDER_KEY,gender),new NodeAttribute(Person.BIRTHDAY_KEY,birthdayDate),new NodeAttribute(Person.EMAIL_1_KEY,email),new NodeAttribute(Person.NEWSLETTER_KEY,StringUtils.isNotEmpty(newsletter)),new NodeAttribute(User.BLOCKED_KEY,true),new NodeAttribute(User.CONFIRMATION_KEY_KEY,confirmationKeyForMail));
         newUser.setPassword(password);
         searchAttrs.add(Search.andExactName(publicUserDirectoryName));
         searchAttrs.add(Search.andExactType(Folder.class.getSimpleName()));

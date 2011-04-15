@@ -1,0 +1,14 @@
+{
+  if (editNodeId != null && getId() == editNodeId.longValue()) {
+    renderEditFrame(out,editUrl);
+  }
+ else {
+    if (hasTemplate(user)) {
+      template.setCallingNode(this);
+      template.renderView(out,startNode,editUrl,editNodeId,user);
+    }
+ else {
+      logger.log(Level.WARNING,"Encountered SelectField without template: {0}",this);
+    }
+  }
+}

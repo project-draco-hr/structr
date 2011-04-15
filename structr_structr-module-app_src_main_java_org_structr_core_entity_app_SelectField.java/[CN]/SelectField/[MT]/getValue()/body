@@ -1,0 +1,31 @@
+{
+  HttpServletRequest request=CurrentRequest.getRequest();
+  String valueFromLastRequest=null;
+  String name=getName();
+  String ret=null;
+  if (CurrentSession.isRedirected()) {
+    valueFromLastRequest=getLastValue().get();
+  }
+ else {
+    getLastValue().set(null);
+  }
+  if (request == null) {
+    return valueFromLastRequest;
+  }
+  if (request != null) {
+    ret=request.getParameter(name);
+    if (ret != null) {
+      if (ret.length() == 0) {
+        return null;
+      }
+ else {
+        getLastValue().set(ret);
+        return ret;
+      }
+    }
+ else {
+      return valueFromLastRequest;
+    }
+  }
+  return null;
+}

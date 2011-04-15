@@ -1,8 +1,8 @@
 {
+  CurrentRequest.setRequest(getContext().getRequest());
+  CurrentRequest.setResponse(getContext().getResponse());
+  CurrentRequest.setCurrentNodePath(nodeId);
   super.onInit();
-  SessionContext.setRequest(getContext().getRequest());
-  SessionContext.setResponse(getContext().getResponse());
-  SessionContext.setAttribute(SessionContext.CURRENT_NODE_PATH,nodeId);
   if (user != null) {
     sessionId=(Long)getContext().getRequest().getSession().getAttribute(SessionMonitor.SESSION_ID);
     SessionMonitor.logPageRequest(user,sessionId,"Page Request",getContext().getRequest());
@@ -36,5 +36,5 @@
     addRelationshipAllowed=node.addRelationshipAllowed(user);
     removeRelationshipAllowed=node.removeRelationshipAllowed(user);
   }
-  SessionContext.onRequestStart();
+  CurrentRequest.onRequestStart();
 }

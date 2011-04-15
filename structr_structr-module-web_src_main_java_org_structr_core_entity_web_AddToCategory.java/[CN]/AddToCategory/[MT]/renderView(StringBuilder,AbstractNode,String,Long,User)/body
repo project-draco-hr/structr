@@ -11,7 +11,7 @@
     if (session == null) {
       return;
     }
-    String usernameFromSession=CurrentSession.getGlobalUsername();
+    String usernameFromSession=(String)session.getAttribute(USERNAME_KEY);
     Boolean loggedIn=usernameFromSession != null;
     if (!loggedIn) {
       logger.log(Level.WARNING,"Not logged in");
@@ -33,12 +33,15 @@
       logger.log(Level.WARNING,"No object id given");
       return;
     }
-    AbstractNode addedObject=user.addToCategory(categoryName,objectId);
-    if (addedObject != null) {
-      out.append("<div class=\"okMsg\">").append(addedObject.getName()).append(" successfully added to ").append(categoryName).append("</div>");
-    }
+    String[] ids=StringUtils.split(objectId,",");
+    for (    String id : ids) {
+      AbstractNode addedObject=user.addToCategory(categoryName,id);
+      if (addedObject != null) {
+        out.append("<div class=\"okMsg\">").append(addedObject.getName()).append(" successfully added to ").append(categoryName).append("</div>");
+      }
  else {
-      out.append("<div class=\"errorMsg\">").append("Could not add to category ").append(categoryName).append("</div>");
+        out.append("<div class=\"errorMsg\">").append("Could not add to category ").append(categoryName).append("</div>");
+      }
     }
   }
 }

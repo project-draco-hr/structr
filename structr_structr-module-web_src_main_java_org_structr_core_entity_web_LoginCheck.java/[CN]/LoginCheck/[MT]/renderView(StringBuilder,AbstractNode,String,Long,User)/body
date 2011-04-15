@@ -12,7 +12,7 @@
     if (session == null) {
       return;
     }
-    String usernameFromSession=CurrentSession.getGlobalUsername();
+    String usernameFromSession=(String)session.getAttribute(USERNAME_KEY);
     Boolean alreadyLoggedIn=usernameFromSession != null;
     if (alreadyLoggedIn) {
       return;
@@ -70,7 +70,7 @@
       countLoginFailure(out,session,maxRetries,delayThreshold,delayTime);
       return;
     }
-    CurrentSession.setGlobalUsername(loginUser.getName());
+    session.setAttribute(USERNAME_KEY,loginUser.getName());
     long sessionId=SessionMonitor.registerUserSession(user,session);
     SessionMonitor.logActivity(user,sessionId,"Login");
     session.setAttribute(SessionMonitor.SESSION_ID,sessionId);

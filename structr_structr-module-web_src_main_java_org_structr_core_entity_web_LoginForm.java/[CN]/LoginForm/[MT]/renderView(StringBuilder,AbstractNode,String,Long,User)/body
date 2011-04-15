@@ -11,7 +11,7 @@
     if (session == null) {
       return;
     }
-    String usernameFromSession=CurrentSession.getGlobalUsername();
+    String usernameFromSession=(String)session.getAttribute(USERNAME_KEY);
     Boolean alreadyLoggedIn=usernameFromSession != null;
     if (alreadyLoggedIn) {
       out.append("<div class=\"okMsg\">").append("Your are logged in as ").append(usernameFromSession).append("</div>");
@@ -34,7 +34,6 @@
     out.append("<form name=\"").append(getName()).append("\" action=\"").append(action).append("\" method=\"post\">");
     out.append("<input type=\"hidden\" name=\"").append(antiRobotFieldName).append("\" value=\"\">");
     out.append("<table class=\"").append(cssClass).append("\">");
-    out.append("<tr><th><span class=\"heading\">").append(label).append("</span></th><th></th></tr>");
     out.append("<tr><td class=\"label\">Username</td></tr>");
     out.append("<tr><td class=\"field\"><input type=\"text\" name=\"").append(usernameFieldName).append("\" value=\"").append(username).append("\" size=\"30\"></td></tr>");
     out.append("<tr><td class=\"label\">Password</td></tr>");

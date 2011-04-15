@@ -1,0 +1,18 @@
+{
+  if (!CurrentSession.wasJustRedirected()) {
+    CurrentSession.setRedirected(false);
+  }
+ else {
+    CurrentSession.setJustRedirected(false);
+  }
+synchronized (requestCycleListener) {
+    for (Iterator<RequestCycleListener> it=requestCycleListener.iterator(); it.hasNext(); ) {
+      RequestCycleListener callback=it.next();
+      try {
+        callback.onRequestStart();
+      }
+ catch (      Throwable t) {
+      }
+    }
+  }
+}

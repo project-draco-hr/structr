@@ -4,7 +4,7 @@
     renderEditFrame(out,editUrl);
   }
  else {
-    HttpServletRequest request=SessionContext.getRequest();
+    HttpServletRequest request=CurrentRequest.getRequest();
     if (request == null) {
       return;
     }
@@ -12,7 +12,7 @@
     if (session == null) {
       return;
     }
-    String usernameFromSession=SessionContext.getGlobalUsername();
+    String usernameFromSession=CurrentSession.getGlobalUsername();
     Boolean alreadyLoggedIn=usernameFromSession != null;
     if (alreadyLoggedIn) {
       return;
@@ -70,7 +70,7 @@
       countLoginFailure(out,session,maxRetries,delayThreshold,delayTime);
       return;
     }
-    SessionContext.setGlobalUsername(loginUser.getName());
+    CurrentSession.setGlobalUsername(loginUser.getName());
     long sessionId=SessionMonitor.registerUserSession(user,session);
     SessionMonitor.logActivity(user,sessionId,"Login");
     session.setAttribute(SessionMonitor.SESSION_ID,sessionId);

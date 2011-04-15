@@ -9,7 +9,7 @@
       if (callingNode != null) {
         root.put(callingNode.getType(),callingNode);
       }
-      HttpServletRequest request=SessionContext.getRequest();
+      HttpServletRequest request=CurrentRequest.getRequest();
       if (request != null) {
         root.put("Request",new freemarker.ext.servlet.HttpRequestParametersHashModel(request));
         String searchString=request.getParameter("search");
@@ -23,7 +23,7 @@
         root.put("User",user);
       }
       root.put("Helper",new TemplateHelper());
-      HttpSession session=SessionContext.getSession();
+      HttpSession session=CurrentRequest.getSession();
       if (session != null) {
         if (session.getAttribute("errorMessage") != null) {
           root.put("ErrorMessage",session.getAttribute("errorMessage"));

@@ -1,7 +1,10 @@
 {
-  CurrentSession session=CurrentSession.getSessionContext();
+  HttpSession session=CurrentRequest.getSession();
   if (session != null) {
-    session.isRedirectedInternal();
+    Boolean ret=(Boolean)session.getAttribute(REDIRECTED_KEY);
+    if (ret != null) {
+      return (ret.booleanValue());
+    }
   }
   return (false);
 }

@@ -1,7 +1,10 @@
 {
-  CurrentSession session=CurrentSession.getSessionContext();
+  HttpSession session=CurrentRequest.getSession();
   if (session != null) {
-    return (session.getGlobalUsernameInternal());
+    String ret=(String)session.getAttribute(GLOBAL_USERNAME_KEY);
+    if (ret != null) {
+      return (ret);
+    }
   }
   return (null);
 }

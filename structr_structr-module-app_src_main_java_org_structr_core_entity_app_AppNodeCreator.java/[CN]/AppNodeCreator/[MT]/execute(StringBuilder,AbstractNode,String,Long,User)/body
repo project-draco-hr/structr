@@ -1,3 +1,26 @@
 {
-  return (true);
+  final List<NodeAttribute> attributes=new LinkedList<NodeAttribute>();
+  final AbstractNode parentNode=getCreateDestination();
+  final String targetType=getTargetType();
+  if (targetType != null && parentNode != null) {
+    List<InteractiveNode> dataSource=getDataSources();
+    attributes.add(new NodeAttribute("type",targetType));
+    for (    InteractiveNode src : dataSource) {
+      attributes.add(new NodeAttribute(src.getMappedName(),src.getValue()));
+    }
+    Services.command(TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws Throwable {
+        Command createNode=Services.command(CreateNodeCommand.class);
+        AbstractNode newNode=(AbstractNode)createNode.execute(attributes);
+        if (newNode != null) {
+          Command storeNode=Services.command(CreateRelationshipCommand.class);
+          storeNode.execute(parentNode,newNode,RelType.HAS_CHILD);
+          return (true);
+        }
+        return (null);
+      }
+    }
+);
+  }
+  return (false);
 }

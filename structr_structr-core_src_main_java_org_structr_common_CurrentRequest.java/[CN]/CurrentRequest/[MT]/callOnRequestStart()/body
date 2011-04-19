@@ -5,6 +5,18 @@
  else {
     CurrentSession.setRedirected(false);
   }
+  Set<String> sessionKeys=CurrentSession.getSessionKeys();
+  if (sessionKeys != null) {
+synchronized (sessionKeys) {
+      for (      String sessionKey : sessionKeys) {
+        String sessionKeyMarker="_".concat(sessionKey);
+        if (CurrentSession.getAttribute(sessionKeyMarker) != null) {
+          logger.log(Level.INFO,"Removing session key marker for {0}",sessionKey);
+          CurrentSession.setAttribute(sessionKeyMarker,null);
+        }
+      }
+    }
+  }
 synchronized (requestCycleListener) {
     for (Iterator<RequestCycleListener> it=requestCycleListener.iterator(); it.hasNext(); ) {
       RequestCycleListener callback=it.next();

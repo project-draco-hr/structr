@@ -2,25 +2,34 @@
   final List<NodeAttribute> attributes=new LinkedList<NodeAttribute>();
   final AbstractNode parentNode=getCreateDestination();
   final String targetType=getTargetType();
+  boolean ret=false;
+  if (targetType == null) {
+    logger.log(Level.WARNING,"AppNodeCreator needs {0} property!",TARGET_TYPE_KEY);
+    ret=false;
+  }
+  if (parentNode == null) {
+    logger.log(Level.WARNING,"AppNodeCreator needs CREATE_DESTINATION relationship!");
+    ret=false;
+  }
   if (targetType != null && parentNode != null) {
-    List<InteractiveNode> dataSource=getDataSources();
+    List<InteractiveNode> dataSource=getInteractiveSourceNodes();
     attributes.add(new NodeAttribute("type",targetType));
+    AbstractNode storeNode=getNodeFromLoader();
     for (    InteractiveNode src : dataSource) {
       attributes.add(new NodeAttribute(src.getMappedName(),src.getValue()));
     }
-    Services.command(TransactionCommand.class).execute(new StructrTransaction(){
-      @Override public Object execute() throws Throwable {
-        Command createNode=Services.command(CreateNodeCommand.class);
-        AbstractNode newNode=(AbstractNode)createNode.execute(attributes);
-        if (newNode != null) {
-          Command storeNode=Services.command(CreateRelationshipCommand.class);
-          storeNode.execute(parentNode,newNode,RelType.HAS_CHILD);
-          return (true);
-        }
-        return (null);
-      }
+    if (storeNode == null) {
+      logger.log(Level.INFO,"storeNode was null, creating..");
+      storeNode=createNewNode(parentNode,targetType);
     }
-);
+    if (storeNode != null) {
+      logger.log(Level.INFO,"storing attributes in node..");
+      ret=storeNodeAttributes(storeNode,attributes);
+    }
+ else {
+      logger.log(Level.WARNING,"Unable to create new node");
+      ret=false;
+    }
   }
-  return (false);
+  return (ret);
 }

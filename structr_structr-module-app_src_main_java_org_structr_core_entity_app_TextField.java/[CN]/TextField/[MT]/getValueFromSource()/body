@@ -1,0 +1,24 @@
+{
+  List<StructrRelationship> rels=getIncomingDataRelationships();
+  String sourceName=this.getName();
+  Object ret=null;
+  for (  StructrRelationship rel : rels) {
+    AbstractNode startNode=rel.getStartNode();
+    if (startNode instanceof NodeSource) {
+      if (rel.getRelationship().hasProperty(SOURCE_SLOT_NAME_KEY)) {
+        sourceName=(String)rel.getRelationship().getProperty(SOURCE_SLOT_NAME_KEY);
+      }
+      NodeSource source=(NodeSource)startNode;
+      if (source != null) {
+        AbstractNode loadedNode=source.loadNode();
+        if (loadedNode != null) {
+          ret=loadedNode.getProperty(sourceName);
+        }
+      }
+    }
+    if (ret != null) {
+      break;
+    }
+  }
+  return (ret);
+}

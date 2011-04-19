@@ -1,16 +1,16 @@
 {
   HttpServletRequest request=CurrentRequest.getRequest();
-  String valueFromLastRequest=null;
+  Object value=getValueFromSource();
   String name=getName();
   String ret=null;
   if (CurrentSession.isRedirected()) {
-    valueFromLastRequest=getLastValue().get();
+    value=getLastValue().get();
   }
  else {
     getLastValue().set(null);
   }
   if (request == null) {
-    return valueFromLastRequest;
+    return value;
   }
   if (request != null) {
     ret=request.getParameter(name);
@@ -24,7 +24,7 @@
       }
     }
  else {
-      return valueFromLastRequest;
+      return value;
     }
   }
   return null;

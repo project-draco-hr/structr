@@ -1,0 +1,15 @@
+{
+  List<StructrRelationship> rels=getIncomingDataRelationships();
+  AbstractNode ret=null;
+  logger.log(Level.INFO,"{0} incoming DATA relationships",rels.size());
+  for (  StructrRelationship rel : rels) {
+    AbstractNode startNode=rel.getStartNode();
+    if (startNode instanceof NodeSource) {
+      logger.log(Level.INFO,"found NodeSource instance");
+      NodeSource source=(NodeSource)startNode;
+      ret=source.loadNode();
+      break;
+    }
+  }
+  return (ret);
+}

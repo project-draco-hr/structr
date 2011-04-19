@@ -1,46 +1,54 @@
 {
-  String currentUrl=CurrentRequest.getCurrentNodePath();
-  String myNodeUrl=getNodePath(user);
-  if (currentUrl != null) {
-    while (currentUrl.endsWith("/")) {
-      currentUrl=currentUrl.substring(0,currentUrl.length() - 1);
+  if (isPathSensitive()) {
+    String currentUrl=CurrentRequest.getCurrentNodePath();
+    String myNodeUrl=getNodePath(user);
+    if (currentUrl != null) {
+      while (currentUrl.endsWith("/")) {
+        currentUrl=currentUrl.substring(0,currentUrl.length() - 1);
+      }
+      if (!myNodeUrl.equals(currentUrl)) {
+        return;
+      }
     }
-    if (myNodeUrl.equals(currentUrl)) {
-      List<InteractiveNode> dataSources=getDataSources();
-      Map<String,Slot> slots=getInputSlots();
-      boolean executionSuccessful=false;
-      if (slots != null) {
-        for (        InteractiveNode source : dataSources) {
-          String name=source.getMappedName();
-          if (slots.containsKey(name)) {
-            Slot slot=slots.get(name);
-            if (slot.getParameterType().equals(source.getParameterType())) {
-              slot.setSource(source);
-              Object value=source.getValue();
-              logger.log(Level.FINE,"sourceName: {0}, mappedName: {1}, value: {2}",new Object[]{source.getName(),source.getMappedName(),value});
-            }
  else {
-              logger.log(Level.WARNING,"Parameter type mismatch: expected {0}, found {1}",new Object[]{slot.getParameterType(),source.getParameterType()});
-            }
-          }
- else {
-            logger.log(Level.INFO,"Slot not found {0}",name);
-          }
+      return;
+    }
+  }
+  List<InteractiveNode> dataSources=getInteractiveSourceNodes();
+  Map<String,Slot> slots=getInputSlots();
+  boolean executionSuccessful=false;
+  if (slots != null) {
+    for (    InteractiveNode source : dataSources) {
+      String name=source.getMappedName();
+      if (slots.containsKey(name)) {
+        Slot slot=slots.get(name);
+        if (slot.getParameterType().equals(source.getParameterType())) {
+          slot.setSource(source);
+          Object value=source.getValue();
+          logger.log(Level.FINE,"sourceName: {0}, mappedName: {1}, value: {2}",new Object[]{source.getName(),source.getMappedName(),value});
         }
-      }
-      executionSuccessful=execute(out,startNode,editUrl,editNodeId,user);
-      logger.log(Level.INFO,"executionSuccessful: {0}",executionSuccessful);
-      if (executionSuccessful) {
-        AbstractNode successTarget=getSuccessTarget();
-        if (successTarget != null) {
-          CurrentRequest.redirect(user,successTarget);
+ else {
+          logger.log(Level.WARNING,"Parameter type mismatch: expected {0}, found {1}",new Object[]{slot.getParameterType(),source.getParameterType()});
         }
       }
  else {
-        AbstractNode failureTarget=getFailureTarget();
-        if (failureTarget != null) {
-          CurrentRequest.redirect(user,failureTarget);
-        }
+        logger.log(Level.INFO,"Slot not found {0}",name);
+      }
+    }
+  }
+  executionSuccessful=execute(out,startNode,editUrl,editNodeId,user);
+  logger.log(Level.INFO,"executionSuccessful: {0}",executionSuccessful);
+  if (doRedirectAfterExecution()) {
+    if (executionSuccessful) {
+      AbstractNode successTarget=getSuccessTarget();
+      if (successTarget != null) {
+        CurrentRequest.redirect(user,successTarget);
+      }
+    }
+ else {
+      AbstractNode failureTarget=getFailureTarget();
+      if (failureTarget != null) {
+        CurrentRequest.redirect(user,failureTarget);
       }
     }
   }

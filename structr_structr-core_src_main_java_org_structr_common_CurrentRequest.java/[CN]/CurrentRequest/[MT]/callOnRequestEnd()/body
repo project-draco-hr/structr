@@ -10,4 +10,17 @@ synchronized (requestCycleListener) {
       it.remove();
     }
   }
+  Set<String> sessionKeys=CurrentSession.getSessionKeys();
+  if (sessionKeys != null) {
+synchronized (sessionKeys) {
+      for (Iterator<String> sessionKeyIterator=sessionKeys.iterator(); sessionKeyIterator.hasNext(); ) {
+        String sessionKey=sessionKeyIterator.next();
+        if (CurrentSession.getAttribute("_".concat(sessionKey)) == null) {
+          logger.log(Level.INFO,"Removing session key marker for {0}",sessionKey);
+          CurrentSession.setAttribute(sessionKey,null);
+          sessionKeyIterator.remove();
+        }
+      }
+    }
+  }
 }

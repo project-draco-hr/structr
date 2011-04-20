@@ -20,8 +20,11 @@
   AbstractNode overview=createNode("Page","overview");
   linkNodes(this,overview,RelType.HAS_CHILD);
   linkNodes(overview,pageTemplate,RelType.USE_TEMPLATE);
+  HtmlSource tableNode=(HtmlSource)createNode("HtmlSource","table");
+  linkNodes(overview,tableNode,RelType.HAS_CHILD);
+  tableNode.setContent(getTableTemplateSource());
   AbstractNode listNode=createNode("AppList","listNode");
-  linkNodes(overview,listNode,RelType.HAS_CHILD);
+  linkNodes(tableNode,listNode,RelType.HAS_CHILD);
   linkNodes(listNode,listItemTemplate,RelType.USE_TEMPLATE);
   AbstractNode editor=createNode("Page","editor");
   linkNodes(this,editor,RelType.HAS_CHILD);
@@ -46,6 +49,8 @@
   AbstractNode creator=createNode("AppNodeCreator","creator");
   creator.setProperty("targetType","DataNode");
   linkNodes(form,creator,RelType.HAS_CHILD);
+  AbstractNode deleter=createNode("AppNodeDeleter","delete");
+  linkNodes(form,deleter,RelType.HAS_CHILD);
   AbstractNode submitButton=createNode("SubmitButton","submit");
   submitButton.setProperty("label","Submit");
   linkNodes(form,submitButton,RelType.HAS_CHILD);
@@ -57,11 +62,15 @@
   linkNodes(creator,overview,RelType.SUCCESS_DESTINATION);
   linkNodes(creator,editor,RelType.ERROR_DESTINATION);
   linkNodes(creator,dataFolder,RelType.CREATE_DESTINATION);
+  linkNodes(deleter,overview,RelType.SUCCESS_DESTINATION);
+  linkNodes(deleter,overview,RelType.ERROR_DESTINATION);
   linkNodes(loader,creator,RelType.DATA);
+  linkNodes(loader,deleter,RelType.DATA);
   linkNodes(loader,name,RelType.DATA);
   linkNodes(loader,surname,RelType.DATA);
   linkNodes(loader,location,RelType.DATA);
   linkNodes(name,creator,RelType.DATA);
   linkNodes(surname,creator,RelType.DATA);
   linkNodes(location,creator,RelType.DATA);
+  this.setProperty(TYPE_KEY,"Site");
 }

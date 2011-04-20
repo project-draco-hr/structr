@@ -7,8 +7,10 @@
         if (possiblePath != null) {
           try {
             Class nodeClass=Class.forName(possiblePath + "." + name);
-            entityClassCache.put(name,nodeClass);
-            break;
+            if (!Modifier.isAbstract(nodeClass.getModifiers())) {
+              entityClassCache.put(name,nodeClass);
+              break;
+            }
           }
  catch (          ClassNotFoundException ex) {
           }

@@ -50,24 +50,26 @@
   for (  final String className : classes) {
     try {
       Class clazz=Class.forName(className);
-      if (AbstractNode.class.isAssignableFrom(clazz)) {
-        String simpleName=clazz.getSimpleName();
-        String fullName=clazz.getName();
-        entityClassCache.put(simpleName,clazz);
-        entityPackages.add(fullName.substring(0,fullName.lastIndexOf(".")));
-      }
-      if (Agent.class.isAssignableFrom(clazz)) {
-        String simpleName=clazz.getSimpleName();
-        String fullName=clazz.getName();
-        agentClassCache.put(simpleName,clazz);
-        agentPackages.add(fullName.substring(0,fullName.lastIndexOf(".")));
-      }
-      if (structrPagePredicate.evaluate(clazz)) {
-        String fullName=clazz.getName();
-        String packageName=fullName.substring(0,fullName.lastIndexOf("."));
-        pagePackages.add(packageName);
-        String parentPackage=packageName.substring(0,packageName.lastIndexOf("."));
-        pagePackages.add(parentPackage);
+      if (!Modifier.isAbstract(clazz.getModifiers())) {
+        if (AbstractNode.class.isAssignableFrom(clazz)) {
+          String simpleName=clazz.getSimpleName();
+          String fullName=clazz.getName();
+          entityClassCache.put(simpleName,clazz);
+          entityPackages.add(fullName.substring(0,fullName.lastIndexOf(".")));
+        }
+        if (Agent.class.isAssignableFrom(clazz)) {
+          String simpleName=clazz.getSimpleName();
+          String fullName=clazz.getName();
+          agentClassCache.put(simpleName,clazz);
+          agentPackages.add(fullName.substring(0,fullName.lastIndexOf(".")));
+        }
+        if (structrPagePredicate.evaluate(clazz)) {
+          String fullName=clazz.getName();
+          String packageName=fullName.substring(0,fullName.lastIndexOf("."));
+          pagePackages.add(packageName);
+          String parentPackage=packageName.substring(0,packageName.lastIndexOf("."));
+          pagePackages.add(parentPackage);
+        }
       }
     }
  catch (    Throwable t) {

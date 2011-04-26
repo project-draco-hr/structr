@@ -1,12 +1,4 @@
 {
-  String loaderSourceParameter=(String)getProperty(LOADER_SOURCE_PARAMETER_KEY);
-  AbstractNode ret=null;
-  if (loaderSourceParameter != null) {
-    String loaderValue=CurrentRequest.getRequest().getParameter(loaderSourceParameter);
-    ret=(AbstractNode)Services.command(FindNodeCommand.class).execute(null,this,loaderValue);
-  }
- else {
-    logger.log(Level.WARNING,"AppNodeLoader needs {0} property",LOADER_SOURCE_PARAMETER_KEY);
-  }
-  return (ret);
+  Object loaderValue=getValue();
+  return ((AbstractNode)Services.command(FindNodeCommand.class).execute(null,this,loaderValue));
 }

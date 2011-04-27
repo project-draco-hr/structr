@@ -1,0 +1,24 @@
+{
+  String relType=getStringProperty(TARGET_REL_TYPE);
+  AbstractNode relStartNode=getNamedNodeSource("startNode");
+  AbstractNode relEndNode=getNamedNodeSource("endNode");
+  if (relType == null) {
+    logger.log(Level.WARNING,"AppRelationshipCreator needs {0} property",TARGET_REL_TYPE);
+    return (false);
+  }
+  if (relStartNode == null) {
+    logger.log(Level.WARNING,"AppRelationshipCreator needs startNode");
+    return (false);
+  }
+  if (relEndNode == null) {
+    logger.log(Level.WARNING,"AppRelationshipCreator needs endNode");
+    return (false);
+  }
+  if (relStartNode.getId() == relEndNode.getId()) {
+    logger.log(Level.WARNING,"AppRelationshipCreator can not operate on a single node (start == end!)");
+    return (false);
+  }
+  logger.log(Level.INFO,"All checks passed, creating relationship {0}",relType);
+  Services.command(CreateRelationshipCommand.class).execute(relStartNode,relEndNode,relType);
+  return (true);
+}

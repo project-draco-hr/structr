@@ -1,0 +1,15 @@
+{
+  List<StructrRelationship> rels=getIncomingDataRelationships();
+  AbstractNode ret=null;
+  for (  StructrRelationship rel : rels) {
+    AbstractNode node=rel.getStartNode();
+    if (rel.getRelationship().hasProperty(TARGET_SLOT_NAME_KEY)) {
+      String targetSlot=(String)rel.getRelationship().getProperty(TARGET_SLOT_NAME_KEY);
+      if (name.equals(targetSlot)) {
+        ret=node;
+        break;
+      }
+    }
+  }
+  return (ret);
+}

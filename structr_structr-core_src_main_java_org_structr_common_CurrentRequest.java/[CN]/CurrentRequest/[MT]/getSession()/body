@@ -2,7 +2,12 @@
   HttpServletRequest request=getRequestContext().getRequestInternal();
   HttpSession ret=null;
   if (request != null) {
-    ret=request.getSession();
+    try {
+      ret=request.getSession();
+    }
+ catch (    Throwable t) {
+      ret=null;
+    }
   }
   return (ret);
 }

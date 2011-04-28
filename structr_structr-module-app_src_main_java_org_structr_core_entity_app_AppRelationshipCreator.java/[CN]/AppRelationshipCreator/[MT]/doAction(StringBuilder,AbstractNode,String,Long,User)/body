@@ -1,7 +1,7 @@
 {
   String relType=getStringProperty(TARGET_REL_TYPE);
-  AbstractNode relStartNode=getNamedNodeSource("startNode");
-  AbstractNode relEndNode=getNamedNodeSource("endNode");
+  AbstractNode relStartNode=getNodeFromNamedSource("startNode");
+  AbstractNode relEndNode=getNodeFromNamedSource("endNode");
   if (relType == null) {
     logger.log(Level.WARNING,"AppRelationshipCreator needs {0} property",TARGET_REL_TYPE);
     return (false);
@@ -19,6 +19,20 @@
     return (false);
   }
   logger.log(Level.INFO,"All checks passed, creating relationship {0}",relType);
-  Services.command(CreateRelationshipCommand.class).execute(relStartNode,relEndNode,relType);
+  final Node fromNode=relStartNode.getNode();
+  final Node toNode=relEndNode.getNode();
+  final RelationshipType newRelType=DynamicRelationshipType.withName(relType);
+  Services.command(TransactionCommand.class).execute(new StructrTransaction(){
+    @Override public Object execute() throws Throwable {
+      try {
+        fromNode.createRelationshipTo(toNode,newRelType);
+      }
+ catch (      Throwable t) {
+        logger.log(Level.WARNING,"Error creating relationship: {0}",t);
+      }
+      return (null);
+    }
+  }
+);
   return (true);
 }

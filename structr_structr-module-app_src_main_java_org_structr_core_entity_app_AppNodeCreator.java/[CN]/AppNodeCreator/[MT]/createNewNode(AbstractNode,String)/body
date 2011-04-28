@@ -6,8 +6,10 @@
       attributes.add(new NodeAttribute(PUBLIC_KEY,"true"));
       AbstractNode newNode=(AbstractNode)Services.command(CreateNodeCommand.class).execute(attributes);
       if (newNode != null) {
-        Command createRelationship=Services.command(CreateRelationshipCommand.class);
-        createRelationship.execute(parentNode,newNode,RelType.HAS_CHILD);
+        if (parentNode != null) {
+          Command createRelationship=Services.command(CreateRelationshipCommand.class);
+          createRelationship.execute(parentNode,newNode,RelType.HAS_CHILD);
+        }
         return (newNode);
       }
       return (null);

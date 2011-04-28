@@ -11,7 +11,7 @@
     logger.log(Level.WARNING,"AppNodeCreator needs CREATE_DESTINATION relationship!");
     ret=false;
   }
-  if (targetType != null && parentNode != null) {
+  if (targetType != null) {
     List<InteractiveNode> dataSource=getInteractiveSourceNodes();
     attributes.add(new NodeAttribute("type",targetType));
     AbstractNode storeNode=getNodeFromLoader();
@@ -38,7 +38,8 @@
  else {
       ret=false;
     }
-    currentNode=storeNode;
+    logger.log(Level.INFO,"Saving newly created node {0}",storeNode);
+    currentNode.set(storeNode);
   }
   return (ret);
 }

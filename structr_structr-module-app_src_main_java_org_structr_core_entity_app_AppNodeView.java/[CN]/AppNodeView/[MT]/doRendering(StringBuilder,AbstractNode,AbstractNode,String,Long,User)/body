@@ -1,0 +1,17 @@
+{
+  String templateSource=getTemplateFromNode(viewNode,user);
+  StringWriter content=new StringWriter(100);
+  AbstractNode.staticReplaceByFreeMarker(templateSource,content,dataNode,editUrl,editNodeId,user);
+  out.append(content.toString());
+  List<AbstractNode> viewChildren=viewNode.getSortedDirectChildNodes(user);
+  for (  AbstractNode viewChild : viewChildren) {
+    String followRel=viewChild.getStringProperty(FOLLOW_RELATIONSHIP_KEY);
+    if (followRel != null) {
+      RelationshipType relType=DynamicRelationshipType.withName(followRel);
+      List<AbstractNode> dataChildren=dataNode.getDirectChildren(relType,user);
+      for (      AbstractNode dataChild : dataChildren) {
+        doRendering(out,viewChild,dataChild,editUrl,editNodeId,user);
+      }
+    }
+  }
+}

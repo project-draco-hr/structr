@@ -1,20 +1,7 @@
 {
   AbstractNode sourceNode=loadNode();
   if (sourceNode != null) {
-    if (hasTemplate(user)) {
-      String html=template.getContent();
-      if (StringUtils.isNotBlank(html)) {
-        StringWriter content=new StringWriter(100);
-        AbstractNode.staticReplaceByFreeMarker(html,content,sourceNode,editUrl,editNodeId,user);
-        out.append(content.toString());
-      }
- else {
-        logger.log(Level.WARNING,"No template!");
-      }
-    }
- else {
-      logger.log(Level.WARNING,"No template!");
-    }
+    doRendering(out,this,sourceNode,editUrl,editNodeId,user);
   }
  else {
     logger.log(Level.WARNING,"sourceNode was null");

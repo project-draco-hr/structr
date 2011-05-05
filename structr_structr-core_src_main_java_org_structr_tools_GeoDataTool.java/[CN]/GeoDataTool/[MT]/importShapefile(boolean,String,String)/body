@@ -1,11 +1,16 @@
 {
   try {
+    Neo4jSpatialDataStore n4jstore=new Neo4jSpatialDataStore(graphDb);
+    Layer layer=n4jstore.getSpatialDatabaseService().getLayer(layerName);
+    if (layer != null) {
+      layer.delete(new NullListener());
+    }
     ShapefileImporter importer=new ShapefileImporter(graphDb);
     if (!test) {
-      importer.importFile(file,layer);
+      importer.importFile(file,layerName);
     }
   }
  catch (  Throwable t) {
-    System.out.println("Error while loading data from shapefile " + t.getMessage() + " into layer "+ layer);
+    System.out.println("Error while loading data from shapefile " + t.getMessage() + " into layer "+ layerName);
   }
 }

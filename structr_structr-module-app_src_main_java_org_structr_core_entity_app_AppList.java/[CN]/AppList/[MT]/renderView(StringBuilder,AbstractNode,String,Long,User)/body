@@ -3,8 +3,13 @@
     if (hasTemplate(user)) {
       String html=template.getContent();
       if (StringUtils.isNotBlank(html)) {
+        init();
         for (        AbstractNode container : getSortedDirectChildren(RelType.DATA,user)) {
-          for (          AbstractNode node : container.getSortedDirectChildNodes(user)) {
+          List<AbstractNode> nodes=container.getDirectChildNodes(user);
+          Collections.sort(nodes,new AbstractNodeComparator(sortKey,sortOrder));
+          int toIndex=Math.min(((pageNo + 1) * pageSize),nodes.size());
+          int fromIndex=Math.min(pageNo * pageSize,toIndex);
+          for (          AbstractNode node : nodes.subList(fromIndex,toIndex)) {
             doRendering(out,this,node,editUrl,editNodeId,user);
           }
         }

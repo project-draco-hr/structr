@@ -1,0 +1,11 @@
+{
+  String userName=getGlobalUsername();
+  if (userName == null) {
+    return null;
+  }
+  if (userName.equals(Services.getSuperuserUsername())) {
+    return new SuperUser();
+  }
+  Command findUser=Services.command(FindUserCommand.class);
+  return ((User)findUser.execute(userName));
+}

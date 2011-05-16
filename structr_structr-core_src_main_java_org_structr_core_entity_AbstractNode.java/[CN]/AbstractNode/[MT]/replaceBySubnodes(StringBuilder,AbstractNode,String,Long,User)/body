@@ -20,15 +20,22 @@
     }
     String key=content.substring(start + NODE_KEY_PREFIX.length(),end);
     int indexOfComma=key.indexOf(",");
+    int indexOfDot=key.indexOf(".");
     String templateKey=null;
+    String methodKey=null;
+    Template customTemplate=null;
     if (indexOfComma > 0) {
       String[] splitted=StringUtils.split(key,",");
       key=splitted[0];
       templateKey=splitted[1];
+      if (StringUtils.isNotEmpty(templateKey)) {
+        customTemplate=(Template)findNode.execute(user,this,new XPath(templateKey));
+      }
     }
-    Template customTemplate=null;
-    if (templateKey != null && !(templateKey.isEmpty())) {
-      customTemplate=(Template)findNode.execute(user,this,new XPath(templateKey));
+ else     if (indexOfDot > 0) {
+      String[] splitted=StringUtils.split(key,".");
+      key=splitted[0];
+      methodKey=splitted[1];
     }
     StringBuilder replacement=new StringBuilder();
     if (callingNode != null && key.equals(CALLING_NODE_SUBNODES_KEY)) {
@@ -59,7 +66,27 @@
         if (customTemplate != null) {
           s.setTemplate(customTemplate);
         }
-        s.renderView(replacement,startNode,editUrl,editNodeId,user);
+        if (StringUtils.isNotEmpty(methodKey)) {
+          methodKey=toGetter(methodKey);
+          Method getter=null;
+          try {
+            getter=s.getClass().getMethod(methodKey);
+            Object value=null;
+            try {
+              value=getter.invoke(s);
+              replacement.append(value);
+            }
+ catch (            Exception ex) {
+              logger.log(Level.FINE,"Cannot invoke method {0} on {1}",new Object[]{getter,s});
+            }
+          }
+ catch (          Exception ex) {
+            logger.log(Level.FINE,"Cannot invoke method {0}",methodKey);
+          }
+        }
+ else {
+          s.renderView(replacement,startNode,editUrl,editNodeId,user);
+        }
       }
  else {
         replacement.append(result);

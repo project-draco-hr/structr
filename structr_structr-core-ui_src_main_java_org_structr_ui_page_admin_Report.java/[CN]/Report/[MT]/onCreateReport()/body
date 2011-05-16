@@ -14,12 +14,17 @@
   for (  AbstractNode s : reportResults) {
     List<String> values=new LinkedList<String>();
     for (    Column c : columns) {
-      Object value=PropertyUtils.getValue(s,c.getName(),methodCache);
-      if (value != null) {
-        values.add(value.toString());
-      }
+      try {
+        Object value=PropertyUtils.getValue(s,c.getName(),methodCache);
+        if (value != null) {
+          values.add(value.toString());
+        }
  else {
-        values.add("");
+          values.add("");
+        }
+      }
+ catch (      RuntimeException re) {
+        continue;
       }
     }
     String[] sa=values.toArray(new String[values.size()]);

@@ -1,0 +1,15 @@
+{
+  if (key == null)   return null;
+  Object propertyValue=this.getProperty(key);
+  if (propertyValue != null) {
+    return propertyValue;
+  }
+  User user=CurrentSession.getUser();
+  List<AbstractNode> subnodes=this.getDirectChildAndLinkNodes();
+  for (  AbstractNode node : subnodes) {
+    if (key.equals(node.getName())) {
+      return node;
+    }
+  }
+  return null;
+}

@@ -1,0 +1,22 @@
+{
+  String refPath=node.getNodePath();
+  String thisPath=this.getNodePath();
+  String[] refParts=refPath.split("/");
+  String[] thisParts=thisPath.split("/");
+  int level=refParts.length - thisParts.length;
+  if (level == 0) {
+    return thisParts[thisParts.length - 1];
+  }
+ else   if (level < 0) {
+    return thisPath.substring(refPath.length());
+  }
+ else {
+    int i=0;
+    String ret="";
+    do {
+      ret=ret.concat("../");
+    }
+ while (++i < level);
+    return ret.concat(thisParts[thisParts.length - 1]);
+  }
+}

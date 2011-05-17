@@ -4,7 +4,7 @@
   if (page == null) {
     return;
   }
-  final Template templateNode=page.getTemplate(user);
+  final Template templateNode=page.getTemplate();
   templateSelect.setDataProvider(new DataProvider(){
     @Override public List<Option> getData(){
       List<Option> options=new LinkedList<Option>();
@@ -31,10 +31,10 @@
     }
   }
 );
-  externalViewUrl=node.getNodeURL(user,contextPath);
+  externalViewUrl=node.getNodeURL(contextPath);
   localViewUrl=getContext().getRequest().getContextPath().concat("/view".concat(node.getNodePath(user).replace("&","%26")));
   StringBuilder out=new StringBuilder();
-  node.renderView(out,node,null,null,user);
+  node.renderView(out,node,null,null);
   rendition=out.toString();
   source=ClickUtils.escapeHtml(rendition);
   renditionPanel=new Panel("renditionPanel","/panel/rendition-panel.htm");

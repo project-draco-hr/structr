@@ -5,7 +5,7 @@
   super.onInit();
   if (user != null) {
     sessionId=(Long)getContext().getRequest().getSession().getAttribute(SessionMonitor.SESSION_ID);
-    SessionMonitor.logPageRequest(user,sessionId,"Page Request",getContext().getRequest());
+    SessionMonitor.logPageRequest(sessionId,"Page Request",getContext().getRequest());
   }
   node=getNodeByIdOrPath(nodeId);
   if (node == null) {
@@ -25,16 +25,16 @@
     removeRelationshipAllowed=true;
   }
  else   if (user != null && node != null) {
-    readAllowed=node.readAllowed(user);
-    showTreeAllowed=node.showTreeAllowed(user);
-    writeAllowed=node.writeAllowed(user);
-    accessControlAllowed=node.accessControlAllowed(user);
-    createNodeAllowed=node.createSubnodeAllowed(user);
-    deleteNodeAllowed=node.deleteNodeAllowed(user);
-    editPropertiesAllowed=node.editPropertiesAllowed(user);
-    editVisibilityAllowed=node.editPropertiesAllowed(user);
-    addRelationshipAllowed=node.addRelationshipAllowed(user);
-    removeRelationshipAllowed=node.removeRelationshipAllowed(user);
+    readAllowed=node.readAllowed();
+    showTreeAllowed=node.showTreeAllowed();
+    writeAllowed=node.writeAllowed();
+    accessControlAllowed=node.accessControlAllowed();
+    createNodeAllowed=node.createSubnodeAllowed();
+    deleteNodeAllowed=node.deleteNodeAllowed();
+    editPropertiesAllowed=node.editPropertiesAllowed();
+    editVisibilityAllowed=node.editPropertiesAllowed();
+    addRelationshipAllowed=node.addRelationshipAllowed();
+    removeRelationshipAllowed=node.removeRelationshipAllowed();
   }
   CurrentRequest.onRequestStart();
 }

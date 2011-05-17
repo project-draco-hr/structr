@@ -1,0 +1,27 @@
+{
+  if (isVisible()) {
+    if (hasTemplate()) {
+      String html=template.getContent();
+      if (StringUtils.isNotBlank(html)) {
+        init();
+        List<AbstractNode> nodesToRender=new LinkedList<AbstractNode>();
+        for (        AbstractNode container : getSortedDirectChildren(RelType.DATA)) {
+          nodesToRender.addAll(container.getDirectChildNodes());
+        }
+        Collections.sort(nodesToRender,new AbstractNodeComparator(toGetter(sortKey),sortOrder));
+        int toIndex=Math.min(pageNo * pageSize,nodesToRender.size());
+        int fromIndex=Math.min(Math.max(pageNo - 1,0) * pageSize,toIndex);
+        logger.log(Level.INFO,"Showing list elements from {0} to {1}",new Object[]{fromIndex,toIndex});
+        for (        AbstractNode node : nodesToRender.subList(fromIndex,toIndex)) {
+          doRendering(out,this,node,editUrl,editNodeId);
+        }
+      }
+ else {
+        logger.log(Level.WARNING,"No template!");
+      }
+    }
+  }
+ else {
+    logger.log(Level.WARNING,"Node not visible");
+  }
+}

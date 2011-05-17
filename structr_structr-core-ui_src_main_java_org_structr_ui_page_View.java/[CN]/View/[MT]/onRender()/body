@@ -6,13 +6,13 @@
     setForward("/click/not-found.htm");
   }
  else {
-    if (!(s.isVisible(user))) {
+    if (!(s.isVisible())) {
       logger.log(Level.FINE,"Hidden page requested ({0})",getNodeId());
       getContext().getResponse().setStatus(HttpServletResponse.SC_NOT_FOUND);
       setForward("/click/not-found.htm");
       return;
     }
-    if (!(isSuperUser || s.readAllowed(user))) {
+    if (!(isSuperUser || s.readAllowed())) {
       logger.log(Level.FINE,"Secure page requested ({0})",getNodeId());
       getContext().getResponse().setStatus(HttpServletResponse.SC_FORBIDDEN);
       setForward("/not-authorized.html");
@@ -40,7 +40,7 @@
       }
       try {
         response.getOutputStream().flush();
-        s.renderDirect(response.getOutputStream(),s,editUrl,editNodeId,user);
+        s.renderDirect(response.getOutputStream(),s,editUrl,editNodeId);
       }
  catch (      IOException e) {
         logger.log(Level.SEVERE,"Error while rendering to output stream: ",e.getStackTrace());
@@ -48,7 +48,7 @@
     }
  else {
       StringBuilder out=new StringBuilder();
-      s.renderView(out,s,editUrl,editNodeId,user);
+      s.renderView(out,s,editUrl,editNodeId);
       output=new StringBuilder(getContext().getResponse().encodeURL(out.toString()));
     }
   }

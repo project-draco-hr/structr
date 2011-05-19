@@ -40,6 +40,7 @@
       logger.log(Level.SEVERE,"No layer name!");
     }
     SimpleFeatureSource featureSource=n4jstore.getFeatureSource(layerName);
+    GeoObject featureNode=null;
     if (auto) {
       if (featureName == null) {
         envelope=featureSource.getBounds();
@@ -53,6 +54,12 @@
         if (featureCollection != null && !(featureCollection.isEmpty())) {
           SimpleFeature requestedFeature=featureCollection.features().next();
           envelope=(ReferencedEnvelope)requestedFeature.getBounds();
+        }
+        List<AbstractNode> result=(List<AbstractNode>)Services.command(SearchNodeCommand.class).execute(new SuperUser(),null,false,false,Search.andExactName(featureName));
+        for (        AbstractNode n : result) {
+          if (n instanceof GeoObject) {
+            featureNode=(GeoObject)n;
+          }
         }
       }
     }
@@ -82,10 +89,17 @@
     boolean displayCities=(getDisplayCities() == Boolean.TRUE);
     if (displayCities) {
       List<GeoObject> cities=new LinkedList<GeoObject>();
-      List<AbstractNode> result=(List<AbstractNode>)Services.command(SearchNodeCommand.class).execute(user,null,false,false,Search.andExactType("City"));
+      List<AbstractNode> result=(List<AbstractNode>)Services.command(SearchNodeCommand.class).execute(user,featureNode,false,false,Search.andExactType("City"));
       for (      AbstractNode node : result) {
         if ("City".equals(node.getType())) {
-          cities.add((GeoObject)node);
+          GeoObject city=(GeoObject)node;
+          List<StructrRelationship> linksIn=city.getIncomingLinkRelationships();
+          for (          StructrRelationship rel : linksIn) {
+            if (rel.getStartNode().equals(featureNode)) {
+              cities.add(city);
+              break;
+            }
+          }
         }
       }
       SimpleFeatureCollection collection=MapHelper.createPointsFromGeoObjects(cities);

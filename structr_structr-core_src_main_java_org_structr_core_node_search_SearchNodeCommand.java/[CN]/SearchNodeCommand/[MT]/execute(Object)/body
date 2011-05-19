@@ -2,7 +2,7 @@
   GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
   Index<Node> index=(Index<Node>)arguments.get("index");
   StructrNodeFactory nodeFactory=(StructrNodeFactory)arguments.get("nodeFactory");
-  Set<AbstractNode> result=new TreeSet<AbstractNode>();
+  List<AbstractNode> finalResult=new LinkedList<AbstractNode>();
   if (graphDb != null) {
     if (parameters == null || parameters.length != 5) {
       logger.log(Level.WARNING,"Exactly 5 parameters are required for advanced search.");
@@ -87,36 +87,51 @@
     }
     long t2=System.currentTimeMillis();
     if (booleanAttributes.isEmpty()) {
-      result.addAll(intermediateResult);
+      finalResult.addAll(intermediateResult);
     }
  else {
       for (      AbstractNode node : intermediateResult) {
         for (        BooleanSearchAttribute attr : booleanAttributes) {
           String key=attr.getKey();
-          Boolean value=attr.getValue();
+          Boolean searchValue=attr.getValue();
           SearchOperator op=attr.getSearchOperator();
           Object nodeValue=node.getProperty(key);
-          if (op.equals(SearchOperator.OR)) {
-            result.add(node);
-          }
- else           if (op.equals(SearchOperator.AND)) {
-            if (nodeValue == null && value == null) {
-              result.add(node);
-            }
-            if (nodeValue != null && nodeValue.equals(value)) {
-              result.add(node);
+          if (op.equals(SearchOperator.NOT)) {
+            if (nodeValue != null && !(nodeValue.equals(searchValue))) {
+              attr.addToResult(node);
             }
           }
- else           if (op.equals(SearchOperator.NOT)) {
-            if (nodeValue != null && !(nodeValue.equals(value))) {
-              result.add(node);
+ else {
+            if (nodeValue == null && searchValue == null) {
+              attr.addToResult(node);
+            }
+            if (nodeValue != null && nodeValue.equals(searchValue)) {
+              attr.addToResult(node);
             }
           }
         }
       }
+      for (      BooleanSearchAttribute attr : booleanAttributes) {
+        SearchOperator op=attr.getSearchOperator();
+        List<AbstractNode> result=attr.getResult();
+        if (op.equals(SearchOperator.AND)) {
+          intermediateResult=ListUtils.intersection(intermediateResult,result);
+        }
+ else         if (op.equals(SearchOperator.AND)) {
+          intermediateResult=ListUtils.sum(intermediateResult,result);
+        }
+ else         if (op.equals(SearchOperator.NOT)) {
+          intermediateResult=ListUtils.subtract(intermediateResult,result);
+        }
+      }
+      finalResult.addAll(intermediateResult);
     }
     long t3=System.currentTimeMillis();
-    logger.log(Level.FINE,"Filtering nodes took {0} ms. Result size now {1}.",new Object[]{t3 - t2,result.size()});
+    logger.log(Level.FINE,"Filtering nodes took {0} ms. Result size now {1}.",new Object[]{t3 - t2,finalResult.size()});
   }
-  return new LinkedList<AbstractNode>(result);
+  long t4=System.currentTimeMillis();
+  Collections.sort(finalResult);
+  long t5=System.currentTimeMillis();
+  logger.log(Level.FINE,"Sorting nodes took {0} ms.",new Object[]{t5 - t4});
+  return finalResult;
 }

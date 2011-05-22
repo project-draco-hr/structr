@@ -3,9 +3,11 @@
   JarFile jarFile=new JarFile(modulePath);
   Set<String> classes=module.getClasses();
   for (  final String className : classes) {
+    logger.log(Level.FINE,"Deploying class {0} ",className);
     try {
       String sourcePath=className.replaceAll("[\\.]+","/").concat(".class");
       String destinationFile=createResourceFileName(servletContext,"WEB-INF/classes",sourcePath);
+      logger.log(Level.FINE,"sourcePath: {0}, destinationFile: {1}",new Object[]{sourcePath,destinationFile});
       ZipEntry entry=jarFile.getEntry(sourcePath);
       if (entry != null) {
         InputStream inputStream=jarFile.getInputStream(entry);
@@ -48,8 +50,10 @@
     }
   }
   for (  final String className : classes) {
+    logger.log(Level.FINE,"Instantiating class {0} ",className);
     try {
       Class clazz=Class.forName(className);
+      logger.log(Level.FINE,"Class {0} instanciated: {1}",new Object[]{className,clazz});
       if (!Modifier.isAbstract(clazz.getModifiers())) {
         if (AbstractNode.class.isAssignableFrom(clazz)) {
           String simpleName=clazz.getSimpleName();
@@ -74,6 +78,7 @@
     }
  catch (    Throwable t) {
       logger.log(Level.WARNING,"error instantiating class {0}: {1}",new Object[]{className,t});
+      t.printStackTrace(System.out);
     }
   }
   Set<String> resources=module.getResources();

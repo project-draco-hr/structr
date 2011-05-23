@@ -87,23 +87,30 @@
     style.featureTypeStyles().add(fts);
     layers.add(new MapLayer(features,style));
     boolean displayCities=(getDisplayCities() == Boolean.TRUE);
-    if (displayCities) {
+    if (featureNode != null && "Country".equals(featureNode.getType()) && displayCities) {
+      List<AbstractNode> subNodes=featureNode.getSortedLinkedNodes();
+      List<GeoObject> geoObjects=new LinkedList<GeoObject>();
       List<GeoObject> cities=new LinkedList<GeoObject>();
-      List<AbstractNode> result=(List<AbstractNode>)Services.command(SearchNodeCommand.class).execute(user,featureNode,false,false,Search.andExactType("City"));
-      for (      AbstractNode node : result) {
+      List<GeoObject> hotels=new LinkedList<GeoObject>();
+      List<GeoObject> islands=new LinkedList<GeoObject>();
+      for (      AbstractNode node : subNodes) {
         if ("City".equals(node.getType())) {
-          GeoObject city=(GeoObject)node;
-          List<StructrRelationship> linksIn=city.getIncomingLinkRelationships();
-          for (          StructrRelationship rel : linksIn) {
-            AbstractNode startNode=rel.getStartNode();
-            if (startNode.isNotDeleted() && startNode.equals(featureNode)) {
-              cities.add(city);
-              break;
-            }
-          }
+          cities.add((GeoObject)node);
+        }
+        if ("Hotel".equals(node.getType())) {
+          hotels.add((GeoObject)node);
+        }
+        if ("Island".equals(node.getType())) {
+          islands.add((GeoObject)node);
         }
       }
-      SimpleFeatureCollection collection=MapHelper.createPointsFromGeoObjects(cities);
+      if (cities.isEmpty()) {
+        geoObjects.addAll(hotels);
+      }
+ else {
+        geoObjects.addAll(cities);
+      }
+      SimpleFeatureCollection collection=MapHelper.createPointsFromGeoObjects(geoObjects);
       Symbolizer cityTextSym=MapHelper.createTextSymbolizer(getPointFontName(),getPointFontSize(),getPointFontColor(),getPointFontOpacity(),getLabelAnchorX(),getLabelAnchorY(),getLabelDisplacementX(),getLabelDisplacementY());
       Symbolizer cityPointSym=MapHelper.createPointSymbolizer(getPointShape(),getPointDiameter(),getPointStrokeColor(),getPointStrokeLineWidth(),getPointFillColor(),this.getPointFillOpacity());
       Rule rule2=MapHelper.styleFactory.createRule();
@@ -113,8 +120,10 @@
       Style style2=MapHelper.styleFactory.createStyle();
       style2.featureTypeStyles().add(fts2);
       SimpleFeatureSource source=DataUtilities.source(collection);
-      SimpleFeatureCollection cityFeatures=source.getFeatures();
-      layers.add(new MapLayer(cityFeatures,style2));
+      SimpleFeatureCollection subFeatures=source.getFeatures();
+      if (!subFeatures.isEmpty()) {
+        layers.add(new MapLayer(subFeatures,style2));
+      }
     }
     mapContext=new DefaultMapContext(layers.toArray(new MapLayer[]{}));
     MapHelper.renderSVGDocument(out,mapContext,envelope,cx,cy,getOptimizeFtsRendering(),getLineWidthOptimization());

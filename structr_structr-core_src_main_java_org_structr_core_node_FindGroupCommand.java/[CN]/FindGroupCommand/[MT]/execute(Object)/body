@@ -1,0 +1,45 @@
+{
+  GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
+  Command searchNode=Services.command(SearchNodeCommand.class);
+  if (graphDb != null) {
+switch (parameters.length) {
+case 0:
+      return (List<Group>)searchNode.execute(null,null,false,false,Search.andExactType(Group.class.getSimpleName()));
+case 1:
+    if (parameters[0] instanceof String) {
+      String groupName=(String)parameters[0];
+      List<SearchAttribute> searchAttrs=new LinkedList<SearchAttribute>();
+      searchAttrs.add(Search.andExactName(groupName));
+      searchAttrs.add(Search.andExactType(Group.class.getSimpleName()));
+      List<AbstractNode> groupsFound=(List<AbstractNode>)searchNode.execute(null,null,false,false,searchAttrs);
+      if (groupsFound != null && groupsFound.size() > 0) {
+        return groupsFound.get(0);
+      }
+ else {
+        logger.log(Level.FINE,"No group with name {0} found.",groupName);
+        return null;
+      }
+    }
+case 2:
+  if (parameters[0] instanceof String && parameters[1] instanceof AbstractNode) {
+    String groupName=(String)parameters[0];
+    AbstractNode topNode=(AbstractNode)parameters[1];
+    List<SearchAttribute> searchAttrs=new LinkedList<SearchAttribute>();
+    searchAttrs.add(Search.andExactName(groupName));
+    searchAttrs.add(Search.andExactType(Group.class.getSimpleName()));
+    List<AbstractNode> groupsFound=(List<AbstractNode>)searchNode.execute(topNode,null,false,false,searchAttrs);
+    if (groupsFound != null && groupsFound.size() > 0) {
+      return groupsFound.get(0);
+    }
+ else {
+      logger.log(Level.FINE,"No group with name {0} found in {1}[{2}].",new Object[]{groupName,topNode.getName(),topNode.getId()});
+      return null;
+    }
+  }
+break;
+default :
+break;
+}
+}
+return null;
+}

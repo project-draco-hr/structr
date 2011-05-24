@@ -1,8 +1,6 @@
 {
   GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
-  Command findNode=Services.command(FindNodeCommand.class);
   Command searchNode=Services.command(SearchNodeCommand.class);
-  String userXPath=null;
   if (graphDb != null) {
 switch (parameters.length) {
 case 0:
@@ -41,25 +39,6 @@ case 2:
 break;
 default :
 break;
-}
-}
-List<AbstractNode> nodes=(List<AbstractNode>)findNode.execute(new SuperUser(),new XPath(userXPath));
-if (nodes != null) {
-if (nodes.size() == 1) {
-AbstractNode r=nodes.get(0);
-if (r instanceof User) {
-return (User)r;
-}
- else {
-logger.log(Level.SEVERE,"XPath search {0} for User, but returned class was not User: {1}",new Object[]{userXPath,r.getType()});
-return null;
-}
-}
- else if (nodes.size() > 1) {
-return nodes;
-}
- else {
-logger.log(Level.SEVERE,"XPath search {0} for User, but returned class was not User!",userXPath);
 }
 }
 return null;

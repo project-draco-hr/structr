@@ -97,7 +97,7 @@
           Image image=(Image)n;
           Image thumbnail=image.getScaledImage(100,100);
           if (thumbnail != null) {
-            String thumbnailSrc="/view.htm?nodeId=" + thumbnail.getId();
+            String thumbnailSrc="/view/" + thumbnail.getId();
             link.setImageSrc(thumbnailSrc);
             hasThumbnail=true;
           }
@@ -252,20 +252,40 @@
     addControl(editRelationshipsPanel);
   }
   if (accessControlAllowed) {
-    nameColumn=new Column(AbstractNode.NAME_KEY);
-    nameDec=new LinkDecorator(securityTable,viewRelLink,"id"){
+    typeColumn=new Column(AbstractNode.TYPE_KEY);
+    iconDec=new LinkDecorator(securityTable,viewRelLink,"id"){
       @Override protected void renderActionLink(      HtmlStringBuffer buffer,      AbstractLink link,      Context context,      Object row,      Object value){
         StructrRelationship r=(StructrRelationship)row;
         AbstractNode startNode=r.getStartNode();
-        PageLink pageLink=new PageLink("id",getEditPageClass(startNode)){
+        link=new PageLink("id",getEditPageClass(startNode)){
           @Override public String getHref(){
             return super.getHref().concat("#security-tab");
           }
         }
 ;
-        pageLink.setParameter(NODE_ID_KEY,startNode.getId());
-        pageLink.setLabel(startNode.getName());
-        super.renderActionLink(buffer,pageLink,context,row,value);
+        link.setParameter(NODE_ID_KEY,startNode.getId());
+        link.setLabel(startNode.getName());
+        link.setImageSrc(getIconSrc(startNode));
+        super.renderActionLink(buffer,link,context,row,value);
+      }
+    }
+;
+    typeColumn.setDecorator(iconDec);
+    securityTable.addColumn(typeColumn);
+    nameColumn=new Column(AbstractNode.NAME_KEY);
+    nameDec=new LinkDecorator(securityTable,viewRelLink,"id"){
+      @Override protected void renderActionLink(      HtmlStringBuffer buffer,      AbstractLink link,      Context context,      Object row,      Object value){
+        StructrRelationship r=(StructrRelationship)row;
+        AbstractNode startNode=r.getStartNode();
+        link=new PageLink("id",getEditPageClass(startNode)){
+          @Override public String getHref(){
+            return super.getHref().concat("#security-tab");
+          }
+        }
+;
+        link.setParameter(NODE_ID_KEY,startNode.getId());
+        link.setLabel(startNode.getName());
+        super.renderActionLink(buffer,link,context,row,value);
       }
     }
 ;
@@ -276,6 +296,7 @@
     securityForm.add(securityTable);
     FieldSet setPermissionFields=new FieldSet("Set Permissions");
     setPermissionFields.add(userSelect);
+    setPermissionFields.add(groupSelect);
     setPermissionFields.add(recursive);
     List<Option> optionList=new LinkedList<Option>();
     Option readOption=new Option(StructrRelationship.READ_KEY,"Read");

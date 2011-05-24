@@ -8,10 +8,21 @@
   if (this.equals(principal)) {
     return true;
   }
-  StructrRelationship r=null;
-  r=getSecurityRelationship(principal);
+  StructrRelationship r=getSecurityRelationship(principal);
   if (r != null && r.isAllowed(permission)) {
     return true;
+  }
+  List<StructrRelationship> rels=principal.getIncomingChildRelationships();
+  for (  StructrRelationship sr : rels) {
+    AbstractNode node=sr.getStartNode();
+    if (!(node instanceof Group)) {
+      continue;
+    }
+    Group group=(Group)node;
+    r=getSecurityRelationship(group);
+    if (r != null && r.isAllowed(permission)) {
+      return true;
+    }
   }
   return false;
 }

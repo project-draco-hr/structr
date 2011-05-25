@@ -1,11 +1,12 @@
 {
   if (copyNodeForm.isValid()) {
     final String targetNodeId=copyNodeForm.getFieldValue(TARGET_NODE_ID_KEY);
+    final String sourceNodeId=StringUtils.isNotEmpty(copyNodeForm.getFieldValue(SOURCE_NODE_ID_KEY)) ? copyNodeForm.getFieldValue(SOURCE_NODE_ID_KEY) : getNodeId();
     Command transactionCommand=Services.command(TransactionCommand.class);
     transactionCommand.execute(new StructrTransaction(){
       @Override public Object execute() throws Throwable {
         Command copyNode=Services.command(CopyNodeCommand.class);
-        copyNode.execute(getNodeId(),targetNodeId,user);
+        copyNode.execute(sourceNodeId,targetNodeId,user);
         return (null);
       }
     }

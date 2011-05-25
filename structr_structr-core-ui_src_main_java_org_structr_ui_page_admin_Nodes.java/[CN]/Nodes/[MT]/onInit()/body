@@ -19,9 +19,11 @@
     newNodeForm.add(new HiddenField(RENDER_MODE_KEY,renderMode != null ? renderMode : ""));
     newNodeForm.add(new Submit("createNewNode"," Create new node ",this,"onCreateNode"));
     newNodePanel=new Panel("newNodePanel","/panel/new-node-panel.htm");
+    copyNodeForm.add(new TextField(SOURCE_NODE_ID_KEY,true));
     copyNodeForm.add(new TextField(TARGET_NODE_ID_KEY,true));
     copyNodeForm.add(new HiddenField(NODE_ID_KEY,nodeId != null ? nodeId : ""));
     copyNodeForm.add(new HiddenField(RENDER_MODE_KEY,renderMode != null ? renderMode : ""));
+    copyNodeForm.setListener(this,"onCopyNode");
     copyNodeForm.add(new Submit("copyNode"," Copy node ",this,"onCopyNode"));
     copyNodePanel=new Panel("copyNodePanel","/panel/copy-node-panel.htm");
     FileField uploadField1=new FileField("file1",false);
@@ -60,9 +62,9 @@
     deleteNodeForm.add(new HiddenField(RENDER_MODE_KEY,renderMode != null ? renderMode : ""));
     deleteNodeForm.add(new Submit("deleteNode"," Delete node ",this,"onDeleteNode"));
     deleteNodePanel=new Panel("deleteNodePanel","/panel/delete-node-panel.htm");
-    moveNodeForm.add(new TextField(NEW_PARENT_NODE_ID_KEY,true));
     moveNodeForm.add(new HiddenField(NODE_ID_KEY,nodeId != null ? nodeId : ""));
-    moveNodeForm.add(new HiddenField(SOURCE_NODE_ID_KEY,""));
+    moveNodeForm.add(new TextField(TARGET_NODE_ID_KEY,true));
+    moveNodeForm.add(new TextField(SOURCE_NODE_ID_KEY,""));
     moveNodeForm.add(new HiddenField(RENDER_MODE_KEY,renderMode != null ? renderMode : ""));
     moveNodeForm.setListener(this,"onMoveNode");
     moveNodeForm.add(new Submit("moveNode"," Move node ",this,"onMoveNode"));
@@ -88,6 +90,7 @@
     newRelationshipForm.add(new TextField(TARGET_SLOT_NAME_KEY,false));
     newRelationshipForm.add(new HiddenField(NODE_ID_KEY,nodeId != null ? nodeId : ""));
     newRelationshipForm.add(new HiddenField(RENDER_MODE_KEY,renderMode != null ? renderMode : ""));
+    newRelationshipForm.setListener(this,"onCreateRelationship");
     newRelationshipForm.add(new Submit("createNewRelationship"," Create new relationship ",this,"onCreateRelationship"));
     newRelationshipPanel=new Panel("newRelationshipPanel","/panel/new-relationship-panel.htm");
   }

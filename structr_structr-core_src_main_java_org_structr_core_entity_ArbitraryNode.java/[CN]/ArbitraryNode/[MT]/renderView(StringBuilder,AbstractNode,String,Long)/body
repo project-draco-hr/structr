@@ -1,3 +1,17 @@
 {
-  out.append(getName());
+  if (editNodeId != null && getId() == editNodeId.longValue()) {
+    renderEditFrame(out,editUrl);
+  }
+ else {
+    if (hasTemplate()) {
+      template.setCallingNode(this);
+      template.renderView(out,startNode,editUrl,editNodeId);
+    }
+ else {
+      List<AbstractNode> subnodes=getSortedDirectChildAndLinkNodes();
+      for (      AbstractNode s : subnodes) {
+        s.renderView(out,startNode,editUrl,editNodeId);
+      }
+    }
+  }
 }

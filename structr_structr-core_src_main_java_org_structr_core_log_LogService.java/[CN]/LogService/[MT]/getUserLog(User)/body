@@ -4,9 +4,9 @@
   }
   LogNodeList userLogNodeList=loggerCache.get(user);
   if (userLogNodeList == null) {
-    for (    AbstractNode s : user.getDirectChildNodes()) {
-      if (s instanceof LogNodeList) {
-        userLogNodeList=(LogNodeList)s;
+    for (    StructrRelationship rel : user.getOutgoingChildRelationships()) {
+      if (rel.getEndNode() instanceof LogNodeList) {
+        userLogNodeList=(LogNodeList)rel.getEndNode();
         loggerCache.put(user,userLogNodeList);
         return userLogNodeList;
       }
@@ -15,7 +15,7 @@
       @Override public Object execute() throws Throwable {
         Command createNode=Services.command(CreateNodeCommand.class);
         Command createRel=Services.command(CreateRelationshipCommand.class);
-        LogNodeList<Activity> newLogNodeList=(LogNodeList<Activity>)createNode.execute(user,new NodeAttribute(AbstractNode.TYPE_KEY,LogNodeList.class.getSimpleName()),new NodeAttribute(AbstractNode.NAME_KEY,user.getName() + "'s Activity Log"));
+        LogNodeList<Activity> newLogNodeList=(LogNodeList<Activity>)createNode.execute(new NodeAttribute(AbstractNode.TYPE_KEY,LogNodeList.class.getSimpleName()),new NodeAttribute(AbstractNode.NAME_KEY,user.getName() + "'s Activity Log"));
         createRel.execute(user,newLogNodeList,RelType.HAS_CHILD);
         return (newLogNodeList);
       }

@@ -1,12 +1,14 @@
 {
   AbstractNode s=null;
+  final String targetNodeId=StringUtils.isNotEmpty(newNodeForm.getFieldValue(TARGET_NODE_ID_KEY)) ? newNodeForm.getFieldValue(TARGET_NODE_ID_KEY) : getNodeId();
   if (newNodeForm.isValid()) {
     Command transactionCommand=Services.command(TransactionCommand.class);
     s=(AbstractNode)transactionCommand.execute(new StructrTransaction(){
       @Override public Object execute() throws Throwable {
+        Command findNode=Services.command(FindNodeCommand.class);
         Command createNode=Services.command(CreateNodeCommand.class);
         Command createRel=Services.command(CreateRelationshipCommand.class);
-        AbstractNode parentNode=node;
+        AbstractNode parentNode=(AbstractNode)findNode.execute(user,Long.parseLong(targetNodeId));
         AbstractNode newNode=(AbstractNode)createNode.execute(user);
         newNodeForm.copyTo(newNode);
         createRel.execute(parentNode,newNode,RelType.HAS_CHILD);

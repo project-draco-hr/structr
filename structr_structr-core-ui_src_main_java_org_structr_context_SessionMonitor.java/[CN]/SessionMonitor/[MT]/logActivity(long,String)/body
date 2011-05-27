@@ -1,15 +1,15 @@
 {
   Date now=new Date();
   User user=CurrentRequest.getCurrentUser();
-  Activity activity=new Activity();
-  activity.setProperty(AbstractNode.TYPE_KEY,Activity.class.getSimpleName());
   if (user != null) {
+    Activity activity=new Activity();
+    activity.setProperty(AbstractNode.TYPE_KEY,Activity.class.getSimpleName());
     activity.setProperty(AbstractNode.NAME_KEY,"User: " + user.getName() + ", Action: "+ action+ ", Date: "+ now);
+    activity.setProperty(Activity.SESSION_ID_KEY,sessionId);
+    activity.setProperty(Activity.START_TIMESTAMP_KEY,now);
+    activity.setProperty(Activity.END_TIMESTAMP_KEY,now);
+    activity.setUser(user);
+    getSession(sessionId).setLastActivity(activity);
+    Services.command(LogCommand.class).execute(activity);
   }
-  activity.setProperty(Activity.SESSION_ID_KEY,sessionId);
-  activity.setProperty(Activity.START_TIMESTAMP_KEY,now);
-  activity.setProperty(Activity.END_TIMESTAMP_KEY,now);
-  activity.setUser(user);
-  getSession(sessionId).setLastActivity(activity);
-  Services.command(LogCommand.class).execute(activity);
 }

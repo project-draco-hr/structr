@@ -1,10 +1,13 @@
 {
   super.onInit();
-  externalViewUrl=node.getNodeURL(contextPath);
-  localViewUrl=getContext().getRequest().getContextPath().concat("/view".concat(node.getNodePath().replace("&","%26")));
-  StringBuilder out=new StringBuilder();
-  node.renderView(out,node,null,null);
-  rendition=out.toString();
-  source=ClickUtils.escapeHtml(rendition);
-  renditionPanel=new Panel("renditionPanel","/panel/rendition-panel.htm");
+  if (node instanceof Page) {
+    page=(Page)node;
+    externalViewUrl=page.getNodeURL(contextPath);
+    localViewUrl=getContext().getRequest().getContextPath().concat("/view".concat(page.getNodePath().replace("&","%26")));
+    StringBuilder out=new StringBuilder();
+    node.renderView(out,page,null,null);
+    rendition=out.toString();
+    source=ClickUtils.escapeHtml(rendition);
+    renditionPanel=new Panel("renditionPanel","/panel/rendition-panel.htm");
+  }
 }

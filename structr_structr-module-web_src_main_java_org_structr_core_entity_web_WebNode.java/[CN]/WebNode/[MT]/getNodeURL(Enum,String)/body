@@ -6,21 +6,22 @@
     Command nodeFactory=Services.command(NodeFactoryCommand.class);
     AbstractNode node=(AbstractNode)nodeFactory.execute(this);
     while (node != null && node.getId() > 0) {
-      String urlPart=node.getUrlPart();
+      String urlPart=node.getName();
       if (urlPart != null) {
-        if (urlPart.startsWith("http://")) {
+        if (node instanceof Site) {
           site=urlPart;
         }
- else         if (urlPart.endsWith("/")) {
+ else         if (node instanceof Domain) {
           domain=urlPart;
         }
  else {
-          path=node.getUrlPart() + (!("".equals(path)) ? "/" + path : "");
+          path=urlPart;
         }
       }
       node=node.getParentNode();
     }
-    return site + (site != null ? "." : "") + domain+ path;
+    String scheme=CurrentRequest.getRequest().getScheme();
+    return scheme + "://" + site+ (StringUtils.isNotEmpty(site) ? "." : "")+ domain+ "/"+ path;
   }
  else   if (RenderMode.LOCAL.equals(renderMode)) {
     String localUrl=contextPath.concat(getNodePath()).concat("&renderMode=local");

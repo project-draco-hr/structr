@@ -18,9 +18,16 @@
     if (request != null) {
       root.put("Request",new freemarker.ext.servlet.HttpRequestParametersHashModel(request));
       String searchString=request.getParameter("search");
+      String searchInContent=request.getParameter("searchInContent");
+      boolean inContent=StringUtils.isNotEmpty(searchInContent) && Boolean.parseBoolean(searchInContent) ? true : false;
       if (searchString != null && !(searchString.isEmpty())) {
+        List<SearchAttribute> searchAttrs=new LinkedList<SearchAttribute>();
+        searchAttrs.add(Search.orName(searchString));
+        if (inContent) {
+          searchAttrs.add(Search.orContent(searchString));
+        }
         Command search=Services.command(SearchNodeCommand.class);
-        List<AbstractNode> result=(List<AbstractNode>)search.execute(null,null,false,true,Search.orName(searchString));
+        List<AbstractNode> result=(List<AbstractNode>)search.execute(null,null,false,true,searchAttrs);
         root.put("SearchResults",result);
       }
     }

@@ -1,0 +1,16 @@
+{
+  if (trash != null) {
+    Command deleteNode=Services.command(DeleteNodeCommand.class);
+    List<AbstractNode> contents=trash.getDirectChildAndLinkNodes();
+    for (    AbstractNode nodeToDelete : contents) {
+      deleteNode.execute(nodeToDelete,null,true,user);
+    }
+  }
+  okMsg="Trash emptied";
+  Map<String,String> parameters=new HashMap<String,String>();
+  parameters.put(NODE_ID_KEY,String.valueOf(getNodeId()));
+  parameters.put(RENDER_MODE_KEY,renderMode);
+  parameters.put(OK_MSG_KEY,okMsg);
+  setRedirect(getRedirectPage(node),parameters);
+  return false;
+}

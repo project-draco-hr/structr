@@ -23,16 +23,11 @@
       Command findNode=Services.command(FindNodeCommand.class);
       AbstractNode n=(AbstractNode)findNode.execute(user,s.getId());
       Map<String,String> parameters=new HashMap<String,String>();
-      parameters.put(NODE_ID_KEY,String.valueOf(n.getId()));
+      parameters.put(NODE_ID_KEY,String.valueOf(s.getId()));
       parameters.put(RENDER_MODE_KEY,renderMode);
       parameters.put(OK_MSG_KEY,okMsg);
-      setRedirect(getRedirectPage(n),parameters);
-      if (n instanceof PlainText) {
-        setRedirect(getRedirect().concat("#content-tab"));
-      }
- else {
-        setRedirect(getRedirect().concat("#properties-tab"));
-      }
+      setRedirect(getRedirectPage(s),parameters);
+      setRedirect(getRedirect().concat("#properties-tab"));
     }
  else {
       errorMsg="New node could not be created!";
@@ -42,5 +37,5 @@
     newNodeFormIsInvalid="true";
     return true;
   }
-  return redirect();
+  return false;
 }

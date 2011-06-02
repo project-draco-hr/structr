@@ -1,0 +1,13 @@
+{
+  if (node != null) {
+    RelationshipType relType=RelType.HAS_CHILD;
+    if (isLink) {
+      relType=RelType.LINK;
+    }
+    Relationship parentRel=node.getNode().getSingleRelationship(relType,Direction.INCOMING);
+    if (parentRel != null) {
+      parentRel.delete();
+    }
+    newParentNode.getNode().createRelationshipTo(node.getNode(),relType);
+  }
+}

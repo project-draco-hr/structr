@@ -1,0 +1,55 @@
+{
+  Configuration cfg=new Configuration();
+  try {
+    AbstractNode callingNode=null;
+    if (getTemplate() != null) {
+      callingNode=template.getCallingNode();
+    }
+ else {
+      callingNode=startNode;
+    }
+    Map root=new HashMap();
+    root.put("this",this);
+    if (callingNode != null) {
+      root.put(callingNode.getType(),callingNode);
+      root.put("CallingNode",callingNode);
+    }
+    HttpServletRequest request=CurrentRequest.getRequest();
+    if (request != null) {
+      root.put("Request",new freemarker.ext.servlet.HttpRequestParametersHashModel(request));
+      String searchString=request.getParameter("search");
+      String searchInContent=request.getParameter("searchInContent");
+      boolean inContent=StringUtils.isNotEmpty(searchInContent) && Boolean.parseBoolean(searchInContent) ? true : false;
+      if (searchString != null && !(searchString.isEmpty())) {
+        List<SearchAttribute> searchAttrs=new LinkedList<SearchAttribute>();
+        searchAttrs.add(Search.orName(searchString));
+        if (inContent) {
+          searchAttrs.add(Search.orContent(searchString));
+        }
+        Command search=Services.command(SearchNodeCommand.class);
+        List<AbstractNode> result=(List<AbstractNode>)search.execute(null,null,false,true,searchAttrs);
+        root.put("SearchResults",result);
+      }
+    }
+    if (user != null) {
+      root.put("User",user);
+    }
+    root.put("Helper",new TemplateHelper());
+    HttpSession session=CurrentRequest.getSession();
+    if (session != null) {
+      if (session.getAttribute("errorMessage") != null) {
+        root.put("ErrorMessage",session.getAttribute("errorMessage"));
+      }
+      if (session.getAttribute("okMessage") != null) {
+        root.put("OkMessage",session.getAttribute("okMessage"));
+      }
+    }
+    String name=template != null ? template.getName() : getName();
+    freemarker.template.Template t=new freemarker.template.Template(name,new StringReader(templateString),cfg);
+    t.process(root,out);
+    out.flush();
+  }
+ catch (  Throwable t) {
+    logger.log(Level.WARNING,"Error: {0}",t.getMessage());
+  }
+}

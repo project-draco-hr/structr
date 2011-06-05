@@ -1,65 +1,51 @@
 {
   GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
-  Command findNode=Services.command(FindNodeCommand.class);
   Command searchNode=Services.command(SearchNodeCommand.class);
-  String userXPath=null;
   if (graphDb != null) {
 switch (parameters.length) {
 case 0:
-      return (List<User>)searchNode.execute(null,null,false,false,Search.andExactType(User.class.getSimpleName()));
-case 1:
-    if (parameters[0] instanceof String) {
-      String userName=(String)parameters[0];
-      List<SearchAttribute> searchAttrs=new LinkedList<SearchAttribute>();
-      searchAttrs.add(Search.andExactName(userName));
-      searchAttrs.add(Search.andExactType(User.class.getSimpleName()));
-      List<AbstractNode> usersFound=(List<AbstractNode>)searchNode.execute(null,null,false,false,searchAttrs);
-      if (usersFound != null && usersFound.size() > 0) {
-        return usersFound.get(0);
-      }
- else {
-        logger.log(Level.FINE,"No user with name {0} found.",userName);
-        return null;
-      }
-    }
-case 2:
-  if (parameters[0] instanceof String && parameters[1] instanceof AbstractNode) {
-    String userName=(String)parameters[0];
-    AbstractNode topNode=(AbstractNode)parameters[1];
-    List<SearchAttribute> searchAttrs=new LinkedList<SearchAttribute>();
-    searchAttrs.add(Search.andExactName(userName));
-    searchAttrs.add(Search.andExactType(User.class.getSimpleName()));
-    List<AbstractNode> usersFound=(List<AbstractNode>)searchNode.execute(topNode,null,false,false,searchAttrs);
-    if (usersFound != null && usersFound.size() > 0) {
-      return usersFound.get(0);
-    }
- else {
-      logger.log(Level.FINE,"No user with name {0} found.",userName);
-      return null;
+      List<User> users=new LinkedList<User>();
+    List<AbstractNode> result=(List<AbstractNode>)searchNode.execute(null,null,false,false,Search.andExactType(User.class.getSimpleName()));
+  for (  AbstractNode n : result) {
+    if (n instanceof User) {
+      users.add((User)n);
     }
   }
-break;
-default :
-break;
-}
-}
-List<AbstractNode> nodes=(List<AbstractNode>)findNode.execute(new SuperUser(),new XPath(userXPath));
-if (nodes != null) {
-if (nodes.size() == 1) {
-AbstractNode r=nodes.get(0);
-if (r instanceof User) {
-return (User)r;
+return users;
+case 1:
+if (parameters[0] instanceof String) {
+String userName=(String)parameters[0];
+List<SearchAttribute> searchAttrs=new LinkedList<SearchAttribute>();
+searchAttrs.add(Search.andExactName(userName));
+searchAttrs.add(Search.andExactType(User.class.getSimpleName()));
+List<AbstractNode> usersFound=(List<AbstractNode>)searchNode.execute(null,null,false,false,searchAttrs);
+if (usersFound != null && usersFound.size() > 0 && usersFound.get(0) instanceof User) {
+  return (User)usersFound.get(0);
 }
  else {
-logger.log(Level.SEVERE,"XPath search {0} for User, but returned class was not User: {1}",new Object[]{userXPath,r.getType()});
+  logger.log(Level.FINE,"No user with name {0} found.",userName);
+  return null;
+}
+}
+case 2:
+if (parameters[0] instanceof String && parameters[1] instanceof AbstractNode) {
+String userName=(String)parameters[0];
+AbstractNode topNode=(AbstractNode)parameters[1];
+List<SearchAttribute> searchAttrs=new LinkedList<SearchAttribute>();
+searchAttrs.add(Search.andExactName(userName));
+searchAttrs.add(Search.andExactType(User.class.getSimpleName()));
+List<AbstractNode> usersFound=(List<AbstractNode>)searchNode.execute(topNode,null,false,false,searchAttrs);
+if (usersFound != null && usersFound.size() > 0 && usersFound.get(0) instanceof User) {
+return (User)usersFound.get(0);
+}
+ else {
+logger.log(Level.FINE,"No user with name {0} found.",userName);
 return null;
 }
 }
- else if (nodes.size() > 1) {
-return nodes;
-}
- else {
-logger.log(Level.SEVERE,"XPath search {0} for User, but returned class was not User!",userXPath);
+break;
+default :
+break;
 }
 }
 return null;

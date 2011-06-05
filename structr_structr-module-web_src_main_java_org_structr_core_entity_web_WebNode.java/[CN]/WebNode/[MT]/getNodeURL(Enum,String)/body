@@ -1,0 +1,33 @@
+{
+  String domain="";
+  String site="";
+  String path="";
+  if (RenderMode.PUBLIC.equals(renderMode)) {
+    Command nodeFactory=Services.command(NodeFactoryCommand.class);
+    AbstractNode node=(AbstractNode)nodeFactory.execute(this);
+    while (node != null && node.getId() > 0) {
+      String urlPart=node.getName();
+      if (urlPart != null) {
+        if (node instanceof Site) {
+          site=urlPart;
+        }
+ else         if (node instanceof Domain) {
+          domain=urlPart;
+        }
+ else {
+          path=urlPart;
+        }
+      }
+      node=node.getParentNode();
+    }
+    String scheme=CurrentRequest.getRequest().getScheme();
+    return scheme + "://" + site+ (StringUtils.isNotEmpty(site) ? "." : "")+ domain+ "/"+ path;
+  }
+ else   if (RenderMode.LOCAL.equals(renderMode)) {
+    String localUrl=contextPath.concat(getNodePath()).concat("&renderMode=local");
+    return localUrl;
+  }
+ else {
+    return null;
+  }
+}

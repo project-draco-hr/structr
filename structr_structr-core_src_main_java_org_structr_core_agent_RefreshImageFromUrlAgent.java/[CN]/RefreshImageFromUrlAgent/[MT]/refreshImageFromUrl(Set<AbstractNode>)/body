@@ -1,0 +1,18 @@
+{
+  Command transactionCommand=Services.command(TransactionCommand.class);
+  transactionCommand.execute(new StructrTransaction(){
+    @Override public Object execute() throws Throwable {
+      List<Image> images=new LinkedList<Image>();
+      for (      AbstractNode node : nodes) {
+        if (node instanceof Image) {
+          Image image=(Image)node;
+          Services.command(SaveImageFromUrl.class).execute(image);
+          images.add(image);
+        }
+        Services.command(ExtractAndSetImageDimensionsAndFormat.class).execute(images);
+      }
+      return null;
+    }
+  }
+);
+}

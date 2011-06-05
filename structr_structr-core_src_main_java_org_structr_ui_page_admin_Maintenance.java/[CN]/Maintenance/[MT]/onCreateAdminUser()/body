@@ -1,0 +1,20 @@
+{
+  Command transactionCommand=Services.command(TransactionCommand.class);
+  transactionCommand.execute(new StructrTransaction(){
+    @Override public Object execute() throws Throwable {
+      Command createNode=Services.command(CreateNodeCommand.class);
+      Command createRel=Services.command(CreateRelationshipCommand.class);
+      User adminUser=(User)createNode.execute(new NodeAttribute(AbstractNode.TYPE_KEY,User.class.getSimpleName()),new NodeAttribute(AbstractNode.NAME_KEY,"admin"),new SuperUser());
+      AbstractNode rootNode=getRootNode();
+      createRel.execute(rootNode,adminUser,RelType.HAS_CHILD);
+      String password=RandomStringUtils.randomAlphanumeric(8);
+      adminUser.setPassword(password);
+      okMsg="New " + adminUser.getType() + " node "+ adminUser.getName()+ " has been created with password "+ password;
+      StructrRelationship securityRel=(StructrRelationship)createRel.execute(adminUser,rootNode,RelType.SECURITY);
+      securityRel.setAllowed(Arrays.asList(StructrRelationship.ALL_PERMISSIONS));
+      return adminUser;
+    }
+  }
+);
+  return redirect();
+}

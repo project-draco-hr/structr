@@ -1,0 +1,49 @@
+{
+  super();
+  editPropertiesForm.add(new TextField(PlainText.CONTENT_TYPE_KEY,"Internet Media Type (Content-Type)",30));
+  addControl(editPlainTextPanel);
+  textArea=new TextArea(PlainText.CONTENT_KEY,false){
+    @Override public void render(    HtmlStringBuffer buffer){
+      buffer.elementStart(textArea.getTag());
+      buffer.appendAttribute("name",getName());
+      buffer.appendAttribute("id",getId());
+      buffer.appendAttribute("title",getTitle());
+      if (isValid()) {
+        removeStyleClass("error");
+        if (isDisabled()) {
+          addStyleClass("disabled");
+        }
+ else {
+          removeStyleClass("disabled");
+        }
+      }
+ else {
+        addStyleClass("error");
+      }
+      if (getTabIndex() > 0) {
+        buffer.appendAttribute("tabindex",getTabIndex());
+      }
+      appendAttributes(buffer);
+      if (isDisabled()) {
+        buffer.appendAttributeDisabled();
+      }
+      if (isReadonly()) {
+        buffer.appendAttributeReadonly();
+      }
+      buffer.closeTag();
+      buffer.appendEscaped(getValue());
+      buffer.elementEnd(getTag());
+      if (getHelp() != null) {
+        buffer.append(getHelp());
+      }
+    }
+  }
+;
+  textArea.setId("code");
+  textArea.setMaxLength(1024 * 1024);
+  textArea.setLabelStyle("display: none;");
+  editContentForm.add(textArea);
+  editContentForm.setActionURL(editContentForm.getActionURL() + "#content-tab");
+  editContentForm.add(new Submit("save"," Save ",this,"onSaveContent"));
+  addControl(editContentForm);
+}

@@ -1,0 +1,142 @@
+{
+  Command graphDbCommand=Services.command(GraphDatabaseCommand.class);
+  GraphDatabaseService graphDb=(GraphDatabaseService)graphDbCommand.execute();
+  MapContext mapContext=null;
+  try {
+    long t0=System.currentTimeMillis();
+    String featureName=null;
+    String staticFeatureName=getStaticFeatureName();
+    if (StringUtils.isNotBlank(staticFeatureName)) {
+      featureName=staticFeatureName;
+    }
+ else {
+      HttpServletRequest request=CurrentRequest.getRequest();
+      String featureNameParamName=getFeatureNameParamName();
+      if (featureNameParamName == null) {
+        featureNameParamName=defaultFeatureParamName;
+      }
+      if (request != null) {
+        featureName=request.getParameter(featureNameParamName);
+      }
+    }
+    int cx=getCanvasX();
+    int cy=getCanvasY();
+    boolean auto=getAutoEnvelope();
+    List<MapLayer> layers=new LinkedList<MapLayer>();
+    MapLayer layer=null;
+    ReferencedEnvelope envelope=null;
+    String shapeFilePath=getShapeFile();
+    if (shapeFilePath != null) {
+      File shapeFile=new File(shapeFilePath);
+      ShapefileDataStore dataStore=new ShapefileDataStore(shapeFile.toURI().toURL());
+      StyleBuilder sb=new StyleBuilder();
+      Symbolizer sym=sb.createLineSymbolizer(Color.decode(getLineColor()),getLineWidth());
+      layer=new MapLayer(dataStore.getFeatureSource(),sb.createStyle(sym));
+      layers.add(layer);
+    }
+    Neo4jSpatialDataStore n4jstore=new Neo4jSpatialDataStore(graphDb);
+    String layerName=getLayer();
+    if (StringUtils.isEmpty(layerName)) {
+      logger.log(Level.SEVERE,"No layer name!");
+    }
+    SimpleFeatureSource featureSource=n4jstore.getFeatureSource(layerName);
+    GeoObject featureNode=null;
+    if (auto) {
+      if (featureName == null) {
+        envelope=featureSource.getBounds();
+      }
+ else {
+        List<Filter> filterList=new LinkedList<Filter>();
+        filterList.add(CQL.toFilter("NAME = '" + StringEscapeUtils.escapeSql(featureName) + "'"));
+        Filter filter=MapHelper.featureFactory.or(filterList);
+        Query query=new Query(layerName,filter);
+        SimpleFeatureCollection featureCollection=featureSource.getFeatures(query);
+        if (featureCollection != null && !(featureCollection.isEmpty())) {
+          SimpleFeature requestedFeature=featureCollection.features().next();
+          envelope=(ReferencedEnvelope)requestedFeature.getBounds();
+        }
+        List<AbstractNode> result=(List<AbstractNode>)Services.command(SearchNodeCommand.class).execute(new SuperUser(),null,false,false,Search.andExactName(featureName));
+        for (        AbstractNode n : result) {
+          if (n instanceof GeoObject && n.isNotDeleted()) {
+            featureNode=(GeoObject)n;
+          }
+        }
+      }
+    }
+ else {
+      Double eminx=getEnvelopeMinX();
+      Double emaxx=getEnvelopeMaxX();
+      Double eminy=getEnvelopeMinY();
+      Double emaxy=getEnvelopeMaxY();
+      if (eminx != null && emaxx != null && eminy != null && emaxy != null) {
+        envelope=new ReferencedEnvelope(eminx,emaxx,eminy,emaxy,null);
+      }
+ else {
+        logger.log(Level.WARNING,"Manual envelope parameter incomplete");
+      }
+    }
+    MapHelper.expandEnvelope(envelope,new Double(cx),new Double(cy));
+    SimpleFeatureCollection features=MapHelper.getIntersectingFeatures(graphDb,envelope,layerName);
+    Symbolizer polygonSymbolizer=MapHelper.createPolygonSymbolizer(getLineColor(),getLineWidth(),getLineOpacity(),getFillColor(),getFillOpacity());
+    Symbolizer textSymbolizer=MapHelper.createTextSymbolizer(getFontName(),getFontSize(),getFontColor(),getFontOpacity(),getAnchorX(),getAnchorY(),getDisplacementX(),getDisplacementY());
+    Rule rule=MapHelper.styleFactory.createRule();
+    rule.symbolizers().add(polygonSymbolizer);
+    rule.symbolizers().add(textSymbolizer);
+    FeatureTypeStyle fts=MapHelper.styleFactory.createFeatureTypeStyle(new Rule[]{rule});
+    Style style=MapHelper.styleFactory.createStyle();
+    style.featureTypeStyles().add(fts);
+    layers.add(new MapLayer(features,style));
+    boolean displayCities=(getDisplayCities() == Boolean.TRUE);
+    if (featureNode != null && "Country".equals(featureNode.getType()) && displayCities) {
+      List<AbstractNode> subNodes=featureNode.getSortedLinkedNodes();
+      List<GeoObject> geoObjects=new LinkedList<GeoObject>();
+      List<GeoObject> cities=new LinkedList<GeoObject>();
+      List<GeoObject> hotels=new LinkedList<GeoObject>();
+      List<GeoObject> islands=new LinkedList<GeoObject>();
+      for (      AbstractNode node : subNodes) {
+        if ("City".equals(node.getType())) {
+          cities.add((GeoObject)node);
+        }
+        if ("Hotel".equals(node.getType())) {
+          hotels.add((GeoObject)node);
+        }
+        if ("Island".equals(node.getType())) {
+          islands.add((GeoObject)node);
+        }
+      }
+      if (cities.isEmpty()) {
+        geoObjects.addAll(hotels);
+      }
+ else {
+        geoObjects.addAll(cities);
+      }
+      SimpleFeatureCollection collection=MapHelper.createPointsFromGeoObjects(geoObjects);
+      Symbolizer cityTextSym=MapHelper.createTextSymbolizer(getPointFontName(),getPointFontSize(),getPointFontColor(),getPointFontOpacity(),getLabelAnchorX(),getLabelAnchorY(),getLabelDisplacementX(),getLabelDisplacementY());
+      Symbolizer cityPointSym=MapHelper.createPointSymbolizer(getPointShape(),getPointDiameter(),getPointStrokeColor(),getPointStrokeLineWidth(),getPointFillColor(),this.getPointFillOpacity());
+      Rule rule2=MapHelper.styleFactory.createRule();
+      rule2.symbolizers().add(cityTextSym);
+      rule2.symbolizers().add(cityPointSym);
+      FeatureTypeStyle fts2=MapHelper.styleFactory.createFeatureTypeStyle(new Rule[]{rule2});
+      Style style2=MapHelper.styleFactory.createStyle();
+      style2.featureTypeStyles().add(fts2);
+      SimpleFeatureSource source=DataUtilities.source(collection);
+      SimpleFeatureCollection subFeatures=source.getFeatures();
+      if (!subFeatures.isEmpty()) {
+        layers.add(new MapLayer(subFeatures,style2));
+      }
+    }
+    mapContext=new DefaultMapContext(layers.toArray(new MapLayer[]{}));
+    MapHelper.renderSVGDocument(out,mapContext,envelope,cx,cy,getOptimizeFtsRendering(),getLineWidthOptimization());
+    mapContext.dispose();
+    long t1=System.currentTimeMillis();
+    logger.log(Level.INFO,"SVG image successfully rendered in {0} ms",(t1 - t0));
+  }
+ catch (  Throwable t) {
+    logger.log(Level.SEVERE,"Error while rendering map to SVG",t);
+  }
+ finally {
+    if (mapContext != null) {
+      mapContext.dispose();
+    }
+  }
+}

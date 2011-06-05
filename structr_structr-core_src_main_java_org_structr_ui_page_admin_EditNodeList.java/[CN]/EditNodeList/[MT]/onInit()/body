@@ -1,0 +1,23 @@
+{
+  super.onInit();
+  if (node != null) {
+    nodeListTable.getControlLink().setParameter(AbstractNode.NODE_ID_KEY,getNodeId());
+    nodeList=(NodeList<AbstractNode>)node;
+    AbstractNode firstNode=nodeList.getFirstNode();
+    if (firstNode != null) {
+      Field[] fields=firstNode.getClass().getFields();
+      for (      Field f : fields) {
+        String fieldName;
+        try {
+          fieldName=(String)f.get(firstNode);
+          Column col;
+          col=new Column(fieldName);
+          nodeListTable.addColumn(col);
+        }
+ catch (        IllegalAccessException ex) {
+          logger.log(Level.SEVERE,null,ex);
+        }
+      }
+    }
+  }
+}

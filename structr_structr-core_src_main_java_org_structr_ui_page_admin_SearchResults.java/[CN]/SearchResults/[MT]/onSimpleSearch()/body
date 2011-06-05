@@ -1,0 +1,12 @@
+{
+  if (simpleSearchForm.isValid()) {
+    String searchText=searchTextField.getValue();
+    List<SearchAttribute> searchAttrs=new LinkedList<SearchAttribute>();
+    searchAttrs.add(Search.andName(searchText));
+    searchResults=(List<AbstractNode>)Services.command(SearchNodeCommand.class).execute(user,null,false,false,searchAttrs);
+    populateSearchResultsTable();
+    setDefaults();
+    saveState();
+  }
+  return false;
+}

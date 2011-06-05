@@ -11,6 +11,11 @@
       logger.log(Level.INFO,"Database config not found");
       graphDb=new EmbeddedGraphDatabase(dbPath);
     }
+    String filesPath=Services.getFilesPath();
+    File files=new File(filesPath);
+    if (!files.exists()) {
+      files.mkdir();
+    }
     logger.log(Level.INFO,"Database ready.");
     logger.log(Level.FINE,"Initializing index...");
     index=graphDb.index().forNodes("fulltextAllNodes",MapUtil.stringMap("provider","lucene","type","fulltext"));

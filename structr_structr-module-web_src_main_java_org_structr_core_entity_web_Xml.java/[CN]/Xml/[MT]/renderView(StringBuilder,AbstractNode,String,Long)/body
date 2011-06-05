@@ -1,0 +1,35 @@
+{
+  if (isVisible()) {
+    StringBuilder xml=new StringBuilder(getXml());
+    int start=xml.indexOf(keyPrefix);
+    while (start > -1) {
+      int end=xml.indexOf(keySuffix,start + keyPrefix.length());
+      String key=xml.substring(start + keyPrefix.length(),end);
+      StringBuilder replacement=new StringBuilder();
+      if (dbNode.hasProperty(key)) {
+        replacement.append(dbNode.getProperty(key));
+      }
+ else {
+        Command nodeFactory=Services.command(NodeFactoryCommand.class);
+        Command relsCommand=Services.command(NodeRelationshipsCommand.class);
+        List<StructrRelationship> rels=(List<StructrRelationship>)relsCommand.execute(this,RelType.HAS_CHILD,Direction.OUTGOING);
+        for (        StructrRelationship r : rels) {
+          AbstractNode s=(AbstractNode)nodeFactory.execute(r.getEndNode());
+          if (key.equals(s.getName())) {
+            s.renderView(replacement,startNode,editUrl,editNodeId);
+          }
+        }
+        rels=(List<StructrRelationship>)relsCommand.execute(this,RelType.LINK,Direction.OUTGOING);
+        for (        StructrRelationship r : rels) {
+          AbstractNode s=(AbstractNode)nodeFactory.execute(r.getEndNode());
+          if (key.equals(s.getName())) {
+            s.renderView(replacement,startNode,editUrl,editNodeId);
+          }
+        }
+      }
+      xml.replace(start,end + keySuffix.length(),replacement.toString());
+      start=xml.indexOf(keyPrefix,end + keySuffix.length() + 1);
+    }
+    out.append(xml);
+  }
+}

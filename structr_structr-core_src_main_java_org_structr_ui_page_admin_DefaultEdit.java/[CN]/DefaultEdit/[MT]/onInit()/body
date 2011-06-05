@@ -1,15 +1,10 @@
 {
   super.onInit();
-  FieldSet typeFields=new FieldSet("Type");
-  typeFields.add(typeSelect);
-  editPropertiesForm.add(typeFields);
-  FieldSet templateFields=new FieldSet("Template");
-  templateFields.add(templateSelect);
-  editPropertiesForm.add(templateFields);
   FieldSet nodePropertiesFields=new FieldSet("Node Properties");
   nodePropertiesFields.setColumns(3);
-  nodePropertiesFields.add(new TextField(AbstractNode.TYPE_KEY,false));
   nodePropertiesFields.add(new TextField(AbstractNode.NAME_KEY,true));
+  nodePropertiesFields.add(typeSelect);
+  nodePropertiesFields.add(new TextField(AbstractNode.TITLE_KEY,false));
   nodePropertiesFields.add(new IntegerField(AbstractNode.POSITION_KEY));
   TextField createdBy=new TextField(AbstractNode.CREATED_BY_KEY);
   createdBy.setReadonly(true);
@@ -30,6 +25,12 @@
   nodePropertiesFields.add(titlesTable);
   editPropertiesForm.add(nodePropertiesFields);
   addControl(editPropertiesForm);
+  FieldSet templateFields=new FieldSet("Template");
+  templateFields.add(templateSelect);
+  editPropertiesForm.add(templateFields);
+  FieldSet customTypeFields=new FieldSet("Custom Type");
+  customTypeFields.add(customTypeSelect);
+  editPropertiesForm.add(customTypeFields);
   FieldSet visibilityFields=new FieldSet("Visibility");
   visibilityFields.setColumns(1);
   DateField visibilityStartDate=new DateField(AbstractNode.VISIBILITY_START_DATE_KEY);
@@ -71,7 +72,7 @@
   Column nameColumn, typeColumn;
   PageLink viewRelLink=new PageLink("viewRel",DefaultEdit.class);
   LinkDecorator nameDec, iconDec;
-  if (node != null && node.hasChildren()) {
+  if (node != null && (node.hasChildren() || node instanceof Folder)) {
     Column actionColumnNodes=new Column("Actions");
     actionColumnNodes.setTextAlign("center");
     actionColumnNodes.setDecorator(new LinkDecorator(childNodesTable,new PageLink(),AbstractNode.NODE_ID_KEY){

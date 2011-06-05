@@ -31,6 +31,20 @@
     final NodeType typeNode=node.getTypeNode();
     typeSelect.setDataProvider(new DataProvider(){
       @Override public List<Option> getData(){
+        List<Option> nodeList=new LinkedList<Option>();
+        nodeList.add(new Option("","--- Select Node Type ---"));
+        List<String> nodeTypes=new LinkedList<String>(((Map<String,Class>)Services.command(GetEntitiesCommand.class).execute()).keySet());
+        Collections.sort(nodeTypes);
+        for (        String className : nodeTypes) {
+          Option o=new Option(className);
+          nodeList.add(o);
+        }
+        return nodeList;
+      }
+    }
+);
+    customTypeSelect.setDataProvider(new DataProvider(){
+      @Override public List<Option> getData(){
         List<Option> options=new LinkedList<Option>();
         List<AbstractNode> nodes=null;
         if (typeNode != null) {

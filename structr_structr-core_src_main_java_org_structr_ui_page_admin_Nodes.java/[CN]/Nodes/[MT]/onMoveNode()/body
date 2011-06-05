@@ -1,12 +1,13 @@
 {
   if (moveNodeForm.isValid()) {
     final String targetNodeId=moveNodeForm.getFieldValue(TARGET_NODE_ID_KEY);
+    final boolean isLink=StringUtils.isNotEmpty(moveNodeForm.getFieldValue(PARENT_NODE_ID_KEY));
     final String sourceNodeId=StringUtils.isNotEmpty(moveNodeForm.getFieldValue(SOURCE_NODE_ID_KEY)) ? moveNodeForm.getFieldValue(SOURCE_NODE_ID_KEY) : getNodeId();
     Command transactionCommand=Services.command(TransactionCommand.class);
     transactionCommand.execute(new StructrTransaction(){
       @Override public Object execute() throws Throwable {
         Command moveNode=Services.command(MoveNodeCommand.class);
-        moveNode.execute(sourceNodeId,targetNodeId);
+        moveNode.execute(sourceNodeId,targetNodeId,isLink);
         return (null);
       }
     }

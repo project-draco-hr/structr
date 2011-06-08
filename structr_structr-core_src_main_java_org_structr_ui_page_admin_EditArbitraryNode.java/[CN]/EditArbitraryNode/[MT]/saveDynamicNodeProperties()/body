@@ -1,0 +1,26 @@
+{
+  final Command transactionCommand=Services.command(TransactionCommand.class);
+  transactionCommand.execute(new StructrTransaction(){
+    @Override public Object execute() throws Throwable {
+      AbstractNode s=getNodeByIdOrPath(getNodeId());
+      if (dynamicPropertiesForm.isValid()) {
+        List<Field> fieldList=ContainerUtils.getInputFields(dynamicPropertiesForm);
+        for (        Field f : fieldList) {
+          String fieldName=f.getName();
+          if (!f.isHidden() && keys.contains(prefix + fieldName)) {
+            node.setProperty(fieldName,f.getValueObject());
+          }
+        }
+        transactionCommand.setExitCode(Command.exitCode.SUCCESS);
+        okMsg="Dynamic properties saved successfully";
+      }
+ else {
+        transactionCommand.setExitCode(Command.exitCode.FAILURE);
+        errorMsg="Dynamic properties form is invalid";
+        transactionCommand.setErrorMessage(errorMsg);
+      }
+      return (null);
+    }
+  }
+);
+}

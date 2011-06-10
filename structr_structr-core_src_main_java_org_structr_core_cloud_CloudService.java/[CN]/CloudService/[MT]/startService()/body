@@ -1,5 +1,5 @@
 {
-  Log.set(Log.LEVEL_DEBUG);
+  Log.set(Log.LEVEL_INFO);
   server=new Server(4194304,1048576);
   server.start();
   Kryo kryo=server.getKryo();
@@ -8,6 +8,7 @@
   try {
     server.bind(tcpPort,udpPort);
     server.addListener(new Listener(){
+      Map<Long,FileNodeDataContainer> fileMap=new HashMap<Long,FileNodeDataContainer>();
       @Override public void received(      Connection connection,      Object object){
         logger.log(Level.FINE,"Received object {0}",object);
         if (object instanceof Integer) {
@@ -17,7 +18,33 @@
           }
           if (END_TRANSACTION.equals(controlSignal)) {
             idMap.clear();
+            Command transactionCommand=Services.command(TransactionCommand.class);
+            transactionCommand.execute(new StructrTransaction(){
+              @Override public Object execute() throws Throwable {
+                for (Iterator<FileNodeDataContainer> it=fileMap.values().iterator(); it.hasNext(); ) {
+                  storeNode(it.next(),linkNode);
+                  it.remove();
+                }
+                return null;
+              }
+            }
+);
           }
+        }
+ else         if (object instanceof FileNodeDataContainer) {
+          final FileNodeDataContainer container=(FileNodeDataContainer)object;
+          fileMap.put(container.sourceNodeId,container);
+        }
+ else         if (object instanceof FileChunkContainer) {
+          final FileChunkContainer chunk=(FileChunkContainer)object;
+          FileNodeDataContainer container=fileMap.get(chunk.getContainerId());
+          if (container == null) {
+            logger.log(Level.WARNING,"Received file chunk for ID {0} without file, this should not happen!",chunk.getContainerId());
+          }
+ else {
+            container.addChunk(chunk);
+          }
+          connection.sendTCP("File chunk received");
         }
  else         if (object instanceof NodeDataContainer) {
           final NodeDataContainer receivedNodeData=(NodeDataContainer)object;

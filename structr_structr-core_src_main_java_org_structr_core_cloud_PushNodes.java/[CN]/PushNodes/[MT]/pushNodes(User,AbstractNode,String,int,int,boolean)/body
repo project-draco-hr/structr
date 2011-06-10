@@ -1,19 +1,26 @@
 {
   List<DataContainer> transportSet=new LinkedList<DataContainer>();
   Set<RelationshipDataContainer> transportRelationships=new HashSet<RelationshipDataContainer>();
+  int chunkSize=65536;
   int maxSize=4096;
   if (recursive) {
     List<AbstractNode> nodes=node.getAllChildren();
     for (    AbstractNode n : nodes) {
-      DataContainer container;
       if (n instanceof File) {
-        container=new FileNodeDataContainer(n);
+        File file=(File)n;
+        FileNodeDataContainer container=new FileNodeDataContainer(file);
+        transportSet.add(container);
+        maxSize=Math.max(maxSize,container.getEstimatedSize());
+        for (        FileChunkContainer chunk : FileNodeDataContainer.getChunks(file,chunkSize)) {
+          maxSize=Math.max(maxSize,chunk.getEstimatedSize());
+          transportSet.add(chunk);
+        }
       }
  else {
-        container=new NodeDataContainer(n);
+        DataContainer container=new NodeDataContainer(n);
+        transportSet.add(container);
+        maxSize=Math.max(maxSize,container.getEstimatedSize());
       }
-      maxSize=Math.max(maxSize,container.getEstimatedSize());
-      transportSet.add(container);
       List<StructrRelationship> rels=n.getOutgoingRelationships();
       for (      StructrRelationship r : rels) {
         AbstractNode startNode=r.getStartNode();
@@ -26,7 +33,19 @@
     transportSet.addAll(transportRelationships);
   }
  else {
-    transportSet.add(new NodeDataContainer(node));
+    if (node instanceof File) {
+      File file=(File)node;
+      FileNodeDataContainer container=new FileNodeDataContainer(file);
+      transportSet.add(container);
+      maxSize=Math.max(maxSize,container.getEstimatedSize());
+      for (      FileChunkContainer chunk : FileNodeDataContainer.getChunks(file,chunkSize)) {
+        maxSize=Math.max(maxSize,chunk.getEstimatedSize());
+        transportSet.add(chunk);
+      }
+    }
+ else {
+      transportSet.add(new NodeDataContainer(node));
+    }
   }
   Log.set(Log.LEVEL_DEBUG);
   Client client=new Client(maxSize * 8,maxSize * 2);
@@ -37,17 +56,16 @@
   try {
     client.connect(5000,remoteHost,remoteTcpPort,remoteUdpPort);
     logger.log(Level.INFO,"Connected to structr instance on {0} (tcp port: {1}, udp port: {2})",new Object[]{remoteHost,remoteTcpPort,remoteUdpPort});
-    int size=transportSet.size();
-    if (size < 16) {
-      client.sendTCP(transportSet);
-    }
- else {
-      client.sendTCP(CloudService.BEGIN_TRANSACTION);
-      for (      DataContainer container : transportSet) {
-        client.sendTCP(container);
+    client.sendTCP(CloudService.BEGIN_TRANSACTION);
+    for (    DataContainer container : transportSet) {
+      client.sendTCP(container);
+      try {
+        Thread.sleep(client.getReturnTripTime());
       }
-      client.sendTCP(CloudService.END_TRANSACTION);
+ catch (      Throwable t) {
+      }
     }
+    client.sendTCP(CloudService.END_TRANSACTION);
     logger.log(Level.INFO,"Transport set with {0} nodes/relationships was sent",transportSet.size());
   }
  catch (  IOException ex) {

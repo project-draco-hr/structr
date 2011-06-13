@@ -1,3 +1,49 @@
 {
-  throw new UnsupportedOperationException("Not supported yet.");
+  User user=null;
+  AbstractNode localTargetNode=null;
+  long remoteSourceNodeId=0L;
+  String remoteHost=null;
+  int remoteTcpPort=0;
+  int remoteUdpPort=0;
+  boolean recursive=false;
+  Command findNode=Services.command(FindNodeCommand.class);
+switch (parameters.length) {
+case 0:
+    throw new UnsupportedArgumentError("No arguments supplied");
+case 7:
+  if (parameters[0] instanceof User) {
+    user=(User)parameters[0];
+  }
+if (parameters[1] instanceof Long) {
+  remoteSourceNodeId=((Long)parameters[1]).longValue();
+}
+if (parameters[2] instanceof Long) {
+long id=((Long)parameters[2]).longValue();
+localTargetNode=(AbstractNode)findNode.execute(null,id);
+}
+ else if (parameters[2] instanceof AbstractNode) {
+localTargetNode=((AbstractNode)parameters[2]);
+}
+ else if (parameters[2] instanceof String) {
+long id=Long.parseLong((String)parameters[2]);
+localTargetNode=(AbstractNode)findNode.execute(null,id);
+}
+if (parameters[3] instanceof String) {
+remoteHost=(String)parameters[3];
+}
+if (parameters[4] instanceof Integer) {
+remoteTcpPort=(Integer)parameters[4];
+}
+if (parameters[5] instanceof Integer) {
+remoteUdpPort=(Integer)parameters[5];
+}
+if (parameters[6] instanceof Boolean) {
+recursive=(Boolean)parameters[6];
+}
+pullNodes(user,remoteSourceNodeId,localTargetNode,remoteHost,remoteTcpPort,remoteUdpPort,recursive);
+break;
+default :
+break;
+}
+return null;
 }

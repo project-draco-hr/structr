@@ -200,6 +200,7 @@
     incomingRelationshipsTable.addColumn(new Column(START_NODE_KEY));
     incomingRelationshipsTable.addColumn(new Column(END_NODE_KEY));
     incomingRelationshipsTable.addColumn(new Column(REL_TYPE_KEY));
+    incomingRelationshipsTable.addColumn(new Column(REL_ATTRS_KEY));
     incomingRelationshipsTable.addColumn(actionColumnIn);
     incomingRelationshipsTable.setPageSize(DEFAULT_PAGESIZE);
     incomingRelationshipsTable.getControlLink().setParameter(AbstractNode.NODE_ID_KEY,getNodeId());
@@ -247,6 +248,7 @@
     outgoingRelationshipsTable.addColumn(new Column(START_NODE_KEY));
     outgoingRelationshipsTable.addColumn(new Column(END_NODE_KEY));
     outgoingRelationshipsTable.addColumn(new Column(REL_TYPE_KEY));
+    outgoingRelationshipsTable.addColumn(new Column(REL_ATTRS_KEY));
     outgoingRelationshipsTable.addColumn(actionColumnOut);
     outgoingRelationshipsTable.setPageSize(DEFAULT_PAGESIZE);
     outgoingRelationshipsTable.getControlLink().setParameter(AbstractNode.NODE_ID_KEY,getNodeId());
@@ -332,16 +334,39 @@
     editSecurityPanel=new Panel("editSecurityPanel","/panel/edit-security-panel.htm");
     addControl(editSecurityPanel);
   }
-  FieldSet pushFields=new FieldSet("Push Nodes");
+  FieldSet pushFields=new FieldSet("Transmit Nodes");
+  remoteSourceNode=new LongField("remoteSourceNode","Remote Node ID");
   remoteHost=new TextField("remoteHost","Remote Host");
   remoteTcpPort=new IntegerField("remoteTcpPort","Remote TCP Port");
   remoteUdpPort=new IntegerField("remoteUdp","Remote UDP Port");
+  cloudPushPull.add(new Option("push","Push nodes to remote destination"));
+  cloudPushPull.add(new Option("pull","Pull nodes from remote destination"));
+  pushFields.add(remoteSourceNode);
   pushFields.add(remoteHost);
   pushFields.add(remoteTcpPort);
   pushFields.add(remoteUdpPort);
+  pushFields.add(cloudPushPull);
   pushFields.add(cloudRecursive);
-  pushFields.add(new Submit("pushNodes","Push Nodes",this,"onPushNodes"));
+  pushFields.add(new Submit("transmitNodes","Transmit",this,"onTransmitNodes"));
+  Table transmissionsTable=new Table("Transmissions");
+  transmissionsTable.addColumn(new Column("transmissionType","Type"));
+  transmissionsTable.addColumn(new Column("remoteHost","Remote Host"));
+  transmissionsTable.addColumn(new Column("remoteTcpPort","TCP"));
+  transmissionsTable.addColumn(new Column("remoteUdpPort","UDP"));
+  transmissionsTable.addColumn(new Column("estimatedSize","Estimated Size"));
+  transmissionsTable.addColumn(new Column("transmittedObjectCount","Objects Transmitted"));
+  transmissionsTable.setDataProvider(new DataProvider(){
+    @Override public List<CloudTransmission> getData(){
+      CloudService cloudService=(CloudService)Services.command(GetCloudServiceCommand.class).execute();
+      if (cloudService != null) {
+        return (cloudService.getActiveTransmissions());
+      }
+      return (new LinkedList());
+    }
+  }
+);
   cloudForm.add(pushFields);
+  cloudForm.add(transmissionsTable);
   cloudForm.add(new HiddenField(NODE_ID_KEY,nodeId != null ? nodeId : ""));
   cloudForm.add(new HiddenField(RENDER_MODE_KEY,renderMode != null ? renderMode : ""));
   cloudForm.setActionURL(cloudForm.getActionURL().concat("#cloud-tab"));

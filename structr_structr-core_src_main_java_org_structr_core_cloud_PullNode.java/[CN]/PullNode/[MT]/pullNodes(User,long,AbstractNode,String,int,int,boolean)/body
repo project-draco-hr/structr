@@ -1,0 +1,33 @@
+{
+  final CloudService cloudService=(CloudService)Services.command(GetCloudServiceCommand.class).execute();
+  final PushNodes.Value count=new PushNodes.Value();
+  int writeBufferSize=CloudService.BUFFER_SIZE * 4;
+  int objectBufferSize=CloudService.BUFFER_SIZE * 2;
+  Client client=new Client(writeBufferSize,objectBufferSize);
+  client.start();
+  Log.set(CloudService.KRYONET_LOG_LEVEL);
+  Kryo kryo=client.getKryo();
+  CloudService.registerClasses(kryo);
+  try {
+    int estimatedSize=0;
+    PushNodes.PushTransmission transmission=new PushNodes.PushTransmission(remoteHost,remoteTcpPort,remoteUdpPort,count,estimatedSize);
+    cloudService.registerTransmission(transmission);
+    client.connect(5000,remoteHost,remoteTcpPort,remoteUdpPort);
+    client.sendTCP(CloudService.BEGIN_TRANSACTION);
+    count.value++;
+    String localHost=Services.getServerIP();
+    int serviceTcpPort=Integer.parseInt(Services.getTcpPort());
+    int serviceUdpPort=Integer.parseInt(Services.getUdpPort());
+    PullNodeRequestContainer container=new PullNodeRequestContainer(user,remoteSourceNodeId,localTargetNode.getId(),localHost,serviceTcpPort,serviceUdpPort,recursive);
+    client.sendTCP(container);
+    count.value++;
+    client.sendTCP(CloudService.END_TRANSACTION);
+    count.value++;
+    client.sendTCP(CloudService.CLOSE_TRANSACTION);
+    count.value++;
+    cloudService.unregisterTransmission(transmission);
+  }
+ catch (  IOException ex) {
+    logger.log(Level.SEVERE,"Error while sending nodes to remote instance",ex);
+  }
+}

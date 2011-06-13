@@ -1,23 +1,8 @@
 {
-  Map<Integer,FileChunkContainer> chunks=new TreeMap<Integer,FileChunkContainer>();
-  int fileSize=(int)fileNode.getSize();
-  try {
-    InputStream is=fileNode.getInputStream();
-    if (is != null) {
-      int sequenceNumber=0;
-      int readSize=0;
-      for (int available=is.available(); available > 0; available=is.available()) {
-        readSize=available < chunkSize ? available : chunkSize;
-        FileChunkContainer chunk=new FileChunkContainer(fileNode.getId(),fileSize,sequenceNumber,readSize);
-        is.read(chunk.getBuffer(),0,readSize);
-        chunks.put(sequenceNumber,chunk);
-        sequenceNumber++;
-      }
-      is.close();
+  return (new Iterable<FileNodeChunk>(){
+    @Override public Iterator<FileNodeChunk> iterator(){
+      return (new ChunkIterator(fileNode,chunkSize));
     }
   }
- catch (  IOException ex) {
-    logger.log(Level.SEVERE,"Could not read file",ex);
-  }
-  return (chunks.values());
+);
 }

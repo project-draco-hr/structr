@@ -1,0 +1,25 @@
+{
+  Integer retries=(Integer)session.getAttribute(NUMBER_OF_LOGIN_ATTEMPTS);
+  if (retries != null && retries > maxRetries) {
+    logger.log(Level.SEVERE,"More than {0} login failures, session {1} is blocked",new Object[]{maxRetries,session.getId()});
+    session.setAttribute(WebNode.SESSION_BLOCKED,true);
+    out.append("<div class=\"errorMsg\">").append("Too many unsuccessful login attempts, your session is blocked for login!").append("</div>");
+    return;
+  }
+ else   if (retries != null && retries > delayThreshold) {
+    logger.log(Level.INFO,"More than {0} login failures, execution delayed by {1} seconds",new Object[]{delayThreshold,delayTime});
+    try {
+      Thread.sleep(delayTime * 1000);
+    }
+ catch (    InterruptedException ex) {
+      logger.log(Level.SEVERE,null,ex);
+    }
+    out.append("<div class=\"errorMsg\">").append("You had more than ").append(delayThreshold).append(" unsuccessful login attempts, execution was delayed by ").append(delayTime).append(" seconds.").append("</div>");
+  }
+ else   if (retries != null) {
+    session.setAttribute(NUMBER_OF_LOGIN_ATTEMPTS,retries + 1);
+  }
+ else {
+    session.setAttribute(NUMBER_OF_LOGIN_ATTEMPTS,1);
+  }
+}

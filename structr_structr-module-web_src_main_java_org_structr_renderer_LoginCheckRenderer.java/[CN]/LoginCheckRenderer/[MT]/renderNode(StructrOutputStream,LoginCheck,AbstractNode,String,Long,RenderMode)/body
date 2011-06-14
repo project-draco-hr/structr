@@ -1,0 +1,76 @@
+{
+  String errorMsg;
+  HttpServletRequest request=CurrentRequest.getRequest();
+  if (request == null) {
+    return;
+  }
+  HttpSession session=request.getSession();
+  if (session == null) {
+    return;
+  }
+  String usernameFromSession=(String)session.getAttribute(WebNode.USERNAME_KEY);
+  Boolean alreadyLoggedIn=usernameFromSession != null;
+  if (alreadyLoggedIn) {
+    return;
+  }
+  Boolean sessionBlocked=(Boolean)session.getAttribute(WebNode.SESSION_BLOCKED);
+  if (Boolean.TRUE.equals(sessionBlocked)) {
+    out.append("<div class=\"errorMsg\">").append("Too many login attempts, session is blocked for login").append("</div>");
+    return;
+  }
+  String submitButtonName=currentNode.getSubmitButtonName() != null ? currentNode.getSubmitButtonName() : defaultSubmitButtonName;
+  String antiRobotFieldName=currentNode.getAntiRobotFieldName() != null ? currentNode.getAntiRobotFieldName() : defaultAntiRobotFieldName;
+  String usernameFieldName=currentNode.getUsernameFieldName() != null ? currentNode.getUsernameFieldName() : defaultUsernameFieldName;
+  String passwordFieldName=currentNode.getPasswordFieldName() != null ? currentNode.getPasswordFieldName() : defaultPasswordFieldName;
+  int maxRetries=currentNode.getMaxErrors() > 0 ? currentNode.getMaxErrors() : defaultMaxErrors;
+  int delayThreshold=currentNode.getDelayThreshold() > 0 ? currentNode.getDelayThreshold() : defaultDelayThreshold;
+  int delayTime=currentNode.getDelayTime() > 0 ? currentNode.getDelayTime() : defaultDelayTime;
+  String username=request.getParameter(usernameFieldName);
+  String password=request.getParameter(passwordFieldName);
+  String submitButton=request.getParameter(submitButtonName);
+  String antiRobot=request.getParameter(antiRobotFieldName);
+  if (StringUtils.isEmpty(submitButton)) {
+    return;
+  }
+  if (StringUtils.isNotEmpty(antiRobot)) {
+    return;
+  }
+  if (StringUtils.isEmpty(username)) {
+    out.append("<div class=\"errorMsg\">").append("You must enter a username").append("</div>");
+    countLoginFailure(out,session,maxRetries,delayThreshold,delayTime);
+    return;
+  }
+  if (StringUtils.isEmpty(password)) {
+    out.append("<div class=\"errorMsg\">").append("You must enter a password").append("</div>");
+    countLoginFailure(out,session,maxRetries,delayThreshold,delayTime);
+    return;
+  }
+  User loginUser=(User)Services.command(FindUserCommand.class).execute(username);
+  errorMsg=LOGIN_FAILURE_TEXT;
+  if (loginUser == null) {
+    logger.log(Level.INFO,"No user found for name {0}",loginUser);
+    out.append("<div class=\"errorMsg\">").append(errorMsg).append("</div>");
+    countLoginFailure(out,session,maxRetries,delayThreshold,delayTime);
+    return;
+  }
+  if (loginUser.isBlocked()) {
+    logger.log(Level.INFO,"User {0} is blocked",loginUser);
+    out.append("<div class=\"errorMsg\">").append(errorMsg).append("</div>");
+    countLoginFailure(out,session,maxRetries,delayThreshold,delayTime);
+    return;
+  }
+  String encryptedPasswordValue=DigestUtils.sha512Hex(password);
+  if (!encryptedPasswordValue.equals(loginUser.getEncryptedPassword())) {
+    logger.log(Level.INFO,"Wrong password for user {0}",loginUser);
+    out.append("<div class=\"errorMsg\">").append(errorMsg).append("</div>");
+    countLoginFailure(out,session,maxRetries,delayThreshold,delayTime);
+    return;
+  }
+  session.setAttribute(WebNode.USERNAME_KEY,loginUser.getName());
+  long sessionId=SessionMonitor.registerUserSession(session);
+  SessionMonitor.logActivity(sessionId,"Login");
+  session.setAttribute(SessionMonitor.SESSION_ID,sessionId);
+  session.removeAttribute(WebNode.SESSION_BLOCKED);
+  session.removeAttribute(NUMBER_OF_LOGIN_ATTEMPTS);
+  out.append("<div class=\"okMsg\">").append("Login successful. Welcome ").append(loginUser.getRealName()).append("!").append("</div>");
+}

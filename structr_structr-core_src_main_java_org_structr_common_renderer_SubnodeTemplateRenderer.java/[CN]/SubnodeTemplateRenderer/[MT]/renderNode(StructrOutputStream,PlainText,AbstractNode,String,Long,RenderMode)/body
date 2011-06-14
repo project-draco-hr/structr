@@ -1,0 +1,12 @@
+{
+  if (currentNode.isVisible()) {
+    String html=currentNode.getContent();
+    if (StringUtils.isNotBlank(html)) {
+      StringWriter content=new StringWriter();
+      currentNode.replaceByFreeMarker(html,content,startNode,editUrl,editNodeId);
+      StringBuilder content2=new StringBuilder(content.toString());
+      currentNode.replaceBySubnodes(content2,startNode,editUrl,editNodeId);
+      out.append(content2.toString());
+    }
+  }
+}

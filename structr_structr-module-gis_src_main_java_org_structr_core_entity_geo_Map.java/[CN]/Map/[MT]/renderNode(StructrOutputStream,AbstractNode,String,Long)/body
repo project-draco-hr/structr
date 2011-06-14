@@ -1,0 +1,25 @@
+{
+  if (editNodeId != null && getId() == editNodeId.longValue()) {
+    renderEditFrame(out,editUrl);
+  }
+ else {
+    if (isVisible()) {
+      if (getDontCache() == Boolean.TRUE) {
+        StringBuilder content=new StringBuilder(1000);
+        renderSVGMap(content,startNode);
+        out.append(content.toString());
+        return;
+      }
+      String cachedSVGMap=getSvgContent();
+      if (StringUtils.isBlank(cachedSVGMap)) {
+        StringBuilder cache=new StringBuilder();
+        renderSVGMap(cache,startNode);
+        setSvgContent(cache.toString());
+        out.append(cache);
+      }
+ else {
+        out.append(cachedSVGMap);
+      }
+    }
+  }
+}

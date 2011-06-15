@@ -1,0 +1,63 @@
+{
+  final CloudService cloudService=(CloudService)Services.command(GetCloudServiceCommand.class).execute();
+  final SynchronizingListener listener=new SynchronizingListener();
+  final Value count=new Value();
+  int chunkSize=CloudService.CHUNK_SIZE;
+  int writeBufferSize=CloudService.BUFFER_SIZE * 4;
+  int objectBufferSize=CloudService.BUFFER_SIZE * 2;
+  Client client=new Client(writeBufferSize,objectBufferSize);
+  client.addListener(listener);
+  client.start();
+  Log.set(CloudService.KRYONET_LOG_LEVEL);
+  Kryo kryo=client.getKryo();
+  CloudService.registerClasses(kryo);
+  try {
+    int estimatedSize=0;
+    PushTransmission transmission=new PushTransmission(remoteHost,remoteTcpPort,remoteUdpPort,count,estimatedSize);
+    cloudService.registerTransmission(transmission);
+    client.connect(10000,remoteHost,remoteTcpPort,remoteUdpPort);
+    client.sendTCP(CloudService.BEGIN_TRANSACTION);
+    count.value++;
+    client.sendTCP(new PushNodeRequestContainer(remoteTargetNodeId));
+    count.value++;
+    if (recursive) {
+      List<AbstractNode> nodes=sourceNode.getAllChildrenForRemotePush(new SuperUser());
+      for (      AbstractNode n : nodes) {
+        if (n instanceof File) {
+          sendFile(client,listener,(File)n,chunkSize,count);
+        }
+ else {
+          NodeDataContainer container=new NodeDataContainer(n);
+          client.sendTCP(container);
+          count.value++;
+        }
+      }
+      for (      AbstractNode n : nodes) {
+        List<StructrRelationship> rels=n.getOutgoingRelationships();
+        for (        StructrRelationship r : rels) {
+          if (nodes.contains(r.getStartNode()) && nodes.contains(r.getEndNode())) {
+            client.sendTCP(new RelationshipDataContainer(r));
+            count.value++;
+          }
+        }
+      }
+    }
+ else {
+      if (sourceNode instanceof File) {
+        sendFile(client,listener,(File)sourceNode,chunkSize,count);
+      }
+ else {
+        client.sendTCP(new NodeDataContainer(sourceNode));
+        count.value++;
+      }
+    }
+    logger.log(Level.INFO,"Data transmitted, sending END_TRANSACTION signal..");
+    client.sendTCP(CloudService.END_TRANSACTION);
+    count.value++;
+    logger.log(Level.INFO,"Transmission done, {0} objects sent",count);
+    cloudService.unregisterTransmission(transmission);
+  }
+ catch (  IOException ex) {
+    logger.log(Level.SEVERE,"Error while sending nodes to remote instance",ex);
+  }
+}

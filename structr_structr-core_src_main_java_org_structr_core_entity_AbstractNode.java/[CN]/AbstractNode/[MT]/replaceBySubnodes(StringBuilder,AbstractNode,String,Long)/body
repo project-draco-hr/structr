@@ -37,16 +37,15 @@
       key=splitted[0];
       methodKey=splitted[1];
     }
-    StructrOutputStream buf=new StructrOutputStream(content);
-    StringBuilder replacement=new StringBuilder();
+    StructrOutputStream replacement=new StructrOutputStream();
     if (callingNode != null && key.equals(CALLING_NODE_SUBNODES_KEY)) {
       for (      AbstractNode s : callingNodeSubnodes) {
-        s.renderNode(buf,startNode,editUrl,editNodeId);
+        s.renderNode(replacement,startNode,editUrl,editNodeId);
       }
     }
  else     if (callingNode != null && key.equals(CALLING_NODE_SUBNODES_AND_LINKED_NODES_KEY)) {
       for (      AbstractNode s : callingNodeSubnodesAndLinkedNodes) {
-        s.renderNode(buf,startNode,editUrl,editNodeId);
+        s.renderNode(replacement,startNode,editUrl,editNodeId);
       }
     }
  else {
@@ -58,7 +57,7 @@
             if (customTemplate != null) {
               s.setTemplate(customTemplate);
             }
-            s.renderNode(buf,startNode,editUrl,editNodeId);
+            s.renderNode(replacement,startNode,editUrl,editNodeId);
           }
         }
       }
@@ -86,7 +85,7 @@
           }
         }
  else {
-          s.renderNode(buf,startNode,editUrl,editNodeId);
+          s.renderNode(replacement,startNode,editUrl,editNodeId);
         }
       }
  else {

@@ -4,7 +4,7 @@
     renderersInitialized=true;
   }
   RenderMode renderMode=RenderMode.Default;
-  if (this.equals(startNode) && this.hasDirect()) {
+  if (this.equals(startNode) && rendererMap.containsKey(RenderMode.Direct)) {
     renderMode=RenderMode.Direct;
   }
   if (editNodeId != null && getId() == editNodeId.longValue()) {
@@ -12,7 +12,7 @@
   }
   NodeRenderer ret=rendererMap.get(renderMode);
   if (ret == null) {
-    logger.log(Level.INFO,"No renderer found for mode {0}, using default renderers",renderMode);
+    logger.log(Level.FINE,"No renderer found for mode {0}, using default renderers",renderMode);
 switch (renderMode) {
 case Default:
       ret=new DefaultRenderer();
@@ -24,7 +24,7 @@ ret=new DefaultEditRenderer();
 break;
 }
 }
-logger.log(Level.INFO,"Got renderer {0} for node type {1} ({2})",new Object[]{ret != null ? ret.getClass().getName() : "Unknown",this.getType(),this.getId()});
+logger.log(Level.FINER,"Got renderer {0} for mode {1}, node type {2} ({3})",new Object[]{ret != null ? ret.getClass().getName() : "Unknown",renderMode,this.getType(),this.getId()});
 if (ret != null) {
 ret.renderNode(out,this,startNode,editUrl,editNodeId,renderMode);
 }

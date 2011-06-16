@@ -18,18 +18,15 @@
       setForward("/not-authorized.html");
       return;
     }
-    String contentType=nodeToRender.getContentType();
     String editUrl=null;
     if (editNodeId != null) {
       AbstractNode editNode=getNodeByIdOrPath(editNodeId);
       editUrl=getContext().getRequest().getContextPath().concat(getContext().getPagePath(getEditPageClass(editNode))).concat("?").concat(NODE_ID_KEY).concat("=").concat(editNodeId.toString()).concat("&").concat(RENDER_MODE_KEY).concat("=").concat(INLINE_MODE);
     }
     try {
-      HttpServletResponse response=getContext().getResponse();
-      response.setContentType(contentType);
-      StructrOutputStream outputStream=new StructrOutputStream(response.getOutputStream());
+      StructrOutputStream outputStream=new StructrOutputStream(getContext().getResponse());
       nodeToRender.renderNode(outputStream,nodeToRender,editUrl,editNodeId);
-      outputStream.flush();
+      getContext().getResponse().getOutputStream().flush();
     }
  catch (    Throwable t) {
       logger.log(Level.WARNING,"Exception while rendering to output stream: {0}",t);

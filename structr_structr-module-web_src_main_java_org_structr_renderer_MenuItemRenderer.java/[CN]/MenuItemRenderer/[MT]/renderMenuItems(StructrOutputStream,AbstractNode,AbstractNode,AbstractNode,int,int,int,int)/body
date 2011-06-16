@@ -1,5 +1,5 @@
 {
-  AbstractNode menuItemNode=startNode;
+  AbstractNode menuItemNode=currentMenuNode;
   if (currentDepth > maxDepth) {
     return;
   }
@@ -12,7 +12,7 @@
     }
   }
   String cssClass="";
-  if (menuItemNode != startNode) {
+  if (menuItemNode != currentNode) {
     if (currentPos == 0) {
       cssClass=" first";
       out.append("<ul>");
@@ -26,35 +26,35 @@
         menuItemNode=linkedPage;
       }
     }
-    if (menuItemNode.equals(currentNode)) {
+    if (menuItemNode.equals(startNode)) {
       cssClass+=" current";
     }
     if (menuItemNode.isVisible()) {
-      String relativeNodePath=menuItemNode.getNodePath(currentNode).replace("&","%26");
+      String relativeNodePath=menuItemNode.getNodePath(startNode).replace("&","%26");
       if (!(cssClass.isEmpty())) {
         cssClass=" class=\"" + cssClass + "\"";
       }
       out.append("<li").append(cssClass).append(">");
-      out.append("<span>" + "<a href=\"").append(relativeNodePath).append("\">");
-      out.append(startNode.getTitleOrName());
-      out.append("</a>").append("</span>\n");
+      out.append("<span><a href=\"").append(relativeNodePath).append("\">");
+      out.append(currentMenuNode.getTitleOrName());
+      out.append("</a></span>");
     }
   }
-  if (startNode.isVisible()) {
+  if (currentMenuNode.isVisible()) {
     int sub=menuItems.size();
     int pos=0;
     for (    AbstractNode s : menuItems) {
-      renderMenuItems(out,currentNode,s,currentDepth,pos,sub,maxDepth);
+      renderMenuItems(out,currentNode,startNode,s,currentDepth,pos,sub,maxDepth);
       pos++;
     }
-    if (startNode != currentNode) {
+    if (currentMenuNode != currentNode) {
       out.append("</li>");
       if (currentPos == numberOfSubnodes - 1) {
         cssClass=" last";
       }
     }
   }
-  if (startNode != currentNode) {
+  if (currentMenuNode != currentNode) {
     if (currentPos == numberOfSubnodes - 1) {
       out.append("</ul>");
     }

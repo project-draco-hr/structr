@@ -7,6 +7,7 @@
   Set<String> classes=ret.getClasses();
   Set<String> properties=ret.getProperties();
   Set<String> resources=ret.getResources();
+  Set<String> libraries=ret.getLibraries();
   JarFile jarFile=new JarFile(moduleFile);
   for (Enumeration<JarEntry> entries=jarFile.entries(); entries.hasMoreElements(); ) {
     JarEntry entry=entries.nextElement();
@@ -21,6 +22,9 @@
  else     if (entryName.endsWith(".properties")) {
       String fileEntry=entry.getName().replaceAll("[/]+",".");
       properties.add(fileEntry.substring(0,fileEntry.length() - 11));
+    }
+ else     if (entryName.toLowerCase().endsWith(".jar")) {
+      libraries.add(entryName);
     }
  else {
       if (!entryName.endsWith("/")) {

@@ -1,0 +1,35 @@
+{
+  if (!renderersInitialized) {
+    initializeRenderers(rendererMap);
+    renderersInitialized=true;
+  }
+  RenderMode renderMode=RenderMode.Default;
+  if (this.equals(startNode) && rendererMap.containsKey(RenderMode.Direct)) {
+    renderMode=RenderMode.Direct;
+  }
+  if (editNodeId != null && getId() == editNodeId.longValue()) {
+    renderMode=RenderMode.Edit;
+  }
+  NodeRenderer ret=rendererMap.get(renderMode);
+  if (ret == null) {
+    logger.log(Level.FINE,"No renderer found for mode {0}, using default renderers",renderMode);
+switch (renderMode) {
+case Default:
+      ret=new DefaultRenderer();
+    break;
+case Direct:
+  break;
+case Edit:
+ret=new DefaultEditRenderer();
+break;
+}
+}
+logger.log(Level.FINE,"Got renderer {0} for mode {1}, node type {2} ({3})",new Object[]{ret != null ? ret.getClass().getName() : "Unknown",renderMode,this.getType(),this.getId()});
+if (ret != null) {
+out.setContentType(ret.getContentType(this));
+ret.renderNode(out,this,startNode,editUrl,editNodeId,renderMode);
+}
+ else {
+logger.log(Level.WARNING,"No renderer for mode {0}, node {1}",new Object[]{renderMode,this.getId()});
+}
+}

@@ -1,6 +1,19 @@
 {
   String modulePath=module.getModulePath();
   JarFile jarFile=new JarFile(modulePath);
+  Set<String> libraries=module.getLibraries();
+  for (  String library : libraries) {
+    String destinationPath=createResourceFileName(servletContext,"WEB-INF/lib",library);
+    try {
+      ZipEntry entry=jarFile.getEntry(library);
+      InputStream inputStream=jarFile.getInputStream(entry);
+      File destinationFile=new File(destinationPath);
+      deployFile(inputStream,destinationFile);
+      logger.log(Level.INFO,"Deploying library {0} to {1}",new Object[]{entry.getName(),destinationFile});
+    }
+ catch (    Throwable t) {
+    }
+  }
   Set<String> classes=module.getClasses();
   for (  final String className : classes) {
     logger.log(Level.FINE,"Deploying class {0} ",className);
@@ -53,7 +66,7 @@
     logger.log(Level.FINE,"Instantiating class {0} ",className);
     try {
       Class clazz=Class.forName(className);
-      logger.log(Level.FINE,"Class {0} instanciated: {1}",new Object[]{className,clazz});
+      logger.log(Level.FINE,"Class {0} instantiated: {1}",new Object[]{className,clazz});
       if (!Modifier.isAbstract(clazz.getModifiers())) {
         if (AbstractNode.class.isAssignableFrom(clazz)) {
           String simpleName=clazz.getSimpleName();
@@ -77,20 +90,18 @@
       }
     }
  catch (    Throwable t) {
-      logger.log(Level.WARNING,"error instantiating class {0}: {1}",new Object[]{className,t});
-      t.printStackTrace(System.out);
     }
-  }
-  Set<String> resources=module.getResources();
-  for (  String resource : resources) {
-    String destinationPath=createResourceFileName(servletContext,resource);
-    try {
-      ZipEntry entry=jarFile.getEntry(resource);
-      InputStream inputStream=jarFile.getInputStream(entry);
-      File destinationFile=new File(destinationPath);
-      deployFile(inputStream,destinationFile);
-    }
- catch (    Throwable t) {
+    Set<String> resources=module.getResources();
+    for (    String resource : resources) {
+      String destinationPath=createResourceFileName(servletContext,resource);
+      try {
+        ZipEntry entry=jarFile.getEntry(resource);
+        InputStream inputStream=jarFile.getInputStream(entry);
+        File destinationFile=new File(destinationPath);
+        deployFile(inputStream,destinationFile);
+      }
+ catch (      Throwable t) {
+      }
     }
   }
 }

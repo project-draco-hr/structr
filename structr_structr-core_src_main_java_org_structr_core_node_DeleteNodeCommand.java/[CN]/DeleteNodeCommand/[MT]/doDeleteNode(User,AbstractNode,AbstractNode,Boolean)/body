@@ -30,6 +30,12 @@
                   logger.log(Level.WARNING,"Relationship {0} already deleted in this transaction",l.getId());
                 }
               }
+              try {
+                ((AbstractNode)findNode.execute(user,n.getId())).onNodeDeletion();
+              }
+ catch (              Throwable t) {
+                logger.log(Level.WARNING,"Exception while calling onDeletion callback: {0}",t);
+              }
               n.delete();
             }
           }
@@ -48,6 +54,12 @@
             List<StructrRelationship> incomingRels=structrNode.getIncomingRelationships();
             for (            StructrRelationship r : incomingRels) {
               r.getRelationship().delete();
+            }
+            try {
+              structrNode.onNodeDeletion();
+            }
+ catch (            Throwable t) {
+              logger.log(Level.WARNING,"Exception while calling onDeletion callback: {0}",t);
             }
             node.delete();
           }

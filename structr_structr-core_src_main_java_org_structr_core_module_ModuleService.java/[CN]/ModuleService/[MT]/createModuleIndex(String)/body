@@ -8,9 +8,9 @@
   Set<String> properties=ret.getProperties();
   Set<String> resources=ret.getResources();
   Set<String> libraries=ret.getLibraries();
-  JarFile jarFile=new JarFile(moduleFile);
-  for (Enumeration<JarEntry> entries=jarFile.entries(); entries.hasMoreElements(); ) {
-    JarEntry entry=entries.nextElement();
+  ZipFile zipFile=new ZipFile(moduleFile);
+  for (Enumeration<? extends ZipEntry> entries=zipFile.entries(); entries.hasMoreElements(); ) {
+    ZipEntry entry=entries.nextElement();
     String entryName=entry.getName();
     if (entryName.toLowerCase().startsWith("meta-inf/")) {
       continue;
@@ -23,7 +23,7 @@
       String fileEntry=entry.getName().replaceAll("[/]+",".");
       properties.add(fileEntry.substring(0,fileEntry.length() - 11));
     }
- else     if (entryName.toLowerCase().endsWith(".jar")) {
+ else     if (entryName.toLowerCase().endsWith(".Zip")) {
       libraries.add(entryName);
     }
  else {

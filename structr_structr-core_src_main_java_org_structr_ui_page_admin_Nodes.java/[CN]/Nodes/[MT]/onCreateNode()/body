@@ -21,7 +21,7 @@
 );
     if (s != null) {
       okMsg="New " + s.getType() + " node "+ s.getName()+ " has been created.";
-      Services.command(AddNotificationCommand.class).execute(new DefaultNotification(okMsg,null));
+      Services.command(AddNotificationCommand.class).execute(new SuccessNotification(okMsg));
       Command findNode=Services.command(FindNodeCommand.class);
       AbstractNode n=(AbstractNode)findNode.execute(user,s.getId());
       Map<String,String> parameters=new HashMap<String,String>();
@@ -33,7 +33,7 @@
     }
  else {
       errorMsg="New node could not be created!";
-      Services.command(AddNotificationCommand.class).execute(new DefaultNotification(errorMsg,null));
+      Services.command(AddNotificationCommand.class).execute(new ErrorNotification(errorMsg));
     }
   }
   if (!newNodeForm.isValid()) {

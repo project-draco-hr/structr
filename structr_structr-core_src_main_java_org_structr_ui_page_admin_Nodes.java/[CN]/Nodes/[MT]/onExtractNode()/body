@@ -26,12 +26,12 @@
     parameters.put(RENDER_MODE_KEY,renderMode);
     if (transactionCommand.getExitCode().equals(Command.exitCode.FAILURE)) {
       errorMsg=transactionCommand.getErrorMessage();
-      Services.command(AddNotificationCommand.class).execute(new DefaultNotification(errorMsg,null));
+      Services.command(AddNotificationCommand.class).execute(new ErrorNotification(errorMsg));
       parameters.put(ERROR_MSG_KEY,errorMsg);
     }
  else {
       okMsg="Node extracted to " + targetNodeId;
-      Services.command(AddNotificationCommand.class).execute(new DefaultNotification(okMsg,null));
+      Services.command(AddNotificationCommand.class).execute(new SuccessNotification(okMsg));
       parameters.put(OK_MSG_KEY,okMsg);
     }
     setRedirect(getRedirectPage(node),parameters);

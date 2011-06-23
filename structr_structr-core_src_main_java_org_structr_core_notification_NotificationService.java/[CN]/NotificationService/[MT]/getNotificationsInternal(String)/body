@@ -1,0 +1,13 @@
+{
+  Queue<Notification> ret=null;
+synchronized (globalNotificationMap) {
+    ret=globalNotificationMap.get(sessionId);
+    if (ret != null) {
+      Notification head=ret.peek();
+      if (head != null && head.isExpired()) {
+        ret.remove();
+      }
+    }
+  }
+  return (ret);
+}

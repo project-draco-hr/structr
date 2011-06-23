@@ -1,0 +1,28 @@
+{
+  StringBuilder ret=new StringBuilder(200);
+  int zIndex=999;
+  Collection<Notification> notifications=(Collection<Notification>)Services.command(GetNotificationsCommand.class).execute(getContext().getSession().getId());
+  ret.append("<div id=\"consoleContent\">");
+  if (notifications != null) {
+    for (    Notification notification : notifications) {
+      String notificationTitle=notification.getTitle();
+      String notificationText=notification.getText();
+      ret.append("<div class='notification' style='z-index:");
+      ret.append(zIndex--);
+      ret.append(";'>");
+      if (notificationTitle != null && notificationTitle.length() > 0) {
+        ret.append("<h3 class='notificationTitle'>");
+        ret.append(notificationTitle);
+        ret.append("</h3>");
+      }
+      if (notificationText != null && notificationText.length() > 0) {
+        ret.append("<p class='notificationText'>");
+        ret.append(notification.getText());
+        ret.append("</p>");
+      }
+      ret.append("</div>");
+    }
+  }
+  ret.append("</div>");
+  return new ActionResult(ret.toString(),ActionResult.HTML);
+}

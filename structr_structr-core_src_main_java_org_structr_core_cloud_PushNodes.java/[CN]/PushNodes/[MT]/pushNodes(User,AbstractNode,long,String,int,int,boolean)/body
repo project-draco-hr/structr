@@ -15,21 +15,24 @@
     int estimatedSize=0;
     PushTransmission transmission=new PushTransmission(remoteHost,remoteTcpPort,remoteUdpPort,count,estimatedSize);
     cloudService.registerTransmission(transmission);
+    StringBuilder titleBuffer=new StringBuilder();
+    titleBuffer.append("Transmission to ").append(remoteHost).append(":").append(remoteTcpPort);
+    ProgressBarNotification progressNotification=new ProgressBarNotification(titleBuffer.toString());
+    Services.command(AddNotificationCommand.class).execute(progressNotification);
     client.connect(10000,remoteHost,remoteTcpPort,remoteUdpPort);
     client.sendTCP(CloudService.BEGIN_TRANSACTION);
-    count.value++;
     client.sendTCP(new PushNodeRequestContainer(remoteTargetNodeId));
-    count.value++;
     if (recursive) {
       List<AbstractNode> nodes=sourceNode.getAllChildrenForRemotePush(new SuperUser());
+      progressNotification.setTargetProgress(sourceNode.getRemotePushSize(new SuperUser(),chunkSize));
       for (      AbstractNode n : nodes) {
         if (n instanceof File) {
-          sendFile(client,listener,(File)n,chunkSize,count);
+          sendFile(client,listener,(File)n,chunkSize,progressNotification);
         }
  else {
           NodeDataContainer container=new NodeDataContainer(n);
           client.sendTCP(container);
-          count.value++;
+          progressNotification.increaseProgress();
         }
       }
       for (      AbstractNode n : nodes) {
@@ -37,24 +40,21 @@
         for (        StructrRelationship r : rels) {
           if (nodes.contains(r.getStartNode()) && nodes.contains(r.getEndNode())) {
             client.sendTCP(new RelationshipDataContainer(r));
-            count.value++;
+            progressNotification.increaseProgress();
           }
         }
       }
     }
  else {
       if (sourceNode instanceof File) {
-        sendFile(client,listener,(File)sourceNode,chunkSize,count);
+        sendFile(client,listener,(File)sourceNode,chunkSize,progressNotification);
       }
  else {
         client.sendTCP(new NodeDataContainer(sourceNode));
-        count.value++;
+        progressNotification.increaseProgress();
       }
     }
-    logger.log(Level.INFO,"Data transmitted, sending END_TRANSACTION signal..");
     client.sendTCP(CloudService.END_TRANSACTION);
-    count.value++;
-    logger.log(Level.INFO,"Transmission done, {0} objects sent",count);
     cloudService.unregisterTransmission(transmission);
   }
  catch (  IOException ex) {

@@ -1,0 +1,27 @@
+{
+  StringBuilder ret=new StringBuilder(200);
+  if (parameters.length > 0) {
+    if (parameters[0] instanceof String) {
+      String commandLine=(String)parameters[0];
+      String[] commands=commandLine.split("[\\s]+");
+      if (commands.length > 0) {
+        Class<? extends NodeServiceCommand> commandClass=commandMap.get(commands[0].toString());
+        if (commandClass != null) {
+          try {
+            NodeServiceCommand command=commandClass.newInstance();
+            Object[] params=new Object[parameters.length - 1];
+            for (int i=1; i < parameters.length; i++)             params[i - 1]=parameters[i];
+            ret.append(command.execute(params));
+          }
+ catch (          Throwable t) {
+            logger.log(Level.WARNING,"Error instantiating command {0}: {1}",new Object[]{commands[0].toString(),t.getMessage()});
+          }
+        }
+ else {
+          ret.append("Command not found");
+        }
+      }
+    }
+  }
+  return (ret.toString());
+}

@@ -1,7 +1,7 @@
 {
   FileNodeDataContainer container=new FileNodeDataContainer(file);
   client.sendTCP(container);
-  count.value++;
+  progressNotification.increaseProgress();
   for (  FileNodeChunk chunk : FileNodeDataContainer.getChunks(file,chunkSize)) {
     try {
       client.sendTCP(chunk);
@@ -10,8 +10,8 @@
  catch (    Throwable t) {
       break;
     }
-    count.value++;
+    progressNotification.increaseProgress();
   }
   client.sendTCP(new FileNodeEndChunk(container.getSourceNodeId(),container.getFileSize()));
-  count.value++;
+  progressNotification.increaseProgress();
 }

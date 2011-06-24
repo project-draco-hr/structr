@@ -1,6 +1,12 @@
 {
   List<Notification> ret=new LinkedList<Notification>();
-  ret.addAll(getNotificationsInternal(sessionId));
-  ret.addAll(getGlobalNotifications());
+  Queue<Notification> notifications=getNotificationsInternal(sessionId);
+  if (notifications != null) {
+    ret.addAll(notifications);
+  }
+  getGlobalNotifications();
+  if (globalNotifications != null) {
+    ret.addAll(globalNotifications);
+  }
   return (ret);
 }

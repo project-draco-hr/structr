@@ -1,19 +1,20 @@
 {
+  logger.log(Level.INFO,"Received {0} ({1})",new Object[]{object,object.getClass().getName()});
   if (transactionFinished && object instanceof KeepAlive) {
     logger.log(Level.INFO,"Received first KeepAlive after transaction finished, closing connection.");
     connection.close();
   }
  else   if (object instanceof Integer) {
     Integer controlSignal=(Integer)object;
-    if (BEGIN_TRANSACTION.equals(controlSignal)) {
+    if (CloudService.BEGIN_TRANSACTION.equals(controlSignal)) {
       linkNode=true;
     }
- else     if (END_TRANSACTION.equals(controlSignal)) {
+ else     if (CloudService.END_TRANSACTION.equals(controlSignal)) {
       logger.log(Level.INFO,"Received END_TRANSACTION signal, waiting for KeepAlive to close connection.");
       idMap.clear();
       transactionFinished=true;
     }
- else     if (CLOSE_TRANSACTION.equals(controlSignal)) {
+ else     if (CloudService.CLOSE_TRANSACTION.equals(controlSignal)) {
       logger.log(Level.INFO,"Received CLOSE_TRANSACTION signal, closing connection..");
       connection.close();
       handlePullRequests();
@@ -21,10 +22,7 @@
     connection.sendTCP(CloudService.ACK_DATA);
   }
  else   if (object instanceof PullNodeRequestContainer) {
-synchronized (pullRequests) {
-      pullRequests.add((PullNodeRequestContainer)object);
-    }
-    connection.sendTCP(CloudService.ACK_DATA);
+    pullRequests.add((PullNodeRequestContainer)object);
   }
  else   if (object instanceof PushNodeRequestContainer) {
     PushNodeRequestContainer request=(PushNodeRequestContainer)object;

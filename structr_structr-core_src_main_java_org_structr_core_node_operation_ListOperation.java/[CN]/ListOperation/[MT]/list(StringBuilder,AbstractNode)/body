@@ -1,0 +1,23 @@
+{
+  List<AbstractNode> children=node.getSortedDirectChildNodes();
+  DecimalFormat df=new DecimalFormat("0000000");
+  if (!children.isEmpty()) {
+    stdOut.append("<ul>");
+    for (    AbstractNode child : children) {
+      stdOut.append("<li>");
+      stdOut.append("<p>");
+      stdOut.append(df.format(child.getId()));
+      stdOut.append(" ");
+      stdOut.append(child.getName());
+      stdOut.append(" (");
+      stdOut.append(child.getType());
+      stdOut.append(")");
+      stdOut.append("</p>");
+      if (recursive) {
+        list(stdOut,child);
+      }
+      stdOut.append("</li>");
+    }
+    stdOut.append("</ul>");
+  }
+}

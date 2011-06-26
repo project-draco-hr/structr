@@ -1,49 +1,36 @@
 {
-  AbstractNode newParentNode=null;
+  List<AbstractNode> toDelete=new LinkedList<AbstractNode>();
+  AbstractNode newParentNode=currentNode;
   for (  String param : parameters) {
     if (".".equals(param)) {
       stdOut.append("Cannot delete current node");
     }
  else {
-      long nodeId=-1;
-      try {
-        nodeId=Long.parseLong(param.toString());
-      }
- catch (      Throwable t) {
-        AbstractNode findNode=(AbstractNode)Services.command(FindNodeCommand.class).execute(CurrentRequest.getCurrentUser(),currentNode,param);
-        if (findNode != null) {
-          nodeId=findNode.getId();
+      Object findNodeResult=Services.command(FindNodeCommand.class).execute(CurrentRequest.getCurrentUser(),currentNode,param);
+      if (findNodeResult != null) {
+        if (findNodeResult instanceof Collection) {
+          toDelete.addAll((Collection)findNodeResult);
         }
- else {
-          nodeId=-1;
+ else         if (findNodeResult instanceof AbstractNode) {
+          toDelete.add((AbstractNode)findNodeResult);
         }
       }
-      if (nodeId > 0) {
-        if (nodeId == currentNode.getId()) {
-          newParentNode=currentNode.getParentNode();
+      for (      AbstractNode node : toDelete) {
+        try {
+          deleteCommand.execute(node,null,recursive,CurrentRequest.getCurrentUser());
+          if (deleteCommand.getExitCode().equals(Command.exitCode.FAILURE)) {
+            stdOut.append(deleteCommand.getErrorMessage());
+          }
         }
-        AbstractNode returnedNode=(AbstractNode)deleteCommand.execute(nodeId,null,recursive,CurrentRequest.getCurrentUser());
-        if (returnedNode != null && newParentNode == null) {
-          newParentNode=returnedNode;
+ catch (        Throwable t) {
+          stdOut.append(t.getMessage());
         }
-        Command.exitCode exitCode=deleteCommand.getExitCode();
-switch (exitCode) {
-case FAILURE:
-          stdOut.append(deleteCommand.getErrorMessage()).append("\n");
-        break;
-case SUCCESS:
-      stdOut.append("Node [").append(nodeId).append("] deleted.\n");
-    break;
-}
-}
- else {
-stdOut.append("Node not found");
-}
-}
-}
-if (newParentNode != null) {
-for (Callback callback : callbacks) callback.callback(newParentNode.getId());
-return (true);
-}
-return (false);
+      }
+    }
+  }
+  if (newParentNode != null) {
+    for (    Callback callback : callbacks)     callback.callback(newParentNode.getId());
+    return (true);
+  }
+  return (false);
 }

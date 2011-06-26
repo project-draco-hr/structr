@@ -1,0 +1,21 @@
+{
+  if (operation instanceof NodePropertyOperation) {
+    for (    String attribute : attributes) {
+      String[] parts=attribute.split("[=]+");
+      if (parts.length == 2) {
+        String key=parts[0].trim();
+        String val=parts[1].trim();
+        if ("type".equals(key.toLowerCase()) || "name".equals(key.toLowerCase())) {
+          throw new InvalidTransformationException("Name and type are restricted properties");
+        }
+        ((NodePropertyOperation)operation).setProperty(key,val);
+      }
+ else {
+        throw new InvalidTransformationException("Invalid property " + attribute);
+      }
+    }
+  }
+ else {
+    throw new InvalidTransformationException("WITH cannot be applied to " + operation.getKeyword());
+  }
+}

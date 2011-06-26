@@ -1,24 +1,84 @@
 {
   StringBuilder ret=new StringBuilder(200);
-  if (parameters.length > 0) {
-    if (parameters[0] instanceof String) {
-      String commandLine=(String)parameters[0];
-      String[] commands=commandLine.split("[\\s]+");
+  AbstractNode currentNode=null;
+  Callback callback=null;
+  String commandLine=null;
+  if (parameters.length == 3) {
+    if (parameters[0] instanceof AbstractNode) {
+      currentNode=(AbstractNode)parameters[0];
+    }
+    if (parameters[1] instanceof String) {
+      commandLine=(String)parameters[1];
+    }
+    if (parameters[2] instanceof Callback) {
+      callback=(Callback)parameters[2];
+    }
+    if (commandLine != null) {
+      ret.append("<p>structr");
+      ret.append(CurrentRequest.getCurrentUser() instanceof SuperUser ? "# " : "$ ");
+      ret.append(commandLine);
+      ret.append("</p>");
+      Object[] commands=splitCommandLine(commandLine);
       if (commands.length > 0) {
-        Class<? extends NodeServiceCommand> commandClass=commandMap.get(commands[0].toString());
-        if (commandClass != null) {
-          try {
-            NodeServiceCommand command=commandClass.newInstance();
-            Object[] params=new Object[parameters.length - 1];
-            for (int i=1; i < parameters.length; i++)             params[i - 1]=parameters[i];
-            ret.append(command.execute(params));
+        try {
+          PrimaryOperation primaryOperation=null;
+          for (int i=0; i < commands.length; i++) {
+            Operation operation=getOperation(commands[i]);
+            if (operation != null) {
+              if (currentNode != null) {
+                operation.setCurrentNode(currentNode);
+              }
+              if (commands.length == 1 && operation instanceof PrimaryOperation && operation.getParameterCount() != 0) {
+                ret.append(((PrimaryOperation)operation).help());
+                break;
+              }
+ else               if (commands.length < i + operation.getParameterCount() + 1) {
+                throw new InvalidParameterException(operation.getKeyword() + " needs " + operation.getParameterCount()+ " parameters");
+              }
+              int parameterCount=operation.getParameterCount();
+              for (int j=0; j < parameterCount; j++) {
+                i++;
+                operation.addParameter(commands[i]);
+              }
+              if (primaryOperation == null) {
+                if (operation instanceof PrimaryOperation) {
+                  primaryOperation=(PrimaryOperation)operation;
+                  if (callback != null) {
+                    primaryOperation.addCallback(callback);
+                  }
+                }
+ else {
+                  throw new InvalidOperationException(operation.getKeyword() + " is not a primary operation");
+                }
+              }
+ else {
+                if (operation instanceof Transformation) {
+                  Transformation transformation=(Transformation)operation;
+                  transformation.transform(primaryOperation);
+                }
+ else {
+                  throw new InvalidOperationException(operation.getKeyword() + " is not a transformation");
+                }
+              }
+            }
+ else {
+              throw new InvalidOperationException(commands[i].toString() + " not found");
+            }
           }
- catch (          Throwable t) {
-            logger.log(Level.WARNING,"Error instantiating command {0}: {1}",new Object[]{commands[0].toString(),t.getMessage()});
+          if (primaryOperation != null) {
+            StringBuilder stdOut=new StringBuilder(200);
+            if (!primaryOperation.executeOperation(stdOut)) {
+              ret.append("<p class=\"error\">Execution failed</p>\n");
+            }
+            if (stdOut.length() > 0) {
+              ret.append("<p>");
+              ret.append(stdOut.toString());
+              ret.append("</p>\n");
+            }
           }
         }
- else {
-          ret.append("Command not found");
+ catch (        NodeCommandException ncex) {
+          ret.append("<p class=\"error\">ERROR: ").append(ncex.getMessage()).append("</p>\n");
         }
       }
     }

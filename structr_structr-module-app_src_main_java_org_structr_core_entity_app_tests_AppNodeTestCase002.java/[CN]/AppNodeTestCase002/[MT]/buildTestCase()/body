@@ -33,6 +33,8 @@
   AbstractNode editorFormActions=createNode(editorForm,"AppActionContainer","actions");
   AbstractNode editorFormCreator=createNode(editorFormActions,"AppNodeCreator","save");
   editorFormCreator.setProperty("targetType","DataNode");
+  AbstractNode nodeTypeBlogEntryLinker=createNode(editorFormActions,"AppRelationshipCreator","setNodeType");
+  nodeTypeBlogEntryLinker.setProperty("targetRelType","TYPE");
   AbstractNode addCommentPage=createNode(this,"Page","addComment",pageTemplate);
   HtmlSource addCommentContentContainer=(HtmlSource)createNode(addCommentPage,"HtmlSource","content");
   addCommentContentContainer.setContent("%{view}\n%{form}");
@@ -50,9 +52,15 @@
   addCommentCreator.setProperty("targetType","DataNode");
   AbstractNode addCommentLinker=createNode(addCommentActions,"AppRelationshipCreator","link");
   addCommentLinker.setProperty("targetRelType","HAS_CHILD");
+  AbstractNode nodeTypeBlogCommentLinker=createNode(addCommentActions,"AppRelationshipCreator","setNodeType");
+  nodeTypeBlogCommentLinker.setProperty("targetRelType","TYPE");
   AbstractNode blogEntries=createNode(this,"Folder","BlogEntries");
   AbstractNode system=createNode(this,"Folder","System");
   AbstractNode timestamp=createNode(system,"AppTimestamp","timestamp");
+  AbstractNode nodeTypeBlogEntry=createNode(system,"NodeType","BlogEntry");
+  nodeTypeBlogEntry.setProperty("_content","java.lang.String");
+  AbstractNode nodeTypeBlogComment=createNode(system,"NodeType","BlogComment");
+  nodeTypeBlogComment.setProperty("_comment","java.lang.String");
   linkNodes(blogPageList,blogEntries,RelType.DATA);
   linkNodes(adminPageList,blogEntries,RelType.DATA);
   linkNodes(editorFormLoader,editorContentField,RelType.DATA);
@@ -69,4 +77,8 @@
   linkNodes(addCommentCreator,addCommentLinker,RelType.DATA).setProperty("targetSlotName","endNode");
   linkNodes(addCommentActions,addCommentPage,RelType.ERROR_DESTINATION);
   linkNodes(addCommentActions,blogPage,RelType.SUCCESS_DESTINATION);
+  linkNodes(editorFormCreator,nodeTypeBlogEntryLinker,RelType.DATA).setProperty("targetSlotName","startNode");
+  linkNodes(nodeTypeBlogEntry,nodeTypeBlogEntryLinker,RelType.DATA).setProperty("targetSlotName","endNode");
+  linkNodes(addCommentCreator,nodeTypeBlogCommentLinker,RelType.DATA).setProperty("targetSlotName","startNode");
+  linkNodes(nodeTypeBlogComment,nodeTypeBlogCommentLinker,RelType.DATA).setProperty("targetSlotName","endNode");
 }

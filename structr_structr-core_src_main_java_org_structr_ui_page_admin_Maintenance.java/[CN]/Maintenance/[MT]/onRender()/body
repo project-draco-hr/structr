@@ -50,49 +50,10 @@
     }
   }
 );
-  runtimeValuesTable.setDataProvider(new DataProvider(){
-    @Override public List<Map.Entry<String,Object>> getData(){
-      List<Map.Entry<String,Object>> params=new LinkedList<Map.Entry<String,Object>>();
-      for (      AbstractNode s : allNodes) {
-        String type=s.getType();
-        long value=0L;
-        if (nodesHistogram.containsKey(type)) {
-          value=(Long)nodesHistogram.get(type);
-        }
-        value++;
-        nodesHistogram.put(type,value);
-      }
-      params.add(new AbstractMap.SimpleEntry<String,Object>("Nodes",allNodes.size()));
-      return params;
-    }
-  }
-);
   modulesTable.setDataProvider(new DataProvider(){
     @Override public Set<String> getData(){
       Command listModules=Services.command(ListModulesCommand.class);
       return (Set<String>)listModules.execute();
-    }
-  }
-);
-  registeredClassesTable.setDataProvider(new DataProvider(){
-    @Override public Set<NodeClassEntry> getData(){
-      SortedSet<NodeClassEntry> nodeClassList=new TreeSet<NodeClassEntry>();
-      Map<String,Class> entities=(Map<String,Class>)Services.command(GetEntitiesCommand.class).execute();
-      for (      Entry<String,Class> entry : entities.entrySet()) {
-        String n=entry.getKey();
-        Class c=entry.getValue();
-        NodeType type=new NodeType(n,c);
-        String iconSrc=type.getIconSrc();
-        String shortName=type.getKey();
-        nodeClassList.add(new NodeClassEntry(c.getName(),iconSrc,nodesHistogram.get(shortName)));
-      }
-      return nodeClassList;
-    }
-  }
-);
-  allNodesTable.setDataProvider(new DataProvider(){
-    @Override public List<AbstractNode> getData(){
-      return getAllNodes();
     }
   }
 );

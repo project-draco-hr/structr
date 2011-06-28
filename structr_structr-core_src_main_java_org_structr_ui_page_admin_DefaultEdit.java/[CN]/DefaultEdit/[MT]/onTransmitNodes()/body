@@ -1,17 +1,22 @@
 {
-  String remoteHostValue=remoteHost.getValue();
-  Long targetNodeValue=remoteSourceNode.getLong();
-  Integer tcpPort=remoteTcpPort.getInteger();
-  Integer udpPort=remoteUdpPort.getInteger();
-  boolean rec=cloudRecursive.isChecked();
-  String pushPull=cloudPushPull.getValue();
-  if ("push".equals(pushPull)) {
-    Command transmitCommand=Services.command(PushNodes.class);
-    transmitCommand.execute(user,node,targetNodeValue,remoteHostValue,tcpPort,udpPort,rec);
+  final String remoteHostValue=remoteHost.getValue();
+  final Long targetNodeValue=remoteSourceNode.getLong();
+  final Integer tcpPort=remoteTcpPort.getInteger();
+  final Integer udpPort=remoteUdpPort.getInteger();
+  final boolean rec=cloudRecursive.isChecked();
+  final String pushPull=cloudPushPull.getValue();
+  new Thread(new Runnable(){
+    @Override public void run(){
+      if ("push".equals(pushPull)) {
+        Command transmitCommand=Services.command(PushNodes.class);
+        transmitCommand.execute(user,node,targetNodeValue,remoteHostValue,tcpPort,udpPort,rec);
+      }
+ else       if ("pull".equals(pushPull)) {
+        Command transmitCommand=Services.command(PullNode.class);
+        transmitCommand.execute(user,targetNodeValue,node,remoteHostValue,tcpPort,udpPort,rec);
+      }
+    }
   }
- else   if ("pull".equals(pushPull)) {
-    Command transmitCommand=Services.command(PullNode.class);
-    transmitCommand.execute(user,targetNodeValue,node,remoteHostValue,tcpPort,udpPort,rec);
-  }
+,getContext().getSession().getId()).start();
   return false;
 }

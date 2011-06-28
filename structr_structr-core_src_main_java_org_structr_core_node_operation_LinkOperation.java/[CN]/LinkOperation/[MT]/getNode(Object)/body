@@ -1,0 +1,20 @@
+{
+  Command findNodeCommand=Services.command(FindNodeCommand.class);
+  AbstractNode ret=null;
+  if (parameter instanceof Collection) {
+    throw new InvalidParameterException("LINK does not take multiple arguments");
+  }
+ else {
+    Object findNodeReturnValue=findNodeCommand.execute(CurrentRequest.getCurrentUser(),currentNode,parameter);
+    if (findNodeReturnValue instanceof Collection) {
+      throw new InvalidParameterException("LINK does not support wildcards");
+    }
+ else     if (findNodeReturnValue instanceof AbstractNode) {
+      ret=(AbstractNode)findNodeReturnValue;
+    }
+ else {
+      throw new InvalidParameterException("Node " + parameter.toString() + " not found");
+    }
+  }
+  return (ret);
+}

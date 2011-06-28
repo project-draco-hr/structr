@@ -1,0 +1,22 @@
+{
+  if (parameter instanceof Collection) {
+    throw new InvalidParameterException("IN cannot handle multiple parmeters");
+  }
+ else {
+    try {
+      parentNodeId=Long.parseLong(parameter.toString());
+    }
+ catch (    Throwable t) {
+      AbstractNode findNode=(AbstractNode)Services.command(FindNodeCommand.class).execute(CurrentRequest.getCurrentUser(),parameter);
+      if (findNode != null) {
+        parentNodeId=findNode.getId();
+      }
+ else {
+        parentNodeId=-1;
+      }
+    }
+    if (parentNodeId == -1) {
+      throw new InvalidParameterException("Invalid parent node ID");
+    }
+  }
+}

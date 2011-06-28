@@ -1,0 +1,15 @@
+{
+  Object findNodeResult=Services.command(FindNodeCommand.class).execute(CurrentRequest.getCurrentUser(),currentNode,obj);
+  if (findNodeResult != null) {
+    if (findNodeResult instanceof AbstractNode) {
+      nodeList.add((AbstractNode)findNodeResult);
+    }
+ else     if (findNodeResult instanceof Collection) {
+      for (      Object o : (Collection)findNodeResult) {
+        if (o instanceof AbstractNode) {
+          nodeList.add((AbstractNode)o);
+        }
+      }
+    }
+  }
+}

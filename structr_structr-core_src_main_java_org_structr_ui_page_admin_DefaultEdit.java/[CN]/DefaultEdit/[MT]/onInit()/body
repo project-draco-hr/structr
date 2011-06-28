@@ -373,10 +373,22 @@
   addControl(cloudForm);
   cloudPanel=new Panel("cloudPanel","/panel/cloud-panel.htm");
   addControl(cloudPanel);
-  consoleForm.setActionURL(consoleForm.getActionURL().concat("#console-tab"));
+  consoleCommand=new TextField("command","Command");
+  consoleCommand.addStyleClass("commandInput");
+  consoleForm.add(consoleCommand);
+  consoleForm.addStyleClass("commandInput");
+  consoleForm.add(new Submit("executeCommand","Execute",this,"onConsoleCommand"));
+  StringBuilder actionURL=new StringBuilder(100);
+  actionURL.append(consoleForm.getActionURL());
+  if (nodeId != null) {
+    actionURL.append("?nodeId=").append(nodeId);
+  }
+  actionURL.append("#console-tab");
+  consoleForm.setActionURL(actionURL.toString());
   addControl(consoleForm);
   consolePanel=new Panel("consolePanel","/panel/console-panel.htm");
   addControl(consolePanel);
+  readConsoleOutput();
   if (!(editPropertiesAllowed)) {
     List<Field> propertyFields=editPropertiesForm.getFieldList();
     for (    Field f : propertyFields) {

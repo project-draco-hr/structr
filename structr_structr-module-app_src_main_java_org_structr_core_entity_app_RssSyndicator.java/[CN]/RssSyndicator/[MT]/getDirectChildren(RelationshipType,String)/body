@@ -6,9 +6,9 @@
     DocumentBuilder builder=DocumentBuilderFactory.newInstance().newDocumentBuilder();
     Document doc=builder.parse(url.openStream());
     NodeList items=doc.getElementsByTagName("item");
-    int len=items.getLength();
+    int len=Math.min(items.getLength(),getIntProperty(Key.numItems));
     for (int i=0; i < len; i++) {
-      ret.add(new RssItem(items.item(i)));
+      ret.add(new RssItem(i,items.item(i)));
     }
   }
  catch (  Throwable t) {

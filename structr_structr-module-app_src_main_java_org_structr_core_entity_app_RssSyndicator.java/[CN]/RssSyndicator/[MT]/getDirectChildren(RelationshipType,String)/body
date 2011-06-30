@@ -1,0 +1,18 @@
+{
+  List<AbstractNode> ret=new LinkedList<AbstractNode>();
+  String source=getStringProperty(Key.source);
+  try {
+    URL url=new URL(source);
+    DocumentBuilder builder=DocumentBuilderFactory.newInstance().newDocumentBuilder();
+    Document doc=builder.parse(url.openStream());
+    NodeList items=doc.getElementsByTagName("item");
+    int len=Math.min(items.getLength(),getIntProperty(Key.numItems));
+    for (int i=0; i < len; i++) {
+      ret.add(new RssItem(i,items.item(i)));
+    }
+  }
+ catch (  Throwable t) {
+    t.printStackTrace();
+  }
+  return (ret);
+}

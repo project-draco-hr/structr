@@ -8,7 +8,7 @@
       userName=SUPERADMIN_USERNAME_KEY;
       isSuperUser=true;
       user=new SuperUser();
-      getContext().getRequest().getSession().setAttribute(USERNAME_KEY,userValue);
+      CurrentRequest.setCurrentUser(user);
       CurrentSession.setGlobalUsername(userValue);
       Services.initialize();
       setRedirect("/admin/maintenance.htm");
@@ -39,13 +39,13 @@
         return true;
       }
       userName=userValue;
+      CurrentRequest.setCurrentUser(user);
       CurrentSession.setGlobalUsername(userValue);
-      getContext().getRequest().getSession().setAttribute(USERNAME_KEY,userValue);
       initFirstPage();
     }
     sessionId=SessionMonitor.registerUserSession(getContext().getSession());
     SessionMonitor.logActivity(sessionId,"Login");
-    getContext().getRequest().getSession().setAttribute(SessionMonitor.SESSION_ID,sessionId);
+    CurrentSession.setAttribute(SessionMonitor.SESSION_ID,sessionId);
     return false;
   }
   return true;

@@ -1,0 +1,22 @@
+{
+  List<String> ret=(List<String>)getContext().getSession().getAttribute(NodeConsoleCommand.CONSOLE_BUFFER_KEY);
+  if (ret == null) {
+    StringBuilder welcome=new StringBuilder();
+    welcome.append("<p>Welcome to the structr console!</p>");
+    welcome.append("<p>Supported commands: ");
+    for (    Entry<String,Class<? extends Operation>> entry : NodeConsoleCommand.operationsMap.entrySet()) {
+      String cmd=entry.getKey();
+      Class op=entry.getValue();
+      if (PrimaryOperation.class.isAssignableFrom(op)) {
+        welcome.append(" <b>").append(cmd).append("</b>");
+      }
+    }
+    welcome.append("</p>");
+    welcome.append("<p>Typing the command without any parameters will show a short help text for each command.</p>");
+    welcome.append("<p>&nbsp;</p>");
+    ret=new LinkedList<String>();
+    ret.add(welcome.toString());
+    getContext().getSession().setAttribute(NodeConsoleCommand.CONSOLE_BUFFER_KEY,ret);
+  }
+  return (ret);
+}

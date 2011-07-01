@@ -1,0 +1,37 @@
+{
+  final AbstractNode parent=(AbstractNode)Services.command(FindNodeCommand.class).execute(CurrentRequest.getCurrentUser(),nodeParent);
+  boolean ret=false;
+  if (parent != null) {
+    Boolean retValue=(Boolean)Services.command(TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws Throwable {
+        Command createRelCommand=Services.command(CreateRelationshipCommand.class);
+        Command createNodeCommand=Services.command(CreateNodeCommand.class);
+        List<Long> newNodeIds=new LinkedList<Long>();
+        int count=0;
+        for (        String nodeName : nodeNames) {
+          AbstractNode newNode=(AbstractNode)createNodeCommand.execute(nodeAttributes);
+          newNode.setName(nodeName);
+          newNode.setType(nodeType);
+          createRelCommand.execute(parent,newNode,RelType.HAS_CHILD);
+          newNodeIds.add(newNode.getId());
+          count++;
+        }
+        if (newNodeIds.size() == 1) {
+          stdOut.append("Node ").append(newNodeIds).append(" with type ").append(nodeType).append(" created");
+        }
+ else {
+          stdOut.append("Nodes ").append(newNodeIds).append(" with type ").append(nodeType).append(" created");
+        }
+        return (true);
+      }
+    }
+);
+    if (retValue != null) {
+      ret=retValue.booleanValue();
+    }
+  }
+ else {
+    throw new NodeCommandException("Creation parent node not found");
+  }
+  return (ret);
+}

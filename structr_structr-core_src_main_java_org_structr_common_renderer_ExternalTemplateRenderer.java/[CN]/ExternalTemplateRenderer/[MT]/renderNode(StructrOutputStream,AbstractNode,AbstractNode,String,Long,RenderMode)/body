@@ -1,0 +1,15 @@
+{
+  if (currentNode.isVisible()) {
+    if (currentNode.hasTemplate()) {
+      Template template=currentNode.getTemplate();
+      template.setCallingNode(currentNode);
+      template.renderNode(out,startNode,editUrl,editNodeId);
+    }
+ else     if (renderSubnodesIfNoTemplate) {
+      List<AbstractNode> subnodes=currentNode.getSortedDirectChildAndLinkNodes();
+      for (      AbstractNode s : subnodes) {
+        s.renderNode(out,startNode,editUrl,editNodeId);
+      }
+    }
+  }
+}

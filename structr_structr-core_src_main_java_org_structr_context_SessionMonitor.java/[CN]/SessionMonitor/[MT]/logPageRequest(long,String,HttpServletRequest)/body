@@ -11,7 +11,9 @@
     Map<String,Object> parameterMap=request.getParameterMap();
     Set<String> keys=parameterMap.keySet();
     for (    String key : keys) {
-      text.append("\"").append(key).append("\": \"").append(request.getParameter(key)).append("\", ");
+      String value=request.getParameter(key);
+      if ("onUpdateNotificationContent".equals(value))       return;
+      text.append("\"").append(key).append("\": \"").append(value).append("\", ");
     }
     text.append("\"uri\": \"").append(request.getRequestURI()).append("\", ");
     text.append("\"remoteAddress\": \"").append(request.getRemoteAddr()).append("\", ");

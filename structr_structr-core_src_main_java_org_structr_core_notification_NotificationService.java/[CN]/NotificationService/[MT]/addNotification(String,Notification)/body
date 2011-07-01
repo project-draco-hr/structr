@@ -1,0 +1,20 @@
+{
+  if (sessionId != null) {
+    Queue<Notification> notifications=getNotificationsInternal(sessionId);
+    boolean ret=false;
+    if (notifications == null) {
+      notifications=new ConcurrentLinkedQueue<Notification>();
+synchronized (globalNotificationMap) {
+        globalNotificationMap.put(sessionId,notifications);
+      }
+    }
+synchronized (notifications) {
+      ret=notifications.add(notification);
+    }
+    return (ret);
+  }
+ else {
+    globalNotifications.add(notification);
+    return (true);
+  }
+}

@@ -1,0 +1,36 @@
+{
+  List<AbstractNode> toDelete=new LinkedList<AbstractNode>();
+  AbstractNode newParentNode=currentNode;
+  for (  String param : parameters) {
+    if (".".equals(param)) {
+      stdOut.append("Cannot delete current node");
+    }
+ else {
+      Object findNodeResult=Services.command(FindNodeCommand.class).execute(CurrentRequest.getCurrentUser(),currentNode,param);
+      if (findNodeResult != null) {
+        if (findNodeResult instanceof Collection) {
+          toDelete.addAll((Collection)findNodeResult);
+        }
+ else         if (findNodeResult instanceof AbstractNode) {
+          toDelete.add((AbstractNode)findNodeResult);
+        }
+      }
+      for (      AbstractNode node : toDelete) {
+        try {
+          deleteCommand.execute(node,null,recursive,CurrentRequest.getCurrentUser());
+          if (deleteCommand.getExitCode().equals(Command.exitCode.FAILURE)) {
+            stdOut.append(deleteCommand.getErrorMessage());
+          }
+        }
+ catch (        Throwable t) {
+          stdOut.append(t.getMessage());
+        }
+      }
+    }
+  }
+  if (newParentNode != null) {
+    for (    Callback callback : callbacks)     callback.callback(newParentNode.getId());
+    return (true);
+  }
+  return (false);
+}

@@ -1,7 +1,7 @@
 {
-  if (nodeId != null) {
-    if (nodeId instanceof String) {
-      String nodeIdString=(String)nodeId;
+  if (nodeIdOrPath != null) {
+    if (nodeIdOrPath instanceof String) {
+      String nodeIdString=(String)nodeIdOrPath;
       try {
         if (nodeIdString.startsWith("/")) {
           AbstractNode byPathNode=TreeHelper.getNodeByPath(getRootNode(),nodeIdString,true);
@@ -14,18 +14,18 @@
             return byNumberNode;
           }
         }
-        return getNodeById(Long.parseLong((String)nodeId));
+        return getNodeById(Long.parseLong((String)nodeIdOrPath));
       }
  catch (      Exception e) {
-        logger.log(Level.SEVERE,"Could not handle nodeId {0}",nodeId);
+        logger.log(Level.SEVERE,"Could not handle nodeId {0}",nodeIdOrPath);
         return null;
       }
     }
- else     if (nodeId instanceof Long) {
-      return getNodeById((Long)nodeId);
+ else     if (nodeIdOrPath instanceof Long) {
+      return getNodeById((Long)nodeIdOrPath);
     }
  else {
-      logger.log(Level.SEVERE,"Node requested by unknown object: {0}",nodeId);
+      logger.log(Level.SEVERE,"Node requested by unknown object: {0}",nodeIdOrPath);
       return null;
     }
   }

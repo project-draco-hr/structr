@@ -1,0 +1,23 @@
+{
+  final Command deleteNode=Services.command(DeleteNodeCommand.class);
+  Command transactionCommand=Services.command(TransactionCommand.class);
+  Long numberOfLogNodes=(Long)transactionCommand.execute(new StructrTransaction(){
+    @Override public Object execute() throws Throwable {
+      long count=0;
+      List<AbstractNode> allNodes=(List<AbstractNode>)Services.command(GetAllNodes.class).execute();
+      for (      AbstractNode s : allNodes) {
+        if (s instanceof Activity) {
+          try {
+            deleteNode.execute(s,null,true,new SuperUser());
+            count++;
+          }
+ catch (          Throwable ignore) {
+          }
+        }
+      }
+      return count;
+    }
+  }
+);
+  return numberOfLogNodes;
+}

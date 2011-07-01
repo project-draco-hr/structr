@@ -1,0 +1,25 @@
+{
+  if (editNodeId != null && currentNode.getId() == editNodeId.longValue()) {
+    currentNode.renderEditFrame(out,editUrl);
+  }
+ else {
+    if (currentNode.isVisible()) {
+      if (currentNode.getDontCache() == Boolean.TRUE) {
+        StringBuilder content=new StringBuilder(1000);
+        renderSVGMap(currentNode,content,startNode);
+        out.append(content.toString());
+        return;
+      }
+      String cachedSVGMap=currentNode.getSvgContent();
+      if (StringUtils.isBlank(cachedSVGMap)) {
+        StringBuilder cache=new StringBuilder();
+        renderSVGMap(currentNode,cache,startNode);
+        currentNode.setSvgContent(cache.toString());
+        out.append(cache);
+      }
+ else {
+        out.append(cachedSVGMap);
+      }
+    }
+  }
+}

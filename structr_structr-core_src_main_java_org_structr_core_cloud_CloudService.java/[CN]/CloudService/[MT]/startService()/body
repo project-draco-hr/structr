@@ -1,72 +1,13 @@
 {
-  Log.set(Log.LEVEL_DEBUG);
-  server=new Server(4194304,1048576);
-  server.start();
+  Log.set(CloudService.KRYONET_LOG_LEVEL);
+  server=new Server(CloudService.BUFFER_SIZE * 4,CloudService.BUFFER_SIZE * 2);
   Kryo kryo=server.getKryo();
   registerClasses(kryo);
+  server.start();
   logger.log(Level.INFO,"KryoNet server started");
   try {
     server.bind(tcpPort,udpPort);
-    server.addListener(new Listener(){
-      @Override public void received(      Connection connection,      Object object){
-        logger.log(Level.FINE,"Received object {0}",object);
-        if (object instanceof Integer) {
-          Integer controlSignal=(Integer)object;
-          if (BEGIN_TRANSACTION.equals(controlSignal)) {
-            linkNode=true;
-          }
-          if (END_TRANSACTION.equals(controlSignal)) {
-            idMap.clear();
-          }
-        }
- else         if (object instanceof NodeDataContainer) {
-          final NodeDataContainer receivedNodeData=(NodeDataContainer)object;
-          Command transactionCommand=Services.command(TransactionCommand.class);
-          transactionCommand.execute(new StructrTransaction(){
-            @Override public Object execute() throws Throwable {
-              storeNode(receivedNodeData,linkNode);
-              return null;
-            }
-          }
-);
-          connection.sendTCP("Node data received");
-        }
- else         if (object instanceof RelationshipDataContainer) {
-          final RelationshipDataContainer receivedRelationshipData=(RelationshipDataContainer)object;
-          Command transactionCommand=Services.command(TransactionCommand.class);
-          transactionCommand.execute(new StructrTransaction(){
-            @Override public Object execute() throws Throwable {
-              storeRelationship(receivedRelationshipData);
-              return null;
-            }
-          }
-);
-          connection.sendTCP("Relationship data received");
-        }
- else         if (object instanceof List) {
-          final List<DataContainer> dataContainers=(List<DataContainer>)object;
-          Command transactionCommand=Services.command(TransactionCommand.class);
-          transactionCommand.execute(new StructrTransaction(){
-            @Override public Object execute() throws Throwable {
-              boolean linkFirstNode=true;
-              for (              DataContainer receivedData : dataContainers) {
-                if (receivedData instanceof NodeDataContainer) {
-                  storeNode(receivedData,linkFirstNode);
-                  linkFirstNode=false;
-                }
- else                 if (receivedData instanceof RelationshipDataContainer) {
-                  storeRelationship(receivedData);
-                }
-              }
-              return null;
-            }
-          }
-);
-          connection.sendTCP("List data received");
-        }
-      }
-    }
-);
+    server.addListener(rootListener);
     logger.log(Level.INFO,"KryoNet server listening on TCP port {0} and UDP port {1}",new Object[]{tcpPort,udpPort});
   }
  catch (  IOException ex) {

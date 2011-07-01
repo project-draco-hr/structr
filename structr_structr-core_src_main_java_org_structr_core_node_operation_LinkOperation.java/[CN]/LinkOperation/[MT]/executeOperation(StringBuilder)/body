@@ -1,0 +1,31 @@
+{
+  boolean ret=false;
+  if (relationships.isEmpty()) {
+    relationships.add("LINK");
+  }
+  if (parameterState.equals(ParameterState.EndNodeSet)) {
+    Command createRelationshipCommand=Services.command(CreateRelationshipCommand.class);
+    for (    String rel : relationships) {
+      final StructrRelationship newRel=(StructrRelationship)createRelationshipCommand.execute(startNode,endNode,rel);
+      if (newRel != null) {
+        Services.command(TransactionCommand.class).execute(new StructrTransaction(){
+          @Override public Object execute() throws Throwable {
+            for (            NodeAttribute attribute : attributes) {
+              newRel.setProperty(attribute.getKey(),attribute.getValue());
+            }
+            return (null);
+          }
+        }
+);
+        ret=true;
+      }
+ else {
+        ret=false;
+      }
+    }
+  }
+ else {
+    throw new NodeCommandException("Invalid number of parameters");
+  }
+  return (ret);
+}

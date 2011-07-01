@@ -1,0 +1,169 @@
+{
+  Command graphDbCommand=Services.command(GraphDatabaseCommand.class);
+  GraphDatabaseService graphDb=(GraphDatabaseService)graphDbCommand.execute();
+  MapContext mapContext=null;
+  try {
+    long t0=System.currentTimeMillis();
+    String featureName=null;
+    String staticFeatureName=currentNode.getStaticFeatureName();
+    GeoObject geoNode=null;
+    boolean auto=false;
+    if (StringUtils.isNotBlank(staticFeatureName)) {
+      featureName=staticFeatureName;
+    }
+ else {
+      if (startNode != null && startNode instanceof GeoObject) {
+        geoNode=(GeoObject)startNode;
+        featureName=geoNode.getName();
+      }
+ else {
+        HttpServletRequest request=CurrentRequest.getRequest();
+        String featureNameParamName=currentNode.getFeatureNameParamName();
+        if (featureNameParamName == null) {
+          featureNameParamName=Map.defaultFeatureParamName;
+        }
+        if (request != null) {
+          featureName=request.getParameter(featureNameParamName);
+        }
+      }
+    }
+    int cx=currentNode.getCanvasX();
+    int cy=currentNode.getCanvasY();
+    auto=geoNode != null ? geoNode.getAutoEnvelope() : currentNode.getAutoEnvelope();
+    List<MapLayer> layers=new LinkedList<MapLayer>();
+    MapLayer layer=null;
+    ReferencedEnvelope envelope=null;
+    String shapeFilePath=currentNode.getShapeFile();
+    if (shapeFilePath != null) {
+      File shapeFile=new File(shapeFilePath);
+      ShapefileDataStore dataStore=new ShapefileDataStore(shapeFile.toURI().toURL());
+      StyleBuilder sb=new StyleBuilder();
+      Symbolizer sym=sb.createLineSymbolizer(Color.decode(currentNode.getLineColor()),currentNode.getLineWidth());
+      layer=new MapLayer(dataStore.getFeatureSource(),sb.createStyle(sym));
+      layers.add(layer);
+    }
+    Neo4jSpatialDataStore n4jstore=new Neo4jSpatialDataStore(graphDb);
+    String layerName=currentNode.getLayer();
+    if (StringUtils.isEmpty(layerName)) {
+      logger.log(Level.SEVERE,"No layer name!");
+    }
+    SimpleFeatureSource featureSource=n4jstore.getFeatureSource(layerName);
+    if (auto) {
+      if (featureName == null) {
+        envelope=featureSource.getBounds();
+      }
+ else {
+        List<Filter> filterList=new LinkedList<Filter>();
+        filterList.add(CQL.toFilter("NAME = '" + StringEscapeUtils.escapeSql(featureName) + "'"));
+        Filter filter=MapHelper.featureFactory.or(filterList);
+        Query query=new Query(layerName,filter);
+        SimpleFeatureCollection featureCollection=featureSource.getFeatures(query);
+        if (featureCollection != null && !(featureCollection.isEmpty())) {
+          SimpleFeature requestedFeature=featureCollection.features().next();
+          envelope=(ReferencedEnvelope)requestedFeature.getBounds();
+        }
+        if (geoNode == null) {
+          List<AbstractNode> result=(List<AbstractNode>)Services.command(SearchNodeCommand.class).execute(new SuperUser(),null,false,false,Search.andExactName(featureName));
+          for (          AbstractNode n : result) {
+            if (n instanceof GeoObject && n.isNotDeleted()) {
+              geoNode=(GeoObject)n;
+            }
+          }
+        }
+      }
+      if (geoNode != null && geoNode.getAutoEnvelope()) {
+        geoNode.setEnvelopeMinX(envelope.getMinX());
+        geoNode.setEnvelopeMaxX(envelope.getMaxX());
+        geoNode.setEnvelopeMinY(envelope.getMinY());
+        geoNode.setEnvelopeMaxY(envelope.getMaxY());
+      }
+    }
+ else {
+      Double eminx;
+      Double emaxx;
+      Double eminy;
+      Double emaxy;
+      if (geoNode != null) {
+        eminx=geoNode.getEnvelopeMinX();
+        emaxx=geoNode.getEnvelopeMaxX();
+        eminy=geoNode.getEnvelopeMinY();
+        emaxy=geoNode.getEnvelopeMaxY();
+      }
+ else {
+        eminx=currentNode.getEnvelopeMinX();
+        emaxx=currentNode.getEnvelopeMaxX();
+        eminy=currentNode.getEnvelopeMinY();
+        emaxy=currentNode.getEnvelopeMaxY();
+      }
+      if (eminx != null && emaxx != null && eminy != null && emaxy != null) {
+        envelope=new ReferencedEnvelope(eminx,emaxx,eminy,emaxy,null);
+      }
+ else {
+        logger.log(Level.WARNING,"Manual envelope parameter incomplete");
+      }
+    }
+    MapHelper.expandEnvelope(envelope,new Double(cx),new Double(cy));
+    SimpleFeatureCollection features=MapHelper.getIntersectingFeatures(graphDb,envelope,layerName);
+    Symbolizer polygonSymbolizer=MapHelper.createPolygonSymbolizer(currentNode.getLineColor(),currentNode.getLineWidth(),currentNode.getLineOpacity(),currentNode.getFillColor(),currentNode.getFillOpacity());
+    Symbolizer textSymbolizer=MapHelper.createTextSymbolizer(currentNode.getFontName(),currentNode.getFontSize(),currentNode.getFontColor(),currentNode.getFontOpacity(),currentNode.getAnchorX(),currentNode.getAnchorY(),currentNode.getDisplacementX(),currentNode.getDisplacementY());
+    Rule rule=MapHelper.styleFactory.createRule();
+    rule.symbolizers().add(polygonSymbolizer);
+    rule.symbolizers().add(textSymbolizer);
+    FeatureTypeStyle fts=MapHelper.styleFactory.createFeatureTypeStyle(new Rule[]{rule});
+    Style style=MapHelper.styleFactory.createStyle();
+    style.featureTypeStyles().add(fts);
+    layers.add(new MapLayer(features,style));
+    boolean displayCities=(currentNode.getDisplayCities() == Boolean.TRUE);
+    if (geoNode != null && "Country".equals(geoNode.getType()) && displayCities) {
+      List<AbstractNode> subNodes=geoNode.getLinkedNodes();
+      List<GeoObject> geoObjects=new LinkedList<GeoObject>();
+      List<GeoObject> cities=new LinkedList<GeoObject>();
+      List<GeoObject> hotels=new LinkedList<GeoObject>();
+      List<GeoObject> islands=new LinkedList<GeoObject>();
+      for (      AbstractNode node : subNodes) {
+        if ("City".equals(node.getType())) {
+          cities.add((GeoObject)node);
+        }
+        if ("Hotel".equals(node.getType())) {
+          hotels.add((GeoObject)node);
+        }
+        if ("Island".equals(node.getType())) {
+          islands.add((GeoObject)node);
+        }
+      }
+      if (cities.isEmpty()) {
+        geoObjects.addAll(hotels);
+      }
+ else {
+        geoObjects.addAll(cities);
+      }
+      SimpleFeatureCollection collection=MapHelper.createPointsFromGeoObjects(geoObjects);
+      Symbolizer cityTextSym=MapHelper.createTextSymbolizer(currentNode.getPointFontName(),currentNode.getPointFontSize(),currentNode.getPointFontColor(),currentNode.getPointFontOpacity(),currentNode.getLabelAnchorX(),currentNode.getLabelAnchorY(),currentNode.getLabelDisplacementX(),currentNode.getLabelDisplacementY());
+      Symbolizer cityPointSym=MapHelper.createPointSymbolizer(currentNode.getPointShape(),currentNode.getPointDiameter(),currentNode.getPointStrokeColor(),currentNode.getPointStrokeLineWidth(),currentNode.getPointFillColor(),currentNode.getPointFillOpacity());
+      Rule rule2=MapHelper.styleFactory.createRule();
+      rule2.symbolizers().add(cityTextSym);
+      rule2.symbolizers().add(cityPointSym);
+      FeatureTypeStyle fts2=MapHelper.styleFactory.createFeatureTypeStyle(new Rule[]{rule2});
+      Style style2=MapHelper.styleFactory.createStyle();
+      style2.featureTypeStyles().add(fts2);
+      SimpleFeatureSource source=DataUtilities.source(collection);
+      SimpleFeatureCollection subFeatures=source.getFeatures();
+      if (!subFeatures.isEmpty()) {
+        layers.add(new MapLayer(subFeatures,style2));
+      }
+    }
+    mapContext=new DefaultMapContext(layers.toArray(new MapLayer[]{}));
+    MapHelper.renderSVGDocument(out,mapContext,envelope,cx,cy,currentNode.getOptimizeFtsRendering(),currentNode.getLineWidthOptimization());
+    mapContext.dispose();
+    long t1=System.currentTimeMillis();
+    logger.log(Level.INFO,"SVG image successfully rendered in {0} ms",(t1 - t0));
+  }
+ catch (  Throwable t) {
+    logger.log(Level.SEVERE,"Error while rendering map to SVG",t);
+  }
+ finally {
+    if (mapContext != null) {
+      mapContext.dispose();
+    }
+  }
+}

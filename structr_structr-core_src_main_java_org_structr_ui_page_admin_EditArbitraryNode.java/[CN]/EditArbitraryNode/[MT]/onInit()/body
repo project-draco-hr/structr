@@ -1,0 +1,35 @@
+{
+  super.onInit();
+  ArbitraryNode arbitraryNode=null;
+  if (node != null) {
+    externalViewUrl="/view/" + node.getId();
+    localViewUrl=getContext().getRequest().getContextPath().concat("/view".concat(node.getNodePath().replace("&","%26")));
+    if (node instanceof ArbitraryNode) {
+      arbitraryNode=(ArbitraryNode)node;
+    }
+  }
+  if (arbitraryNode == null) {
+    return;
+  }
+  typeNode=arbitraryNode.getTypeNode();
+  if (typeNode == null) {
+    return;
+  }
+  Map<String,Class> signature=typeNode.getSignature();
+  keys=signature.keySet();
+  FieldSet dynamicProperties=new FieldSet("Dynamic Properties");
+  for (  String key : keys) {
+    if (key.startsWith(prefix)) {
+      dynamicProperties.add(getControlForClass(key.substring(prefix.length()),typeNode.getStringProperty(key)));
+    }
+  }
+  dynamicPropertiesForm.add(dynamicProperties);
+  dynamicPropertiesForm.copyTo(node);
+  dynamicPropertiesForm.setActionURL(dynamicPropertiesForm.getActionURL().concat("#properties-tab"));
+  if (editPropertiesAllowed) {
+    dynamicProperties.add(new Submit("saveDynamicProperties"," Save Dynamic Properties ",this,"onSaveDynamicProperties"));
+    dynamicProperties.add(new Submit("cancel"," Cancel ",this,"onCancel"));
+  }
+  editPropertiesPanel.add(dynamicPropertiesForm);
+  addControl(dynamicPropertiesForm);
+}

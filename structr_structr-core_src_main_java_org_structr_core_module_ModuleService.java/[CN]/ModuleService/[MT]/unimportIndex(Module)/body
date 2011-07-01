@@ -30,5 +30,10 @@
  catch (    Throwable t) {
       logger.log(Level.WARNING,"error instantiating class {0}: {1}",new Object[]{className,t});
     }
+    Set<String> libraries=module.getLibraries();
+    for (    String library : libraries) {
+      String destinationPath=createResourceFileName(servletContext,"WEB-INF/lib",library);
+      undeployFile(library,destinationPath);
+    }
   }
 }

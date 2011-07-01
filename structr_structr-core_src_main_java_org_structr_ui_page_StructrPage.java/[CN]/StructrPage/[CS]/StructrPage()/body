@@ -4,9 +4,14 @@
   CurrentRequest.setResponse(getContext().getResponse());
   contextPath=getContext().getRequest().getContextPath();
   FILES_PATH=Services.getFilesPath();
-  userName=CurrentSession.getGlobalUsername();
+  userName=getUsernameFromSession();
   user=getUserNode();
-  if (userName != null && userName.equals(SUPERADMIN_USERNAME_KEY)) {
+  if (user != null) {
+    CurrentRequest.setCurrentUser(user);
+    sessionId=(Long)CurrentSession.getAttribute(SessionMonitor.SESSION_ID);
+    SessionMonitor.logPageRequest(sessionId,"Page Request",getContext().getRequest());
+  }
+  if ((userName != null) && userName.equals(SUPERADMIN_USERNAME_KEY)) {
     isSuperUser=true;
   }
 }

@@ -1,9 +1,10 @@
 {
   Thread currentThread=Thread.currentThread();
-  CurrentRequest ret=contextMap.get(currentThread);
-  if (ret == null) {
-    ret=new CurrentRequest();
-    contextMap.put(currentThread,ret);
+  logger.log(Level.INFO,"Current thread: {0}[{1}]",new Object[]{currentThread.getName(),currentThread.getId()});
+  CurrentRequest request=contextMap.get(currentThread);
+  if (request == null) {
+    request=new CurrentRequest();
+    contextMap.put(currentThread,request);
   }
-  return (ret);
+  return (request);
 }

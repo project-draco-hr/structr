@@ -19,8 +19,8 @@
       root.put("Request",new freemarker.ext.servlet.HttpRequestParametersHashModel(request));
       String searchString=request.getParameter("search");
       String searchInContent=request.getParameter("searchInContent");
-      boolean inContent=StringUtils.isNotEmpty(searchInContent) && Boolean.parseBoolean(searchInContent) ? true : false;
-      if (searchString != null && !(searchString.isEmpty())) {
+      boolean inContent=(StringUtils.isNotEmpty(searchInContent) && Boolean.parseBoolean(searchInContent)) ? true : false;
+      if ((searchString != null) && !(searchString.isEmpty())) {
         List<SearchAttribute> searchAttrs=new LinkedList<SearchAttribute>();
         searchAttrs.add(Search.orName(searchString));
         if (inContent) {
@@ -44,7 +44,7 @@
         root.put("OkMessage",session.getAttribute("okMessage"));
       }
     }
-    String name=template != null ? template.getName() : getName();
+    String name=(template != null) ? template.getName() : getName();
     freemarker.template.Template t=new freemarker.template.Template(name,new StringReader(templateString),cfg);
     t.process(root,out);
     out.flush();

@@ -6,8 +6,11 @@
       if (StringUtils.isNotBlank(html)) {
         init(currentNode);
         List<AbstractNode> nodesToRender=new LinkedList<AbstractNode>();
-        for (        AbstractNode container : currentNode.getSortedDirectChildren(RelType.DATA)) {
-          nodesToRender.addAll(container.getDirectChildNodes());
+        for (        AbstractNode container : currentNode.getDirectChildren(RelType.DATA)) {
+          Iterable<AbstractNode> iterable=container.getDataNodes();
+          for (          AbstractNode node : iterable) {
+            nodesToRender.add(node);
+          }
         }
         Collections.sort(nodesToRender,new AbstractNodeComparator(AbstractNode.toGetter(sortKey),sortOrder));
         int toIndex=Math.min(pageNo * pageSize,nodesToRender.size());

@@ -1,0 +1,43 @@
+{
+  return (new Iterator<AbstractNode>(){
+    private Iterator<AbstractNode> currentIterator=null;
+    @Override public boolean hasNext(){
+      if (currentIterator != null) {
+        if (currentIterator.hasNext()) {
+          return (true);
+        }
+ else {
+          if (iterator.hasNext()) {
+            Iterable<AbstractNode> nextDataNodes=iterator.next().getDataNodes();
+            if (nextDataNodes != null) {
+              currentIterator=nextDataNodes.iterator();
+              return (true);
+            }
+          }
+        }
+      }
+ else {
+        if (iterator.hasNext()) {
+          Iterable<AbstractNode> nextDataNodes=iterator.next().getDataNodes();
+          if (nextDataNodes != null) {
+            currentIterator=nextDataNodes.iterator();
+            return (true);
+          }
+        }
+      }
+      return (false);
+    }
+    @Override public AbstractNode next(){
+      if (currentIterator != null) {
+        return (currentIterator.next());
+      }
+      return (null);
+    }
+    @Override public void remove(){
+      if (currentIterator != null) {
+        currentIterator.remove();
+      }
+    }
+  }
+);
+}

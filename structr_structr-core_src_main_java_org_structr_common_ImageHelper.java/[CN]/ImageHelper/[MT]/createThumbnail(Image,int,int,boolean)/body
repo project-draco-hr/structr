@@ -2,12 +2,18 @@
   ByteArrayOutputStream baos=new ByteArrayOutputStream();
   try {
     long start=System.nanoTime();
+    InputStream in=originalImage.getInputStream();
     BufferedImage source=null;
     try {
-      source=ImageIO.read(originalImage.getInputStream());
+      source=ImageIO.read(in);
     }
  catch (    Throwable t) {
       logger.log(Level.WARNING,"Could not read original image {0} ({1})",new Object[]{originalImage.getName(),originalImage.getId()});
+    }
+ finally {
+      if (in != null) {
+        in.close();
+      }
     }
     if (source != null) {
       int sourceWidth=source.getWidth();
@@ -62,6 +68,15 @@
   }
  catch (  Throwable t) {
     logger.log(Level.WARNING,"Error creating thumbnail");
+  }
+ finally {
+    try {
+      if (baos != null) {
+        baos.close();
+      }
+    }
+ catch (    Exception ignore) {
+    }
   }
   return null;
 }

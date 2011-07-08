@@ -1,7 +1,7 @@
 {
-  logger.log(Level.INFO,"Received {0} ({1})",new Object[]{object,object.getClass().getName()});
+  logger.log(Level.FINEST,"Received {0} ({1})",new Object[]{object,object.getClass().getName()});
   if (transactionFinished && object instanceof KeepAlive) {
-    logger.log(Level.INFO,"Received first KeepAlive after transaction finished, closing connection.");
+    logger.log(Level.FINE,"Received first KeepAlive after transaction finished, closing connection.");
     connection.close();
   }
  else   if (object instanceof Integer) {
@@ -20,6 +20,17 @@
       handlePullRequests();
     }
     connection.sendTCP(CloudService.ACK_DATA);
+  }
+ else   if (object instanceof AuthenticationContainer) {
+    AuthenticationContainer auth=(AuthenticationContainer)object;
+    this.userName=auth.getUserName();
+    logger.log(Level.INFO,"Received authentication container, user {0}",auth.getUserName());
+    targetUser=(User)Services.command(FindUserCommand.class).execute(userName);
+    if (targetUser == null) {
+      logger.log(Level.WARNING,"User not found, disconnecting");
+      connection.sendTCP("Authentication failed");
+      connection.close();
+    }
   }
  else   if (object instanceof PullNodeRequestContainer) {
     pullRequests.add((PullNodeRequestContainer)object);

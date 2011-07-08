@@ -1,5 +1,6 @@
 {
-  User user=null;
+  String userName=null;
+  String password=null;
   AbstractNode sourceNode=null;
   long remoteTargetNodeId=0L;
   String remoteHost=null;
@@ -10,37 +11,40 @@
 switch (parameters.length) {
 case 0:
     throw new UnsupportedArgumentError("No arguments supplied");
-case 7:
-  if (parameters[0] instanceof User) {
-    user=(User)parameters[0];
+case 8:
+  if (parameters[0] instanceof String) {
+    userName=(String)parameters[0];
   }
-if (parameters[1] instanceof Long) {
-  long id=((Long)parameters[1]).longValue();
-  sourceNode=(AbstractNode)findNode.execute(null,id);
-}
- else if (parameters[1] instanceof AbstractNode) {
-  sourceNode=((AbstractNode)parameters[1]);
-}
- else if (parameters[1] instanceof String) {
-  long id=Long.parseLong((String)parameters[1]);
-  sourceNode=(AbstractNode)findNode.execute(null,id);
+if (parameters[1] instanceof String) {
+  password=(String)parameters[1];
 }
 if (parameters[2] instanceof Long) {
-remoteTargetNodeId=((Long)parameters[2]).longValue();
+long id=((Long)parameters[2]).longValue();
+sourceNode=(AbstractNode)findNode.execute(null,id);
 }
-if (parameters[3] instanceof String) {
-remoteHost=(String)parameters[3];
+ else if (parameters[2] instanceof AbstractNode) {
+sourceNode=((AbstractNode)parameters[2]);
 }
-if (parameters[4] instanceof Integer) {
-remoteTcpPort=(Integer)parameters[4];
+ else if (parameters[2] instanceof String) {
+long id=Long.parseLong((String)parameters[2]);
+sourceNode=(AbstractNode)findNode.execute(null,id);
+}
+if (parameters[3] instanceof Long) {
+remoteTargetNodeId=((Long)parameters[3]).longValue();
+}
+if (parameters[4] instanceof String) {
+remoteHost=(String)parameters[4];
 }
 if (parameters[5] instanceof Integer) {
-remoteUdpPort=(Integer)parameters[5];
+remoteTcpPort=(Integer)parameters[5];
 }
-if (parameters[6] instanceof Boolean) {
-recursive=(Boolean)parameters[6];
+if (parameters[6] instanceof Integer) {
+remoteUdpPort=(Integer)parameters[6];
 }
-pushNodes(user,sourceNode,remoteTargetNodeId,remoteHost,remoteTcpPort,remoteUdpPort,recursive);
+if (parameters[7] instanceof Boolean) {
+recursive=(Boolean)parameters[7];
+}
+pushNodes(userName,password,sourceNode,remoteTargetNodeId,remoteHost,remoteTcpPort,remoteUdpPort,recursive);
 break;
 default :
 break;

@@ -5,7 +5,10 @@
     if (n instanceof ActionNode) {
       ActionNode actionNode=(ActionNode)n;
       actionNode.initialize();
-      executionSuccessful&=actionNode.doAction(out,startNode,editUrl,editNodeId);
+      if (!actionNode.doAction(out,startNode,editUrl,editNodeId)) {
+        executionSuccessful=false;
+        break;
+      }
     }
   }
   if (executionSuccessful) {

@@ -1,11 +1,20 @@
 {
+  boolean unencrypted=false;
   try {
     Cipher decrypt=cypherProvider.getDecryptionCipher(Kryo.getContext().getRemoteEntityID());
     if (decrypt != null) {
+      logger.log(Level.FINE,"Input buffer size {0}, output buffer size {1}",new Object[]{inputBuffer.capacity(),outputBuffer.capacity()});
       decrypt.doFinal(inputBuffer,outputBuffer);
+    }
+ else {
+      unencrypted=true;
     }
   }
  catch (  GeneralSecurityException ex) {
-    throw new SerializationException(ex);
+    logger.log(Level.WARNING,"Exception while decompressing {0}: {1}",new Object[]{type.getName(),ex.getMessage()});
+    unencrypted=true;
+  }
+  if (unencrypted) {
+    outputBuffer.put(inputBuffer);
   }
 }

@@ -1,0 +1,15 @@
+{
+  Cipher ret=null;
+  if (encryptedPassword != null) {
+    try {
+      byte[] key=DigestUtils.md5(encryptedPassword);
+      SecretKeySpec keySpec=new SecretKeySpec(key,"Blowfish");
+      ret=Cipher.getInstance("Blowfish");
+      ret.init(Cipher.DECRYPT_MODE,keySpec);
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"Unable to initialize decryption cipher: {0}",t);
+    }
+  }
+  return (ret);
+}

@@ -1,0 +1,26 @@
+{
+  if (decryptionCipher == null) {
+    if (targetUser != null) {
+      logger.log(Level.FINE,"Creating decryption cipher for {0}: user {1}",new Object[]{obj,targetUser.getName()});
+      String password=targetUser.getEncryptedPassword();
+      if (password != null) {
+        try {
+          byte[] key=DigestUtils.md5(password);
+          SecretKeySpec keySpec=new SecretKeySpec(key,"Blowfish");
+          decryptionCipher=Cipher.getInstance("Blowfish");
+          decryptionCipher.init(Cipher.DECRYPT_MODE,keySpec);
+        }
+ catch (        Throwable t) {
+          logger.log(Level.WARNING,"Unable to initialize decryption cipher: {0}",t);
+        }
+      }
+ else {
+        logger.log(Level.WARNING,"Unable to initialize decryption cipher, password was null!");
+      }
+    }
+ else {
+      logger.log(Level.WARNING,"NOT creating decryption cipher for {0}, no user set",obj);
+    }
+  }
+  return (decryptionCipher);
+}

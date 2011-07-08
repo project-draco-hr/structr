@@ -1,12 +1,19 @@
 {
-  Cipher ret=null;
-  try {
-    byte[] key=null;
-    SecretKeySpec keySpec=new SecretKeySpec(key,"Blowfish");
-    ret=Cipher.getInstance("Blowfish");
-    ret.init(Cipher.DECRYPT_MODE,keySpec);
+  if (obj instanceof Integer) {
+    Integer connectionId=(Integer)obj;
+    Connection connection=connections.get(connectionId);
+    if (connection != null) {
+      ConnectionListener listener=listeners.get(connection);
+      if (listener != null) {
+        return (listener.getDecryptionCipher(obj));
+      }
+ else {
+        logger.log(Level.WARNING,"NO listener found for {0}",obj);
+      }
+    }
+ else {
+      logger.log(Level.WARNING,"NO connection found for {0}",obj);
+    }
   }
- catch (  Throwable t) {
-  }
-  return (ret);
+  return (null);
 }

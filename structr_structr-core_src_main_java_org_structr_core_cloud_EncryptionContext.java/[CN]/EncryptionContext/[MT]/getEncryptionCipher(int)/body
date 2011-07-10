@@ -1,0 +1,18 @@
+{
+  logger.log(Level.INFO,"Remote entity ID {0}",remoteEntityId);
+  Cipher ret=encryptionCipherMap.get(remoteEntityId);
+  if (ret == null && passwordMap.containsKey(remoteEntityId)) {
+    String password=passwordMap.get(remoteEntityId);
+    try {
+      byte[] key=DigestUtils.md5(password);
+      SecretKeySpec keySpec=new SecretKeySpec(key,"Blowfish");
+      ret=Cipher.getInstance("Blowfish");
+      ret.init(Cipher.ENCRYPT_MODE,keySpec);
+      encryptionCipherMap.put(remoteEntityId,ret);
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"Unable to initialize decryption cipher: {0}",t);
+    }
+  }
+  return (ret);
+}

@@ -8,49 +8,50 @@
   client.start();
   Log.set(CloudService.KRYONET_LOG_LEVEL);
   Kryo kryo=client.getKryo();
-  CipherProvider cipherProvider=new CipherProviderImpl(null);
-  CloudService.registerClasses(kryo,cipherProvider);
+  CloudService.registerClasses(kryo);
   StringBuilder titleBuffer=new StringBuilder();
   titleBuffer.append("Transmission to ").append(remoteHost).append(":").append(remoteTcpPort);
   ProgressBarNotification progressNotification=new ProgressBarNotification(titleBuffer.toString());
   Services.command(AddNotificationCommand.class).execute(progressNotification);
   listener.setNotification(progressNotification);
+  listener.setPassword(password);
   try {
     client.connect(10000,remoteHost,remoteTcpPort,remoteUdpPort);
     client.sendTCP(CloudService.BEGIN_TRANSACTION);
     client.sendTCP(new AuthenticationContainer(userName));
-    cipherProvider.enableEncryption(DigestUtils.sha512Hex(password));
-    client.sendTCP(new PushNodeRequestContainer(remoteTargetNodeId));
-    if (recursive) {
-      List<AbstractNode> nodes=sourceNode.getAllChildrenForRemotePush(new SuperUser());
-      progressNotification.setTargetProgress(sourceNode.getRemotePushSize(new SuperUser(),chunkSize));
-      for (      AbstractNode n : nodes) {
-        if (n instanceof File) {
-          sendFile(client,listener,(File)n,chunkSize,progressNotification);
-        }
+    if (listener.waitForAuthentication()) {
+      client.sendTCP(new PushNodeRequestContainer(remoteTargetNodeId));
+      if (recursive) {
+        List<AbstractNode> nodes=sourceNode.getAllChildrenForRemotePush(new SuperUser());
+        progressNotification.setTargetProgress(sourceNode.getRemotePushSize(new SuperUser(),chunkSize));
+        for (        AbstractNode n : nodes) {
+          if (n instanceof File) {
+            sendFile(client,listener,(File)n,chunkSize,progressNotification);
+          }
  else {
-          NodeDataContainer container=new NodeDataContainer(n);
-          client.sendTCP(container);
-          progressNotification.increaseProgress();
-        }
-      }
-      for (      AbstractNode n : nodes) {
-        List<StructrRelationship> rels=n.getOutgoingRelationships();
-        for (        StructrRelationship r : rels) {
-          if (nodes.contains(r.getStartNode()) && nodes.contains(r.getEndNode())) {
-            client.sendTCP(new RelationshipDataContainer(r));
+            NodeDataContainer container=new NodeDataContainer(n);
+            client.sendTCP(container);
             progressNotification.increaseProgress();
           }
         }
+        for (        AbstractNode n : nodes) {
+          List<StructrRelationship> rels=n.getOutgoingRelationships();
+          for (          StructrRelationship r : rels) {
+            if (nodes.contains(r.getStartNode()) && nodes.contains(r.getEndNode())) {
+              client.sendTCP(new RelationshipDataContainer(r));
+              progressNotification.increaseProgress();
+            }
+          }
+        }
       }
-    }
  else {
-      if (sourceNode instanceof File) {
-        sendFile(client,listener,(File)sourceNode,chunkSize,progressNotification);
-      }
+        if (sourceNode instanceof File) {
+          sendFile(client,listener,(File)sourceNode,chunkSize,progressNotification);
+        }
  else {
-        client.sendTCP(new NodeDataContainer(sourceNode));
-        progressNotification.increaseProgress();
+          client.sendTCP(new NodeDataContainer(sourceNode));
+          progressNotification.increaseProgress();
+        }
       }
     }
     client.sendTCP(CloudService.END_TRANSACTION);

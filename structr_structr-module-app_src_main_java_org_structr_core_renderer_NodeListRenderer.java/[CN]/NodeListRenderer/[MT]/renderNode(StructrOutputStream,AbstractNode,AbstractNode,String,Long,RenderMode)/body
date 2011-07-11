@@ -7,10 +7,7 @@
         init(currentNode);
         List<AbstractNode> nodesToRender=new LinkedList<AbstractNode>();
         for (        AbstractNode container : currentNode.getDirectChildren(RelType.DATA)) {
-          Iterable<AbstractNode> iterable=container.getDataNodes();
-          for (          AbstractNode node : iterable) {
-            nodesToRender.add(node);
-          }
+          collectDataNodes(container,nodesToRender,0,255);
         }
         Collections.sort(nodesToRender,new AbstractNodeComparator(AbstractNode.toGetter(sortKey),sortOrder));
         int toIndex=Math.min(pageNo * pageSize,nodesToRender.size());

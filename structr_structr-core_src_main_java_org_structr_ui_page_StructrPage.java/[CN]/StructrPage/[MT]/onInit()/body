@@ -1,13 +1,6 @@
 {
-  CurrentRequest.setRequest(getContext().getRequest());
-  CurrentRequest.setResponse(getContext().getResponse());
-  CurrentRequest.setCurrentNodePath(nodeId);
   super.onInit();
-  if (user != null) {
-    sessionId=(Long)getContext().getRequest().getSession().getAttribute(SessionMonitor.SESSION_ID);
-    SessionMonitor.logPageRequest(sessionId,"Page Request",getContext().getRequest());
-    CurrentRequest.setCurrentUser(user);
-  }
+  CurrentRequest.setCurrentNodePath(nodeId);
   node=getNodeByIdOrPath(nodeId);
   if (node == null) {
     return;
@@ -25,7 +18,7 @@
     addRelationshipAllowed=true;
     removeRelationshipAllowed=true;
   }
- else   if (user != null && node != null) {
+ else   if ((user != null) && (node != null)) {
     readAllowed=node.readAllowed();
     showTreeAllowed=node.showTreeAllowed();
     writeAllowed=node.writeAllowed();

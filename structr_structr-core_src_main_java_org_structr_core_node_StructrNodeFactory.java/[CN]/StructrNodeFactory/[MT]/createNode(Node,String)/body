@@ -1,18 +1,18 @@
 {
   Class nodeClass=(Class)Services.command(GetEntityClassCommand.class).execute(nodeType);
-  AbstractNode ret=null;
+  AbstractNode newNode=null;
   if (nodeClass != null) {
     try {
-      ret=(AbstractNode)nodeClass.newInstance();
+      newNode=(AbstractNode)nodeClass.newInstance();
     }
  catch (    Throwable t) {
-      ret=null;
+      newNode=null;
     }
   }
-  if (ret == null) {
-    ret=new ArbitraryNode();
+  if (newNode == null) {
+    newNode=new ArbitraryNode();
   }
-  ret.init(node);
-  ret.onNodeInstantiation();
-  return ret;
+  newNode.init(node);
+  newNode.onNodeInstantiation();
+  return newNode;
 }

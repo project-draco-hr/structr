@@ -12,13 +12,13 @@
       if (request != null) {
         root.put("Request",new freemarker.ext.servlet.HttpRequestParametersHashModel(request));
         String searchString=request.getParameter("search");
-        if (searchString != null && !(searchString.isEmpty())) {
+        if ((searchString != null) && !(searchString.isEmpty())) {
           Command search=Services.command(SearchNodeCommand.class);
           List<AbstractNode> result=(List<AbstractNode>)search.execute(null,null,false,true,Search.orName(searchString));
           root.put("SearchResults",result);
         }
       }
-      root.put("User",CurrentRequest.getCurrentUser());
+      root.put("User",CurrentSession.getUser());
       root.put("Helper",new TemplateHelper());
       HttpSession session=CurrentRequest.getSession();
       if (session != null) {

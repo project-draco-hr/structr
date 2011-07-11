@@ -5,7 +5,12 @@
     return 0.0d;
   }
   if (propertyValue instanceof Double) {
-    result=((Double)propertyValue).doubleValue();
+    Double doubleValue=(Double)propertyValue;
+    if (doubleValue.equals(Double.NaN)) {
+      setProperty(key,null);
+      return 0.0d;
+    }
+    result=doubleValue.doubleValue();
   }
  else   if (propertyValue instanceof String) {
     if ("".equals((String)propertyValue)) {

@@ -1,5 +1,5 @@
 {
-  final AbstractNode parent=(AbstractNode)Services.command(FindNodeCommand.class).execute(CurrentRequest.getCurrentUser(),nodeParent);
+  final AbstractNode parent=(AbstractNode)Services.command(FindNodeCommand.class).execute(CurrentSession.getUser(),nodeParent);
   boolean ret=false;
   if (parent != null) {
     Boolean retValue=(Boolean)Services.command(TransactionCommand.class).execute(new StructrTransaction(){
@@ -9,7 +9,7 @@
         List<Long> newNodeIds=new LinkedList<Long>();
         int count=0;
         for (        String nodeName : nodeNames) {
-          AbstractNode newNode=(AbstractNode)createNodeCommand.execute(CurrentRequest.getCurrentUser(),nodeAttributes);
+          AbstractNode newNode=(AbstractNode)createNodeCommand.execute(CurrentSession.getUser(),nodeAttributes);
           newNode.setName(nodeName);
           newNode.setType(nodeType);
           createRelCommand.execute(parent,newNode,RelType.HAS_CHILD);

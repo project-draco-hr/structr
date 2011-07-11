@@ -1,7 +1,7 @@
 {
   long t0=System.currentTimeMillis();
   Date now=new Date();
-  User user=CurrentRequest.getCurrentUser();
+  User user=CurrentSession.getUser();
   PageRequest pageRequest=new PageRequest();
   pageRequest.setProperty(AbstractNode.TYPE_KEY,PageRequest.class.getSimpleName());
   pageRequest.setProperty(AbstractNode.NAME_KEY,action + ", Date: " + now);
@@ -12,7 +12,9 @@
     Set<String> keys=parameterMap.keySet();
     for (    String key : keys) {
       String value=request.getParameter(key);
-      if ("onUpdateNotificationContent".equals(value))       return;
+      if ("onUpdateNotificationContent".equals(value)) {
+        return;
+      }
       text.append("\"").append(key).append("\": \"").append(value).append("\", ");
     }
     text.append("\"uri\": \"").append(request.getRequestURI()).append("\", ");

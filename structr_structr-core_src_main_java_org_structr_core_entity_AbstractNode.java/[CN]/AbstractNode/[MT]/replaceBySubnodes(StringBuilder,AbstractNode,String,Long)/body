@@ -1,14 +1,18 @@
 {
-  List<AbstractNode> callingNodeSubnodes=null;
-  List<AbstractNode> callingNodeSubnodesAndLinkedNodes=null;
+  List<AbstractNode> subnodes=null;
+  List<AbstractNode> subnodesAndLinkedNodes=null;
   template=startNode.getTemplate();
   AbstractNode callingNode=null;
-  if (template != null) {
+  if ((template != null) && (this instanceof Template)) {
     callingNode=template.getCallingNode();
     if (callingNode != null) {
-      callingNodeSubnodesAndLinkedNodes=callingNode.getSortedDirectChildAndLinkNodes();
-      callingNodeSubnodes=callingNode.getSortedDirectChildNodes();
+      subnodesAndLinkedNodes=callingNode.getSortedDirectChildAndLinkNodes();
+      subnodes=callingNode.getSortedDirectChildNodes();
     }
+  }
+ else {
+    subnodesAndLinkedNodes=getSortedDirectChildAndLinkNodes();
+    subnodes=getSortedDirectChildNodes();
   }
   Command findNode=Services.command(FindNodeCommand.class);
   int start=content.indexOf(NODE_KEY_PREFIX);
@@ -38,13 +42,13 @@
       methodKey=splitted[1];
     }
     StructrOutputStream replacement=new StructrOutputStream();
-    if ((callingNode != null) && key.equals(CALLING_NODE_SUBNODES_KEY)) {
-      for (      AbstractNode s : callingNodeSubnodes) {
+    if ((callingNode != null) && key.equals(SUBNODES_KEY)) {
+      for (      AbstractNode s : subnodes) {
         s.renderNode(replacement,startNode,editUrl,editNodeId);
       }
     }
- else     if ((callingNode != null) && key.equals(CALLING_NODE_SUBNODES_AND_LINKED_NODES_KEY)) {
-      for (      AbstractNode s : callingNodeSubnodesAndLinkedNodes) {
+ else     if ((callingNode != null) && key.equals(SUBNODES_AND_LINKED_NODES_KEY)) {
+      for (      AbstractNode s : subnodesAndLinkedNodes) {
         s.renderNode(replacement,startNode,editUrl,editNodeId);
       }
     }

@@ -17,7 +17,9 @@
     }
     HttpServletRequest request=CurrentRequest.getRequest();
     if (request != null) {
-      root.put("Request",new freemarker.ext.servlet.HttpRequestParametersHashModel(request));
+      HttpRequestParametersHashModel requestModel=new HttpRequestParametersHashModel(request);
+      root.put("Request",requestModel);
+      root.put("ContextPath",request.getContextPath());
       String searchString=request.getParameter("search");
       String searchInContent=request.getParameter("searchInContent");
       boolean inContent=(StringUtils.isNotEmpty(searchInContent) && Boolean.parseBoolean(searchInContent)) ? true : false;

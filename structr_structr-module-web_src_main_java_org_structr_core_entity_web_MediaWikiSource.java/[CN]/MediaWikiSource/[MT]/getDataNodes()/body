@@ -1,0 +1,19 @@
+{
+  ServletContext context=CurrentRequest.getRequest().getSession().getServletContext();
+  List<AbstractNode> ret=null;
+  if (context != null) {
+    TemporaryValue<List<AbstractNode>> value=(TemporaryValue<List<AbstractNode>>)context.getAttribute(CACHED_WIKI_CONTENT.concat(this.getIdString()));
+    if (value == null) {
+      value=new TemporaryValue<List<AbstractNode>>(null,TimeUnit.MINUTES.toMillis(10));
+      context.setAttribute(CACHED_WIKI_CONTENT.concat(this.getIdString()),value);
+    }
+    if ((value.getStoredValue() == null) || value.isExpired()) {
+      ret=getContentFromSource();
+      value.refreshStoredValue(ret);
+    }
+ else {
+      ret=value.getStoredValue();
+    }
+  }
+  return (ret);
+}

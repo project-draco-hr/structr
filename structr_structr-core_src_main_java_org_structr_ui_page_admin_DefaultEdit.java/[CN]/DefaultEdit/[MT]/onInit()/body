@@ -1,5 +1,6 @@
 {
   super.onInit();
+  SecurityContext securityContext=CurrentRequest.getSecurityContext();
   FieldSet nodePropertiesFields=new FieldSet("Node Properties");
   nodePropertiesFields.setColumns(3);
   nodePropertiesFields.add(new TextField(AbstractNode.NAME_KEY,true));
@@ -51,7 +52,7 @@
   editVisibilityForm.add(new HiddenField(NODE_ID_KEY,nodeId != null ? nodeId : ""));
   editVisibilityForm.add(new HiddenField(RENDER_MODE_KEY,renderMode != null ? renderMode : ""));
   editVisibilityForm.setActionURL(editVisibilityForm.getActionURL().concat("#visibility-tab"));
-  if (editVisibilityAllowed) {
+  if (securityContext.isAllowed(node,Permission.EditProperty)) {
     visibilityFields.add(new Submit("saveVisibility"," Save Visibility ",this,"onSaveVisibility"));
     visibilityFields.add(new Submit("saveVisibilityDirectChildren"," Save Visibility (including direct children) ",this,"onSaveVisibilityIncludingDirectChildren"));
     visibilityFields.add(new Submit("saveVisibilityAllChildren"," Save Visibility (including all children) ",this,"onSaveVisibilityIncludingAllChildren"));
@@ -63,7 +64,7 @@
   editPropertiesForm.add(new HiddenField(NODE_ID_KEY,nodeId != null ? nodeId : ""));
   editPropertiesForm.add(new HiddenField(RENDER_MODE_KEY,renderMode != null ? renderMode : ""));
   editPropertiesForm.setActionURL(editPropertiesForm.getActionURL().concat("#properties-tab"));
-  if (editPropertiesAllowed) {
+  if (securityContext.isAllowed(node,Permission.EditProperty)) {
     nodePropertiesFields.add(new Submit("saveProperties"," Save Properties ",this,"onSaveProperties"));
     nodePropertiesFields.add(new Submit("cancel"," Cancel ",this,"onCancel"));
   }
@@ -152,7 +153,7 @@
     editChildNodesPanel=new Panel("editChildNodesPanel","/panel/edit-child-nodes-panel.htm");
     addControl(editChildNodesPanel);
   }
-  if (removeRelationshipAllowed) {
+  if (securityContext.isAllowed(node,Permission.DeleteRelationship)) {
     deleteRelationshipLink.setImageSrc("/images/delete.png");
     deleteRelationshipLink.setTitle("Delete relationship");
     deleteRelationshipLink.setAttribute("onclick","return window.confirm('Do you really want to delete this relationship?');");
@@ -257,7 +258,7 @@
     editRelationshipsPanel=new Panel("editRelationshipsPanel","/panel/edit-relationships-panel.htm");
     addControl(editRelationshipsPanel);
   }
-  if (accessControlAllowed) {
+  if (securityContext.isAllowed(node,Permission.AccessControl)) {
     typeColumn=new Column(AbstractNode.TYPE_KEY);
     iconDec=new LinkDecorator(securityTable,viewRelLink,"id"){
       @Override protected void renderActionLink(      HtmlStringBuffer buffer,      AbstractLink link,      Context context,      Object row,      Object value){
@@ -394,7 +395,7 @@
   consolePanel=new Panel("consolePanel","/panel/console-panel.htm");
   addControl(consolePanel);
   readConsoleOutput();
-  if (!(editPropertiesAllowed)) {
+  if (!(securityContext.isAllowed(node,Permission.EditProperty))) {
     List<Field> propertyFields=editPropertiesForm.getFieldList();
     for (    Field f : propertyFields) {
       f.setReadonly(true);

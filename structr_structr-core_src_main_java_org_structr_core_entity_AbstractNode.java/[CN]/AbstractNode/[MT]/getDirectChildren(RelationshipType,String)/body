@@ -1,9 +1,10 @@
 {
-  List<AbstractNode> nodes=new LinkedList<AbstractNode>();
   List<StructrRelationship> rels=this.getOutgoingRelationships(relType);
+  SecurityContext securityContext=CurrentRequest.getSecurityContext();
+  List<AbstractNode> nodes=new LinkedList<AbstractNode>();
   for (  StructrRelationship r : rels) {
     AbstractNode s=r.getEndNode();
-    if (s.readAllowed() && ((nodeType == null) || nodeType.equals(s.getType()))) {
+    if (securityContext.isAllowed(s,Permission.Read) && ((nodeType == null) || nodeType.equals(s.getType()))) {
       nodes.add(s);
     }
   }

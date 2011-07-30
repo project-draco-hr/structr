@@ -1,9 +1,14 @@
 {
-  List<AbstractNode> ancestors=getAncestorNodes();
-  for (  AbstractNode node : ancestors) {
-    if (node instanceof Trash) {
-      return true;
+  return (countIterableElements(traverseDepthFirst(RelType.HAS_CHILD,Direction.INCOMING,new Evaluator(){
+    @Override public Evaluation evaluate(    Path path){
+      Node node=path.endNode();
+      if (node.hasProperty(TYPE_KEY) && node.getProperty(TYPE_KEY).equals("Trash")) {
+        return (Evaluation.INCLUDE_AND_PRUNE);
+      }
+ else {
+        return (Evaluation.EXCLUDE_AND_CONTINUE);
+      }
     }
   }
-  return false;
+)) > 0);
 }

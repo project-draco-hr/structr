@@ -1,0 +1,52 @@
+{
+  StandaloneTestHelper.prepareStandaloneTest("/tmp/structr-test/");
+  GraphDatabaseService db=(GraphDatabaseService)Services.command(GraphDatabaseCommand.class).execute();
+  final int num=1000;
+  final int depth=3;
+  if (!db.getReferenceNode().hasRelationship(Direction.OUTGOING)) {
+    Services.command(TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws Throwable {
+        Command linkNodes=Services.command(CreateRelationshipCommand.class);
+        Command createNode=Services.command(CreateNodeCommand.class);
+        AbstractNode rootNode=(AbstractNode)Services.command(FindNodeCommand.class).execute(null,0L);
+        for (int i=0; i < num; i++) {
+          String name="node" + i;
+          AbstractNode newNode=(AbstractNode)createNode.execute(new NodeAttribute("type","Folder"),new NodeAttribute("name",name));
+          linkNodes.execute(rootNode,newNode,RelType.HAS_CHILD);
+          AbstractNode currentNode=newNode;
+          for (int j=0; j < depth; j++) {
+            AbstractNode newNode2=(AbstractNode)createNode.execute(new NodeAttribute("type","Folder"),new NodeAttribute("name",name));
+            linkNodes.execute(currentNode,newNode,RelType.HAS_CHILD);
+            currentNode=newNode2;
+          }
+        }
+        return (null);
+      }
+    }
+);
+  }
+  Command factory=Services.command(NodeFactoryCommand.class);
+  List<AbstractNode> allNodes=new LinkedList<AbstractNode>();
+  for (  Node node : db.getAllNodes()) {
+    if (!node.equals(db.getReferenceNode())) {
+      allNodes.add((AbstractNode)factory.execute(node));
+    }
+  }
+  logger.log(Level.INFO,"{0} nodes in list",allNodes.size());
+{
+    int out=0;
+    int in=0;
+    long start=System.currentTimeMillis();
+    for (    AbstractNode node : allNodes) {
+      if (node.isInTrash()) {
+        in++;
+      }
+ else {
+        out++;
+      }
+    }
+    long end=System.currentTimeMillis();
+    logger.log(Level.INFO,"NON-OPTIMIZED: {0} in trash, {1} not in trash, {2} ms",new Object[]{in,out,(end - start)});
+  }
+  StandaloneTestHelper.finishStandaloneTest();
+}

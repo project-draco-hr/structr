@@ -1,9 +1,10 @@
 {
+  SecurityContext securityContext=CurrentRequest.getSecurityContext();
   List<AbstractNode> nodes=new LinkedList<AbstractNode>();
   if ((input != null) && input.iterator().hasNext()) {
     for (    Node node : input) {
       AbstractNode n=createNode(node);
-      if (n != null && ((user == null) || n.readAllowed()) && (includeDeleted || !(n.isDeleted())) && (!publicOnly || n.isPublic())) {
+      if (((user == null) || securityContext.isAllowed(n,Permission.Read)) && (includeDeleted || !(n.isDeleted())) && (!publicOnly || n.isPublic())) {
         nodes.add(n);
       }
     }

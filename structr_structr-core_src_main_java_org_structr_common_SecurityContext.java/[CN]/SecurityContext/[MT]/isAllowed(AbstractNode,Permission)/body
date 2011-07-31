@@ -1,9 +1,16 @@
 {
+  boolean ret=false;
 switch (accessMode) {
 case Backend:
-    return isAllowedInBackend(node,permission);
+    ret=isAllowedInBackend(node,permission);
+  break;
 case Frontend:
-  return isAllowedInFrontend(node,permission);
+ret=isAllowedInFrontend(node,permission);
+break;
 }
-return (false);
+if (node != null) {
+User user=getUser();
+logger.log(Level.INFO,"Returning {0} for user {1}, access mode {2}, node {3}, permission {4}",new Object[]{ret,user != null ? user.getName() : "null",accessMode,node.getId(),permission});
+}
+return (ret);
 }

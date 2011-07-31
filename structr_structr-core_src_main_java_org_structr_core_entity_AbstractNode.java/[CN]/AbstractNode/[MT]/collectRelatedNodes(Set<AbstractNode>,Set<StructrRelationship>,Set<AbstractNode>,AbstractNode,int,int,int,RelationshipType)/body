@@ -15,7 +15,7 @@
     }
     for (    StructrRelationship rel : inRels) {
       AbstractNode startNode=rel.getStartNode();
-      if (startNode != null) {
+      if (startNode != null && nodes.size() < maxNum) {
         nodes.add(startNode);
         rels.add(rel);
         collectRelatedNodes(nodes,rels,visitedNodes,startNode,depth + 1,maxDepth,maxNum,relTypes);
@@ -32,7 +32,7 @@
     }
     for (    StructrRelationship rel : outRels) {
       AbstractNode endNode=rel.getEndNode();
-      if (endNode != null) {
+      if (endNode != null && nodes.size() < maxNum) {
         nodes.add(endNode);
         rels.add(rel);
         collectRelatedNodes(nodes,rels,visitedNodes,endNode,depth + 1,maxDepth,maxNum,relTypes);

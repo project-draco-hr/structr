@@ -2,5 +2,14 @@
   if (node == null) {
     return false;
   }
-  return isAllowedInBackend(node,permission);
+  User user=getUser();
+  if (user != null && user instanceof SuperUser) {
+    return (true);
+  }
+switch (permission) {
+case Read:
+    return node.hasPermission(StructrRelationship.READ_KEY,user);
+default :
+  return (false);
+}
 }

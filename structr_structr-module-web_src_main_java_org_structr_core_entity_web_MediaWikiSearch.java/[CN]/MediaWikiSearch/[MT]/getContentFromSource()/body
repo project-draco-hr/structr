@@ -1,18 +1,29 @@
 {
   LinkedList<AbstractNode> nodeList=new LinkedList<AbstractNode>();
-  String source=getStringProperty(Key.baseUrl).concat("?action=opensearch&format=xml&search=").concat(CurrentRequest.getRequest().getParameter("search"));
-  try {
-    URL url=new URL(source);
-    DocumentBuilder builder=DocumentBuilderFactory.newInstance().newDocumentBuilder();
-    Document doc=builder.parse(url.openStream());
-    NodeList items=doc.getElementsByTagName("Item");
-    int len=items.getLength();
-    for (int i=0; i < len; i++) {
-      nodeList.add(new MediaWikiItem(i,items.item(i)));
+  String source=getStringProperty(Key.baseUrl);
+  String nodePath=CurrentRequest.getCurrentNodePath();
+  String search=null;
+  if (nodePath != null) {
+    if (nodePath.endsWith("/")) {
+      nodePath=nodePath.substring(0,nodePath.length() - 1);
     }
+    search=nodePath.substring(nodePath.lastIndexOf("/") + 1);
   }
- catch (  Throwable t) {
-    t.printStackTrace();
+  if ((source != null) && (search != null)) {
+    source=source.concat("?action=opensearch&format=xml&search=").concat(search);
+    try {
+      URL url=new URL(source);
+      DocumentBuilder builder=DocumentBuilderFactory.newInstance().newDocumentBuilder();
+      Document doc=builder.parse(url.openStream());
+      NodeList items=doc.getElementsByTagName("Item");
+      int len=items.getLength();
+      for (int i=0; i < len; i++) {
+        nodeList.add(new MediaWikiItem(i,items.item(i)));
+      }
+    }
+ catch (    Throwable t) {
+      t.printStackTrace();
+    }
   }
   return nodeList;
 }

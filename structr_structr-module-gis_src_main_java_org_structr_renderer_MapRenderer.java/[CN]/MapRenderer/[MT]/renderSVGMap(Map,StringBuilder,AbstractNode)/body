@@ -12,7 +12,7 @@
       featureName=staticFeatureName;
     }
  else {
-      if (startNode != null && startNode instanceof GeoObject) {
+      if ((startNode != null) && (startNode instanceof GeoObject)) {
         geoNode=(GeoObject)startNode;
         featureName=geoNode.getName();
       }
@@ -29,7 +29,7 @@
     }
     int cx=currentNode.getCanvasX();
     int cy=currentNode.getCanvasY();
-    auto=geoNode != null ? geoNode.getAutoEnvelope() : currentNode.getAutoEnvelope();
+    auto=(geoNode != null) ? geoNode.getAutoEnvelope() : currentNode.getAutoEnvelope();
     List<MapLayer> layers=new LinkedList<MapLayer>();
     MapLayer layer=null;
     ReferencedEnvelope envelope=null;
@@ -57,21 +57,24 @@
         filterList.add(CQL.toFilter("NAME = '" + StringEscapeUtils.escapeSql(featureName) + "'"));
         Filter filter=MapHelper.featureFactory.or(filterList);
         Query query=new Query(layerName,filter);
+        long t2=System.currentTimeMillis();
         SimpleFeatureCollection featureCollection=featureSource.getFeatures(query);
-        if (featureCollection != null && !(featureCollection.isEmpty())) {
+        long t3=System.currentTimeMillis();
+        logger.log(Level.INFO,"getFeatures() for query \"{0}\" took {1} ms",new Object[]{query,t3 - t2});
+        if ((featureCollection != null) && !(featureCollection.isEmpty())) {
           SimpleFeature requestedFeature=featureCollection.features().next();
           envelope=(ReferencedEnvelope)requestedFeature.getBounds();
         }
         if (geoNode == null) {
           List<AbstractNode> result=(List<AbstractNode>)Services.command(SearchNodeCommand.class).execute(new SuperUser(),null,false,false,Search.andExactName(featureName));
           for (          AbstractNode n : result) {
-            if (n instanceof GeoObject && n.isNotDeleted()) {
+            if ((n instanceof GeoObject) && n.isNotDeleted()) {
               geoNode=(GeoObject)n;
             }
           }
         }
       }
-      if (geoNode != null && geoNode.getAutoEnvelope()) {
+      if ((geoNode != null) && geoNode.getAutoEnvelope()) {
         geoNode.setEnvelopeMinX(envelope.getMinX());
         geoNode.setEnvelopeMaxX(envelope.getMaxX());
         geoNode.setEnvelopeMinY(envelope.getMinY());
@@ -95,7 +98,7 @@
         eminy=currentNode.getEnvelopeMinY();
         emaxy=currentNode.getEnvelopeMaxY();
       }
-      if (eminx != null && emaxx != null && eminy != null && emaxy != null) {
+      if ((eminx != null) && (emaxx != null) && (eminy != null)&& (emaxy != null)) {
         envelope=new ReferencedEnvelope(eminx,emaxx,eminy,emaxy,null);
       }
  else {
@@ -103,7 +106,10 @@
       }
     }
     MapHelper.expandEnvelope(envelope,new Double(cx),new Double(cy));
+    long t4=System.currentTimeMillis();
     SimpleFeatureCollection features=MapHelper.getIntersectingFeatures(graphDb,envelope,layerName);
+    long t5=System.currentTimeMillis();
+    logger.log(Level.INFO,"getIntersectingFeatures() for layer \"{0}\" took {1} ms",new Object[]{layerName,t5 - t4});
     Symbolizer polygonSymbolizer=MapHelper.createPolygonSymbolizer(currentNode.getLineColor(),currentNode.getLineWidth(),currentNode.getLineOpacity(),currentNode.getFillColor(),currentNode.getFillOpacity());
     Symbolizer textSymbolizer=MapHelper.createTextSymbolizer(currentNode.getFontName(),currentNode.getFontSize(),currentNode.getFontColor(),currentNode.getFontOpacity(),currentNode.getAnchorX(),currentNode.getAnchorY(),currentNode.getDisplacementX(),currentNode.getDisplacementY());
     Rule rule=MapHelper.styleFactory.createRule();
@@ -112,9 +118,12 @@
     FeatureTypeStyle fts=MapHelper.styleFactory.createFeatureTypeStyle(new Rule[]{rule});
     Style style=MapHelper.styleFactory.createStyle();
     style.featureTypeStyles().add(fts);
+    long t12=System.currentTimeMillis();
     layers.add(new MapLayer(features,style));
+    long t13=System.currentTimeMillis();
+    logger.log(Level.INFO,"new MapLayer() took {0} ms",new Object[]{t13 - t12});
     boolean displayCities=(currentNode.getDisplayCities() == Boolean.TRUE);
-    if (geoNode != null && "Country".equals(geoNode.getType()) && displayCities) {
+    if ((geoNode != null) && "Country".equals(geoNode.getType()) && displayCities) {
       List<AbstractNode> subNodes=geoNode.getLinkedNodes();
       List<GeoObject> geoObjects=new LinkedList<GeoObject>();
       List<GeoObject> cities=new LinkedList<GeoObject>();
@@ -147,13 +156,22 @@
       Style style2=MapHelper.styleFactory.createStyle();
       style2.featureTypeStyles().add(fts2);
       SimpleFeatureSource source=DataUtilities.source(collection);
+      long t6=System.currentTimeMillis();
       SimpleFeatureCollection subFeatures=source.getFeatures();
+      long t7=System.currentTimeMillis();
+      logger.log(Level.INFO,"Subfeatures: getFeatures() took {0} ms",new Object[]{t7 - t6});
       if (!subFeatures.isEmpty()) {
         layers.add(new MapLayer(subFeatures,style2));
       }
     }
+    long t8=System.currentTimeMillis();
     mapContext=new DefaultMapContext(layers.toArray(new MapLayer[]{}));
+    long t9=System.currentTimeMillis();
+    logger.log(Level.INFO,"Creating map context took {0} ms",new Object[]{t9 - t8});
+    long t10=System.currentTimeMillis();
     MapHelper.renderSVGDocument(out,mapContext,envelope,cx,cy,currentNode.getOptimizeFtsRendering(),currentNode.getLineWidthOptimization());
+    long t11=System.currentTimeMillis();
+    logger.log(Level.INFO,"renderSVGDocument took {0} ms",new Object[]{t11 - t10});
     mapContext.dispose();
     long t1=System.currentTimeMillis();
     logger.log(Level.INFO,"SVG image successfully rendered in {0} ms",(t1 - t0));

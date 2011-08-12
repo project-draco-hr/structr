@@ -1,14 +1,29 @@
 {
-  if (editNodeId != null && currentNode.getId() == editNodeId.longValue()) {
+  if ((editNodeId != null) && (currentNode.getId() == editNodeId.longValue())) {
     currentNode.renderEditFrame(out,editUrl);
   }
  else {
     SecurityContext securityContext=CurrentRequest.getSecurityContext();
     if (securityContext.isVisible(currentNode)) {
       if (currentNode.getDontCache() == Boolean.TRUE) {
-        StringBuilder content=new StringBuilder(1000);
-        renderSVGMap(currentNode,content,startNode);
-        out.append(content.toString());
+        long id=startNode.getId();
+        ServletContext context=CurrentRequest.getRequest().getSession().getServletContext();
+        java.util.Map<Long,TemporaryValue<String>> mapCache=(java.util.Map<Long,TemporaryValue<String>>)context.getAttribute(MAP_CACHE);
+        if (mapCache == null) {
+          mapCache=new ConcurrentHashMap<Long,TemporaryValue<String>>(1000,0.9f,8);
+          context.setAttribute(MAP_CACHE,mapCache);
+        }
+        TemporaryValue<String> cachedSVGMap=(TemporaryValue<String>)mapCache.get(id);
+        if (cachedSVGMap == null) {
+          cachedSVGMap=new TemporaryValue<String>(null,TimeUnit.MINUTES.toMillis(1));
+          mapCache.put(id,cachedSVGMap);
+        }
+        if ((cachedSVGMap.getStoredValue() == null) || cachedSVGMap.isExpired()) {
+          StringBuilder content=new StringBuilder(500000);
+          renderSVGMap(currentNode,content,startNode);
+          cachedSVGMap.refreshStoredValue(content.toString());
+        }
+        out.append(cachedSVGMap.getStoredValue());
         return;
       }
       String cachedSVGMap=currentNode.getSvgContent();

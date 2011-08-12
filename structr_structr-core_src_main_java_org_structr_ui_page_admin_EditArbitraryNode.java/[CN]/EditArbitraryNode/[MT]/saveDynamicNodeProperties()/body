@@ -2,12 +2,11 @@
   final Command transactionCommand=Services.command(TransactionCommand.class);
   transactionCommand.execute(new StructrTransaction(){
     @Override public Object execute() throws Throwable {
-      AbstractNode s=getNodeByIdOrPath(getNodeId());
       if (dynamicPropertiesForm.isValid()) {
         List<Field> fieldList=ContainerUtils.getInputFields(dynamicPropertiesForm);
         for (        Field f : fieldList) {
           String fieldName=f.getName();
-          if (!f.isHidden() && keys.contains(prefix + fieldName)) {
+          if (!f.isHidden() && keys.contains(NodeType.PREFIX + fieldName)) {
             node.setProperty(fieldName,f.getValueObject());
           }
         }

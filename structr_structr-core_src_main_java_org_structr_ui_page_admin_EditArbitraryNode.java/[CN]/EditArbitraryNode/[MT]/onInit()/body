@@ -20,8 +20,14 @@
   keys=signature.keySet();
   FieldSet dynamicProperties=new FieldSet("Dynamic Properties");
   for (  String key : keys) {
-    if (key.startsWith(prefix)) {
-      dynamicProperties.add(getControlForClass(key.substring(prefix.length()),typeNode.getStringProperty(key)));
+    if (key.startsWith(NodeType.PREFIX)) {
+      InputField inputField=typeNode.getInputField(key);
+      if (inputField != null) {
+        Control control=getControlForInput(inputField);
+        if (control != null) {
+          dynamicProperties.add(control);
+        }
+      }
     }
   }
   dynamicPropertiesForm.add(dynamicProperties);

@@ -1,0 +1,52 @@
+{
+  String javaClassName=inputField.getFieldType();
+  String inputType=inputField.getInputType();
+  String name=inputField.getName();
+  String label=inputField.getLabel();
+  int maxLength=inputField.getMaxLength();
+  int size=inputField.getSize();
+  int rows=inputField.getRows();
+  int columns=inputField.getColumns();
+  boolean required=inputField.isRequired();
+  logger.log(Level.FINE,"{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}",new Object[]{javaClassName != null ? javaClassName : "null",inputType != null ? inputType : "null",name != null ? name : "null",label != null ? label : "null",maxLength,size,rows,columns,required});
+  if (javaClassName.equals(String.class.getCanonicalName())) {
+    if ("TextArea".equals(inputType)) {
+      TextArea textArea=new TextArea(name,label,columns,rows,required);
+      if (maxLength >= 0) {
+        textArea.setMaxLength(maxLength);
+      }
+      return (textArea);
+    }
+ else {
+      TextField textField=new TextField(name,label,size,required);
+      if (maxLength >= 0) {
+        textField.setMaxLength(maxLength);
+      }
+      return textField;
+    }
+  }
+ else   if (javaClassName.equals(Double.class.getCanonicalName())) {
+    return new DoubleField(name,label,size,required);
+  }
+ else   if (javaClassName.equals(Integer.class.getCanonicalName())) {
+    return new IntegerField(name,label,size,required);
+  }
+ else   if (javaClassName.equals(Long.class.getCanonicalName())) {
+    if (Date.class.getCanonicalName().equals(javaClassName)) {
+      return new DateField(name,label,size,required);
+    }
+ else {
+      return new LongField(name,label,size,required);
+    }
+  }
+ else   if (javaClassName.equals(Float.class.getCanonicalName())) {
+    return new NumberField(name,label,size,required);
+  }
+ else   if (javaClassName.equals(Boolean.class.getCanonicalName())) {
+    return new Checkbox(name,label);
+  }
+ else   if (javaClassName.equals(Date.class.getCanonicalName())) {
+    return new DateField(name,label,size,required);
+  }
+  return null;
+}

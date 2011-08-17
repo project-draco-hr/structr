@@ -34,7 +34,14 @@
       Object[] content=currentNode.getContent();
       if (content != null) {
         for (        Object o : content) {
-          output.append(o);
+          if (o instanceof AbstractComponent) {
+            AbstractComponent comp=(AbstractComponent)o;
+            comp.initComponents();
+            renderNode(output,comp,startNode,editUrl,editNodeId,renderMode);
+          }
+ else {
+            output.append(o);
+          }
         }
       }
     }

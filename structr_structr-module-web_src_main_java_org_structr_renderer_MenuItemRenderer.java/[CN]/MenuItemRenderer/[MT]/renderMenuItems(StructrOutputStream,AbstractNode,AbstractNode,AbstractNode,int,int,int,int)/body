@@ -31,7 +31,14 @@
       cssClass+=" current";
     }
     if (securityContext.isVisible(menuItemNode)) {
-      String relativeNodeURL=menuItemNode.getNodeURL(startNode).replace("&","%26");
+      AbstractNode contextNode;
+      if (startNode instanceof Link) {
+        contextNode=((Link)startNode).getStructrNode().getContextNode();
+      }
+ else {
+        contextNode=startNode.getContextNode();
+      }
+      String relativeNodeURL=menuItemNode.getNodeURL(contextNode).replace("&","%26");
       if (!(cssClass.isEmpty())) {
         cssClass=" class=\"" + cssClass + "\"";
       }

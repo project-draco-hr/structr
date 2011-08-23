@@ -1,0 +1,62 @@
+{
+  if (currentNode != null) {
+    List<AbstractComponent> components=currentNode.getComponents();
+    boolean forceClosingTag=currentNode.getForceClosingTag();
+    Map<String,Set> attributes=currentNode.getAttributes();
+    String tag=tagMap.get(currentNode.getClass());
+    String id=currentNode.getId();
+    currentNode.doBeforeRendering();
+    if (currentNode instanceof HelpLink && startNode != null) {
+      ((HelpLink)currentNode).setHref(CurrentRequest.getRequest().getRequestURL().toString().concat("?nodeId=").concat(startNode.getIdString()));
+    }
+    if (tag != null) {
+      output.append("<");
+      output.append(tag);
+      if (id != null) {
+        output.append(" id=\"").append(id).append("\"");
+      }
+      for (      Entry<String,Set> attribute : attributes.entrySet()) {
+        output.append(" ");
+        output.append(attribute.getKey());
+        output.append("=\"");
+        for (Iterator it=attribute.getValue().iterator(); it.hasNext(); ) {
+          Object attributeValue=it.next();
+          output.append(attributeValue);
+          if (it.hasNext())           output.append(" ");
+        }
+        output.append("\"");
+      }
+      if (components.isEmpty() && !forceClosingTag) {
+        output.append(" />");
+      }
+ else {
+        output.append(">");
+      }
+    }
+    if (components.isEmpty()) {
+      Object[] content=currentNode.getContent();
+      if (content != null) {
+        for (        Object o : content) {
+          if (o instanceof AbstractComponent) {
+            AbstractComponent comp=(AbstractComponent)o;
+            comp.initComponents();
+            renderNode(output,comp,startNode,editUrl,editNodeId,renderMode);
+          }
+ else {
+            output.append(o);
+          }
+        }
+      }
+    }
+ else {
+      for (      AbstractComponent content : components) {
+        renderNode(output,content,startNode,editUrl,editNodeId,renderMode);
+      }
+    }
+    if (tag != null && (forceClosingTag || !components.isEmpty())) {
+      output.append("</");
+      output.append(tag);
+      output.append(">");
+    }
+  }
+}

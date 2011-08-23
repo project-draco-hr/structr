@@ -1,5 +1,6 @@
 {
   super.onRender();
+  SecurityContext securityContext=CurrentRequest.getSecurityContext();
   if (node != null) {
     title=node.getName() + " (" + node.getId()+ ") ["+ Services.getApplicationTitle()+ "]";
   }
@@ -26,7 +27,7 @@
     okMsg="";
     logger.log(Level.FINE,"Node {0} not contained in node tree",getNodeId());
   }
-  if (writeAllowed) {
+  if (securityContext.isAllowed(node,Permission.Write)) {
     propertiesTable.setDataProvider(new DataProvider(){
       @Override public List<Property> getData(){
         return getProperties();

@@ -1,4 +1,5 @@
 {
+  SecurityContext securityContext=CurrentRequest.getSecurityContext();
   AbstractNode p=(AbstractNode)parentNode.getValue();
   if (!(p instanceof Link)) {
     List<AbstractNode> nodes=new LinkedList<AbstractNode>();
@@ -10,8 +11,7 @@
     int counter=0;
     for (    StructrRelationship r : rels) {
       AbstractNode subNode=r.getEndNode();
-      if (isSuperUser || (subNode.readAllowed())) {
-        logger.log(Level.FINEST,"isSuperUser? {0}, readAllowed? {1}",new Object[]{isSuperUser,subNode.readAllowed()});
+      if (securityContext.isAllowed(subNode,Permission.Read)) {
         AbstractNode s=(AbstractNode)nodeFactory.execute(subNode);
         nodes.add(s);
       }
@@ -25,7 +25,7 @@
     rels=nodeToAdd.getOutgoingLinkRelationships();
     for (    StructrRelationship r : rels) {
       AbstractNode subNode=r.getEndNode();
-      if (isSuperUser || (subNode.readAllowed())) {
+      if (securityContext.isAllowed(subNode,Permission.Read)) {
         AbstractNode s=(AbstractNode)nodeFactory.execute(subNode);
         nodes.add(s);
       }

@@ -1,10 +1,7 @@
 {
   StringBuilder ret=new StringBuilder();
-  ret.append("<#assign context = \"\" />");
-  ret.append("<#if Request?? && Request.contextPath?? >");
-  ret.append("  <#assign context = Request.contextPath />");
-  ret.append("</#if>");
-  ret.append("<script type=\"text/javascript\" src=\"${context}/ckeditor/ckeditor.js\"></script>\n");
+  ret.append("<#if ContextPath?? >");
+  ret.append("<script type=\"text/javascript\" src=\"${ContextPath}/ckeditor/ckeditor.js\"></script>\n");
   ret.append("<script type=\"text/javascript\">\n");
   ret.append("window.onload = function()\n");
   ret.append("{\n");
@@ -16,6 +13,7 @@
   ret.append("}\n");
   ret.append("</script>\n");
   ret.append("<p>\n");
+  ret.append("</#if>");
   ret.append("<textarea name=\"${TextField.name}\" id=\"content\">");
   ret.append("<#if TextField.value ?? >${TextField.value}</#if>");
   ret.append("</textarea>\n");

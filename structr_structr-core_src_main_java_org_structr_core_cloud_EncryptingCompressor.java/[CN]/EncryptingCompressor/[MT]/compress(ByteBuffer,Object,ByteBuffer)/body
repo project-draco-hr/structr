@@ -1,0 +1,16 @@
+{
+  int remoteEntityId=Kryo.getContext().getRemoteEntityID();
+  Cipher cipher=EncryptionContext.getEncryptionCipher(remoteEntityId);
+  if (cipher != null) {
+    try {
+      cipher.doFinal(inputBuffer,outputBuffer);
+    }
+ catch (    Throwable t) {
+      EncryptionContext.setErrorMessage(remoteEntityId,t.getMessage());
+      t.printStackTrace();
+    }
+  }
+ else {
+    outputBuffer.put(inputBuffer);
+  }
+}

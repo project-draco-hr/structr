@@ -14,10 +14,10 @@
       callback=(Callback)parameters[2];
     }
     if (commandLine != null) {
-      User user=CurrentRequest.getCurrentUser();
-      boolean superUser=user != null && user instanceof SuperUser;
+      User user=CurrentSession.getUser();
+      boolean superUser=(user != null) && (user instanceof SuperUser);
       ret.append("<p>");
-      ret.append(user != null ? user.getName() : "anonymous");
+      ret.append((user != null) ? user.getName() : "anonymous");
       ret.append("@structr");
       ret.append(superUser ? "# " : "$ ");
       ret.append(commandLine);
@@ -58,7 +58,7 @@
               throw new InvalidOperationException(commands[currentPosition].toString() + " not found");
             }
           }
-          if (primaryOperation != null && primaryOperation.canExecute()) {
+          if ((primaryOperation != null) && primaryOperation.canExecute()) {
             StringBuilder stdOut=new StringBuilder(200);
             if (!primaryOperation.executeOperation(stdOut)) {
               ret.append("<p class=\"error\">Execution failed</p>\n");

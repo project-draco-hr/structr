@@ -1,4 +1,5 @@
 {
+  SecurityContext securityContext=CurrentRequest.getSecurityContext();
   AbstractNode menuItemNode=currentMenuNode;
   if (currentDepth > maxDepth) {
     return;
@@ -7,7 +8,7 @@
   List<AbstractNode> menuItems=new LinkedList<AbstractNode>();
   List<AbstractNode> allMenuItems=menuItemNode.getSortedMenuItems();
   for (  AbstractNode n : allMenuItems) {
-    if (n.isVisible()) {
+    if (securityContext.isVisible(n)) {
       menuItems.add(n);
     }
   }
@@ -29,18 +30,25 @@
     if (menuItemNode.equals(startNode)) {
       cssClass+=" current";
     }
-    if (menuItemNode.isVisible()) {
-      String relativeNodePath=menuItemNode.getNodePath(startNode).replace("&","%26");
+    if (securityContext.isVisible(menuItemNode)) {
+      AbstractNode contextNode;
+      if (startNode instanceof Link) {
+        contextNode=((Link)startNode).getStructrNode().getContextNode();
+      }
+ else {
+        contextNode=startNode.getContextNode();
+      }
+      String relativeNodeURL=menuItemNode.getNodeURL(contextNode).replace("&","%26");
       if (!(cssClass.isEmpty())) {
         cssClass=" class=\"" + cssClass + "\"";
       }
       out.append("<li").append(cssClass).append(">");
-      out.append("<span><a href=\"").append(relativeNodePath).append("\">");
+      out.append("<span><a href=\"").append(relativeNodeURL).append("\">");
       out.append(currentMenuNode.getTitleOrName());
       out.append("</a></span>");
     }
   }
-  if (currentMenuNode.isVisible()) {
+  if (securityContext.isVisible(currentMenuNode)) {
     int sub=menuItems.size();
     int pos=0;
     for (    AbstractNode s : menuItems) {

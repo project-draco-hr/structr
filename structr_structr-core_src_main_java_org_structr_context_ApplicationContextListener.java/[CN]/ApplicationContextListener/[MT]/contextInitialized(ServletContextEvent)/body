@@ -1,6 +1,6 @@
 {
   logger.log(Level.INFO,"Servlet context created");
-  Map<String,Object> context=new ConcurrentHashMap<String,Object>();
+  Map<String,Object> context=new ConcurrentHashMap<String,Object>(20,0.9f,8);
   ServletContext servletContext=sce.getServletContext();
   String configFilePath=servletContext.getInitParameter(Services.CONFIG_FILE_PATH);
   context.put(Services.CONFIG_FILE_PATH,configFilePath);
@@ -74,6 +74,5 @@
   }
 );
   Services.initialize(context);
-  Services.command(StartCloudService.class);
   logger.log(Level.INFO,"structr application context initialized (structr started successfully)");
 }

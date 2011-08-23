@@ -1,5 +1,6 @@
 {
   super.onInit();
+  SecurityContext securityContext=CurrentRequest.getSecurityContext();
   ArbitraryNode arbitraryNode=null;
   if (node != null) {
     externalViewUrl="/view/" + node.getId();
@@ -19,14 +20,20 @@
   keys=signature.keySet();
   FieldSet dynamicProperties=new FieldSet("Dynamic Properties");
   for (  String key : keys) {
-    if (key.startsWith(prefix)) {
-      dynamicProperties.add(getControlForClass(key.substring(prefix.length()),typeNode.getStringProperty(key)));
+    if (key.startsWith(NodeType.PREFIX)) {
+      InputField inputField=typeNode.getInputField(key);
+      if (inputField != null) {
+        Control control=getControlForInput(inputField);
+        if (control != null) {
+          dynamicProperties.add(control);
+        }
+      }
     }
   }
   dynamicPropertiesForm.add(dynamicProperties);
   dynamicPropertiesForm.copyTo(node);
   dynamicPropertiesForm.setActionURL(dynamicPropertiesForm.getActionURL().concat("#properties-tab"));
-  if (editPropertiesAllowed) {
+  if (securityContext.isAllowed(node,Permission.EditProperty)) {
     dynamicProperties.add(new Submit("saveDynamicProperties"," Save Dynamic Properties ",this,"onSaveDynamicProperties"));
     dynamicProperties.add(new Submit("cancel"," Cancel ",this,"onCancel"));
   }

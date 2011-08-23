@@ -10,13 +10,17 @@
     }
     Map root=new HashMap();
     root.put("this",this);
+    root.put("StartNode",startNode);
+    root.put("node",startNode);
     if (callingNode != null) {
       root.put(callingNode.getType(),callingNode);
       root.put("CallingNode",callingNode);
     }
     HttpServletRequest request=CurrentRequest.getRequest();
     if (request != null) {
-      root.put("Request",new freemarker.ext.servlet.HttpRequestParametersHashModel(request));
+      HttpRequestParametersHashModel requestModel=new HttpRequestParametersHashModel(request);
+      root.put("Request",requestModel);
+      root.put("ContextPath",request.getContextPath());
       String searchString=request.getParameter("search");
       String searchInContent=request.getParameter("searchInContent");
       boolean inContent=(StringUtils.isNotEmpty(searchInContent) && Boolean.parseBoolean(searchInContent)) ? true : false;
@@ -35,6 +39,7 @@
       root.put("User",user);
     }
     root.put("Helper",new TemplateHelper());
+    root.put("path",new PathHelper());
     HttpSession session=CurrentRequest.getSession();
     if (session != null) {
       if (session.getAttribute("errorMessage") != null) {

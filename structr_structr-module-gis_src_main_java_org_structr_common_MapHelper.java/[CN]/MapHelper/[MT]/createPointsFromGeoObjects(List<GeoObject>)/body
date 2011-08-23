@@ -6,13 +6,19 @@
     SimpleFeatureBuilder featureBuilder=new SimpleFeatureBuilder(TYPE);
     GeometryFactory geometryFactory=JTSFactoryFinder.getGeometryFactory(null);
     for (    GeoObject obj : geoObjects) {
-      Coordinate coord=new Coordinate(obj.getLongitude(),obj.getLatitude());
-      Point point=geometryFactory.createPoint(coord);
-      featureBuilder.add(point);
-      featureBuilder.add(obj.getName());
-      featureBuilder.add(obj.getName());
-      SimpleFeature feature=featureBuilder.buildFeature(null);
-      collection.add(feature);
+      Double lng=obj.getLongitude();
+      Double lat=obj.getLatitude();
+      if ((lng != null) && (lat != null)) {
+        Coordinate coord=new Coordinate(obj.getLongitude(),obj.getLatitude());
+        Point point=geometryFactory.createPoint(coord);
+        featureBuilder.add(point);
+        featureBuilder.add(obj.getName());
+        featureBuilder.add(obj.getName());
+        featureBuilder.add(obj.getId());
+        SimpleFeature feature=featureBuilder.buildFeature(null);
+        feature.getUserData().put("label",obj.getName());
+        collection.add(feature);
+      }
     }
   }
  catch (  SchemaException ex) {

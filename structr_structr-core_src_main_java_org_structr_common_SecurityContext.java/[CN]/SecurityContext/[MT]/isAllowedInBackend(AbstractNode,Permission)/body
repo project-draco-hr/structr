@@ -1,0 +1,49 @@
+{
+  User user=getUser();
+  if (node == null) {
+    return false;
+  }
+  if ((user != null) && (user instanceof SuperUser)) {
+    return true;
+  }
+switch (permission) {
+case AccessControl:
+    if (user == null) {
+      return false;
+    }
+  if (user instanceof SuperUser) {
+    return true;
+  }
+if (node.equals(user)) {
+  return true;
+}
+StructrRelationship r=null;
+if (user.equals(node.getOwnerNode())) {
+return true;
+}
+r=node.getSecurityRelationship(user);
+if ((r != null) && r.isAllowed(StructrRelationship.ACCESS_CONTROL_KEY)) {
+return true;
+}
+return false;
+case CreateNode:
+return node.hasPermission(StructrRelationship.CREATE_SUBNODE_KEY,user);
+case CreateRelationship:
+return node.hasPermission(StructrRelationship.ADD_RELATIONSHIP_KEY,user);
+case DeleteNode:
+return node.hasPermission(StructrRelationship.DELETE_NODE_KEY,user);
+case DeleteRelationship:
+return node.hasPermission(StructrRelationship.REMOVE_RELATIONSHIP_KEY,user);
+case EditProperty:
+return node.hasPermission(StructrRelationship.EDIT_PROPERTIES_KEY,user);
+case Execute:
+return node.hasPermission(StructrRelationship.EXECUTE_KEY,user);
+case Read:
+return node.hasPermission(StructrRelationship.READ_KEY,user);
+case ShowTree:
+return node.hasPermission(StructrRelationship.SHOW_TREE_KEY,user);
+case Write:
+return node.hasPermission(StructrRelationship.WRITE_KEY,user);
+}
+return (false);
+}

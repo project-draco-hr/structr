@@ -1,0 +1,26 @@
+{
+  HttpServletResponse response=getResponse();
+  HttpServletRequest request=getRequest();
+  if ((request != null) && (response != null)) {
+    String redirectUrl=null;
+    String referrer=request.getHeader("referer");
+    String requestURI=request.getRequestURI();
+    if ((currentNode != null) && (!referrer.contains(request.getContextPath()))) {
+      redirectUrl=destination.getNodePath(currentNode);
+      String[] requestUriParts=StringUtils.split(requestURI,"/");
+      for (int i=0; i < requestUriParts.length + 1; i++) {
+        redirectUrl="../".concat(redirectUrl);
+      }
+    }
+ else {
+      redirectUrl=getAbsoluteNodePath(destination);
+    }
+    try {
+      CurrentSession.setRedirected(true);
+      response.sendRedirect(redirectUrl);
+    }
+ catch (    IOException ioex) {
+      logger.log(Level.WARNING,"Exception while trying to redirect to {0}: {1}",new Object[]{redirectUrl,ioex});
+    }
+  }
+}

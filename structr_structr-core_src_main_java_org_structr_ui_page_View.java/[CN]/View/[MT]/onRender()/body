@@ -1,4 +1,5 @@
 {
+  SecurityContext securityContext=CurrentRequest.getSecurityContext();
   AbstractNode nodeToRender=getNodeByIdOrPath(getNodeId());
   if (nodeToRender == null) {
     logger.log(Level.FINE,"Node {0} not found",getNodeId());
@@ -6,13 +7,13 @@
     setForward("/not-found.htm");
   }
  else {
-    if (!(nodeToRender.isVisible())) {
+    if (!securityContext.isVisible(nodeToRender)) {
       logger.log(Level.FINE,"Hidden page requested ({0})",getNodeId());
       getContext().getResponse().setStatus(HttpServletResponse.SC_NOT_FOUND);
       setForward("/not-found.htm");
       return;
     }
-    if (!(isSuperUser || nodeToRender.readAllowed())) {
+    if (!securityContext.isAllowed(nodeToRender,Permission.Read)) {
       logger.log(Level.FINE,"Secure page requested ({0})",getNodeId());
       getContext().getResponse().setStatus(HttpServletResponse.SC_FORBIDDEN);
       setForward("/not-authorized.html");

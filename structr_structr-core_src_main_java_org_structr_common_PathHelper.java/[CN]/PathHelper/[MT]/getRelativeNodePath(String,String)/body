@@ -1,0 +1,38 @@
+{
+  if (basePath.equals(targetPath)) {
+    return ".";
+  }
+  if (basePath.equals("/") && targetPath.length() > 1) {
+    return targetPath.substring(1);
+  }
+  String[] baseAncestors=FilenameUtils.normalizeNoEndSeparator(basePath).split("/");
+  String[] targetAncestors=FilenameUtils.normalizeNoEndSeparator(targetPath).split("/");
+  int length=(baseAncestors.length < targetAncestors.length) ? baseAncestors.length : targetAncestors.length;
+  int lastCommonRoot=-1;
+  int i;
+  for (i=0; i < length; i++) {
+    if (baseAncestors[i].equals(targetAncestors[i])) {
+      lastCommonRoot=i;
+    }
+ else {
+      break;
+    }
+  }
+  if (lastCommonRoot != -1) {
+    StringBuilder newRelativePath=new StringBuilder();
+    for (i=lastCommonRoot + 1; i < baseAncestors.length; i++) {
+      if (baseAncestors[i].length() > 0) {
+        newRelativePath.append("../");
+      }
+    }
+    for (i=lastCommonRoot + 1; i < targetAncestors.length; i++) {
+      newRelativePath.append(targetAncestors[i]).append("/");
+    }
+    String result=newRelativePath.toString();
+    if (result.endsWith("/")) {
+      result=result.substring(0,result.length() - 1);
+    }
+    return result;
+  }
+  return targetPath;
+}

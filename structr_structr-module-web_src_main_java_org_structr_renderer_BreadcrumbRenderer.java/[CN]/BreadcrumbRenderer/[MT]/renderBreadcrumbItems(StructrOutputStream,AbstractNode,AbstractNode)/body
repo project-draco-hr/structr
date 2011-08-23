@@ -1,4 +1,5 @@
 {
+  SecurityContext securityContext=CurrentRequest.getSecurityContext();
   List<AbstractNode> ancestors=startNode.getAncestorNodes();
   String cssClass="";
   int currentPos=0;
@@ -13,7 +14,7 @@
     if (breadcrumbItem.equals(startNode)) {
       cssClass+=" current";
     }
-    if (breadcrumbItem.isVisible()) {
+    if (securityContext.isVisible(breadcrumbItem)) {
       String relativeNodePath=breadcrumbItem.getNodePath(startNode).replace("&","%26");
       if (!(cssClass.isEmpty())) {
         cssClass=" class=\"" + cssClass + "\"";

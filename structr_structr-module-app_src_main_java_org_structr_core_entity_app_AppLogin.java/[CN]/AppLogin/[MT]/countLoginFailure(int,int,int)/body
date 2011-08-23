@@ -1,12 +1,12 @@
 {
   HttpSession session=CurrentRequest.getSession();
   Integer retries=getLoginAttemptsValue().get();
-  if (retries != null && retries > maxRetries) {
+  if ((retries != null) && (retries > maxRetries)) {
     logger.log(Level.SEVERE,"More than {0} login failures, session {1} is blocked",new Object[]{maxRetries,session.getId()});
     getSessionBlockedValue().set(true);
     getErrorMessageValue().set("Too many unsuccessful login attempts, your session is blocked for login!");
   }
- else   if (retries != null && retries > delayThreshold) {
+ else   if ((retries != null) && (retries > delayThreshold)) {
     logger.log(Level.INFO,"More than {0} login failures, execution delayed by {1} seconds",new Object[]{maxRetries,delayTime});
     try {
       Thread.sleep(delayTime * 1000);

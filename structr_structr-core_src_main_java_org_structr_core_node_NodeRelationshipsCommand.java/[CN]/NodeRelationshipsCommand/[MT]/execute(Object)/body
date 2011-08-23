@@ -9,11 +9,18 @@
     RelationshipType relType=(RelationshipType)arg1;
     Direction dir=(Direction)arg2;
     Node node=null;
+    long id=-1;
     try {
-      node=graphDb.getNodeById(sNode.getId());
+      id=sNode.getId();
+      if (id > -1) {
+        node=graphDb.getNodeById(sNode.getId());
+      }
+ else {
+        return result;
+      }
     }
  catch (    Exception e) {
-      logger.log(Level.WARNING,"Exception occured: ",e.getMessage());
+      logger.log(Level.WARNING,"Not found: " + id,e.getMessage());
       return result;
     }
     Iterable<Relationship> rels;

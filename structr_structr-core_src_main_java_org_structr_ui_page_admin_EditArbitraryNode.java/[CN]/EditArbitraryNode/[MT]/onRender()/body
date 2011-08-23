@@ -4,8 +4,9 @@
     List<Field> fieldList=ContainerUtils.getInputFields(dynamicPropertiesForm);
     for (    Field f : fieldList) {
       String fieldName=f.getName();
-      if (!f.isHidden() && keys.contains(prefix + fieldName)) {
-        String javaClassName=typeNode.getStringProperty(prefix + fieldName);
+      if (!f.isHidden() && keys.contains(NodeType.PREFIX + fieldName)) {
+        InputField inputField=typeNode.getInputField(NodeType.PREFIX + fieldName);
+        String javaClassName=inputField.getFieldType();
         if (javaClassName != null) {
           if (javaClassName.equals("java.util.Date")) {
             f.setValueObject(node.getDateProperty(fieldName));

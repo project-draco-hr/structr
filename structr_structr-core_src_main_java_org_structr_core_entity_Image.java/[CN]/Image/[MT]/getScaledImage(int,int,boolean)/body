@@ -2,17 +2,19 @@
   thumbnailRelationships=getThumbnailRelationships();
   Image thumbnail=null;
   final Image originalImage=this;
-  int origWidth=originalImage.getWidth();
-  int origHeight=originalImage.getHeight();
-  if (thumbnailRelationships != null && !(thumbnailRelationships.isEmpty())) {
-    for (    StructrRelationship r : thumbnailRelationships) {
-      Integer w=(Integer)r.getProperty(Image.WIDTH_KEY);
-      Integer h=(Integer)r.getProperty(Image.HEIGHT_KEY);
-      if (w != null && h != null) {
-        if ((w == maxWidth && h <= maxHeight) || (w <= maxWidth && h == maxHeight) || (origWidth <= w && origHeight <= h)) {
-          thumbnail=(Image)r.getEndNode();
-          if (!(originalImage.getLastModifiedDate().after(thumbnail.getLastModifiedDate()))) {
-            return thumbnail;
+  Integer origWidth=originalImage.getWidth();
+  Integer origHeight=originalImage.getHeight();
+  if ((origWidth != null) && (origHeight != null)) {
+    if ((thumbnailRelationships != null) && !(thumbnailRelationships.isEmpty())) {
+      for (      StructrRelationship r : thumbnailRelationships) {
+        Integer w=(Integer)r.getProperty(Image.WIDTH_KEY);
+        Integer h=(Integer)r.getProperty(Image.HEIGHT_KEY);
+        if ((w != null) && (h != null)) {
+          if (((w == maxWidth) && (h <= maxHeight)) || ((w <= maxWidth) && (h == maxHeight)) || ((origWidth <= w) && (origHeight <= h))) {
+            thumbnail=(Image)r.getEndNode();
+            if (!(originalImage.getLastModifiedDate().after(thumbnail.getLastModifiedDate()))) {
+              return thumbnail;
+            }
           }
         }
       }
@@ -47,8 +49,8 @@
           }
           long size=imageFile.length();
           thumbnail.setSize(size);
-          int tnWidth=thumbnailData.getWidth();
-          int tnHeight=thumbnailData.getHeight();
+          Integer tnWidth=thumbnailData.getWidth();
+          Integer tnHeight=thumbnailData.getHeight();
           thumbnailRelationship.setProperty(Image.WIDTH_KEY,tnWidth);
           thumbnailRelationship.setProperty(Image.HEIGHT_KEY,tnHeight);
           thumbnail.setRelativeFilePath(relativeFilePath);

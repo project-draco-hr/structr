@@ -18,5 +18,19 @@
   smtpPort=getConfigValue(context,Services.SMTP_PORT,"25");
   superuserUsername=getConfigValue(context,Services.SUPERUSER_USERNAME,"superadmin");
   superuserPassword=getConfigValue(context,Services.SUPERUSER_PASSWORD,"");
-  logger.log(Level.INFO,"Finished initialization of service layer");
+  logger.log(Level.INFO,"Starting services");
+  Services.command(InitializeModuleServiceCommand.class).execute();
+  for (  Class serviceClass : registeredServiceClasses) {
+    if (Service.class.isAssignableFrom(serviceClass)) {
+      try {
+        createService(serviceClass);
+      }
+ catch (      Throwable t) {
+        logger.log(Level.WARNING,"Exception while registering service {0}: {1}",new Object[]{serviceClass.getName(),t.getMessage()});
+      }
+    }
+  }
+  logger.log(Level.INFO,"{0} service(s) processed",registeredServiceClasses.size());
+  registeredServiceClasses.clear();
+  logger.log(Level.INFO,"Initialization complete");
 }

@@ -6,7 +6,7 @@
       stdOut.append("Cannot delete current node");
     }
  else {
-      Object findNodeResult=Services.command(FindNodeCommand.class).execute(CurrentRequest.getCurrentUser(),currentNode,param);
+      Object findNodeResult=Services.command(FindNodeCommand.class).execute(CurrentSession.getUser(),currentNode,param);
       if (findNodeResult != null) {
         if (findNodeResult instanceof Collection) {
           toDelete.addAll((Collection)findNodeResult);
@@ -17,7 +17,7 @@
       }
       for (      AbstractNode node : toDelete) {
         try {
-          deleteCommand.execute(node,currentNode,recursive,CurrentRequest.getCurrentUser());
+          deleteCommand.execute(node,currentNode,recursive,CurrentSession.getUser());
           if (deleteCommand.getExitCode().equals(Command.exitCode.FAILURE)) {
             stdOut.append(deleteCommand.getErrorMessage());
           }

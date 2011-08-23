@@ -1,5 +1,5 @@
 {
-  List<AbstractNode> result=new LinkedList<AbstractNode>();
+  Set<AbstractNode> result=new HashSet<AbstractNode>();
   GraphDatabaseService graphDb=(GraphDatabaseService)Services.command(GraphDatabaseCommand.class).execute();
   final SpatialDatabaseService db=new SpatialDatabaseService(graphDb);
   SimplePointLayer layer=(SimplePointLayer)db.getLayer("Hotels");
@@ -7,7 +7,11 @@
   Coordinate myPosition=node.getCoordinates();
   List<SpatialDatabaseRecord> results=layer.findClosestPointsTo(myPosition,radius);
   for (  SpatialDatabaseRecord record : results) {
-    AbstractNode newNode=(AbstractNode)findNode.execute(new SuperUser(),record.getProperty("nodeId"));
+    Long nodeId=(Long)record.getProperty("nodeId");
+    if (nodeId.equals(node.getId())) {
+      continue;
+    }
+    AbstractNode newNode=(AbstractNode)findNode.execute(new SuperUser(),nodeId);
     result.add(newNode);
   }
   return result;

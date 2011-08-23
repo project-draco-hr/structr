@@ -1,9 +1,10 @@
 {
   super.onInit();
-  if (showTreeAllowed) {
+  SecurityContext securityContext=CurrentRequest.getSecurityContext();
+  if (securityContext.isAllowed(node,Permission.ShowTree)) {
     nodeTreePanel=new Panel("nodeTreePanel","/panel/node-tree-panel.htm");
   }
-  if (createNodeAllowed) {
+  if (securityContext.isAllowed(node,Permission.CreateNode)) {
     Select nodeTypeField=new Select(AbstractNode.TYPE_KEY,"Select Node Type",false);
     nodeTypeField.add(new Option("","--- Select Node Type ---"));
     List<String> nodeTypes=new LinkedList<String>(((Map<String,Class>)Services.command(GetEntitiesCommand.class).execute()).keySet());
@@ -58,7 +59,7 @@
     extractNodeForm.add(new Submit("extractNode"," Extract node ",this,"onExtractNode"));
     extractNodePanel=new Panel("extractNodePanel","/panel/extract-node-panel.htm");
   }
-  if (deleteNodeAllowed) {
+  if (securityContext.isAllowed(node,Permission.DeleteNode)) {
     deleteNodeForm.add(new Checkbox(RECURSIVE_KEY,false));
     deleteNodeForm.add(new HiddenField(NODE_ID_KEY,nodeId != null ? nodeId : ""));
     deleteNodeForm.add(new HiddenField(RENDER_MODE_KEY,renderMode != null ? renderMode : ""));
@@ -73,7 +74,7 @@
     moveNodeForm.add(new Submit("moveNode"," Move node ",this,"onMoveNode"));
     moveNodePanel=new Panel("moveNodePanel","/panel/move-node-panel.htm");
   }
-  if (addRelationshipAllowed) {
+  if (securityContext.isAllowed(node,Permission.CreateRelationship)) {
     newRelationshipForm.add(new TextField(SOURCE_NODE_ID_KEY,true));
     newRelationshipForm.add(new TextField(TARGET_NODE_ID_KEY,true));
     newRelationshipForm.add(new TextField(REL_TYPE_KEY,true));

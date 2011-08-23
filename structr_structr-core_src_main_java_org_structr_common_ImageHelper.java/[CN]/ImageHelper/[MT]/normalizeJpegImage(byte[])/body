@@ -3,7 +3,7 @@
     return new byte[]{};
   }
   ByteArrayInputStream in=new ByteArrayInputStream(original);
-  if (original[0] == (byte)0xff && original[1] == (byte)0xd9 && original[2] == (byte)0xff && original[3] == (byte)0xd8) {
+  if ((original[0] == (byte)0xff) && (original[1] == (byte)0xd9) && (original[2] == (byte)0xff)&& (original[3] == (byte)0xd8)) {
     in.skip(4);
   }
   ByteArrayOutputStream out=new ByteArrayOutputStream();
@@ -17,6 +17,15 @@
   }
  catch (  IOException ex) {
     logger.log(Level.SEVERE,null,ex);
+    if (in != null) {
+      try {
+        in.close();
+      }
+ catch (      IOException ignore) {
+      }
+    }
+  }
+ finally {
   }
   return out.toByteArray();
 }

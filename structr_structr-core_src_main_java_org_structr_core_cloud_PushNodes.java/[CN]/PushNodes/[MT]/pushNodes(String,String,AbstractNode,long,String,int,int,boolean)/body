@@ -1,0 +1,63 @@
+{
+  final SynchronizingListener listener=new SynchronizingListener();
+  int chunkSize=CloudService.CHUNK_SIZE;
+  int writeBufferSize=CloudService.BUFFER_SIZE * 4;
+  int objectBufferSize=CloudService.BUFFER_SIZE * 2;
+  Client client=new Client(writeBufferSize,objectBufferSize);
+  client.addListener(listener);
+  client.start();
+  Log.set(CloudService.KRYONET_LOG_LEVEL);
+  Kryo kryo=client.getKryo();
+  CloudService.registerClasses(kryo);
+  StringBuilder titleBuffer=new StringBuilder();
+  titleBuffer.append("Transmission to ").append(remoteHost).append(":").append(remoteTcpPort);
+  ProgressBarNotification progressNotification=new ProgressBarNotification(titleBuffer.toString());
+  Services.command(AddNotificationCommand.class).execute(progressNotification);
+  listener.setNotification(progressNotification);
+  listener.setPassword(password);
+  try {
+    client.connect(10000,remoteHost,remoteTcpPort,remoteUdpPort);
+    client.sendTCP(CloudService.BEGIN_TRANSACTION);
+    client.sendTCP(new AuthenticationContainer(userName));
+    if (listener.waitForAuthentication()) {
+      client.sendTCP(new PushNodeRequestContainer(remoteTargetNodeId));
+      if (recursive) {
+        List<AbstractNode> nodes=sourceNode.getAllChildrenForRemotePush(new SuperUser());
+        progressNotification.setTargetProgress(sourceNode.getRemotePushSize(new SuperUser(),chunkSize));
+        for (        AbstractNode n : nodes) {
+          if (n instanceof File) {
+            sendFile(client,listener,(File)n,chunkSize,progressNotification);
+          }
+ else {
+            NodeDataContainer container=new NodeDataContainer(n);
+            client.sendTCP(container);
+            progressNotification.increaseProgress();
+          }
+        }
+        for (        AbstractNode n : nodes) {
+          List<StructrRelationship> rels=n.getOutgoingRelationships();
+          for (          StructrRelationship r : rels) {
+            if (nodes.contains(r.getStartNode()) && nodes.contains(r.getEndNode())) {
+              client.sendTCP(new RelationshipDataContainer(r));
+              progressNotification.increaseProgress();
+            }
+          }
+        }
+      }
+ else {
+        if (sourceNode instanceof File) {
+          sendFile(client,listener,(File)sourceNode,chunkSize,progressNotification);
+        }
+ else {
+          client.sendTCP(new NodeDataContainer(sourceNode));
+          progressNotification.increaseProgress();
+        }
+      }
+    }
+    client.sendTCP(CloudService.END_TRANSACTION);
+  }
+ catch (  IOException ex) {
+    progressNotification.setErrorMessage("Transmission failed");
+    logger.log(Level.SEVERE,"Error while sending nodes to remote instance",ex.getMessage());
+  }
+}

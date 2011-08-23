@@ -2,7 +2,14 @@
   renderer.setTag("form");
   AppActionContainer submit=findSubmit();
   if (submit != null) {
-    renderer.addAttribute("action",CurrentRequest.getAbsoluteNodePath(submit));
+    String actionUrl=null;
+    if (startNode != null) {
+      actionUrl=submit.getNodePath(startNode.getContextNode());
+    }
+ else {
+      actionUrl=CurrentRequest.getAbsoluteNodePath(submit);
+    }
+    renderer.addAttribute("action",actionUrl);
   }
   renderer.addAttribute("method","post");
 }

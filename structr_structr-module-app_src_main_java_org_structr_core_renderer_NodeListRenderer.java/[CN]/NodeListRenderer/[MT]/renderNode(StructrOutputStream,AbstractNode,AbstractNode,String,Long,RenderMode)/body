@@ -1,15 +1,15 @@
 {
-  if (currentNode.isVisible()) {
+  SecurityContext securityContext=CurrentRequest.getSecurityContext();
+  if (securityContext.isVisible(currentNode)) {
     if (currentNode.hasTemplate()) {
       Template template=currentNode.getTemplate();
       String html=template.getContent();
       if (StringUtils.isNotBlank(html)) {
         init(currentNode);
         List<AbstractNode> nodesToRender=new LinkedList<AbstractNode>();
-        for (        AbstractNode container : currentNode.getSortedDirectChildren(RelType.DATA)) {
-          nodesToRender.addAll(container.getDirectChildNodes());
+        for (        AbstractNode container : currentNode.getDirectChildren(RelType.DATA)) {
+          collectDataNodes(container,nodesToRender,0,255);
         }
-        Collections.sort(nodesToRender,new AbstractNodeComparator(AbstractNode.toGetter(sortKey),sortOrder));
         int toIndex=Math.min(pageNo * pageSize,nodesToRender.size());
         int fromIndex=Math.min(Math.max(pageNo - 1,0) * pageSize,toIndex);
         logger.log(Level.INFO,"Showing list elements from {0} to {1}",new Object[]{fromIndex,toIndex});

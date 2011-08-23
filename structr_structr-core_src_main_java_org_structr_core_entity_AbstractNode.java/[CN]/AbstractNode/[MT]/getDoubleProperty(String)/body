@@ -2,14 +2,19 @@
   Object propertyValue=getProperty(key);
   Double result=null;
   if (propertyValue == null) {
-    return 0.0d;
+    return null;
   }
   if (propertyValue instanceof Double) {
-    result=((Double)propertyValue).doubleValue();
+    Double doubleValue=(Double)propertyValue;
+    if (doubleValue.equals(Double.NaN)) {
+      setProperty(key,null);
+      return null;
+    }
+    result=doubleValue.doubleValue();
   }
  else   if (propertyValue instanceof String) {
     if ("".equals((String)propertyValue)) {
-      return 0.0d;
+      return null;
     }
     result=Double.parseDouble(((String)propertyValue));
   }

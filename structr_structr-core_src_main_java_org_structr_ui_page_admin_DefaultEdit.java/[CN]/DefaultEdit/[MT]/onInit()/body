@@ -16,6 +16,10 @@
   createdDate.setReadonly(true);
   nodePropertiesFields.add(createdDate);
   nodePropertiesFields.add(ownerSelect);
+  if (securityContext.isAllowed(node,Permission.AccessControl)) {
+    addControl(setCurrentOwnerRecursivelyLink);
+    nodePropertiesFields.add(setCurrentOwnerRecursivelyLink);
+  }
   DateField lastModifiedDate=new DateField(AbstractNode.LAST_MODIFIED_DATE_KEY);
   lastModifiedDate.setFormatPattern(dateFormat.toPattern());
   lastModifiedDate.setShowTime(true);

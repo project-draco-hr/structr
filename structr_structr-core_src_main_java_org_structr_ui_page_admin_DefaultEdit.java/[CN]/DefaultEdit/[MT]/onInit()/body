@@ -2,10 +2,10 @@
   super.onInit();
   SecurityContext securityContext=CurrentRequest.getSecurityContext();
   FieldSet nodePropertiesFields=new FieldSet("Node Properties");
-  nodePropertiesFields.setColumns(3);
+  nodePropertiesFields.setColumns(2);
   nodePropertiesFields.add(new TextField(AbstractNode.NAME_KEY,true));
-  nodePropertiesFields.add(typeSelect);
   nodePropertiesFields.add(new TextField(AbstractNode.TITLE_KEY,false));
+  nodePropertiesFields.add(typeSelect);
   nodePropertiesFields.add(new IntegerField(AbstractNode.POSITION_KEY));
   TextField createdBy=new TextField(AbstractNode.CREATED_BY_KEY);
   createdBy.setReadonly(true);
@@ -15,6 +15,7 @@
   createdDate.setShowTime(true);
   createdDate.setReadonly(true);
   nodePropertiesFields.add(createdDate);
+  nodePropertiesFields.add(ownerSelect);
   DateField lastModifiedDate=new DateField(AbstractNode.LAST_MODIFIED_DATE_KEY);
   lastModifiedDate.setFormatPattern(dateFormat.toPattern());
   lastModifiedDate.setShowTime(true);
@@ -49,8 +50,8 @@
   Checkbox forAuthenticatedUsersCheckbox=new Checkbox(AbstractNode.VISIBLE_TO_AUTHENTICATED_USERS_KEY,"Visible to authenticated users");
   visibilityFields.add(forAuthenticatedUsersCheckbox);
   editVisibilityForm.add(visibilityFields);
-  editVisibilityForm.add(new HiddenField(NODE_ID_KEY,nodeId != null ? nodeId : ""));
-  editVisibilityForm.add(new HiddenField(RENDER_MODE_KEY,renderMode != null ? renderMode : ""));
+  editVisibilityForm.add(new HiddenField(NODE_ID_KEY,(nodeId != null) ? nodeId : ""));
+  editVisibilityForm.add(new HiddenField(RENDER_MODE_KEY,(renderMode != null) ? renderMode : ""));
   editVisibilityForm.setActionURL(editVisibilityForm.getActionURL().concat("#visibility-tab"));
   if (securityContext.isAllowed(node,Permission.EditProperty)) {
     visibilityFields.add(new Submit("saveVisibility"," Save Visibility ",this,"onSaveVisibility"));
@@ -61,8 +62,8 @@
   addControl(editVisibilityForm);
   editVisibilityPanel=new Panel("editVisibilityPanel","/panel/edit-visibility-panel.htm");
   addControl(editVisibilityPanel);
-  editPropertiesForm.add(new HiddenField(NODE_ID_KEY,nodeId != null ? nodeId : ""));
-  editPropertiesForm.add(new HiddenField(RENDER_MODE_KEY,renderMode != null ? renderMode : ""));
+  editPropertiesForm.add(new HiddenField(NODE_ID_KEY,(nodeId != null) ? nodeId : ""));
+  editPropertiesForm.add(new HiddenField(RENDER_MODE_KEY,(renderMode != null) ? renderMode : ""));
   editPropertiesForm.setActionURL(editPropertiesForm.getActionURL().concat("#properties-tab"));
   if (securityContext.isAllowed(node,Permission.EditProperty)) {
     nodePropertiesFields.add(new Submit("saveProperties"," Save Properties ",this,"onSaveProperties"));
@@ -73,7 +74,7 @@
   Column nameColumn, typeColumn;
   PageLink viewRelLink=new PageLink("viewRel",DefaultEdit.class);
   LinkDecorator nameDec, iconDec;
-  if (node != null && (node.hasChildren() || node instanceof Folder)) {
+  if ((node != null) && (node.hasChildren() || (node instanceof Folder))) {
     Column actionColumnNodes=new Column("Actions");
     actionColumnNodes.setTextAlign("center");
     actionColumnNodes.setDecorator(new LinkDecorator(childNodesTable,new PageLink(),AbstractNode.NODE_ID_KEY){
@@ -328,8 +329,8 @@
     setPermissionFields.add(allowed);
     setPermissionFields.add(new Submit("setPermissions"," Set Permissions ",this,"onSetPermissions"));
     securityForm.add(setPermissionFields);
-    securityForm.add(new HiddenField(NODE_ID_KEY,nodeId != null ? nodeId : ""));
-    securityForm.add(new HiddenField(RENDER_MODE_KEY,renderMode != null ? renderMode : ""));
+    securityForm.add(new HiddenField(NODE_ID_KEY,(nodeId != null) ? nodeId : ""));
+    securityForm.add(new HiddenField(RENDER_MODE_KEY,(renderMode != null) ? renderMode : ""));
     securityForm.setActionURL(securityForm.getActionURL().concat("#security-tab"));
     addControl(securityForm);
     editSecurityPanel=new Panel("editSecurityPanel","/panel/edit-security-panel.htm");
@@ -372,13 +373,13 @@
 );
   cloudForm.add(pushFields);
   cloudForm.add(transmissionsTable);
-  cloudForm.add(new HiddenField(NODE_ID_KEY,nodeId != null ? nodeId : ""));
-  cloudForm.add(new HiddenField(RENDER_MODE_KEY,renderMode != null ? renderMode : ""));
+  cloudForm.add(new HiddenField(NODE_ID_KEY,(nodeId != null) ? nodeId : ""));
+  cloudForm.add(new HiddenField(RENDER_MODE_KEY,(renderMode != null) ? renderMode : ""));
   cloudForm.setActionURL(cloudForm.getActionURL().concat("#cloud-tab"));
   addControl(cloudForm);
   cloudPanel=new Panel("cloudPanel","/panel/cloud-panel.htm");
   addControl(cloudPanel);
-  String prompt=(user != null ? user.getName() : "anonymous") + "@structr" + (isSuperUser ? "# " : "$ ");
+  String prompt=((user != null) ? user.getName() : "anonymous") + "@structr" + (isSuperUser ? "# " : "$ ");
   consoleCommand=new TextField("command",prompt);
   consoleCommand.addStyleClass("commandInput");
   consoleForm.add(consoleCommand);

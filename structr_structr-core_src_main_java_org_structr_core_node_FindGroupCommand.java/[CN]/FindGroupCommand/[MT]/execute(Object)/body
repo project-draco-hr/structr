@@ -4,14 +4,14 @@
   if (graphDb != null) {
 switch (parameters.length) {
 case 0:
-      return (List<Group>)searchNode.execute(null,null,false,false,Search.andExactType(Group.class.getSimpleName()));
+      return (List<Group>)searchNode.execute(new SuperUser(),null,false,false,Search.andExactType(Group.class.getSimpleName()));
 case 1:
     if (parameters[0] instanceof String) {
       String groupName=(String)parameters[0];
       List<SearchAttribute> searchAttrs=new LinkedList<SearchAttribute>();
       searchAttrs.add(Search.andExactName(groupName));
       searchAttrs.add(Search.andExactType(Group.class.getSimpleName()));
-      List<AbstractNode> groupsFound=(List<AbstractNode>)searchNode.execute(null,null,false,false,searchAttrs);
+      List<AbstractNode> groupsFound=(List<AbstractNode>)searchNode.execute(new SuperUser(),null,false,false,searchAttrs);
       if (groupsFound != null && groupsFound.size() > 0) {
         return groupsFound.get(0);
       }

@@ -3,36 +3,37 @@
   index=(Index<Node>)arguments.get("index");
   if (graphDb != null) {
     long id=0;
-    Node node=null;
-    AbstractNode structrNode=null;
+    AbstractNode node=null;
     String key=null;
+    Command findNode=Services.command(FindNodeCommand.class);
 switch (parameters.length) {
 case 1:
       if (parameters[0] instanceof Long) {
         id=((Long)parameters[0]).longValue();
+        node=(AbstractNode)findNode.execute(new SuperUser(),id);
       }
  else       if (parameters[0] instanceof String) {
         id=Long.parseLong((String)parameters[0]);
+        node=(AbstractNode)findNode.execute(new SuperUser(),id);
       }
  else       if (parameters[0] instanceof AbstractNode) {
-        structrNode=(AbstractNode)parameters[0];
-        id=structrNode.getId();
+        node=(AbstractNode)parameters[0];
       }
-    node=graphDb.getNodeById(id);
-  indexNode(node);
-break;
+    indexNode(node);
+  break;
 case 2:
 if (parameters[0] instanceof Long) {
-id=((Long)parameters[0]).longValue();
+  id=((Long)parameters[0]).longValue();
+  node=(AbstractNode)findNode.execute(new SuperUser(),id);
 }
  else if (parameters[0] instanceof String) {
-id=Long.parseLong((String)parameters[0]);
+  id=Long.parseLong((String)parameters[0]);
+  node=(AbstractNode)findNode.execute(new SuperUser(),id);
 }
  else if (parameters[0] instanceof AbstractNode) {
-structrNode=(AbstractNode)parameters[0];
-id=structrNode.getId();
+  node=(AbstractNode)parameters[0];
+  id=node.getId();
 }
-node=graphDb.getNodeById(id);
 if (parameters[1] instanceof String) {
 key=(String)parameters[1];
 }

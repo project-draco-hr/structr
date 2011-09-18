@@ -4,9 +4,9 @@
   if ((input != null) && input.iterator().hasNext()) {
     for (    Node node : input) {
       AbstractNode n=createNode(node);
-      boolean readableByUser=(user instanceof SuperUser || securityContext.isAllowed(n,Permission.Read));
       boolean publicUserAndPublicNode=((user == null) && n.isPublic());
-      if ((readableByUser || publicUserAndPublicNode) && (includeDeleted || !n.isDeleted()) && (n.isPublic() || !publicOnly)) {
+      boolean readableByUser=(publicUserAndPublicNode || ((user != null) && (user instanceof SuperUser)) || securityContext.isAllowed(n,Permission.Read));
+      if (readableByUser && (includeDeleted || !n.isDeleted()) && (n.isPublic() || !publicOnly)) {
         nodes.add(n);
       }
     }

@@ -1,10 +1,13 @@
 {
   if (AbstractNode.NAME_KEY.equals(key) || AbstractNode.TITLE_KEY.equals(key)) {
     String name=(String)getStringProperty(key);
-    String normalizedName=Normalizer.normalize(name,Normalizer.Form.NFC);
-    return name.concat(" ").concat(normalizedName);
+    if (name != null) {
+      String normalizedName=Normalizer.normalize(name,Normalizer.Form.NFD);
+      normalizedName=normalizedName.replaceAll("[^\\p{ASCII}]","");
+      if ((normalizedName != null) && !(name.equals(normalizedName))) {
+        return name.concat(" ").concat(normalizedName);
+      }
+    }
   }
- else {
-    return getProperty(key);
-  }
+  return getProperty(key);
 }

@@ -6,7 +6,6 @@
     final String selectedGroupName=securityForm.getFieldValue(groupSelect.getName());
     final List<String> selectedValues=allowed.getSelectedValues();
     final boolean rec=recursive.isChecked();
-    node=getNodeByIdOrPath(nodeId);
     Command transaction=Services.command(TransactionCommand.class);
     transaction.execute(new StructrTransaction(){
       @Override public Object execute() throws Throwable {
@@ -14,7 +13,7 @@
         Command findGroup=Services.command(FindGroupCommand.class);
         User selectedUser=(User)findUser.execute(selectedUserName);
         Group selectedGroup=(Group)findGroup.execute(selectedGroupName);
-        if (selectedUser != null || selectedGroup != null) {
+        if ((selectedUser != null) || (selectedGroup != null)) {
           List<AbstractNode> nodes=new LinkedList<AbstractNode>();
           if (rec) {
             Command findNode=Services.command(FindNodeCommand.class);
@@ -36,7 +35,7 @@
               if (r == null) {
                 r=(StructrRelationship)createRel.execute(selectedUser,n,RelType.SECURITY);
               }
-              if (selectedValues != null && selectedValues.size() > 0) {
+              if ((selectedValues != null) && (selectedValues.size() > 0)) {
                 r.setAllowed(selectedValues);
               }
  else {
@@ -48,7 +47,7 @@
               if (r == null) {
                 r=(StructrRelationship)createRel.execute(selectedGroup,n,RelType.SECURITY);
               }
-              if (selectedValues != null && selectedValues.size() > 0) {
+              if ((selectedValues != null) && (selectedValues.size() > 0)) {
                 r.setAllowed(selectedValues);
               }
  else {

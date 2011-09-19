@@ -1,0 +1,34 @@
+{
+  Node dbNode=node.getNode();
+  long id=node.getId();
+  if (key == null) {
+    logger.log(Level.SEVERE,"Node {0} has null key",new Object[]{id});
+    return;
+  }
+  boolean emptyKey=StringUtils.isEmpty((String)key);
+  if (emptyKey) {
+    logger.log(Level.SEVERE,"Node {0} has empty, not-null key, removing property",new Object[]{id});
+    dbNode.removeProperty(key);
+    return;
+  }
+  if (!(node.getNode().hasProperty(key))) {
+    logger.log(Level.FINE,"Node {0} has no key {1}, ignoring",new Object[]{id,key});
+    return;
+  }
+  Object value=node.getPropertyForIndexing(key);
+  boolean emptyValue=((value instanceof String) && StringUtils.isEmpty((String)value));
+  if (value == null) {
+    logger.log(Level.SEVERE,"Node {0} has null value for key {1}, removing property",new Object[]{id,key});
+    dbNode.removeProperty(key);
+  }
+ else   if (emptyValue) {
+    logger.log(Level.SEVERE,"Node {0} has empty, non-null value for key {1}, removing property",new Object[]{id,key});
+    dbNode.removeProperty(key);
+  }
+ else {
+    index.remove(dbNode,key);
+    logger.log(Level.FINE,"Node {0}: Old value for key {1} removed from index",new Object[]{id,key});
+    index.add(dbNode,key,value);
+    logger.log(Level.FINE,"Node {0}: New value {2} added to index for key {1}",new Object[]{id,key,value});
+  }
+}

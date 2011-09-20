@@ -1,0 +1,23 @@
+{
+  CurrentRequest.setAccessMode(AccessMode.Frontend);
+  try {
+    Result<AbstractNode> result=getResults(request);
+    if (result != null) {
+      response.setContentType("application/json; charset=utf-8");
+      Writer writer=response.getWriter();
+      Type type=new TypeToken<Result<AbstractNode>>(){
+      }
+.getType();
+      gson.toJson(result,type,writer);
+      writer.flush();
+      writer.close();
+      response.setStatus(HttpServletResponse.SC_OK);
+    }
+ else {
+      response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+    }
+  }
+ catch (  PathException pex) {
+    response.setStatus(pex.getStatus());
+  }
+}

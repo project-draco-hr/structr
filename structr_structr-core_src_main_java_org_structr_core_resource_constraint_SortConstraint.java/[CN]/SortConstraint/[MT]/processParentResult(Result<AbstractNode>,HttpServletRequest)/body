@@ -1,0 +1,27 @@
+{
+  Comparator<AbstractNode> comparator=null;
+  if ("desc".equals(sortOrder)) {
+    comparator=new Comparator<AbstractNode>(){
+      @Override public int compare(      AbstractNode n1,      AbstractNode n2){
+        Comparable c1=(Comparable)n1.getProperty(sortKey);
+        Comparable c2=(Comparable)n2.getProperty(sortKey);
+        return (c2.compareTo(c1));
+      }
+    }
+;
+  }
+ else {
+    comparator=new Comparator<AbstractNode>(){
+      @Override public int compare(      AbstractNode n1,      AbstractNode n2){
+        Comparable c1=(Comparable)n1.getProperty(sortKey);
+        Comparable c2=(Comparable)n2.getProperty(sortKey);
+        return (c1.compareTo(c2));
+      }
+    }
+;
+  }
+  if (comparator != null) {
+    Collections.sort(result.getResults(),comparator);
+  }
+  return result;
+}

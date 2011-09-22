@@ -1,0 +1,52 @@
+{
+  JsonObject jsonObject=new JsonObject();
+  jsonObject.add("id",new JsonPrimitive(src.getId()));
+  JsonArray properties=new JsonArray();
+  for (  String key : src.getPropertyKeys()) {
+    Object value=src.getProperty(key);
+    if (value != null) {
+      String type=value.getClass().getSimpleName();
+      JsonObject property=new JsonObject();
+      property.add("key",new JsonPrimitive(key));
+      property.add("value",new JsonPrimitive(value.toString()));
+      property.add("type",new JsonPrimitive(type));
+      properties.add(property);
+    }
+  }
+  jsonObject.add("properties",properties);
+  Map<RelationshipType,Long> outRelStatistics=src.getRelationshipInfo(Direction.OUTGOING);
+  if (outRelStatistics != null) {
+    JsonArray outRels=new JsonArray();
+    for (    Entry<RelationshipType,Long> entry : outRelStatistics.entrySet()) {
+      RelationshipType type=entry.getKey();
+      Long count=entry.getValue();
+      JsonObject outRelEntry=new JsonObject();
+      outRelEntry.add("type",new JsonPrimitive(type.name()));
+      outRelEntry.add("count",new JsonPrimitive(count));
+      outRels.add(outRelEntry);
+    }
+    jsonObject.add("outgoingRelationships",outRels);
+  }
+  Map<RelationshipType,Long> inRelStatistics=src.getRelationshipInfo(Direction.INCOMING);
+  if (inRelStatistics != null) {
+    JsonArray inRels=new JsonArray();
+    for (    Entry<RelationshipType,Long> entry : inRelStatistics.entrySet()) {
+      RelationshipType type=entry.getKey();
+      Long count=entry.getValue();
+      JsonObject inRelEntry=new JsonObject();
+      inRelEntry.add("type",new JsonPrimitive(type.name()));
+      inRelEntry.add("count",new JsonPrimitive(count));
+      inRels.add(inRelEntry);
+    }
+    jsonObject.add("incomingRelationships",inRels);
+  }
+  Long startNodeId=src.getStartNodeId();
+  if (startNodeId != null) {
+    jsonObject.add("startNodeId",new JsonPrimitive(startNodeId));
+  }
+  Long endNodeId=src.getEndNodeId();
+  if (endNodeId != null) {
+    jsonObject.add("endNodeId",new JsonPrimitive(endNodeId));
+  }
+  return jsonObject;
+}

@@ -2,7 +2,7 @@
   CurrentRequest.setAccessMode(AccessMode.Frontend);
   try {
     double queryTimeStart=System.nanoTime();
-    Result<AbstractNode> result=getResults(request);
+    Result result=getResults(request);
     double queryTimeEnd=System.nanoTime();
     if (result != null) {
       DecimalFormat decimalFormat=new DecimalFormat("0.000000000",DecimalFormatSymbols.getInstance(Locale.ENGLISH));
@@ -10,10 +10,7 @@
       response.setContentType("application/json; charset=utf-8");
       Writer writer=response.getWriter();
       double serializationTimeStart=System.nanoTime();
-      Type type=new TypeToken<Result<AbstractNode>>(){
-      }
-.getType();
-      gson.toJson(result,type,writer);
+      gson.toJson(result,writer);
       double serializationTimeEnd=System.nanoTime();
       writer.flush();
       writer.close();

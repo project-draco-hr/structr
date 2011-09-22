@@ -1,0 +1,21 @@
+{
+  if (result != null) {
+    try {
+      List<GraphObject> list=result.getResults();
+      if (list != null && list.size() == 1) {
+        GraphObject obj=list.get(0);
+        List relationships=obj.getRelationships(null,direction);
+        if (relationships != null) {
+          return new Result(relationships);
+        }
+      }
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"Exception while fetching relationships",t);
+    }
+  }
+ else {
+    logger.log(Level.INFO,"No results from parent..");
+  }
+  throw new IllegalPathException();
+}

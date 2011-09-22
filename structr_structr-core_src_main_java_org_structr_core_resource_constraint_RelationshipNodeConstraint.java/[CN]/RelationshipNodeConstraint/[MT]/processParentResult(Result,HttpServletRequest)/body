@@ -1,0 +1,26 @@
+{
+  if (result != null) {
+    try {
+      List<GraphObject> list=result.getResults();
+      if (list != null && list.size() == 1) {
+        GraphObject obj=list.get(0);
+        if (obj instanceof StructrRelationship) {
+          StructrRelationship rel=(StructrRelationship)obj;
+          if (startNode) {
+            return new Result(rel.getStartNode());
+          }
+ else {
+            return new Result(rel.getEndNode());
+          }
+        }
+      }
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"Exception while fetching relationships",t);
+    }
+  }
+ else {
+    logger.log(Level.INFO,"No results from parent..");
+  }
+  throw new IllegalPathException();
+}

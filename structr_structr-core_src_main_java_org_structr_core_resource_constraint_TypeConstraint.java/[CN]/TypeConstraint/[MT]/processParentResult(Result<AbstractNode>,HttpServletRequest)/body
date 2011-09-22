@@ -1,3 +1,15 @@
 {
-  return null;
+  List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
+  User user=new SuperUser();
+  AbstractNode topNode=null;
+  boolean includeDeleted=false;
+  boolean publicOnly=false;
+  if (type != null) {
+    searchAttributes.add(new TextualSearchAttribute("type",type,SearchOperator.OR));
+    List<AbstractNode> results=(List<AbstractNode>)Services.command(SearchNodeCommand.class).execute(user,topNode,includeDeleted,publicOnly,searchAttributes);
+    if (!results.isEmpty()) {
+      return new Result(results);
+    }
+  }
+  throw new NoResultsException();
 }

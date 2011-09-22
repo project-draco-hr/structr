@@ -1,17 +1,24 @@
 {
   CurrentRequest.setAccessMode(AccessMode.Frontend);
   try {
+    double queryTimeStart=System.nanoTime();
     Result<AbstractNode> result=getResults(request);
+    double queryTimeEnd=System.nanoTime();
     if (result != null) {
+      DecimalFormat decimalFormat=new DecimalFormat("0.000000000",DecimalFormatSymbols.getInstance(Locale.ENGLISH));
+      result.setQueryTime(decimalFormat.format((queryTimeEnd - queryTimeStart) / 1000000000.0));
       response.setContentType("application/json; charset=utf-8");
       Writer writer=response.getWriter();
+      double serializationTimeStart=System.nanoTime();
       Type type=new TypeToken<Result<AbstractNode>>(){
       }
 .getType();
       gson.toJson(result,type,writer);
+      double serializationTimeEnd=System.nanoTime();
       writer.flush();
       writer.close();
       response.setStatus(HttpServletResponse.SC_OK);
+      logger.log(Level.INFO,"GSON serialization took {0} seconds",decimalFormat.format((serializationTimeEnd - serializationTimeStart) / 1000000000.0));
     }
  else {
       response.setStatus(HttpServletResponse.SC_NO_CONTENT);

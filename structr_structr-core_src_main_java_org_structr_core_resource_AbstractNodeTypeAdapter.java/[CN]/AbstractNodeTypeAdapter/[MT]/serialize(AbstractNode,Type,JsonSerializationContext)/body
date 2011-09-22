@@ -1,10 +1,36 @@
 {
   JsonObject jsonObject=new JsonObject();
+  jsonObject.add("id",new JsonPrimitive(src.getId()));
+  JsonArray properties=new JsonArray();
   for (  String key : src.getPropertyKeys()) {
     Object value=src.getProperty(key);
     if (value != null) {
-      jsonObject.add(key,new JsonPrimitive(value.toString()));
+      JsonObject property=new JsonObject();
+      String type="unknown";
+      property.add("key",new JsonPrimitive(key));
+      property.add("value",new JsonPrimitive(value.toString()));
+      property.add("type",new JsonPrimitive(type));
+      properties.add(property);
     }
   }
+  jsonObject.add("properties",properties);
+  JsonArray outRels=new JsonArray();
+  for (  StructrRelationship outRel : src.getOutgoingRelationships()) {
+    JsonObject rel=new JsonObject();
+    rel.add("id",new JsonPrimitive(outRel.getId()));
+    rel.add("type",new JsonPrimitive(outRel.getRelType().name()));
+    rel.add("endNodeId",new JsonPrimitive(outRel.getEndNode().getId()));
+    outRels.add(rel);
+  }
+  jsonObject.add("outgoingRelationships",outRels);
+  JsonArray inRels=new JsonArray();
+  for (  StructrRelationship inRel : src.getIncomingRelationships()) {
+    JsonObject rel=new JsonObject();
+    rel.add("id",new JsonPrimitive(inRel.getId()));
+    rel.add("type",new JsonPrimitive(inRel.getRelType().name()));
+    rel.add("startNodeId",new JsonPrimitive(inRel.getStartNode().getId()));
+    inRels.add(rel);
+  }
+  jsonObject.add("incomingRelationships",inRels);
   return jsonObject;
 }

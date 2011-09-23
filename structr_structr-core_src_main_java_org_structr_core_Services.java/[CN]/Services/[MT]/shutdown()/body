@@ -5,7 +5,9 @@
     try {
       if (service instanceof RunnableService) {
         RunnableService runnableService=(RunnableService)service;
-        runnableService.stopService();
+        if (runnableService.isRunning()) {
+          runnableService.stopService();
+        }
       }
       service.shutdown();
     }

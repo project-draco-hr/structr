@@ -5,6 +5,7 @@
     return;
   }
   configFilePath=getConfigValue(context,Services.CONFIG_FILE_PATH,"/opt/structr/structr.conf");
+  configuredServices=getConfigValue(context,Services.CONFIGURED_SERVICES,"NodeService AgentService CloudService CacheService LogService NotificationService");
   appTitle=getConfigValue(context,Services.APPLICATION_TITLE,"structr");
   tmpPath=getConfigValue(context,Services.TMP_PATH,"/tmp");
   basePath=getConfigValue(context,Services.BASE_PATH,"/opt/structr");
@@ -21,7 +22,7 @@
   logger.log(Level.INFO,"Starting services");
   Services.command(InitializeModuleServiceCommand.class).execute();
   for (  Class serviceClass : registeredServiceClasses) {
-    if (Service.class.isAssignableFrom(serviceClass)) {
+    if (Service.class.isAssignableFrom(serviceClass) && isConfigured(serviceClass)) {
       try {
         createService(serviceClass);
       }

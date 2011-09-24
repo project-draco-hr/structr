@@ -1,0 +1,29 @@
+{
+  ResourceConstraint currentConstraint=rootConstraint;
+  String[] pathParts=path.split("[/]+");
+  for (int i=0; i < pathParts.length; i++) {
+    String part=pathParts[i].trim();
+    if (part.length() > 0) {
+      for (      Entry<Pattern,Class> entry : constraints.entrySet()) {
+        Pattern pattern=entry.getKey();
+        Matcher matcher=pattern.matcher(pathParts[i]);
+        if (matcher.matches()) {
+          try {
+            Class type=entry.getValue();
+            ResourceConstraint constraint=(ResourceConstraint)type.newInstance();
+            if (constraint.acceptUriPart(part)) {
+              logger.log(Level.FINEST,"{0} matched, adding constraint of type {1} for part {2}",new Object[]{matcher.pattern(),type.getName(),part});
+              currentConstraint.setChild(constraint);
+              currentConstraint=constraint;
+              break;
+            }
+          }
+ catch (          Throwable t) {
+            logger.log(Level.WARNING,"Error instantiating constraint class",t);
+          }
+        }
+      }
+    }
+  }
+  return currentConstraint;
+}

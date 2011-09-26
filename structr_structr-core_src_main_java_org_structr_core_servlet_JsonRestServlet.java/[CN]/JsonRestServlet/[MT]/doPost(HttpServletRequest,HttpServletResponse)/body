@@ -1,0 +1,21 @@
+{
+  if (request.getPathInfo().endsWith("/node")) {
+    AbstractNode node=(AbstractNode)Services.command(TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws Throwable {
+        Command createNodeCommand=Services.command(CreateNodeCommand.class);
+        AbstractNode newNode=null;
+        List<NodeAttributeWrapper> wrappers=parseRequestBody(request);
+        for (        NodeAttributeWrapper wrapper : wrappers) {
+          newNode=(AbstractNode)createNodeCommand.execute(new SuperUser(),wrapper.getAttributes());
+        }
+        return newNode;
+      }
+    }
+);
+    response.setHeader("Location",request.getContextPath() + "/" + node.getId());
+    response.setStatus(HttpServletResponse.SC_CREATED);
+  }
+ else   if (request.getPathInfo().endsWith("/rel")) {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+}

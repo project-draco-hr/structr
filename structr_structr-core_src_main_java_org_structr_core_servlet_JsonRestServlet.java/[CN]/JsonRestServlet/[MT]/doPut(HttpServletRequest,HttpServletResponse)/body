@@ -1,0 +1,37 @@
+{
+  CurrentRequest.setAccessMode(AccessMode.Frontend);
+  try {
+    Result result=getResults(request);
+    if (result != null) {
+      final List<NodeAttributeWrapper> wrappers=parseRequestBody(request);
+      final List<GraphObject> results=result.getResults();
+      if (results != null) {
+        Boolean success=(Boolean)Services.command(TransactionCommand.class).execute(new StructrTransaction(){
+          @Override public Object execute() throws Throwable {
+            boolean success=true;
+            for (            GraphObject obj : results) {
+              for (              NodeAttributeWrapper wrapper : wrappers) {
+                for (                NodeAttribute attr : wrapper.getAttributes()) {
+                  obj.setProperty(attr.getKey(),attr.getValue());
+                }
+              }
+            }
+            return success;
+          }
+        }
+);
+        if (success.booleanValue()) {
+          response.setStatus(HttpServletResponse.SC_OK);
+          return;
+        }
+      }
+    }
+    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+  }
+ catch (  PathException pex) {
+    response.setStatus(pex.getStatus());
+  }
+catch (  Throwable t) {
+    logger.log(Level.WARNING,"Exception",t);
+  }
+}

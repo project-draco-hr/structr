@@ -1,0 +1,23 @@
+{
+  List<NodeAttributeWrapper> wrappers=new LinkedList<NodeAttributeWrapper>();
+  Type listType=new TypeToken<List<NodeAttributeWrapper>>(){
+  }
+.getType();
+  BufferedReader reader=new BufferedReader(request.getReader());
+  try {
+    if (reader.markSupported()) {
+      reader.mark(request.getContentLength());
+    }
+    wrappers.addAll((List<NodeAttributeWrapper>)gson.fromJson(reader,listType));
+  }
+ catch (  Throwable t) {
+    if (reader.markSupported()) {
+      reader.reset();
+    }
+    NodeAttributeWrapper wrapper=gson.fromJson(reader,NodeAttributeWrapper.class);
+    if (wrapper != null) {
+      wrappers.add(wrapper);
+    }
+  }
+  return wrappers;
+}

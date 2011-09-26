@@ -1,0 +1,32 @@
+{
+  CurrentRequest.setAccessMode(AccessMode.Frontend);
+  try {
+    Result result=getResults(request);
+    if (result != null) {
+      final List<GraphObject> results=result.getResults();
+      if (results != null) {
+        Boolean success=(Boolean)Services.command(TransactionCommand.class).execute(new StructrTransaction(){
+          @Override public Object execute() throws Throwable {
+            boolean success=true;
+            for (            GraphObject obj : results) {
+              success&=obj.delete();
+            }
+            return success;
+          }
+        }
+);
+        if (success.booleanValue()) {
+          response.setStatus(HttpServletResponse.SC_OK);
+          return;
+        }
+      }
+    }
+    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+  }
+ catch (  PathException pex) {
+    response.setStatus(pex.getStatus());
+  }
+catch (  Throwable t) {
+    logger.log(Level.WARNING,"Exception",t);
+  }
+}

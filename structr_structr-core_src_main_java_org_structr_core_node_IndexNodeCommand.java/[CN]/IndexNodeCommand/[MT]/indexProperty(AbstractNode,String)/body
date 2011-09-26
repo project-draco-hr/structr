@@ -15,7 +15,8 @@
     logger.log(Level.FINE,"Node {0} has no key {1}, ignoring",new Object[]{id,key});
     return;
   }
-  Object value=node.getPropertyForIndexing(key);
+  Object value=node.getProperty(key);
+  Object valueForIndexing=node.getPropertyForIndexing(key);
   boolean emptyValue=((value instanceof String) && StringUtils.isEmpty((String)value));
   if (value == null) {
     logger.log(Level.SEVERE,"Node {0} has null value for key {1}, removing property",new Object[]{id,key});
@@ -28,7 +29,7 @@
  else {
     index.remove(dbNode,key);
     logger.log(Level.FINE,"Node {0}: Old value for key {1} removed from index",new Object[]{id,key});
-    index.add(dbNode,key,value);
+    index.add(dbNode,key,valueForIndexing);
     logger.log(Level.FINE,"Node {0}: New value {2} added to index for key {1}",new Object[]{id,key,value});
   }
 }

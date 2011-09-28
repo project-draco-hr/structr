@@ -1,21 +1,37 @@
 {
-  if (request.getPathInfo().endsWith("/node")) {
-    AbstractNode node=(AbstractNode)Services.command(TransactionCommand.class).execute(new StructrTransaction(){
-      @Override public Object execute() throws Throwable {
-        Command createNodeCommand=Services.command(CreateNodeCommand.class);
-        AbstractNode newNode=null;
-        List<NodeAttributeWrapper> wrappers=parseRequestBody(request);
-        for (        NodeAttributeWrapper wrapper : wrappers) {
-          newNode=(AbstractNode)createNodeCommand.execute(new SuperUser(),wrapper.getAttributes());
+  try {
+    if (request.getPathInfo().endsWith("/node")) {
+      final PropertySet propertySet=gson.fromJson(request.getReader(),PropertySet.class);
+      AbstractNode newNode=(AbstractNode)Services.command(TransactionCommand.class).execute(new StructrTransaction(){
+        @Override public Object execute() throws Throwable {
+          Command createNodeCommand=Services.command(CreateNodeCommand.class);
+          return (AbstractNode)createNodeCommand.execute(new SuperUser(),propertySet.getAttributes());
         }
-        return newNode;
       }
-    }
 );
-    response.setHeader("Location",request.getContextPath() + "/" + node.getId());
-    response.setStatus(HttpServletResponse.SC_CREATED);
+      StringBuilder uriBuilder=new StringBuilder(40);
+      uriBuilder.append("/api/");
+      uriBuilder.append(newNode.getId());
+      response.setHeader("Location",uriBuilder.toString());
+      response.setStatus(HttpServletResponse.SC_CREATED);
+    }
+ else     if (request.getPathInfo().endsWith("/rel")) {
+      throw new IllegalPathException();
+    }
+ else {
+      throw new IllegalPathException();
+    }
   }
- else   if (request.getPathInfo().endsWith("/rel")) {
-    throw new UnsupportedOperationException("Not supported yet.");
+ catch (  PathException pathException) {
+    response.setStatus(pathException.getStatus());
+  }
+catch (  JsonSyntaxException jsex) {
+    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+  }
+catch (  JsonParseException jpex) {
+    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+  }
+catch (  Throwable t) {
+    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
   }
 }

@@ -1,24 +1,21 @@
 {
-  this.graphObjectAdapter=new GraphObjectGSONAdapter();
-  this.nodeAttributeAdapter=new PropertySetGSONAdapter();
+  String propertyFormatParameter=this.getInitParameter(SERVLET_PARAMETER_PROPERTY_FORMAT);
+  PropertyFormat propertyFormat=PropertyFormat.NestedKeyValueType;
+  if (propertyFormatParameter != null) {
+    try {
+      propertyFormat=PropertyFormat.valueOf(propertyFormatParameter);
+      logger.log(Level.INFO,"Setting property format to {0}",propertyFormatParameter);
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"Cannot use property format {0}, unknown format.",propertyFormatParameter);
+    }
+  }
   this.constraints=new LinkedHashMap<Pattern,Class>();
-  this.gson=new GsonBuilder().setPrettyPrinting().registerTypeAdapter(AbstractNode.class,new AbstractNodeGSONAdapter()).registerTypeAdapter(PropertySet.class,nodeAttributeAdapter).registerTypeAdapter(GraphObject.class,graphObjectAdapter).create();
+  this.gson=new GsonBuilder().setPrettyPrinting().registerTypeAdapter(PropertySet.class,new PropertySetGSONAdapter(propertyFormat)).registerTypeAdapter(GraphObject.class,new GraphObjectGSONAdapter(propertyFormat)).create();
   constraints.put(Pattern.compile("[0-9]+"),IdConstraint.class);
   constraints.put(Pattern.compile("out"),RelationshipConstraint.class);
   constraints.put(Pattern.compile("in"),RelationshipConstraint.class);
   constraints.put(Pattern.compile("start"),RelationshipNodeConstraint.class);
   constraints.put(Pattern.compile("end"),RelationshipNodeConstraint.class);
   constraints.put(Pattern.compile("[a-z_]+"),TypeConstraint.class);
-  String propertyFormat=this.getInitParameter(SERVLET_PARAMETER_PROPERTY_FORMAT);
-  if (propertyFormat != null) {
-    try {
-      PropertyFormat format=PropertyFormat.valueOf(propertyFormat);
-      graphObjectAdapter.setDefaultPropertyFormat(format);
-      logger.log(Level.INFO,"Setting property format to {0}",propertyFormat);
-    }
- catch (    Throwable t) {
-      graphObjectAdapter.setDefaultPropertyFormat(PropertyFormat.NestedKeyValue);
-      logger.log(Level.WARNING,"Cannot use property format {0}, unknown format.",propertyFormat);
-    }
-  }
 }

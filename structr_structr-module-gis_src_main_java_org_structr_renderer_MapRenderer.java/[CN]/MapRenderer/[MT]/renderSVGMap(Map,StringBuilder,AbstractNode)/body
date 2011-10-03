@@ -117,32 +117,21 @@
     if ((geoNode != null) && "Country".equals(geoNode.getType()) && displayCities) {
       List<AbstractNode> subNodes=geoNode.getLinkedNodes();
       List<GeoObject> geoObjects=new LinkedList<GeoObject>();
-      List<GeoObject> cities=new LinkedList<GeoObject>();
-      List<GeoObject> hotels=new LinkedList<GeoObject>();
-      List<GeoObject> islands=new LinkedList<GeoObject>();
       for (      AbstractNode node : subNodes) {
-        if ("City".equals(node.getType())) {
-          cities.add((GeoObject)node);
+        if (node instanceof GeoObject) {
+          GeoObject geo=(GeoObject)node;
+          String geoContainerClass=geo.getGeoContainerClass();
+          if ((geoContainerClass != null) && geoNode.getType().equals(geoContainerClass)) {
+            geoObjects.add((GeoObject)node);
+          }
         }
-        if ("Hotel".equals(node.getType())) {
-          hotels.add((GeoObject)node);
-        }
-        if ("Island".equals(node.getType())) {
-          islands.add((GeoObject)node);
-        }
-      }
-      if (cities.isEmpty()) {
-        geoObjects.addAll(hotels);
-      }
- else {
-        geoObjects.addAll(cities);
       }
       SimpleFeatureCollection collection=MapHelper.createPointsFromGeoObjects(geoObjects);
-      Symbolizer cityTextSym=MapHelper.createTextSymbolizer(currentNode.getPointFontName(),currentNode.getPointFontSize(),currentNode.getPointFontColor(),currentNode.getPointFontOpacity(),currentNode.getLabelAnchorX(),currentNode.getLabelAnchorY(),currentNode.getLabelDisplacementX(),currentNode.getLabelDisplacementY());
-      Symbolizer cityPointSym=MapHelper.createPointSymbolizer(currentNode.getPointShape(),currentNode.getPointDiameter(),currentNode.getPointStrokeColor(),currentNode.getPointStrokeLineWidth(),currentNode.getPointFillColor(),currentNode.getPointFillOpacity());
+      Symbolizer subnodeTextSym=MapHelper.createTextSymbolizer(currentNode.getPointFontName(),currentNode.getPointFontSize(),currentNode.getPointFontColor(),currentNode.getPointFontOpacity(),currentNode.getLabelAnchorX(),currentNode.getLabelAnchorY(),currentNode.getLabelDisplacementX(),currentNode.getLabelDisplacementY());
+      Symbolizer subnodePointSym=MapHelper.createPointSymbolizer(currentNode.getPointShape(),currentNode.getPointDiameter(),currentNode.getPointStrokeColor(),currentNode.getPointStrokeLineWidth(),currentNode.getPointFillColor(),currentNode.getPointFillOpacity());
       Rule rule2=MapHelper.styleFactory.createRule();
-      rule2.symbolizers().add(cityTextSym);
-      rule2.symbolizers().add(cityPointSym);
+      rule2.symbolizers().add(subnodeTextSym);
+      rule2.symbolizers().add(subnodePointSym);
       FeatureTypeStyle fts2=MapHelper.styleFactory.createFeatureTypeStyle(new Rule[]{rule2});
       Style style2=MapHelper.styleFactory.createStyle();
       style2.featureTypeStyles().add(fts2);

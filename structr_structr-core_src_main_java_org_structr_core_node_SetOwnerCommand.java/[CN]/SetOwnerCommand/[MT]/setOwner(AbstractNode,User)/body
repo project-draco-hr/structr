@@ -1,0 +1,11 @@
+{
+  Command delRel=Services.command(DeleteRelationshipCommand.class);
+  for (  StructrRelationship s : node.getRelationships(RelType.OWNS,Direction.INCOMING)) {
+    long id=s.getId();
+    delRel.execute(s);
+    logger.log(Level.FINEST,"Old owner relationship removed: {0}",id);
+  }
+  Command createRel=Services.command(CreateRelationshipCommand.class);
+  createRel.execute(user,node,RelType.OWNS);
+  logger.log(Level.FINEST,"Relationship to owner {0} added",user.getName());
+}

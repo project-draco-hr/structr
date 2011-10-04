@@ -1,0 +1,30 @@
+{
+  Iterable<Node> nodes=Traversal.description().breadthFirst().relationships(relType,direction).evaluator(new Evaluator(){
+    @Override public Evaluation evaluate(    Path path){
+      int len=path.length();
+      if (len <= 1) {
+        if (len == 0) {
+          return Evaluation.EXCLUDE_AND_CONTINUE;
+        }
+ else {
+          Node currentNode=path.endNode();
+          boolean include=true;
+          for (          Filter filter : filters) {
+            include&=filter.includeInResultSet(currentNode);
+          }
+          if (include) {
+            return Evaluation.INCLUDE_AND_CONTINUE;
+          }
+        }
+      }
+      return Evaluation.EXCLUDE_AND_PRUNE;
+    }
+  }
+).traverse(node).nodes();
+  Command nodeFactory=Services.command(NodeFactoryCommand.class);
+  List<AbstractNode> nodeList=new LinkedList<AbstractNode>();
+  for (  Node n : nodes) {
+    nodeList.add((AbstractNode)nodeFactory.execute(n));
+  }
+  return nodeList;
+}

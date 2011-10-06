@@ -9,8 +9,17 @@
         }
       }
 );
-      StringBuilder uriBuilder=new StringBuilder(40);
-      uriBuilder.append("/api/");
+      StringBuilder uriBuilder=new StringBuilder(100);
+      uriBuilder.append(request.getScheme());
+      uriBuilder.append("://");
+      uriBuilder.append(request.getServerName());
+      uriBuilder.append(":");
+      uriBuilder.append(request.getServerPort());
+      uriBuilder.append(request.getContextPath());
+      uriBuilder.append(request.getServletPath());
+      uriBuilder.append("/");
+      uriBuilder.append(newNode.getType().toLowerCase());
+      uriBuilder.append("s/");
       uriBuilder.append(newNode.getId());
       response.setHeader("Location",uriBuilder.toString());
       response.setStatus(HttpServletResponse.SC_CREATED);

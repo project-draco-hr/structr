@@ -10,12 +10,13 @@
       logger.log(Level.WARNING,"Cannot use property format {0}, unknown format.",propertyFormatParameter);
     }
   }
-  this.constraints=new LinkedHashMap<Pattern,Class>();
-  this.gson=new GsonBuilder().setPrettyPrinting().registerTypeAdapter(PropertySet.class,new PropertySetGSONAdapter(propertyFormat)).registerTypeAdapter(GraphObject.class,new GraphObjectGSONAdapter(propertyFormat)).create();
-  constraints.put(Pattern.compile("[0-9]+"),IdConstraint.class);
-  constraints.put(Pattern.compile("out"),RelationshipConstraint.class);
-  constraints.put(Pattern.compile("in"),RelationshipConstraint.class);
-  constraints.put(Pattern.compile("start"),RelationshipNodeConstraint.class);
-  constraints.put(Pattern.compile("end"),RelationshipNodeConstraint.class);
-  constraints.put(Pattern.compile("[a-z_]+"),TypeConstraint.class);
+  this.constraintMap=new LinkedHashMap<Pattern,Class>();
+  this.gson=new GsonBuilder().setPrettyPrinting().registerTypeAdapter(PropertySet.class,new PropertySetGSONAdapter(propertyFormat)).registerTypeAdapter(Result.class,new ResultGSONAdapter(propertyFormat)).create();
+  constraintMap.put(Pattern.compile("[0-9]+"),IdConstraint.class);
+  constraintMap.put(Pattern.compile("search"),SearchConstraint.class);
+  constraintMap.put(Pattern.compile("out"),RelationshipConstraint.class);
+  constraintMap.put(Pattern.compile("in"),RelationshipConstraint.class);
+  constraintMap.put(Pattern.compile("start"),RelationshipNodeConstraint.class);
+  constraintMap.put(Pattern.compile("end"),RelationshipNodeConstraint.class);
+  constraintMap.put(Pattern.compile("[a-z_]+"),TypeConstraint.class);
 }

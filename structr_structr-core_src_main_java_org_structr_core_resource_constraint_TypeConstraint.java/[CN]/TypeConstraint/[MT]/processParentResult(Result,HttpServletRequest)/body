@@ -6,6 +6,10 @@
     boolean includeDeleted=false;
     boolean publicOnly=false;
     if (type != null) {
+      if (type.endsWith("s")) {
+        logger.log(Level.FINEST,"Removing trailing plural 's' from type {0}",type);
+        type=type.substring(0,type.length() - 1);
+      }
       searchAttributes.add(new TextualSearchAttribute("type",type,SearchOperator.OR));
       List results=(List)Services.command(SearchNodeCommand.class).execute(user,topNode,includeDeleted,publicOnly,searchAttributes);
       if (!results.isEmpty()) {
@@ -14,6 +18,7 @@
     }
   }
  else {
+    logger.log(Level.WARNING,"Received results from predecessor, this query is probably not optimized!");
     for (Iterator<GraphObject> it=result.getResults().iterator(); it.hasNext(); ) {
       if (!type.equalsIgnoreCase(it.next().getType())) {
         it.remove();

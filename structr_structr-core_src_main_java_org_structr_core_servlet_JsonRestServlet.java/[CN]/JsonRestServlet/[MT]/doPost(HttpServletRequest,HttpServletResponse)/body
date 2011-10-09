@@ -25,7 +25,65 @@
       response.setStatus(HttpServletResponse.SC_CREATED);
     }
  else     if (request.getPathInfo().endsWith("/rel")) {
-      throw new IllegalPathException();
+      final PropertySet propertySet=gson.fromJson(request.getReader(),PropertySet.class);
+      List<NodeAttribute> attributes=propertySet.getAttributes();
+      long startNodeId=-1;
+      long endNodeId=-1;
+      String type=null;
+      for (Iterator<NodeAttribute> it=attributes.iterator(); it.hasNext(); ) {
+        NodeAttribute attr=it.next();
+        if ("start".equals(attr.getKey())) {
+          try {
+            startNodeId=Long.parseLong(attr.getValue().toString());
+          }
+ catch (          Throwable t) {
+          }
+          it.remove();
+        }
+ else         if ("end".equals(attr.getKey())) {
+          try {
+            endNodeId=Long.parseLong(attr.getValue().toString());
+          }
+ catch (          Throwable t) {
+          }
+          it.remove();
+        }
+ else         if ("type".equals(attr.getKey())) {
+          type=attr.getValue().toString();
+          it.remove();
+        }
+      }
+      if (startNodeId != -1 && endNodeId != -1 && type != null) {
+        Command findNodeCommand=Services.command(FindNodeCommand.class);
+        AbstractNode startNode=(AbstractNode)findNodeCommand.execute(new SuperUser(),startNodeId);
+        AbstractNode endNode=(AbstractNode)findNodeCommand.execute(new SuperUser(),endNodeId);
+        if (startNode != null && endNode != null) {
+          StructrRelationship nodeRel=(StructrRelationship)Services.command(CreateRelationshipCommand.class).execute(startNode,endNode,type);
+          for (          NodeAttribute attr : attributes) {
+            nodeRel.setProperty(attr.getKey(),attr.getValue());
+          }
+          StringBuilder uriBuilder=new StringBuilder(100);
+          uriBuilder.append(request.getScheme());
+          uriBuilder.append("://");
+          uriBuilder.append(request.getServerName());
+          uriBuilder.append(":");
+          uriBuilder.append(request.getServerPort());
+          uriBuilder.append(request.getContextPath());
+          uriBuilder.append(request.getServletPath());
+          uriBuilder.append("/");
+          uriBuilder.append(nodeRel.getType().toLowerCase());
+          uriBuilder.append("s/");
+          uriBuilder.append(nodeRel.getId());
+          response.setHeader("Location",uriBuilder.toString());
+          response.setStatus(HttpServletResponse.SC_CREATED);
+        }
+ else {
+          throw new NotFoundException();
+        }
+      }
+ else {
+        throw new IllegalPathException();
+      }
     }
  else {
       throw new IllegalPathException();
@@ -42,5 +100,6 @@ catch (  JsonParseException jpex) {
   }
 catch (  Throwable t) {
     response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    logger.log(Level.WARNING,"Exception",t);
   }
 }

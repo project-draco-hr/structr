@@ -1,21 +1,17 @@
 {
-  RootResourceConstraint rootConstraint=new RootResourceConstraint();
-  ResourceConstraint currentConstraint=rootConstraint;
-  PagingConstraint pagingConstraint=null;
-  String sortOrder=null;
-  String sortKey=null;
   String path=request.getPathInfo();
   if (path != null) {
-    currentConstraint=parsePath(path,rootConstraint);
+    List<ResourceConstraint> constraintChain=parsePath(path);
+    PagingConstraint pagingConstraint=null;
+    String sortOrder=null;
+    String sortKey=null;
     sortKey=request.getParameter(REQUEST_PARAMETER_SORT_KEY);
     if (sortKey != null) {
       sortOrder=request.getParameter(REQUEST_PARAMETER_SORT_ORDER);
       if (sortOrder == null) {
         sortOrder=DEFAULT_VALUE_SORT_ORDER;
       }
-      SortConstraint sortConstraint=new SortConstraint(sortKey,sortOrder);
-      currentConstraint.setChild(sortConstraint);
-      currentConstraint=sortConstraint;
+      constraintChain.add(new SortConstraint(sortKey,sortOrder));
     }
     String pageSizeParameter=request.getParameter(REQUEST_PARAMETER_PAGE_SIZE);
     if (pageSizeParameter != null) {
@@ -26,29 +22,30 @@
       if (pageSize <= 0) {
         throw new IllegalPathException();
       }
-      currentConstraint.setChild(pagingConstraint);
-      currentConstraint=pagingConstraint;
+      constraintChain.add(pagingConstraint);
     }
-  }
-  Result results=rootConstraint.getNestedResults(request);
-  if (results != null) {
-    if (pagingConstraint != null) {
-      results.setPage(pagingConstraint.getPage());
-      results.setPageSize(pagingConstraint.getPageSize());
-      results.setPageCount(pagingConstraint.getPageCount());
-      results.setResultCount(pagingConstraint.getResultCount());
-    }
- else {
-      List<GraphObject> resultList=results.getResults();
-      if (resultList != null) {
-        results.setResultCount(resultList.size());
+    Result results=evaluateConstraints(constraintChain,request);
+    if (results != null) {
+      if (pagingConstraint != null) {
+        results.setPage(pagingConstraint.getPage());
+        results.setPageSize(pagingConstraint.getPageSize());
+        results.setPageCount(pagingConstraint.getPageCount());
+        results.setResultCount(pagingConstraint.getResultCount());
       }
  else {
-        logger.log(Level.WARNING,"Got empty result set!");
+        List<GraphObject> resultList=results.getResults();
+        if (resultList != null) {
+          results.setResultCount(resultList.size());
+        }
+ else {
+          logger.log(Level.WARNING,"Got empty result set!");
+        }
       }
+      results.setSortOrder(sortOrder);
+      results.setSortKey(sortKey);
+      results.setSearchString(request.getParameter(JsonRestServlet.REQUEST_PARAMETER_SEARCH_STRING));
     }
-    results.setSortOrder(sortOrder);
-    results.setSortKey(sortKey);
+    return results;
   }
-  return results;
+  return null;
 }

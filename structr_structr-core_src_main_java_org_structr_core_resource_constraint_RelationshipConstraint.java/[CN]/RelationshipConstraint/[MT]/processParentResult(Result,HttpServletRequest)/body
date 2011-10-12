@@ -1,13 +1,18 @@
 {
   if (result != null) {
     try {
-      List<GraphObject> list=result.getResults();
-      if (list != null && list.size() == 1) {
-        GraphObject obj=list.get(0);
-        List relationships=obj.getRelationships(null,direction);
-        if (relationships != null) {
-          return new Result(relationships);
+      List<GraphObject> resultList=new LinkedList<GraphObject>();
+      List<GraphObject> source=result.getResults();
+      if (source != null) {
+        for (        GraphObject obj : source) {
+          if (obj instanceof AbstractNode) {
+            List relationships=obj.getRelationships(null,direction);
+            if (relationships != null) {
+              resultList.addAll(relationships);
+            }
+          }
         }
+        return new Result(resultList);
       }
     }
  catch (    Throwable t) {

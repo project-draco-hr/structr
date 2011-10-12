@@ -1,18 +1,21 @@
 {
   if (result != null) {
     try {
-      List<GraphObject> list=result.getResults();
-      if (list != null && list.size() == 1) {
-        GraphObject obj=list.get(0);
-        if (obj instanceof StructrRelationship) {
-          StructrRelationship rel=(StructrRelationship)obj;
-          if (startNode) {
-            return new Result(rel.getStartNode());
-          }
+      List<GraphObject> resultList=new LinkedList<GraphObject>();
+      List<GraphObject> source=result.getResults();
+      if (source != null) {
+        for (        GraphObject obj : source) {
+          if (obj instanceof StructrRelationship) {
+            StructrRelationship rel=(StructrRelationship)obj;
+            if (startNode) {
+              resultList.add(rel.getStartNode());
+            }
  else {
-            return new Result(rel.getEndNode());
+              resultList.add(rel.getEndNode());
+            }
           }
         }
+        return new Result(resultList);
       }
     }
  catch (    Throwable t) {

@@ -1,7 +1,14 @@
 {
   int num=constraintChain.size();
   boolean found=false;
+  int iterations=0;
   do {
+    StringBuilder chain=new StringBuilder();
+    for (    ResourceConstraint constr : constraintChain) {
+      chain.append(constr.getClass().getSimpleName());
+      chain.append(", ");
+    }
+    logger.log(Level.FINEST,"########## Constraint chain after iteration {0}: {1}",new Object[]{iterations,chain.toString()});
     found=false;
     for (int i=0; i < num; i++) {
       try {
@@ -10,17 +17,17 @@
         ResourceConstraint combinedConstraint=firstElement.tryCombineWith(secondElement);
         if (combinedConstraint != null) {
           logger.log(Level.FINE,"Combined constraint {0}",combinedConstraint.getClass().getSimpleName());
+          combinedConstraint.configureContext(resultGsonAdapter);
           constraintChain.remove(firstElement);
           constraintChain.remove(secondElement);
           constraintChain.add(i,combinedConstraint);
           found=true;
-          i++;
         }
       }
  catch (      Throwable t) {
       }
     }
+    iterations++;
   }
  while (found);
-  logger.log(Level.FINE,"Final constraint chain {0}",constraintChain);
 }

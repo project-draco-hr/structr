@@ -1,5 +1,4 @@
 {
-  GraphObjectGSONAdapter adapter=new GraphObjectGSONAdapter(propertyFormat);
   JsonObject result=new JsonObject();
   Integer page=src.getPage();
   Integer pageCount=src.getPageCount();
@@ -28,12 +27,12 @@
   if (results != null) {
     int size=results.size();
     if (size == 1) {
-      result.add("result",adapter.serialize(results.get(0),GraphObject.class,context));
+      result.add("result",graphObjectGsonAdapter.serialize(results.get(0),GraphObject.class,context));
     }
  else     if (size > 1) {
       JsonArray resultArray=new JsonArray();
       for (      GraphObject graphObject : results) {
-        resultArray.add(adapter.serialize(graphObject,GraphObject.class,context));
+        resultArray.add(graphObjectGsonAdapter.serialize(graphObject,GraphObject.class,context));
       }
       result.add("result",resultArray);
     }

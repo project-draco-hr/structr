@@ -5,10 +5,13 @@
   if (type != null) {
     jsonObject.add("type",new JsonPrimitive(type));
   }
-  for (  String key : src.getPropertyKeys(threadLocalPropertyView.get())) {
+  for (  String key : src.getPropertyKeys(propertyView.get())) {
     Object value=src.getProperty(key);
     if (value != null) {
       jsonObject.add(key,new JsonPrimitive(value.toString()));
+    }
+ else {
+      jsonObject.add(key,new JsonNull());
     }
   }
   return jsonObject;

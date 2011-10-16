@@ -1,35 +1,31 @@
 {
   try {
-    if (request.getPathInfo().endsWith("/node")) {
-      final PropertySet propertySet=gson.fromJson(request.getReader(),PropertySet.class);
-      AbstractNode newNode=(AbstractNode)Services.command(TransactionCommand.class).execute(new StructrTransaction(){
+    final PropertySet propertySet=gson.fromJson(request.getReader(),PropertySet.class);
+    final List<NodeAttribute> attributes=propertySet.getAttributes();
+    String type=null;
+    long id=-1;
+    String path=request.getPathInfo();
+    if (path.endsWith("/node")) {
+      StructrTransaction transaction=new StructrTransaction(){
         @Override public Object execute() throws Throwable {
-          Command createNodeCommand=Services.command(CreateNodeCommand.class);
-          return (AbstractNode)createNodeCommand.execute(new SuperUser(),propertySet.getAttributes());
+          return (AbstractNode)Services.command(CreateNodeCommand.class).execute(new SuperUser(),attributes);
         }
       }
-);
-      StringBuilder uriBuilder=new StringBuilder(100);
-      uriBuilder.append(request.getScheme());
-      uriBuilder.append("://");
-      uriBuilder.append(request.getServerName());
-      uriBuilder.append(":");
-      uriBuilder.append(request.getServerPort());
-      uriBuilder.append(request.getContextPath());
-      uriBuilder.append(request.getServletPath());
-      uriBuilder.append("/");
-      uriBuilder.append(newNode.getType().toLowerCase());
-      uriBuilder.append("s/");
-      uriBuilder.append(newNode.getId());
-      response.setHeader("Location",uriBuilder.toString());
-      response.setStatus(HttpServletResponse.SC_CREATED);
+;
+      AbstractNode newNode=(AbstractNode)Services.command(TransactionCommand.class).execute(transaction);
+      if (newNode != null) {
+        type=newNode.getType();
+        id=newNode.getId();
+      }
+ else {
+        if (transaction.getCause() != null) {
+          throw transaction.getCause();
+        }
+      }
     }
- else     if (request.getPathInfo().endsWith("/rel")) {
-      final PropertySet propertySet=gson.fromJson(request.getReader(),PropertySet.class);
-      List<NodeAttribute> attributes=propertySet.getAttributes();
+ else     if (path.endsWith("/rel")) {
       long startNodeId=-1;
       long endNodeId=-1;
-      String type=null;
       for (Iterator<NodeAttribute> it=attributes.iterator(); it.hasNext(); ) {
         NodeAttribute attr=it.next();
         if ("start".equals(attr.getKey())) {
@@ -62,20 +58,8 @@
           for (          NodeAttribute attr : attributes) {
             nodeRel.setProperty(attr.getKey(),attr.getValue());
           }
-          StringBuilder uriBuilder=new StringBuilder(100);
-          uriBuilder.append(request.getScheme());
-          uriBuilder.append("://");
-          uriBuilder.append(request.getServerName());
-          uriBuilder.append(":");
-          uriBuilder.append(request.getServerPort());
-          uriBuilder.append(request.getContextPath());
-          uriBuilder.append(request.getServletPath());
-          uriBuilder.append("/");
-          uriBuilder.append(nodeRel.getType().toLowerCase());
-          uriBuilder.append("s/");
-          uriBuilder.append(nodeRel.getId());
-          response.setHeader("Location",uriBuilder.toString());
-          response.setStatus(HttpServletResponse.SC_CREATED);
+          type=nodeRel.getType();
+          id=nodeRel.getId();
         }
  else {
           throw new NotFoundException();
@@ -86,10 +70,56 @@
       }
     }
  else {
-      throw new IllegalPathException();
+      List<ResourceConstraint> constraintChain=parsePath(path);
+      if (constraintChain.size() == 1) {
+        ResourceConstraint constr=constraintChain.get(0);
+        if (constr instanceof TypeConstraint) {
+          TypeConstraint typeConstraint=(TypeConstraint)constr;
+          type=typeConstraint.getType();
+          attributes.add(new NodeAttribute(AbstractNode.TYPE_KEY,StringUtils.capitalize(type)));
+          StructrTransaction transaction=new StructrTransaction(){
+            @Override public Object execute() throws Throwable {
+              return (AbstractNode)Services.command(CreateNodeCommand.class).execute(new SuperUser(),attributes);
+            }
+          }
+;
+          AbstractNode newNode=(AbstractNode)Services.command(TransactionCommand.class).execute(transaction);
+          if (newNode != null) {
+            type=newNode.getType();
+            id=newNode.getId();
+          }
+ else {
+            if (transaction.getCause() != null) {
+              throw transaction.getCause();
+            }
+          }
+        }
+ else {
+          throw new IllegalPathException();
+        }
+      }
+ else {
+        throw new IllegalPathException();
+      }
+    }
+    if (type != null && id > -1) {
+      response.setHeader("Location",buildLocationURI(request,type,id));
+      response.setStatus(HttpServletResponse.SC_CREATED);
+    }
+ else {
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
     }
   }
- catch (  PathException pathException) {
+ catch (  IllegalStateException illegalStateException) {
+    StringBuilder errorBuffer=new StringBuilder(100);
+    errorBuffer.append(illegalStateException.getMessage());
+    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    response.setContentLength(errorBuffer.length());
+    response.getWriter().append(errorBuffer.toString());
+    response.getWriter().flush();
+    response.getWriter().close();
+  }
+catch (  PathException pathException) {
     response.setStatus(pathException.getStatus());
   }
 catch (  JsonSyntaxException jsex) {

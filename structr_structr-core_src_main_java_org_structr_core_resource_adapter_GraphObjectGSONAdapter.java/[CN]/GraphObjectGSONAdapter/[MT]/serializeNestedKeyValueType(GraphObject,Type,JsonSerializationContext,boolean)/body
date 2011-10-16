@@ -6,18 +6,21 @@
     jsonObject.add("type",new JsonPrimitive(type));
   }
   JsonArray properties=new JsonArray();
-  for (  String key : src.getPropertyKeys(threadLocalPropertyView.get())) {
+  for (  String key : src.getPropertyKeys(propertyView.get())) {
     Object value=src.getProperty(key);
+    JsonObject property=new JsonObject();
+    property.add("key",new JsonPrimitive(key));
     if (value != null) {
-      JsonObject property=new JsonObject();
-      property.add("key",new JsonPrimitive(key));
       property.add("value",new JsonPrimitive(value.toString()));
-      if (includeTypeInOutput) {
-        String valueType=value.getClass().getSimpleName();
-        property.add("type",new JsonPrimitive(valueType));
-      }
-      properties.add(property);
     }
+ else {
+      property.add("value",new JsonNull());
+    }
+    if (includeTypeInOutput) {
+      String valueType=value.getClass().getSimpleName();
+      property.add("type",new JsonPrimitive(valueType));
+    }
+    properties.add(property);
   }
   jsonObject.add("properties",properties);
   Map<RelationshipType,Long> outRelStatistics=src.getRelationshipInfo(Direction.OUTGOING);

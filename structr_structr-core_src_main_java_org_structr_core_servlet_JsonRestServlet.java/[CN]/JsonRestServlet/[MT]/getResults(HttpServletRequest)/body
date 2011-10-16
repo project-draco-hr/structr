@@ -1,18 +1,11 @@
 {
+  PagingConstraint pagingConstraint=null;
   String path=request.getPathInfo();
   if (path != null) {
     List<ResourceConstraint> constraintChain=parsePath(path);
-    PagingConstraint pagingConstraint=null;
-    String sortOrder=null;
-    String sortKey=null;
-    sortKey=request.getParameter(REQUEST_PARAMETER_SORT_KEY);
-    if (sortKey != null) {
-      sortOrder=request.getParameter(REQUEST_PARAMETER_SORT_ORDER);
-      if (sortOrder == null) {
-        sortOrder=DEFAULT_VALUE_SORT_ORDER;
-      }
-      constraintChain.add(new SortConstraint(sortKey,sortOrder));
-    }
+    addOptimizableConstraints(request,constraintChain);
+    optimizeConstraintChain(constraintChain);
+    addNonOptimizableConstraints(request,constraintChain);
     String pageSizeParameter=request.getParameter(REQUEST_PARAMETER_PAGE_SIZE);
     if (pageSizeParameter != null) {
       String pageParameter=request.getParameter(REQUEST_PARAMETER_PAGE_NUMBER);
@@ -41,8 +34,8 @@
           logger.log(Level.WARNING,"Got empty result set!");
         }
       }
-      results.setSortOrder(sortOrder);
-      results.setSortKey(sortKey);
+      results.setSortOrder(request.getParameter(REQUEST_PARAMETER_SORT_ORDER));
+      results.setSortKey(request.getParameter(REQUEST_PARAMETER_SORT_KEY));
       results.setSearchString(request.getParameter(JsonRestServlet.REQUEST_PARAMETER_SEARCH_STRING));
     }
     return results;

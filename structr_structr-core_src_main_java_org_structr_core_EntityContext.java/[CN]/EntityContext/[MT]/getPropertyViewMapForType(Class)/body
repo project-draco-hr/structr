@@ -4,5 +4,10 @@
     propertyViewMap=new LinkedHashMap<PropertyView,Set<String>>();
     globalPropertyKeyMap.put(type,propertyViewMap);
   }
+  while (!(type.equals(Object.class))) {
+    Class superclass=type.getSuperclass();
+    Map<PropertyView,Set<String>> superclassPropertyViewMap=globalPropertyKeyMap.get(superclass);
+    propertyViewMap.putAll(superclassPropertyViewMap);
+  }
   return propertyViewMap;
 }

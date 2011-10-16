@@ -2,72 +2,13 @@
   try {
     final PropertySet propertySet=gson.fromJson(request.getReader(),PropertySet.class);
     final List<NodeAttribute> attributes=propertySet.getAttributes();
-    String type=null;
-    long id=-1;
+    GraphObject newGraphObject=null;
     String path=request.getPathInfo();
     if (path.endsWith("/node")) {
-      StructrTransaction transaction=new StructrTransaction(){
-        @Override public Object execute() throws Throwable {
-          return (AbstractNode)Services.command(CreateNodeCommand.class).execute(new SuperUser(),attributes);
-        }
-      }
-;
-      AbstractNode newNode=(AbstractNode)Services.command(TransactionCommand.class).execute(transaction);
-      if (newNode != null) {
-        type=newNode.getType();
-        id=newNode.getId();
-      }
- else {
-        if (transaction.getCause() != null) {
-          throw transaction.getCause();
-        }
-      }
+      newGraphObject=handleNodeCreation(attributes);
     }
  else     if (path.endsWith("/rel")) {
-      long startNodeId=-1;
-      long endNodeId=-1;
-      for (Iterator<NodeAttribute> it=attributes.iterator(); it.hasNext(); ) {
-        NodeAttribute attr=it.next();
-        if ("start".equals(attr.getKey())) {
-          try {
-            startNodeId=Long.parseLong(attr.getValue().toString());
-          }
- catch (          Throwable t) {
-          }
-          it.remove();
-        }
- else         if ("end".equals(attr.getKey())) {
-          try {
-            endNodeId=Long.parseLong(attr.getValue().toString());
-          }
- catch (          Throwable t) {
-          }
-          it.remove();
-        }
- else         if ("type".equals(attr.getKey())) {
-          type=attr.getValue().toString();
-          it.remove();
-        }
-      }
-      if (startNodeId != -1 && endNodeId != -1 && type != null) {
-        Command findNodeCommand=Services.command(FindNodeCommand.class);
-        AbstractNode startNode=(AbstractNode)findNodeCommand.execute(new SuperUser(),startNodeId);
-        AbstractNode endNode=(AbstractNode)findNodeCommand.execute(new SuperUser(),endNodeId);
-        if (startNode != null && endNode != null) {
-          StructrRelationship nodeRel=(StructrRelationship)Services.command(CreateRelationshipCommand.class).execute(startNode,endNode,type);
-          for (          NodeAttribute attr : attributes) {
-            nodeRel.setProperty(attr.getKey(),attr.getValue());
-          }
-          type=nodeRel.getType();
-          id=nodeRel.getId();
-        }
- else {
-          throw new NotFoundException();
-        }
-      }
- else {
-        throw new IllegalPathException();
-      }
+      newGraphObject=handleRelationshipCreation(attributes);
     }
  else {
       List<ResourceConstraint> constraintChain=parsePath(path);
@@ -75,24 +16,9 @@
         ResourceConstraint constr=constraintChain.get(0);
         if (constr instanceof TypeConstraint) {
           TypeConstraint typeConstraint=(TypeConstraint)constr;
-          type=typeConstraint.getType();
+          String type=typeConstraint.getType();
           attributes.add(new NodeAttribute(AbstractNode.TYPE_KEY,StringUtils.capitalize(type)));
-          StructrTransaction transaction=new StructrTransaction(){
-            @Override public Object execute() throws Throwable {
-              return (AbstractNode)Services.command(CreateNodeCommand.class).execute(new SuperUser(),attributes);
-            }
-          }
-;
-          AbstractNode newNode=(AbstractNode)Services.command(TransactionCommand.class).execute(transaction);
-          if (newNode != null) {
-            type=newNode.getType();
-            id=newNode.getId();
-          }
- else {
-            if (transaction.getCause() != null) {
-              throw transaction.getCause();
-            }
-          }
+          newGraphObject=handleNodeCreation(attributes);
         }
  else {
           throw new IllegalPathException();
@@ -102,17 +28,17 @@
         throw new IllegalPathException();
       }
     }
-    if (type != null && id > -1) {
-      response.setHeader("Location",buildLocationURI(request,type,id));
+    if (newGraphObject != null) {
+      response.setHeader("Location",buildLocationURI(request,newGraphObject.getType(),newGraphObject.getId()));
       response.setStatus(HttpServletResponse.SC_CREATED);
     }
  else {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
     }
   }
- catch (  IllegalStateException illegalStateException) {
+ catch (  IllegalArgumentException illegalArgumentException) {
     StringBuilder errorBuffer=new StringBuilder(100);
-    errorBuffer.append(illegalStateException.getMessage());
+    errorBuffer.append(illegalArgumentException.getMessage());
     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
     response.setContentLength(errorBuffer.length());
     response.getWriter().append(errorBuffer.toString());

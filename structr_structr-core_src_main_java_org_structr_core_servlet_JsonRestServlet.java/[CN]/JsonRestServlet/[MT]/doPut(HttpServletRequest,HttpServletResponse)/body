@@ -6,7 +6,7 @@
       final PropertySet propertySet=gson.fromJson(request.getReader(),PropertySet.class);
       final List<GraphObject> results=result.getResults();
       if (results != null && !results.isEmpty()) {
-        Services.command(TransactionCommand.class).execute(new StructrTransaction(){
+        StructrTransaction transaction=new StructrTransaction(){
           @Override public Object execute() throws Throwable {
             for (            GraphObject obj : results) {
               for (              NodeAttribute attr : propertySet.getAttributes()) {
@@ -16,7 +16,11 @@
             return null;
           }
         }
-);
+;
+        Services.command(TransactionCommand.class).execute(transaction);
+        if (transaction.getCause() != null) {
+          throw transaction.getCause();
+        }
       }
  else {
         throw new NotFoundException();
@@ -27,7 +31,16 @@
     }
     response.setStatus(HttpServletResponse.SC_OK);
   }
- catch (  PathException pathException) {
+ catch (  IllegalArgumentException illegalArgumentException) {
+    StringBuilder errorBuffer=new StringBuilder(100);
+    errorBuffer.append(illegalArgumentException.getMessage());
+    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    response.setContentLength(errorBuffer.length());
+    response.getWriter().append(errorBuffer.toString());
+    response.getWriter().flush();
+    response.getWriter().close();
+  }
+catch (  PathException pathException) {
     response.setStatus(pathException.getStatus());
   }
 catch (  JsonSyntaxException jsex) {

@@ -3,6 +3,16 @@
     logger.log(Level.SEVERE,"Tried to set property with null key (action was denied)");
     return;
   }
+  Class type=this.getClass();
+  PropertyValidator validator=EntityContext.getPropertyValidator(type,key);
+  if (validator != null) {
+    logger.log(Level.FINE,"Using validator of type {0} for property {1}",new Object[]{validator.getClass().getSimpleName(),key});
+    Value parameter=EntityContext.getPropertyValidationParameter(type,key);
+    StringBuilder errorBuffer=new StringBuilder(20);
+    if (!validator.isValid(key,value,parameter,errorBuffer)) {
+      throw new IllegalArgumentException(errorBuffer.toString());
+    }
+  }
   if (isDirty) {
     properties.put(key,value);
   }

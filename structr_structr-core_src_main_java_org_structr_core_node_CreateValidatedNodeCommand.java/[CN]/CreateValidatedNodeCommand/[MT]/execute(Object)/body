@@ -1,0 +1,80 @@
+{
+  GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
+  StructrNodeFactory nodeFactory=(StructrNodeFactory)arguments.get("nodeFactory");
+  AbstractNode node=null;
+  User user=null;
+  boolean updateIndex=true;
+  if (graphDb != null) {
+    Date now=new Date();
+    Command createRel=Services.command(CreateRelationshipCommand.class);
+    Map<String,Object> attrs=new HashMap<String,Object>();
+    for (    Object o : parameters) {
+      if (o instanceof Collection) {
+        Collection<NodeAttribute> c=(Collection)o;
+        for (        NodeAttribute attr : c) {
+          attrs.put(attr.getKey(),attr.getValue());
+        }
+      }
+ else       if (o instanceof NodeAttribute) {
+        NodeAttribute attr=(NodeAttribute)o;
+        attrs.put(attr.getKey(),attr.getValue());
+      }
+ else       if (o instanceof User) {
+        user=(User)o;
+      }
+ else       if (o instanceof Boolean) {
+        updateIndex=(Boolean)o;
+      }
+    }
+    Object typeObject=attrs.get("type");
+    String nodeType=typeObject != null ? typeObject.toString() : "GenericNode";
+    node=nodeFactory.createNode(graphDb.createNode(),nodeType);
+    logger.log(Level.FINE,"Node {0} created",node.getId());
+    Class nodeClass=node.getClass();
+    Set<String> propertySet=EntityContext.getPropertySet(nodeClass,PropertyView.All);
+    StringBuilder validationErrorBuffer=new StringBuilder(20);
+    boolean nodeIsValid=true;
+    for (    String property : propertySet) {
+      PropertyValidator validator=EntityContext.getPropertyValidator(nodeClass,property);
+      if (validator != null) {
+        Value parameter=EntityContext.getPropertyValidationParameter(nodeClass,property);
+        Object value=attrs.get(property);
+        nodeIsValid&=validator.isValid(property,value,parameter,validationErrorBuffer);
+      }
+    }
+    if (!nodeIsValid) {
+      throw new IllegalArgumentException(validationErrorBuffer.toString());
+    }
+    for (    Entry<String,Object> entry : attrs.entrySet()) {
+      node.setProperty(entry.getKey(),entry.getValue(),false);
+      logger.log(Level.FINEST,"Set node attribute {0} to {1}",new Object[]{entry.getKey(),entry.getValue()});
+    }
+    attrs.clear();
+    if ((user != null) && !(user instanceof SuperUser)) {
+      createRel.execute(user,node,RelType.OWNS);
+      logger.log(Level.FINEST,"Relationship to owner {0} added",user.getName());
+      Principal principal;
+      Group group=user.getGroupNode();
+      if (group != null) {
+        principal=group;
+      }
+ else {
+        principal=user;
+      }
+      StructrRelationship securityRel=(StructrRelationship)createRel.execute(principal,node,RelType.SECURITY);
+      securityRel.setAllowed(Arrays.asList(StructrRelationship.ALL_PERMISSIONS));
+      logger.log(Level.FINEST,"All permissions given to {0}",principal.getName());
+      node.setProperty(AbstractNode.CREATED_BY_KEY,user.getRealName() + " (" + user.getName()+ ")",false);
+    }
+    node.setProperty(AbstractNode.CREATED_DATE_KEY,now,false);
+    node.setProperty(AbstractNode.LAST_MODIFIED_DATE_KEY,now,false);
+    if (updateIndex) {
+      Services.command(IndexNodeCommand.class).execute(node);
+      logger.log(Level.FINE,"Node {0} indexed.",node.getId());
+    }
+  }
+  if (node != null) {
+    node.onNodeCreation();
+  }
+  return node;
+}

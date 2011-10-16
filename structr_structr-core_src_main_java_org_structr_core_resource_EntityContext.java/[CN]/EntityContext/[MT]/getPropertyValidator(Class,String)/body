@@ -1,0 +1,14 @@
+{
+  Map<String,Class<? extends PropertyValidator>> validatorMap=getPropertyValidatorMapForType(type);
+  Class clazz=validatorMap.get(propertyKey);
+  PropertyValidator validator=null;
+  if (clazz != null) {
+    try {
+      validator=(PropertyValidator)clazz.newInstance();
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"Unable to instantiate validator {0}: {1}",new Object[]{clazz.getName(),t.getMessage()});
+    }
+  }
+  return validator;
+}

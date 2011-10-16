@@ -45,10 +45,7 @@
     if (!nodeIsValid) {
       throw new IllegalArgumentException(validationErrorBuffer.toString());
     }
-    for (    Entry<String,Object> entry : attrs.entrySet()) {
-      node.setProperty(entry.getKey(),entry.getValue(),false);
-      logger.log(Level.FINEST,"Set node attribute {0} to {1}",new Object[]{entry.getKey(),entry.getValue()});
-    }
+    node.putAll(attrs);
     attrs.clear();
     if ((user != null) && !(user instanceof SuperUser)) {
       createRel.execute(user,node,RelType.OWNS);

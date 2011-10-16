@@ -1,0 +1,18 @@
+{
+  Map<String,Class<? extends PropertyConverter>> validatorMap=getPropertyConverterMapForType(type);
+  Class clazz=validatorMap.get(propertyKey);
+  PropertyConverter propertyConverter=null;
+  if (clazz == null) {
+    validatorMap=getPropertyConverterMapForType(GlobalClassPlaceholder.class);
+    clazz=validatorMap.get(propertyKey);
+  }
+  if (clazz != null) {
+    try {
+      propertyConverter=(PropertyConverter)clazz.newInstance();
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"Unable to instantiate property PropertyConverter {0}: {1}",new Object[]{clazz.getName(),t.getMessage()});
+    }
+  }
+  return propertyConverter;
+}

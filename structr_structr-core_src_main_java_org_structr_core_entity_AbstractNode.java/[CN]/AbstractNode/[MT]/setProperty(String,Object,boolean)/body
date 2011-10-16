@@ -4,36 +4,44 @@
     return;
   }
   Class type=this.getClass();
+  PropertyConverter converter=EntityContext.getPropertyConverter(type,key);
+  final Object convertedValue;
+  if (converter != null) {
+    convertedValue=converter.convertFrom(value);
+  }
+ else {
+    convertedValue=value;
+  }
   PropertyValidator validator=EntityContext.getPropertyValidator(type,key);
   if (validator != null) {
     logger.log(Level.FINE,"Using validator of type {0} for property {1}",new Object[]{validator.getClass().getSimpleName(),key});
     Value parameter=EntityContext.getPropertyValidationParameter(type,key);
     StringBuilder errorBuffer=new StringBuilder(20);
-    if (!validator.isValid(key,value,parameter,errorBuffer)) {
+    if (!validator.isValid(key,convertedValue,parameter,errorBuffer)) {
       throw new IllegalArgumentException(errorBuffer.toString());
     }
   }
   if (isDirty) {
-    properties.put(key,value);
+    properties.put(key,convertedValue);
   }
  else {
     Object oldValue=getProperty(key);
-    if (((value == null) && (oldValue == null)) || ((value != null) && (oldValue != null) && value.equals(oldValue))) {
+    if (((convertedValue == null) && (oldValue == null)) || ((convertedValue != null) && (oldValue != null) && convertedValue.equals(oldValue))) {
       return;
     }
     Command transactionCommand=Services.command(TransactionCommand.class);
     transactionCommand.execute(new StructrTransaction(){
       @Override public Object execute() throws Throwable {
-        if (value == null) {
+        if (convertedValue == null) {
           dbNode.removeProperty(key);
         }
  else {
           if (!key.equals(AbstractNode.LAST_MODIFIED_DATE_KEY)) {
-            if (value instanceof Date) {
-              dbNode.setProperty(key,((Date)value).getTime());
+            if (convertedValue instanceof Date) {
+              dbNode.setProperty(key,((Date)convertedValue).getTime());
             }
  else {
-              dbNode.setProperty(key,value);
+              dbNode.setProperty(key,convertedValue);
               dbNode.setProperty(AbstractNode.LAST_MODIFIED_DATE_KEY,(new Date()).getTime());
             }
           }

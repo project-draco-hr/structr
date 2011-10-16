@@ -1,11 +1,14 @@
 {
+  Object value=null;
   if (isDirty) {
-    return properties.get(key);
+    value=properties.get(key);
   }
   if ((key != null) && dbNode.hasProperty(key)) {
-    return dbNode.getProperty(key);
+    value=dbNode.getProperty(key);
   }
- else {
-    return null;
+  PropertyConverter converter=EntityContext.getPropertyConverter(this.getClass(),key);
+  if (converter != null) {
+    value=converter.convertTo(value);
   }
+  return value;
 }

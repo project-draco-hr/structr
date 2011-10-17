@@ -1,7 +1,13 @@
 {
-  Map<String,Class<? extends PropertyValidator>> validatorMap=getPropertyValidatorMapForType(type);
-  Class clazz=validatorMap.get(propertyKey);
+  Map<String,Class<? extends PropertyValidator>> validatorMap=null;
   PropertyValidator validator=null;
+  Class localType=type;
+  Class clazz=null;
+  while (clazz == null && !localType.equals(Object.class)) {
+    validatorMap=getPropertyValidatorMapForType(localType);
+    clazz=validatorMap.get(propertyKey);
+    localType=localType.getSuperclass();
+  }
   if (clazz != null) {
     try {
       validator=(PropertyValidator)clazz.newInstance();

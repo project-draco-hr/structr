@@ -5,7 +5,7 @@
     nodeTreePanel=new Panel("nodeTreePanel","/panel/node-tree-panel.htm");
   }
   if (securityContext.isAllowed(node,Permission.CreateNode)) {
-    Select nodeTypeField=new Select(AbstractNode.TYPE_KEY,"Select Node Type",false);
+    Select nodeTypeField=new Select(AbstractNode.Key.type.name(),"Select Node Type",false);
     nodeTypeField.add(new Option("","--- Select Node Type ---"));
     List<String> nodeTypes=new LinkedList<String>(((Map<String,Class>)Services.command(GetEntitiesCommand.class).execute()).keySet());
     Collections.sort(nodeTypes);
@@ -15,7 +15,7 @@
     }
     newNodeForm.add(nodeTypeField);
     newNodeForm.add(new TextField("name",true));
-    newNodeForm.add(new LongField(AbstractNode.POSITION_KEY,false));
+    newNodeForm.add(new LongField(AbstractNode.Key.position.name(),false));
     newNodeForm.add(new HiddenField(NODE_ID_KEY,nodeId != null ? nodeId : ""));
     newNodeForm.add(new TextField(TARGET_NODE_ID_KEY,true));
     newNodeForm.add(new HiddenField(RENDER_MODE_KEY,renderMode != null ? renderMode : ""));

@@ -1,7 +1,11 @@
 {
-  Map<String,Value> validationParameterMap=getPropertyValidatonParameterMapForType(type);
-  if (validationParameterMap != null) {
-    return validationParameterMap.get(propertyKey);
+  Map<String,Value> validationParameterMap=null;
+  Class localType=type;
+  Value value=null;
+  while (value == null && !localType.equals(Object.class)) {
+    validationParameterMap=getPropertyValidatonParameterMapForType(localType);
+    value=validationParameterMap.get(propertyKey);
+    localType=localType.getSuperclass();
   }
-  return null;
+  return value;
 }

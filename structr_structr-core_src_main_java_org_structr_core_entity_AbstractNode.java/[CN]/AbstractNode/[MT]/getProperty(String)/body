@@ -1,4 +1,5 @@
 {
+  Class type=this.getClass();
   Object value=null;
   if (isDirty) {
     value=properties.get(key);
@@ -6,9 +7,10 @@
   if ((key != null) && dbNode.hasProperty(key)) {
     value=dbNode.getProperty(key);
   }
-  PropertyConverter converter=EntityContext.getPropertyConverter(this.getClass(),key);
+  PropertyConverter converter=EntityContext.getPropertyConverter(type,key);
   if (converter != null) {
-    value=converter.convertTo(value);
+    Value conversionValue=EntityContext.getPropertyConversionParameter(type,key);
+    value=converter.convertTo(value,conversionValue);
   }
   return value;
 }

@@ -1,10 +1,12 @@
 {
-  Map<String,Class<? extends PropertyConverter>> validatorMap=getPropertyConverterMapForType(type);
-  Class clazz=validatorMap.get(propertyKey);
+  Map<String,Class<? extends PropertyConverter>> converterMap=null;
   PropertyConverter propertyConverter=null;
-  if (clazz == null) {
-    validatorMap=getPropertyConverterMapForType(GlobalClassPlaceholder.class);
-    clazz=validatorMap.get(propertyKey);
+  Class localType=type;
+  Class clazz=null;
+  while (clazz == null && !localType.equals(Object.class)) {
+    converterMap=getPropertyConverterMapForType(localType);
+    clazz=converterMap.get(propertyKey);
+    localType=localType.getSuperclass();
   }
   if (clazz != null) {
     try {

@@ -7,7 +7,8 @@
   PropertyConverter converter=EntityContext.getPropertyConverter(type,key);
   final Object convertedValue;
   if (converter != null) {
-    convertedValue=converter.convertFrom(value);
+    Value conversionValue=EntityContext.getPropertyConversionParameter(type,key);
+    convertedValue=converter.convertFrom(value,conversionValue);
   }
  else {
     convertedValue=value;
@@ -29,7 +30,6 @@
     if (((convertedValue == null) && (oldValue == null)) || ((convertedValue != null) && (oldValue != null) && convertedValue.equals(oldValue))) {
       return;
     }
-    logger.log(Level.INFO,"################################### Setting {0} to {1}, starting transaction",new Object[]{key,convertedValue});
     StructrTransaction transaction=new StructrTransaction(){
       @Override public Object execute() throws Throwable {
         if (convertedValue == null) {

@@ -26,11 +26,11 @@
     @Override public Object execute() throws Throwable {
       Command createNode=Services.command(CreateNodeCommand.class);
       Command createRel=Services.command(CreateRelationshipCommand.class);
-      NodeAttribute typeAttr=new NodeAttribute(AbstractNode.TYPE_KEY,Image.class.getSimpleName());
+      NodeAttribute typeAttr=new NodeAttribute(AbstractNode.Key.type.name(),Image.class.getSimpleName());
       NodeAttribute contentTypeAttr=new NodeAttribute(File.Key.contentType.name(),"image/" + Thumbnail.FORMAT);
-      NodeAttribute isHiddenAttr=new NodeAttribute(AbstractNode.HIDDEN_KEY,originalImage.getHidden());
-      NodeAttribute isPublicAttr=new NodeAttribute(AbstractNode.PUBLIC_KEY,originalImage.getPublic());
-      NodeAttribute isVisibleForAuthenticatedUsersAttr=new NodeAttribute(AbstractNode.VISIBLE_TO_AUTHENTICATED_USERS_KEY,originalImage.getVisibleToAuthenticatedUsers());
+      NodeAttribute isHiddenAttr=new NodeAttribute(AbstractNode.Key.hidden.name(),originalImage.getHidden());
+      NodeAttribute isPublicAttr=new NodeAttribute(AbstractNode.Key.isPublic.name(),originalImage.getPublic());
+      NodeAttribute isVisibleForAuthenticatedUsersAttr=new NodeAttribute(AbstractNode.Key.visibleToAuthenticatedUsers.name(),originalImage.getVisibleToAuthenticatedUsers());
       Thumbnail thumbnailData=ImageHelper.createThumbnail(originalImage,maxWidth,maxHeight,cropToFit);
       if (thumbnailData != null) {
         Image thumbnail=(Image)createNode.execute(originalImage.getOwnerNode(),typeAttr,contentTypeAttr,isHiddenAttr,isPublicAttr,isVisibleForAuthenticatedUsersAttr,false);

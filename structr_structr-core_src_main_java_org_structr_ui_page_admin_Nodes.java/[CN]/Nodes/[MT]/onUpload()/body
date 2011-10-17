@@ -23,7 +23,7 @@
  else {
               mimeProperty="File";
             }
-            AbstractNode newNode=(AbstractNode)createNode.execute(new NodeAttribute(AbstractNode.TYPE_KEY,mimeProperty),user);
+            AbstractNode newNode=(AbstractNode)createNode.execute(new NodeAttribute(AbstractNode.Key.type.name(),mimeProperty),user);
             String relativeFilePath=newNode.getId() + "_" + System.currentTimeMillis();
             String path=FILES_PATH + "/" + relativeFilePath;
             long size=fileFromUpload.getSize();
@@ -37,9 +37,9 @@
               errorMsg="Error while write uploaded file(s) to disk: " + e.getStackTrace();
             }
             Date now=new Date();
-            newNode.setProperty(AbstractNode.NAME_KEY,name);
-            newNode.setProperty(AbstractNode.CREATED_DATE_KEY,now);
-            newNode.setProperty(AbstractNode.LAST_MODIFIED_DATE_KEY,now);
+            newNode.setProperty(AbstractNode.Key.name.name(),name);
+            newNode.setProperty(AbstractNode.Key.createdDate.name(),now);
+            newNode.setProperty(AbstractNode.Key.lastModifiedDate.name(),now);
             newNode.setProperty(File.Key.contentType.name(),mimeType);
             newNode.setProperty(File.Key.size.name(),String.valueOf(size));
             newNode.setProperty(File.Key.url.name(),fileUrl);

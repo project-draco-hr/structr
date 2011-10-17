@@ -1,15 +1,12 @@
 {
   Set<String> properties=getPropertySet(type,propertyView);
   for (  PropertyKey property : propertySet) {
-    if ("id".equals(property.name().toLowerCase()) || "type".equals(property.name().toLowerCase())) {
-      logger.log(Level.SEVERE,"id and type are not allowed in property views, ignoring!");
-    }
- else {
-      properties.add(property.name());
-    }
+    properties.add(property.name());
   }
-  if (!(type.getCanonicalName().equals(Object.class.getCanonicalName()))) {
-    Class superType=type.getSuperclass();
-    registerPropertySet(superType,propertyView,propertySet);
+  Class superClass=type.getSuperclass();
+  while (superClass != null && !superClass.equals(Object.class)) {
+    Set<String> superProperties=getPropertySet(superClass,propertyView);
+    properties.addAll(superProperties);
+    superClass=superClass.getSuperclass();
   }
 }

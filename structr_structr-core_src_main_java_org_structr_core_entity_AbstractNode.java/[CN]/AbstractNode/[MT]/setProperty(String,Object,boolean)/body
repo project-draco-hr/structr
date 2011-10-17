@@ -29,8 +29,8 @@
     if (((convertedValue == null) && (oldValue == null)) || ((convertedValue != null) && (oldValue != null) && convertedValue.equals(oldValue))) {
       return;
     }
-    Command transactionCommand=Services.command(TransactionCommand.class);
-    transactionCommand.execute(new StructrTransaction(){
+    logger.log(Level.INFO,"################################### Setting {0} to {1}, starting transaction",new Object[]{key,convertedValue});
+    StructrTransaction transaction=new StructrTransaction(){
       @Override public Object execute() throws Throwable {
         if (convertedValue == null) {
           dbNode.removeProperty(key);
@@ -55,6 +55,10 @@
         return null;
       }
     }
-);
+;
+    Services.command(TransactionCommand.class).execute(transaction);
+    if (transaction.getCause() != null) {
+      logger.log(Level.WARNING,"Error while setting property",transaction.getCause());
+    }
   }
 }

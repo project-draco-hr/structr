@@ -1,3 +1,16 @@
 {
-  return null;
+  String userHeader=request.getHeader("X-User");
+  User user=null;
+  try {
+    if (userHeader != null) {
+      long userId=Long.parseLong(userHeader);
+      AbstractNode userNode=(AbstractNode)Services.command(securityContext,FindNodeCommand.class).execute(user,userId);
+      if (userNode != null && userNode instanceof User) {
+        user=(User)userNode;
+      }
+    }
+  }
+ catch (  Throwable t) {
+  }
+  return user;
 }

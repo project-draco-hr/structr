@@ -1,10 +1,11 @@
 {
-  Command transactionCommand=Services.command(TransactionCommand.class);
+  final SecurityContext securityContext=SecurityContext.getSuperUserInstance();
+  Command transactionCommand=Services.command(securityContext,TransactionCommand.class);
   Long nodes=(Long)transactionCommand.execute(new StructrTransaction(){
     @Override public Object execute() throws Throwable {
       long nodes=0;
-      Command indexer=Services.command(IndexNodeCommand.class);
-      List<AbstractNode> allNodes=(List<AbstractNode>)Services.command(GetAllNodes.class).execute();
+      Command indexer=Services.command(securityContext,IndexNodeCommand.class);
+      List<AbstractNode> allNodes=(List<AbstractNode>)Services.command(securityContext,GetAllNodes.class).execute();
       for (      AbstractNode s : allNodes) {
         indexer.execute(s);
         nodes++;

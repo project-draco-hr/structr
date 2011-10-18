@@ -4,7 +4,7 @@
     logger.log(Level.SEVERE,"Empty category name!");
     return null;
   }
-  final AbstractNode object=(AbstractNode)Services.command(FindNodeCommand.class).execute(user,objectId);
+  final AbstractNode object=(AbstractNode)Services.command(securityContext,FindNodeCommand.class).execute(user,objectId);
   if (object == null) {
     logger.log(Level.SEVERE,"Object not found!");
     return null;
@@ -17,12 +17,12 @@
     }
   }
   final Category category=cat;
-  final Command createRel=Services.command(CreateRelationshipCommand.class);
-  Services.command(TransactionCommand.class).execute(new StructrTransaction(){
+  final Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
+  Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
     Category cat=null;
     @Override public Object execute(){
       if (category == null) {
-        cat=(Category)Services.command(CreateNodeCommand.class).execute(user,new NodeAttribute(AbstractNode.Key.name.name(),categoryName),new NodeAttribute(AbstractNode.Key.type.name(),Category.class.getSimpleName()),true);
+        cat=(Category)Services.command(securityContext,CreateNodeCommand.class).execute(user,new NodeAttribute(AbstractNode.Key.name.name(),categoryName),new NodeAttribute(AbstractNode.Key.type.name(),Category.class.getSimpleName()),true);
         createRel.execute(user,cat,RelType.HAS_CHILD,true);
       }
  else {

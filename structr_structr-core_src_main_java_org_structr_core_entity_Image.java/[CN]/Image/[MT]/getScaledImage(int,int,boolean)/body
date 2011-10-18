@@ -21,11 +21,11 @@
     }
   }
   logger.log(Level.INFO,"Creating thumbnail for {0}",getName());
-  Command transactionCommand=Services.command(TransactionCommand.class);
+  Command transactionCommand=Services.command(securityContext,TransactionCommand.class);
   thumbnail=(Image)transactionCommand.execute(new StructrTransaction(){
     @Override public Object execute() throws Throwable {
-      Command createNode=Services.command(CreateNodeCommand.class);
-      Command createRel=Services.command(CreateRelationshipCommand.class);
+      Command createNode=Services.command(securityContext,CreateNodeCommand.class);
+      Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
       NodeAttribute typeAttr=new NodeAttribute(AbstractNode.Key.type.name(),Image.class.getSimpleName());
       NodeAttribute contentTypeAttr=new NodeAttribute(File.Key.contentType.name(),"image/" + Thumbnail.FORMAT);
       NodeAttribute isHiddenAttr=new NodeAttribute(AbstractNode.Key.hidden.name(),originalImage.getHidden());

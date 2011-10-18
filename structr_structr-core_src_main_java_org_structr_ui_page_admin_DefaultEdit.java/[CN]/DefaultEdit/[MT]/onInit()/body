@@ -366,7 +366,7 @@
   transmissionsTable.addColumn(new Column("transmittedObjectCount","Objects Transmitted"));
   transmissionsTable.setDataProvider(new DataProvider(){
     @Override public List<CloudTransmission> getData(){
-      CloudService cloudService=(CloudService)Services.command(GetCloudServiceCommand.class).execute();
+      CloudService cloudService=(CloudService)Services.command(securityContext,GetCloudServiceCommand.class).execute();
       if (cloudService != null) {
         return (cloudService.getActiveTransmissions());
       }
@@ -383,7 +383,7 @@
   cloudPanel=new Panel("cloudPanel","/panel/cloud-panel.htm");
   addControl(cloudPanel);
   User user=securityContext.getUser();
-  String prompt=((user != null) ? user.getName() : "anonymous") + "@structr" + (isSuperUser ? "# " : "$ ");
+  String prompt=((user != null) ? user.getName() : "anonymous") + "@structr" + (securityContext.isSuperUser() ? "# " : "$ ");
   consoleCommand=new TextField("command",prompt);
   consoleCommand.addStyleClass("commandInput");
   consoleForm.add(consoleCommand);

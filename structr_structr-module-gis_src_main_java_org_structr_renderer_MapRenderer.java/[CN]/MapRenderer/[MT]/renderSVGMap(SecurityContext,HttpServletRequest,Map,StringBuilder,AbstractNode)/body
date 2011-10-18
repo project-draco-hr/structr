@@ -1,5 +1,5 @@
 {
-  Command graphDbCommand=Services.command(GraphDatabaseCommand.class);
+  Command graphDbCommand=Services.command(securityContext,GraphDatabaseCommand.class);
   GraphDatabaseService graphDb=(GraphDatabaseService)graphDbCommand.execute();
   MapContext mapContext=null;
   try {
@@ -62,7 +62,7 @@
           envelope=(ReferencedEnvelope)requestedFeature.getBounds();
         }
         if (geoNode == null) {
-          List<AbstractNode> result=(List<AbstractNode>)Services.command(SearchNodeCommand.class).execute(securityContext,null,false,false,Search.andExactName(featureName));
+          List<AbstractNode> result=(List<AbstractNode>)Services.command(securityContext,SearchNodeCommand.class).execute(securityContext,null,false,false,Search.andExactName(featureName));
           for (          AbstractNode n : result) {
             if ((n instanceof GeoObject) && n.isNotDeleted()) {
               geoNode=(GeoObject)n;

@@ -59,11 +59,11 @@
     csvw.flush();
     csvw.close();
     AbstractNode s=null;
-    Command transaction=Services.command(TransactionCommand.class);
+    Command transaction=Services.command(securityContext,TransactionCommand.class);
     s=(AbstractNode)transaction.execute(new StructrTransaction(){
       @Override public Object execute() throws Throwable {
-        Command createNode=Services.command(CreateNodeCommand.class);
-        Command createRel=Services.command(CreateRelationshipCommand.class);
+        Command createNode=Services.command(securityContext,CreateNodeCommand.class);
+        Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
         User user=securityContext.getUser();
         AbstractNode newNode=(AbstractNode)createNode.execute(new NodeAttribute(AbstractNode.Key.type.name(),File.class.getSimpleName()),user);
         String relativeFilePath=newNode.getId() + "_" + System.currentTimeMillis();

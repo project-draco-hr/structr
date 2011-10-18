@@ -2,8 +2,8 @@
   List<AbstractNode> nodes=new LinkedList<AbstractNode>();
   AbstractNode parentNode=getParentNode();
   if (parentNode != null) {
-    Command nodeFactory=Services.command(NodeFactoryCommand.class);
-    Command relsCommand=Services.command(NodeRelationshipsCommand.class);
+    Command nodeFactory=Services.command(securityContext,NodeFactoryCommand.class);
+    Command relsCommand=Services.command(securityContext,NodeRelationshipsCommand.class);
     List<StructrRelationship> rels=(List<StructrRelationship>)relsCommand.execute(parentNode,RelType.HAS_CHILD,Direction.OUTGOING);
     for (    StructrRelationship r : rels) {
       AbstractNode s=(AbstractNode)nodeFactory.execute(r.getEndNode());

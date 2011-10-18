@@ -1,4 +1,5 @@
 {
+  Command deleteCommand=Services.command(securityContext,DeleteNodeCommand.class);
   List<AbstractNode> toDelete=new LinkedList<AbstractNode>();
   AbstractNode newParentNode=currentNode;
   for (  String param : parameters) {
@@ -6,7 +7,7 @@
       stdOut.append("Cannot delete current node");
     }
  else {
-      Object findNodeResult=Services.command(FindNodeCommand.class).execute(securityContext.getUser(),currentNode,param);
+      Object findNodeResult=Services.command(securityContext,FindNodeCommand.class).execute(securityContext.getUser(),currentNode,param);
       if (findNodeResult != null) {
         if (findNodeResult instanceof Collection) {
           toDelete.addAll((Collection)findNodeResult);

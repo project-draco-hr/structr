@@ -69,7 +69,7 @@
   }
   User loginUser=null;
   if (StringUtils.isNotEmpty(confirmationKey) && StringUtils.isNotEmpty(username)) {
-    loginUser=(User)Services.command(FindUserCommand.class).execute(username);
+    loginUser=(User)Services.command(securityContext,FindUserCommand.class).execute(username);
     if (loginUser == null) {
       String message="<div class=\"errorMsg\">Missing username or user not found!</div>";
       registerFailure(out,message,session,maxRetries,delayThreshold,delayTime);
@@ -89,7 +89,7 @@
     return;
   }
   if (StringUtils.isNotEmpty(username)) {
-    loginUser=(User)Services.command(FindUserCommand.class).execute(username);
+    loginUser=(User)Services.command(securityContext,FindUserCommand.class).execute(username);
   }
   if (loginUser != null) {
     logger.log(Level.INFO,"User with name {0} already exists",loginUser);
@@ -114,7 +114,7 @@
       errorsOnMandatoryFields.append("input[name=").append(usernameFieldName).append("] { background-color: #ffc }");
     }
  else {
-      loginUser=(User)Services.command(FindUserCommand.class).execute(username);
+      loginUser=(User)Services.command(securityContext,FindUserCommand.class).execute(username);
       if (loginUser != null) {
         logger.log(Level.FINE,"User with name {0} already exists",loginUser);
         String message="<div class=\"errorMsg\">" + REGISTRATION_FAILURE_USER_EXISTS + "</div>";
@@ -243,11 +243,11 @@
   }
   final RegistrationCheck registrationCheckNode=currentNode;
   final Date birthdayDate=parsedDate;
-  User newUser=(User)Services.command(TransactionCommand.class).execute(new StructrTransaction(){
+  User newUser=(User)Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
     @Override public Object execute(){
-      Command create=Services.command(CreateNodeCommand.class);
-      Command link=Services.command(CreateRelationshipCommand.class);
-      Command search=Services.command(SearchNodeCommand.class);
+      Command create=Services.command(securityContext,CreateNodeCommand.class);
+      Command link=Services.command(securityContext,CreateRelationshipCommand.class);
+      Command search=Services.command(securityContext,SearchNodeCommand.class);
       List<SearchAttribute> searchAttrs=new LinkedList<SearchAttribute>();
       User assignedUser=null;
       searchAttrs.add(Search.andExactName(assignedUsername));
@@ -274,7 +274,7 @@
         link.execute(registrationCheckNode,publicUserDirectory,RelType.HAS_CHILD);
       }
       link.execute(publicUserDirectory,newUser,RelType.HAS_CHILD);
-      Services.command(IndexNodeCommand.class).execute(newUser);
+      Services.command(securityContext,IndexNodeCommand.class).execute(newUser);
       return newUser;
     }
   }

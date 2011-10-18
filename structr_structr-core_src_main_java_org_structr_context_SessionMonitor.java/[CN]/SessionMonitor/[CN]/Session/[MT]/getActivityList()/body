@@ -6,8 +6,9 @@
       return activityList;
     }
   }
-  Command createNode=Services.command(CreateNodeCommand.class);
-  Command createRel=Services.command(CreateRelationshipCommand.class);
+  final SecurityContext securityContext=SecurityContext.getSuperUserInstance();
+  Command createNode=Services.command(securityContext,CreateNodeCommand.class);
+  Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
   activityList=(LogNodeList<Activity>)createNode.execute(user,new NodeAttribute(AbstractNode.Key.type.name(),LogNodeList.class.getSimpleName()),new NodeAttribute(AbstractNode.Key.name.name(),user.getName() + "'s Activity Log"));
   createRel.execute(user,activityList,RelType.HAS_CHILD);
   return activityList;

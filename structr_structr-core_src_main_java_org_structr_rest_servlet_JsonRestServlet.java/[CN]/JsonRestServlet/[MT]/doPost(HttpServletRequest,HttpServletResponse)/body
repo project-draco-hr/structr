@@ -6,10 +6,10 @@
     GraphObject newGraphObject=null;
     String path=request.getPathInfo();
     if (path.endsWith("/node")) {
-      newGraphObject=handleNodeCreation(attributes);
+      newGraphObject=handleNodeCreation(securityContext,attributes);
     }
  else     if (path.endsWith("/rel")) {
-      newGraphObject=handleRelationshipCreation(attributes);
+      newGraphObject=handleRelationshipCreation(securityContext,attributes);
     }
  else {
       List<ResourceConstraint> constraintChain=parsePath(securityContext,path);
@@ -19,7 +19,7 @@
           TypeConstraint typeConstraint=(TypeConstraint)constr;
           String type=typeConstraint.getType();
           attributes.add(new NodeAttribute(AbstractNode.Key.type.name(),StringUtils.capitalize(type)));
-          newGraphObject=handleNodeCreation(attributes);
+          newGraphObject=handleNodeCreation(securityContext,attributes);
         }
  else {
           throw new IllegalPathException();

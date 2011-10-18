@@ -5,10 +5,10 @@
     final User user=securityContext.getUser();
     AbstractNode parentNode=null;
     try {
-      final Command transactionCommand=Services.command(TransactionCommand.class);
+      final Command transactionCommand=Services.command(securityContext,TransactionCommand.class);
       parentNode=(AbstractNode)transactionCommand.execute(new StructrTransaction(){
         @Override public Object execute() throws Throwable {
-          Command deleteNode=Services.command(DeleteNodeCommand.class);
+          Command deleteNode=Services.command(securityContext,DeleteNodeCommand.class);
           Object result=deleteNode.execute(getNodeId(),parent,recursive,user);
           transactionCommand.setExitCode(deleteNode.getExitCode());
           transactionCommand.setErrorMessage(deleteNode.getErrorMessage());
@@ -38,7 +38,7 @@
       logger.log(Level.WARNING,"Node {0} could not be deleted.",getNodeId());
       okMsg=null;
       errorMsg="Node " + getNodeId() + " could not be deleted. "+ e.getMessage();
-      Services.command(AddNotificationCommand.class).execute(new ErrorNotification(securityContext,errorMsg));
+      Services.command(securityContext,AddNotificationCommand.class).execute(new ErrorNotification(securityContext,errorMsg));
       return true;
     }
   }

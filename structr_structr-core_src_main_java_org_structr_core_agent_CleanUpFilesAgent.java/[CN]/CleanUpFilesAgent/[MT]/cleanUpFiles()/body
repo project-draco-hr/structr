@@ -1,7 +1,8 @@
 {
   File filesFolder=new File(Services.getFilesPath());
   File[] files=filesFolder.listFiles();
-  Command graphDbCommand=Services.command(GraphDatabaseCommand.class);
+  final SecurityContext securityContext=SecurityContext.getSuperUserInstance();
+  Command graphDbCommand=Services.command(securityContext,GraphDatabaseCommand.class);
   GraphDatabaseService graphDb=(GraphDatabaseService)graphDbCommand.execute();
   long count=0;
   for (  File file : files) {

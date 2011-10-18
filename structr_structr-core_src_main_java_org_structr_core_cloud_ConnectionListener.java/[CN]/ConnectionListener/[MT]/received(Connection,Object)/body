@@ -23,7 +23,7 @@
   }
  else   if (object instanceof AuthenticationContainer) {
     AuthenticationContainer auth=(AuthenticationContainer)object;
-    targetUser=(User)Services.command(FindUserCommand.class).execute(auth.getUserName());
+    targetUser=(User)Services.command(securityContext,FindUserCommand.class).execute(auth.getUserName());
     if (targetUser == null) {
       logger.log(Level.WARNING,"User not found, disconnecting");
       connection.sendTCP("Authentication failed");
@@ -39,7 +39,7 @@
   }
  else   if (object instanceof PushNodeRequestContainer) {
     PushNodeRequestContainer request=(PushNodeRequestContainer)object;
-    rootNode=(AbstractNode)Services.command(FindNodeCommand.class).execute(new SuperUser(),request.getTargetNodeId());
+    rootNode=(AbstractNode)Services.command(securityContext,FindNodeCommand.class).execute(new SuperUser(),request.getTargetNodeId());
     connection.sendTCP(CloudService.ACK_DATA);
   }
  else   if (object instanceof FileNodeDataContainer) {
@@ -56,7 +56,7 @@
     }
  else {
       container.flushAndCloseTemporaryFile();
-      Command transactionCommand=Services.command(TransactionCommand.class);
+      Command transactionCommand=Services.command(securityContext,TransactionCommand.class);
       transactionCommand.execute(new StructrTransaction(){
         @Override public Object execute() throws Throwable {
           storeNode(container,linkNode);
@@ -80,7 +80,7 @@
   }
  else   if (object instanceof NodeDataContainer) {
     final NodeDataContainer receivedNodeData=(NodeDataContainer)object;
-    Command transactionCommand=Services.command(TransactionCommand.class);
+    Command transactionCommand=Services.command(securityContext,TransactionCommand.class);
     transactionCommand.execute(new StructrTransaction(){
       @Override public Object execute() throws Throwable {
         storeNode(receivedNodeData,linkNode);
@@ -92,7 +92,7 @@
   }
  else   if (object instanceof RelationshipDataContainer) {
     final RelationshipDataContainer receivedRelationshipData=(RelationshipDataContainer)object;
-    Command transactionCommand=Services.command(TransactionCommand.class);
+    Command transactionCommand=Services.command(securityContext,TransactionCommand.class);
     transactionCommand.execute(new StructrTransaction(){
       @Override public Object execute() throws Throwable {
         storeRelationship(receivedRelationshipData);

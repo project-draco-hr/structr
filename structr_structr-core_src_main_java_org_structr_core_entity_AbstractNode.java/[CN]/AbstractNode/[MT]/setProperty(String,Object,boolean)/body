@@ -4,7 +4,7 @@
     return;
   }
   Class type=this.getClass();
-  PropertyConverter converter=EntityContext.getPropertyConverter(type,key);
+  PropertyConverter converter=EntityContext.getPropertyConverter(securityContext,type,key);
   final Object convertedValue;
   if (converter != null) {
     Value conversionValue=EntityContext.getPropertyConversionParameter(type,key);
@@ -13,7 +13,7 @@
  else {
     convertedValue=value;
   }
-  PropertyValidator validator=EntityContext.getPropertyValidator(type,key);
+  PropertyValidator validator=EntityContext.getPropertyValidator(securityContext,type,key);
   if (validator != null) {
     logger.log(Level.FINE,"Using validator of type {0} for property {1}",new Object[]{validator.getClass().getSimpleName(),key});
     Value parameter=EntityContext.getPropertyValidationParameter(type,key);
@@ -50,13 +50,13 @@
           }
         }
         if (updateIndex && dbNode.hasProperty(key)) {
-          Services.command(IndexNodeCommand.class).execute(getId(),key);
+          Services.command(securityContext,IndexNodeCommand.class).execute(getId(),key);
         }
         return null;
       }
     }
 ;
-    Services.command(TransactionCommand.class).execute(transaction);
+    Services.command(securityContext,TransactionCommand.class).execute(transaction);
     if (transaction.getCause() != null) {
       logger.log(Level.WARNING,"Error while setting property",transaction.getCause());
     }

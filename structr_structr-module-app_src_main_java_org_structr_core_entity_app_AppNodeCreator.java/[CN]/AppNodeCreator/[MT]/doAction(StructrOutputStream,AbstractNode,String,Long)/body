@@ -2,10 +2,10 @@
   final List<NodeAttribute> attributes=new LinkedList<NodeAttribute>();
   final AbstractNode parentNode=getCreateDestination();
   final String targetType=getTargetType();
-  boolean ret=false;
+  boolean success=false;
   if (targetType == null) {
-    logger.log(Level.WARNING,"AppNodeCreator needs {0} property!",TARGET_TYPE_KEY);
-    ret=false;
+    logger.log(Level.WARNING,"AppNodeCreator needs {0} property!",Key.targetType.name());
+    success=false;
   }
   if (targetType != null) {
     List<InteractiveNode> dataSource=getInteractiveSourceNodes();
@@ -14,7 +14,7 @@
     boolean error=false;
     for (    InteractiveNode src : dataSource) {
       Object value=src.getValue();
-      if (value != null && value.toString().length() > 0) {
+      if ((value != null) && (value.toString().length() > 0)) {
         attributes.add(new NodeAttribute(src.getMappedName(),value));
       }
  else {
@@ -29,13 +29,13 @@
       storeNode=createNewNode(parentNode,targetType);
     }
     if (storeNode != null) {
-      ret=storeNodeAttributes(storeNode,attributes);
+      success=storeNodeAttributes(storeNode,attributes);
     }
  else {
-      ret=false;
+      success=false;
     }
     logger.log(Level.INFO,"Saving newly created node {0}",storeNode);
     currentNode.set(storeNode);
   }
-  return (ret);
+  return (success);
 }

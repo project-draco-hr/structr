@@ -1,16 +1,16 @@
 {
   List<StructrRelationship> rels=getIncomingDataRelationships();
-  List<InteractiveNode> ret=new LinkedList<InteractiveNode>();
+  List<InteractiveNode> nodes=new LinkedList<InteractiveNode>();
   for (  StructrRelationship rel : rels) {
     AbstractNode node=rel.getStartNode();
     if (node instanceof InteractiveNode) {
       InteractiveNode interactiveNode=(InteractiveNode)node;
-      if (rel.getRelationship().hasProperty(TARGET_SLOT_NAME_KEY)) {
-        String targetSlot=(String)rel.getRelationship().getProperty(TARGET_SLOT_NAME_KEY);
+      if (rel.getRelationship().hasProperty(Key.targetSlotName.name())) {
+        String targetSlot=(String)rel.getRelationship().getProperty(Key.targetSlotName.name());
         interactiveNode.setMappedName(targetSlot);
       }
-      ret.add(interactiveNode);
+      nodes.add(interactiveNode);
     }
   }
-  return (ret);
+  return nodes;
 }

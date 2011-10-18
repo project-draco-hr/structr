@@ -8,12 +8,12 @@
   if (session == null) {
     return;
   }
-  String usernameFromSession=(String)session.getAttribute(WebNode.USERNAME_KEY);
+  String usernameFromSession=(String)session.getAttribute(WebNode.Key.username.name());
   Boolean alreadyLoggedIn=usernameFromSession != null;
   if (alreadyLoggedIn) {
     return;
   }
-  Boolean sessionBlocked=(Boolean)session.getAttribute(WebNode.SESSION_BLOCKED);
+  Boolean sessionBlocked=(Boolean)session.getAttribute(WebNode.Key.sessionBlocked.name());
   if (Boolean.TRUE.equals(sessionBlocked)) {
     out.append("<div class=\"errorMsg\">").append("Too many login attempts, session is blocked for login").append("</div>");
     return;
@@ -53,7 +53,7 @@
     countLoginFailure(out,session,maxRetries,delayThreshold,delayTime);
     return;
   }
-  session.removeAttribute(WebNode.SESSION_BLOCKED);
+  session.removeAttribute(WebNode.Key.sessionBlocked.name());
   session.removeAttribute(NUMBER_OF_LOGIN_ATTEMPTS);
   out.append("<div class=\"okMsg\">").append("Login successful. Welcome ").append(securityContext.getUser().getRealName()).append("!").append("</div>");
 }

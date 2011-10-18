@@ -8,12 +8,12 @@
   if (session == null) {
     return;
   }
-  String usernameFromSession=(String)session.getAttribute(RegistrationCheck.USERNAME_KEY);
+  String usernameFromSession=(String)session.getAttribute(WebNode.Key.username.name());
   Boolean alreadyLoggedIn=usernameFromSession != null;
   if (alreadyLoggedIn) {
     return;
   }
-  Boolean sessionBlocked=(Boolean)session.getAttribute(RegistrationCheck.SESSION_BLOCKED);
+  Boolean sessionBlocked=(Boolean)session.getAttribute(WebNode.Key.sessionBlocked.name());
   if (Boolean.TRUE.equals(sessionBlocked)) {
     out.append("<div class=\"errorMsg\">").append("Unable to register. Session is blocked.").append("</div>");
     return;
@@ -280,7 +280,7 @@
   }
 );
   logger.log(Level.INFO,"A new public user {0}[{1}] has been created.",new Object[]{newUser.getName(),newUser.getId()});
-  session.removeAttribute(WebNode.SESSION_BLOCKED);
+  session.removeAttribute(WebNode.Key.sessionBlocked.name());
   session.removeAttribute(NUMBER_OF_REGISTRATION_ATTEMPTS);
   out.append("<div class=\"okMsg\">").append("An e-mail has been sent to you to validate the given e-mail address. Please click on the link in the e-mail to complete registration.").append("</div>");
 }

@@ -1,9 +1,9 @@
 {
-  CurrentRequest.setAccessMode(AccessMode.Frontend);
   try {
+    SecurityContext securityContext=getSecurityContext(request);
     propertyView.set(PropertyView.Public);
     double queryTimeStart=System.nanoTime();
-    Result result=getResults(request);
+    Result result=getResults(securityContext,request);
     double queryTimeEnd=System.nanoTime();
     if (result != null) {
       DecimalFormat decimalFormat=new DecimalFormat("0.000000000",DecimalFormatSymbols.getInstance(Locale.ENGLISH));

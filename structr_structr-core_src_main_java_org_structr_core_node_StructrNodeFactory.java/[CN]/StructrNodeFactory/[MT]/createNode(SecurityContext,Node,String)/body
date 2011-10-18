@@ -1,0 +1,18 @@
+{
+  Class nodeClass=(Class)Services.command(GetEntityClassCommand.class).execute(nodeType);
+  AbstractNode newNode=null;
+  if (nodeClass != null) {
+    try {
+      newNode=(AbstractNode)nodeClass.newInstance();
+    }
+ catch (    Throwable t) {
+      newNode=null;
+    }
+  }
+  if (newNode == null) {
+    newNode=new GenericNode();
+  }
+  newNode.init(securityContext,node);
+  newNode.onNodeInstantiation();
+  return newNode;
+}

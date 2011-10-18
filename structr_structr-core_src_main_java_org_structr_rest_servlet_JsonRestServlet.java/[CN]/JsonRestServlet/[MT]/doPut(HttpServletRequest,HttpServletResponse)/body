@@ -1,7 +1,7 @@
 {
-  CurrentRequest.setAccessMode(AccessMode.Frontend);
   try {
-    Result result=getResults(request);
+    SecurityContext securityContext=getSecurityContext(request);
+    Result result=getResults(securityContext,request);
     if (result != null) {
       final PropertySet propertySet=gson.fromJson(request.getReader(),PropertySet.class);
       final List<GraphObject> results=result.getResults();
@@ -9,8 +9,10 @@
         StructrTransaction transaction=new StructrTransaction(){
           @Override public Object execute() throws Throwable {
             for (            GraphObject obj : results) {
-              for (              NodeAttribute attr : propertySet.getAttributes()) {
-                obj.setProperty(attr.getKey(),attr.getValue());
+              if (mayModify(obj,request)) {
+                for (                NodeAttribute attr : propertySet.getAttributes()) {
+                  obj.setProperty(attr.getKey(),attr.getValue());
+                }
               }
             }
             return null;

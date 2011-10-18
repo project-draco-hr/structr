@@ -1,0 +1,15 @@
+{
+  List<AbstractNode> nodes=new LinkedList<AbstractNode>();
+  User user=securityContext.getUser();
+  if ((input != null) && input.iterator().hasNext()) {
+    for (    Node node : input) {
+      AbstractNode n=createNode(securityContext,node);
+      boolean publicUserAndPublicNode=((user == null) && n.isPublic());
+      boolean readableByUser=(publicUserAndPublicNode || ((user != null) && (user instanceof SuperUser)) || securityContext.isAllowed(n,Permission.Read));
+      if (readableByUser && (includeDeleted || !n.isDeleted()) && (n.isPublic() || !publicOnly)) {
+        nodes.add(n);
+      }
+    }
+  }
+  return nodes;
+}

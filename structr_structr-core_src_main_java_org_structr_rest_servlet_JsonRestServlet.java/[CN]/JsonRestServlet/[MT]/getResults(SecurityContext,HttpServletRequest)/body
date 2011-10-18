@@ -1,0 +1,44 @@
+{
+  PagingConstraint pagingConstraint=null;
+  String path=request.getPathInfo();
+  if (path != null) {
+    List<ResourceConstraint> constraintChain=parsePath(securityContext,path);
+    addOptimizableConstraints(request,constraintChain);
+    optimizeConstraintChain(constraintChain);
+    addNonOptimizableConstraints(request,constraintChain);
+    String pageSizeParameter=request.getParameter(REQUEST_PARAMETER_PAGE_SIZE);
+    if (pageSizeParameter != null) {
+      String pageParameter=request.getParameter(REQUEST_PARAMETER_PAGE_NUMBER);
+      int pageSize=parseInt(pageSizeParameter,DEFAULT_VALUE_PAGE_SIZE);
+      int page=parseInt(pageParameter,1);
+      pagingConstraint=new PagingConstraint(page,pageSize);
+      if (pageSize <= 0) {
+        throw new IllegalPathException();
+      }
+      constraintChain.add(pagingConstraint);
+    }
+    Result results=evaluateConstraints(constraintChain,request);
+    if (results != null) {
+      if (pagingConstraint != null) {
+        results.setPage(pagingConstraint.getPage());
+        results.setPageSize(pagingConstraint.getPageSize());
+        results.setPageCount(pagingConstraint.getPageCount());
+        results.setResultCount(pagingConstraint.getResultCount());
+      }
+ else {
+        List<GraphObject> resultList=results.getResults();
+        if (resultList != null) {
+          results.setResultCount(resultList.size());
+        }
+ else {
+          logger.log(Level.WARNING,"Got empty result set!");
+        }
+      }
+      results.setSortOrder(request.getParameter(REQUEST_PARAMETER_SORT_ORDER));
+      results.setSortKey(request.getParameter(REQUEST_PARAMETER_SORT_KEY));
+      results.setSearchString(request.getParameter(JsonRestServlet.REQUEST_PARAMETER_SEARCH_STRING));
+    }
+    return results;
+  }
+  return null;
+}

@@ -1,5 +1,6 @@
 {
-  HttpServletRequest request=CurrentRequest.getRequest();
+  final SecurityContext securityContext=out.getSecurityContext();
+  final HttpServletRequest request=out.getRequest();
   if (request == null) {
     return;
   }
@@ -251,7 +252,7 @@
       User assignedUser=null;
       searchAttrs.add(Search.andExactName(assignedUsername));
       searchAttrs.add(Search.andExactType(User.class.getSimpleName()));
-      List<User> userList=(List<User>)search.execute(new SuperUser(),null,false,false,searchAttrs);
+      List<User> userList=(List<User>)search.execute(securityContext,null,false,false,searchAttrs);
       if (!(userList.isEmpty())) {
         assignedUser=userList.get(0);
       }

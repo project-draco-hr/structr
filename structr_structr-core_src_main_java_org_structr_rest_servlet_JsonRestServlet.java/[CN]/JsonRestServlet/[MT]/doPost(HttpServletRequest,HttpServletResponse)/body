@@ -1,5 +1,6 @@
 {
   try {
+    SecurityContext securityContext=getSecurityContext(request);
     final PropertySet propertySet=gson.fromJson(request.getReader(),PropertySet.class);
     final List<NodeAttribute> attributes=propertySet.getAttributes();
     GraphObject newGraphObject=null;
@@ -11,7 +12,7 @@
       newGraphObject=handleRelationshipCreation(attributes);
     }
  else {
-      List<ResourceConstraint> constraintChain=parsePath(path);
+      List<ResourceConstraint> constraintChain=parsePath(securityContext,path);
       if (constraintChain.size() == 1) {
         ResourceConstraint constr=constraintChain.get(0);
         if (constr instanceof TypeConstraint) {

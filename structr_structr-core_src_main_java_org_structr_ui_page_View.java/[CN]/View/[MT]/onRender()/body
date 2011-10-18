@@ -1,5 +1,4 @@
 {
-  SecurityContext securityContext=CurrentRequest.getSecurityContext();
   AbstractNode nodeToRender=getNodeByIdOrPath(getNodeId());
   if (nodeToRender == null) {
     logger.log(Level.FINE,"Node {0} not found",getNodeId());
@@ -25,7 +24,7 @@
       editUrl=getContext().getRequest().getContextPath().concat(getContext().getPagePath(getEditPageClass(editNode))).concat("?").concat(NODE_ID_KEY).concat("=").concat(editNodeId.toString()).concat("&").concat(RENDER_MODE_KEY).concat("=").concat(INLINE_MODE);
     }
     try {
-      StructrOutputStream outputStream=new StructrOutputStream(getContext().getResponse());
+      StructrOutputStream outputStream=new StructrOutputStream(getContext().getRequest(),getContext().getResponse(),securityContext);
       nodeToRender.renderNode(outputStream,nodeToRender,editUrl,editNodeId);
       getContext().getResponse().getOutputStream().flush();
     }

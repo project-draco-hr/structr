@@ -1,14 +1,14 @@
 {
   Object result=null;
   if (argument instanceof Node) {
-    result=nodeFactory.createNode((Node)argument);
+    result=nodeFactory.createNode(securityContext,(Node)argument);
   }
  else   if (argument instanceof Long) {
     long id=((Long)argument).longValue();
     Node node=null;
     try {
       node=graphDb.getNodeById(id);
-      result=nodeFactory.createNode(node);
+      result=nodeFactory.createNode(securityContext,node);
     }
  catch (    NotFoundException nfe) {
       logger.log(Level.WARNING,"Node with id {0} not found in database!",id);
@@ -18,17 +18,17 @@
     try {
       long id=Long.parseLong((String)argument);
       Node node=graphDb.getNodeById(id);
-      result=nodeFactory.createNode(node);
+      result=nodeFactory.createNode(securityContext,node);
     }
  catch (    NumberFormatException ex) {
       logger.log(Level.FINE,"Could not parse {0} to number",argument);
       String path=(String)argument;
       Node rootNode=graphDb.getReferenceNode();
       if (path.endsWith("*")) {
-        result=TreeHelper.getNodesByPath(nodeFactory.createNode(rootNode),path,true);
+        result=TreeHelper.getNodesByPath(nodeFactory.createNode(securityContext,rootNode),path,true);
       }
  else {
-        result=TreeHelper.getNodeByPath(nodeFactory.createNode(rootNode),path,true);
+        result=TreeHelper.getNodeByPath(nodeFactory.createNode(securityContext,rootNode),path,true);
       }
     }
   }
@@ -37,15 +37,15 @@
     XPath xpath=(XPath)argument;
     String path=xpath.getXPath();
     if (path.endsWith("*")) {
-      result=TreeHelper.getNodesByPath(nodeFactory.createNode(rootNode),path,true);
+      result=TreeHelper.getNodesByPath(nodeFactory.createNode(securityContext,rootNode),path,true);
     }
  else {
-      result=TreeHelper.getNodeByPath(nodeFactory.createNode(rootNode),path,true);
+      result=TreeHelper.getNodeByPath(nodeFactory.createNode(securityContext,rootNode),path,true);
     }
   }
  else   if (argument instanceof ReferenceNode) {
     Node node=graphDb.getReferenceNode();
-    result=nodeFactory.createNode(node);
+    result=nodeFactory.createNode(securityContext,node);
   }
  else   if (argument instanceof NodeAttribute) {
     throw new UnsupportedOperationException("Not supported yet, use SearchNodeCommand instead!");
@@ -59,7 +59,7 @@
  else {
       s=graphDb.getNodeById(startNode.getId());
     }
-    result=nodeFactory.createNodes(Traversal.description().breadthFirst().relationships(RelType.HAS_CHILD,Direction.OUTGOING).traverse(s).nodes());
+    result=nodeFactory.createNodes(securityContext,Traversal.description().breadthFirst().relationships(RelType.HAS_CHILD,Direction.OUTGOING).traverse(s).nodes());
   }
   return result;
 }

@@ -3,11 +3,11 @@
     currentNode.renderEditFrame(out,editUrl);
   }
  else {
-    SecurityContext securityContext=CurrentRequest.getSecurityContext();
+    SecurityContext securityContext=out.getSecurityContext();
     if (securityContext.isVisible(currentNode)) {
       if (currentNode.getDontCache() == Boolean.TRUE) {
         long id=startNode.getId();
-        ServletContext context=CurrentRequest.getRequest().getSession().getServletContext();
+        ServletContext context=securityContext.getSession().getServletContext();
         java.util.Map<Long,TemporaryValue<String>> mapCache=(java.util.Map<Long,TemporaryValue<String>>)context.getAttribute(MAP_CACHE);
         if (mapCache == null) {
           mapCache=new ConcurrentHashMap<Long,TemporaryValue<String>>(1000,0.9f,8);
@@ -20,7 +20,7 @@
         }
         if ((cachedSVGMap.getStoredValue() == null) || cachedSVGMap.isExpired()) {
           StringBuilder content=new StringBuilder(500000);
-          renderSVGMap(currentNode,content,startNode);
+          renderSVGMap(securityContext,out.getRequest(),currentNode,content,startNode);
           cachedSVGMap.refreshStoredValue(content.toString());
         }
         out.append(cachedSVGMap.getStoredValue());
@@ -29,7 +29,7 @@
       String cachedSVGMap=currentNode.getSvgContent();
       if (StringUtils.isBlank(cachedSVGMap)) {
         StringBuilder cache=new StringBuilder();
-        renderSVGMap(currentNode,cache,startNode);
+        renderSVGMap(securityContext,out.getRequest(),currentNode,cache,startNode);
         currentNode.setSvgContent(cache.toString());
         out.append(cache);
       }

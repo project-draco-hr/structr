@@ -3,9 +3,16 @@
     logger.log(Level.WARNING,"Exactly 5 parameters are required for advanced search.");
     return Collections.emptyList();
   }
+  SecurityContext securityContext=null;
+  if (parameters[0] instanceof SecurityContext) {
+    securityContext=(SecurityContext)parameters[0];
+  }
   User user=null;
   if (parameters[0] instanceof User) {
     user=(User)parameters[0];
+  }
+ else   if (securityContext != null) {
+    user=securityContext.getUser();
   }
   AbstractNode topNode=null;
   if (parameters[1] instanceof AbstractNode) {
@@ -29,5 +36,5 @@
       searchAttrs.add((SearchAttribute)o);
     }
   }
-  return search(user,topNode,includeDeleted,publicOnly,searchAttrs);
+  return search(securityContext,topNode,includeDeleted,publicOnly,searchAttrs);
 }

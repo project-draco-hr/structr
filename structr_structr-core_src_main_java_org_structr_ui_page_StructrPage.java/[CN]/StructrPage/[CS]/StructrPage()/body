@@ -1,16 +1,13 @@
 {
   super();
-  CurrentRequest.setRequest(getContext().getRequest());
-  CurrentRequest.setResponse(getContext().getResponse());
+  securityContext=SecurityContext.getInstance(getContext().getServletConfig(),getContext().getRequest(),AccessMode.Frontend);
   contextPath=getContext().getRequest().getContextPath();
   FILES_PATH=Services.getFilesPath();
-  userName=getUsernameFromSession();
-  user=getUserNode();
-  if (user != null) {
-    CurrentSession.setUser(user);
-    sessionId=(Long)CurrentSession.getAttribute(SessionMonitor.SESSION_ID);
-    SessionMonitor.logPageRequest(sessionId,"Page Request",getContext().getRequest());
+  if (securityContext.getUser() != null) {
+    sessionId=(Long)getContext().getRequest().getSession().getAttribute(SessionMonitor.SESSION_ID);
+    SessionMonitor.logPageRequest(securityContext,sessionId,"Page Request",getContext().getRequest());
   }
+  String userName=securityContext.getUserName();
   if ((userName != null) && userName.equals(SUPERADMIN_USERNAME_KEY)) {
     isSuperUser=true;
   }

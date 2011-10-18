@@ -1,5 +1,6 @@
 {
   if (extractNodeForm.isValid()) {
+    final User user=securityContext.getUser();
     Object targetNodeId;
     String fieldValue=extractNodeForm.getFieldValue(TARGET_NODE_ID_KEY);
     if (fieldValue != null && !(fieldValue.isEmpty())) {
@@ -26,12 +27,12 @@
     parameters.put(RENDER_MODE_KEY,renderMode);
     if (transactionCommand.getExitCode().equals(Command.exitCode.FAILURE)) {
       errorMsg=transactionCommand.getErrorMessage();
-      Services.command(AddNotificationCommand.class).execute(new ErrorNotification(errorMsg));
+      Services.command(AddNotificationCommand.class).execute(new ErrorNotification(securityContext,errorMsg));
       parameters.put(ERROR_MSG_KEY,errorMsg);
     }
  else {
       okMsg="Node extracted to " + targetNodeId;
-      Services.command(AddNotificationCommand.class).execute(new SuccessNotification(okMsg));
+      Services.command(AddNotificationCommand.class).execute(new SuccessNotification(securityContext,okMsg));
       parameters.put(OK_MSG_KEY,okMsg);
     }
     setRedirect(getRedirectPage(node),parameters);

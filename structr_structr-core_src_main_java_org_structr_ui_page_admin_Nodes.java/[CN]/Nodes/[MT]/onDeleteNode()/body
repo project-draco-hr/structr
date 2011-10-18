@@ -2,6 +2,7 @@
   if (deleteNodeForm.isValid()) {
     final String parent=deleteNodeForm.getFieldValue(PARENT_NODE_ID_KEY);
     final String recursive=deleteNodeForm.getFieldValue(RECURSIVE_KEY);
+    final User user=securityContext.getUser();
     AbstractNode parentNode=null;
     try {
       final Command transactionCommand=Services.command(TransactionCommand.class);
@@ -37,7 +38,7 @@
       logger.log(Level.WARNING,"Node {0} could not be deleted.",getNodeId());
       okMsg=null;
       errorMsg="Node " + getNodeId() + " could not be deleted. "+ e.getMessage();
-      Services.command(AddNotificationCommand.class).execute(new ErrorNotification(errorMsg));
+      Services.command(AddNotificationCommand.class).execute(new ErrorNotification(securityContext,errorMsg));
       return true;
     }
   }

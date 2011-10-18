@@ -1,7 +1,7 @@
 {
-  CurrentRequest.setAccessMode(AccessMode.Frontend);
   try {
-    Result result=getResults(request);
+    SecurityContext securityContext=getSecurityContext(request);
+    Result result=getResults(securityContext,request);
     if (result != null) {
       final List<GraphObject> results=result.getResults();
       if (results != null && !results.isEmpty()) {
@@ -9,7 +9,9 @@
           @Override public Object execute() throws Throwable {
             boolean success=true;
             for (            GraphObject obj : results) {
-              success&=obj.delete();
+              if (mayDelete(obj,request)) {
+                success&=obj.delete();
+              }
             }
             if (!success) {
               throw new IllegalStateException("Deletion failed, roll back transaction");

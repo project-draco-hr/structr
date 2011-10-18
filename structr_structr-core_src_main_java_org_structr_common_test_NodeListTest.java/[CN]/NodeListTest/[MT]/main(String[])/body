@@ -1,6 +1,7 @@
 {
   StandaloneTestHelper.prepareStandaloneTest("/tmp/structr-test/");
   final GraphDatabaseService graphDb=(GraphDatabaseService)Services.command(GraphDatabaseCommand.class).execute();
+  final SecurityContext securityContext=SecurityContext.getSuperUserInstance();
   final Command factory=Services.command(NodeFactoryCommand.class);
   NodeList<AbstractNode> nodeList=null;
   for (  Node node : graphDb.getAllNodes()) {
@@ -56,7 +57,7 @@
             @Override public Object execute() throws Throwable {
               for (int i=0; i < finalCount; i++) {
                 AbstractNode node=new PlainText();
-                node.init(graphDb.createNode());
+                node.init(securityContext,graphDb.createNode());
                 node.setProperty(AbstractNode.Key.type.name(),"PlainText");
                 nodes.add(node);
               }
@@ -71,7 +72,7 @@
           final AbstractNode node=new PlainText();
           Services.command(TransactionCommand.class).execute(new StructrTransaction(){
             @Override public Object execute() throws Throwable {
-              node.init(graphDb.createNode());
+              node.init(securityContext,graphDb.createNode());
               node.setProperty(AbstractNode.Key.type.name(),"PlainText");
               return (null);
             }

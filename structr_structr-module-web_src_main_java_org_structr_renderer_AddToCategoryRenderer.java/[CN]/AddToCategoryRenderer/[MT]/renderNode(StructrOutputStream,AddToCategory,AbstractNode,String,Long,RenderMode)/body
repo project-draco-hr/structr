@@ -1,5 +1,5 @@
 {
-  HttpServletRequest request=CurrentRequest.getRequest();
+  HttpServletRequest request=out.getRequest();
   if (request == null) {
     return;
   }
@@ -31,7 +31,7 @@
   }
   String[] ids=StringUtils.split(objectId,",");
   for (  String id : ids) {
-    User user=CurrentSession.getUser();
+    User user=out.getSecurityContext().getUser();
     AbstractNode addedObject=user.addToCategory(categoryName,id);
     if (addedObject != null) {
       out.append("<div class=\"okMsg\">").append(addedObject.getName()).append(" successfully added to ").append(categoryName).append("</div>");

@@ -64,6 +64,7 @@
       @Override public Object execute() throws Throwable {
         Command createNode=Services.command(CreateNodeCommand.class);
         Command createRel=Services.command(CreateRelationshipCommand.class);
+        User user=securityContext.getUser();
         AbstractNode newNode=(AbstractNode)createNode.execute(new NodeAttribute(AbstractNode.Key.type.name(),File.class.getSimpleName()),user);
         String relativeFilePath=newNode.getId() + "_" + System.currentTimeMillis();
         String targetPath=FILES_PATH + "/" + relativeFilePath;

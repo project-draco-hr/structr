@@ -1,0 +1,30 @@
+{
+  Integer retries=getLoginAttemptsValue().get(request);
+  if ((retries != null) && (retries > maxRetries)) {
+    logger.log(Level.SEVERE,"More than {0} login failures, session {1} is blocked",new Object[]{maxRetries,session.getId()});
+    getSessionBlockedValue().set(request,true);
+    getErrorMessageValue().set(request,"Too many unsuccessful login attempts, your session is blocked for login!");
+  }
+ else   if ((retries != null) && (retries > delayThreshold)) {
+    logger.log(Level.INFO,"More than {0} login failures, execution delayed by {1} seconds",new Object[]{maxRetries,delayTime});
+    try {
+      Thread.sleep(delayTime * 1000);
+    }
+ catch (    InterruptedException ex) {
+      logger.log(Level.SEVERE,null,ex);
+    }
+    StringBuilder errorBuffer=new StringBuilder(200);
+    errorBuffer.append("You had more than ");
+    errorBuffer.append(maxRetries);
+    errorBuffer.append(" unsuccessful login attempts, execution was delayed by ");
+    errorBuffer.append(delayTime);
+    errorBuffer.append(" seconds.");
+    getErrorMessageValue().set(request,errorBuffer.toString());
+  }
+ else   if (retries != null) {
+    getLoginAttemptsValue().set(request,getLoginAttemptsValue().get(request) + 1);
+  }
+ else {
+    getLoginAttemptsValue().set(request,1);
+  }
+}

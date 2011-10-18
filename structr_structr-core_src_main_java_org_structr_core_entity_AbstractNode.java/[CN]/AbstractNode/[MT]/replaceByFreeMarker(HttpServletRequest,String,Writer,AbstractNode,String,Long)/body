@@ -1,0 +1,52 @@
+{
+  Configuration cfg=new Configuration();
+  try {
+    AbstractNode callingNode=null;
+    if (getTemplate() != null) {
+      callingNode=template.getCallingNode();
+    }
+ else {
+      callingNode=startNode;
+    }
+    Map root=new HashMap();
+    root.put("this",this);
+    root.put("StartNode",startNode);
+    root.put("node",startNode);
+    if (callingNode != null) {
+      root.put(callingNode.getType(),callingNode);
+      root.put("CallingNode",callingNode);
+    }
+    if (request != null) {
+      HttpRequestParametersHashModel requestModel=new HttpRequestParametersHashModel(request);
+      root.put("Request",requestModel);
+      root.put("ContextPath",request.getContextPath());
+      String searchString=Search.clean(request.getParameter("search"));
+      if ((searchString != null) && !(searchString.isEmpty())) {
+        root.put("SearchString",searchString);
+        List<AbstractNode> result=RequestHelper.retrieveSearchResult(securityContext,request);
+        root.put("SearchResults",result);
+      }
+    }
+    if (user != null) {
+      root.put("User",user);
+    }
+    root.put("Helper",new TemplateHelper());
+    root.put("path",new PathHelper());
+    HttpSession session=securityContext.getSession();
+    if (session != null) {
+      if (session.getAttribute("errorMessage") != null) {
+        root.put("ErrorMessage",session.getAttribute("errorMessage"));
+      }
+      if (session.getAttribute("okMessage") != null) {
+        root.put("OkMessage",session.getAttribute("okMessage"));
+      }
+    }
+    String name=(template != null) ? template.getName() : getName();
+    freemarker.template.Template t=new freemarker.template.Template(name,new StringReader(templateString),cfg);
+    t.process(root,out);
+    out.flush();
+  }
+ catch (  Throwable t) {
+    logger.log(Level.WARNING,"Error: {0}",t.getMessage());
+  }
+}

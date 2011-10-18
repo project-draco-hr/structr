@@ -1,0 +1,11 @@
+{
+  StringBuilder ret=new StringBuilder();
+  Map<String,Object> parameterMap=request.getParameterMap();
+  for (  String name : parameterMap.keySet()) {
+    if (name.startsWith(PREVIEW_PARAMETER_PREFIX)) {
+      String newName=name.substring(PREVIEW_PARAMETER_PREFIX.length());
+      ret.append((ret.length() > 0) ? "&" : "?").append(newName).append("=").append(request.getParameter(name));
+    }
+  }
+  return ret.toString();
+}

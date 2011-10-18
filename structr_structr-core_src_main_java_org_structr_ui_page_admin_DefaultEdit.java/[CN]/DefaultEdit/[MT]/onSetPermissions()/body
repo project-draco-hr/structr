@@ -1,5 +1,4 @@
 {
-  final SecurityContext securityContext=CurrentRequest.getSecurityContext();
   final Map<String,String> parameters=new HashMap<String,String>();
   if (securityForm.isValid()) {
     final String selectedUserName=securityForm.getFieldValue(userSelect.getName());
@@ -13,6 +12,7 @@
         Command findGroup=Services.command(FindGroupCommand.class);
         User selectedUser=(User)findUser.execute(selectedUserName);
         Group selectedGroup=(Group)findGroup.execute(selectedGroupName);
+        User user=securityContext.getUser();
         if ((selectedUser != null) || (selectedGroup != null)) {
           List<AbstractNode> nodes=new LinkedList<AbstractNode>();
           if (rec) {

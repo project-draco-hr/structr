@@ -12,13 +12,13 @@
     try {
       long id=Long.parseLong(path);
       Node node=graphDb.getNodeById(id);
-      return nodeFactory.createNode(node);
+      return nodeFactory.createNode(securityContext,node);
     }
  catch (    Exception ex) {
       logger.log(Level.FINE,"Node with id {0} not found in database! Reason: {1}",new Object[]{path,ex.getMessage()});
     }
     if (path.startsWith("/")) {
-      currentNode=nodeFactory.createNode(graphDb.getReferenceNode());
+      currentNode=nodeFactory.createNode(securityContext,graphDb.getReferenceNode());
     }
     if (path.endsWith("*")) {
       result=TreeHelper.getNodesByPath(currentNode,path,true);

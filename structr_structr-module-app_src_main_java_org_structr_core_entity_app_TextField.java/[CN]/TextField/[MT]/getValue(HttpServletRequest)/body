@@ -1,2 +1,28 @@
 {
+  Object value=getValueFromSource(request);
+  String name=getName();
+  String ret=null;
+  if (RequestHelper.isRedirected(request)) {
+    value=getLastValue().get(request);
+    getLastValue().set(request,null);
+  }
+  if (request == null) {
+    return value;
+  }
+  if (request != null) {
+    ret=request.getParameter(name);
+    if (ret != null) {
+      if (ret.length() == 0) {
+        return null;
+      }
+ else {
+        getLastValue().set(request,ret);
+        return ret;
+      }
+    }
+ else {
+      return value;
+    }
+  }
+  return null;
 }

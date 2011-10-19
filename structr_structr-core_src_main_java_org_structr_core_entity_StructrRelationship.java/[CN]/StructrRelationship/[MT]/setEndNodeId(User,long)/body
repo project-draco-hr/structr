@@ -1,2 +1,20 @@
 {
+  Command transaction=Services.command(securityContext,TransactionCommand.class);
+  transaction.execute(new StructrTransaction(){
+    @Override public Object execute() throws Throwable {
+      Command findNode=Services.command(securityContext,FindNodeCommand.class);
+      Command deleteRel=Services.command(securityContext,DeleteRelationshipCommand.class);
+      Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
+      Command nodeFactory=Services.command(securityContext,NodeFactoryCommand.class);
+      AbstractNode startNode=(AbstractNode)nodeFactory.execute(getStartNode());
+      AbstractNode newEndNode=(AbstractNode)findNode.execute(user,endNodeId);
+      if (newEndNode != null) {
+        RelationshipType type=dbRelationship.getType();
+        deleteRel.execute(dbRelationship);
+        dbRelationship=((StructrRelationship)createRel.execute(type,startNode,newEndNode)).getRelationship();
+      }
+      return (null);
+    }
+  }
+);
 }

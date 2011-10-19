@@ -4,9 +4,9 @@
   if (isDirty) {
     value=properties.get(key);
   }
-  if (key.equals(Key.isPublic.name())) {
-    final Object oldValue=getProperty("public");
-    new StructrTransaction(){
+  if (key.equals(Key.isPublic.name()) && dbNode.hasProperty("public")) {
+    final Object oldValue=dbNode.getProperty("public");
+    StructrTransaction transaction=new StructrTransaction(){
       @Override public Object execute() throws Throwable {
         dbNode.setProperty(Key.isPublic.name(),oldValue);
         dbNode.removeProperty("public");
@@ -14,6 +14,10 @@
       }
     }
 ;
+    Services.command(securityContext,TransactionCommand.class).execute(transaction);
+    if (transaction.getCause() != null) {
+      logger.log(Level.WARNING,"Error while setting property",transaction.getCause());
+    }
   }
   if ((key != null) && dbNode.hasProperty(key)) {
     value=dbNode.getProperty(key);

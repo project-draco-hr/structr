@@ -252,7 +252,7 @@
       User assignedUser=null;
       searchAttrs.add(Search.andExactName(assignedUsername));
       searchAttrs.add(Search.andExactType(User.class.getSimpleName()));
-      List<User> userList=(List<User>)search.execute(securityContext,null,false,false,searchAttrs);
+      List<User> userList=(List<User>)search.execute(null,false,false,searchAttrs);
       if (!(userList.isEmpty())) {
         assignedUser=userList.get(0);
       }
@@ -261,7 +261,8 @@
       newUser.setPassword(password);
       searchAttrs.add(Search.andExactName(publicUserDirectoryName));
       searchAttrs.add(Search.andExactType(Folder.class.getSimpleName()));
-      List<Folder> folders=(List<Folder>)search.execute(null,registrationCheckNode,false,false,searchAttrs);
+      searchAttrs.add(new BooleanSearchAttribute(AbstractNode.Key.isPublic.name(),Boolean.TRUE,SearchOperator.AND));
+      List<Folder> folders=(List<Folder>)search.execute(registrationCheckNode,false,false,searchAttrs);
       Folder publicUserDirectory=null;
       if (folders.size() > 0) {
         publicUserDirectory=folders.get(0);

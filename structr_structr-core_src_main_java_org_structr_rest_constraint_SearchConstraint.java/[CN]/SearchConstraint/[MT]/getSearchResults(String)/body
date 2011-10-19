@@ -1,6 +1,5 @@
 {
   List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
-  User user=new SuperUser();
   AbstractNode topNode=null;
   boolean includeDeleted=false;
   boolean publicOnly=false;
@@ -17,7 +16,7 @@
     nameGroup.add(new TextualSearchAttribute("name",searchString,SearchOperator.OR));
     nameGroup.add(new TextualSearchAttribute("shortName",searchString,SearchOperator.OR));
     searchAttributes.add(nameGroup);
-    return (List<GraphObject>)Services.command(securityContext,SearchNodeCommand.class).execute(securityContext,topNode,includeDeleted,publicOnly,searchAttributes);
+    return (List<GraphObject>)Services.command(securityContext,SearchNodeCommand.class).execute(topNode,includeDeleted,publicOnly,searchAttributes);
   }
   throw new NoResultsException();
 }

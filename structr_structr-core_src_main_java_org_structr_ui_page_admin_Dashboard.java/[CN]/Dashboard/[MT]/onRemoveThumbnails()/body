@@ -2,7 +2,7 @@
   Long numberOfRemovedThumbnails=(Long)Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
     @Override public Object execute() throws Throwable {
       Long numberOfThumbnails=0L;
-      List<Image> images=new LinkedList<Image>();
+      List<Image> images=(List<Image>)Services.command(securityContext,SearchNodeCommand.class).execute(null,null,true,false,Search.andExactType(Image.class.getSimpleName()));
       for (      AbstractNode s : getAllNodes()) {
         if (s instanceof Image) {
           images.add((Image)s);

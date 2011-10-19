@@ -4,19 +4,19 @@
   if (isDirty) {
     value=properties.get(key);
   }
+  if (key.equals(Key.isPublic.name())) {
+    final Object oldValue=getProperty("public");
+    new StructrTransaction(){
+      @Override public Object execute() throws Throwable {
+        dbNode.setProperty(Key.isPublic.name(),oldValue);
+        dbNode.removeProperty("public");
+        return null;
+      }
+    }
+;
+  }
   if ((key != null) && dbNode.hasProperty(key)) {
     value=dbNode.getProperty(key);
-    if (key.equals("public")) {
-      final Object val=value;
-      new StructrTransaction(){
-        @Override public Object execute() throws Throwable {
-          dbNode.setProperty(Key.isPublic.name(),val);
-          dbNode.removeProperty(key);
-          return null;
-        }
-      }
-;
-    }
   }
   PropertyConverter converter=EntityContext.getPropertyConverter(securityContext,type,key);
   if (converter != null) {

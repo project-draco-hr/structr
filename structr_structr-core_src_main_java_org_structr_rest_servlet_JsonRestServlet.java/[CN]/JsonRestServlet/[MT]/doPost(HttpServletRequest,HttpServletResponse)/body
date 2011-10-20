@@ -2,39 +2,12 @@
   try {
     SecurityContext securityContext=getSecurityContext(request);
     final PropertySet propertySet=gson.fromJson(request.getReader(),PropertySet.class);
-    final List<NodeAttribute> attributes=propertySet.getAttributes();
-    GraphObject newGraphObject=null;
-    String path=request.getPathInfo();
-    if (path.endsWith("/node")) {
-      newGraphObject=handleNodeCreation(securityContext,attributes);
-    }
- else     if (path.endsWith("/rel")) {
-      newGraphObject=handleRelationshipCreation(securityContext,attributes);
+    ResourceConstraint resourceConstraint=optimizeConstraintChain(parsePath(securityContext,request));
+    if (propertySet != null) {
+      resourceConstraint.doPost(propertySet);
     }
  else {
-      List<ResourceConstraint> constraintChain=parsePath(securityContext,request);
-      if (constraintChain.size() == 1) {
-        ResourceConstraint constr=constraintChain.get(0);
-        if (constr instanceof TypeConstraint) {
-          TypeConstraint typeConstraint=(TypeConstraint)constr;
-          String type=typeConstraint.getType();
-          attributes.add(new NodeAttribute(AbstractNode.Key.type.name(),StringUtils.capitalize(type)));
-          newGraphObject=handleNodeCreation(securityContext,attributes);
-        }
- else {
-          throw new IllegalPathException();
-        }
-      }
- else {
-        throw new IllegalPathException();
-      }
-    }
-    if (newGraphObject != null) {
-      response.setHeader("Location",buildLocationURI(request,newGraphObject.getType(),newGraphObject.getId()));
-      response.setStatus(HttpServletResponse.SC_CREATED);
-    }
- else {
-      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+      logger.log(Level.WARNING,"propertySet was null!");
     }
   }
  catch (  IllegalArgumentException illegalArgumentException) {

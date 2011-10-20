@@ -3,8 +3,9 @@
     SecurityContext securityContext=getSecurityContext(request);
     propertyView.set(PropertyView.Public);
     double queryTimeStart=System.nanoTime();
-    Result result=getResults(securityContext,request);
+    ResourceConstraint resourceConstraint=optimizeConstraintChain(parsePath(securityContext,request));
     double queryTimeEnd=System.nanoTime();
+    Result result=new Result(resourceConstraint.doGet());
     if (result != null) {
       DecimalFormat decimalFormat=new DecimalFormat("0.000000000",DecimalFormatSymbols.getInstance(Locale.ENGLISH));
       result.setQueryTime(decimalFormat.format((queryTimeEnd - queryTimeStart) / 1000000000.0));

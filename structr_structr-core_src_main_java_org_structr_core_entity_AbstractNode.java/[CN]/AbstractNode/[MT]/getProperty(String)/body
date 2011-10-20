@@ -1,6 +1,12 @@
 {
   Class type=this.getClass();
   Object value=null;
+  if (EntityContext.getRelations(type).containsKey(key)) {
+    DirectedRelationship rel=EntityContext.getRelations(type).get(key);
+    if (rel != null) {
+      return getTraversalResults(rel.getRelType(),rel.getDirection());
+    }
+  }
   if (isDirty) {
     value=properties.get(key);
   }

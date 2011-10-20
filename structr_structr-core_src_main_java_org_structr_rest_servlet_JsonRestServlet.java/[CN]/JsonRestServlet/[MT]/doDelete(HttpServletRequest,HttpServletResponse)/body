@@ -1,10 +1,15 @@
 {
   try {
     SecurityContext securityContext=getSecurityContext(request);
-    ResourceConstraint resourceConstraint=optimizeConstraintChain(parsePath(securityContext,request));
-    resourceConstraint.doDelete(graphObjectListeners);
+    List<ResourceConstraint> chain=parsePath(securityContext,request);
+    ResourceConstraint resourceConstraint=optimizeConstraintChain(chain);
+    RestMethodResult result=resourceConstraint.doDelete(graphObjectListeners);
+    result.commitResponse(response);
   }
- catch (  PathException pathException) {
+ catch (  IllegalArgumentException illegalArgumentException) {
+    handleValidationError(illegalArgumentException,response);
+  }
+catch (  PathException pathException) {
     response.setStatus(pathException.getStatus());
   }
 catch (  JsonSyntaxException jsex) {

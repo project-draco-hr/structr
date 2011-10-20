@@ -1,10 +1,11 @@
 {
   Class type=this.getClass();
   Object value=null;
-  if (EntityContext.getRelations(type).containsKey(key)) {
-    DirectedRelationship rel=EntityContext.getRelations(type).get(key);
+  String singularType=(key.endsWith("ies") ? key.substring(0,key.length() - 3) : (key.endsWith("s") ? key.substring(0,key.length() - 1) : key));
+  if (EntityContext.getRelations(type).containsKey(singularType)) {
+    DirectedRelationship rel=EntityContext.getRelations(type).get(singularType);
     if (rel != null) {
-      return getTraversalResults(rel.getRelType(),rel.getDirection());
+      return getTraversalResults(rel.getRelType(),rel.getDirection(),StringUtils.capitalize(singularType));
     }
   }
   if (isDirty) {

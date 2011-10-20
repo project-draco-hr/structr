@@ -1,0 +1,14 @@
+{
+  StringBuilder errorBuffer=new StringBuilder(100);
+  errorBuffer.append(illegalArgumentException.getMessage());
+  response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+  response.setContentLength(errorBuffer.length());
+  try {
+    response.getWriter().append(errorBuffer.toString());
+    response.getWriter().flush();
+    response.getWriter().close();
+  }
+ catch (  Throwable t) {
+    logger.log(Level.WARNING,"Unable to commit response",t);
+  }
+}

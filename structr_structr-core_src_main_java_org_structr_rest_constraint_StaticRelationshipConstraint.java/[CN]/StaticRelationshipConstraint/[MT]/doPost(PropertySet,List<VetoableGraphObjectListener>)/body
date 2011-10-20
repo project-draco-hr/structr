@@ -2,7 +2,7 @@
   final AbstractNode sourceNode=typedIdConstraint.getIdConstraint().getNode();
   final AbstractNode newNode=typeConstraint.createNode(propertySet);
   final DirectedRelationship rel=EntityContext.getRelation(sourceNode.getClass(),newNode.getClass());
-  if (rel != null) {
+  if (sourceNode != null && newNode != null && rel != null) {
     final RelationshipType relType=rel.getRelType();
     StructrTransaction transaction=new StructrTransaction(){
       @Override public Object execute() throws Throwable {
@@ -14,6 +14,8 @@
     if (transaction.getCause() != null) {
       throw transaction.getCause();
     }
+    RestMethodResult result=new RestMethodResult(HttpServletResponse.SC_CREATED);
+    return result;
   }
   throw new IllegalPathException();
 }

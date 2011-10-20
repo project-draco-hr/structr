@@ -3,7 +3,8 @@
     SecurityContext securityContext=getSecurityContext(request);
     propertyView.set(PropertyView.Public);
     double queryTimeStart=System.nanoTime();
-    ResourceConstraint resourceConstraint=optimizeConstraintChain(parsePath(securityContext,request));
+    List<ResourceConstraint> chain=parsePath(securityContext,request);
+    ResourceConstraint resourceConstraint=optimizeConstraintChain(chain);
     double queryTimeEnd=System.nanoTime();
     Result result=new Result(resourceConstraint.doGet());
     if (result != null) {
@@ -21,7 +22,10 @@
       response.setStatus(HttpServletResponse.SC_NO_CONTENT);
     }
   }
- catch (  PathException pathException) {
+ catch (  IllegalArgumentException illegalArgumentException) {
+    handleValidationError(illegalArgumentException,response);
+  }
+catch (  PathException pathException) {
     response.setStatus(pathException.getStatus());
   }
 catch (  JsonSyntaxException jsex) {

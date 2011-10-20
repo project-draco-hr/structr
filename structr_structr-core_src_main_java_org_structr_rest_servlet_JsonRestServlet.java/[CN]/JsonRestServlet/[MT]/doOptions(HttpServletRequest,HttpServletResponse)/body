@@ -1,13 +1,15 @@
 {
   try {
     SecurityContext securityContext=getSecurityContext(request);
-    ResourceConstraint resourceConstraint=optimizeConstraintChain(parsePath(securityContext,request));
-    resourceConstraint.doOptions();
-    response.setHeader("Allowed","GET");
-    response.setContentLength(0);
-    response.setStatus(HttpServletResponse.SC_OK);
+    List<ResourceConstraint> chain=parsePath(securityContext,request);
+    ResourceConstraint resourceConstraint=optimizeConstraintChain(chain);
+    RestMethodResult result=resourceConstraint.doOptions();
+    result.commitResponse(response);
   }
- catch (  PathException pathException) {
+ catch (  IllegalArgumentException illegalArgumentException) {
+    handleValidationError(illegalArgumentException,response);
+  }
+catch (  PathException pathException) {
     response.setStatus(pathException.getStatus());
   }
 catch (  JsonSyntaxException jsex) {
@@ -17,7 +19,7 @@ catch (  JsonParseException jpex) {
     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
   }
 catch (  Throwable t) {
-    logger.log(Level.WARNING,"Exception in GET",t);
+    logger.log(Level.WARNING,"Exception in OPTIONS",t);
     response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
   }
 }

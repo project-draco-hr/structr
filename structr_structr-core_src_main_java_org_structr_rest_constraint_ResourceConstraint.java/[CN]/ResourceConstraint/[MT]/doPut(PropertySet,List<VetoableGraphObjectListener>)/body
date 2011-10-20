@@ -1,0 +1,22 @@
+{
+  final List<GraphObject> results=doGet();
+  if (results != null && !results.isEmpty()) {
+    StructrTransaction transaction=new StructrTransaction(){
+      @Override public Object execute() throws Throwable {
+        for (        GraphObject obj : results) {
+          if (mayModify(listeners,obj)) {
+            for (            NodeAttribute attr : propertySet.getAttributes()) {
+              obj.setProperty(attr.getKey(),attr.getValue());
+            }
+          }
+        }
+        return null;
+      }
+    }
+;
+    Services.command(securityContext,TransactionCommand.class).execute(transaction);
+    if (transaction.getCause() != null) {
+      throw transaction.getCause();
+    }
+  }
+}

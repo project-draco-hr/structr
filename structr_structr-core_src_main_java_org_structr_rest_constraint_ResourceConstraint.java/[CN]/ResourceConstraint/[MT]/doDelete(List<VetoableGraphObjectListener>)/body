@@ -1,0 +1,23 @@
+{
+  final List<GraphObject> results=doGet();
+  if (results != null && !results.isEmpty()) {
+    Boolean success=(Boolean)Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws Throwable {
+        boolean success=true;
+        for (        GraphObject obj : results) {
+          if (mayDelete(listeners,obj)) {
+            success&=obj.delete();
+          }
+        }
+        if (!success) {
+          throw new IllegalStateException("Deletion failed, roll back transaction");
+        }
+        return success;
+      }
+    }
+);
+  }
+ else {
+    throw new NotFoundException();
+  }
+}

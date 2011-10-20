@@ -29,7 +29,7 @@
   }
   String searchString=request.getParameter(REQUEST_PARAMETER_SEARCH_STRING);
   if (searchString != null) {
-    constraintChain.add(new SearchConstraint(searchString));
+    constraintChain.add(new SearchConstraint(securityContext,searchString));
   }
   String sortKey=request.getParameter(REQUEST_PARAMETER_SORT_KEY);
   if (sortKey != null) {
@@ -37,7 +37,7 @@
     if (sortOrder == null) {
       sortOrder=DEFAULT_VALUE_SORT_ORDER;
     }
-    constraintChain.add(new SortConstraint(sortKey,sortOrder));
+    constraintChain.add(new SortConstraint(securityContext,sortKey,sortOrder));
   }
   String pageSizeParameter=request.getParameter(REQUEST_PARAMETER_PAGE_SIZE);
   if (pageSizeParameter != null) {
@@ -47,7 +47,7 @@
     if (pageSize <= 0) {
       throw new IllegalPathException();
     }
-    constraintChain.add(new PagingConstraint(page,pageSize));
+    constraintChain.add(new PagingConstraint(securityContext,page,pageSize));
   }
   return constraintChain;
 }

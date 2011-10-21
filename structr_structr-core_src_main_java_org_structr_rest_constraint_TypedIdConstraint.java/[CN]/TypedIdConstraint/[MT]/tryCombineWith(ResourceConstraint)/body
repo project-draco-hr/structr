@@ -3,10 +3,10 @@
     return new StaticRelationshipConstraint(this,(TypeConstraint)next);
   }
  else   if (next instanceof TypedIdConstraint) {
-    TypedIdConstraint constr1=this;
-    TypedIdConstraint constr2=(TypedIdConstraint)next;
-    AbstractNode node1=constr1.getTypesafeNode();
-    AbstractNode node2=constr2.getTypesafeNode();
+    return handleNestedIdConstraint((TypedIdConstraint)next);
+  }
+ else   if (next instanceof StaticRelationshipConstraint) {
+    return handleNestedIdConstraint(((StaticRelationshipConstraint)next).getTypedIdConstraint());
   }
   return super.tryCombineWith(next);
 }

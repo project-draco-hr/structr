@@ -1,8 +1,9 @@
 {
   AbstractNode node=idConstraint.getNode();
   String type=typeConstraint.getType();
-  if (type.equals(node.getType())) {
+  if (type.equalsIgnoreCase(node.getType())) {
     return node;
   }
-  throw new IllegalPathException();
+  logger.log(Level.WARNING,"Path rejected because of type mismatch. Expected {0}, encountered {1}",new Object[]{type,node.getType()});
+  throw new NotFoundException();
 }

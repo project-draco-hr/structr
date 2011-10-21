@@ -1,12 +1,8 @@
 {
-  List<GraphObject> results=idConstraint.doGet();
-  if (results != null) {
-    String type=typeConstraint.getType();
-    for (    GraphObject obj : results) {
-      if (!type.equalsIgnoreCase(obj.getType())) {
-        throw new IllegalPathException();
-      }
-    }
+  List<GraphObject> results=new LinkedList<GraphObject>();
+  AbstractNode node=getTypesafeNode();
+  if (node != null) {
+    results.add(node);
     return results;
   }
   throw new NotFoundException();

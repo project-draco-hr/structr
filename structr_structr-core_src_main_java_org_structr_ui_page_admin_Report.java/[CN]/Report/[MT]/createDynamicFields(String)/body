@@ -1,7 +1,7 @@
 {
   Class<AbstractNode> c=(Class<AbstractNode>)Services.command(securityContext,GetEntityClassCommand.class).execute(resultType);
   if (c != null) {
-    java.lang.reflect.Field[] fields=c.getFields();
+    Set<String> fields=EntityContext.getPropertySet(c,PropertyView.All);
     AbstractNode o=new CustomTypeNode();
     try {
       o=(AbstractNode)c.newInstance();
@@ -10,39 +10,32 @@
       logger.log(Level.SEVERE,null,t);
     }
     if (fields != null) {
-      for (      java.lang.reflect.Field f : fields) {
-        String fieldName=null;
-        try {
-          fieldName=(String)f.get(o);
-          if (AbstractNode.Key.type.name().equals(fieldName)) {
-            continue;
-          }
-          TextField text=new TextField(fieldName);
-          text.bindRequestValue();
-          propertyFields.add(text);
-          Checkbox check=new Checkbox(checkBoxName(fieldName),"");
-          check.bindRequestValue();
-          propertyFields.add(check);
-          String fieldValue=reportForm.getFieldValue(fieldName);
-          if (fieldValue != null && !(fieldValue.isEmpty())) {
-            searchAttributes.add(new TextualSearchAttribute(fieldName,fieldValue,SearchOperator.AND));
-          }
-          Field field=propertyFields.getField(checkBoxName(fieldName));
-          Checkbox checkbox=null;
-          if (field instanceof Checkbox) {
-            checkbox=(Checkbox)field;
-          }
-          if (checkbox.isChecked()) {
-            Column col;
-            col=new Column(fieldName);
-            reportTable.addColumn(col);
-            columns.add(col);
-          }
-          reportForm.add(propertyFields);
+      for (      String fieldName : fields) {
+        if (AbstractNode.Key.type.name().equals(fieldName)) {
+          continue;
         }
- catch (        Throwable t) {
-          logger.log(Level.SEVERE,null,t);
+        TextField text=new TextField(fieldName);
+        text.bindRequestValue();
+        propertyFields.add(text);
+        Checkbox check=new Checkbox(checkBoxName(fieldName),"");
+        check.bindRequestValue();
+        propertyFields.add(check);
+        String fieldValue=reportForm.getFieldValue(fieldName);
+        if (fieldValue != null && !(fieldValue.isEmpty())) {
+          searchAttributes.add(new TextualSearchAttribute(fieldName,fieldValue,SearchOperator.AND));
         }
+        Field field=propertyFields.getField(checkBoxName(fieldName));
+        Checkbox checkbox=null;
+        if (field instanceof Checkbox) {
+          checkbox=(Checkbox)field;
+        }
+        if (checkbox.isChecked()) {
+          Column col;
+          col=new Column(fieldName);
+          reportTable.addColumn(col);
+          columns.add(col);
+        }
+        reportForm.add(propertyFields);
       }
     }
   }

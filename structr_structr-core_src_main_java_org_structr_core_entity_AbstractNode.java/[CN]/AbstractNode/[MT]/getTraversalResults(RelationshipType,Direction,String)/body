@@ -7,7 +7,13 @@
           return Evaluation.EXCLUDE_AND_CONTINUE;
         }
  else {
-          return Evaluation.INCLUDE_AND_CONTINUE;
+          Node currentNode=path.endNode();
+          if (currentNode.hasProperty(AbstractNode.Key.type.name())) {
+            String nodeType=(String)currentNode.getProperty(AbstractNode.Key.type.name());
+            if (type.equals(nodeType)) {
+              return Evaluation.INCLUDE_AND_CONTINUE;
+            }
+          }
         }
       }
       return Evaluation.EXCLUDE_AND_PRUNE;

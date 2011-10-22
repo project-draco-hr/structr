@@ -4,9 +4,15 @@
   final DirectedRelationship rel=EntityContext.getRelation(sourceNode.getClass(),newNode.getClass());
   if (sourceNode != null && newNode != null && rel != null) {
     final RelationshipType relType=rel.getRelType();
+    final Direction direction=rel.getDirection();
     StructrTransaction transaction=new StructrTransaction(){
       @Override public Object execute() throws Throwable {
-        return Services.command(securityContext,CreateRelationshipCommand.class).execute(sourceNode,newNode,relType);
+        if (direction.equals(Direction.OUTGOING)) {
+          return Services.command(securityContext,CreateRelationshipCommand.class).execute(sourceNode,newNode,relType);
+        }
+ else {
+          return Services.command(securityContext,CreateRelationshipCommand.class).execute(newNode,sourceNode,relType);
+        }
       }
     }
 ;

@@ -1,9 +1,20 @@
 {
+  Class type=this.getClass();
   if (key == null) {
     logger.log(Level.SEVERE,"Tried to set property with null key (action was denied)");
     return;
   }
-  Class type=this.getClass();
+  String singularType=getSingularTypeName(key);
+  if (key.endsWith("Id")) {
+    singularType=singularType.substring(0,singularType.length() - 2);
+  }
+  if (EntityContext.getRelations(type).containsKey(singularType)) {
+    DirectedRelationship rel=EntityContext.getRelations(type).get(singularType);
+    if (rel != null) {
+      rel.createRelationship(securityContext,this,value);
+      return;
+    }
+  }
   PropertyConverter converter=EntityContext.getPropertyConverter(securityContext,type,key);
   final Object convertedValue;
   if (converter != null) {

@@ -1,11 +1,24 @@
 {
-  Class type=this.getClass();
+  boolean idRequested=false;
   Object value=null;
-  String singularType=(key.endsWith("ies") ? key.substring(0,key.length() - 3).concat("y") : (key.endsWith("s") ? key.substring(0,key.length() - 1) : key));
-  if (EntityContext.getRelations(type).containsKey(singularType)) {
+  Class type=this.getClass();
+  String singularType=getSingularTypeName(key);
+  if (key.endsWith("Id")) {
+    singularType=singularType.substring(0,singularType.length() - 2);
+    idRequested=true;
+  }
+  if (singularType != null && EntityContext.getRelations(type).containsKey(singularType)) {
     DirectedRelationship rel=EntityContext.getRelations(type).get(singularType);
-    if (rel != null) {
-      return getTraversalResults(rel.getRelType(),rel.getDirection(),StringUtils.capitalize(singularType));
+    if (idRequested) {
+      AbstractNode node=rel.getRelatedNode(securityContext,this,singularType);
+      if (node != null) {
+        return node.getId();
+      }
+ else {
+      }
+    }
+ else {
+      return rel.getRelatedNodes(securityContext,this,singularType);
     }
   }
   if (isDirty) {

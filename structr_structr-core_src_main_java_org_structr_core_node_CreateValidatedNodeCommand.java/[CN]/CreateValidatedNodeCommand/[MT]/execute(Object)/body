@@ -9,7 +9,11 @@
     Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
     Map<String,Object> attrs=new HashMap<String,Object>();
     for (    Object o : parameters) {
-      if (o instanceof Collection) {
+      if (o instanceof Map) {
+        Map<String,Object> map=(Map<String,Object>)o;
+        attrs.putAll(map);
+      }
+ else       if (o instanceof Collection) {
         Collection<NodeAttribute> c=(Collection)o;
         for (        NodeAttribute attr : c) {
           attrs.put(attr.getKey(),attr.getValue());

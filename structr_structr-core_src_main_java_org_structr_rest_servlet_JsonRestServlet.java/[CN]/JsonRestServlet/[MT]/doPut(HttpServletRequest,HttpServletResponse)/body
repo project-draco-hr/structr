@@ -4,7 +4,11 @@
     SecurityContext securityContext=getSecurityContext(request);
     List<ResourceConstraint> chain=parsePath(securityContext,request);
     ResourceConstraint resourceConstraint=optimizeConstraintChain(chain);
-    RestMethodResult result=resourceConstraint.doPut(propertySet,graphObjectListeners);
+    Map<String,Object> properties=new LinkedHashMap<String,Object>();
+    for (    NodeAttribute attr : propertySet.getAttributes()) {
+      properties.put(attr.getKey(),attr.getValue());
+    }
+    RestMethodResult result=resourceConstraint.doPut(properties,graphObjectListeners);
     result.commitResponse(response);
   }
  catch (  IllegalArgumentException illegalArgumentException) {

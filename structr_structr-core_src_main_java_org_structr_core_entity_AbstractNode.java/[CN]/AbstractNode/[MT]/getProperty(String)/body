@@ -11,12 +11,17 @@
   if (isDirty) {
     value=properties.get(key);
   }
-  if (key.equals(Key.isPublic.name()) && dbNode.hasProperty("public")) {
-    final Object oldValue=dbNode.getProperty("public");
+  if (key.equals(Key.visibleToPublicUsers.name()) && (dbNode.hasProperty("public") || dbNode.hasProperty("isPublic"))) {
+    final Object oldValue=dbNode.hasProperty("public") ? dbNode.getProperty("public") : dbNode.getProperty("isPublic");
     StructrTransaction transaction=new StructrTransaction(){
       @Override public Object execute() throws Throwable {
-        dbNode.setProperty(Key.isPublic.name(),oldValue);
-        dbNode.removeProperty("public");
+        dbNode.setProperty(Key.visibleToPublicUsers.name(),oldValue);
+        if (dbNode.hasProperty("public")) {
+          dbNode.removeProperty("public");
+        }
+        if (dbNode.hasProperty("isPublic")) {
+          dbNode.removeProperty("isPublic");
+        }
         return null;
       }
     }

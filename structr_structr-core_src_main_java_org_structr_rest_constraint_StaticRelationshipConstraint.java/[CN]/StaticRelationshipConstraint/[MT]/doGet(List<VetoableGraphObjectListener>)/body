@@ -5,21 +5,7 @@
     String targetType=typeConstraint.getType();
     DirectedRelationship staticRel=EntityContext.getRelation(sourceType,targetType);
     if (staticRel != null) {
-      LinkedList<GraphObject> transformedResults=new LinkedList<GraphObject>();
-      for (      GraphObject obj : results) {
-        List<StructrRelationship> rels=obj.getRelationships(staticRel.getRelType(),staticRel.getDirection());
-        if (staticRel.getDirection().equals(Direction.INCOMING)) {
-          for (          StructrRelationship rel : rels) {
-            transformedResults.add(rel.getStartNode());
-          }
-        }
- else {
-          for (          StructrRelationship rel : rels) {
-            transformedResults.add(rel.getEndNode());
-          }
-        }
-      }
-      return transformedResults;
+      return staticRel.getRelatedNodes(securityContext,typedIdConstraint.getTypesafeNode(),targetType);
     }
   }
   throw new IllegalPathException();

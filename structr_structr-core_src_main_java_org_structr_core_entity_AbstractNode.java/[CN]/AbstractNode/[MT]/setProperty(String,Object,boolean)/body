@@ -11,7 +11,12 @@
   if (EntityContext.getRelations(type).containsKey(singularType)) {
     DirectedRelationship rel=EntityContext.getRelations(type).get(singularType);
     if (rel != null) {
-      rel.createRelationship(securityContext,this,value);
+      try {
+        rel.createRelationship(securityContext,this,value);
+      }
+ catch (      Throwable t) {
+        logger.log(Level.WARNING,"Exception while setting nested property",t);
+      }
       return;
     }
   }

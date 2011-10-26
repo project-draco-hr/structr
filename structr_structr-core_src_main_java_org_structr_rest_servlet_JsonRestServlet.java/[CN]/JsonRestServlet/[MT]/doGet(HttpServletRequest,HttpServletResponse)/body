@@ -22,7 +22,14 @@
       response.setStatus(HttpServletResponse.SC_NO_CONTENT);
     }
   }
- catch (  IllegalArgumentException illegalArgumentException) {
+ catch (  MessageException msgException) {
+    response.setStatus(msgException.getStatus());
+    response.setContentLength(msgException.getMessage().length());
+    response.getWriter().append(msgException.getMessage());
+    response.getWriter().flush();
+    response.getWriter().close();
+  }
+catch (  IllegalArgumentException illegalArgumentException) {
     handleValidationError(illegalArgumentException,response);
   }
 catch (  PathException pathException) {

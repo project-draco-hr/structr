@@ -4,7 +4,9 @@
     return this;
   }
  else   if (next instanceof TypeConstraint) {
-    return new StaticRelationshipConstraint(securityContext,lastConstraint,(TypeConstraint)next);
+    if (getValidatedPath() != null) {
+      return new StaticRelationshipConstraint(securityContext,lastConstraint,(TypeConstraint)next);
+    }
   }
   return super.tryCombineWith(next);
 }

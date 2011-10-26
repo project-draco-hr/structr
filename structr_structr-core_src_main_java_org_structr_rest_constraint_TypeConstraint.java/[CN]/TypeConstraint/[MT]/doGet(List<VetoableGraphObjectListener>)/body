@@ -4,7 +4,7 @@
   boolean includeDeleted=false;
   boolean publicOnly=false;
   if (type != null) {
-    searchAttributes.add(new TextualSearchAttribute("type",type,SearchOperator.OR));
+    searchAttributes.add(Search.orExactType(CaseHelper.toCamelCase(type)));
     List<GraphObject> results=(List<GraphObject>)Services.command(securityContext,SearchNodeCommand.class).execute(topNode,includeDeleted,publicOnly,searchAttributes);
     if (!results.isEmpty()) {
       return results;

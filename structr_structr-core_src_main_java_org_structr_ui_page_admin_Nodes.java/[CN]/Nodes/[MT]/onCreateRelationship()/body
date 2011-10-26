@@ -10,8 +10,8 @@
       @Override public Object execute() throws Throwable {
         Command findNode=Services.command(securityContext,FindNodeCommand.class);
         Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
-        AbstractNode startNode=(AbstractNode)findNode.execute(user,Long.parseLong(sourceNodeId));
-        AbstractNode endNode=(AbstractNode)findNode.execute(user,Long.parseLong(targetNodeId));
+        AbstractNode startNode=(AbstractNode)findNode.execute(Long.parseLong(sourceNodeId));
+        AbstractNode endNode=(AbstractNode)findNode.execute(Long.parseLong(targetNodeId));
         StructrRelationship newRel=(StructrRelationship)createRel.execute(startNode,endNode,relType);
         newRel.setProperty(TARGET_SLOT_NAME_KEY,targetSlotName);
         return (null);

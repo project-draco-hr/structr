@@ -15,37 +15,45 @@
         return node.getId();
       }
  else {
+        logger.log(Level.FINE,"Related node not found for key {0}",key);
       }
     }
  else {
-      return rel.getRelatedNodes(securityContext,this,singularType);
-    }
+switch (rel.getCardinality()) {
+case ManyToMany:
+case OneToMany:
+        return rel.getRelatedNodes(securityContext,this,singularType);
+case OneToOne:
+case ManyToOne:
+      return rel.getRelatedNode(securityContext,this,singularType);
   }
-  if (isDirty) {
-    value=properties.get(key);
+}
+}
+if (isDirty) {
+value=properties.get(key);
+}
+if (key.equals(Key.visibleToPublicUsers.name()) && dbNode.hasProperty("public")) {
+final Object oldValue=dbNode.getProperty("public");
+StructrTransaction transaction=new StructrTransaction(){
+  @Override public Object execute() throws Throwable {
+    dbNode.setProperty(Key.visibleToPublicUsers.name(),oldValue);
+    dbNode.removeProperty("public");
+    return null;
   }
-  if (key.equals(Key.visibleToPublicUsers.name()) && dbNode.hasProperty("public")) {
-    final Object oldValue=dbNode.getProperty("public");
-    StructrTransaction transaction=new StructrTransaction(){
-      @Override public Object execute() throws Throwable {
-        dbNode.setProperty(Key.visibleToPublicUsers.name(),oldValue);
-        dbNode.removeProperty("public");
-        return null;
-      }
-    }
+}
 ;
-    Services.command(securityContext,TransactionCommand.class).execute(transaction);
-    if (transaction.getCause() != null) {
-      logger.log(Level.WARNING,"Error while setting property",transaction.getCause());
-    }
-  }
-  if ((key != null) && dbNode.hasProperty(key)) {
-    value=dbNode.getProperty(key);
-  }
-  PropertyConverter converter=EntityContext.getPropertyConverter(securityContext,type,key);
-  if (converter != null) {
-    Value conversionValue=EntityContext.getPropertyConversionParameter(type,key);
-    value=converter.convertForGetter(value,conversionValue);
-  }
-  return value;
+Services.command(securityContext,TransactionCommand.class).execute(transaction);
+if (transaction.getCause() != null) {
+  logger.log(Level.WARNING,"Error while setting property",transaction.getCause());
+}
+}
+if ((key != null) && dbNode.hasProperty(key)) {
+value=dbNode.getProperty(key);
+}
+PropertyConverter converter=EntityContext.getPropertyConverter(securityContext,type,key);
+if (converter != null) {
+Value conversionValue=EntityContext.getPropertyConversionParameter(type,key);
+value=converter.convertForGetter(value,conversionValue);
+}
+return value;
 }

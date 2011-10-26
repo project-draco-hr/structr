@@ -9,7 +9,7 @@
         Command findNode=Services.command(securityContext,FindNodeCommand.class);
         Command createNode=Services.command(securityContext,CreateNodeCommand.class);
         Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
-        AbstractNode parentNode=(AbstractNode)findNode.execute(user,Long.parseLong(targetNodeId));
+        AbstractNode parentNode=(AbstractNode)findNode.execute(Long.parseLong(targetNodeId));
         AbstractNode newNode=(AbstractNode)createNode.execute(user);
         newNodeForm.copyTo(newNode);
         createRel.execute(parentNode,newNode,RelType.HAS_CHILD);
@@ -24,7 +24,7 @@
       okMsg="New " + s.getType() + " node "+ s.getName()+ " has been created.";
       Services.command(securityContext,AddNotificationCommand.class).execute(new SuccessNotification(securityContext,okMsg));
       Command findNode=Services.command(securityContext,FindNodeCommand.class);
-      AbstractNode n=(AbstractNode)findNode.execute(user,s.getId());
+      AbstractNode n=(AbstractNode)findNode.execute(s.getId());
       Map<String,String> parameters=new HashMap<String,String>();
       parameters.put(NODE_ID_KEY,String.valueOf(s.getId()));
       parameters.put(RENDER_MODE_KEY,renderMode);

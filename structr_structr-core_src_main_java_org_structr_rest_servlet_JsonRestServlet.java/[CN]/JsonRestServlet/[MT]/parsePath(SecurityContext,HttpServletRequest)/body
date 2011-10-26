@@ -12,10 +12,9 @@
           try {
             Class type=entry.getValue();
             ResourceConstraint constraint=(ResourceConstraint)type.newInstance();
-            if (constraint.checkAndConfigure(part,request)) {
+            if (constraint.checkAndConfigure(part,securityContext,request)) {
               logger.log(Level.FINE,"{0} matched, adding constraint of type {1} for part {2}",new Object[]{matcher.pattern(),type.getName(),part});
               constraint.configurePropertyView(propertyView);
-              constraint.setSecurityContext(securityContext);
               constraintChain.add(constraint);
               break;
             }

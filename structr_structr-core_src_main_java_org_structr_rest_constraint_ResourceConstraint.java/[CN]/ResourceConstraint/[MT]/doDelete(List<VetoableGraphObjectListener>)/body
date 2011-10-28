@@ -3,9 +3,10 @@
   if (results != null && !results.isEmpty()) {
     Boolean success=(Boolean)Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
       @Override public Object execute() throws Throwable {
+        ErrorBuffer errorBuffer=new ErrorBuffer();
         boolean success=true;
         for (        GraphObject obj : results) {
-          if (mayDelete(listeners,obj)) {
+          if (mayDelete(listeners,obj,errorBuffer)) {
             if (obj instanceof AbstractNode) {
               List<StructrRelationship> rels=((AbstractNode)obj).getRelationships();
               for (              StructrRelationship rel : rels) {
@@ -16,7 +17,7 @@
           }
         }
         if (!success) {
-          throw new IllegalStateException("Deletion failed, roll back transaction");
+          throw new IllegalArgumentException(errorBuffer.toString());
         }
         return success;
       }

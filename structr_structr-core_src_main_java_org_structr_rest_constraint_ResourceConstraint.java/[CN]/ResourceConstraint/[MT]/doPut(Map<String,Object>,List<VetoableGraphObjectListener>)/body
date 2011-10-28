@@ -3,11 +3,15 @@
   if (results != null && !results.isEmpty()) {
     StructrTransaction transaction=new StructrTransaction(){
       @Override public Object execute() throws Throwable {
+        ErrorBuffer errorBuffer=new ErrorBuffer();
         for (        GraphObject obj : results) {
-          if (mayModify(listeners,obj)) {
+          if (mayModify(listeners,obj,errorBuffer)) {
             for (            Entry<String,Object> attr : propertySet.entrySet()) {
               obj.setProperty(attr.getKey(),attr.getValue());
             }
+          }
+ else {
+            throw new IllegalArgumentException(errorBuffer.toString());
           }
         }
         return null;

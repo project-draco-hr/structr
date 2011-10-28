@@ -12,12 +12,12 @@
     DirectedRelationship rel=EntityContext.getRelations(type).get(singularType);
     if (rel != null) {
       try {
-        rel.createRelationship(securityContext,this,value);
+        rel.createRelationship(securityContext,this,value,singularType);
+        return;
       }
  catch (      Throwable t) {
-        logger.log(Level.WARNING,"Exception while setting nested property",t);
+        throw new IllegalArgumentException(t.getMessage());
       }
-      return;
     }
   }
   PropertyConverter converter=EntityContext.getPropertyConverter(securityContext,type,key);
@@ -33,7 +33,7 @@
   if (validator != null) {
     logger.log(Level.FINE,"Using validator of type {0} for property {1}",new Object[]{validator.getClass().getSimpleName(),key});
     Value parameter=EntityContext.getPropertyValidationParameter(type,key);
-    StringBuilder errorBuffer=new StringBuilder(20);
+    ErrorBuffer errorBuffer=new ErrorBuffer();
     if (!validator.isValid(key,convertedValue,parameter,errorBuffer)) {
       throw new IllegalArgumentException(errorBuffer.toString());
     }

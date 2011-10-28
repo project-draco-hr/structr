@@ -1,9 +1,9 @@
 {
   final AbstractNode sourceNode=typedIdConstraint.getIdConstraint().getNode();
-  final AbstractNode newNode=typeConstraint.createNode(propertySet);
+  final AbstractNode newNode=typeConstraint.createNode(listeners,propertySet);
   final DirectedRelationship rel=EntityContext.getRelation(sourceNode.getClass(),newNode.getClass());
   if (sourceNode != null && newNode != null && rel != null) {
-    rel.createRelationship(securityContext,sourceNode,newNode);
+    rel.createRelationship(securityContext,sourceNode,newNode,newNode.getType());
     RestMethodResult result=new RestMethodResult(HttpServletResponse.SC_CREATED);
     result.addHeader("Location",buildLocationHeader(newNode.getType(),newNode.getId()));
     return result;

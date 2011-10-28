@@ -1,8 +1,8 @@
 {
   GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
   StructrNodeFactory nodeFactory=(StructrNodeFactory)arguments.get("nodeFactory");
+  User user=securityContext.getUser();
   AbstractNode node=null;
-  User user=null;
   boolean updateIndex=true;
   if (graphDb != null) {
     Date now=new Date();
@@ -23,9 +23,6 @@
         NodeAttribute attr=(NodeAttribute)o;
         attrs.put(attr.getKey(),attr.getValue());
       }
- else       if (o instanceof User) {
-        user=(User)o;
-      }
  else       if (o instanceof Boolean) {
         updateIndex=(Boolean)o;
       }
@@ -34,20 +31,19 @@
     String nodeType=typeObject != null ? typeObject.toString() : "GenericNode";
     node=nodeFactory.createNode(securityContext,graphDb.createNode(),nodeType);
     Class nodeClass=node.getClass();
-    logger.log(Level.INFO,"New node with type {0} and ID {1} created",new Object[]{nodeClass.getSimpleName(),node.getId()});
     Set<String> propertySet=EntityContext.getPropertySet(nodeClass,PropertyView.All);
-    StringBuilder validationErrorBuffer=new StringBuilder(20);
+    ErrorBuffer errorBuffer=new ErrorBuffer();
     boolean nodeIsValid=true;
     for (    String property : propertySet) {
       PropertyValidator validator=EntityContext.getPropertyValidator(securityContext,nodeClass,property);
       if (validator != null) {
         Value parameter=EntityContext.getPropertyValidationParameter(nodeClass,property);
         Object value=attrs.get(property);
-        nodeIsValid&=validator.isValid(property,value,parameter,validationErrorBuffer);
+        nodeIsValid&=validator.isValid(property,value,parameter,errorBuffer);
       }
     }
     if (!nodeIsValid) {
-      throw new IllegalArgumentException(validationErrorBuffer.toString());
+      throw new IllegalArgumentException(errorBuffer.toString());
     }
     for (    Entry<String,Object> attr : attrs.entrySet()) {
       node.setProperty(attr.getKey(),attr.getValue());
@@ -79,5 +75,6 @@
   if (node != null) {
     node.onNodeCreation();
   }
+  logger.log(Level.INFO,"New node with type {0} and ID {1} created",new Object[]{node.getType(),node.getId()});
   return node;
 }

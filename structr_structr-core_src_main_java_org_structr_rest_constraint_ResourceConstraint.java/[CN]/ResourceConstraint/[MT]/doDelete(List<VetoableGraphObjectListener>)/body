@@ -1,11 +1,18 @@
 {
-  final List<? extends GraphObject> results=doGet(listeners);
+  List<? extends GraphObject> results;
+  try {
+    results=doGet(listeners);
+  }
+ catch (  NoResultsException nre) {
+    results=null;
+  }
   if (results != null && !results.isEmpty()) {
-    Boolean success=(Boolean)Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+    final List<? extends GraphObject> finalResults=results;
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
       @Override public Object execute() throws Throwable {
         ErrorBuffer errorBuffer=new ErrorBuffer();
         boolean success=true;
-        for (        GraphObject obj : results) {
+        for (        GraphObject obj : finalResults) {
           if (mayDelete(listeners,obj,errorBuffer)) {
             if (obj instanceof AbstractNode) {
               List<StructrRelationship> rels=((AbstractNode)obj).getRelationships();
@@ -23,9 +30,6 @@
       }
     }
 );
-    if (success != null && success.booleanValue() == true) {
-      return new RestMethodResult(HttpServletResponse.SC_OK);
-    }
   }
-  throw new NotFoundException();
+  return new RestMethodResult(HttpServletResponse.SC_OK);
 }

@@ -4,6 +4,14 @@
     logger.log(Level.SEVERE,"Tried to set property with null key (action was denied)");
     return;
   }
+  if (EntityContext.isReadOnlyProperty(type,key)) {
+    if (readOnlyPropertiesUnlocked) {
+      readOnlyPropertiesUnlocked=false;
+    }
+ else {
+      throw new IllegalArgumentException("Property '".concat(key).concat("' is read-only."));
+    }
+  }
   String singularType=getSingularTypeName(key);
   if (key.endsWith("Id")) {
     singularType=singularType.substring(0,singularType.length() - 2);

@@ -22,8 +22,8 @@
     if (listener.waitForAuthentication()) {
       client.sendTCP(new PushNodeRequestContainer(remoteTargetNodeId));
       if (recursive) {
-        List<AbstractNode> nodes=sourceNode.getAllChildrenForRemotePush(new SuperUser());
-        progressNotification.setTargetProgress(sourceNode.getRemotePushSize(new SuperUser(),chunkSize));
+        List<AbstractNode> nodes=sourceNode.getAllChildrenForRemotePush();
+        progressNotification.setTargetProgress(sourceNode.getRemotePushSize(chunkSize));
         for (        AbstractNode n : nodes) {
           if (n instanceof File) {
             sendFile(client,listener,(File)n,chunkSize,progressNotification);

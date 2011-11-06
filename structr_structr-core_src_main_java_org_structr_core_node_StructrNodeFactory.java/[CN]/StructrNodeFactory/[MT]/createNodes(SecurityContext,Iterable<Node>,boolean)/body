@@ -5,7 +5,7 @@
     for (    Node node : input) {
       AbstractNode n=createNode(securityContext,node);
       boolean readableByUser=((user instanceof SuperUser) || securityContext.isAllowed(n,Permission.Read));
-      boolean publicUserAndPublicNode=((user == null) && n.isPublic());
+      boolean publicUserAndPublicNode=((user == null) && n.isVisibleToPublicUsers());
       if ((readableByUser || publicUserAndPublicNode) && (includeDeleted || !n.isDeleted())) {
         nodes.add(n);
       }

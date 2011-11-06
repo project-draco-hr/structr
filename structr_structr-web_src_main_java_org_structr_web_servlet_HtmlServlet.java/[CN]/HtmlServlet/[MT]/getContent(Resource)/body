@@ -1,26 +1,2 @@
 {
-  final StringBuilder builder=new StringBuilder();
-  TraversalDescription localDesc=desc.expand(new ResourceExpander(resource.getIdString()));
-  localDesc=localDesc.evaluator(new Evaluator(){
-    @Override public Evaluation evaluate(    Path path){
-      Node node=path.endNode();
-      try {
-        String type=(String)node.getProperty(AbstractNode.Key.type.name());
-        if ("Content".equals(type)) {
-          builder.append(node.getProperty(Content.Key.content.name()));
-          return Evaluation.EXCLUDE_AND_PRUNE;
-        }
- else {
-          return Evaluation.EXCLUDE_AND_CONTINUE;
-        }
-      }
- catch (      Throwable t) {
-      }
-      return Evaluation.EXCLUDE_AND_PRUNE;
-    }
-  }
-);
-  for (  Path path : localDesc.traverse(resource.getNode())) {
-  }
-  return builder.toString();
 }

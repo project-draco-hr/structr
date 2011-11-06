@@ -8,17 +8,25 @@
     request.setCharacterEncoding("UTF-8");
     DecimalFormat decimalFormat=new DecimalFormat("0.000000000",DecimalFormatSymbols.getInstance(Locale.ENGLISH));
     double start=System.nanoTime();
-    long id=Long.parseLong(request.getParameter("id"));
-    Resource resource=(Resource)Services.command(SecurityContext.getSuperUserInstance(),FindNodeCommand.class).execute(id);
-    String content=getContent(resource);
-    double end=System.nanoTime();
-    logger.log(Level.INFO,"Content collected in {0} seconds",decimalFormat.format((end - start) / 1000000000.0));
-    response.getWriter().append(content);
+    String idString=request.getParameter("id");
+    if (idString != null) {
+      long id=Long.parseLong(idString);
+      Resource resource=(Resource)Services.command(SecurityContext.getSuperUserInstance(),FindNodeCommand.class).execute(id);
+      if (resource == null) {
+        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        return;
+      }
+      String content=getContent(resource);
+      double end=System.nanoTime();
+      logger.log(Level.INFO,"Content collected in {0} seconds",decimalFormat.format((end - start) / 1000000000.0));
+      response.getWriter().append(content);
+    }
     response.getWriter().flush();
     response.getWriter().close();
     response.setStatus(HttpServletResponse.SC_OK);
   }
  catch (  Throwable t) {
     logger.log(Level.WARNING,"Exception while processing request",t);
+    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
   }
 }

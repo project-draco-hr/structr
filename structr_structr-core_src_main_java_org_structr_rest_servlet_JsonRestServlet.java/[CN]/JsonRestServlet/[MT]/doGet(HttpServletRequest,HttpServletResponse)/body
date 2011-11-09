@@ -7,7 +7,7 @@
     List<ResourceConstraint> chain=parsePath(securityContext,request);
     ResourceConstraint resourceConstraint=optimizeConstraintChain(chain);
     double queryTimeEnd=System.nanoTime();
-    Result result=new Result(resourceConstraint.doGet(graphObjectListeners));
+    Result result=new Result(resourceConstraint.doGet(graphObjectListeners),resourceConstraint.isCollectionResource());
     if (result != null) {
       DecimalFormat decimalFormat=new DecimalFormat("0.000000000",DecimalFormatSymbols.getInstance(Locale.ENGLISH));
       result.setQueryTime(decimalFormat.format((queryTimeEnd - queryTimeStart) / 1000000000.0));

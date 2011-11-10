@@ -5,7 +5,12 @@
     for (    Entry<String,JsonElement> entry : obj.entrySet()) {
       String key=entry.getKey();
       JsonElement elem=entry.getValue();
-      wrapper.add(key,elem.getAsString());
+      if (elem.isJsonNull()) {
+        wrapper.add(key,null);
+      }
+ else {
+        wrapper.add(key,elem.getAsString());
+      }
     }
   }
   return wrapper;

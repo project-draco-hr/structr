@@ -31,6 +31,10 @@
       String content=getContent(resource);
       double end=System.nanoTime();
       logger.log(Level.INFO,"Content collected in {0} seconds",decimalFormat.format((end - start) / 1000000000.0));
+      String contentType=resource.getContentType();
+      if (contentType != null) {
+        response.setContentType(contentType);
+      }
       response.getWriter().append(content);
       response.getWriter().flush();
       response.getWriter().close();

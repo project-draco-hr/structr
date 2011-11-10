@@ -5,22 +5,27 @@
     @Override public Evaluation evaluate(    Path path){
       Node node=path.endNode();
       try {
-        String type=(String)node.getProperty(AbstractNode.Key.type.name());
-        if ("Content".equals(type)) {
-          builder.append(node.getProperty(Content.Key.content.name()));
-          return Evaluation.EXCLUDE_AND_PRUNE;
-        }
+        if (node.hasProperty(AbstractNode.Key.type.name())) {
+          String type=(String)node.getProperty(AbstractNode.Key.type.name());
+          if ("Content".equals(type)) {
+            builder.append(node.getProperty(Content.Key.content.name()));
+            return Evaluation.EXCLUDE_AND_PRUNE;
+          }
  else {
-          return Evaluation.EXCLUDE_AND_CONTINUE;
+            return Evaluation.EXCLUDE_AND_CONTINUE;
+          }
         }
       }
  catch (      Throwable t) {
+        logger.log(Level.SEVERE,"While evaluating path " + path,t);
       }
-      return Evaluation.EXCLUDE_AND_PRUNE;
+      return Evaluation.EXCLUDE_AND_CONTINUE;
     }
   }
 );
-  for (  Path path : localDesc.traverse(resource.getNode())) {
+  Iterable<Path> paths=localDesc.traverse(resource.getNode());
+  for (  Path path : paths) {
+    logger.log(Level.INFO,"Path: {0}",path.toString());
   }
   return builder.toString();
 }

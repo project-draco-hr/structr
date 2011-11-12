@@ -1,0 +1,29 @@
+{
+  if (parameter == null) {
+    throw new IllegalStateException("TypeAndExactNameValidator needs a type parameter.");
+  }
+  String type=(String)parameter.get();
+  if (key == null) {
+    return false;
+  }
+  if (!(value instanceof String)) {
+    errorBuffer.add("Property '",key,"' must be of type string.");
+    return false;
+  }
+  String stringValue=(String)value;
+  if (StringUtils.isBlank(stringValue)) {
+    errorBuffer.add("Property '",key,"' must not be empty.");
+    return false;
+  }
+  List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
+  attrs.add(Search.andExactName(stringValue));
+  attrs.add(Search.andType(type));
+  List<AbstractNode> nodes=(List<AbstractNode>)Services.command(securityContext,SearchNodeCommand.class).execute(null,false,false,attrs);
+  if (nodes != null && !nodes.isEmpty()) {
+    return true;
+  }
+ else {
+    errorBuffer.add("Property value for '",key,"' does not match any existing value.");
+    return false;
+  }
+}

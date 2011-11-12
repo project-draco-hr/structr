@@ -1,13 +1,13 @@
 {
-  List<? extends GraphObject> results;
+  Iterable<? extends GraphObject> results;
   try {
     results=doGet(listeners);
   }
  catch (  NoResultsException nre) {
     results=null;
   }
-  if (results != null && !results.isEmpty()) {
-    final List<? extends GraphObject> finalResults=results;
+  if (results != null) {
+    final Iterable<? extends GraphObject> finalResults=results;
     Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
       @Override public Object execute() throws Throwable {
         ErrorBuffer errorBuffer=new ErrorBuffer();

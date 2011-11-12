@@ -11,13 +11,21 @@
   JsonArray properties=new JsonArray();
   for (  String key : src.getPropertyKeys(localPropertyView)) {
     Object value=src.getProperty(key);
-    if (value instanceof Collection) {
-      Collection<GraphObject> values=(Collection<GraphObject>)value;
+    if (value instanceof Iterable) {
       JsonArray property=new JsonArray();
-      for (      GraphObject obj : values) {
-        JsonElement recursiveSerializedValue=this.serializeNestedKeyValueType(obj,typeOfSrc,context,includeTypeInOutput,localPropertyView,depth + 1);
-        if (recursiveSerializedValue != null) {
-          property.add(recursiveSerializedValue);
+      for (      Object o : (Iterable)value) {
+        if (o instanceof GraphObject) {
+          GraphObject obj=(GraphObject)o;
+          JsonElement recursiveSerializedValue=this.serializeNestedKeyValueType(obj,typeOfSrc,context,includeTypeInOutput,localPropertyView,depth + 1);
+          if (recursiveSerializedValue != null) {
+            property.add(recursiveSerializedValue);
+          }
+        }
+ else         if (o instanceof Map) {
+          properties.add(serializeMap((Map)o));
+        }
+ else {
+          properties.add(serializePrimitive(key,o,includeTypeInOutput));
         }
       }
       properties.add(property);
@@ -26,23 +34,11 @@
       GraphObject graphObject=(GraphObject)value;
       properties.add(this.serializeNestedKeyValueType(graphObject,typeOfSrc,context,includeTypeInOutput,localPropertyView,depth + 1));
     }
+ else     if (value instanceof Map) {
+      properties.add(serializeMap((Map)value));
+    }
  else {
-      JsonObject property=new JsonObject();
-      property.add("key",new JsonPrimitive(key));
-      if (value != null) {
-        property.add("value",new JsonPrimitive(value.toString()));
-        if (includeTypeInOutput) {
-          String valueType=value.getClass().getSimpleName();
-          property.add("type",new JsonPrimitive(valueType));
-        }
-      }
- else {
-        property.add("value",new JsonNull());
-        if (includeTypeInOutput) {
-          property.add("type",new JsonNull());
-        }
-      }
-      properties.add(property);
+      properties.add(serializePrimitive(key,value,includeTypeInOutput));
     }
   }
   jsonObject.add("properties",properties);

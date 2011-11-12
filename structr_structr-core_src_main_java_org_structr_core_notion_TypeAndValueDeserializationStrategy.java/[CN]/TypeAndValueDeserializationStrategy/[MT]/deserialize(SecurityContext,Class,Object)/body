@@ -1,0 +1,18 @@
+{
+  List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
+  attrs.add(Search.andExactPropertyValue(propertyKey,source.toString()));
+  attrs.add(Search.andType(type.getSimpleName()));
+  List<AbstractNode> nodes=(List<AbstractNode>)Services.command(securityContext,SearchNodeCommand.class).execute(null,false,false,attrs);
+  ErrorBuffer buf=new ErrorBuffer();
+  int size=nodes.size();
+switch (size) {
+case 0:
+    buf.add(type.getSimpleName(),"' with ",propertyKey.name()," = '",source,"' not found.");
+  break;
+case 1:
+return nodes.get(0);
+default :
+buf.add(type.getSimpleName(),"' with ",propertyKey.name()," = '",source,"' is ambiguous.");
+}
+throw new IllegalStateException(buf.toString());
+}

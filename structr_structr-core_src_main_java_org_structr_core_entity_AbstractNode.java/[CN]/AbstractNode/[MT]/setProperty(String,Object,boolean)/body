@@ -20,10 +20,12 @@
     DirectedRelationship rel=EntityContext.getRelations(type).get(singularType.toLowerCase());
     if (rel != null) {
       try {
-        rel.createRelationship(securityContext,this,value,singularType);
+        GraphObject graphObject=rel.getNotion().getAdapterForSetter(securityContext).adapt(value);
+        rel.createRelationship(securityContext,this,graphObject,singularType);
         return;
       }
  catch (      Throwable t) {
+        logger.log(Level.WARNING,"Exception in setProperty",t);
         throw new IllegalArgumentException(t.getMessage());
       }
     }

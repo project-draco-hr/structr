@@ -10,7 +10,7 @@
   if ((singularType != null) && EntityContext.getRelations(type).containsKey(singularType.toLowerCase())) {
     DirectedRelationship rel=EntityContext.getRelations(type).get(singularType.toLowerCase());
     if (idRequested) {
-      AbstractNode node=rel.getRelatedNode(securityContext,this,singularType);
+      GraphObject node=rel.getRelatedNode(securityContext,this,singularType);
       if (node != null) {
         return node.getId();
       }
@@ -19,13 +19,14 @@
       }
     }
  else {
+      Notion notion=rel.getNotion();
 switch (rel.getCardinality()) {
 case ManyToMany:
 case OneToMany:
-        return rel.getRelatedNodes(securityContext,this,singularType);
+        return new IterableAdapter(rel.getRelatedNodes(securityContext,this,singularType),notion.getAdapterForGetter(securityContext));
 case OneToOne:
 case ManyToOne:
-      return rel.getRelatedNode(securityContext,this,singularType);
+      return notion.getAdapterForGetter(securityContext).adapt(rel.getRelatedNode(securityContext,this,singularType));
   }
 }
 }

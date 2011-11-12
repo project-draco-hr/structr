@@ -1,21 +1,9 @@
 {
   propertySet.put(AbstractNode.Key.type.name(),CaseHelper.toCamelCase(type));
-  StructrTransaction transaction=new StructrTransaction(){
-    @Override public Object execute() throws Throwable {
-      AbstractNode newNode=(AbstractNode)Services.command(securityContext,CreateNodeCommand.class).execute(propertySet);
-      ErrorBuffer errorBuffer=new ErrorBuffer();
-      if (!mayCreate(listeners,newNode,errorBuffer) || !validAFterCreation(listeners,newNode,errorBuffer)) {
-        throw new IllegalArgumentException(errorBuffer.toString());
-      }
-      return newNode;
-    }
-  }
-;
-  AbstractNode newNode=(AbstractNode)Services.command(securityContext,TransactionCommand.class).execute(transaction);
-  if (newNode == null) {
-    if (transaction.getCause() != null) {
-      throw transaction.getCause();
-    }
+  AbstractNode newNode=(AbstractNode)Services.command(securityContext,CreateNodeCommand.class).execute(propertySet);
+  ErrorBuffer errorBuffer=new ErrorBuffer();
+  if (!mayCreate(listeners,newNode,errorBuffer)) {
+    throw new IllegalArgumentException(errorBuffer.toString());
   }
   return newNode;
 }

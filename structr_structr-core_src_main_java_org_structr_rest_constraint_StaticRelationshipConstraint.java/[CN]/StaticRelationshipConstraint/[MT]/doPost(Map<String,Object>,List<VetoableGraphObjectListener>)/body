@@ -1,12 +1,28 @@
 {
-  final AbstractNode sourceNode=typedIdConstraint.getIdConstraint().getNode();
-  final AbstractNode newNode=typeConstraint.createNode(listeners,propertySet);
-  final DirectedRelationship rel=EntityContext.getRelation(sourceNode.getClass(),newNode.getClass());
-  if (sourceNode != null && newNode != null && rel != null) {
-    rel.createRelationship(securityContext,sourceNode,newNode,newNode.getType());
-    RestMethodResult result=new RestMethodResult(HttpServletResponse.SC_CREATED);
-    result.addHeader("Location",buildLocationHeader(newNode.getType(),newNode.getId()));
-    return result;
+  StructrTransaction transaction=new StructrTransaction(){
+    @Override public Object execute() throws Throwable {
+      AbstractNode sourceNode=typedIdConstraint.getIdConstraint().getNode();
+      AbstractNode newNode=typeConstraint.createNode(listeners,propertySet);
+      DirectedRelationship rel=EntityContext.getRelation(sourceNode.getClass(),newNode.getClass());
+      if (sourceNode != null && newNode != null && rel != null) {
+        rel.createRelationship(securityContext,sourceNode,newNode,newNode.getType());
+        ErrorBuffer errorBuffer=new ErrorBuffer();
+        if (!validAfterCreation(listeners,newNode,errorBuffer)) {
+          throw new IllegalArgumentException(errorBuffer.toString());
+        }
+        return newNode;
+      }
+      throw new IllegalPathException();
+    }
   }
-  throw new IllegalPathException();
+;
+  AbstractNode newNode=(AbstractNode)Services.command(securityContext,TransactionCommand.class).execute(transaction);
+  if (newNode == null) {
+    if (transaction.getCause() != null) {
+      throw transaction.getCause();
+    }
+  }
+  RestMethodResult result=new RestMethodResult(HttpServletResponse.SC_CREATED);
+  result.addHeader("Location",buildLocationHeader(newNode.getType(),newNode.getId()));
+  return result;
 }

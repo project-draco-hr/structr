@@ -7,13 +7,26 @@
       try {
         if (node.hasProperty(AbstractNode.Key.type.name())) {
           String type=(String)node.getProperty(AbstractNode.Key.type.name());
+          if (edit) {
+            builder.append("<div class=\"structr-editable-area data-structr-type-").append(type).append("\" id=\"structr-id-").append(node.getId()).append("\">");
+          }
+          Evaluation evaluation;
           if ("Content".equals(type)) {
-            builder.append(node.getProperty(Content.Key.content.name()));
-            return Evaluation.EXCLUDE_AND_PRUNE;
+            if (node.hasProperty(Content.Key.content.name())) {
+              Object content=node.getProperty(Content.Key.content.name());
+              if (content != null) {
+                builder.append(content);
+              }
+            }
+            evaluation=Evaluation.EXCLUDE_AND_PRUNE;
           }
  else {
-            return Evaluation.EXCLUDE_AND_CONTINUE;
+            evaluation=Evaluation.EXCLUDE_AND_CONTINUE;
           }
+          if (edit) {
+            builder.append("</div><!-- .structr-editable-area structr-type-").append(type).append("\" -->");
+          }
+          return evaluation;
         }
       }
  catch (      Throwable t) {

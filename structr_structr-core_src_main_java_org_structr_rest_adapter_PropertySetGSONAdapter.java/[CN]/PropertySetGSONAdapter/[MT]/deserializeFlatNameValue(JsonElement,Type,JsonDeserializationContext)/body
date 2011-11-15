@@ -8,7 +8,10 @@
       if (elem.isJsonNull()) {
         wrapper.add(key,null);
       }
- else {
+ else       if (elem.isJsonObject()) {
+        wrapper.add(key,deserializeFlatNameValue(elem,typeOfT,context));
+      }
+ else       if (elem.isJsonPrimitive()) {
         wrapper.add(key,elem.getAsString());
       }
     }

@@ -12,6 +12,11 @@
       throw new IllegalArgumentException("Property '".concat(key).concat("' is read-only."));
     }
   }
+  PropertyGroup propertyGroup=EntityContext.getPropertyGroup(type,key);
+  if (propertyGroup != null) {
+    propertyGroup.setGroupedProperties(value,this);
+    return;
+  }
   String singularType=getSingularTypeName(key);
   if (key.endsWith("Id")) {
     singularType=singularType.substring(0,singularType.length() - 2);

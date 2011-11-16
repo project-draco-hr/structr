@@ -1,0 +1,11 @@
+{
+  AbstractNode node=idConstraint.getNode();
+  Class entityClass=node.getClass();
+  String type=CaseHelper.toCamelCase(typeConstraint.getType());
+  Map<String,Class> entities=(Map)Services.command(SecurityContext.getSuperUserInstance(),GetEntitiesCommand.class).execute();
+  Class parentClass=entities.get(type);
+  if (parentClass.isAssignableFrom(entityClass)) {
+    return node;
+  }
+  throw new NotFoundException();
+}

@@ -1,39 +1,47 @@
 {
   GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
   StructrNodeFactory nodeFactory=(StructrNodeFactory)arguments.get("nodeFactory");
+  User user=securityContext.getUser();
   AbstractNode node=null;
-  User user=null;
   boolean updateIndex=true;
   if (graphDb != null) {
     Date now=new Date();
-    Command createRel=Services.command(CreateRelationshipCommand.class);
-    List<NodeAttribute> attrs=new LinkedList<NodeAttribute>();
+    Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
+    Map<String,Object> attrs=new HashMap<String,Object>();
     for (    Object o : parameters) {
-      if (o instanceof List) {
-        attrs.addAll((List)o);
+      if (o instanceof Map) {
+        Map<String,Object> map=(Map<String,Object>)o;
+        attrs.putAll(map);
+      }
+ else       if (o instanceof Collection) {
+        Collection<NodeAttribute> c=(Collection)o;
+        for (        NodeAttribute attr : c) {
+          attrs.put(attr.getKey(),attr.getValue());
+        }
       }
  else       if (o instanceof NodeAttribute) {
         NodeAttribute attr=(NodeAttribute)o;
-        attrs.add(attr);
-      }
- else       if (o instanceof User) {
-        user=(User)o;
+        attrs.put(attr.getKey(),attr.getValue());
       }
  else       if (o instanceof Boolean) {
         updateIndex=(Boolean)o;
       }
     }
-    String nodeType=null;
-    for (    NodeAttribute attr : attrs) {
-      if (AbstractNode.TYPE_KEY.equals(attr.getKey())) {
-        nodeType=(String)attr.getValue();
+    Object typeObject=attrs.get(AbstractNode.Key.type.name());
+    String nodeType=typeObject != null ? typeObject.toString() : "GenericNode";
+    node=nodeFactory.createNode(securityContext,graphDb.createNode(),nodeType);
+    logger.log(Level.FINE,"Node {0} created",node.getId());
+    ErrorBuffer errorBuffer=new ErrorBuffer();
+    for (    Entry<String,Object> attr : attrs.entrySet()) {
+      try {
+        node.setProperty(attr.getKey(),attr.getValue());
+      }
+ catch (      Throwable t) {
+        errorBuffer.add(t.getMessage());
       }
     }
-    node=nodeFactory.createNode(graphDb.createNode(),nodeType);
-    logger.log(Level.FINE,"Node {0} created",node.getId());
-    for (    NodeAttribute attr : attrs) {
-      node.setProperty(attr.getKey(),attr.getValue(),false);
-      logger.log(Level.FINEST,"Set node attribute {0} to {1}",new Object[]{attr.getKey(),attr.getValue()});
+    if (errorBuffer.hasError()) {
+      throw new IllegalArgumentException(errorBuffer.toString());
     }
     attrs.clear();
     if ((user != null) && !(user instanceof SuperUser)) {
@@ -48,14 +56,14 @@
         principal=user;
       }
       StructrRelationship securityRel=(StructrRelationship)createRel.execute(principal,node,RelType.SECURITY);
-      securityRel.setAllowed(Arrays.asList(StructrRelationship.ALL_PERMISSIONS));
+      securityRel.setAllowed(StructrRelationship.Permission.values());
       logger.log(Level.FINEST,"All permissions given to {0}",principal.getName());
-      node.setProperty(AbstractNode.CREATED_BY_KEY,user.getRealName() + " (" + user.getName()+ ")",false);
+      node.setProperty(AbstractNode.Key.createdBy.name(),user.getRealName() + " (" + user.getName()+ ")",false);
     }
-    node.setProperty(AbstractNode.CREATED_DATE_KEY,now,false);
-    node.setProperty(AbstractNode.LAST_MODIFIED_DATE_KEY,now,false);
+    node.setProperty(AbstractNode.Key.createdDate.name(),now,false);
+    node.setProperty(AbstractNode.Key.lastModifiedDate.name(),now,false);
     if (updateIndex) {
-      Services.command(IndexNodeCommand.class).execute(node);
+      Services.command(securityContext,IndexNodeCommand.class).execute(node);
       logger.log(Level.FINE,"Node {0} indexed.",node.getId());
     }
   }

@@ -1,8 +1,7 @@
 {
-  SecurityContext securityContext=CurrentRequest.getSecurityContext();
   List<AbstractNode> nodes=new LinkedList<AbstractNode>();
-  Command findNode=Services.command(FindNodeCommand.class);
-  List<AbstractNode> result=(List<AbstractNode>)findNode.execute(user,this);
+  Command findNode=Services.command(securityContext,FindNodeCommand.class);
+  List<AbstractNode> result=(List<AbstractNode>)findNode.execute(this);
   for (  AbstractNode s : result) {
     if (securityContext.isAllowed(s,Permission.Read) && ((nodeType == null) || nodeType.equals(s.getType()))) {
       nodes.add(s);

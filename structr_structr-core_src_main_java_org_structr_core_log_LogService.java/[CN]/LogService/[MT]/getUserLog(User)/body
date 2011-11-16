@@ -11,11 +11,11 @@
         return userLogNodeList;
       }
     }
-    userLogNodeList=(LogNodeList)Services.command(TransactionCommand.class).execute(new StructrTransaction(){
+    userLogNodeList=(LogNodeList)Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
       @Override public Object execute() throws Throwable {
-        Command createNode=Services.command(CreateNodeCommand.class);
-        Command createRel=Services.command(CreateRelationshipCommand.class);
-        LogNodeList<Activity> newLogNodeList=(LogNodeList<Activity>)createNode.execute(new NodeAttribute(AbstractNode.TYPE_KEY,LogNodeList.class.getSimpleName()),new NodeAttribute(AbstractNode.NAME_KEY,user.getName() + "'s Activity Log"));
+        Command createNode=Services.command(securityContext,CreateNodeCommand.class);
+        Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
+        LogNodeList<Activity> newLogNodeList=(LogNodeList<Activity>)createNode.execute(new NodeAttribute(AbstractNode.Key.type.name(),LogNodeList.class.getSimpleName()),new NodeAttribute(AbstractNode.Key.name.name(),user.getName() + "'s Activity Log"));
         createRel.execute(user,newLogNodeList,RelType.HAS_CHILD);
         return (newLogNodeList);
       }

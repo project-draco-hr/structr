@@ -1,12 +1,12 @@
 {
-  SecurityContext securityContext=CurrentRequest.getSecurityContext();
+  SecurityContext securityContext=out.getSecurityContext();
   if (securityContext.isVisible(currentNode)) {
     String html=currentNode.getContent();
     if (StringUtils.isNotBlank(html)) {
       StringWriter content=new StringWriter();
-      currentNode.replaceByFreeMarker(html,content,startNode,editUrl,editNodeId);
+      currentNode.replaceByFreeMarker(out.getRequest(),html,content,startNode,editUrl,editNodeId);
       StringBuilder content2=new StringBuilder(content.toString());
-      currentNode.replaceBySubnodes(content2,startNode,editUrl,editNodeId);
+      currentNode.replaceBySubnodes(out.getRequest(),content2,startNode,editUrl,editNodeId);
       out.append(content2.toString());
     }
   }

@@ -1,15 +1,15 @@
 {
-  final AbstractNode parent=(AbstractNode)Services.command(FindNodeCommand.class).execute(CurrentSession.getUser(),nodeParent);
+  final AbstractNode parent=(AbstractNode)Services.command(securityContext,FindNodeCommand.class).execute(nodeParent);
   boolean ret=false;
   if (parent != null) {
-    Boolean retValue=(Boolean)Services.command(TransactionCommand.class).execute(new StructrTransaction(){
+    Boolean retValue=(Boolean)Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
       @Override public Object execute() throws Throwable {
-        Command createRelCommand=Services.command(CreateRelationshipCommand.class);
-        Command createNodeCommand=Services.command(CreateNodeCommand.class);
+        Command createRelCommand=Services.command(securityContext,CreateRelationshipCommand.class);
+        Command createNodeCommand=Services.command(securityContext,CreateNodeCommand.class);
         List<Long> newNodeIds=new LinkedList<Long>();
         int count=0;
         for (        String nodeName : nodeNames) {
-          AbstractNode newNode=(AbstractNode)createNodeCommand.execute(CurrentSession.getUser(),nodeAttributes);
+          AbstractNode newNode=(AbstractNode)createNodeCommand.execute(securityContext.getUser(),nodeAttributes);
           newNode.setName(nodeName);
           newNode.setType(nodeType);
           createRelCommand.execute(parent,newNode,RelType.HAS_CHILD);

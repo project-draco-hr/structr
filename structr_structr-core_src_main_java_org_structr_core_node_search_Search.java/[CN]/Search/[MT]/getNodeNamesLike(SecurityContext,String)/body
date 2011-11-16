@@ -1,0 +1,12 @@
+{
+  List<String> names=new LinkedList<String>();
+  List<SearchAttribute> searchAttrs=new LinkedList<SearchAttribute>();
+  searchAttrs.add(Search.andName(string + SearchAttribute.WILDCARD));
+  List<AbstractNode> result=(List<AbstractNode>)Services.command(securityContext,SearchNodeCommand.class).execute(null,false,false,searchAttrs);
+  if (result != null) {
+    for (    AbstractNode n : result) {
+      names.add(n.getName());
+    }
+  }
+  return names;
+}

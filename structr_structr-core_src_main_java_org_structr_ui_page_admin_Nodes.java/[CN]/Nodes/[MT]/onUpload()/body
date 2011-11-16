@@ -10,12 +10,13 @@
       final FileItem fileFromUpload=fileField.getFileItem();
       final String name=fileFromUpload.getName();
       final String mimeType=fileFromUpload.getContentType();
+      final User user=securityContext.getUser();
       if (name != null && !("".equals(name))) {
-        Command transaction=Services.command(TransactionCommand.class);
+        Command transaction=Services.command(securityContext,TransactionCommand.class);
         s=(AbstractNode)transaction.execute(new StructrTransaction(){
           @Override public Object execute() throws Throwable {
-            Command createNode=Services.command(CreateNodeCommand.class);
-            Command createRel=Services.command(CreateRelationshipCommand.class);
+            Command createNode=Services.command(securityContext,CreateNodeCommand.class);
+            Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
             String mimeProperty=null;
             if (mimeType != null && mimeType.startsWith("image")) {
               mimeProperty="Image";
@@ -23,7 +24,7 @@
  else {
               mimeProperty="File";
             }
-            AbstractNode newNode=(AbstractNode)createNode.execute(new NodeAttribute(AbstractNode.TYPE_KEY,mimeProperty),user);
+            AbstractNode newNode=(AbstractNode)createNode.execute(new NodeAttribute(AbstractNode.Key.type.name(),mimeProperty),user);
             String relativeFilePath=newNode.getId() + "_" + System.currentTimeMillis();
             String path=FILES_PATH + "/" + relativeFilePath;
             long size=fileFromUpload.getSize();
@@ -37,13 +38,13 @@
               errorMsg="Error while write uploaded file(s) to disk: " + e.getStackTrace();
             }
             Date now=new Date();
-            newNode.setProperty(AbstractNode.NAME_KEY,name);
-            newNode.setProperty(AbstractNode.CREATED_DATE_KEY,now);
-            newNode.setProperty(AbstractNode.LAST_MODIFIED_DATE_KEY,now);
-            newNode.setProperty(File.CONTENT_TYPE_KEY,mimeType);
-            newNode.setProperty(File.SIZE_KEY,String.valueOf(size));
-            newNode.setProperty(File.URL_KEY,fileUrl);
-            newNode.setProperty(File.RELATIVE_FILE_PATH_KEY,relativeFilePath);
+            newNode.setProperty(AbstractNode.Key.name.name(),name);
+            newNode.setProperty(AbstractNode.Key.createdDate.name(),now);
+            newNode.setProperty(AbstractNode.Key.lastModifiedDate.name(),now);
+            newNode.setProperty(File.Key.contentType.name(),mimeType);
+            newNode.setProperty(File.Key.size.name(),String.valueOf(size));
+            newNode.setProperty(File.Key.url.name(),fileUrl);
+            newNode.setProperty(File.Key.relativeFilePath.name(),relativeFilePath);
             AbstractNode parentNode=node;
             createRel.execute(parentNode,newNode,RelType.HAS_CHILD);
             newNodeForm.clearValues();
@@ -58,7 +59,7 @@
       }
     }
     okMsg="New " + s.getType() + " node "+ s.getName()+ " has been created.";
-    Services.command(AddNotificationCommand.class).execute(new SuccessNotification(okMsg));
+    Services.command(securityContext,AddNotificationCommand.class).execute(new SuccessNotification(securityContext,okMsg));
     Map<String,String> parameters=new HashMap<String,String>();
     parameters.put(NODE_ID_KEY,String.valueOf(getNodeId()));
     parameters.put(RENDER_MODE_KEY,renderMode);

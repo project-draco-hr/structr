@@ -4,7 +4,7 @@
   for (  AbstractNode n : children) {
     if (n instanceof ActionNode) {
       ActionNode actionNode=(ActionNode)n;
-      actionNode.initialize();
+      actionNode.initialize(out.getRequest());
       if (!actionNode.doAction(out,startNode,editUrl,editNodeId)) {
         executionSuccessful=false;
         break;
@@ -14,13 +14,13 @@
   if (executionSuccessful) {
     AbstractNode successTarget=getSuccessTarget(currentNode);
     if (successTarget != null) {
-      CurrentRequest.redirect(currentNode,successTarget);
+      RequestHelper.redirect(out.getRequest(),out.getResponse(),currentNode,successTarget);
     }
   }
  else {
     AbstractNode failureTarget=getFailureTarget(currentNode);
     if (failureTarget != null) {
-      CurrentRequest.redirect(currentNode,failureTarget);
+      RequestHelper.redirect(out.getRequest(),out.getResponse(),currentNode,failureTarget);
     }
   }
 }

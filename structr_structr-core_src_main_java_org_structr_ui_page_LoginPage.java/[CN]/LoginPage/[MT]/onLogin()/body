@@ -1,49 +1,25 @@
 {
   if (loginForm.isValid()) {
-    String userValue=loginForm.getFieldValue(USERNAME_KEY);
+    String userValue=loginForm.getFieldValue(StructrAuthenticator.USERNAME_KEY);
     returnUrl=loginForm.getFieldValue(RETURN_URL_KEY);
     String passwordValue=loginForm.getFieldValue(PASSWORD_KEY);
-    if (SUPERADMIN_USERNAME_KEY.equals(userValue) && SUPERADMIN_PASSWORD_KEY.equals(passwordValue)) {
-      logger.log(Level.INFO,"############# Logged in as superadmin! ############");
-      userName=SUPERADMIN_USERNAME_KEY;
-      isSuperUser=true;
-      user=new SuperUser();
-      CurrentSession.setUser(user);
-      setUsernameInSession(userValue);
-      setRedirect("/admin/dashboard.htm");
-    }
+    try {
+      securityContext.doLogin(userValue,passwordValue);
+      if (SUPERADMIN_USERNAME_KEY.equals(userValue) && SUPERADMIN_PASSWORD_KEY.equals(passwordValue)) {
+        logger.log(Level.INFO,"############# Logged in as superadmin! ############");
+        setRedirect("/admin/dashboard.htm");
+      }
  else {
-      Command findUser=Services.command(FindUserCommand.class);
-      user=(User)findUser.execute(userValue);
-      if (user == null) {
-        logger.log(Level.INFO,"No user found for name {0}",user);
-        errorMsg="Wrong username or password, or user is blocked. Check caps lock. Note: Username is case sensitive!";
-        return true;
+        initFirstPage();
       }
-      if (user.isBlocked()) {
-        logger.log(Level.INFO,"User {0} is blocked",user);
-        errorMsg="Wrong username or password, or user is blocked. Check caps lock. Note: Username is case sensitive!";
-        return true;
-      }
-      if (passwordValue == null) {
-        logger.log(Level.INFO,"Password for user {0} is null",user);
-        errorMsg="You should enter a password.";
-        return true;
-      }
-      String encryptedPasswordValue=DigestUtils.sha512Hex(passwordValue);
-      if (!encryptedPasswordValue.equals(user.getEncryptedPassword())) {
-        logger.log(Level.INFO,"Wrong password for user {0}",user);
-        errorMsg="Wrong username or password, or user is blocked. Check caps lock. Note: Username is case sensitive!";
-        return true;
-      }
-      userName=userValue;
-      CurrentSession.setUser(user);
-      setUsernameInSession(userValue);
-      initFirstPage();
     }
-    sessionId=SessionMonitor.registerUserSession(getContext().getSession());
-    SessionMonitor.logActivity(sessionId,"Login");
-    CurrentSession.setAttribute(SessionMonitor.SESSION_ID,sessionId);
+ catch (    AuthenticationException aex) {
+      errorMsg=aex.getMessage();
+      return true;
+    }
+    sessionId=SessionMonitor.registerUserSession(securityContext,getContext().getSession());
+    SessionMonitor.logActivity(securityContext,sessionId,"Login");
+    getContext().getSession().setAttribute(SessionMonitor.SESSION_ID,sessionId);
     return false;
   }
   return true;

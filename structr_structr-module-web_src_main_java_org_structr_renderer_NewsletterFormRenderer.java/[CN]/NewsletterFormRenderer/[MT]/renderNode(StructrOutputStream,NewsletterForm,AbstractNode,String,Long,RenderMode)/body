@@ -1,5 +1,5 @@
 {
-  HttpServletRequest request=CurrentRequest.getRequest();
+  HttpServletRequest request=out.getRequest();
   if (request == null) {
     return;
   }
@@ -7,13 +7,13 @@
   if (session == null) {
     return;
   }
-  String usernameFromSession=(String)session.getAttribute(WebNode.USERNAME_KEY);
+  String usernameFromSession=(String)session.getAttribute(WebNode.Key.username.name());
   Boolean alreadyLoggedIn=usernameFromSession != null;
   if (alreadyLoggedIn) {
     out.append("<div class=\"okMsg\">").append("Your are logged in as ").append(usernameFromSession).append(".</div>");
     return;
   }
-  Boolean sessionBlocked=(Boolean)session.getAttribute(WebNode.SESSION_BLOCKED);
+  Boolean sessionBlocked=(Boolean)session.getAttribute(WebNode.Key.sessionBlocked.name());
   if (Boolean.TRUE.equals(sessionBlocked)) {
     out.append("<div class=\"errorMsg\">").append("Too many login attempts, session is blocked for login").append("</div>");
     return;

@@ -1,11 +1,11 @@
 {
-  Command findNodeCommand=Services.command(FindNodeCommand.class);
+  Command findNodeCommand=Services.command(securityContext,FindNodeCommand.class);
   AbstractNode ret=null;
   if (parameter instanceof Collection) {
     throw new InvalidParameterException("MOVE does not take multiple arguments");
   }
  else {
-    Object findNodeReturnValue=findNodeCommand.execute(CurrentSession.getUser(),currentNode,parameter);
+    Object findNodeReturnValue=findNodeCommand.execute(currentNode,parameter);
     if (findNodeReturnValue instanceof Collection) {
       throw new InvalidParameterException("MOVE does not support wildcards");
     }

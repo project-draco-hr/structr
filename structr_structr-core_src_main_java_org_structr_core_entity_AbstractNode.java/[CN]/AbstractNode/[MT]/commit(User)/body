@@ -1,11 +1,11 @@
 {
   isDirty=false;
-  Command transactionCommand=Services.command(TransactionCommand.class);
+  Command transactionCommand=Services.command(securityContext,TransactionCommand.class);
   transactionCommand.execute(new StructrTransaction(){
     @Override public Object execute() throws Throwable {
-      Command createNode=Services.command(CreateNodeCommand.class);
+      Command createNode=Services.command(securityContext,CreateNodeCommand.class);
       AbstractNode s=(AbstractNode)createNode.execute(user);
-      init(s);
+      init(securityContext,s);
       Set<String> keys=properties.keySet();
       for (      String key : keys) {
         Object value=properties.get(key);

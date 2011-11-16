@@ -1,5 +1,6 @@
 {
   if (extractNodeForm.isValid()) {
+    final User user=securityContext.getUser();
     Object targetNodeId;
     String fieldValue=extractNodeForm.getFieldValue(TARGET_NODE_ID_KEY);
     if (fieldValue != null && !(fieldValue.isEmpty())) {
@@ -8,12 +9,12 @@
  else {
       targetNodeId=getNodeId();
     }
-    Command findNode=Services.command(FindNodeCommand.class);
-    final AbstractNode targetNode=(AbstractNode)findNode.execute(user,targetNodeId);
-    final Command transactionCommand=Services.command(TransactionCommand.class);
+    Command findNode=Services.command(securityContext,FindNodeCommand.class);
+    final AbstractNode targetNode=(AbstractNode)findNode.execute(targetNodeId);
+    final Command transactionCommand=Services.command(securityContext,TransactionCommand.class);
     transactionCommand.execute(new StructrTransaction(){
       @Override public Object execute() throws Throwable {
-        Command extractFile=Services.command(ExtractFileCommand.class);
+        Command extractFile=Services.command(securityContext,ExtractFileCommand.class);
         extractFile.execute(getNodeId(),targetNode,user);
         transactionCommand.setExitCode(extractFile.getExitCode());
         transactionCommand.setErrorMessage(extractFile.getErrorMessage());
@@ -26,12 +27,12 @@
     parameters.put(RENDER_MODE_KEY,renderMode);
     if (transactionCommand.getExitCode().equals(Command.exitCode.FAILURE)) {
       errorMsg=transactionCommand.getErrorMessage();
-      Services.command(AddNotificationCommand.class).execute(new ErrorNotification(errorMsg));
+      Services.command(securityContext,AddNotificationCommand.class).execute(new ErrorNotification(securityContext,errorMsg));
       parameters.put(ERROR_MSG_KEY,errorMsg);
     }
  else {
       okMsg="Node extracted to " + targetNodeId;
-      Services.command(AddNotificationCommand.class).execute(new SuccessNotification(okMsg));
+      Services.command(securityContext,AddNotificationCommand.class).execute(new SuccessNotification(securityContext,okMsg));
       parameters.put(OK_MSG_KEY,okMsg);
     }
     setRedirect(getRedirectPage(node),parameters);

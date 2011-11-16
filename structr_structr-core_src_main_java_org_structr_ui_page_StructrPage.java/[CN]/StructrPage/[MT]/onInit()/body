@@ -1,10 +1,32 @@
 {
   super.onInit();
-  CurrentRequest.setCurrentNodePath(nodeId);
   node=getNodeByIdOrPath(nodeId);
   if (node == null) {
     return;
   }
   nodeId=node.getIdString();
-  CurrentRequest.onRequestStart();
+  if (isSuperUser) {
+    readAllowed=true;
+    showTreeAllowed=true;
+    writeAllowed=true;
+    accessControlAllowed=true;
+    createNodeAllowed=true;
+    deleteNodeAllowed=true;
+    editPropertiesAllowed=true;
+    editVisibilityAllowed=true;
+    addRelationshipAllowed=true;
+    removeRelationshipAllowed=true;
+  }
+ else   if ((user != null) && (node != null)) {
+    readAllowed=securityContext.isAllowed(node,Permission.Read);
+    showTreeAllowed=securityContext.isAllowed(node,Permission.Read);
+    writeAllowed=securityContext.isAllowed(node,Permission.Write);
+    accessControlAllowed=securityContext.isAllowed(node,Permission.AccessControl);
+    createNodeAllowed=securityContext.isAllowed(node,Permission.CreateNode);
+    deleteNodeAllowed=securityContext.isAllowed(node,Permission.DeleteNode);
+    editPropertiesAllowed=securityContext.isAllowed(node,Permission.EditProperty);
+    editVisibilityAllowed=securityContext.isAllowed(node,Permission.Write);
+    addRelationshipAllowed=securityContext.isAllowed(node,Permission.CreateRelationship);
+    removeRelationshipAllowed=securityContext.isAllowed(node,Permission.DeleteRelationship);
+  }
 }

@@ -1,5 +1,5 @@
 {
-  HttpServletRequest request=CurrentRequest.getRequest();
+  HttpServletRequest request=out.getRequest();
   if (request == null) {
     return;
   }
@@ -7,10 +7,10 @@
   if (session == null) {
     return;
   }
-  String usernameFromSession=(String)session.getAttribute(WebNode.USERNAME_KEY);
+  String usernameFromSession=(String)session.getAttribute(WebNode.Key.username.name());
   Boolean alreadyLoggedIn=usernameFromSession != null;
   if (alreadyLoggedIn) {
-    logout(session);
+    logout(out.getSecurityContext(),session);
     out.append("<div class=\"okMsg\">").append("User ").append(usernameFromSession).append(" logged out").append("</div>");
     logger.log(Level.INFO,"User {0} logged out",usernameFromSession);
     return;

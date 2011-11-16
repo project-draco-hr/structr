@@ -1,0 +1,13 @@
+{
+  List<StructrRelationship> rels=getIncomingDataRelationships();
+  AbstractNode node=null;
+  for (  StructrRelationship rel : rels) {
+    AbstractNode startNode=rel.getStartNode();
+    if (startNode instanceof NodeSource) {
+      NodeSource source=(NodeSource)startNode;
+      node=source.loadNode(request);
+      break;
+    }
+  }
+  return node;
+}

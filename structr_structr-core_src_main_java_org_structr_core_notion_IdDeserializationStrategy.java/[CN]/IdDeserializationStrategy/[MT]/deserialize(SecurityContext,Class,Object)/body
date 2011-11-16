@@ -1,0 +1,15 @@
+{
+  try {
+    return (GraphObject)Services.command(securityContext,FindNodeCommand.class).execute(source);
+  }
+ catch (  Throwable t) {
+    StringBuilder errorMessage=new StringBuilder(100);
+    if (type != null) {
+      errorMessage.append(StringUtils.capitalize(type.getSimpleName()));
+    }
+    errorMessage.append(" with id ");
+    errorMessage.append(source);
+    errorMessage.append(" not found.");
+    throw new IllegalArgumentException(errorMessage.toString());
+  }
+}

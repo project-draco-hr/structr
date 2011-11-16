@@ -1,10 +1,11 @@
 {
-  final Command extract=Services.command(ExtractAndSetImageDimensionsAndFormat.class);
-  Command transactionCommand=Services.command(TransactionCommand.class);
+  final SecurityContext securityContext=SecurityContext.getSuperUserInstance();
+  final Command extract=Services.command(securityContext,ExtractAndSetImageDimensionsAndFormat.class);
+  Command transactionCommand=Services.command(securityContext,TransactionCommand.class);
   Long numberOfImages=(Long)transactionCommand.execute(new StructrTransaction(){
     @Override public Object execute() throws Throwable {
       List<Image> images=new LinkedList<Image>();
-      List<AbstractNode> allNodes=(List<AbstractNode>)Services.command(GetAllNodes.class).execute();
+      List<AbstractNode> allNodes=(List<AbstractNode>)Services.command(securityContext,GetAllNodes.class).execute();
       for (      AbstractNode s : allNodes) {
         if (s instanceof Image) {
           images.add((Image)s);

@@ -1,0 +1,12 @@
+{
+  if (next instanceof TypedIdConstraint) {
+    addTypedIdConstraint((TypedIdConstraint)next);
+    return this;
+  }
+ else   if (next instanceof TypeConstraint) {
+    if (getValidatedPath() != null) {
+      return new StaticRelationshipConstraint(securityContext,lastConstraint,(TypeConstraint)next);
+    }
+  }
+  return super.tryCombineWith(next);
+}

@@ -1,4 +1,5 @@
 {
+  User user=securityContext.getUser();
   if (returnUrl != null && StringUtils.isNotBlank(returnUrl)) {
     setRedirect(returnUrl);
   }
@@ -16,13 +17,13 @@
   long[] expandedNodesArray=getExpandedNodesFromUserProfile();
   if (expandedNodesArray != null && expandedNodesArray.length > 0) {
     openNodes=new LinkedList<TreeNode>();
-    Command findNode=Services.command(FindNodeCommand.class);
+    Command findNode=Services.command(securityContext,FindNodeCommand.class);
     for (    Long s : expandedNodesArray) {
-      AbstractNode n=(AbstractNode)findNode.execute(user,s);
+      AbstractNode n=(AbstractNode)findNode.execute(s);
       if (n != null) {
         openNodes.add(new TreeNode(n,String.valueOf(n.getId())));
       }
     }
-    CurrentSession.setAttribute(EXPANDED_NODES_KEY,openNodes);
+    getContext().getSession().setAttribute(EXPANDED_NODES_KEY,openNodes);
   }
 }

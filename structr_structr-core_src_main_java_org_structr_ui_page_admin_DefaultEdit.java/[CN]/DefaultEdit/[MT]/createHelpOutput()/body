@@ -1,8 +1,8 @@
 {
-  String helpTarget=CurrentRequest.getRequest().getParameter("helpTarget");
+  String helpTarget=getContext().getRequest().getParameter("helpTarget");
   AbstractNode helpNode=null;
   if ((helpTarget != null) && (helpTarget.length() > 0)) {
-    Class nodeClass=(Class)Services.command(GetEntityClassCommand.class).execute(helpTarget);
+    Class nodeClass=(Class)Services.command(securityContext,GetEntityClassCommand.class).execute(helpTarget);
     if (nodeClass != null) {
       try {
         helpNode=(AbstractNode)nodeClass.newInstance();
@@ -15,8 +15,9 @@
     helpNode=this.node;
   }
   if (helpNode != null) {
+    Context context=getContext();
     HtmlComponentRenderer htmlComponentRenderer=new HtmlComponentRenderer();
-    StructrOutputStream out=new StructrOutputStream();
+    StructrOutputStream out=new StructrOutputStream(getContext().getRequest(),securityContext);
     AbstractComponent content=helpNode.getHelpContent();
     if (content != null) {
       htmlComponentRenderer.renderNode(out,content,helpNode,"",editNodeId,RenderMode.Direct);

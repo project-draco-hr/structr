@@ -1,17 +1,17 @@
 {
   GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
-  Command searchNode=Services.command(SearchNodeCommand.class);
+  Command searchNode=Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class);
   if (graphDb != null) {
 switch (parameters.length) {
 case 0:
-      return (List<Group>)searchNode.execute(new SuperUser(),null,false,false,Search.andExactType(Group.class.getSimpleName()));
+      return (List<Group>)searchNode.execute(null,false,false,Search.andExactType(Group.class.getSimpleName()));
 case 1:
     if (parameters[0] instanceof String) {
       String groupName=(String)parameters[0];
       List<SearchAttribute> searchAttrs=new LinkedList<SearchAttribute>();
       searchAttrs.add(Search.andExactName(groupName));
       searchAttrs.add(Search.andExactType(Group.class.getSimpleName()));
-      List<AbstractNode> groupsFound=(List<AbstractNode>)searchNode.execute(new SuperUser(),null,false,false,searchAttrs);
+      List<AbstractNode> groupsFound=(List<AbstractNode>)searchNode.execute(null,false,false,searchAttrs);
       if (groupsFound != null && groupsFound.size() > 0) {
         return groupsFound.get(0);
       }
@@ -27,7 +27,7 @@ case 2:
     List<SearchAttribute> searchAttrs=new LinkedList<SearchAttribute>();
     searchAttrs.add(Search.andExactName(groupName));
     searchAttrs.add(Search.andExactType(Group.class.getSimpleName()));
-    List<AbstractNode> groupsFound=(List<AbstractNode>)searchNode.execute(topNode,null,false,false,searchAttrs);
+    List<AbstractNode> groupsFound=(List<AbstractNode>)searchNode.execute(topNode,false,false,searchAttrs);
     if (groupsFound != null && groupsFound.size() > 0) {
       return groupsFound.get(0);
     }

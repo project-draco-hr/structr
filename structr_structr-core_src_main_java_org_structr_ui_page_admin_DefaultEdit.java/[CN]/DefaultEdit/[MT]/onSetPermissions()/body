@@ -1,23 +1,23 @@
 {
-  final SecurityContext securityContext=CurrentRequest.getSecurityContext();
   final Map<String,String> parameters=new HashMap<String,String>();
   if (securityForm.isValid()) {
     final String selectedUserName=securityForm.getFieldValue(userSelect.getName());
     final String selectedGroupName=securityForm.getFieldValue(groupSelect.getName());
     final List<String> selectedValues=allowed.getSelectedValues();
     final boolean rec=recursive.isChecked();
-    Command transaction=Services.command(TransactionCommand.class);
+    Command transaction=Services.command(securityContext,TransactionCommand.class);
     transaction.execute(new StructrTransaction(){
       @Override public Object execute() throws Throwable {
-        Command findUser=Services.command(FindUserCommand.class);
-        Command findGroup=Services.command(FindGroupCommand.class);
+        Command findUser=Services.command(securityContext,FindUserCommand.class);
+        Command findGroup=Services.command(securityContext,FindGroupCommand.class);
         User selectedUser=(User)findUser.execute(selectedUserName);
         Group selectedGroup=(Group)findGroup.execute(selectedGroupName);
+        User user=securityContext.getUser();
         if ((selectedUser != null) || (selectedGroup != null)) {
           List<AbstractNode> nodes=new LinkedList<AbstractNode>();
           if (rec) {
-            Command findNode=Services.command(FindNodeCommand.class);
-            List<AbstractNode> result=(List<AbstractNode>)findNode.execute(user,node);
+            Command findNode=Services.command(securityContext,FindNodeCommand.class);
+            List<AbstractNode> result=(List<AbstractNode>)findNode.execute(node);
             for (            AbstractNode s : result) {
               if (securityContext.isAllowed(node,Permission.AccessControl)) {
                 nodes.add(s);
@@ -27,8 +27,8 @@
  else {
             nodes.add(node);
           }
-          Command createRel=Services.command(CreateRelationshipCommand.class);
-          Command deleteRel=Services.command(DeleteRelationshipCommand.class);
+          Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
+          Command deleteRel=Services.command(securityContext,DeleteRelationshipCommand.class);
           for (          AbstractNode n : nodes) {
             if (selectedUser != null) {
               StructrRelationship r=n.getSecurityRelationship(selectedUser);

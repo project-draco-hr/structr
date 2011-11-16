@@ -1,5 +1,5 @@
 {
-  HttpServletRequest request=CurrentRequest.getRequest();
+  HttpServletRequest request=out.getRequest();
   if (request == null) {
     return;
   }
@@ -7,13 +7,13 @@
   if (session == null) {
     return;
   }
-  String usernameFromSession=(String)session.getAttribute(WebNode.USERNAME_KEY);
+  String usernameFromSession=(String)session.getAttribute(WebNode.Key.username.name());
   Boolean loggedIn=usernameFromSession != null;
   if (!loggedIn) {
     logger.log(Level.WARNING,"Not logged in");
     return;
   }
-  Boolean sessionBlocked=(Boolean)session.getAttribute(WebNode.SESSION_BLOCKED);
+  Boolean sessionBlocked=(Boolean)session.getAttribute(WebNode.Key.sessionBlocked.name());
   if (Boolean.TRUE.equals(sessionBlocked)) {
     logger.log(Level.WARNING,"Session blocked");
     return;
@@ -31,7 +31,7 @@
   }
   String[] ids=StringUtils.split(objectId,",");
   for (  String id : ids) {
-    User user=CurrentSession.getUser();
+    User user=out.getSecurityContext().getUser();
     AbstractNode addedObject=user.addToCategory(categoryName,id);
     if (addedObject != null) {
       out.append("<div class=\"okMsg\">").append(addedObject.getName()).append(" successfully added to ").append(categoryName).append("</div>");

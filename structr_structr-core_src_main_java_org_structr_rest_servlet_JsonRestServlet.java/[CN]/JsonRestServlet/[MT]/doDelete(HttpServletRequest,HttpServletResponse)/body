@@ -1,0 +1,25 @@
+{
+  try {
+    request.setCharacterEncoding("UTF-8");
+    SecurityContext securityContext=getSecurityContext(request);
+    List<ResourceConstraint> chain=parsePath(securityContext,request);
+    ResourceConstraint resourceConstraint=optimizeConstraintChain(chain);
+    RestMethodResult result=resourceConstraint.doDelete(graphObjectListeners);
+    result.commitResponse(response);
+  }
+ catch (  IllegalArgumentException illegalArgumentException) {
+    handleValidationError(illegalArgumentException,response);
+  }
+catch (  PathException pathException) {
+    response.setStatus(pathException.getStatus());
+  }
+catch (  JsonSyntaxException jsex) {
+    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+  }
+catch (  JsonParseException jpex) {
+    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+  }
+catch (  Throwable t) {
+    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+  }
+}

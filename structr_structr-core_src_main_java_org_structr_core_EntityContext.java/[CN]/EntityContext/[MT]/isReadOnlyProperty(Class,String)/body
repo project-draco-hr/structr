@@ -1,0 +1,9 @@
+{
+  boolean isReadOnly=getReadOnlyPropertySetForType(type).contains(key);
+  Class localType=type;
+  while (!isReadOnly && !localType.equals(Object.class)) {
+    isReadOnly=getReadOnlyPropertySetForType(localType).contains(key);
+    localType=localType.getSuperclass();
+  }
+  return isReadOnly;
+}

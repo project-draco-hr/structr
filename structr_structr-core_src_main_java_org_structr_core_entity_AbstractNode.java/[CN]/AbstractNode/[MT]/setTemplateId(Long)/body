@@ -1,13 +1,13 @@
 {
-  Command findNode=Services.command(FindNodeCommand.class);
-  Template templateNode=(Template)findNode.execute(new SuperUser(),value);
+  Command findNode=Services.command(securityContext,FindNodeCommand.class);
+  Template templateNode=(Template)findNode.execute(value);
   List<StructrRelationship> templateRels=this.getOutgoingRelationships(RelType.USE_TEMPLATE);
-  Command delRel=Services.command(DeleteRelationshipCommand.class);
+  Command delRel=Services.command(securityContext,DeleteRelationshipCommand.class);
   if (templateRels != null) {
     for (    StructrRelationship r : templateRels) {
       delRel.execute(r);
     }
   }
-  Command createRel=Services.command(CreateRelationshipCommand.class);
+  Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
   createRel.execute(this,templateNode,RelType.USE_TEMPLATE);
 }

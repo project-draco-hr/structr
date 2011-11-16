@@ -1,13 +1,13 @@
 {
-  Command findNode=Services.command(FindNodeCommand.class);
-  AbstractNode linkTargetNode=(AbstractNode)findNode.execute(new SuperUser(),value);
+  Command findNode=Services.command(securityContext,FindNodeCommand.class);
+  AbstractNode linkTargetNode=(AbstractNode)findNode.execute(value);
   List<StructrRelationship> pageLinkRels=getRelationships(RelType.PAGE_LINK,Direction.OUTGOING);
-  Command delRel=Services.command(DeleteRelationshipCommand.class);
+  Command delRel=Services.command(securityContext,DeleteRelationshipCommand.class);
   if (pageLinkRels != null) {
     for (    StructrRelationship r : pageLinkRels) {
       delRel.execute(r);
     }
   }
-  Command createRel=Services.command(CreateRelationshipCommand.class);
+  Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
   createRel.execute(this,linkTargetNode,RelType.PAGE_LINK);
 }

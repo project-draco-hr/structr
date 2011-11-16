@@ -10,11 +10,12 @@
   new Thread(new Runnable(){
     @Override public void run(){
       if ("push".equals(pushPull)) {
-        Command transmitCommand=Services.command(PushNodes.class);
+        Command transmitCommand=Services.command(securityContext,PushNodes.class);
         transmitCommand.execute(userNameValue,passwordValue,node,targetNodeValue,remoteHostValue,tcpPort,udpPort,rec);
       }
  else       if ("pull".equals(pushPull)) {
-        Command transmitCommand=Services.command(PullNode.class);
+        Command transmitCommand=Services.command(securityContext,PullNode.class);
+        User user=securityContext.getUser();
         transmitCommand.execute(user,targetNodeValue,node,remoteHostValue,tcpPort,udpPort,rec);
       }
     }

@@ -1,0 +1,20 @@
+{
+  PropertySet wrapper=new PropertySet();
+  if (json.isJsonObject()) {
+    JsonObject obj=json.getAsJsonObject();
+    for (    Entry<String,JsonElement> entry : obj.entrySet()) {
+      String key=entry.getKey();
+      JsonElement elem=entry.getValue();
+      if (elem.isJsonNull()) {
+        wrapper.add(key,null);
+      }
+ else       if (elem.isJsonObject()) {
+        wrapper.add(key,deserializeFlatNameValue(elem,typeOfT,context));
+      }
+ else       if (elem.isJsonPrimitive()) {
+        wrapper.add(key,elem.getAsString());
+      }
+    }
+  }
+  return wrapper;
+}

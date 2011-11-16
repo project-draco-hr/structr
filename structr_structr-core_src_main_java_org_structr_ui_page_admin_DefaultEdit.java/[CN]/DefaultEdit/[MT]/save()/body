@@ -1,6 +1,6 @@
 {
-  final Command transactionCommand=Services.command(TransactionCommand.class);
-  transactionCommand.execute(new StructrTransaction(){
+  final Command transactionCommand=Services.command(securityContext,TransactionCommand.class);
+  StructrTransaction transaction=new StructrTransaction(){
     @Override public Object execute() throws Throwable {
       AbstractNode s=getNodeByIdOrPath(getNodeId());
       if (editPropertiesForm.isValid()) {
@@ -16,5 +16,10 @@
       return (null);
     }
   }
-);
+;
+  transactionCommand.execute(transaction);
+  if (transaction.getCause() != null) {
+    okMsg=transaction.getCause().getMessage();
+    logger.log(Level.WARNING,"Exception while storing properties",transaction.getCause());
+  }
 }

@@ -1,15 +1,15 @@
 {
-  Long numberOfRemovedThumbnails=(Long)Services.command(TransactionCommand.class).execute(new StructrTransaction(){
+  Long numberOfRemovedThumbnails=(Long)Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
     @Override public Object execute() throws Throwable {
       Long numberOfThumbnails=0L;
-      List<Image> images=new LinkedList<Image>();
+      List<Image> images=(List<Image>)Services.command(securityContext,SearchNodeCommand.class).execute(null,null,true,false,Search.andExactType(Image.class.getSimpleName()));
       for (      AbstractNode s : getAllNodes()) {
         if (s instanceof Image) {
           images.add((Image)s);
         }
       }
-      Command deleteNode=Services.command(DeleteNodeCommand.class);
-      Command deleteRel=Services.command(DeleteRelationshipCommand.class);
+      Command deleteNode=Services.command(securityContext,DeleteNodeCommand.class);
+      Command deleteRel=Services.command(securityContext,DeleteRelationshipCommand.class);
       for (      Image image : images) {
         List<StructrRelationship> rels=(List<StructrRelationship>)image.getThumbnailRelationships();
         for (        StructrRelationship r : rels) {

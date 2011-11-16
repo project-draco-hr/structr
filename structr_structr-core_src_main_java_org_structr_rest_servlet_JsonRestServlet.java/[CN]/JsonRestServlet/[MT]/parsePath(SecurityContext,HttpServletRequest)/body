@@ -1,0 +1,55 @@
+{
+  String path=request.getPathInfo();
+  if (!StringUtils.isNotBlank(path)) {
+    throw new NoResultsException();
+  }
+  String[] pathParts=path.split("[/]+");
+  List<ResourceConstraint> constraintChain=new ArrayList<ResourceConstraint>(pathParts.length);
+  for (int i=0; i < pathParts.length; i++) {
+    String part=pathParts[i].trim();
+    if (part.length() > 0) {
+      for (      Entry<Pattern,Class> entry : constraintMap.entrySet()) {
+        Pattern pattern=entry.getKey();
+        Matcher matcher=pattern.matcher(pathParts[i]);
+        if (matcher.matches()) {
+          try {
+            Class type=entry.getValue();
+            ResourceConstraint constraint=(ResourceConstraint)type.newInstance();
+            if (constraint.checkAndConfigure(part,securityContext,request)) {
+              logger.log(Level.FINE,"{0} matched, adding constraint of type {1} for part {2}",new Object[]{matcher.pattern(),type.getName(),part});
+              constraint.configurePropertyView(propertyView);
+              constraintChain.add(constraint);
+              break;
+            }
+          }
+ catch (          Throwable t) {
+            logger.log(Level.WARNING,"Error instantiating constraint class",t);
+          }
+        }
+      }
+    }
+  }
+  String searchString=request.getParameter(REQUEST_PARAMETER_SEARCH_STRING);
+  if (searchString != null) {
+    constraintChain.add(new SearchConstraint(securityContext,searchString));
+  }
+  String sortKey=request.getParameter(REQUEST_PARAMETER_SORT_KEY);
+  if (sortKey != null) {
+    String sortOrder=request.getParameter(REQUEST_PARAMETER_SORT_ORDER);
+    if (sortOrder == null) {
+      sortOrder=DEFAULT_VALUE_SORT_ORDER;
+    }
+    constraintChain.add(new SortConstraint(securityContext,sortKey,sortOrder));
+  }
+  String pageSizeParameter=request.getParameter(REQUEST_PARAMETER_PAGE_SIZE);
+  if (pageSizeParameter != null) {
+    String pageParameter=request.getParameter(REQUEST_PARAMETER_PAGE_NUMBER);
+    int pageSize=parseInt(pageSizeParameter,DEFAULT_VALUE_PAGE_SIZE);
+    int page=parseInt(pageParameter,1);
+    if (pageSize <= 0) {
+      throw new IllegalPathException();
+    }
+    constraintChain.add(new PagingConstraint(securityContext,page,pageSize));
+  }
+  return constraintChain;
+}

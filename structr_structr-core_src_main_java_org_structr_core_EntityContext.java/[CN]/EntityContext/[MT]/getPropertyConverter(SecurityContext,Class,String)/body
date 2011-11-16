@@ -1,0 +1,21 @@
+{
+  Map<String,Class<? extends PropertyConverter>> converterMap=null;
+  PropertyConverter propertyConverter=null;
+  Class localType=type;
+  Class clazz=null;
+  while (clazz == null && !localType.equals(Object.class)) {
+    converterMap=getPropertyConverterMapForType(localType);
+    clazz=converterMap.get(propertyKey);
+    localType=localType.getSuperclass();
+  }
+  if (clazz != null) {
+    try {
+      propertyConverter=(PropertyConverter)clazz.newInstance();
+      propertyConverter.setSecurityContext(securityContext);
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"Unable to instantiate property PropertyConverter {0}: {1}",new Object[]{clazz.getName(),t.getMessage()});
+    }
+  }
+  return propertyConverter;
+}

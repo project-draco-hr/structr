@@ -12,8 +12,8 @@
     try {
       input=new ArchiveStreamFactory().createArchiveInputStream(in);
       if (input != null) {
-        Command createNode=Services.command(CreateNodeCommand.class);
-        Command createRel=Services.command(CreateRelationshipCommand.class);
+        Command createNode=Services.command(securityContext,CreateNodeCommand.class);
+        Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
         Map<String,AbstractNode> createdPaths=new HashMap<String,AbstractNode>();
         try {
           ArchiveEntry ae=input.getNextEntry();
@@ -29,16 +29,16 @@
                 for (                String p : pathElements) {
                   List<NodeAttribute> attrs=new LinkedList<NodeAttribute>();
                   if (count < pathElements.length - 1) {
-                    attrs.add(new NodeAttribute(AbstractNode.TYPE_KEY,"Folder"));
+                    attrs.add(new NodeAttribute(AbstractNode.Key.type.name(),"Folder"));
                   }
  else {
                     String contentType=getContentTypeFromFilename(ae.getName());
-                    attrs.add(new NodeAttribute(File.CONTENT_TYPE_KEY,contentType));
+                    attrs.add(new NodeAttribute(File.Key.contentType.name(),contentType));
                     if (contentType != null && contentType.startsWith("image")) {
-                      attrs.add(new NodeAttribute(AbstractNode.TYPE_KEY,Image.class.getSimpleName()));
+                      attrs.add(new NodeAttribute(AbstractNode.Key.type.name(),Image.class.getSimpleName()));
                     }
  else {
-                      attrs.add(new NodeAttribute(AbstractNode.TYPE_KEY,File.class.getSimpleName()));
+                      attrs.add(new NodeAttribute(AbstractNode.Key.type.name(),File.class.getSimpleName()));
                     }
                   }
                   StringBuilder path=new StringBuilder();
@@ -46,7 +46,7 @@
                     path.append(pathElements[i]).append(PATH_SEPARATOR);
                   }
                   if (!(createdPaths.containsKey(path.toString()))) {
-                    attrs.add(new NodeAttribute(AbstractNode.NAME_KEY,p));
+                    attrs.add(new NodeAttribute(AbstractNode.Key.name.name(),p));
                     AbstractNode childNode=(AbstractNode)createNode.execute(attrs,user,true);
                     if (childNode instanceof org.structr.core.entity.File) {
                       writeFile(childNode,input);
@@ -62,9 +62,9 @@
                 }
               }
  else {
-                NodeAttribute typeAttr=new NodeAttribute(AbstractNode.TYPE_KEY,"File");
-                NodeAttribute sizeAttr=new NodeAttribute(File.SIZE_KEY,size);
-                NodeAttribute nameAttr=new NodeAttribute(AbstractNode.NAME_KEY,name);
+                NodeAttribute typeAttr=new NodeAttribute(AbstractNode.Key.type.name(),"File");
+                NodeAttribute sizeAttr=new NodeAttribute(File.Key.size.name(),size);
+                NodeAttribute nameAttr=new NodeAttribute(AbstractNode.Key.name.name(),name);
                 AbstractNode fileNode=(AbstractNode)createNode.execute(nameAttr,typeAttr,sizeAttr,user);
                 createRel.execute(targetNode,fileNode,RelType.HAS_CHILD);
                 writeFile(fileNode,input);

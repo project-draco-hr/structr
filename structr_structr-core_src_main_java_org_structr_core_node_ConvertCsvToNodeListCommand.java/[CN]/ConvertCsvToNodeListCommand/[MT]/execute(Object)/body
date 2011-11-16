@@ -15,7 +15,7 @@
     }
     if (o instanceof Long) {
       csvNodeId=(Long)o;
-      sourceNode=(AbstractNode)Services.command(FindNodeCommand.class).execute(new SuperUser(),csvNodeId);
+      sourceNode=(AbstractNode)Services.command(securityContext,FindNodeCommand.class).execute(csvNodeId);
       if (sourceNode instanceof CsvFile) {
         csvFileNode=(CsvFile)sourceNode;
         filePath=Services.getFilesPath() + "/" + csvFileNode.getRelativeFilePath();
@@ -51,12 +51,12 @@
     }
     final User userCopy=user;
     final AbstractNode sourceNodeCopy=csvFileNode;
-    final Command transactionCommand=Services.command(TransactionCommand.class);
-    final Command createNode=Services.command(CreateNodeCommand.class);
-    final Command createRel=Services.command(CreateRelationshipCommand.class);
+    final Command transactionCommand=Services.command(securityContext,TransactionCommand.class);
+    final Command createNode=Services.command(securityContext,CreateNodeCommand.class);
+    final Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
     final NodeList<AbstractNode> nodeListNode=(NodeList<AbstractNode>)transactionCommand.execute(new StructrTransaction(){
       @Override public Object execute() throws Throwable {
-        NodeList<AbstractNode> result=(NodeList)createNode.execute(userCopy,new NodeAttribute(AbstractNode.TYPE_KEY,NodeList.class.getSimpleName()),new NodeAttribute(AbstractNode.NAME_KEY,sourceNodeCopy.getName() + " List"));
+        NodeList<AbstractNode> result=(NodeList)createNode.execute(userCopy,new NodeAttribute(AbstractNode.Key.type.name(),NodeList.class.getSimpleName()),new NodeAttribute(AbstractNode.Key.name.name(),sourceNodeCopy.getName() + " List"));
         createRel.execute(sourceNodeCopy,result,RelType.HAS_CHILD);
         return result;
       }
@@ -73,7 +73,7 @@
       }
       if (line != null) {
         List<NodeAttribute> nodeAttributes=new LinkedList<NodeAttribute>();
-        nodeAttributes.add(new NodeAttribute(AbstractNode.TYPE_KEY,targetClassName));
+        nodeAttributes.add(new NodeAttribute(AbstractNode.Key.type.name(),targetClassName));
         for (int i=0; i < col; i++) {
           String csvValue=line[i];
           String key=fieldIndex.get(i);

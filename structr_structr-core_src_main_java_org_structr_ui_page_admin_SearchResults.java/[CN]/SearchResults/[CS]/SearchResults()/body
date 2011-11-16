@@ -15,10 +15,10 @@
   advancedSearchForm.add(new Submit("Reset",this,"onReset"));
   Column actionColumnNodes=new Column("Actions");
   actionColumnNodes.setTextAlign("center");
-  actionColumnNodes.setDecorator(new LinkDecorator(searchResultsTable,new PageLink(),AbstractNode.NODE_ID_KEY){
+  actionColumnNodes.setDecorator(new LinkDecorator(searchResultsTable,new PageLink(),AbstractNode.Key.nodeId.name()){
     @Override protected void renderActionLink(    HtmlStringBuffer buffer,    AbstractLink link,    Context context,    Object row,    Object value){
       AbstractNode n=(AbstractNode)row;
-      link=new PageLink(AbstractNode.NODE_ID_KEY,getEditPageClass(n)){
+      link=new PageLink(AbstractNode.Key.nodeId.name(),getEditPageClass(n)){
         @Override public String getHref(){
           if (getPageClass() == null) {
             throw new IllegalStateException("target pageClass is not defined");
@@ -45,11 +45,11 @@
     }
   }
 );
-  Column typeColumn=new Column(AbstractNode.TYPE_KEY);
-  LinkDecorator iconDec=new LinkDecorator(searchResultsTable,new PageLink(),AbstractNode.NODE_ID_KEY){
+  Column typeColumn=new Column(AbstractNode.Key.type.name());
+  LinkDecorator iconDec=new LinkDecorator(searchResultsTable,new PageLink(),AbstractNode.Key.nodeId.name()){
     @Override protected void renderActionLink(    HtmlStringBuffer buffer,    AbstractLink link,    Context context,    Object row,    Object value){
       AbstractNode n=(AbstractNode)row;
-      link=new PageLink(AbstractNode.NODE_ID_KEY,getEditPageClass(n));
+      link=new PageLink(AbstractNode.Key.nodeId.name(),getEditPageClass(n));
       link.setParameter(NODE_ID_KEY,n.getId());
       link.setImageSrc(n.getIconSrc());
       super.renderActionLink(buffer,link,context,row,value);
@@ -58,7 +58,7 @@
 ;
   typeColumn.setDecorator(iconDec);
   searchResultsTable.addColumn(typeColumn);
-  Column nameColumn=new Column(AbstractNode.NAME_KEY);
+  Column nameColumn=new Column(AbstractNode.Key.name.name());
   LinkDecorator nameDec=new LinkDecorator(searchResultsTable,new PageLink(),"id"){
     @Override protected void renderActionLink(    HtmlStringBuffer buffer,    AbstractLink link,    Context context,    Object row,    Object value){
       AbstractNode n=(AbstractNode)row;
@@ -91,16 +91,16 @@
 ;
   nameColumn.setDecorator(nameDec);
   searchResultsTable.addColumn(nameColumn);
-  searchResultsTable.addColumn(new Column(AbstractNode.LAST_MODIFIED_DATE_KEY));
-  searchResultsTable.addColumn(new Column(AbstractNode.OWNER_KEY));
-  searchResultsTable.addColumn(new Column(AbstractNode.CREATED_BY_KEY));
-  searchResultsTable.addColumn(new Column(AbstractNode.CREATED_DATE_KEY));
-  searchResultsTable.addColumn(new Column(AbstractNode.POSITION_KEY));
-  searchResultsTable.addColumn(new Column(AbstractNode.PUBLIC_KEY));
+  searchResultsTable.addColumn(new Column(AbstractNode.Key.lastModifiedDate.name()));
+  searchResultsTable.addColumn(new Column(AbstractNode.Key.owner.name()));
+  searchResultsTable.addColumn(new Column(AbstractNode.Key.createdBy.name()));
+  searchResultsTable.addColumn(new Column(AbstractNode.Key.createdDate.name()));
+  searchResultsTable.addColumn(new Column(AbstractNode.Key.position.name()));
+  searchResultsTable.addColumn(new Column(AbstractNode.Key.visibleToPublicUsers.name()));
   searchResultsTable.addColumn(actionColumnNodes);
   searchResultsTable.setSortable(true);
   searchResultsTable.setShowBanner(true);
   searchResultsTable.setPageSize(DEFAULT_PAGESIZE);
-  searchResultsTable.getControlLink().setParameter(AbstractNode.NODE_ID_KEY,getNodeId());
+  searchResultsTable.getControlLink().setParameter(AbstractNode.Key.nodeId.name(),getNodeId());
   searchResultsTable.setClass(TABLE_CLASS);
 }

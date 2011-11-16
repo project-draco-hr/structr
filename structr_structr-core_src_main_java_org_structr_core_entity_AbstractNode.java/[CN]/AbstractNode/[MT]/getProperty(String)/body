@@ -1,11 +1,64 @@
 {
-  if (isDirty) {
-    return properties.get(key);
+  boolean idRequested=false;
+  Object value=null;
+  Class type=this.getClass();
+  PropertyGroup propertyGroup=EntityContext.getPropertyGroup(type,key);
+  if (propertyGroup != null) {
+    return propertyGroup.getGroupedProperties(this);
   }
-  if ((key != null) && dbNode.hasProperty(key)) {
-    return dbNode.getProperty(key);
+  String singularType=getSingularTypeName(key);
+  if (key.endsWith("Id")) {
+    singularType=singularType.substring(0,singularType.length() - 2);
+    idRequested=true;
   }
+  if ((singularType != null) && EntityContext.getRelations(type).containsKey(singularType.toLowerCase())) {
+    DirectedRelationship rel=EntityContext.getRelations(type).get(singularType.toLowerCase());
+    if (idRequested) {
+      GraphObject node=rel.getRelatedNode(securityContext,this,singularType);
+      if (node != null) {
+        return node.getId();
+      }
  else {
+        logger.log(Level.FINE,"Related node not found for key {0}",key);
+      }
+    }
+ else {
+      Notion notion=rel.getNotion();
+switch (rel.getCardinality()) {
+case ManyToMany:
+case OneToMany:
+        return new IterableAdapter(rel.getRelatedNodes(securityContext,this,singularType),notion.getAdapterForGetter(securityContext));
+case OneToOne:
+case ManyToOne:
+      return notion.getAdapterForGetter(securityContext).adapt(rel.getRelatedNode(securityContext,this,singularType));
+  }
+}
+}
+if (isDirty) {
+value=properties.get(key);
+}
+if (key.equals(Key.visibleToPublicUsers.name()) && dbNode.hasProperty("public")) {
+final Object oldValue=dbNode.getProperty("public");
+StructrTransaction transaction=new StructrTransaction(){
+  @Override public Object execute() throws Throwable {
+    dbNode.setProperty(Key.visibleToPublicUsers.name(),oldValue);
+    dbNode.removeProperty("public");
     return null;
   }
+}
+;
+Services.command(securityContext,TransactionCommand.class).execute(transaction);
+if (transaction.getCause() != null) {
+  logger.log(Level.WARNING,"Error while setting property",transaction.getCause());
+}
+}
+if ((key != null) && (dbNode != null) && dbNode.hasProperty(key)) {
+value=dbNode.getProperty(key);
+}
+PropertyConverter converter=EntityContext.getPropertyConverter(securityContext,type,key);
+if (converter != null) {
+Value conversionValue=EntityContext.getPropertyConversionParameter(type,key);
+value=converter.convertForGetter(value,conversionValue);
+}
+return value;
 }

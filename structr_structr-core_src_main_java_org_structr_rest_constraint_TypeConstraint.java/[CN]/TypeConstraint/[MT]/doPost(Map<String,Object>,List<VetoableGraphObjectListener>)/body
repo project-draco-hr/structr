@@ -1,0 +1,22 @@
+{
+  StructrTransaction transaction=new StructrTransaction(){
+    @Override public Object execute() throws Throwable {
+      AbstractNode newNode=createNode(listeners,propertySet);
+      ErrorBuffer errorBuffer=new ErrorBuffer();
+      if (!validAfterCreation(listeners,newNode,errorBuffer)) {
+        throw new IllegalArgumentException(errorBuffer.toString());
+      }
+      return newNode;
+    }
+  }
+;
+  AbstractNode newNode=(AbstractNode)Services.command(securityContext,TransactionCommand.class).execute(transaction);
+  if (newNode == null) {
+    if (transaction.getCause() != null) {
+      throw transaction.getCause();
+    }
+  }
+  RestMethodResult result=new RestMethodResult(HttpServletResponse.SC_CREATED);
+  result.addHeader("Location",buildLocationHeader(newNode.getType(),newNode.getId()));
+  return result;
+}

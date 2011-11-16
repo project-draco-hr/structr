@@ -1,0 +1,13 @@
+{
+  for (  Entry<String,String> header : headers.entrySet()) {
+    response.setHeader(header.getKey(),header.getValue());
+  }
+  response.setStatus(responseCode);
+  try {
+    response.getOutputStream().flush();
+    response.getOutputStream().close();
+  }
+ catch (  Throwable t) {
+    logger.log(Level.WARNING,"Unable to commit HttpServletResponse",t);
+  }
+}

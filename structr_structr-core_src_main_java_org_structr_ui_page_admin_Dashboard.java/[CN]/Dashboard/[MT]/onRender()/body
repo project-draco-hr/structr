@@ -1,12 +1,12 @@
 {
-  rootNodeLink.setParameter(AbstractNode.NODE_ID_KEY,"0");
+  rootNodeLink.setParameter(AbstractNode.Key.nodeId.name(),"0");
   if (allNodes == null) {
     return;
   }
   activitiesTable.setDataProvider(new DataProvider(){
     @Override public List<Activity> getData(){
       List<Activity> result=new LinkedList<Activity>();
-      LogNodeList<AbstractNode> globalLog=(LogNodeList<AbstractNode>)Services.command(GetGlobalLogCommand.class).execute();
+      LogNodeList<AbstractNode> globalLog=(LogNodeList<AbstractNode>)Services.command(securityContext,GetGlobalLogCommand.class).execute();
       if (globalLog != null) {
         for (        AbstractNode s : globalLog) {
           if (s instanceof PageRequest) {
@@ -68,7 +68,7 @@
 );
   modulesTable.setDataProvider(new DataProvider(){
     @Override public Set<String> getData(){
-      Command listModules=Services.command(ListModulesCommand.class);
+      Command listModules=Services.command(securityContext,ListModulesCommand.class);
       return (Set<String>)listModules.execute();
     }
   }
@@ -76,7 +76,7 @@
   registeredClassesTable.setDataProvider(new DataProvider(){
     @Override public Set<NodeClassEntry> getData(){
       SortedSet<NodeClassEntry> nodeClassList=new TreeSet<NodeClassEntry>();
-      Map<String,Class> entities=(Map<String,Class>)Services.command(GetEntitiesCommand.class).execute();
+      Map<String,Class> entities=(Map<String,Class>)Services.command(securityContext,GetEntitiesCommand.class).execute();
       for (      Entry<String,Class> entry : entities.entrySet()) {
         String n=entry.getKey();
         Class c=entry.getValue();

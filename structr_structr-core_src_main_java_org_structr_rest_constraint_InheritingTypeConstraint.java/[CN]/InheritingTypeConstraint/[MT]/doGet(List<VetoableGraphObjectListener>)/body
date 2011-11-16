@@ -1,0 +1,17 @@
+{
+  List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
+  AbstractNode topNode=null;
+  boolean includeDeleted=false;
+  boolean publicOnly=false;
+  if (type != null) {
+    searchAttributes.addAll(Search.andExactTypeAndSubtypes(CaseHelper.toCamelCase(type)));
+    List<GraphObject> results=(List<GraphObject>)Services.command(securityContext,SearchNodeCommand.class).execute(topNode,includeDeleted,publicOnly,searchAttributes);
+    if (!results.isEmpty()) {
+      return results;
+    }
+  }
+ else {
+    logger.log(Level.WARNING,"type was null");
+  }
+  throw new NoResultsException();
+}

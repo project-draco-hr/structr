@@ -1,97 +1,117 @@
 {
-  Class type=this.getClass();
-  if (key == null) {
-    logger.log(Level.SEVERE,"Tried to set property with null key (action was denied)");
-    throw new IllegalArgumentException("A property key may not be null.");
-  }
-  if (EntityContext.isReadOnlyProperty(type,key) || (EntityContext.isWriteOnceProperty(type,key) && dbNode != null && dbNode.hasProperty(key))) {
-    if (readOnlyPropertiesUnlocked) {
-      readOnlyPropertiesUnlocked=false;
+synchronized (AbstractNode.class) {
+    final Class type=this.getClass();
+    if (key == null) {
+      logger.log(Level.SEVERE,"Tried to set property with null key (action was denied)");
+      throw new IllegalArgumentException("A property key may not be null.");
     }
+    if (EntityContext.isReadOnlyProperty(type,key) || (EntityContext.isWriteOnceProperty(type,key) && dbNode != null && dbNode.hasProperty(key))) {
+      if (readOnlyPropertiesUnlocked) {
+        readOnlyPropertiesUnlocked=false;
+      }
  else {
-      throw new IllegalArgumentException("Property '".concat(key).concat("' is read-only."));
-    }
-  }
-  PropertyGroup propertyGroup=EntityContext.getPropertyGroup(type,key);
-  if (propertyGroup != null) {
-    propertyGroup.setGroupedProperties(value,this);
-    return;
-  }
-  String singularType=getSingularTypeName(key);
-  if (key.endsWith("Id")) {
-    singularType=singularType.substring(0,singularType.length() - 2);
-  }
-  if (EntityContext.getRelations(type).containsKey(singularType.toLowerCase())) {
-    DirectedRelationship rel=EntityContext.getRelations(type).get(singularType.toLowerCase());
-    if (rel != null) {
-      try {
-        GraphObject graphObject=rel.getNotion().getAdapterForSetter(securityContext).adapt(value);
-        rel.createRelationship(securityContext,this,graphObject,singularType);
-        return;
-      }
- catch (      IllegalArgumentException iaex) {
-        throw iaex;
-      }
-catch (      Throwable t) {
-        throw new IllegalArgumentException(t.getMessage());
+        throw new IllegalArgumentException("Property '".concat(key).concat("' is read-only."));
       }
     }
-  }
-  PropertyConverter converter=EntityContext.getPropertyConverter(securityContext,type,key);
-  final Object convertedValue;
-  if (converter != null) {
-    Value conversionValue=EntityContext.getPropertyConversionParameter(type,key);
-    convertedValue=converter.convertForSetter(value,conversionValue);
-  }
- else {
-    convertedValue=value;
-  }
-  PropertyValidator validator=EntityContext.getPropertyValidator(securityContext,type,key);
-  if (validator != null) {
-    logger.log(Level.FINE,"Using validator of type {0} for property {1}",new Object[]{validator.getClass().getSimpleName(),key});
-    Value parameter=EntityContext.getPropertyValidationParameter(type,key);
-    ErrorBuffer errorBuffer=new ErrorBuffer();
-    if (!validator.isValid(key,convertedValue,parameter,errorBuffer)) {
-      throw new IllegalArgumentException(errorBuffer.toString());
-    }
-  }
-  if (isDirty) {
-    properties.put(key,convertedValue);
-  }
- else {
-    Object oldValue=getProperty(key);
-    if (((convertedValue == null) && (oldValue == null)) || ((convertedValue != null) && (oldValue != null) && convertedValue.equals(oldValue))) {
+    PropertyGroup propertyGroup=EntityContext.getPropertyGroup(type,key);
+    if (propertyGroup != null) {
+      propertyGroup.setGroupedProperties(value,this);
       return;
     }
-    StructrTransaction transaction=new StructrTransaction(){
-      @Override public Object execute() throws Throwable {
-        if (convertedValue == null) {
-          dbNode.removeProperty(key);
+    String singularType=getSingularTypeName(key);
+    if (key.endsWith("Id")) {
+      singularType=singularType.substring(0,singularType.length() - 2);
+    }
+    if (EntityContext.getRelations(type).containsKey(singularType.toLowerCase())) {
+      DirectedRelationship rel=EntityContext.getRelations(type).get(singularType.toLowerCase());
+      if (rel != null) {
+        try {
+          GraphObject graphObject=rel.getNotion().getAdapterForSetter(securityContext).adapt(value);
+          rel.createRelationship(securityContext,this,graphObject,singularType);
+          return;
         }
- else {
-          if (!key.equals(Key.lastModifiedDate.name())) {
-            if (convertedValue instanceof Date) {
-              dbNode.setProperty(key,((Date)convertedValue).getTime());
-            }
- else {
-              dbNode.setProperty(key,convertedValue);
-              dbNode.setProperty(Key.lastModifiedDate.name(),(new Date()).getTime());
-            }
-          }
- else {
-            logger.log(Level.FINE,"Tried to set lastModifiedDate explicitely (action was denied)");
-          }
+ catch (        IllegalArgumentException iaex) {
+          throw iaex;
         }
-        if (updateIndex && dbNode.hasProperty(key)) {
-          Services.command(securityContext,IndexNodeCommand.class).execute(getId(),key);
+catch (        Throwable t) {
+          throw new IllegalArgumentException(t.getMessage());
         }
-        return null;
       }
     }
+    PropertyConverter converter=EntityContext.getPropertyConverter(securityContext,type,key);
+    final Object convertedValue;
+    if (converter != null) {
+      Value conversionValue=EntityContext.getPropertyConversionParameter(type,key);
+      convertedValue=converter.convertForSetter(value,conversionValue);
+    }
+ else {
+      convertedValue=value;
+    }
+    PropertyValidator validator=EntityContext.getPropertyValidator(securityContext,type,key);
+    if (validator != null) {
+      logger.log(Level.FINE,"Using validator of type {0} for property {1}",new Object[]{validator.getClass().getSimpleName(),key});
+      Value parameter=EntityContext.getPropertyValidationParameter(type,key);
+      ErrorBuffer errorBuffer=new ErrorBuffer();
+      if (!validator.isValid(key,convertedValue,parameter,errorBuffer)) {
+        throw new IllegalArgumentException(errorBuffer.toString());
+      }
+    }
+    if (isDirty) {
+      properties.put(key,convertedValue);
+    }
+ else {
+      Object oldValue=getProperty(key);
+      if (((convertedValue == null) && (oldValue == null)) || ((convertedValue != null) && (oldValue != null) && convertedValue.equals(oldValue))) {
+        return;
+      }
+      StructrTransaction transaction=new StructrTransaction(){
+        @Override public Object execute() throws Throwable {
+          Semaphore semaphore=EntityContext.getSemaphoreForTypeAndProperty(type.getSimpleName(),key);
+          try {
+            if (semaphore != null) {
+              try {
+                semaphore.acquire();
+              }
+ catch (              InterruptedException iex) {
+                iex.printStackTrace();
+              }
+              logger.log(Level.INFO,"Entering critical section for type {0} key {1} from thread {2}",new Object[]{type.getSimpleName(),key,Thread.currentThread()});
+            }
+            if (convertedValue == null) {
+              dbNode.removeProperty(key);
+            }
+ else {
+              if (!key.equals(Key.lastModifiedDate.name())) {
+                if (convertedValue instanceof Date) {
+                  dbNode.setProperty(key,((Date)convertedValue).getTime());
+                }
+ else {
+                  dbNode.setProperty(key,convertedValue);
+                  dbNode.setProperty(Key.lastModifiedDate.name(),(new Date()).getTime());
+                }
+              }
+ else {
+                logger.log(Level.FINE,"Tried to set lastModifiedDate explicitely (action was denied)");
+              }
+            }
+            if (updateIndex && dbNode.hasProperty(key)) {
+              Services.command(securityContext,IndexNodeCommand.class).execute(getId(),key);
+            }
+          }
+  finally {
+            if (semaphore != null) {
+              semaphore.release();
+              logger.log(Level.INFO,"Exiting critical section for type {0} key {1} from thread {2}",new Object[]{type.getSimpleName(),key,Thread.currentThread()});
+            }
+          }
+          return null;
+        }
+      }
 ;
-    Services.command(securityContext,TransactionCommand.class).execute(transaction);
-    if (transaction.getCause() != null) {
-      logger.log(Level.WARNING,"Error while setting property",transaction.getCause());
+      Services.command(securityContext,TransactionCommand.class).execute(transaction);
+      if (transaction.getCause() != null) {
+        logger.log(Level.WARNING,"Error while setting property",transaction.getCause());
+      }
     }
   }
 }

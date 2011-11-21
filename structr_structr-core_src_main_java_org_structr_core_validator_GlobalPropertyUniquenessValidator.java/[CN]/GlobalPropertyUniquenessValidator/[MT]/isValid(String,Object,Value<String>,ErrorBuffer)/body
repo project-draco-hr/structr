@@ -7,6 +7,7 @@
     if (!(value instanceof String)) {
       return false;
     }
+    String type=EntityContext.GLOBAL_UNIQUENESS;
     String stringValue=(String)value;
     AbstractNode topNode=null;
     Boolean includeDeleted=false;
@@ -14,8 +15,25 @@
     boolean nodeExists=false;
     List<SearchAttribute> attributes=new LinkedList<SearchAttribute>();
     attributes.add(new TextualSearchAttribute(key,stringValue,SearchOperator.AND));
+    Semaphore semaphore=null;
+    if (type != null && key != null) {
+      semaphore=EntityContext.getSemaphoreForTypeAndProperty(type,key);
+      if (semaphore != null) {
+        try {
+          semaphore.acquire();
+        }
+ catch (        InterruptedException iex) {
+          iex.printStackTrace();
+        }
+        logger.log(Level.INFO,"Entering critical section for type {0} key {1} from thread {2}",new Object[]{type,key,Thread.currentThread()});
+      }
+    }
     List<AbstractNode> resultList=(List<AbstractNode>)Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class).execute(topNode,includeDeleted,publicOnly,attributes);
     nodeExists=!resultList.isEmpty();
+    if (semaphore != null) {
+      semaphore.release();
+      logger.log(Level.INFO,"Exiting critical section for type {0} key {1} from thread {2}",new Object[]{type,key,Thread.currentThread()});
+    }
     if (nodeExists) {
       errorBuffer.add("A node with value '",value,"' for property '",key,"' already exists.");
       return false;

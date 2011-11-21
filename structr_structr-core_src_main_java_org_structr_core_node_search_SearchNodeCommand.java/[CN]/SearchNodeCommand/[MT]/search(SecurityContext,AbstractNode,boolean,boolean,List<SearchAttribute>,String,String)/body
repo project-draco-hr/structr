@@ -2,8 +2,8 @@
   GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
   Index<Node> index=(Index<Node>)arguments.get("index");
   StructrNodeFactory nodeFactory=(StructrNodeFactory)arguments.get("nodeFactory");
-  Map<String,String> typesAndKeys=new LinkedHashMap<String,String>();
   List<AbstractNode> finalResult=new LinkedList<AbstractNode>();
+  Semaphore semaphore=null;
   if (graphDb != null) {
     BooleanQuery query=new BooleanQuery();
     List<BooleanSearchAttribute> booleanAttributes=new LinkedList<BooleanSearchAttribute>();
@@ -18,7 +18,6 @@
           String subQueryPrefix=(StringUtils.isBlank(textualQueryString) ? "" : attributeGroup.getSearchOperator()) + " ( ";
           for (          SearchAttribute groupedAttr : groupedAttributes) {
             if (groupedAttr instanceof TextualSearchAttribute) {
-              extractTypeAndKey(groupedAttr,typesAndKeys);
               subQuery.add(toQuery((TextualSearchAttribute)groupedAttr),translateToBooleanClauseOccur(groupedAttr.getSearchOperator()));
               subQueryString+=toQueryString((TextualSearchAttribute)groupedAttr,StringUtils.isBlank(subQueryString));
             }
@@ -31,7 +30,6 @@
         }
       }
  else       if (attr instanceof TextualSearchAttribute) {
-        extractTypeAndKey(attr,typesAndKeys);
         query.add(toQuery((TextualSearchAttribute)attr),translateToBooleanClauseOccur(attr.getSearchOperator()));
         textualQueryString+=toQueryString((TextualSearchAttribute)attr,StringUtils.isBlank(textualQueryString));
       }
@@ -51,28 +49,8 @@
  else {
       long t0=System.currentTimeMillis();
       logger.log(Level.FINE,"Textual Query String: {0}",textualQueryString);
-      for (      Entry<String,String> requiredLock : typesAndKeys.entrySet()) {
-        String type=requiredLock.getKey();
-        String key=requiredLock.getValue();
-        Semaphore semaphore=EntityContext.getSemaphoreForTypeAndProperty(type,key);
-        if (semaphore != null) {
-          try {
-            semaphore.acquire();
-          }
- catch (          InterruptedException iex) {
-          }
-        }
-      }
       IndexHits hits=index.query(new QueryContext(textualQueryString));
       long t1=System.currentTimeMillis();
-      for (      Entry<String,String> requiredLock : typesAndKeys.entrySet()) {
-        String type=requiredLock.getKey();
-        String key=requiredLock.getValue();
-        Semaphore semaphore=EntityContext.getSemaphoreForTypeAndProperty(type,key);
-        if (semaphore != null) {
-          semaphore.release();
-        }
-      }
       logger.log(Level.FINE,"Querying index took {0} ms, {1} results retrieved.",new Object[]{t1 - t0,hits.size()});
       intermediateResult=nodeFactory.createNodes(securityContext,hits,includeDeleted,publicOnly);
       long t2=System.currentTimeMillis();

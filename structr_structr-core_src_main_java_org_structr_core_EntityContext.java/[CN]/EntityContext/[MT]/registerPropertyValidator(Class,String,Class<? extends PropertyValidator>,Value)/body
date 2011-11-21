@@ -1,6 +1,12 @@
 {
   Map<String,Class<? extends PropertyValidator>> validatorMap=getPropertyValidatorMapForType(type);
   validatorMap.put(propertyKey,validatorClass);
+  if (validatorClass.equals(GlobalPropertyUniquenessValidator.class)) {
+    getSemaphoreMapForType(GLOBAL_UNIQUENESS).put(propertyKey,new Semaphore(1));
+  }
+ else   if (validatorClass.equals(TypeAndPropertyUniquenessValidator.class)) {
+    getSemaphoreMapForType(type.getSimpleName()).put(propertyKey,new Semaphore(1));
+  }
   if (parameter != null) {
     Map<String,Value> validatorParameterMap=getPropertyValidatonParameterMapForType(type);
     validatorParameterMap.put(propertyKey,parameter);

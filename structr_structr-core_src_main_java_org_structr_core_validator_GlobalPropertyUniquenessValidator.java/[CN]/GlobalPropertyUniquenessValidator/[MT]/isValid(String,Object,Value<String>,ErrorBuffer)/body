@@ -3,19 +3,17 @@
     errorBuffer.add("Property '",key,"' must not be empty.");
     return false;
   }
-  if (key != null && value != null && parameter != null) {
+  if (key != null && value != null) {
     if (!(value instanceof String)) {
       return false;
     }
-    String type=parameter.get();
     String stringValue=(String)value;
     AbstractNode topNode=null;
     Boolean includeDeleted=false;
     Boolean publicOnly=false;
     boolean nodeExists=false;
     List<SearchAttribute> attributes=new LinkedList<SearchAttribute>();
-    attributes.add(Search.andExactType(type));
-    attributes.add(Search.andExactPropertyValue(key,stringValue));
+    attributes.add(new TextualSearchAttribute(key,stringValue,SearchOperator.AND));
     List<AbstractNode> resultList=(List<AbstractNode>)Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class).execute(topNode,includeDeleted,publicOnly,attributes);
     nodeExists=!resultList.isEmpty();
     if (nodeExists) {

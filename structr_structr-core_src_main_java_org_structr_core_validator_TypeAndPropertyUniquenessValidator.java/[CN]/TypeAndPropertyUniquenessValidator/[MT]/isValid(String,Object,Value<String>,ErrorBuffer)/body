@@ -16,25 +16,8 @@
     List<SearchAttribute> attributes=new LinkedList<SearchAttribute>();
     attributes.add(Search.andExactType(type));
     attributes.add(Search.andExactPropertyValue(key,stringValue));
-    Semaphore semaphore=null;
-    if (type != null && key != null) {
-      semaphore=EntityContext.getSemaphoreForTypeAndProperty(type,key);
-      if (semaphore != null) {
-        try {
-          semaphore.acquire();
-        }
- catch (        InterruptedException iex) {
-          iex.printStackTrace();
-        }
-        logger.log(Level.INFO,"Entering critical section for type {0} key {1} from thread {2}",new Object[]{type,key,Thread.currentThread()});
-      }
-    }
     List<AbstractNode> resultList=(List<AbstractNode>)Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class).execute(topNode,includeDeleted,publicOnly,attributes,type,key);
     nodeExists=!resultList.isEmpty();
-    if (semaphore != null) {
-      semaphore.release();
-      logger.log(Level.INFO,"Exiting critical section for type {0} key {1} from thread {2}",new Object[]{type,key,Thread.currentThread()});
-    }
     if (nodeExists) {
       errorBuffer.add("A node with value '",value,"' for property '",key,"' already exists.");
       return false;

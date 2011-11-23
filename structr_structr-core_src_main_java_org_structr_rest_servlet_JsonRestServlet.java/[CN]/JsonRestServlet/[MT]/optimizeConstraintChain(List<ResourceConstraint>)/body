@@ -42,7 +42,9 @@ catch (      Throwable t) {
   }
   logger.log(Level.FINE,"########## Final constraint chain {0}",chain.toString());
   if (constraintChain.size() == 1) {
-    return constraintChain.get(0);
+    ResourceConstraint finalConstraint=constraintChain.get(0);
+    finalConstraint.configureIdProperty(defaultIdProperty);
+    return finalConstraint;
   }
   throw new IllegalPathException();
 }

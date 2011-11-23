@@ -1,10 +1,10 @@
 {
-  Class type=this.getClass();
+  final Class type=this.getClass();
   if (key == null) {
     logger.log(Level.SEVERE,"Tried to set property with null key (action was denied)");
-    throw new IllegalArgumentException("Property key '".concat(key).concat("' is null."));
+    throw new IllegalArgumentException("A property key may not be null.");
   }
-  if (EntityContext.isReadOnlyProperty(type,key)) {
+  if (EntityContext.isReadOnlyProperty(type,key) || (EntityContext.isWriteOnceProperty(type,key) && dbNode != null && dbNode.hasProperty(key))) {
     if (readOnlyPropertiesUnlocked) {
       readOnlyPropertiesUnlocked=false;
     }
@@ -41,6 +41,7 @@ catch (      Throwable t) {
   final Object convertedValue;
   if (converter != null) {
     Value conversionValue=EntityContext.getPropertyConversionParameter(type,key);
+    converter.setCurrentNode(this);
     convertedValue=converter.convertForSetter(value,conversionValue);
   }
  else {
@@ -65,25 +66,29 @@ catch (      Throwable t) {
     }
     StructrTransaction transaction=new StructrTransaction(){
       @Override public Object execute() throws Throwable {
-        if (convertedValue == null) {
-          dbNode.removeProperty(key);
-        }
- else {
-          if (!key.equals(Key.lastModifiedDate.name())) {
-            if (convertedValue instanceof Date) {
-              dbNode.setProperty(key,((Date)convertedValue).getTime());
-            }
- else {
-              dbNode.setProperty(key,convertedValue);
-              dbNode.setProperty(Key.lastModifiedDate.name(),(new Date()).getTime());
-            }
+        try {
+          if (convertedValue == null) {
+            dbNode.removeProperty(key);
           }
  else {
-            logger.log(Level.FINE,"Tried to set lastModifiedDate explicitely (action was denied)");
+            if (!key.equals(Key.lastModifiedDate.name())) {
+              if (convertedValue instanceof Date) {
+                dbNode.setProperty(key,((Date)convertedValue).getTime());
+              }
+ else {
+                dbNode.setProperty(key,convertedValue);
+                dbNode.setProperty(Key.lastModifiedDate.name(),(new Date()).getTime());
+              }
+            }
+ else {
+              logger.log(Level.FINE,"Tried to set lastModifiedDate explicitely (action was denied)");
+            }
+          }
+          if (updateIndex && dbNode.hasProperty(key)) {
+            Services.command(securityContext,IndexNodeCommand.class).execute(getId(),key);
           }
         }
-        if (updateIndex && dbNode.hasProperty(key)) {
-          Services.command(securityContext,IndexNodeCommand.class).execute(getId(),key);
+  finally {
         }
         return null;
       }

@@ -6,6 +6,13 @@
   if (idProperty == null) {
     jsonObject.add("id",new JsonPrimitive(src.getId()));
   }
+ else {
+    Object idPropertyValue=src.getProperty(idProperty);
+    if (idPropertyValue != null) {
+      String idString=idPropertyValue.toString();
+      jsonObject.add("id",new JsonPrimitive(idString));
+    }
+  }
   String type=src.getType();
   if (type != null) {
     jsonObject.add("type",new JsonPrimitive(type));
@@ -24,7 +31,7 @@
           }
         }
  else         if (o instanceof Map) {
-          properties.add(serializeMap((Map)o));
+          properties.add(serializeMap((Map)o,typeOfSrc,context,localPropertyView,includeTypeInOutput,true,depth));
         }
  else {
           properties.add(serializePrimitive(key,o,includeTypeInOutput));
@@ -37,7 +44,7 @@
       properties.add(this.serializeNestedKeyValueType(graphObject,typeOfSrc,context,includeTypeInOutput,localPropertyView,depth + 1));
     }
  else     if (value instanceof Map) {
-      properties.add(serializeMap((Map)value));
+      properties.add(serializeMap((Map)value,typeOfSrc,context,localPropertyView,includeTypeInOutput,true,depth));
     }
  else {
       properties.add(serializePrimitive(key,value,includeTypeInOutput));

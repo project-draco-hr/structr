@@ -1,10 +1,11 @@
 {
   StringBuilder errorBuffer=new StringBuilder(100);
   errorBuffer.append(illegalArgumentException.getMessage());
-  response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-  response.setContentType("text/plain; charset=UTF-8");
+  final int code=HttpServletResponse.SC_BAD_REQUEST;
+  response.setStatus(code);
+  response.setContentType("application/json; charset=UTF-8");
   try {
-    response.getWriter().append(errorBuffer.toString());
+    response.getWriter().append(jsonError(code,errorBuffer.toString()));
     response.getWriter().flush();
     response.getWriter().close();
   }

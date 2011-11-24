@@ -1,6 +1,7 @@
 {
   try {
     request.setCharacterEncoding("UTF-8");
+    response.setContentType("application/json; charset=UTF-8");
     final PropertySet propertySet=gson.fromJson(request.getReader(),PropertySet.class);
     SecurityContext securityContext=getSecurityContext(request);
     List<ResourceConstraint> chain=parsePath(securityContext,request);
@@ -16,18 +17,26 @@
     handleValidationError(illegalArgumentException,response);
   }
 catch (  PathException pathException) {
-    response.setStatus(pathException.getStatus());
+    int code=pathException.getStatus();
+    response.setStatus(code);
+    response.getWriter().append(jsonError(code,pathException.getMessage()));
   }
 catch (  JsonSyntaxException jsex) {
     logger.log(Level.WARNING,"JsonSyntaxException in PUT",jsex);
-    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    int code=HttpServletResponse.SC_BAD_REQUEST;
+    response.setStatus(code);
+    response.getWriter().append(jsonError(code,"JsonSyntaxException in PUT: " + jsex.getMessage()));
   }
 catch (  JsonParseException jpex) {
     logger.log(Level.WARNING,"JsonParseException in PUT",jpex);
-    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    int code=HttpServletResponse.SC_BAD_REQUEST;
+    response.setStatus(code);
+    response.getWriter().append(jsonError(code,"JsonSyntaxException in PUT: " + jpex.getMessage()));
   }
 catch (  Throwable t) {
     logger.log(Level.WARNING,"Exception in PUT",t);
-    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    int code=HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+    response.setStatus(code);
+    response.getWriter().append(jsonError(code,"JsonSyntaxException in PUT: " + t.getMessage()));
   }
 }

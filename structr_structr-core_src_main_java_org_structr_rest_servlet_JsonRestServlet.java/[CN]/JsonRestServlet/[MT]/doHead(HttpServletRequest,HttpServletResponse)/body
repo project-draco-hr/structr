@@ -1,6 +1,7 @@
 {
   try {
     request.setCharacterEncoding("UTF-8");
+    response.setContentType("application/json; charset=UTF-8");
     SecurityContext securityContext=getSecurityContext(request);
     List<ResourceConstraint> chain=parsePath(securityContext,request);
     ResourceConstraint resourceConstraint=optimizeConstraintChain(chain);
@@ -11,16 +12,26 @@
     handleValidationError(illegalArgumentException,response);
   }
 catch (  PathException pathException) {
-    response.setStatus(pathException.getStatus());
+    int code=pathException.getStatus();
+    response.setStatus(code);
+    response.getWriter().append(jsonError(code,pathException.getMessage()));
   }
 catch (  JsonSyntaxException jsex) {
-    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    logger.log(Level.WARNING,"JsonSyntaxException in HEAD",jsex);
+    int code=HttpServletResponse.SC_BAD_REQUEST;
+    response.setStatus(code);
+    response.getWriter().append(jsonError(code,"JsonSyntaxException in HEAD: " + jsex.getMessage()));
   }
 catch (  JsonParseException jpex) {
-    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    logger.log(Level.WARNING,"JsonParseException in HEAD",jpex);
+    int code=HttpServletResponse.SC_BAD_REQUEST;
+    response.setStatus(code);
+    response.getWriter().append(jsonError(code,"JsonSyntaxException in HEAD: " + jpex.getMessage()));
   }
 catch (  Throwable t) {
     logger.log(Level.WARNING,"Exception in HEAD",t);
-    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    int code=HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+    response.setStatus(code);
+    response.getWriter().append(jsonError(code,"JsonSyntaxException in HEAD: " + t.getMessage()));
   }
 }

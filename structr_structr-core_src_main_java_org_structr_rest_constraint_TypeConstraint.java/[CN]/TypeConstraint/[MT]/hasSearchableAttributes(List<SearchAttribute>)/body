@@ -1,0 +1,16 @@
+{
+  boolean hasSearchableAttributes=false;
+  if (type != null && request != null && !request.getParameterMap().isEmpty()) {
+    Set<String> searchableAttributes=EntityContext.getSearchableProperties(type);
+    if (searchableAttributes != null) {
+      for (      String key : searchableAttributes) {
+        String searchValue=request.getParameter(key);
+        if (searchValue != null) {
+          searchAttributes.add(Search.andExactPropertyValue(key,searchValue));
+          hasSearchableAttributes=true;
+        }
+      }
+    }
+  }
+  return hasSearchableAttributes;
+}

@@ -1,0 +1,17 @@
+{
+  for (  Entry<String,String> header : headers.entrySet()) {
+    response.setHeader(header.getKey(),header.getValue());
+  }
+  response.setStatus(responseCode);
+  try {
+    Writer writer=response.getWriter();
+    if (content != null) {
+      gson.toJson(content,writer);
+    }
+    writer.flush();
+    writer.close();
+  }
+ catch (  Throwable t) {
+    logger.log(Level.WARNING,"Unable to commit HttpServletResponse",t);
+  }
+}

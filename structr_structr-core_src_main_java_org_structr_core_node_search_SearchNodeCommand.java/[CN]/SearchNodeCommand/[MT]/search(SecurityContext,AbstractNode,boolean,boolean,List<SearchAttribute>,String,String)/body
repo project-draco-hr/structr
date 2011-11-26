@@ -6,6 +6,7 @@
   if (graphDb != null) {
     BooleanQuery query=new BooleanQuery();
     List<BooleanSearchAttribute> booleanAttributes=new LinkedList<BooleanSearchAttribute>();
+    List<TextualSearchAttribute> textualAttributes=new LinkedList<TextualSearchAttribute>();
     String textualQueryString="";
     for (    SearchAttribute attr : searchAttrs) {
       if (attr instanceof SearchAttributeGroup) {
@@ -17,6 +18,7 @@
           String subQueryPrefix=(StringUtils.isBlank(textualQueryString) ? "" : attributeGroup.getSearchOperator()) + " ( ";
           for (          SearchAttribute groupedAttr : groupedAttributes) {
             if (groupedAttr instanceof TextualSearchAttribute) {
+              textualAttributes.add((TextualSearchAttribute)groupedAttr);
               subQuery.add(toQuery((TextualSearchAttribute)groupedAttr),translateToBooleanClauseOccur(groupedAttr.getSearchOperator()));
               subQueryString+=toQueryString((TextualSearchAttribute)groupedAttr,StringUtils.isBlank(subQueryString));
             }
@@ -29,6 +31,7 @@
         }
       }
  else       if (attr instanceof TextualSearchAttribute) {
+        textualAttributes.add((TextualSearchAttribute)attr);
         query.add(toQuery((TextualSearchAttribute)attr),translateToBooleanClauseOccur(attr.getSearchOperator()));
         textualQueryString+=toQueryString((TextualSearchAttribute)attr,StringUtils.isBlank(textualQueryString));
       }
@@ -56,10 +59,7 @@
       logger.log(Level.FINE,"Creating structr nodes took {0} ms, {1} nodes made.",new Object[]{t2 - t1,intermediateResult.size()});
     }
     long t2=System.currentTimeMillis();
-    if (booleanAttributes.isEmpty()) {
-      finalResult.addAll(intermediateResult);
-    }
- else {
+    if (!booleanAttributes.isEmpty()) {
       for (      AbstractNode node : intermediateResult) {
         for (        BooleanSearchAttribute attr : booleanAttributes) {
           String key=attr.getKey();
@@ -94,7 +94,22 @@
           intermediateResult=ListUtils.subtract(intermediateResult,result);
         }
       }
-      finalResult.addAll(intermediateResult);
+    }
+    finalResult.addAll(intermediateResult);
+    for (    AbstractNode node : finalResult) {
+      List<AbstractNode> notMatchingNodes=new LinkedList<AbstractNode>();
+      for (      TextualSearchAttribute attr : textualAttributes) {
+        String value=attr.getValue();
+        if ((value != null) && isExactMatch(value)) {
+          String key=attr.getKey();
+          String nodeValue=node.getStringProperty(key);
+          String decodedValue=decodeExactMatch(value);
+          if (!nodeValue.equals(decodedValue)) {
+            notMatchingNodes.add(node);
+          }
+        }
+      }
+      finalResult=ListUtils.subtract(finalResult,notMatchingNodes);
     }
     long t3=System.currentTimeMillis();
     logger.log(Level.FINE,"Filtering nodes took {0} ms. Result size now {1}.",new Object[]{t3 - t2,finalResult.size()});

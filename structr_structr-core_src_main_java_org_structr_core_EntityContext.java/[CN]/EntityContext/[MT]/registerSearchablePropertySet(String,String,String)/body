@@ -1,12 +1,9 @@
 {
-  Map<String,Set<String>> searchablePropertyMap=getSearchablePropertyMapForType(type);
-  if (searchablePropertyMap == null) {
-    searchablePropertyMap=new LinkedHashMap<String,Set<String>>();
-    Set<String> props=new LinkedHashSet<String>();
-    props.add(key);
-    searchablePropertyMap.put(index,props);
+  Map<String,Set<String>> searchablePropertyMapForType=getSearchablePropertyMapForType(type);
+  Set<String> searchablePropertySet=searchablePropertyMapForType.get(index);
+  if (searchablePropertySet == null) {
+    searchablePropertySet=new LinkedHashSet<String>();
+    searchablePropertyMapForType.put(index,searchablePropertySet);
   }
- else {
-    getSearchablePropertyMapForType(type).get(index).add(key);
-  }
+  searchablePropertySet.add(key);
 }

@@ -8,8 +8,10 @@
       List<ResourceConstraint> chain=parsePath(securityContext,request);
       ResourceConstraint resourceConstraint=optimizeConstraintChain(chain);
       Map<String,Object> properties=new LinkedHashMap<String,Object>();
-      for (      NodeAttribute attr : propertySet.getAttributes()) {
-        properties.put(attr.getKey(),attr.getValue());
+      if (propertySet != null) {
+        for (        NodeAttribute attr : propertySet.getAttributes()) {
+          properties.put(attr.getKey(),attr.getValue());
+        }
       }
       RestMethodResult result=resourceConstraint.doPost(properties,graphObjectListeners);
       propertyView.set(defaultPropertyView);

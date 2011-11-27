@@ -1,6 +1,6 @@
 {
   GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
-  Index<Node> index=(Index<Node>)arguments.get("index");
+  Index<Node> index=(Index<Node>)arguments.get(NodeIndex.user.name());
   Command findNode=Services.command(securityContext,FindNodeCommand.class);
   if (graphDb != null) {
 switch (parameters.length) {
@@ -16,11 +16,11 @@ case 1:
       }
     break;
 case 2:
-  if (parameters[0] instanceof String && parameters[1] instanceof String) {
+  if ((parameters[0] instanceof String) && (parameters[1] instanceof String)) {
     String userName=(String)parameters[0];
     String rootNodePath=(String)parameters[1];
     List<AbstractNode> nodes=(List<AbstractNode>)findNode.execute(new XPath(rootNodePath));
-    if (nodes != null && nodes.size() > 0) {
+    if ((nodes != null) && (nodes.size() > 0)) {
       AbstractNode r=nodes.get(0);
       Node startNode=null;
       if (r != null) {

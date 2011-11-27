@@ -1,5 +1,4 @@
 {
-  String type=node.getClass().getSimpleName();
   Node dbNode=node.getNode();
   long id=node.getId();
   if (key == null) {
@@ -28,9 +27,16 @@
     dbNode.removeProperty(key);
   }
  else {
-    index.remove(dbNode,key);
-    logger.log(Level.FINE,"Node {0}: Old value for key {1} removed from index",new Object[]{id,key});
-    index.add(dbNode,key,valueForIndexing);
-    logger.log(Level.FINE,"Node {0}: New value {2} added to index for key {1}",new Object[]{id,key,value});
+    removeNodePropertyFromAllIndices(dbNode,key);
+    logger.log(Level.FINE,"Node {0}: Old value for key {1} removed from all indices",new Object[]{id,key});
+    addNodePropertyToFulltextIndex(dbNode,key,valueForIndexing);
+    addNodePropertyToKeywordIndex(dbNode,key,valueForIndexing);
+    if ((node instanceof User) && (key.equals(AbstractNode.Key.name.name()) || key.equals(Person.Key.email.name()))) {
+      addNodePropertyToUserIndex(dbNode,key,valueForIndexing);
+    }
+    if (key.equals(AbstractNode.Key.uuid.name())) {
+      addNodePropertyToUuidIndex(dbNode,key,valueForIndexing);
+    }
+    logger.log(Level.FINE,"Node {0}: New value {2} added for key {1}",new Object[]{id,key,value});
   }
 }

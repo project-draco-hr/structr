@@ -8,6 +8,7 @@
   for (int i=0; i < pathParts.length; i++) {
     String part=pathParts[i].trim();
     if (part.length() > 0) {
+      boolean found=false;
       for (      Entry<Pattern,Class> entry : constraintMap.entrySet()) {
         Pattern pattern=entry.getKey();
         Matcher matcher=pattern.matcher(pathParts[i]);
@@ -20,6 +21,7 @@
               logger.log(Level.FINE,"{0} matched, adding constraint of type {1} for part {2}",new Object[]{matcher.pattern(),type.getName(),part});
               constraint.configurePropertyView(propertyView);
               constraintChain.add(constraint);
+              found=true;
               break;
             }
           }
@@ -27,6 +29,9 @@
             logger.log(Level.WARNING,"Error instantiating constraint class",t);
           }
         }
+      }
+      if (!found) {
+        throw new IllegalPathException();
       }
     }
   }

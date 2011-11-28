@@ -1,7 +1,15 @@
 {
-  logger.log(Level.INFO,"Adding id {0} to id set",typedIdConstraint.getIdConstraint().getId());
-  if (!idSet.add(typedIdConstraint.getIdConstraint().getId())) {
-    throw new IllegalPathException();
+  logger.log(Level.FINE,"Adding id {0} to id set",typedIdConstraint.getIdConstraint().getUriPart());
+  IdConstraint idConstraint=typedIdConstraint.getIdConstraint();
+  if (idConstraint instanceof UuidConstraint) {
+    if (!idSet.add(((UuidConstraint)idConstraint).getUriPart())) {
+      throw new IllegalPathException();
+    }
+  }
+ else {
+    if (!idSet.add(idConstraint.getId())) {
+      throw new IllegalPathException();
+    }
   }
   uriParts.add(typedIdConstraint.getUriPart());
   String type1=lastConstraint.getTypeConstraint().getType();

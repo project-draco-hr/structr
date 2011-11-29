@@ -1,0 +1,61 @@
+{
+  if (depth > outputNestingDepth) {
+    return null;
+  }
+  JsonObject jsonObject=new JsonObject();
+  if (idProperty == null) {
+    jsonObject.add("id",new JsonPrimitive(src.getId()));
+  }
+ else {
+    Object idPropertyValue=src.getProperty(idProperty);
+    if (idPropertyValue != null) {
+      String idString=idPropertyValue.toString();
+      jsonObject.add("id",new JsonPrimitive(idString));
+    }
+  }
+  String type=src.getType();
+  if (type != null) {
+    jsonObject.add("type",new JsonPrimitive(type));
+  }
+  for (  String key : src.getPropertyKeys(localPropertyView)) {
+    Object value=src.getProperty(key);
+    if (value != null) {
+      if (key.equals(idProperty)) {
+        key="id";
+      }
+      if (value instanceof Iterable) {
+        JsonArray property=new JsonArray();
+        for (        Object o : (Iterable)value) {
+          if (o instanceof GraphObject) {
+            GraphObject obj=(GraphObject)o;
+            JsonElement recursiveSerializedValue=this.serializeFlatNameValue(obj,typeOfSrc,context,localPropertyView,depth + 1);
+            if (recursiveSerializedValue != null) {
+              property.add(recursiveSerializedValue);
+            }
+          }
+ else           if (o instanceof Map) {
+            property.add(serializeMap((Map)o,typeOfSrc,context,localPropertyView,false,false,depth));
+          }
+ else {
+            property.add(new JsonPrimitive(o.toString()));
+          }
+        }
+        jsonObject.add(key,property);
+      }
+ else       if (value instanceof GraphObject) {
+        GraphObject graphObject=(GraphObject)value;
+        jsonObject.add(key,this.serializeFlatNameValue(graphObject,typeOfSrc,context,localPropertyView,depth + 1));
+      }
+ else       if (value instanceof Map) {
+        jsonObject.add(key,serializeMap((Map)value,typeOfSrc,context,localPropertyView,false,false,depth));
+      }
+ else {
+        jsonObject.add(key,new JsonPrimitive(value.toString()));
+      }
+    }
+ else {
+      jsonObject.add(key,new JsonNull());
+    }
+  }
+  return jsonObject;
+}

@@ -1,0 +1,9 @@
+{
+  boolean isWriteOnce=getWriteOncePropertySetForType(type).contains(key);
+  Class localType=type;
+  while (!isWriteOnce && !localType.equals(Object.class)) {
+    isWriteOnce=getWriteOncePropertySetForType(localType).contains(key);
+    localType=localType.getSuperclass();
+  }
+  return isWriteOnce;
+}

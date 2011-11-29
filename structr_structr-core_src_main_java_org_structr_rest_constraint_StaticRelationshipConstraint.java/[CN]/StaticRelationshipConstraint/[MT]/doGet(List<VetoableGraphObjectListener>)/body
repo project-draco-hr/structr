@@ -5,7 +5,11 @@
     String targetType=typeConstraint.getType();
     DirectedRelationship staticRel=EntityContext.getRelation(sourceType,targetType);
     if (staticRel != null) {
-      return staticRel.getRelatedNodes(securityContext,typedIdConstraint.getTypesafeNode(),targetType);
+      List<AbstractNode> relatedNodes=staticRel.getRelatedNodes(securityContext,typedIdConstraint.getTypesafeNode(),targetType);
+      if (!relatedNodes.isEmpty()) {
+        return relatedNodes;
+      }
+      throw new NoResultsException();
     }
   }
   throw new IllegalPathException();

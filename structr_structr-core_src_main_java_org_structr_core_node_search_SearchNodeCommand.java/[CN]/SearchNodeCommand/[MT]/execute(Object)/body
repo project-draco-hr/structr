@@ -1,6 +1,6 @@
 {
-  if ((parameters == null) || (parameters.length != 4)) {
-    logger.log(Level.WARNING,"Exactly 4 parameters are required for advanced search.");
+  if ((parameters == null) || (parameters.length < 4)) {
+    logger.log(Level.WARNING,"4 or more parameters are required for advanced search.");
     return Collections.emptyList();
   }
   AbstractNode topNode=null;
@@ -19,5 +19,15 @@
   if (parameters[3] instanceof List) {
     searchAttrs=(List<SearchAttribute>)parameters[3];
   }
-  return search(securityContext,topNode,includeDeleted,publicOnly,searchAttrs);
+  String propertyKey=null;
+  String type=null;
+  if (parameters.length >= 6) {
+    if (parameters[4] instanceof String) {
+      type=(String)parameters[4];
+    }
+    if (parameters[5] instanceof String) {
+      propertyKey=(String)parameters[5];
+    }
+  }
+  return search(securityContext,topNode,includeDeleted,publicOnly,searchAttrs,type,propertyKey);
 }

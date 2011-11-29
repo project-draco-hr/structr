@@ -1,31 +1,51 @@
 {
   try {
     request.setCharacterEncoding("UTF-8");
+    response.setContentType("application/json; charset=UTF-8");
     final PropertySet propertySet=gson.fromJson(request.getReader(),PropertySet.class);
     SecurityContext securityContext=getSecurityContext(request);
-    List<ResourceConstraint> chain=parsePath(securityContext,request);
-    ResourceConstraint resourceConstraint=optimizeConstraintChain(chain);
-    Map<String,Object> properties=new LinkedHashMap<String,Object>();
-    for (    NodeAttribute attr : propertySet.getAttributes()) {
-      properties.put(attr.getKey(),attr.getValue());
+    if (securityContext != null) {
+      List<ResourceConstraint> chain=parsePath(securityContext,request);
+      ResourceConstraint resourceConstraint=optimizeConstraintChain(chain);
+      Map<String,Object> properties=new LinkedHashMap<String,Object>();
+      if (propertySet != null) {
+        for (        NodeAttribute attr : propertySet.getAttributes()) {
+          properties.put(attr.getKey(),attr.getValue());
+        }
+      }
+      RestMethodResult result=resourceConstraint.doPost(properties,graphObjectListeners);
+      propertyView.set(defaultPropertyView);
+      result.commitResponse(gson,response);
     }
-    RestMethodResult result=resourceConstraint.doPost(properties,graphObjectListeners);
-    result.commitResponse(response);
+ else {
+      RestMethodResult result=new RestMethodResult(HttpServletResponse.SC_FORBIDDEN);
+      result.commitResponse(gson,response);
+    }
   }
  catch (  IllegalArgumentException illegalArgumentException) {
     handleValidationError(illegalArgumentException,response);
   }
 catch (  PathException pathException) {
-    response.setStatus(pathException.getStatus());
+    int code=pathException.getStatus();
+    response.setStatus(code);
+    response.getWriter().append(jsonError(code,pathException.getMessage()));
   }
 catch (  JsonSyntaxException jsex) {
-    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    logger.log(Level.WARNING,"JsonSyntaxException in POST",jsex);
+    int code=HttpServletResponse.SC_BAD_REQUEST;
+    response.setStatus(code);
+    response.getWriter().append(jsonError(code,"JsonSyntaxException in POST: " + jsex.getMessage()));
   }
 catch (  JsonParseException jpex) {
-    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    logger.log(Level.WARNING,"JsonParseException in POST",jpex);
+    int code=HttpServletResponse.SC_BAD_REQUEST;
+    response.setStatus(code);
+    response.getWriter().append(jsonError(code,"JsonSyntaxException in POST: " + jpex.getMessage()));
   }
 catch (  Throwable t) {
     logger.log(Level.WARNING,"Exception in POST",t);
-    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    int code=HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+    response.setStatus(code);
+    response.getWriter().append(jsonError(code,"JsonSyntaxException in POST: " + t.getMessage()));
   }
 }

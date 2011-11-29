@@ -10,7 +10,13 @@
     }
     if (obj.has("key")) {
       key=obj.get("key").getAsString();
-      logger.log(Level.INFO,"key: {0}",key);
+      if (idProperty != null && "id".equals(key)) {
+        logger.log(Level.INFO,"mapped key: {0} -> {1}",new Object[]{key,idProperty});
+        key=idProperty;
+      }
+ else {
+        logger.log(Level.INFO,"key: {0}",key);
+      }
     }
     if (obj.has("value")) {
       JsonElement valueElement=obj.get("value");

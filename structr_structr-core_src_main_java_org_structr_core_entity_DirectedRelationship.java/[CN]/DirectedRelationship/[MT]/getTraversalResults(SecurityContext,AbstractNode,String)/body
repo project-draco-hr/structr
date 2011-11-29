@@ -1,4 +1,7 @@
 {
+  final Class realType=(Class)Services.command(securityContext,GetEntityClassCommand.class).execute(StringUtils.capitalize(type));
+  final StructrNodeFactory nodeFactory=new StructrNodeFactory<AbstractNode>(securityContext);
+  final List<AbstractNode> nodeList=new LinkedList<AbstractNode>();
   Iterable<Node> nodes=Traversal.description().breadthFirst().relationships(relType,direction).evaluator(new Evaluator(){
     @Override public Evaluation evaluate(    Path path){
       int len=path.length();
@@ -7,12 +10,10 @@
           return Evaluation.EXCLUDE_AND_CONTINUE;
         }
  else {
-          Node currentNode=path.endNode();
-          if (currentNode.hasProperty(AbstractNode.Key.type.name())) {
-            String nodeType=(String)currentNode.getProperty(AbstractNode.Key.type.name());
-            if (type.equals(nodeType)) {
-              return Evaluation.INCLUDE_AND_CONTINUE;
-            }
+          AbstractNode abstractNode=(AbstractNode)nodeFactory.createNode(securityContext,path.endNode());
+          if (realType != null && realType.isAssignableFrom(abstractNode.getClass())) {
+            nodeList.add(abstractNode);
+            return Evaluation.INCLUDE_AND_CONTINUE;
           }
         }
       }
@@ -20,10 +21,7 @@
     }
   }
 ).traverse(node.getNode()).nodes();
-  StructrNodeFactory nodeFactory=new StructrNodeFactory<AbstractNode>(securityContext);
-  List<AbstractNode> nodeList=new LinkedList<AbstractNode>();
   for (  Node n : nodes) {
-    nodeList.add(nodeFactory.createNode(securityContext,n,type));
   }
   return nodeList;
 }

@@ -1,0 +1,18 @@
+{
+  List<GraphObject> results=typedIdConstraint.doGet(listeners);
+  if (results != null) {
+    String sourceType=typedIdConstraint.getTypeConstraint().getType();
+    String targetType=typeConstraint.getType();
+    DirectedRelationship staticRel=EntityContext.getRelation(sourceType,targetType);
+    if (staticRel != null) {
+      AbstractNode startNode=typedIdConstraint.getTypesafeNode();
+      if (startNode != null) {
+        List<StructrRelationship> rels=startNode.getRelationships(staticRel.getRelType(),staticRel.getDirection());
+        for (        StructrRelationship rel : rels) {
+          rel.delete();
+        }
+      }
+    }
+  }
+  return new RestMethodResult(HttpServletResponse.SC_OK);
+}

@@ -1,0 +1,27 @@
+{
+  final Class realType=(Class)Services.command(securityContext,GetEntityClassCommand.class).execute(StringUtils.capitalize(destType));
+  final StructrNodeFactory nodeFactory=new StructrNodeFactory<AbstractNode>(securityContext);
+  final List<AbstractNode> nodeList=new LinkedList<AbstractNode>();
+  Iterable<Node> nodes=Traversal.description().breadthFirst().relationships(relType,direction).evaluator(new Evaluator(){
+    @Override public Evaluation evaluate(    Path path){
+      int len=path.length();
+      if (len <= 1) {
+        if (len == 0) {
+          return Evaluation.EXCLUDE_AND_CONTINUE;
+        }
+ else {
+          AbstractNode abstractNode=(AbstractNode)nodeFactory.createNode(securityContext,path.endNode());
+          if (realType != null && realType.isAssignableFrom(abstractNode.getClass())) {
+            nodeList.add(abstractNode);
+            return Evaluation.INCLUDE_AND_CONTINUE;
+          }
+        }
+      }
+      return Evaluation.EXCLUDE_AND_PRUNE;
+    }
+  }
+).traverse(node.getNode()).nodes();
+  for (  Node n : nodes) {
+  }
+  return nodeList;
+}

@@ -17,16 +17,12 @@
     propertyGroup.setGroupedProperties(value,this);
     return;
   }
-  String singularType=getSingularTypeName(key);
-  if (key.endsWith("Id")) {
-    singularType=singularType.substring(0,singularType.length() - 2);
-  }
-  if (EntityContext.getRelations(type).containsKey(singularType.toLowerCase())) {
-    DirectedRelationship rel=EntityContext.getRelations(type).get(singularType.toLowerCase());
+  if (EntityContext.getRelations(type).containsKey(key)) {
+    DirectedRelationship rel=EntityContext.getRelations(type).get(key);
     if (rel != null) {
       try {
         GraphObject graphObject=rel.getNotion().getAdapterForSetter(securityContext).adapt(value);
-        rel.createRelationship(securityContext,this,graphObject,singularType);
+        rel.createRelationship(securityContext,this,graphObject);
         return;
       }
  catch (      IllegalArgumentException iaex) {

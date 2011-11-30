@@ -8,24 +8,38 @@
       nodeList.add(0,traversedNode);
     }
     if (nodeList.size() >= 2) {
+      final String property=lastConstraint.getTypeConstraint().getType();
       final AbstractNode startNode=(AbstractNode)nodeList.get(1);
       final AbstractNode endNode=(AbstractNode)nodeList.get(0);
+      logger.log(Level.INFO,"Identified property name {0} for relationship between {1} and {2}",new Object[]{property,startNode.getType(),endNode.getType()});
       if ((startNode != null) && (endNode != null)) {
-        StructrTransaction transaction=new StructrTransaction(){
-          @Override public Object execute() throws Throwable {
-            for (            StructrRelationship rel : startNode.getRelationships()) {
+        final DirectedRelationship directedRelationship=EntityContext.getRelation(startNode.getClass(),property);
+        if (directedRelationship != null) {
+          StructrTransaction transaction=new StructrTransaction(){
+            @Override public Object execute() throws Throwable {
+              for (              StructrRelationship rel : startNode.getRelationships(directedRelationship.getRelType(),directedRelationship.getDirection())) {
+switch (directedRelationship.getDirection()) {
+case INCOMING:
+                  if (rel.getStartNodeId().equals(endNode.getId()) && rel.getEndNodeId().equals(startNode.getId())) {
+                    rel.delete();
+                  }
+                break;
+case OUTGOING:
               if (rel.getStartNodeId().equals(startNode.getId()) && rel.getEndNodeId().equals(endNode.getId())) {
                 rel.delete();
               }
-            }
-            return null;
-          }
+            break;
         }
-;
-        Services.command(securityContext,TransactionCommand.class).execute(transaction);
       }
+      return null;
     }
-    return new RestMethodResult(HttpServletResponse.SC_OK);
   }
-  throw new NotFoundException();
+;
+  Services.command(securityContext,TransactionCommand.class).execute(transaction);
+}
+}
+}
+return new RestMethodResult(HttpServletResponse.SC_OK);
+}
+throw new NotFoundException();
 }

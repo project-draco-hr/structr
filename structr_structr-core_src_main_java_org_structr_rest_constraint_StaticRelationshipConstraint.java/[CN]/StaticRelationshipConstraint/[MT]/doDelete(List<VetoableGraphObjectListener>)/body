@@ -7,10 +7,17 @@
     if (staticRel != null) {
       AbstractNode startNode=typedIdConstraint.getTypesafeNode();
       if (startNode != null) {
-        List<StructrRelationship> rels=startNode.getRelationships(staticRel.getRelType(),staticRel.getDirection());
-        for (        StructrRelationship rel : rels) {
-          rel.delete();
+        final List<StructrRelationship> rels=startNode.getRelationships(staticRel.getRelType(),staticRel.getDirection());
+        StructrTransaction transaction=new StructrTransaction(){
+          @Override public Object execute() throws Throwable {
+            for (            StructrRelationship rel : rels) {
+              rel.delete();
+            }
+            return null;
+          }
         }
+;
+        Services.command(securityContext,TransactionCommand.class).execute(transaction);
       }
     }
   }

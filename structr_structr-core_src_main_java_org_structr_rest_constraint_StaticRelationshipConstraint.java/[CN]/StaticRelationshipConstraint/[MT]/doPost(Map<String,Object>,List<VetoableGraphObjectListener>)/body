@@ -1,11 +1,11 @@
 {
-  if (securityContext != null && securityContext.getUser() != null) {
+  if ((securityContext != null) && (securityContext.getUser() != null)) {
     StructrTransaction transaction=new StructrTransaction(){
       @Override public Object execute() throws Throwable {
         AbstractNode sourceNode=typedIdConstraint.getIdConstraint().getNode();
         AbstractNode newNode=typeConstraint.createNode(listeners,propertySet);
         DirectedRelationship rel=EntityContext.getRelation(sourceNode.getClass(),newNode.getClass());
-        if (sourceNode != null && newNode != null && rel != null) {
+        if ((sourceNode != null) && (newNode != null) && (rel != null)) {
           rel.createRelationship(securityContext,sourceNode,newNode);
           ErrorBuffer errorBuffer=new ErrorBuffer();
           if (!validAfterCreation(listeners,newNode,errorBuffer)) {

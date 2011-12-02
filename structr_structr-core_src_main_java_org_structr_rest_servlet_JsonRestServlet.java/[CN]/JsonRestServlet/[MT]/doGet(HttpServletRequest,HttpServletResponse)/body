@@ -5,8 +5,7 @@
     SecurityContext securityContext=getSecurityContext(request);
     propertyView.set(defaultPropertyView);
     double queryTimeStart=System.nanoTime();
-    List<ResourceConstraint> chain=parsePath(securityContext,request);
-    ResourceConstraint resourceConstraint=optimizeConstraintChain(chain);
+    ResourceConstraint resourceConstraint=addSortingAndPaging(request,securityContext,optimizeConstraintChain(parsePath(securityContext,request)));
     double queryTimeEnd=System.nanoTime();
     Result result=new Result(resourceConstraint.doGet(graphObjectListeners),resourceConstraint.isCollectionResource());
     if (result != null) {

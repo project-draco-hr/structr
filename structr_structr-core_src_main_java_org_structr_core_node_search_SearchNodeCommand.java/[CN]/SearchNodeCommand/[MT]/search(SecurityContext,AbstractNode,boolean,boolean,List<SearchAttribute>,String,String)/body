@@ -1,11 +1,13 @@
 {
   GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
-  Index<Node> index=(Index<Node>)arguments.get("index");
+  Index<Node> index;
   StructrNodeFactory nodeFactory=(StructrNodeFactory)arguments.get("nodeFactory");
   List<AbstractNode> finalResult=new LinkedList<AbstractNode>();
+  boolean allExactMatch=true;
   if (graphDb != null) {
     BooleanQuery query=new BooleanQuery();
     List<BooleanSearchAttribute> booleanAttributes=new LinkedList<BooleanSearchAttribute>();
+    List<TextualSearchAttribute> textualAttributes=new LinkedList<TextualSearchAttribute>();
     String textualQueryString="";
     for (    SearchAttribute attr : searchAttrs) {
       if (attr instanceof SearchAttributeGroup) {
@@ -17,8 +19,10 @@
           String subQueryPrefix=(StringUtils.isBlank(textualQueryString) ? "" : attributeGroup.getSearchOperator()) + " ( ";
           for (          SearchAttribute groupedAttr : groupedAttributes) {
             if (groupedAttr instanceof TextualSearchAttribute) {
+              textualAttributes.add((TextualSearchAttribute)groupedAttr);
               subQuery.add(toQuery((TextualSearchAttribute)groupedAttr),translateToBooleanClauseOccur(groupedAttr.getSearchOperator()));
               subQueryString+=toQueryString((TextualSearchAttribute)groupedAttr,StringUtils.isBlank(subQueryString));
+              allExactMatch&=isExactMatch(((TextualSearchAttribute)groupedAttr).getValue());
             }
           }
           query.add(subQuery,translateToBooleanClauseOccur(attributeGroup.getSearchOperator()));
@@ -29,8 +33,10 @@
         }
       }
  else       if (attr instanceof TextualSearchAttribute) {
+        textualAttributes.add((TextualSearchAttribute)attr);
         query.add(toQuery((TextualSearchAttribute)attr),translateToBooleanClauseOccur(attr.getSearchOperator()));
         textualQueryString+=toQueryString((TextualSearchAttribute)attr,StringUtils.isBlank(textualQueryString));
+        allExactMatch&=isExactMatch(((TextualSearchAttribute)attr).getValue());
       }
  else       if (attr instanceof BooleanSearchAttribute) {
         booleanAttributes.add((BooleanSearchAttribute)attr);
@@ -48,7 +54,20 @@
  else {
       long t0=System.currentTimeMillis();
       logger.log(Level.FINE,"Textual Query String: {0}",textualQueryString);
-      IndexHits hits=index.query(new QueryContext(textualQueryString));
+      QueryContext queryContext=new QueryContext(textualQueryString);
+      IndexHits hits;
+      if ((textualAttributes.size() == 1) && textualAttributes.get(0).getKey().equals(AbstractNode.Key.uuid.name())) {
+        index=(Index<Node>)arguments.get(NodeIndex.uuid.name());
+        hits=index.get(AbstractNode.Key.uuid.name(),decodeExactMatch(textualAttributes.get(0).getValue()));
+      }
+ else       if ((textualAttributes.size() > 1) && allExactMatch) {
+        index=(Index<Node>)arguments.get(NodeIndex.keyword.name());
+        hits=index.query(queryContext);
+      }
+ else {
+        index=(Index<Node>)arguments.get(NodeIndex.fulltext.name());
+        hits=index.query(queryContext);
+      }
       long t1=System.currentTimeMillis();
       logger.log(Level.FINE,"Querying index took {0} ms, {1} results retrieved.",new Object[]{t1 - t0,hits.size()});
       intermediateResult=nodeFactory.createNodes(securityContext,hits,includeDeleted,publicOnly);
@@ -56,10 +75,7 @@
       logger.log(Level.FINE,"Creating structr nodes took {0} ms, {1} nodes made.",new Object[]{t2 - t1,intermediateResult.size()});
     }
     long t2=System.currentTimeMillis();
-    if (booleanAttributes.isEmpty()) {
-      finalResult.addAll(intermediateResult);
-    }
- else {
+    if (!booleanAttributes.isEmpty()) {
       for (      AbstractNode node : intermediateResult) {
         for (        BooleanSearchAttribute attr : booleanAttributes) {
           String key=attr.getKey();
@@ -94,8 +110,8 @@
           intermediateResult=ListUtils.subtract(intermediateResult,result);
         }
       }
-      finalResult.addAll(intermediateResult);
     }
+    finalResult.addAll(intermediateResult);
     long t3=System.currentTimeMillis();
     logger.log(Level.FINE,"Filtering nodes took {0} ms. Result size now {1}.",new Object[]{t3 - t2,finalResult.size()});
   }

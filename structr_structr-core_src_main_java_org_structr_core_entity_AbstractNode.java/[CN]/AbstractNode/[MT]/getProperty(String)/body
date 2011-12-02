@@ -1,37 +1,20 @@
 {
-  boolean idRequested=false;
   Object value=null;
   Class type=this.getClass();
   PropertyGroup propertyGroup=EntityContext.getPropertyGroup(type,key);
   if (propertyGroup != null) {
     return propertyGroup.getGroupedProperties(this);
   }
-  String singularType=getSingularTypeName(key);
-  if (key.endsWith("Id")) {
-    singularType=singularType.substring(0,singularType.length() - 2);
-    idRequested=true;
-  }
-  if ((singularType != null) && EntityContext.getRelations(type).containsKey(singularType.toLowerCase())) {
-    DirectedRelationship rel=EntityContext.getRelations(type).get(singularType.toLowerCase());
-    if (idRequested) {
-      GraphObject node=rel.getRelatedNode(securityContext,this,singularType);
-      if (node != null) {
-        return node.getId();
-      }
- else {
-        logger.log(Level.FINE,"Related node not found for key {0}",key);
-      }
-    }
- else {
-      Notion notion=rel.getNotion();
+  if (EntityContext.getRelations(type).containsKey(key)) {
+    DirectedRelationship rel=EntityContext.getRelations(type).get(key);
+    Notion notion=rel.getNotion();
 switch (rel.getCardinality()) {
 case ManyToMany:
 case OneToMany:
-        return new IterableAdapter(rel.getRelatedNodes(securityContext,this,singularType),notion.getAdapterForGetter(securityContext));
+      return new IterableAdapter(rel.getRelatedNodes(securityContext,this),notion.getAdapterForGetter(securityContext));
 case OneToOne:
 case ManyToOne:
-      return notion.getAdapterForGetter(securityContext).adapt(rel.getRelatedNode(securityContext,this,singularType));
-  }
+    return notion.getAdapterForGetter(securityContext).adapt(rel.getRelatedNode(securityContext,this));
 }
 }
 if (isDirty) {

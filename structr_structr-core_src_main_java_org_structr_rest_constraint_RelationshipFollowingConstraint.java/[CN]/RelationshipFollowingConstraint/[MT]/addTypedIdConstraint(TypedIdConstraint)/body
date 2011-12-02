@@ -1,20 +1,32 @@
 {
-  logger.log(Level.INFO,"Adding id {0} to id set",typedIdConstraint.getIdConstraint().getId());
-  if (!idSet.add(typedIdConstraint.getIdConstraint().getId())) {
-    throw new IllegalPathException();
+  logger.log(Level.FINE,"Adding id {0} to id set",typedIdConstraint.getIdConstraint().getUriPart());
+  IdConstraint idConstraint=typedIdConstraint.getIdConstraint();
+  if (idConstraint instanceof UuidConstraint) {
+    if (!idSet.add(((UuidConstraint)idConstraint).getUriPart())) {
+      throw new IllegalPathException();
+    }
+  }
+ else {
+    if (!idSet.add(idConstraint.getId())) {
+      throw new IllegalPathException();
+    }
   }
   uriParts.add(typedIdConstraint.getUriPart());
   String type1=lastConstraint.getTypeConstraint().getType();
   String type2=typedIdConstraint.getTypeConstraint().getType();
-  DirectedRelationship rel=EntityContext.getRelation(type1,type2);
+  String typeOrProperty=typedIdConstraint.getTypeConstraint().getRawType();
+  DirectedRelationship rel=EntityContext.getRelation(type1,typeOrProperty);
+  if (rel == null) {
+    rel=EntityContext.getRelation(type1,type2);
+  }
   if (rel != null) {
     if (!visitedRelationships.contains(rel)) {
-      traversalDescription.relationships(rel.getRelType(),rel.getDirection());
+      traversalDescription=traversalDescription.relationships(rel.getRelType(),rel.getDirection());
       visitedRelationships.add(rel);
     }
   }
  else {
-    logger.log(Level.INFO,"No relationship defined between {0} and {1}, illegal path",new Object[]{type1,type2});
+    logger.log(Level.INFO,"No relationship defined between {0} and {1}, illegal path",new Object[]{type1,typeOrProperty});
     throw new IllegalPathException();
   }
   lastConstraint=typedIdConstraint;

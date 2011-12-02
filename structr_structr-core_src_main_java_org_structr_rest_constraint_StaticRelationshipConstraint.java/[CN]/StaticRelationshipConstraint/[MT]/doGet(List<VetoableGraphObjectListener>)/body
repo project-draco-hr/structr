@@ -2,10 +2,14 @@
   List<GraphObject> results=typedIdConstraint.doGet(listeners);
   if (results != null) {
     String sourceType=typedIdConstraint.getTypeConstraint().getType();
-    String targetType=typeConstraint.getType();
+    String targetType=typeConstraint.getRawType();
     DirectedRelationship staticRel=EntityContext.getRelation(sourceType,targetType);
     if (staticRel != null) {
-      return staticRel.getRelatedNodes(securityContext,typedIdConstraint.getTypesafeNode(),targetType);
+      List<AbstractNode> relatedNodes=staticRel.getRelatedNodes(securityContext,typedIdConstraint.getTypesafeNode());
+      if (!relatedNodes.isEmpty()) {
+        return relatedNodes;
+      }
+      throw new NoResultsException();
     }
   }
   throw new IllegalPathException();

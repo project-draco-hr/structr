@@ -3,10 +3,16 @@
     request.setCharacterEncoding("UTF-8");
     response.setContentType("application/json; charset=utf-8");
     SecurityContext securityContext=getSecurityContext(request);
-    List<ResourceConstraint> chain=parsePath(securityContext,request);
-    ResourceConstraint resourceConstraint=optimizeConstraintChain(chain);
-    RestMethodResult result=resourceConstraint.doDelete(graphObjectListeners);
-    result.commitResponse(response);
+    if (securityContext != null) {
+      List<ResourceConstraint> chain=parsePath(securityContext,request);
+      ResourceConstraint resourceConstraint=optimizeConstraintChain(chain);
+      RestMethodResult result=resourceConstraint.doDelete(graphObjectListeners);
+      result.commitResponse(gson,response);
+    }
+ else {
+      RestMethodResult result=new RestMethodResult(HttpServletResponse.SC_FORBIDDEN);
+      result.commitResponse(gson,response);
+    }
   }
  catch (  IllegalArgumentException illegalArgumentException) {
     handleValidationError(illegalArgumentException,response);

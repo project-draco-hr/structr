@@ -4,14 +4,23 @@
     response.setContentType("application/json; charset=UTF-8");
     final PropertySet propertySet=gson.fromJson(request.getReader(),PropertySet.class);
     SecurityContext securityContext=getSecurityContext(request);
-    List<ResourceConstraint> chain=parsePath(securityContext,request);
-    ResourceConstraint resourceConstraint=optimizeConstraintChain(chain);
-    Map<String,Object> properties=new LinkedHashMap<String,Object>();
-    for (    NodeAttribute attr : propertySet.getAttributes()) {
-      properties.put(attr.getKey(),attr.getValue());
+    if (securityContext != null) {
+      List<ResourceConstraint> chain=parsePath(securityContext,request);
+      ResourceConstraint resourceConstraint=optimizeConstraintChain(chain);
+      Map<String,Object> properties=new LinkedHashMap<String,Object>();
+      if (propertySet != null) {
+        for (        NodeAttribute attr : propertySet.getAttributes()) {
+          properties.put(attr.getKey(),attr.getValue());
+        }
+      }
+      RestMethodResult result=resourceConstraint.doPost(properties,graphObjectListeners);
+      propertyView.set(defaultPropertyView);
+      result.commitResponse(gson,response);
     }
-    RestMethodResult result=resourceConstraint.doPost(properties,graphObjectListeners);
-    result.commitResponse(response);
+ else {
+      RestMethodResult result=new RestMethodResult(HttpServletResponse.SC_FORBIDDEN);
+      result.commitResponse(gson,response);
+    }
   }
  catch (  IllegalArgumentException illegalArgumentException) {
     handleValidationError(illegalArgumentException,response);

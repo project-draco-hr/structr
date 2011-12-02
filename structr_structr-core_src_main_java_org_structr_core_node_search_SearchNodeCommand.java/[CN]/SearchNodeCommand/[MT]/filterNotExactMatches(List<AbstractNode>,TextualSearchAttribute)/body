@@ -1,0 +1,15 @@
+{
+  List<AbstractNode> notMatchingNodes=new LinkedList<AbstractNode>();
+  for (  AbstractNode node : result) {
+    String value=attr.getValue();
+    if ((value != null) && isExactMatch(value)) {
+      String key=attr.getKey();
+      String nodeValue=node.getStringProperty(key);
+      String decodedValue=decodeExactMatch(value);
+      if (!nodeValue.equals(decodedValue)) {
+        notMatchingNodes.add(node);
+      }
+    }
+  }
+  return ListUtils.subtract(result,notMatchingNodes);
+}

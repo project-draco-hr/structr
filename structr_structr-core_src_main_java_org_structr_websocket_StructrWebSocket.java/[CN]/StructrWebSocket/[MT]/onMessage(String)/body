@@ -1,9 +1,19 @@
 {
   AbstractMessage message=AbstractMessage.createMessage(connection,data);
   if (message != null) {
+    message.setIdProperty(idProperty);
     Map<String,String> result=message.processMessage();
     if (result != null) {
       result.put(AbstractMessage.COMMAND_KEY,message.getCommand());
+      AbstractNode node=message.getNode();
+      if (node != null && !result.containsKey(AbstractMessage.ID_KEY)) {
+        if (idProperty != null) {
+          result.put(AbstractMessage.ID_KEY,node.getStringProperty(idProperty));
+        }
+ else {
+          result.put(AbstractMessage.ID_KEY,node.getIdString());
+        }
+      }
       broadcast(gson.toJson(result,new TypeToken<Map<String,String>>(){
       }
 .getType()));

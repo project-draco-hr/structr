@@ -3,8 +3,12 @@
   if (json instanceof JsonObject) {
     JsonObject root=json.getAsJsonObject();
     JsonObject data=root.getAsJsonObject("data");
-    webSocketData.setCommand(root.getAsJsonPrimitive("command").getAsString());
-    webSocketData.setId(root.getAsJsonPrimitive("id").getAsString());
+    if (root.has("command")) {
+      webSocketData.setCommand(root.getAsJsonPrimitive("command").getAsString());
+    }
+    if (root.has("id")) {
+      webSocketData.setId(root.getAsJsonPrimitive("id").getAsString());
+    }
     if (root.has("callback")) {
       webSocketData.setCallback(root.getAsJsonPrimitive("callback").getAsString());
     }

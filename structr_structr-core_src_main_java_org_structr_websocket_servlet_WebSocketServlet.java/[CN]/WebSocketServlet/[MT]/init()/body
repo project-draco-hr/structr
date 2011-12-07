@@ -1,7 +1,22 @@
 {
-  String idPropertyName=this.getInitParameter(SERVLET_PARAMETER_ID_PROPERTY);
+  final String idPropertyName=this.getInitParameter(SERVLET_PARAMETER_ID_PROPERTY);
   if (idPropertyName != null) {
     logger.log(Level.INFO,"Setting id property to {0}",idPropertyName);
-    this.idProperty=idPropertyName;
   }
+  final Gson gson=new GsonBuilder().setPrettyPrinting().registerTypeAdapter(WebSocketData.class,new WebSocketDataGSONAdapter()).create();
+  factory=new WebSocketFactory(new Acceptor(){
+    @Override public WebSocket doWebSocketConnect(    HttpServletRequest request,    String protocol){
+      if (STRUCTR_PROTOCOL.equals(protocol)) {
+        return new StructrWebSocket(gson,idPropertyName);
+      }
+ else {
+        logger.log(Level.INFO,"Protocol {0} not accepted",protocol);
+      }
+      return null;
+    }
+    @Override public boolean checkOrigin(    HttpServletRequest request,    String origin){
+      return true;
+    }
+  }
+);
 }

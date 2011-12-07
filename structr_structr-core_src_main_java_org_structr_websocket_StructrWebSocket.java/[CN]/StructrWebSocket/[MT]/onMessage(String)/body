@@ -1,24 +1,23 @@
 {
-  AbstractMessage message=AbstractMessage.createMessage(connection,data);
-  if (message != null) {
-    message.setIdProperty(idProperty);
-    Map<String,String> result=message.processMessage();
-    if (result != null) {
-      result.put(AbstractMessage.COMMAND_KEY,message.getCommand());
-      AbstractNode node=message.getNode();
-      if (node != null && !result.containsKey(AbstractMessage.ID_KEY)) {
-        if (idProperty != null) {
-          result.put(AbstractMessage.ID_KEY,node.getStringProperty(idProperty));
-        }
+  WebSocketData webSocketData=gson.fromJson(data,WebSocketData.class);
+  try {
+    String command=webSocketData.getCommand();
+    Class type=commandSet.get(command);
+    if (type != null) {
+      AbstractMessage message=(AbstractMessage)type.newInstance();
+      message.setConnection(connection);
+      message.setIdProperty(idProperty);
+      if (message.processMessage(webSocketData)) {
+        broadcast(gson.toJson(webSocketData,WebSocketData.class));
+      }
  else {
-          result.put(AbstractMessage.ID_KEY,node.getIdString());
-        }
       }
-      broadcast(gson.toJson(result,new TypeToken<Map<String,String>>(){
-      }
-.getType()));
     }
  else {
+      logger.log(Level.WARNING,"Unknow command {0}",command);
     }
+  }
+ catch (  Throwable t) {
+    logger.log(Level.WARNING,"Unable to parse message.",t);
   }
 }

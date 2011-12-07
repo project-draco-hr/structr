@@ -1,0 +1,27 @@
+{
+  WebSocketData webSocketData=new WebSocketData();
+  if (json instanceof JsonObject) {
+    JsonObject root=json.getAsJsonObject();
+    JsonObject data=root.getAsJsonObject("data");
+    webSocketData.setCommand(root.getAsJsonPrimitive("command").getAsString());
+    webSocketData.setId(root.getAsJsonPrimitive("id").getAsString());
+    if (root.has("callback")) {
+      webSocketData.setCallback(root.getAsJsonPrimitive("callback").getAsString());
+    }
+    if (root.has("button")) {
+      webSocketData.setButton(root.getAsJsonPrimitive("button").getAsString());
+    }
+    if (root.has("parent")) {
+      webSocketData.setParent(root.getAsJsonPrimitive("parent").getAsString());
+    }
+    if (root.has("view")) {
+      webSocketData.setView(root.getAsJsonPrimitive("view").getAsString());
+    }
+    if (data != null) {
+      for (      Entry<String,JsonElement> entry : data.entrySet()) {
+        webSocketData.setData(entry.getKey(),entry.getValue().getAsString());
+      }
+    }
+  }
+  return webSocketData;
+}

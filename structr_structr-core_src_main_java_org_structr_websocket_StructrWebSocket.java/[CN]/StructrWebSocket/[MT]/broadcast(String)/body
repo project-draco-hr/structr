@@ -1,0 +1,14 @@
+{
+  logger.log(Level.INFO,"Broadcasting message to {0} clients..",sockets.size());
+  for (  StructrWebSocket socket : sockets) {
+    Connection connection=socket.getConnection();
+    if (connection != null) {
+      try {
+        connection.sendMessage(message);
+      }
+ catch (      Throwable t) {
+        logger.log(Level.WARNING,"Error sending message to client.",t);
+      }
+    }
+  }
+}

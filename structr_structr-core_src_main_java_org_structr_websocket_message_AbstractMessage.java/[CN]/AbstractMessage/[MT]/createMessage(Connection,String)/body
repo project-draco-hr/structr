@@ -1,14 +1,18 @@
 {
   try {
-    Map<String,String> map=gson.fromJson(source,new TypeToken<Map<String,Map<String,String>>>(){
+    Map<String,String> parsedSource=gson.fromJson(source,new TypeToken<Map<String,String>>(){
     }
 .getType());
-    String command=map.get(COMMAND_KEY);
-    String uuid=map.get(UUID_KEY);
+    String command=parsedSource.get(COMMAND_KEY);
+    String uuid=parsedSource.get(UUID_KEY);
+    parsedSource.remove(COMMAND_KEY);
+    parsedSource.remove(UUID_KEY);
     Class type=commandSet.get(command);
     if (type != null) {
       AbstractMessage msg=(AbstractMessage)type.newInstance();
+      msg.setParameters(parsedSource);
       msg.setConnection(connection);
+      msg.setSource(source);
       msg.setUuid(uuid);
       return msg;
     }

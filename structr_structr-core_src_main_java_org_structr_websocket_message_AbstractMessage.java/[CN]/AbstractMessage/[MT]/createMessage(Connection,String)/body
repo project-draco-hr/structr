@@ -1,0 +1,23 @@
+{
+  try {
+    Map<String,String> map=gson.fromJson(source,new TypeToken<Map<String,Map<String,String>>>(){
+    }
+.getType());
+    String command=map.get(COMMAND_KEY);
+    String uuid=map.get(UUID_KEY);
+    Class type=commandSet.get(command);
+    if (type != null) {
+      AbstractMessage msg=(AbstractMessage)type.newInstance();
+      msg.setConnection(connection);
+      msg.setUuid(uuid);
+      return msg;
+    }
+ else {
+      logger.log(Level.WARNING,"Unknow command {0}",command);
+    }
+  }
+ catch (  Throwable t) {
+    logger.log(Level.WARNING,"Unable to parse message.",t);
+  }
+  return null;
+}

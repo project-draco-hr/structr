@@ -1,9 +1,7 @@
 {
   AbstractNode node=getNode();
   if (node != null) {
-    for (    Entry<String,String> entry : getParameters().entrySet()) {
-      node.setProperty(entry.getKey(),entry.getValue());
-    }
+    Services.command(SecurityContext.getSuperUserInstance(),DeleteNodeCommand.class).execute(node);
     StructrWebSocket.broadcast(getSource());
   }
  else {

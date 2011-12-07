@@ -1,6 +1,14 @@
 {
   AbstractMessage message=AbstractMessage.createMessage(connection,data);
   if (message != null) {
-    message.processMessage();
+    Map<String,String> result=message.processMessage();
+    if (result != null) {
+      result.put(AbstractMessage.COMMAND_KEY,message.getCommand());
+      broadcast(gson.toJson(result,new TypeToken<Map<String,String>>(){
+      }
+.getType()));
+    }
+ else {
+    }
   }
 }

@@ -4,9 +4,11 @@
     for (    Entry<String,String> entry : getParameters().entrySet()) {
       node.setProperty(entry.getKey(),entry.getValue());
     }
-    StructrWebSocket.broadcast(getSource());
+    getParameters().put(AbstractMessage.UUID_KEY,node.getStringProperty(AbstractNode.Key.uuid));
+    return getParameters();
   }
  else {
     logger.log(Level.WARNING,"Node with uuid {0} not found.",getUuid());
   }
+  return null;
 }

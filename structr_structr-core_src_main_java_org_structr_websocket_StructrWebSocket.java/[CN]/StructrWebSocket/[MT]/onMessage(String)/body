@@ -1,14 +1,14 @@
 {
-  WebSocketData webSocketData=gson.fromJson(data,WebSocketData.class);
+  WebSocketMessage webSocketData=gson.fromJson(data,WebSocketMessage.class);
   try {
     String command=webSocketData.getCommand();
     Class type=commandSet.get(command);
     if (type != null) {
-      AbstractMessage message=(AbstractMessage)type.newInstance();
+      AbstractCommand message=(AbstractCommand)type.newInstance();
       message.setConnection(connection);
       message.setIdProperty(idProperty);
       if (message.processMessage(webSocketData)) {
-        broadcast(gson.toJson(webSocketData,WebSocketData.class));
+        broadcast(gson.toJson(webSocketData,WebSocketMessage.class));
       }
  else {
       }

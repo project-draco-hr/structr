@@ -1,0 +1,58 @@
+{
+  JsonObject root=new JsonObject();
+  JsonObject data=new JsonObject();
+  if (src.getCommand() != null) {
+    root.add("command",new JsonPrimitive(src.getCommand()));
+  }
+  if (src.getId() != null) {
+    root.add("id",new JsonPrimitive(src.getId()));
+  }
+  if (src.getCallback() != null) {
+    root.add("callback",new JsonPrimitive(src.getCallback()));
+  }
+  if (src.getButton() != null) {
+    root.add("button",new JsonPrimitive(src.getButton()));
+  }
+  if (src.getParent() != null) {
+    root.add("parent",new JsonPrimitive(src.getParent()));
+  }
+  if (src.getView() != null) {
+    root.add("view",new JsonPrimitive(src.getView()));
+  }
+  if (src.getSortKey() != null) {
+    root.add("sort",new JsonPrimitive(src.getSortKey()));
+  }
+  if (src.getSortOrder() != null) {
+    root.add("order",new JsonPrimitive(src.getSortOrder()));
+  }
+  if (src.getPageSize() > 0) {
+    root.add("pageSize",new JsonPrimitive(src.getPageSize()));
+  }
+  if (src.getPage() > 0) {
+    root.add("page",new JsonPrimitive(src.getPage()));
+  }
+  if (src.getData() != null) {
+    for (    Entry<String,String> entry : src.getData().entrySet()) {
+      String value=entry.getValue();
+      String key=entry.getKey();
+      if (value != null) {
+        data.add(key,new JsonPrimitive(value));
+      }
+    }
+    root.add("data",data);
+  }
+  if (src.getResult() != null) {
+    if (src.getView() != null) {
+      propertyView.set(src.getView());
+    }
+ else {
+      propertyView.set(PropertyView.All);
+    }
+    JsonArray result=new JsonArray();
+    for (    GraphObject obj : src.getResult()) {
+      result.add(graphObjectSerializer.serialize(obj,GraphObject.class,context));
+    }
+    root.add("result",result);
+  }
+  return root;
+}

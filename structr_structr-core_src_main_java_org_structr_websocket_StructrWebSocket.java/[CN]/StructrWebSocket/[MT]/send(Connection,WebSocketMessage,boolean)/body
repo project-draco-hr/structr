@@ -1,0 +1,17 @@
+{
+  message.setSessionValid(isAuthenticated());
+  if (clearToken) {
+    message.setToken(null);
+  }
+  try {
+    if (isAuthenticated()) {
+      connection.sendMessage(gson.toJson(message,WebSocketMessage.class));
+    }
+ else {
+      logger.log(Level.WARNING,"NOT sending message to unauthenticated client.");
+    }
+  }
+ catch (  Throwable t) {
+    logger.log(Level.WARNING,"Error sending message to client.",t);
+  }
+}

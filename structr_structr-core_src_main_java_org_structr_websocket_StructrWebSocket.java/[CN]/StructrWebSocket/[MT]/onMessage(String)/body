@@ -4,21 +4,18 @@
     String messageToken=webSocketData.getToken();
     String command=webSocketData.getCommand();
     Class type=commandSet.get(command);
-    boolean valid=false;
     if (type != null) {
-      if (token.equals(messageToken) || type.equals(LoginCommand.class)) {
-        valid=true;
+      if (!isAuthenticated() && messageToken != null) {
+        authenticateToken(messageToken);
       }
-      if (valid) {
-        AbstractCommand message=(AbstractCommand)type.newInstance();
-        message.setParent(this);
-        message.setConnection(connection);
-        message.setIdProperty(idProperty);
-        message.setToken(token);
-        if (message.processMessage(webSocketData)) {
-          webSocketData.setToken(null);
-          broadcast(gson.toJson(webSocketData,WebSocketMessage.class));
-        }
+      AbstractCommand message=(AbstractCommand)type.newInstance();
+      message.setWebSocket(this);
+      message.setConnection(connection);
+      message.setIdProperty(idProperty);
+      webSocketData.setSessionValid(isAuthenticated());
+      webSocketData.setToken(null);
+      if (message.processMessage(webSocketData)) {
+        broadcast(gson.toJson(webSocketData,WebSocketMessage.class));
       }
     }
  else {

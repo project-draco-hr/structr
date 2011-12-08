@@ -1,8 +1,8 @@
 {
   logger.log(Level.INFO,"Broadcasting message to {0} clients..",sockets.size());
-  for (  StructrWebSocket socket : sockets.values()) {
+  for (  StructrWebSocket socket : sockets) {
     Connection socketConnection=socket.getConnection();
-    if (socketConnection != null) {
+    if (socketConnection != null && socket.isAuthenticated()) {
       try {
         socketConnection.sendMessage(message);
       }

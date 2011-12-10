@@ -8,6 +8,10 @@
       if (!isAuthenticated() && messageToken != null) {
         authenticateToken(messageToken);
       }
+      if (!isAuthenticated() && !type.equals(LoginCommand.class)) {
+        send(MessageBuilder.status().code(401).message("").build(),true);
+        return;
+      }
       AbstractCommand message=(AbstractCommand)type.newInstance();
       message.setWebSocket(this);
       message.setConnection(connection);
@@ -20,6 +24,7 @@
     }
  else {
       logger.log(Level.WARNING,"Unknow command {0}",command);
+      send(MessageBuilder.status().code(400).message("Unknown command").build(),true);
     }
   }
  catch (  Throwable t) {

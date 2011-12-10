@@ -5,19 +5,9 @@
     }
   }
 ;
-  AbstractNode newNode=(AbstractNode)Services.command(SecurityContext.getSuperUserInstance(),TransactionCommand.class).execute(transaction);
+  Services.command(SecurityContext.getSuperUserInstance(),TransactionCommand.class).execute(transaction);
   if (transaction.getCause() != null) {
     logger.log(Level.WARNING,"Could not create node.",transaction.getCause());
+    getWebSocket().send(MessageBuilder.status().code(400).message(transaction.getCause().getMessage()).build(),true);
   }
- else {
-    if (newNode != null) {
-      webSocketData.setId(getIdFromNode(newNode));
-      webSocketData.setData("id",getIdFromNode(newNode));
-      return true;
-    }
- else {
-      logger.log(Level.WARNING,"Could not create new node.");
-    }
-  }
-  return false;
 }

@@ -1,0 +1,15 @@
+{
+  logger.log(Level.INFO,"Broadcasting message to {0} clients..",clients.size());
+  String message=gson.toJson(webSocketData,WebSocketMessage.class);
+  for (  StructrWebSocket socket : clients) {
+    Connection socketConnection=socket.getConnection();
+    if ((socketConnection != null) && socket.isAuthenticated()) {
+      try {
+        socketConnection.sendMessage(message);
+      }
+ catch (      Throwable t) {
+        logger.log(Level.WARNING,"Error sending message to client.",t);
+      }
+    }
+  }
+}

@@ -1,5 +1,4 @@
 {
-  this.graphObjectListeners=new LinkedList<VetoableGraphObjectListener>();
   this.constraintMap=new LinkedHashMap<Pattern,Class>();
   this.propertyView=new ThreadLocalPropertyView();
   String externalProviderName=this.getInitParameter(SERVLET_PARAMETER_CONSTRAINT_PROVIDER);
@@ -14,21 +13,6 @@
       }
  catch (      Throwable t) {
         logger.log(Level.WARNING,"Unable to inject external resource constraints",t);
-      }
-    }
-  }
-  String externalListenerName=this.getInitParameter(SERVLET_PARAMETER_MODIFICATION_LISTENER);
-  if (externalListenerName != null) {
-    String[] parts=externalListenerName.split("[, ]+");
-    for (    String part : parts) {
-      try {
-        logger.log(Level.INFO,"Injecting listener {0}",part);
-        Class listenerClass=Class.forName(part);
-        VetoableGraphObjectListener listener=(VetoableGraphObjectListener)listenerClass.newInstance();
-        graphObjectListeners.add(listener);
-      }
- catch (      Throwable t) {
-        logger.log(Level.WARNING,"Unable to instantiate listener",t);
       }
     }
   }

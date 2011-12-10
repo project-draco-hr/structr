@@ -2,10 +2,9 @@
   AbstractNode node=getNode(webSocketData.getId());
   if (node != null) {
     Services.command(SecurityContext.getSuperUserInstance(),DeleteNodeCommand.class).execute(node);
-    return true;
   }
  else {
     logger.log(Level.WARNING,"Node with id {0} not found.",webSocketData.getId());
+    getWebSocket().send(MessageBuilder.status().code(404).build(),true);
   }
-  return false;
 }

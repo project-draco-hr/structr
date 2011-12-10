@@ -12,15 +12,13 @@
         send(MessageBuilder.status().code(401).message("").build(),true);
         return;
       }
-      AbstractCommand message=(AbstractCommand)type.newInstance();
-      message.setWebSocket(this);
-      message.setConnection(connection);
-      message.setIdProperty(idProperty);
+      AbstractCommand abstractCommand=(AbstractCommand)type.newInstance();
+      abstractCommand.setWebSocket(this);
+      abstractCommand.setConnection(connection);
+      abstractCommand.setIdProperty(idProperty);
       webSocketData.setSessionValid(isAuthenticated());
       webSocketData.setToken(null);
-      if (message.processMessage(webSocketData)) {
-        broadcast(gson.toJson(webSocketData,WebSocketMessage.class));
-      }
+      abstractCommand.processMessage(webSocketData);
     }
  else {
       logger.log(Level.WARNING,"Unknow command {0}",command);

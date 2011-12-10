@@ -1,0 +1,28 @@
+{
+  List<GraphObject> results=typedIdConstraint.doGet();
+  if (results != null) {
+    String sourceType=typedIdConstraint.getTypeConstraint().getType();
+    String targetType=typeConstraint.getType();
+    DirectedRelationship staticRel=EntityContext.getRelation(sourceType,targetType);
+    if (staticRel != null) {
+      AbstractNode startNode=typedIdConstraint.getTypesafeNode();
+      if (startNode != null) {
+        final List<StructrRelationship> rels=startNode.getRelationships(staticRel.getRelType(),staticRel.getDirection());
+        StructrTransaction transaction=new StructrTransaction(){
+          @Override public Object execute() throws Throwable {
+            for (            StructrRelationship rel : rels) {
+              rel.delete(securityContext);
+            }
+            return null;
+          }
+        }
+;
+        Services.command(securityContext,TransactionCommand.class).execute(transaction);
+        if (transaction.getCause() != null) {
+          throw transaction.getCause();
+        }
+      }
+    }
+  }
+  return new RestMethodResult(HttpServletResponse.SC_OK);
+}

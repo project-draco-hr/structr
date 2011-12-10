@@ -10,6 +10,7 @@
     }
  catch (    AuthenticationException e) {
       logger.log(Level.INFO,"Could not login {0} with {1}",new Object[]{username,password});
+      this.getWebSocket().send(MessageBuilder.status().code(403).build(),true);
     }
     if (user != null) {
       String token=StructrWebSocket.secureRandomString();
@@ -20,5 +21,4 @@
       this.getWebSocket().send(webSocketData,false);
     }
   }
-  return false;
 }

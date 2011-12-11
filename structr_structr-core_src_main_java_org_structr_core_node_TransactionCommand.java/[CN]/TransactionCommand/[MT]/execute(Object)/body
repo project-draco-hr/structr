@@ -20,7 +20,15 @@
           tx.finish();
         }
  catch (        Throwable t) {
-          logger.log(Level.SEVERE,"Transaction could not be finished",t);
+          transaction.setCause(t);
+          Throwable cause=t;
+          do {
+            if (cause != null) {
+              logger.log(Level.INFO,"################## NESTED CAUSE: {0}",cause.getMessage());
+            }
+            cause=cause.getCause();
+          }
+ while (cause != null);
         }
       }
     }
@@ -43,6 +51,7 @@
         tx.finish();
       }
  catch (      Throwable t) {
+        transaction.setCause(t);
         logger.log(Level.SEVERE,"Transaction could not be finished",t);
       }
     }

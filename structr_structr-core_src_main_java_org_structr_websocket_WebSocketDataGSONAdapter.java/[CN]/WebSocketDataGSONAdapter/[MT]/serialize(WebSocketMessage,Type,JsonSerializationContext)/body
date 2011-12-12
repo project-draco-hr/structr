@@ -41,6 +41,15 @@
     root.add("page",new JsonPrimitive(src.getPage()));
   }
   root.add("sessionValid",new JsonPrimitive(src.isSessionValid()));
+  if (src.getGraphObject() != null && !src.getModifiedProperties().isEmpty()) {
+    GraphObject graphObject=src.getGraphObject();
+    for (    String modifiedKey : src.getModifiedProperties()) {
+      Object newValue=graphObject.getProperty(modifiedKey);
+      if (newValue != null) {
+        src.getData().put(modifiedKey,newValue.toString());
+      }
+    }
+  }
   if (src.getData() != null) {
     for (    Entry<String,String> entry : src.getData().entrySet()) {
       String value=entry.getValue();

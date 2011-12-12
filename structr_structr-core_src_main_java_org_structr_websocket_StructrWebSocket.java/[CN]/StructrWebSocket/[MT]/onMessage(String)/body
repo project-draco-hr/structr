@@ -19,7 +19,12 @@
       abstractCommand.setIdProperty(idProperty);
       webSocketData.setSessionValid(isAuthenticated());
       webSocketData.setToken(null);
-      abstractCommand.processMessage(webSocketData);
+      try {
+        abstractCommand.processMessage(webSocketData);
+      }
+ catch (      Throwable t) {
+        send(MessageBuilder.status().code(400).message(t.getMessage()).build(),true);
+      }
     }
  else {
       logger.log(Level.WARNING,"Unknow command {0}",command);

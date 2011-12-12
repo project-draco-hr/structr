@@ -1,0 +1,34 @@
+{
+  final SecurityContext securityContext=SecurityContext.getSuperUserInstance();
+  String sourceId=webSocketData.getId();
+  String targetId=webSocketData.getData().get("id");
+  if (sourceId != null && targetId != null) {
+    AbstractNode sourceNode=getNode(sourceId);
+    AbstractNode targetNode=getNode(targetId);
+    if (sourceNode != null && targetNode != null) {
+      DirectedRelationship relationship=EntityContext.getRelation(sourceNode.getClass(),targetNode.getClass());
+      if (relationship != null) {
+        final List<StructrRelationship> rels=sourceNode.getRelationships(relationship.getRelType(),relationship.getDirection());
+        StructrTransaction transaction=new StructrTransaction(){
+          @Override public Object execute() throws Throwable {
+            for (            StructrRelationship rel : rels) {
+              rel.delete(securityContext);
+            }
+            return null;
+          }
+        }
+;
+        Services.command(securityContext,TransactionCommand.class).execute(transaction);
+        if (transaction.getCause() != null) {
+          getWebSocket().send(MessageBuilder.status().code(400).message(transaction.getCause().getMessage()).build(),true);
+        }
+      }
+    }
+ else {
+      getWebSocket().send(MessageBuilder.status().code(404).build(),true);
+    }
+  }
+ else {
+    getWebSocket().send(MessageBuilder.status().code(400).message("Add needs id and data.id!").build(),true);
+  }
+}

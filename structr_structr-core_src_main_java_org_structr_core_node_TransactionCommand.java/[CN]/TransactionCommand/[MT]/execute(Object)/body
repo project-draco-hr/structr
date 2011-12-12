@@ -16,19 +16,17 @@
         logger.log(Level.WARNING,"Transaction failure",t);
       }
  finally {
+        long transactionKey=nextLong();
+        EntityContext.setTransactionKey(transactionKey);
         try {
           tx.finish();
         }
  catch (        Throwable t) {
-          transaction.setCause(t);
-          Throwable cause=t;
-          do {
-            if (cause != null) {
-              logger.log(Level.INFO,"################## NESTED CAUSE: {0}",cause.getMessage());
-            }
-            cause=cause.getCause();
+          Throwable throwable=EntityContext.getThrowable(transactionKey);
+          EntityContext.removeTransactionKey();
+          if (throwable != null) {
+            throw new IllegalArgumentException(throwable.getMessage());
           }
- while (cause != null);
         }
       }
     }
@@ -47,12 +45,17 @@
       logger.log(Level.WARNING,"Transaction failure",t);
     }
  finally {
+      long transactionKey=nextLong();
+      EntityContext.setTransactionKey(transactionKey);
       try {
         tx.finish();
       }
  catch (      Throwable t) {
-        transaction.setCause(t);
-        logger.log(Level.SEVERE,"Transaction could not be finished",t);
+        Throwable throwable=EntityContext.getThrowable(transactionKey);
+        EntityContext.removeTransactionKey();
+        if (throwable != null) {
+          throw new IllegalArgumentException(throwable.getMessage());
+        }
       }
     }
   }

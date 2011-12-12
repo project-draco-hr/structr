@@ -1,5 +1,5 @@
 {
-  long transactionKey=secureRandom.nextLong();
+  long transactionKey=transactionKeyMap.get(Thread.currentThread());
   try {
     Map<Node,Map<String,Object>> removedProperties=new LinkedHashMap<Node,Map<String,Object>>();
     SecurityContext securityContext=SecurityContext.getSuperUserInstance();
@@ -40,6 +40,8 @@
     commit(securityContext,transactionKey);
   }
  catch (  Throwable t) {
+    throwableMap.put(transactionKey,t);
+    throw new IllegalStateException("Rollback");
   }
   return transactionKey;
 }

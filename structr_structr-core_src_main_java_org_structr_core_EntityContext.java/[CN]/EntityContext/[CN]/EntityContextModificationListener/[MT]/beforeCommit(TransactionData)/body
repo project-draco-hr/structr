@@ -6,6 +6,8 @@
     StructrNodeFactory factory=new StructrNodeFactory(securityContext);
     Set<AbstractNode> modifiedNodes=new LinkedHashSet<AbstractNode>();
     Set<AbstractNode> createdNodes=new LinkedHashSet<AbstractNode>();
+    Set<StructrRelationship> createdRels=new LinkedHashSet<StructrRelationship>();
+    Set<StructrRelationship> deletedRels=new LinkedHashSet<StructrRelationship>();
     begin(securityContext,transactionKey);
     for (    PropertyEntry<Node> entry : data.removedNodeProperties()) {
       Node node=entry.entity();
@@ -22,7 +24,14 @@
       createdNodes.add(entity);
     }
     for (    Relationship rel : data.createdRelationships()) {
-      graphObjectCreated(securityContext,transactionKey,new StructrRelationship(securityContext,rel));
+      StructrRelationship relationship=new StructrRelationship(securityContext,rel);
+      relationshipCreated(securityContext,transactionKey,relationship);
+      deletedRels.add(relationship);
+    }
+    for (    Relationship rel : data.deletedRelationships()) {
+      StructrRelationship relationship=new StructrRelationship(securityContext,rel);
+      relationshipDeleted(securityContext,transactionKey,relationship);
+      deletedRels.add(relationship);
     }
     for (    Node node : data.deletedNodes()) {
       graphObjectDeleted(securityContext,transactionKey,node.getId(),removedProperties.get(node));

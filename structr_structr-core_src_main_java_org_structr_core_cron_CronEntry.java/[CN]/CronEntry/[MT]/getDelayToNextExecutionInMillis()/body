@@ -1,0 +1,53 @@
+{
+  Calendar now=GregorianCalendar.getInstance();
+  int nowSeconds=now.get(Calendar.SECOND);
+  int nowMinutes=now.get(Calendar.MINUTE);
+  int nowHours=now.get(Calendar.HOUR_OF_DAY);
+  int nowDays=now.get(Calendar.DAY_OF_MONTH);
+  int nowDow=now.get(Calendar.DAY_OF_WEEK);
+  int nowMonths=now.get(Calendar.MONTH);
+  int minSecondsNext=seconds.getStartValue();
+  int minMinutesNext=minutes.getStartValue();
+  int minHoursNext=hours.getStartValue();
+  int minDaysNext=days.getStartValue();
+  int minDowNext=dow.getStartValue();
+  int minMonthsNext=months.getStartValue();
+  int stepSeconds=seconds.getStep();
+  int stepMinutes=minutes.getStep();
+  int stepHours=hours.getStep();
+  int stepDays=days.getStep();
+  int stepDow=dow.getStep();
+  int stepMonths=months.getStep();
+  int diffSeconds=minSecondsNext - nowSeconds;
+  int diffMinutes=minMinutesNext - nowMinutes;
+  int diffHours=minHoursNext - nowHours;
+  int diffDays=minDaysNext - nowDays;
+  int diffDow=minDowNext - nowDow;
+  int diffMonths=minMonthsNext - nowMonths;
+  if (diffSeconds < 0) {
+    diffSeconds+=60;
+  }
+  if (diffMinutes < 0) {
+    diffMinutes+=60;
+  }
+  if (diffHours < 0) {
+    diffHours+=24;
+  }
+  if (diffDays < 0) {
+    diffDays+=1;
+  }
+  if (diffDow < 0) {
+    diffDow+=7;
+  }
+  if (diffMonths < 0) {
+    diffMonths+=30;
+  }
+  long next=0;
+  if (!seconds.isInside(nowSeconds))   next+=(diffSeconds) * (1000L);
+  if (!minutes.isInside(nowMinutes))   next+=(diffMinutes) * (1000L * 60L);
+  if (!hours.isInside(nowHours))   next+=(diffHours) * (1000L * 60L * 60L);
+  if (!days.isInside(nowDays))   next+=(diffDays) * (1000L * 60L * 60L* 24L);
+  if (!dow.isInside(nowDow))   next+=(diffDow) * (1000L * 60L * 60L* 24L* 7L);
+  if (!months.isInside(nowMonths))   next+=(diffMonths) * (1000L * 60L * 60L* 24L* 30L);
+  return next;
+}

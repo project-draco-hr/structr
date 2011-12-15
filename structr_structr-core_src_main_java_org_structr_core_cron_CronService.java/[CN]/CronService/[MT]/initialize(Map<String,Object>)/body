@@ -1,0 +1,19 @@
+{
+  String taskList=Services.getConfigValue(context,TASKS,"");
+  String[] tasks=taskList.split("[ \\t]+");
+  for (  String task : tasks) {
+    String expression=(String)context.get(task.concat(EXPRESSION_SUFFIX));
+    if (expression != null) {
+      CronEntry entry=CronEntry.parse(task,expression);
+      if (entry != null) {
+        cronEntries.add(entry);
+      }
+ else {
+        logger.log(Level.WARNING,"Unable to parse cron expression for taks {0}, ignoring.",task);
+      }
+    }
+ else {
+      logger.log(Level.WARNING,"No cron expression for task {0}, ignoring.",task);
+    }
+  }
+}

@@ -68,6 +68,11 @@
     if (superuserPassword != null) {
       context.put(Services.SUPERUSER_PASSWORD,superuserPassword);
     }
+    for (    String name : properties.stringPropertyNames()) {
+      if (!context.containsKey(name)) {
+        context.put(name,properties.getProperty(name));
+      }
+    }
   }
  catch (  Throwable t) {
     logger.log(Level.WARNING,"Could not inititialize all values");

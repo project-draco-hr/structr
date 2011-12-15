@@ -1,0 +1,38 @@
+{
+  TraversalDescription localDesc=desc.expand(new ResourceExpander(resource.getIdString()));
+  final StructrNodeFactory factory=new StructrNodeFactory(securityContext);
+  final ContentTreeNode root=new ContentTreeNode(null,null);
+  localDesc=localDesc.evaluator(new Evaluator(){
+    ContentTreeNode localRoot=root;
+    @Override public Evaluation evaluate(    Path path){
+      Node node=path.endNode();
+      try {
+        if (node.hasProperty(AbstractNode.Key.type.name())) {
+          String type=(String)node.getProperty(AbstractNode.Key.type.name());
+          ContentTreeNode newTreeNode=new ContentTreeNode(localRoot,factory.createNode(securityContext,node,type));
+          localRoot.addChild(newTreeNode);
+          Evaluation evaluation;
+          if ("Content".equals(type)) {
+            evaluation=Evaluation.EXCLUDE_AND_PRUNE;
+            localRoot=localRoot.getParent();
+          }
+ else {
+            evaluation=Evaluation.EXCLUDE_AND_CONTINUE;
+            localRoot=newTreeNode;
+          }
+          return evaluation;
+        }
+      }
+ catch (      Throwable t) {
+        logger.log(Level.SEVERE,"While evaluating path " + path,t);
+      }
+      return Evaluation.EXCLUDE_AND_CONTINUE;
+    }
+  }
+);
+  for (  Node node : localDesc.traverse(resource.getNode()).nodes()) {
+  }
+  StringBuilder buffer=new StringBuilder(10000);
+  printNodes(buffer,root,0);
+  return buffer.toString();
+}

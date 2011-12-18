@@ -3,24 +3,32 @@
   final StructrNodeFactory factory=new StructrNodeFactory(securityContext);
   final ContentTreeNode root=new ContentTreeNode(null,null);
   localDesc=localDesc.evaluator(new Evaluator(){
-    ContentTreeNode localRoot=root;
+    ContentTreeNode currentNode=root;
     @Override public Evaluation evaluate(    Path path){
       Node node=path.endNode();
+      int nodeDepth=path.length();
+      int currentTreeDepth=currentNode.depth();
+      System.out.println();
+      System.out.println("Node depth: " + nodeDepth);
+      System.out.println("Current tree depth: " + currentTreeDepth);
+      System.out.println(node.getProperty("name") + ": " + node.getProperty("type")+ "["+ node.getProperty("uuid")+ "]");
       try {
         if (node.hasProperty(AbstractNode.Key.type.name())) {
           String type=(String)node.getProperty(AbstractNode.Key.type.name());
-          ContentTreeNode newTreeNode=new ContentTreeNode(localRoot,factory.createNode(securityContext,node,type));
-          localRoot.addChild(newTreeNode);
-          Evaluation evaluation;
-          if ("Content".equals(type)) {
-            evaluation=Evaluation.EXCLUDE_AND_PRUNE;
-            localRoot=localRoot.getParent();
+          ContentTreeNode newTreeNode=new ContentTreeNode(currentNode,factory.createNode(securityContext,node,type));
+          if (nodeDepth > currentTreeDepth) {
+            currentNode.addChild(newTreeNode);
+            currentNode=newTreeNode;
+          }
+ else           if (nodeDepth < currentTreeDepth) {
+            currentNode.getParent().addChild(newTreeNode);
+            currentNode=newTreeNode;
           }
  else {
-            evaluation=Evaluation.EXCLUDE_AND_CONTINUE;
-            localRoot=newTreeNode;
+            currentNode.getParent().addChild(newTreeNode);
           }
-          return evaluation;
+          newTreeNode.depth(nodeDepth);
+          return Evaluation.INCLUDE_AND_CONTINUE;
         }
       }
  catch (      Throwable t) {
@@ -31,6 +39,7 @@
   }
 );
   for (  Node node : localDesc.traverse(resource.getNode()).nodes()) {
+    System.out.println(node.getProperty("type") + "[" + node.getProperty("uuid")+ "]: "+ node.getProperty("name"));
   }
   StringBuilder buffer=new StringBuilder(10000);
   printNodes(buffer,root,0);

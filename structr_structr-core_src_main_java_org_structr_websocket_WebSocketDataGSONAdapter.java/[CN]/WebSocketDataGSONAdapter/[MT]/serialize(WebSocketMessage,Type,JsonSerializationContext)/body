@@ -41,7 +41,7 @@
     root.add("page",new JsonPrimitive(src.getPage()));
   }
   root.add("sessionValid",new JsonPrimitive(src.isSessionValid()));
-  if (src.getGraphObject() != null && !src.getModifiedProperties().isEmpty()) {
+  if ((src.getGraphObject() != null) && !src.getModifiedProperties().isEmpty()) {
     GraphObject graphObject=src.getGraphObject();
     for (    String modifiedKey : src.getModifiedProperties()) {
       Object newValue=graphObject.getProperty(modifiedKey);
@@ -51,11 +51,27 @@
     }
   }
   if (src.getData() != null) {
-    for (    Entry<String,String> entry : src.getData().entrySet()) {
-      String value=entry.getValue();
+    for (    Entry<String,Object> entry : src.getData().entrySet()) {
+      Object value=entry.getValue();
       String key=entry.getKey();
       if (value != null) {
-        data.add(key,new JsonPrimitive(value));
+        JsonPrimitive jp;
+        if (value instanceof String) {
+          jp=new JsonPrimitive((String)value);
+        }
+ else         if (value instanceof Number) {
+          jp=new JsonPrimitive((Number)value);
+        }
+ else         if (value instanceof Boolean) {
+          jp=new JsonPrimitive((Boolean)value);
+        }
+ else         if (value instanceof Character) {
+          jp=new JsonPrimitive((Character)value);
+        }
+ else {
+          jp=new JsonPrimitive(value.toString());
+        }
+        data.add(key,jp);
       }
     }
     root.add("data",data);

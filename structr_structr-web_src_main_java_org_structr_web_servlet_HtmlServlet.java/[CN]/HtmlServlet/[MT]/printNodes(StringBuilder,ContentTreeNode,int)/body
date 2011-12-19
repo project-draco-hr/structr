@@ -1,0 +1,30 @@
+{
+  AbstractNode node=root.getData();
+  String content=null;
+  String tag=null;
+  if (node != null) {
+    content=(String)node.getProperty("content");
+    tag=(String)node.getProperty("tag");
+    if (tag != null) {
+      String onload=(String)node.getProperty("onload");
+      String id=(String)node.getProperty("uuid");
+      buffer.append("<").append(tag);
+      if (id != null) {
+        buffer.append(" id='").append(id).append("'");
+      }
+      if (onload != null) {
+        buffer.append(" onload='").append(onload).append("'");
+      }
+      buffer.append(">");
+    }
+    if (content != null) {
+      buffer.append(content);
+    }
+  }
+  for (  ContentTreeNode subNode : root.getChildren()) {
+    printNodes(buffer,subNode,depth + 1);
+  }
+  if (tag != null) {
+    buffer.append("</").append(tag).append(">");
+  }
+}

@@ -1,0 +1,59 @@
+{
+  SecurityContext securityContext=SecurityContext.getSuperUserInstance();
+  edit=false;
+  if (request.getParameter("create") != null) {
+    createTestStructure();
+    response.setStatus(HttpServletResponse.SC_CREATED);
+    return;
+  }
+  if (request.getParameter("editor") != null) {
+    createEditorStructure();
+    response.setStatus(HttpServletResponse.SC_CREATED);
+    return;
+  }
+  if (request.getParameter("edit") != null) {
+    edit=true;
+  }
+  try {
+    request.setCharacterEncoding("UTF-8");
+    DecimalFormat decimalFormat=new DecimalFormat("0.000000000",DecimalFormatSymbols.getInstance(Locale.ENGLISH));
+    double start=System.nanoTime();
+    Resource resource=null;
+    String path=request.getPathInfo();
+    logger.log(Level.INFO,"Path info {0}",path);
+    String resourceName=path.substring(path.lastIndexOf("/") + 1);
+    if (resourceName.length() > 0) {
+      logger.log(Level.INFO,"File name {0}",resourceName);
+      List<SearchAttribute> searchAttrs=new LinkedList<SearchAttribute>();
+      searchAttrs.add(Search.andExactName(resourceName));
+      searchAttrs.add(Search.andExactType(Resource.class.getSimpleName()));
+      List<AbstractNode> results=(List<AbstractNode>)Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class).execute(null,false,false,searchAttrs);
+      logger.log(Level.INFO,"{0} results",results.size());
+      if (!results.isEmpty()) {
+        resource=(Resource)results.get(0);
+      }
+    }
+    if (resource != null) {
+      String content=getContent(securityContext,resource);
+      double end=System.nanoTime();
+      logger.log(Level.INFO,"Content collected in {0} seconds",decimalFormat.format((end - start) / 1000000000.0));
+      String contentType=resource.getContentType();
+      if (contentType != null) {
+        response.setContentType(contentType);
+      }
+ else {
+        response.setContentType("text/html; charset=utf-8");
+      }
+      response.getWriter().append(content);
+      response.getWriter().flush();
+      response.getWriter().close();
+      response.setStatus(HttpServletResponse.SC_OK);
+    }
+ else {
+      response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+    }
+  }
+ catch (  Throwable t) {
+    logger.log(Level.WARNING,"Exception while processing request",t);
+  }
+}

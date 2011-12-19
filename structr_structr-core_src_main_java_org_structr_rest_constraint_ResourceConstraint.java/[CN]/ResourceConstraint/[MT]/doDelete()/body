@@ -1,0 +1,29 @@
+{
+  Iterable<? extends GraphObject> results;
+  try {
+    results=doGet();
+  }
+ catch (  NoResultsException nre) {
+    results=null;
+  }
+  if (results != null) {
+    final Iterable<? extends GraphObject> finalResults=results;
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws Throwable {
+        for (        GraphObject obj : finalResults) {
+          Services.command(securityContext,RemoveNodeFromIndex.class).execute(obj);
+          if (obj instanceof AbstractNode) {
+            List<StructrRelationship> rels=((AbstractNode)obj).getRelationships();
+            for (            StructrRelationship rel : rels) {
+              rel.delete(securityContext);
+            }
+          }
+          obj.delete(securityContext);
+        }
+        return null;
+      }
+    }
+);
+  }
+  return new RestMethodResult(HttpServletResponse.SC_OK);
+}

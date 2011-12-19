@@ -1,0 +1,25 @@
+{
+  Map<Integer,Relationship> sortedRelationshipMap=new TreeMap<Integer,Relationship>();
+  for (  Relationship rel : node.getRelationships(RelType.CONTAINS,direction)) {
+    try {
+      Integer position=null;
+      if (rel.hasProperty(resourceId)) {
+        Object prop=rel.getProperty(resourceId);
+        if (prop instanceof Integer) {
+          position=(Integer)prop;
+        }
+ else         if (prop instanceof String) {
+          position=Integer.parseInt((String)prop);
+        }
+ else {
+          throw new java.lang.IllegalArgumentException("Expected Integer or String");
+        }
+        sortedRelationshipMap.put(position,rel);
+      }
+    }
+ catch (    Throwable t) {
+      logger.log(Level.SEVERE,"While reading property " + resourceId,t);
+    }
+  }
+  return sortedRelationshipMap.values();
+}

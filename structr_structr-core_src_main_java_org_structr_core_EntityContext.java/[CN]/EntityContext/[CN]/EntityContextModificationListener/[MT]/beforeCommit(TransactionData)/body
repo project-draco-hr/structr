@@ -1,0 +1,56 @@
+{
+  long transactionKey=transactionKeyMap.get(Thread.currentThread());
+  try {
+    Map<Node,Map<String,Object>> removedProperties=new LinkedHashMap<Node,Map<String,Object>>();
+    SecurityContext securityContext=SecurityContext.getSuperUserInstance();
+    StructrNodeFactory factory=new StructrNodeFactory(securityContext);
+    Set<AbstractNode> modifiedNodes=new LinkedHashSet<AbstractNode>();
+    Set<AbstractNode> createdNodes=new LinkedHashSet<AbstractNode>();
+    Set<StructrRelationship> createdRels=new LinkedHashSet<StructrRelationship>();
+    Set<StructrRelationship> deletedRels=new LinkedHashSet<StructrRelationship>();
+    begin(securityContext,transactionKey);
+    for (    PropertyEntry<Node> entry : data.removedNodeProperties()) {
+      Node node=entry.entity();
+      Map<String,Object> propertyMap=removedProperties.get(node);
+      if (propertyMap == null) {
+        propertyMap=new LinkedHashMap<String,Object>();
+        removedProperties.put(node,propertyMap);
+      }
+      propertyMap.put(entry.key(),entry.previouslyCommitedValue());
+    }
+    for (    Node node : data.createdNodes()) {
+      AbstractNode entity=factory.createNode(securityContext,node);
+      graphObjectCreated(securityContext,transactionKey,entity);
+      createdNodes.add(entity);
+    }
+    for (    Relationship rel : data.createdRelationships()) {
+      StructrRelationship relationship=new StructrRelationship(securityContext,rel);
+      relationshipCreated(securityContext,transactionKey,relationship);
+      deletedRels.add(relationship);
+    }
+    for (    Relationship rel : data.deletedRelationships()) {
+      StructrRelationship relationship=new StructrRelationship(securityContext,rel);
+      relationshipDeleted(securityContext,transactionKey,relationship);
+      deletedRels.add(relationship);
+    }
+    for (    Node node : data.deletedNodes()) {
+      graphObjectDeleted(securityContext,transactionKey,node.getId(),removedProperties.get(node));
+    }
+    for (    PropertyEntry<Node> entry : data.assignedNodeProperties()) {
+      AbstractNode entity=factory.createNode(securityContext,entry.entity());
+      propertyModified(securityContext,transactionKey,entity,entry.key(),entry.previouslyCommitedValue(),entry.value());
+      modifiedNodes.add(entity);
+    }
+    for (    AbstractNode node : modifiedNodes) {
+      if (!createdNodes.contains(node)) {
+        graphObjectModified(securityContext,transactionKey,node);
+      }
+    }
+    commit(securityContext,transactionKey);
+  }
+ catch (  Throwable t) {
+    throwableMap.put(transactionKey,t);
+    throw new IllegalStateException("Rollback");
+  }
+  return transactionKey;
+}

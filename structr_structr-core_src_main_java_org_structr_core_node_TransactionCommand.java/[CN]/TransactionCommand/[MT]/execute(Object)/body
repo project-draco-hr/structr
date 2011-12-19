@@ -16,11 +16,17 @@
         logger.log(Level.WARNING,"Transaction failure",t);
       }
  finally {
+        long transactionKey=nextLong();
+        EntityContext.setTransactionKey(transactionKey);
         try {
           tx.finish();
         }
  catch (        Throwable t) {
-          logger.log(Level.SEVERE,"Transaction could not be finished",t);
+          Throwable throwable=EntityContext.getThrowable(transactionKey);
+          EntityContext.removeTransactionKey();
+          if (throwable != null) {
+            throw new IllegalArgumentException(throwable.getMessage());
+          }
         }
       }
     }
@@ -39,11 +45,17 @@
       logger.log(Level.WARNING,"Transaction failure",t);
     }
  finally {
+      long transactionKey=nextLong();
+      EntityContext.setTransactionKey(transactionKey);
       try {
         tx.finish();
       }
  catch (      Throwable t) {
-        logger.log(Level.SEVERE,"Transaction could not be finished",t);
+        Throwable throwable=EntityContext.getThrowable(transactionKey);
+        EntityContext.removeTransactionKey();
+        if (throwable != null) {
+          throw new IllegalArgumentException(throwable.getMessage());
+        }
       }
     }
   }

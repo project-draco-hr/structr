@@ -1,0 +1,51 @@
+{
+  final Command cmd=Services.command(securityContext,CreateRelationshipCommand.class);
+  AbstractNode targetNode=null;
+  if (value instanceof AbstractNode) {
+    targetNode=(AbstractNode)value;
+  }
+ else {
+    try {
+      targetNode=(AbstractNode)Services.command(securityContext,FindNodeCommand.class).execute(value);
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"Unable to find target node for relationship creation: {0}",value);
+      targetNode=null;
+    }
+  }
+  if ((sourceNode != null) && (targetNode != null)) {
+    final AbstractNode finalTargetNode=targetNode;
+    StructrTransaction transaction=new StructrTransaction(){
+      @Override public Object execute() throws Throwable {
+        if (cardinality.equals(Cardinality.OneToOne)) {
+          List<StructrRelationship> rels=sourceNode.getRelationships(relType,direction);
+          for (          StructrRelationship rel : rels) {
+            rel.delete(securityContext);
+          }
+        }
+        StructrRelationship newRel;
+        if (direction.equals(Direction.OUTGOING)) {
+          newRel=(StructrRelationship)cmd.execute(sourceNode,finalTargetNode,relType);
+        }
+ else {
+          newRel=(StructrRelationship)cmd.execute(finalTargetNode,sourceNode,relType);
+        }
+        newRel.setProperties(properties);
+        return newRel;
+      }
+    }
+;
+    Services.command(securityContext,TransactionCommand.class).execute(transaction);
+    if (transaction.getCause() != null) {
+      throw transaction.getCause();
+    }
+  }
+ else {
+    StringBuilder errorMessage=new StringBuilder(100);
+    errorMessage.append(StringUtils.capitalize(destType));
+    errorMessage.append(" with id ");
+    errorMessage.append(value);
+    errorMessage.append(" not found.");
+    throw new IllegalArgumentException(errorMessage.toString());
+  }
+}

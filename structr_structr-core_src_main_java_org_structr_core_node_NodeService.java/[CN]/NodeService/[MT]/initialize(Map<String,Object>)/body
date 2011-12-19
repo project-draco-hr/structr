@@ -11,6 +11,9 @@
       logger.log(Level.INFO,"Database config not found");
       graphDb=new EmbeddedGraphDatabase(dbPath);
     }
+    if (graphDb != null) {
+      graphDb.registerTransactionEventHandler(EntityContext.getTransactionEventHandler());
+    }
     String filesPath=Services.getFilesPath();
     File files=new File(filesPath);
     if (!files.exists()) {

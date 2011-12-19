@@ -1,0 +1,12 @@
+{
+  AbstractNode node=getNode(webSocketData.getId());
+  if (node != null) {
+    for (    Entry<String,Object> entry : webSocketData.getData().entrySet()) {
+      node.setProperty(entry.getKey(),entry.getValue());
+    }
+  }
+ else {
+    logger.log(Level.WARNING,"Node with uuid {0} not found.",webSocketData.getId());
+    getWebSocket().send(MessageBuilder.status().code(404).build(),true);
+  }
+}

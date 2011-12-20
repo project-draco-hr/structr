@@ -1,5 +1,7 @@
 {
-  TraversalDescription localDesc=desc.expand(new ResourceExpander(resource.getStringProperty(AbstractNode.Key.uuid.name())));
+  final SecurityContext securityContext=SecurityContext.getSuperUserInstance();
+  AbstractNode rootNode=getNode(webSocketData.getId());
+  TraversalDescription localDesc=Traversal.description().depthFirst().uniqueness(Uniqueness.NODE_GLOBAL).expand(new ResourceExpander(rootNode.getStringProperty(AbstractNode.Key.uuid.name())));
   final StructrNodeFactory factory=new StructrNodeFactory(securityContext);
   final TreeNode root=new TreeNode(null,null);
   localDesc=localDesc.evaluator(new Evaluator(){
@@ -38,10 +40,9 @@
     }
   }
 );
-  for (  Node node : localDesc.traverse(resource.getNode()).nodes()) {
+  for (  Node node : localDesc.traverse(rootNode.getNode()).nodes()) {
     System.out.println(node.getProperty("type") + "[" + node.getProperty("uuid")+ "]: "+ node.getProperty("name"));
   }
-  StringBuilder buffer=new StringBuilder(10000);
-  printNodes(buffer,root,0);
-  return buffer.toString();
+  webSocketData.setResultTree(root);
+  getWebSocket().send(webSocketData,true);
 }

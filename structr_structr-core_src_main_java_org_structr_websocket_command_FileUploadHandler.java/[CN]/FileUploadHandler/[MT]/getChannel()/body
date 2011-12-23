@@ -1,0 +1,11 @@
+{
+  if (this.privateFileChannel == null) {
+    String relativeFilePath=file.getRelativeFilePath();
+    if (relativeFilePath != null) {
+      String filePath=Services.getFilePath(Path.Files,relativeFilePath);
+      java.io.File fileOnDisk=new java.io.File(filePath);
+      this.privateFileChannel=new FileOutputStream(fileOnDisk).getChannel();
+    }
+  }
+  return this.privateFileChannel;
+}

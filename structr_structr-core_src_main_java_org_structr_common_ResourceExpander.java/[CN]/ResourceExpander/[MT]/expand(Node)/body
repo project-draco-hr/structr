@@ -3,8 +3,14 @@
   for (  Relationship rel : node.getRelationships(RelType.CONTAINS,direction)) {
     try {
       Integer position=null;
-      if (rel.hasProperty(resourceId)) {
-        Object prop=rel.getProperty(resourceId);
+      Object prop=null;
+      if (rel.hasProperty("*")) {
+        prop=rel.getProperty("*");
+      }
+ else       if (rel.hasProperty(resourceId)) {
+        prop=rel.getProperty(resourceId);
+      }
+      if (prop != null) {
         if (prop instanceof Integer) {
           position=(Integer)prop;
         }

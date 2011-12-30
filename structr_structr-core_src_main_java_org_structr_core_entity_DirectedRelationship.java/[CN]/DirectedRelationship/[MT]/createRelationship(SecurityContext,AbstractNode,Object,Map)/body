@@ -1,5 +1,5 @@
 {
-  final Command cmd=Services.command(securityContext,CreateRelationshipCommand.class);
+  final Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
   AbstractNode targetNode=null;
   if (value instanceof AbstractNode) {
     targetNode=(AbstractNode)value;
@@ -25,10 +25,10 @@
         }
         StructrRelationship newRel;
         if (direction.equals(Direction.OUTGOING)) {
-          newRel=(StructrRelationship)cmd.execute(sourceNode,finalTargetNode,relType);
+          newRel=(StructrRelationship)createRel.execute(sourceNode,finalTargetNode,relType);
         }
  else {
-          newRel=(StructrRelationship)cmd.execute(finalTargetNode,sourceNode,relType);
+          newRel=(StructrRelationship)createRel.execute(finalTargetNode,sourceNode,relType);
         }
         newRel.setProperties(properties);
         return newRel;

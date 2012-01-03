@@ -1,0 +1,21 @@
+{
+  JsonObject property=new JsonObject();
+  if (key.equals(idProperty)) {
+    key="id";
+  }
+  property.add("key",new JsonPrimitive(key));
+  if (value != null) {
+    property.add("value",new JsonPrimitive(value.toString()));
+    if (includeTypeInOutput) {
+      String valueType=value.getClass().getSimpleName();
+      property.add("type",new JsonPrimitive(valueType));
+    }
+  }
+ else {
+    property.add("value",new JsonNull());
+    if (includeTypeInOutput) {
+      property.add("type",new JsonNull());
+    }
+  }
+  return property;
+}

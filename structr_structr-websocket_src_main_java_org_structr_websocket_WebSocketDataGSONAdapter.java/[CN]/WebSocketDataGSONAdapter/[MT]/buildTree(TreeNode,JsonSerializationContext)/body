@@ -1,0 +1,11 @@
+{
+  AbstractNode data=node.getData();
+  JsonObject jsonChild=new JsonObject();
+  if (data != null)   jsonChild=graphObjectSerializer.serialize(data,GraphObject.class,context).getAsJsonObject();
+  JsonArray array=new JsonArray();
+  for (  TreeNode childNode : node.getChildren()) {
+    array.add(buildTree(childNode,context));
+  }
+  jsonChild.add("children",array);
+  return jsonChild;
+}

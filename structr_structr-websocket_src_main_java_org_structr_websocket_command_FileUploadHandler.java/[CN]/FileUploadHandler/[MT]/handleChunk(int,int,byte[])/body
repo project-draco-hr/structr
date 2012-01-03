@@ -1,0 +1,10 @@
+{
+  FileChannel channel=getChannel();
+  if (channel != null) {
+    channel.position(sequenceNumber * chunkSize);
+    channel.write(ByteBuffer.wrap(data));
+    if (channel.position() == this.size) {
+      finish();
+    }
+  }
+}

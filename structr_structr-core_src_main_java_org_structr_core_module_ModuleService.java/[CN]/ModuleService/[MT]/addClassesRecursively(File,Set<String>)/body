@@ -1,0 +1,18 @@
+{
+  for (  File file : dir.listFiles()) {
+    if (file.isDirectory()) {
+      addClassesRecursively(file,classes);
+    }
+ else {
+      try {
+        String fileEntry=file.getAbsolutePath();
+        fileEntry=fileEntry.substring(0,fileEntry.length() - 6);
+        fileEntry=fileEntry.substring(fileEntry.indexOf("/WEB-INF/classes") + 17);
+        fileEntry=fileEntry.replaceAll("[/]+",".");
+        classes.add(fileEntry);
+      }
+ catch (      Throwable t) {
+      }
+    }
+  }
+}

@@ -3,11 +3,13 @@
   String content=null;
   String tag=null;
   if (node != null) {
-    content=(String)node.getProperty("content");
-    tag=(String)node.getProperty("tag");
+    if (node instanceof Content) {
+      content=node.getStringProperty("content");
+    }
+    tag=node.getStringProperty("tag");
     if (tag != null) {
-      String onload=(String)node.getProperty("onload");
-      String id=(String)node.getProperty("uuid");
+      String onload=node.getStringProperty("onload");
+      String id=node.getStringProperty("uuid");
       buffer.append("<").append(tag);
       if (edit && id != null) {
         buffer.append(" structr_id='").append(id).append("'");

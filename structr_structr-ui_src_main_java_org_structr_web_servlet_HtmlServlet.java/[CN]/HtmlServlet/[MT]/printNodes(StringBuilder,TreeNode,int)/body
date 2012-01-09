@@ -2,16 +2,24 @@
   AbstractNode node=root.getData();
   String content=null;
   String tag=null;
+  StructrRelationship link=null;
   if (node != null) {
     if (node instanceof Content) {
       content=node.getStringProperty("content");
+      List<StructrRelationship> links=node.getOutgoingLinkRelationships();
+      if ((links != null) && !links.isEmpty()) {
+        link=links.get(0);
+      }
+    }
+    if (link != null) {
+      buffer.append("<a href=\"").append(link.getEndNode().getName()).append("\">");
     }
     tag=node.getStringProperty("tag");
     if (tag != null) {
       String onload=node.getStringProperty("onload");
       String id=node.getStringProperty("uuid");
       buffer.append("<").append(tag);
-      if (edit && id != null) {
+      if (edit && (id != null)) {
         buffer.append(" structr_id='").append(id).append("'");
       }
       if (onload != null) {
@@ -28,5 +36,8 @@
   }
   if (tag != null) {
     buffer.append("</").append(tag).append(">");
+  }
+  if (link != null) {
+    buffer.append("</a>");
   }
 }

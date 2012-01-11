@@ -31,6 +31,8 @@
     String nodeType=typeObject != null ? typeObject.toString() : "GenericNode";
     node=nodeFactory.createNode(securityContext,graphDb.createNode(),nodeType);
     logger.log(Level.FINE,"Node {0} created",node.getId());
+    node.setProperty(AbstractNode.Key.type.name(),nodeType);
+    attrs.remove(AbstractNode.Key.type.name());
     ErrorBuffer errorBuffer=new ErrorBuffer();
     for (    Entry<String,Object> attr : attrs.entrySet()) {
       try {

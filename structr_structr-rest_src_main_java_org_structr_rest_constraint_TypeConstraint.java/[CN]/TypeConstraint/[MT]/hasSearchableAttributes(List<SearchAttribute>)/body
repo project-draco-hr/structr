@@ -1,13 +1,13 @@
 {
   boolean hasSearchableAttributes=false;
-  if (type != null && request != null && !request.getParameterMap().isEmpty()) {
+  if (rawType != null && request != null && !request.getParameterMap().isEmpty()) {
     boolean strictSearch=parseInteger(request.getParameter(JsonRestServlet.REQUEST_PARAMETER_SEARCH_STRICT)) == 1;
     Set<String> searchableAttributes;
     if (strictSearch) {
-      searchableAttributes=EntityContext.getSearchableProperties(type,NodeIndex.keyword.name());
+      searchableAttributes=EntityContext.getSearchableProperties(rawType,NodeIndex.keyword.name());
     }
  else {
-      searchableAttributes=EntityContext.getSearchableProperties(type,NodeIndex.fulltext.name());
+      searchableAttributes=EntityContext.getSearchableProperties(rawType,NodeIndex.fulltext.name());
     }
     if (searchableAttributes != null) {
       for (      String key : searchableAttributes) {

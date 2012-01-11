@@ -4,8 +4,8 @@
   AbstractNode topNode=null;
   boolean includeDeleted=false;
   boolean publicOnly=false;
-  if (type != null) {
-    searchAttributes.addAll(Search.andExactTypeAndSubtypes(CaseHelper.toCamelCase(type)));
+  if (rawType != null) {
+    searchAttributes.addAll(Search.andExactTypeAndSubtypes(EntityContext.normalizeEntityName(rawType)));
     hasSearchableAttributes=hasSearchableAttributes(searchAttributes);
     List<GraphObject> results=(List<GraphObject>)Services.command(securityContext,SearchNodeCommand.class).execute(topNode,includeDeleted,publicOnly,searchAttributes);
     if (!results.isEmpty()) {

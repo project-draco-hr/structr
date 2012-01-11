@@ -5,38 +5,44 @@
   if (propertyGroup != null) {
     return propertyGroup.getGroupedProperties(this);
   }
-  if (EntityContext.getRelations(type).containsKey(key)) {
-    DirectedRelationship rel=EntityContext.getRelations(type).get(key);
-    Notion notion=rel.getNotion();
+  if (dbNode.hasProperty(key)) {
+    if (isDirty) {
+      value=properties.get(key);
+    }
+    if (key.equals(Key.visibleToPublicUsers.name()) && dbNode.hasProperty("public")) {
+      final Object oldValue=dbNode.getProperty("public");
+      StructrTransaction transaction=new StructrTransaction(){
+        @Override public Object execute() throws Throwable {
+          dbNode.setProperty(Key.visibleToPublicUsers.name(),oldValue);
+          dbNode.removeProperty("public");
+          return null;
+        }
+      }
+;
+      Services.command(securityContext,TransactionCommand.class).execute(transaction);
+      if (transaction.getCause() != null) {
+        logger.log(Level.WARNING,"Error while setting property",transaction.getCause());
+      }
+    }
+    if ((key != null) && (dbNode != null) && dbNode.hasProperty(key)) {
+      value=dbNode.getProperty(key);
+    }
+  }
+ else {
+    DirectedRelationship rel=EntityContext.getDirectedRelationship(type,key);
+    if (rel != null) {
+      Notion notion=rel.getNotion();
 switch (rel.getCardinality()) {
 case ManyToMany:
 case OneToMany:
-      return new IterableAdapter(rel.getRelatedNodes(securityContext,this),notion.getAdapterForGetter(securityContext));
+        value=new IterableAdapter(rel.getRelatedNodes(securityContext,this),notion.getAdapterForGetter(securityContext));
+      break;
 case OneToOne:
 case ManyToOne:
-    return notion.getAdapterForGetter(securityContext).adapt(rel.getRelatedNode(securityContext,this));
+    value=notion.getAdapterForGetter(securityContext).adapt(rel.getRelatedNode(securityContext,this));
+  break;
 }
 }
-if (isDirty) {
-value=properties.get(key);
-}
-if (key.equals(Key.visibleToPublicUsers.name()) && dbNode.hasProperty("public")) {
-final Object oldValue=dbNode.getProperty("public");
-StructrTransaction transaction=new StructrTransaction(){
-  @Override public Object execute() throws Throwable {
-    dbNode.setProperty(Key.visibleToPublicUsers.name(),oldValue);
-    dbNode.removeProperty("public");
-    return null;
-  }
-}
-;
-Services.command(securityContext,TransactionCommand.class).execute(transaction);
-if (transaction.getCause() != null) {
-  logger.log(Level.WARNING,"Error while setting property",transaction.getCause());
-}
-}
-if ((key != null) && (dbNode != null) && dbNode.hasProperty(key)) {
-value=dbNode.getProperty(key);
 }
 PropertyConverter converter=EntityContext.getPropertyConverter(securityContext,type,key);
 if (converter != null) {

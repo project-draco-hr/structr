@@ -1,6 +1,8 @@
 {
   long transactionKey=transactionKeyMap.get(Thread.currentThread());
   try {
+    ErrorBuffer errorBuffer=new ErrorBuffer();
+    boolean hasError=false;
     Map<Node,Map<String,Object>> removedProperties=new LinkedHashMap<Node,Map<String,Object>>();
     SecurityContext securityContext=SecurityContext.getSuperUserInstance();
     StructrNodeFactory factory=new StructrNodeFactory(securityContext);
@@ -8,7 +10,7 @@
     Set<AbstractNode> createdNodes=new LinkedHashSet<AbstractNode>();
     Set<StructrRelationship> createdRels=new LinkedHashSet<StructrRelationship>();
     Set<StructrRelationship> deletedRels=new LinkedHashSet<StructrRelationship>();
-    begin(securityContext,transactionKey);
+    begin(securityContext,transactionKey,errorBuffer);
     for (    PropertyEntry<Node> entry : data.removedNodeProperties()) {
       Node node=entry.entity();
       Map<String,Object> propertyMap=removedProperties.get(node);
@@ -20,21 +22,21 @@
     }
     for (    Node node : data.createdNodes()) {
       AbstractNode entity=factory.createNode(securityContext,node);
-      graphObjectCreated(securityContext,transactionKey,entity);
+      hasError|=graphObjectCreated(securityContext,transactionKey,errorBuffer,entity);
       createdNodes.add(entity);
     }
     for (    Relationship rel : data.createdRelationships()) {
       StructrRelationship relationship=new StructrRelationship(securityContext,rel);
-      relationshipCreated(securityContext,transactionKey,relationship);
+      hasError|=relationshipCreated(securityContext,transactionKey,errorBuffer,relationship);
       createdRels.add(relationship);
     }
     for (    Relationship rel : data.deletedRelationships()) {
       StructrRelationship relationship=new StructrRelationship(securityContext,rel);
-      relationshipDeleted(securityContext,transactionKey,relationship);
+      hasError|=relationshipDeleted(securityContext,transactionKey,errorBuffer,relationship);
       deletedRels.add(relationship);
     }
     for (    Node node : data.deletedNodes()) {
-      graphObjectDeleted(securityContext,transactionKey,node.getId(),removedProperties.get(node));
+      hasError|=graphObjectDeleted(securityContext,transactionKey,errorBuffer,node.getId(),removedProperties.get(node));
     }
     for (    PropertyEntry<Node> entry : data.assignedNodeProperties()) {
       AbstractNode entity=factory.createNode(securityContext,entry.entity());
@@ -44,21 +46,21 @@
       if (validator != null) {
         logger.log(Level.FINE,"Using validator of type {0} for property {1}",new Object[]{validator.getClass().getSimpleName(),key});
         Value parameter=EntityContext.getPropertyValidationParameter(entity.getClass(),key);
-        ErrorBuffer errorBuffer=new ErrorBuffer();
-        if (!validator.isValid(key,value,parameter,errorBuffer)) {
-          throw new IllegalArgumentException(errorBuffer.toString());
-        }
+        hasError|=!(validator.isValid(key,value,parameter,errorBuffer));
       }
-      propertyModified(securityContext,transactionKey,entity,key,entry.previouslyCommitedValue(),value);
+      hasError|=propertyModified(securityContext,transactionKey,errorBuffer,entity,key,entry.previouslyCommitedValue(),value);
       Services.command(securityContext,IndexNodeCommand.class).execute(entity,key);
       modifiedNodes.add(entity);
     }
     for (    AbstractNode node : modifiedNodes) {
       if (!createdNodes.contains(node)) {
-        graphObjectModified(securityContext,transactionKey,node);
+        hasError|=graphObjectModified(securityContext,transactionKey,errorBuffer,node);
       }
     }
-    commit(securityContext,transactionKey);
+    hasError|=commit(securityContext,transactionKey,errorBuffer);
+    if (hasError) {
+      throw new IllegalArgumentException(errorBuffer.toString());
+    }
   }
  catch (  Throwable t) {
     throwableMap.put(transactionKey,t);

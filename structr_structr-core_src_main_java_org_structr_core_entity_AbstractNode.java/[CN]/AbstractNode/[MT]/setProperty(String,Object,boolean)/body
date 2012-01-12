@@ -47,15 +47,6 @@ catch (    Throwable t) {
     if (((convertedValue == null) && (oldValue == null)) || ((convertedValue != null) && (oldValue != null) && convertedValue.equals(oldValue))) {
       return;
     }
-    PropertyValidator validator=EntityContext.getPropertyValidator(securityContext,type,key);
-    if (validator != null) {
-      logger.log(Level.FINE,"Using validator of type {0} for property {1}",new Object[]{validator.getClass().getSimpleName(),key});
-      Value parameter=EntityContext.getPropertyValidationParameter(type,key);
-      ErrorBuffer errorBuffer=new ErrorBuffer();
-      if (!validator.isValid(key,convertedValue,parameter,errorBuffer)) {
-        throw new IllegalArgumentException(errorBuffer.toString());
-      }
-    }
     if (isDirty) {
       properties.put(key,convertedValue);
     }
@@ -79,9 +70,6 @@ catch (    Throwable t) {
  else {
                 logger.log(Level.FINE,"Tried to set lastModifiedDate explicitely (action was denied)");
               }
-            }
-            if (updateIndex) {
-              Services.command(securityContext,IndexNodeCommand.class).execute(getId(),key);
             }
           }
   finally {

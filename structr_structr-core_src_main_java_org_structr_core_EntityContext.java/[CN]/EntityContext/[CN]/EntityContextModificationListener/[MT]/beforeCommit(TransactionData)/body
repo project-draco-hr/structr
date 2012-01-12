@@ -38,7 +38,19 @@
     }
     for (    PropertyEntry<Node> entry : data.assignedNodeProperties()) {
       AbstractNode entity=factory.createNode(securityContext,entry.entity());
-      propertyModified(securityContext,transactionKey,entity,entry.key(),entry.previouslyCommitedValue(),entry.value());
+      String key=entry.key();
+      Object value=entry.value();
+      PropertyValidator validator=EntityContext.getPropertyValidator(securityContext,entity.getClass(),key);
+      if (validator != null) {
+        logger.log(Level.FINE,"Using validator of type {0} for property {1}",new Object[]{validator.getClass().getSimpleName(),key});
+        Value parameter=EntityContext.getPropertyValidationParameter(entity.getClass(),key);
+        ErrorBuffer errorBuffer=new ErrorBuffer();
+        if (!validator.isValid(key,value,parameter,errorBuffer)) {
+          throw new IllegalArgumentException(errorBuffer.toString());
+        }
+      }
+      propertyModified(securityContext,transactionKey,entity,key,entry.previouslyCommitedValue(),value);
+      Services.command(securityContext,IndexNodeCommand.class).execute(entity,key);
       modifiedNodes.add(entity);
     }
     for (    AbstractNode node : modifiedNodes) {

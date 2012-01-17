@@ -3,7 +3,6 @@
   StructrNodeFactory nodeFactory=(StructrNodeFactory)arguments.get("nodeFactory");
   User user=securityContext.getUser();
   AbstractNode node=null;
-  boolean updateIndex=true;
   if (graphDb != null) {
     Date now=new Date();
     Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
@@ -22,9 +21,6 @@
  else       if (o instanceof NodeAttribute) {
         NodeAttribute attr=(NodeAttribute)o;
         attrs.put(attr.getKey(),attr.getValue());
-      }
- else       if (o instanceof Boolean) {
-        updateIndex=(Boolean)o;
       }
     }
     Object typeObject=attrs.get(AbstractNode.Key.type.name());
@@ -60,8 +56,10 @@
       StructrRelationship securityRel=(StructrRelationship)createRel.execute(principal,node,RelType.SECURITY);
       securityRel.setAllowed(StructrRelationship.Permission.values());
       logger.log(Level.FINEST,"All permissions given to {0}",principal.getName());
-      node.setProperty(AbstractNode.Key.createdBy.name(),user.getRealName() + " (" + user.getName()+ ")",false);
+      node.unlockReadOnlyPropertiesOnce();
+      node.setProperty(AbstractNode.Key.createdBy.name(),user.getProperty(AbstractNode.Key.uuid),false);
     }
+    node.unlockReadOnlyPropertiesOnce();
     node.setProperty(AbstractNode.Key.createdDate.name(),now,false);
     node.setProperty(AbstractNode.Key.lastModifiedDate.name(),now,false);
   }

@@ -1,10 +1,10 @@
 {
   if (node != null) {
-    Command createNode=Services.command(CreateNodeCommand.class);
-    Command createRel=Services.command(CreateRelationshipCommand.class);
+    Command createNode=Services.command(securityContext,CreateNodeCommand.class);
+    Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
     AbstractNode newNode=(AbstractNode)createNode.execute(user);
     for (    String key : node.getPropertyKeys()) {
-      if (!(key.equals(AbstractNode.CREATED_DATE_KEY))) {
+      if (!(key.equals(AbstractNode.Key.createdDate.name()))) {
         newNode.setProperty(key,node.getProperty(key));
       }
     }

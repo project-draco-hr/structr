@@ -8,8 +8,11 @@
       graphDb=new EmbeddedGraphDatabase(dbPath,configuration);
     }
  catch (    Throwable t) {
-      logger.log(Level.INFO,"Database config not found");
+      logger.log(Level.INFO,"Database config {0}/neo4j.conf not found",dbPath);
       graphDb=new EmbeddedGraphDatabase(dbPath);
+    }
+    if (graphDb != null) {
+      graphDb.registerTransactionEventHandler(EntityContext.getTransactionEventHandler());
     }
     String filesPath=Services.getFilesPath();
     File files=new File(filesPath);
@@ -17,9 +20,18 @@
       files.mkdir();
     }
     logger.log(Level.INFO,"Database ready.");
-    logger.log(Level.FINE,"Initializing index...");
-    index=graphDb.index().forNodes("fulltextAllNodes",MapUtil.stringMap("provider","lucene","type","fulltext"));
-    logger.log(Level.FINE,"Index ready.");
+    logger.log(Level.FINE,"Initializing UUID index...");
+    uuidIndex=graphDb.index().forNodes("uuidAllNodes",LuceneIndexImplementation.EXACT_CONFIG);
+    logger.log(Level.FINE,"UUID index ready.");
+    logger.log(Level.FINE,"Initializing user index...");
+    userIndex=graphDb.index().forNodes("nameEmailAllUsers",LuceneIndexImplementation.EXACT_CONFIG);
+    logger.log(Level.FINE,"UUID index ready.");
+    logger.log(Level.FINE,"Initializing fulltext index...");
+    fulltextIndex=graphDb.index().forNodes("fulltextAllNodes",LuceneIndexImplementation.FULLTEXT_CONFIG);
+    logger.log(Level.FINE,"Fulltext index ready.");
+    logger.log(Level.FINE,"Initializing keyword index...");
+    keywordIndex=graphDb.index().forNodes("keywordAllNodes",LuceneIndexImplementation.EXACT_CONFIG);
+    logger.log(Level.FINE,"Keyword index ready.");
     logger.log(Level.FINE,"Initializing node factory...");
     nodeFactory=new StructrNodeFactory();
     logger.log(Level.FINE,"Node factory ready.");

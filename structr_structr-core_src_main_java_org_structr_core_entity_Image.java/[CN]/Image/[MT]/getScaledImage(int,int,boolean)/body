@@ -7,8 +7,8 @@
   if ((origWidth != null) && (origHeight != null)) {
     if ((thumbnailRelationships != null) && !(thumbnailRelationships.isEmpty())) {
       for (      StructrRelationship r : thumbnailRelationships) {
-        Integer w=(Integer)r.getProperty(Image.WIDTH_KEY);
-        Integer h=(Integer)r.getProperty(Image.HEIGHT_KEY);
+        Integer w=(Integer)r.getProperty(Key.width.name());
+        Integer h=(Integer)r.getProperty(Key.height.name());
         if ((w != null) && (h != null)) {
           if (((w == maxWidth) && (h <= maxHeight)) || ((w <= maxWidth) && (h == maxHeight)) || ((origWidth <= w) && (origHeight <= h))) {
             thumbnail=(Image)r.getEndNode();
@@ -21,16 +21,16 @@
     }
   }
   logger.log(Level.INFO,"Creating thumbnail for {0}",getName());
-  Command transactionCommand=Services.command(TransactionCommand.class);
+  Command transactionCommand=Services.command(securityContext,TransactionCommand.class);
   thumbnail=(Image)transactionCommand.execute(new StructrTransaction(){
     @Override public Object execute() throws Throwable {
-      Command createNode=Services.command(CreateNodeCommand.class);
-      Command createRel=Services.command(CreateRelationshipCommand.class);
-      NodeAttribute typeAttr=new NodeAttribute(AbstractNode.TYPE_KEY,Image.class.getSimpleName());
-      NodeAttribute contentTypeAttr=new NodeAttribute(Image.CONTENT_TYPE_KEY,"image/" + Thumbnail.FORMAT);
-      NodeAttribute isHiddenAttr=new NodeAttribute(AbstractNode.HIDDEN_KEY,originalImage.getHidden());
-      NodeAttribute isPublicAttr=new NodeAttribute(AbstractNode.PUBLIC_KEY,originalImage.getPublic());
-      NodeAttribute isVisibleForAuthenticatedUsersAttr=new NodeAttribute(AbstractNode.VISIBLE_TO_AUTHENTICATED_USERS_KEY,originalImage.getVisibleToAuthenticatedUsers());
+      Command createNode=Services.command(securityContext,CreateNodeCommand.class);
+      Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
+      NodeAttribute typeAttr=new NodeAttribute(AbstractNode.Key.type.name(),Image.class.getSimpleName());
+      NodeAttribute contentTypeAttr=new NodeAttribute(File.Key.contentType.name(),"image/" + Thumbnail.FORMAT);
+      NodeAttribute isHiddenAttr=new NodeAttribute(AbstractNode.Key.hidden.name(),originalImage.getHidden());
+      NodeAttribute isPublicAttr=new NodeAttribute(AbstractNode.Key.visibleToPublicUsers.name(),originalImage.getVisibleToPublicUsers());
+      NodeAttribute isVisibleForAuthenticatedUsersAttr=new NodeAttribute(AbstractNode.Key.visibleToAuthenticatedUsers.name(),originalImage.getVisibleToAuthenticatedUsers());
       Thumbnail thumbnailData=ImageHelper.createThumbnail(originalImage,maxWidth,maxHeight,cropToFit);
       if (thumbnailData != null) {
         Image thumbnail=(Image)createNode.execute(originalImage.getOwnerNode(),typeAttr,contentTypeAttr,isHiddenAttr,isPublicAttr,isVisibleForAuthenticatedUsersAttr,false);
@@ -51,8 +51,8 @@
           thumbnail.setSize(size);
           Integer tnWidth=thumbnailData.getWidth();
           Integer tnHeight=thumbnailData.getHeight();
-          thumbnailRelationship.setProperty(Image.WIDTH_KEY,tnWidth);
-          thumbnailRelationship.setProperty(Image.HEIGHT_KEY,tnHeight);
+          thumbnailRelationship.setProperty(Key.width.name(),tnWidth);
+          thumbnailRelationship.setProperty(Key.height.name(),tnHeight);
           thumbnail.setRelativeFilePath(relativeFilePath);
           thumbnail.setName(originalImage.getName() + "_thumb_" + tnWidth+ "x"+ tnHeight);
         }

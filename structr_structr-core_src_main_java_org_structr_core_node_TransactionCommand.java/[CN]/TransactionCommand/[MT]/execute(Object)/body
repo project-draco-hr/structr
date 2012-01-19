@@ -1,36 +1,63 @@
 {
   Object ret=null;
   GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
-  if (parameters.length > 0 && parameters[0] instanceof StructrTransaction) {
+  if ((parameters.length > 0) && (parameters[0] instanceof StructrTransaction)) {
     StructrTransaction transaction=(StructrTransaction)parameters[0];
     if (graphDb != null) {
       Transaction tx=graphDb.beginTx();
       try {
         ret=transaction.execute();
         tx.success();
+        logger.log(Level.FINEST,"Transaction successfull");
       }
  catch (      Throwable t) {
-        t.printStackTrace();
+        transaction.setCause(t);
         tx.failure();
+        logger.log(Level.WARNING,"Transaction failure",t);
       }
  finally {
-        tx.finish();
+        long transactionKey=nextLong();
+        EntityContext.setTransactionKey(transactionKey);
+        try {
+          tx.finish();
+        }
+ catch (        Throwable t) {
+          Throwable throwable=EntityContext.getThrowable(transactionKey);
+          EntityContext.removeTransactionKey();
+          if (throwable != null) {
+            throwable.printStackTrace();
+            throw new IllegalArgumentException(throwable.getMessage());
+          }
+        }
       }
     }
   }
- else   if (parameters.length > 0 && parameters[0] instanceof BatchTransaction) {
+ else   if ((parameters.length > 0) && (parameters[0] instanceof BatchTransaction)) {
     BatchTransaction transaction=(BatchTransaction)parameters[0];
     Transaction tx=graphDb.beginTx();
     try {
       ret=transaction.execute(tx);
       tx.success();
+      logger.log(Level.FINEST,"Transaction successfull");
     }
  catch (    Throwable t) {
-      t.printStackTrace();
+      transaction.setCause(t);
       tx.failure();
+      logger.log(Level.WARNING,"Transaction failure",t);
     }
  finally {
-      tx.finish();
+      long transactionKey=nextLong();
+      EntityContext.setTransactionKey(transactionKey);
+      try {
+        tx.finish();
+      }
+ catch (      Throwable t) {
+        Throwable throwable=EntityContext.getThrowable(transactionKey);
+        EntityContext.removeTransactionKey();
+        if (throwable != null) {
+          throw new IllegalArgumentException(throwable.getMessage());
+        }
+      }
     }
   }
   return ret;

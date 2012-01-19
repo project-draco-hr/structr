@@ -1,0 +1,15 @@
+{
+  StringBuilder errorBuffer=new StringBuilder(100);
+  errorBuffer.append(illegalArgumentException.getMessage());
+  final int code=HttpServletResponse.SC_BAD_REQUEST;
+  response.setStatus(code);
+  response.setContentType("application/json; charset=UTF-8");
+  try {
+    response.getWriter().append(jsonError(code,errorBuffer.toString()));
+    response.getWriter().flush();
+    response.getWriter().close();
+  }
+ catch (  Throwable t) {
+    logger.log(Level.WARNING,"Unable to commit response",t);
+  }
+}

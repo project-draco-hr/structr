@@ -1,26 +1,26 @@
 {
   GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
-  Index<Node> index=(Index<Node>)arguments.get("index");
-  Command findNode=Services.command(FindNodeCommand.class);
+  Index<Node> index=(Index<Node>)arguments.get(NodeIndex.user.name());
+  Command findNode=Services.command(securityContext,FindNodeCommand.class);
   if (graphDb != null) {
 switch (parameters.length) {
 case 1:
       if (parameters[0] instanceof String) {
         String userName=(String)parameters[0];
-        for (        Node n : index.get(AbstractNode.NAME_KEY,userName)) {
+        for (        Node n : index.get(AbstractNode.Key.name.name(),userName)) {
           AbstractNode s=(AbstractNode)findNode.execute(n);
-          if (s.getType().equals("User")) {
+          if (s.getType().equals(User.class.getSimpleName())) {
             return s;
           }
         }
       }
     break;
 case 2:
-  if (parameters[0] instanceof String && parameters[1] instanceof String) {
+  if ((parameters[0] instanceof String) && (parameters[1] instanceof String)) {
     String userName=(String)parameters[0];
     String rootNodePath=(String)parameters[1];
     List<AbstractNode> nodes=(List<AbstractNode>)findNode.execute(new XPath(rootNodePath));
-    if (nodes != null && nodes.size() > 0) {
+    if ((nodes != null) && (nodes.size() > 0)) {
       AbstractNode r=nodes.get(0);
       Node startNode=null;
       if (r != null) {
@@ -30,7 +30,7 @@ case 2:
         }
         for (        Node n : getSubnodes(startNode)) {
           AbstractNode s=(AbstractNode)findNode.execute(n);
-          if (s.getType().equals("User") && userName.equals(s.getName())) {
+          if (s.getType().equals(User.class.getSimpleName()) && userName.equals(s.getName())) {
             return s;
           }
         }

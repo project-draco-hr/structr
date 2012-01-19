@@ -1,33 +1,33 @@
 {
-  if ((parameters == null) || (parameters.length != 5)) {
-    logger.log(Level.WARNING,"Exactly 5 parameters are required for advanced search.");
+  if ((parameters == null) || (parameters.length < 4)) {
+    logger.log(Level.WARNING,"4 or more parameters are required for advanced search.");
     return Collections.emptyList();
   }
-  User user=null;
-  if (parameters[0] instanceof User) {
-    user=(User)parameters[0];
-  }
   AbstractNode topNode=null;
-  if (parameters[1] instanceof AbstractNode) {
-    topNode=(AbstractNode)parameters[1];
+  if (parameters[0] instanceof AbstractNode) {
+    topNode=(AbstractNode)parameters[0];
   }
   boolean includeDeleted=false;
-  if (parameters[2] instanceof Boolean) {
-    includeDeleted=(Boolean)parameters[2];
+  if (parameters[1] instanceof Boolean) {
+    includeDeleted=(Boolean)parameters[1];
   }
   boolean publicOnly=false;
-  if (parameters[3] instanceof Boolean) {
-    publicOnly=(Boolean)parameters[3];
+  if (parameters[2] instanceof Boolean) {
+    publicOnly=(Boolean)parameters[2];
   }
   List<SearchAttribute> searchAttrs=new LinkedList<SearchAttribute>();
-  if (parameters[4] instanceof List) {
-    searchAttrs=(List<SearchAttribute>)parameters[4];
+  if (parameters[3] instanceof List) {
+    searchAttrs=(List<SearchAttribute>)parameters[3];
   }
-  for (int i=4; i < parameters.length; i++) {
-    Object o=parameters[i];
-    if (o instanceof SearchAttribute) {
-      searchAttrs.add((SearchAttribute)o);
+  String propertyKey=null;
+  String type=null;
+  if (parameters.length >= 6) {
+    if (parameters[4] instanceof String) {
+      type=(String)parameters[4];
+    }
+    if (parameters[5] instanceof String) {
+      propertyKey=(String)parameters[5];
     }
   }
-  return search(user,topNode,includeDeleted,publicOnly,searchAttrs);
+  return search(securityContext,topNode,includeDeleted,publicOnly,searchAttrs,type,propertyKey);
 }

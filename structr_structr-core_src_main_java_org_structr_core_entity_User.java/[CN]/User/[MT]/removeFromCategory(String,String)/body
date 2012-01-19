@@ -4,7 +4,7 @@
     logger.log(Level.SEVERE,"Empty category name!");
     return;
   }
-  final AbstractNode object=(AbstractNode)Services.command(FindNodeCommand.class).execute(user,objectId);
+  final AbstractNode object=(AbstractNode)Services.command(securityContext,FindNodeCommand.class).execute(objectId);
   if (object == null) {
     logger.log(Level.SEVERE,"Object not found!");
     return;
@@ -12,7 +12,7 @@
   Category cat=null;
   List<AbstractNode> children=this.getDirectChildNodes();
   for (  AbstractNode child : children) {
-    if (child instanceof Category && categoryName.equals(child.getName())) {
+    if ((child instanceof Category) && categoryName.equals(child.getName())) {
       cat=(Category)child;
     }
   }
@@ -30,9 +30,9 @@
   }
   if (relationshipToRemove != null) {
     final StructrRelationship relToDel=relationshipToRemove;
-    Services.command(TransactionCommand.class).execute(new StructrTransaction(){
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
       @Override public Object execute(){
-        Services.command(DeleteRelationshipCommand.class).execute(relToDel);
+        Services.command(securityContext,DeleteRelationshipCommand.class).execute(relToDel);
         return null;
       }
     }

@@ -1,0 +1,16 @@
+{
+  String normalizedType=normalizedEntityNameCache.get(possibleEntityName);
+  if (normalizedType == null) {
+    normalizedType=StringUtils.capitalize(CaseHelper.toCamelCase(possibleEntityName));
+    if (normalizedType.endsWith("ies")) {
+      normalizedType=normalizedType.substring(0,normalizedType.length() - 3).concat("y");
+    }
+ else     if (normalizedType.endsWith("s")) {
+      logger.log(Level.FINEST,"Removing trailing plural 's' from type {0}",normalizedType);
+      normalizedType=normalizedType.substring(0,normalizedType.length() - 1);
+    }
+    logger.log(Level.FINEST,"String {0} normalized to {1}",new Object[]{possibleEntityName,normalizedType});
+    normalizedEntityNameCache.put(possibleEntityName,normalizedType);
+  }
+  return normalizedType;
+}

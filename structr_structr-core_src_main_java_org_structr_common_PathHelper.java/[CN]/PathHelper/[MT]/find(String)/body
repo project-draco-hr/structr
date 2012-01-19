@@ -1,9 +1,8 @@
 {
   AbstractNode node=null;
-  Command findNodeCommand=Services.command(FindNodeCommand.class);
-  node=(AbstractNode)findNodeCommand.execute(null,path);
-  SecurityContext context=CurrentRequest.getSecurityContext();
-  if (context.isVisible(node)) {
+  Command findNodeCommand=Services.command(securityContext,FindNodeCommand.class);
+  node=(AbstractNode)findNodeCommand.execute(path);
+  if (securityContext.isVisible(node)) {
     return (node);
   }
   return (null);

@@ -1,5 +1,9 @@
 {
-  String modulePath=createModuleFileName(moduleName);
+  String libPath=servletContext.getRealPath("WEB-INF/lib");
+  if (libPath == null) {
+    return null;
+  }
+  String modulePath=libPath.concat("/").concat(moduleName);
   String indexPath=createIndexFileName(moduleName);
   File moduleFile=new File(modulePath);
   File indexFile=new File(indexPath);
@@ -32,6 +36,8 @@
       }
     }
   }
+  File classesDir=new File(servletContext.getRealPath("/WEB-INF/classes"));
+  addClassesRecursively(classesDir,classes);
   try {
     indexFile.getParentFile().mkdirs();
     ObjectOutputStream ois=new ObjectOutputStream(new FileOutputStream(indexFile));

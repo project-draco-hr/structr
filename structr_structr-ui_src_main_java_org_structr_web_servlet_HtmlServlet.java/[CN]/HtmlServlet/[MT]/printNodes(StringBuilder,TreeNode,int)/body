@@ -1,0 +1,43 @@
+{
+  AbstractNode node=root.getData();
+  String content=null;
+  String tag=null;
+  StructrRelationship link=null;
+  if (node != null) {
+    if (node instanceof Content) {
+      content=node.getStringProperty("content");
+      List<StructrRelationship> links=node.getOutgoingLinkRelationships();
+      if ((links != null) && !links.isEmpty()) {
+        link=links.get(0);
+      }
+    }
+    if (link != null) {
+      buffer.append("<a href=\"").append(link.getEndNode().getName()).append("\">");
+    }
+    tag=node.getStringProperty("tag");
+    if (tag != null) {
+      String onload=node.getStringProperty("onload");
+      String id=node.getStringProperty("uuid");
+      buffer.append("<").append(tag);
+      if (edit && (id != null)) {
+        buffer.append(" structr_id='").append(id).append("'");
+      }
+      if (onload != null) {
+        buffer.append(" onload='").append(onload).append("'");
+      }
+      buffer.append(">");
+    }
+    if (content != null) {
+      buffer.append(content);
+    }
+  }
+  for (  TreeNode subNode : root.getChildren()) {
+    printNodes(buffer,subNode,depth + 1);
+  }
+  if (tag != null) {
+    buffer.append("</").append(tag).append(">");
+  }
+  if (link != null) {
+    buffer.append("</a>");
+  }
+}

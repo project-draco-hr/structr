@@ -1,14 +1,15 @@
 {
   StandaloneTestHelper.prepareStandaloneTest("/tmp/structr-test/");
-  GraphDatabaseService db=(GraphDatabaseService)Services.command(GraphDatabaseCommand.class).execute();
+  final SecurityContext securityContext=SecurityContext.getSuperUserInstance();
+  GraphDatabaseService db=(GraphDatabaseService)Services.command(securityContext,GraphDatabaseCommand.class).execute();
   final int num=1000;
   final int depth=3;
   if (!db.getReferenceNode().hasRelationship(Direction.OUTGOING)) {
-    Services.command(TransactionCommand.class).execute(new StructrTransaction(){
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
       @Override public Object execute() throws Throwable {
-        Command linkNodes=Services.command(CreateRelationshipCommand.class);
-        Command createNode=Services.command(CreateNodeCommand.class);
-        AbstractNode rootNode=(AbstractNode)Services.command(FindNodeCommand.class).execute(null,0L);
+        Command linkNodes=Services.command(securityContext,CreateRelationshipCommand.class);
+        Command createNode=Services.command(securityContext,CreateNodeCommand.class);
+        AbstractNode rootNode=(AbstractNode)Services.command(securityContext,FindNodeCommand.class).execute(0L);
         for (int i=0; i < num; i++) {
           String name="node" + i;
           AbstractNode newNode=(AbstractNode)createNode.execute(new NodeAttribute("type","Folder"),new NodeAttribute("name",name));
@@ -25,7 +26,7 @@
     }
 );
   }
-  Command factory=Services.command(NodeFactoryCommand.class);
+  Command factory=Services.command(securityContext,NodeFactoryCommand.class);
   List<AbstractNode> allNodes=new LinkedList<AbstractNode>();
   for (  Node node : db.getAllNodes()) {
     if (!node.equals(db.getReferenceNode())) {

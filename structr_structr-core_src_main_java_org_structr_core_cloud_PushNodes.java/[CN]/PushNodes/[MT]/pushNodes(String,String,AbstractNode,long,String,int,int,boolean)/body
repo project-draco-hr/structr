@@ -11,8 +11,8 @@
   CloudService.registerClasses(kryo);
   StringBuilder titleBuffer=new StringBuilder();
   titleBuffer.append("Transmission to ").append(remoteHost).append(":").append(remoteTcpPort);
-  ProgressBarNotification progressNotification=new ProgressBarNotification(titleBuffer.toString());
-  Services.command(AddNotificationCommand.class).execute(progressNotification);
+  ProgressBarNotification progressNotification=new ProgressBarNotification(securityContext,titleBuffer.toString());
+  Services.command(securityContext,AddNotificationCommand.class).execute(progressNotification);
   listener.setNotification(progressNotification);
   listener.setPassword(password);
   try {
@@ -22,8 +22,8 @@
     if (listener.waitForAuthentication()) {
       client.sendTCP(new PushNodeRequestContainer(remoteTargetNodeId));
       if (recursive) {
-        List<AbstractNode> nodes=sourceNode.getAllChildrenForRemotePush(new SuperUser());
-        progressNotification.setTargetProgress(sourceNode.getRemotePushSize(new SuperUser(),chunkSize));
+        List<AbstractNode> nodes=sourceNode.getAllChildrenForRemotePush();
+        progressNotification.setTargetProgress(sourceNode.getRemotePushSize(chunkSize));
         for (        AbstractNode n : nodes) {
           if (n instanceof File) {
             sendFile(client,listener,(File)n,chunkSize,progressNotification);

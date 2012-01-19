@@ -28,16 +28,10 @@
       response.getWriter().close();
     }
   }
- catch (  MessageException msgException) {
-    int code=msgException.getStatus();
-    response.setStatus(code);
-    response.getWriter().append(jsonMsg(msgException.getMessage()));
-    response.getWriter().flush();
-    response.getWriter().close();
-  }
-catch (  FrameworkException frameworkException) {
+ catch (  FrameworkException frameworkException) {
     response.setStatus(frameworkException.getStatus());
     gson.toJson(frameworkException,response.getWriter());
+    response.getWriter().println();
     response.getWriter().flush();
     response.getWriter().close();
   }

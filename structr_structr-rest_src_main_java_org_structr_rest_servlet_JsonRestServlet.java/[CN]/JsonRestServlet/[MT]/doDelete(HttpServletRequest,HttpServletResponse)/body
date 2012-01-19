@@ -15,13 +15,12 @@
       result.commitResponse(gson,response);
     }
   }
- catch (  IllegalArgumentException illegalArgumentException) {
-    handleValidationError(illegalArgumentException,response);
-  }
-catch (  FrameworkException frameworkException) {
-    int code=frameworkException.getStatus();
-    response.setStatus(code);
-    response.getWriter().append(jsonError(code,frameworkException.getMessage()));
+ catch (  FrameworkException frameworkException) {
+    response.setStatus(frameworkException.getStatus());
+    gson.toJson(frameworkException,response.getWriter());
+    response.getWriter().println();
+    response.getWriter().flush();
+    response.getWriter().close();
   }
 catch (  JsonSyntaxException jsex) {
     logger.log(Level.WARNING,"JsonSyntaxException in DELETE",jsex);

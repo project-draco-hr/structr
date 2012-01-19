@@ -1,16 +1,18 @@
 {
   if (source instanceof PropertySet) {
+    Map<String,Object> attributes=new LinkedHashMap<String,Object>();
     List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
     for (    NodeAttribute attr : ((PropertySet)source).getAttributes()) {
       String key=attr.getKey();
       String value=(String)attr.getValue();
       attrs.add(Search.andExactProperty(key,value));
+      attributes.put(key,value);
     }
     List<AbstractNode> nodes=(List<AbstractNode>)Services.command(securityContext,SearchNodeCommand.class).execute(null,false,false,attrs);
     if (nodes.size() == 1) {
       return nodes.get(0);
     }
-    throw new FrameworkException(type.getSimpleName(),new PropertiesNotFoundToken("base",attrs));
+    throw new FrameworkException(type.getSimpleName(),new PropertiesNotFoundToken("base",attributes));
   }
   return null;
 }

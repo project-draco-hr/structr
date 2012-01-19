@@ -1,0 +1,17 @@
+{
+  JsonObject container=new JsonObject();
+  JsonObject error=new JsonObject();
+  container.add("code",new JsonPrimitive(src.getStatus()));
+  container.add("errors",error);
+  Map<String,List<ErrorToken>> tokens=src.getErrorBuffer().getErrorTokens();
+  for (  Entry<String,List<ErrorToken>> entry : tokens.entrySet()) {
+    List<ErrorToken> list=entry.getValue();
+    String type=entry.getKey();
+    JsonArray array=new JsonArray();
+    for (    ErrorToken token : list) {
+      array.add(token.getContent());
+    }
+    error.add(type,array);
+  }
+  return container;
+}

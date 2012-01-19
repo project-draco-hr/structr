@@ -5,18 +5,12 @@
     targetNode=(AbstractNode)value;
   }
  else {
-    try {
-      targetNode=(AbstractNode)Services.command(securityContext,FindNodeCommand.class).execute(value);
-    }
- catch (    Throwable t) {
-      logger.log(Level.WARNING,"Unable to find target node for relationship creation: {0}",value);
-      targetNode=null;
-    }
+    targetNode=(AbstractNode)Services.command(securityContext,FindNodeCommand.class).execute(value);
   }
   if ((sourceNode != null) && (targetNode != null)) {
     final AbstractNode finalTargetNode=targetNode;
     StructrTransaction transaction=new StructrTransaction(){
-      @Override public Object execute() throws Throwable {
+      @Override public Object execute() throws FrameworkException {
         if (cardinality.equals(Cardinality.OneToOne)) {
           String destType=finalTargetNode.getType();
           List<StructrRelationship> rels=sourceNode.getRelationships(relType,direction);
@@ -39,16 +33,15 @@
     }
 ;
     Services.command(securityContext,TransactionCommand.class).execute(transaction);
-    if (transaction.getCause() != null) {
-      throw transaction.getCause();
-    }
   }
  else {
-    StringBuilder errorMessage=new StringBuilder(100);
-    errorMessage.append(StringUtils.capitalize(destType));
-    errorMessage.append(" with id ");
-    errorMessage.append(value);
-    errorMessage.append(" not found.");
-    throw new IllegalArgumentException(errorMessage.toString());
+    String type="unknown";
+    if (sourceNode != null) {
+      type=sourceNode.getType();
+    }
+ else     if (targetNode != null) {
+      type=targetNode.getType();
+    }
+    throw new FrameworkException(type,new IdNotFoundToken(value));
   }
 }

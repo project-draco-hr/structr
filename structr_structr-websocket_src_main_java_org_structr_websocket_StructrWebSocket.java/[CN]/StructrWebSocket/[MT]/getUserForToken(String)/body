@@ -2,12 +2,17 @@
   List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
   attrs.add(Search.andExactProperty(User.Key.sessionId,messageToken));
   attrs.add(Search.andExactType("User"));
-  List<AbstractNode> results=(List<AbstractNode>)Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class).execute(null,false,false,attrs);
-  if (!results.isEmpty()) {
-    User user=(User)results.get(0);
-    if (user != null && messageToken.equals(user.getProperty(User.Key.sessionId))) {
-      return user;
+  try {
+    List<AbstractNode> results=(List<AbstractNode>)Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class).execute(null,false,false,attrs);
+    if (!results.isEmpty()) {
+      User user=(User)results.get(0);
+      if (user != null && messageToken.equals(user.getProperty(User.Key.sessionId))) {
+        return user;
+      }
     }
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"Error while executing SearchNodeCommand",fex);
   }
   return null;
 }

@@ -1,15 +1,20 @@
 {
-  Object findNodeResult=Services.command(securityContext,FindNodeCommand.class).execute(currentNode,obj);
-  if (findNodeResult != null) {
-    if (findNodeResult instanceof AbstractNode) {
-      nodeList.add((AbstractNode)findNodeResult);
-    }
- else     if (findNodeResult instanceof Collection) {
-      for (      Object o : (Collection)findNodeResult) {
-        if (o instanceof AbstractNode) {
-          nodeList.add((AbstractNode)o);
+  try {
+    Object findNodeResult=Services.command(securityContext,FindNodeCommand.class).execute(currentNode,obj);
+    if (findNodeResult != null) {
+      if (findNodeResult instanceof AbstractNode) {
+        nodeList.add((AbstractNode)findNodeResult);
+      }
+ else       if (findNodeResult instanceof Collection) {
+        for (        Object o : (Collection)findNodeResult) {
+          if (o instanceof AbstractNode) {
+            nodeList.add((AbstractNode)o);
+          }
         }
       }
     }
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
   }
 }

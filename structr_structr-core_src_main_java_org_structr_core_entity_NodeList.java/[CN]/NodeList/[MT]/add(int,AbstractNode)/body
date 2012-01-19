@@ -3,19 +3,24 @@
   if ((index < 0) || (index > size)) {
     throw new ArrayIndexOutOfBoundsException();
   }
-  transaction.execute(new StructrTransaction(){
-    @Override public Object execute() throws Throwable {
-      for (      Decorator<AbstractNode> decorator : decorators) {
-        decorator.decorate(toAdd);
-      }
-      if (index == size) {
-        appendNodeToList(toAdd.getNode());
-      }
+  try {
+    transaction.execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        for (        Decorator<AbstractNode> decorator : decorators) {
+          decorator.decorate(toAdd);
+        }
+        if (index == size) {
+          appendNodeToList(toAdd.getNode());
+        }
  else {
-        insertNodeIntoList(index,toAdd.getNode());
+          insertNodeIntoList(index,toAdd.getNode());
+        }
+        return (null);
       }
-      return (null);
     }
-  }
 );
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"Unable to add node to this list",fex);
+  }
 }

@@ -23,15 +23,20 @@
   }
  else   if (object instanceof AuthenticationContainer) {
     AuthenticationContainer auth=(AuthenticationContainer)object;
-    targetUser=(User)Services.command(securityContext,FindUserCommand.class).execute(auth.getUserName());
-    if (targetUser == null) {
-      logger.log(Level.WARNING,"User not found, disconnecting");
-      connection.sendTCP("Authentication failed");
-      connection.close();
-    }
+    try {
+      targetUser=(User)Services.command(securityContext,FindUserCommand.class).execute(auth.getUserName());
+      if (targetUser == null) {
+        logger.log(Level.WARNING,"User not found, disconnecting");
+        connection.sendTCP("Authentication failed");
+        connection.close();
+      }
  else {
-      connection.sendTCP(auth);
-      EncryptionContext.setPassword(connection.getID(),targetUser.getEncryptedPassword());
+        connection.sendTCP(auth);
+        EncryptionContext.setPassword(connection.getID(),targetUser.getEncryptedPassword());
+      }
+    }
+ catch (    FrameworkException fex) {
+      fex.printStackTrace();
     }
   }
  else   if (object instanceof PullNodeRequestContainer) {
@@ -39,8 +44,13 @@
   }
  else   if (object instanceof PushNodeRequestContainer) {
     PushNodeRequestContainer request=(PushNodeRequestContainer)object;
-    rootNode=(AbstractNode)Services.command(securityContext,FindNodeCommand.class).execute(request.getTargetNodeId());
-    connection.sendTCP(CloudService.ACK_DATA);
+    try {
+      rootNode=(AbstractNode)Services.command(securityContext,FindNodeCommand.class).execute(request.getTargetNodeId());
+      connection.sendTCP(CloudService.ACK_DATA);
+    }
+ catch (    FrameworkException fex) {
+      fex.printStackTrace();
+    }
   }
  else   if (object instanceof FileNodeDataContainer) {
     final FileNodeDataContainer container=(FileNodeDataContainer)object;
@@ -56,14 +66,19 @@
     }
  else {
       container.flushAndCloseTemporaryFile();
-      Command transactionCommand=Services.command(securityContext,TransactionCommand.class);
-      transactionCommand.execute(new StructrTransaction(){
-        @Override public Object execute() throws Throwable {
-          storeNode(container,linkNode);
-          return null;
+      try {
+        Command transactionCommand=Services.command(securityContext,TransactionCommand.class);
+        transactionCommand.execute(new StructrTransaction(){
+          @Override public Object execute() throws FrameworkException {
+            storeNode(container,linkNode);
+            return null;
+          }
         }
-      }
 );
+      }
+ catch (      FrameworkException fex) {
+        fex.printStackTrace();
+      }
     }
     connection.sendTCP(CloudService.ACK_DATA);
   }
@@ -80,26 +95,36 @@
   }
  else   if (object instanceof NodeDataContainer) {
     final NodeDataContainer receivedNodeData=(NodeDataContainer)object;
-    Command transactionCommand=Services.command(securityContext,TransactionCommand.class);
-    transactionCommand.execute(new StructrTransaction(){
-      @Override public Object execute() throws Throwable {
-        storeNode(receivedNodeData,linkNode);
-        return null;
+    try {
+      Command transactionCommand=Services.command(securityContext,TransactionCommand.class);
+      transactionCommand.execute(new StructrTransaction(){
+        @Override public Object execute() throws FrameworkException {
+          storeNode(receivedNodeData,linkNode);
+          return null;
+        }
       }
-    }
 );
-    connection.sendTCP(CloudService.ACK_DATA);
+      connection.sendTCP(CloudService.ACK_DATA);
+    }
+ catch (    FrameworkException fex) {
+      fex.printStackTrace();
+    }
   }
  else   if (object instanceof RelationshipDataContainer) {
     final RelationshipDataContainer receivedRelationshipData=(RelationshipDataContainer)object;
-    Command transactionCommand=Services.command(securityContext,TransactionCommand.class);
-    transactionCommand.execute(new StructrTransaction(){
-      @Override public Object execute() throws Throwable {
-        storeRelationship(receivedRelationshipData);
-        return null;
+    try {
+      Command transactionCommand=Services.command(securityContext,TransactionCommand.class);
+      transactionCommand.execute(new StructrTransaction(){
+        @Override public Object execute() throws FrameworkException {
+          storeRelationship(receivedRelationshipData);
+          return null;
+        }
       }
-    }
 );
-    connection.sendTCP(CloudService.ACK_DATA);
+      connection.sendTCP(CloudService.ACK_DATA);
+    }
+ catch (    FrameworkException fex) {
+      fex.printStackTrace();
+    }
   }
 }

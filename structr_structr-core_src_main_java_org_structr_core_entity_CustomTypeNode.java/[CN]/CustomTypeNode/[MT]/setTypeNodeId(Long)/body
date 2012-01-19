@@ -1,13 +1,18 @@
 {
-  Command findNode=Services.command(securityContext,FindNodeCommand.class);
-  NodeType newTypeNode=(NodeType)findNode.execute(value);
-  List<StructrRelationship> templateRels=this.getOutgoingRelationships(RelType.TYPE);
-  Command delRel=Services.command(securityContext,DeleteRelationshipCommand.class);
-  if (templateRels != null) {
-    for (    StructrRelationship r : templateRels) {
-      delRel.execute(r);
+  try {
+    Command findNode=Services.command(securityContext,FindNodeCommand.class);
+    NodeType newTypeNode=(NodeType)findNode.execute(value);
+    List<StructrRelationship> templateRels=this.getOutgoingRelationships(RelType.TYPE);
+    Command delRel=Services.command(securityContext,DeleteRelationshipCommand.class);
+    if (templateRels != null) {
+      for (      StructrRelationship r : templateRels) {
+        delRel.execute(r);
+      }
     }
+    Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
+    createRel.execute(this,newTypeNode,RelType.TYPE);
   }
-  Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
-  createRel.execute(this,newTypeNode,RelType.TYPE);
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"Unable to set type node id",fex);
+  }
 }

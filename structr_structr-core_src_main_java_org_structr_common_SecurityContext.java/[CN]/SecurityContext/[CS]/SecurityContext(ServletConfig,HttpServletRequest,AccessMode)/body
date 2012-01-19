@@ -2,5 +2,10 @@
   this.attrs=Collections.synchronizedMap(new LinkedHashMap<String,Object>());
   this.accessMode=accessMode;
   this.request=request;
-  this.authenticator=(Authenticator)Services.command(null,AuthenticatorCommand.class).execute(config);
+  try {
+    this.authenticator=(Authenticator)Services.command(null,AuthenticatorCommand.class).execute(config);
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+  }
 }

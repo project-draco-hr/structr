@@ -7,25 +7,30 @@
       stdOut.append("Cannot delete current node");
     }
  else {
-      Object findNodeResult=Services.command(securityContext,FindNodeCommand.class).execute(currentNode,param);
-      if (findNodeResult != null) {
-        if (findNodeResult instanceof Collection) {
-          toDelete.addAll((Collection)findNodeResult);
-        }
- else         if (findNodeResult instanceof AbstractNode) {
-          toDelete.add((AbstractNode)findNodeResult);
-        }
-      }
-      for (      AbstractNode node : toDelete) {
-        try {
-          deleteCommand.execute(node,currentNode,recursive,securityContext.getUser());
-          if (deleteCommand.getExitCode().equals(Command.exitCode.FAILURE)) {
-            stdOut.append(deleteCommand.getErrorMessage());
+      try {
+        Object findNodeResult=Services.command(securityContext,FindNodeCommand.class).execute(currentNode,param);
+        if (findNodeResult != null) {
+          if (findNodeResult instanceof Collection) {
+            toDelete.addAll((Collection)findNodeResult);
+          }
+ else           if (findNodeResult instanceof AbstractNode) {
+            toDelete.add((AbstractNode)findNodeResult);
           }
         }
- catch (        Throwable t) {
-          stdOut.append(t.getMessage());
+        for (        AbstractNode node : toDelete) {
+          try {
+            deleteCommand.execute(node,currentNode,recursive,securityContext.getUser());
+            if (deleteCommand.getExitCode().equals(Command.exitCode.FAILURE)) {
+              stdOut.append(deleteCommand.getErrorMessage());
+            }
+          }
+ catch (          Throwable t) {
+            stdOut.append(t.getMessage());
+          }
         }
+      }
+ catch (      FrameworkException fex) {
+        stdOut.append(fex.getMessage());
       }
     }
   }

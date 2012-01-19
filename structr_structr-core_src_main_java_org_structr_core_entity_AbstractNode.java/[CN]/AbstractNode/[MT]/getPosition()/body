@@ -8,7 +8,12 @@
  else     if (p instanceof Integer) {
       try {
         pos=Long.parseLong(p.toString());
-        setPosition(pos);
+        try {
+          setPosition(pos);
+        }
+ catch (        FrameworkException fex) {
+          logger.log(Level.WARNING,"Unable to set position property",fex);
+        }
       }
  catch (      NumberFormatException e) {
         pos=getId();
@@ -18,7 +23,12 @@
  else     if (p instanceof String) {
       try {
         pos=Long.parseLong(((String)p));
-        setPosition(pos);
+        try {
+          setPosition(pos);
+        }
+ catch (        FrameworkException fex) {
+          logger.log(Level.WARNING,"Unable to set position property",fex);
+        }
       }
  catch (      NumberFormatException e) {
         pos=getId();
@@ -31,6 +41,11 @@
   }
   long id=getId();
   logger.log(Level.FINE,"No position property in database, writing id {0} to database",id);
-  setPosition(id);
+  try {
+    setPosition(id);
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"Unable to set position property",fex);
+  }
   return id;
 }

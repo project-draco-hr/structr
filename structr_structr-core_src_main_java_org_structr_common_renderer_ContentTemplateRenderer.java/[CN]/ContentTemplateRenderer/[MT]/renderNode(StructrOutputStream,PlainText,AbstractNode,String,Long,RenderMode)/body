@@ -6,8 +6,13 @@
       StringWriter content=new StringWriter();
       currentNode.replaceByFreeMarker(out.getRequest(),html,content,startNode,editUrl,editNodeId);
       StringBuilder content2=new StringBuilder(content.toString());
-      currentNode.replaceBySubnodes(out.getRequest(),content2,startNode,editUrl,editNodeId);
-      out.append(content2.toString());
+      try {
+        currentNode.replaceBySubnodes(out.getRequest(),content2,startNode,editUrl,editNodeId);
+        out.append(content2.toString());
+      }
+ catch (      FrameworkException fex) {
+        logger.log(Level.WARNING,"Unable to replace content",fex);
+      }
     }
   }
 }

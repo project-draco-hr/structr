@@ -1,12 +1,17 @@
 {
   boolean ret=true;
   int count=0;
-  for (  AbstractNode node : nodeList) {
-    for (    NodeAttribute attr : attributes) {
-      node.setProperty(attr.getKey(),attr.getValue());
+  try {
+    for (    AbstractNode node : nodeList) {
+      for (      NodeAttribute attr : attributes) {
+        node.setProperty(attr.getKey(),attr.getValue());
+      }
+      count++;
     }
-    count++;
+    stdOut.append("set: ").append(count).append(" nodes modified");
   }
-  stdOut.append("set: ").append(count).append(" nodes modified");
+ catch (  FrameworkException fex) {
+    stdOut.append(fex.getMessage());
+  }
   return (ret);
 }

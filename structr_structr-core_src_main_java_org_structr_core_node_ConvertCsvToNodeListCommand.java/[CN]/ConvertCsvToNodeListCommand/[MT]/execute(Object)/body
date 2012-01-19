@@ -55,7 +55,7 @@
     final Command createNode=Services.command(securityContext,CreateNodeCommand.class);
     final Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
     final NodeList<AbstractNode> nodeListNode=(NodeList<AbstractNode>)transactionCommand.execute(new StructrTransaction(){
-      @Override public Object execute() throws Throwable {
+      @Override public Object execute() throws FrameworkException {
         NodeList<AbstractNode> result=(NodeList)createNode.execute(userCopy,new NodeAttribute(AbstractNode.Key.type.name(),NodeList.class.getSimpleName()),new NodeAttribute(AbstractNode.Key.name.name(),sourceNodeCopy.getName() + " List"));
         createRel.execute(sourceNodeCopy,result,RelType.HAS_CHILD);
         return result;
@@ -85,7 +85,7 @@
  while (line != null);
     reader.close();
     transactionCommand.execute(new StructrTransaction(){
-      @Override public Object execute() throws Throwable {
+      @Override public Object execute() throws FrameworkException {
         List<AbstractNode> nodesToAdd=new LinkedList<AbstractNode>();
         for (        List<NodeAttribute> attrList : creationList) {
           nodesToAdd.add((AbstractNode)createNode.execute(attrList,false));

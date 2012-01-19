@@ -3,8 +3,13 @@
   Command nodeFactory=Services.command(securityContext,NodeFactoryCommand.class);
   List<StructrRelationship> rels=getIncomingChildRelationships();
   for (  StructrRelationship r : rels) {
-    AbstractNode s=(AbstractNode)nodeFactory.execute(r.getStartNode());
-    nodes.add(s);
+    try {
+      AbstractNode s=(AbstractNode)nodeFactory.execute(r.getStartNode());
+      nodes.add(s);
+    }
+ catch (    FrameworkException fex) {
+      logger.log(Level.WARNING,"Unable to instantiate node",fex);
+    }
   }
   return nodes;
 }

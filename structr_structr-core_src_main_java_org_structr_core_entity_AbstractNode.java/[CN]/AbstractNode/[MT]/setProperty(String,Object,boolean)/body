@@ -2,14 +2,14 @@
   final Class type=this.getClass();
   if (key == null) {
     logger.log(Level.SEVERE,"Tried to set property with null key (action was denied)");
-    throw new IllegalArgumentException("A property key may not be null.");
+    throw new FrameworkException(type.getSimpleName(),new NullArgumentToken());
   }
   if (EntityContext.isReadOnlyProperty(type,key) || (EntityContext.isWriteOnceProperty(type,key) && (dbNode != null) && dbNode.hasProperty(key))) {
     if (readOnlyPropertiesUnlocked) {
       readOnlyPropertiesUnlocked=false;
     }
  else {
-      throw new IllegalArgumentException("Property '".concat(key).concat("' is read-only."));
+      throw new FrameworkException(type.getSimpleName(),new ReadOnlyPropertyToken(key));
     }
   }
   PropertyGroup propertyGroup=EntityContext.getPropertyGroup(type,key);
@@ -19,18 +19,8 @@
   }
   DirectedRelationship rel=EntityContext.getDirectedRelationship(type,key);
   if (rel != null) {
-    try {
-      GraphObject graphObject=rel.getNotion().getAdapterForSetter(securityContext).adapt(value);
-      rel.createRelationship(securityContext,this,graphObject);
-      return;
-    }
- catch (    IllegalArgumentException iaex) {
-      throw iaex;
-    }
-catch (    Throwable t) {
-      t.printStackTrace();
-      throw new IllegalArgumentException(t.getMessage());
-    }
+    GraphObject graphObject=rel.getNotion().getAdapterForSetter(securityContext).adapt(value);
+    rel.createRelationship(securityContext,this,graphObject);
   }
  else {
     PropertyConverter converter=EntityContext.getPropertyConverter(securityContext,type,key);
@@ -52,7 +42,7 @@ catch (    Throwable t) {
     }
  else {
       StructrTransaction transaction=new StructrTransaction(){
-        @Override public Object execute() throws Throwable {
+        @Override public Object execute() throws FrameworkException {
           try {
             if (convertedValue == null) {
               dbNode.removeProperty(key);
@@ -79,9 +69,6 @@ catch (    Throwable t) {
       }
 ;
       Services.command(securityContext,TransactionCommand.class).execute(transaction);
-      if (transaction.getCause() != null) {
-        logger.log(Level.WARNING,"Error while setting property",transaction.getCause());
-      }
     }
   }
 }

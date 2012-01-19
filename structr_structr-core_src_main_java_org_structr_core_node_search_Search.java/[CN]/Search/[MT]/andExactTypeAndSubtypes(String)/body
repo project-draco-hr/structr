@@ -1,16 +1,21 @@
 {
   List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
   attrs.add(Search.orExactType(searchString));
-  Map<String,Class> entities=(Map)Services.command(SecurityContext.getSuperUserInstance(),GetEntitiesCommand.class).execute();
-  Class parentClass=entities.get(searchString);
-  if (parentClass == null) {
-    return attrs;
-  }
-  for (  Map.Entry<String,Class> entity : entities.entrySet()) {
-    Class entityClass=entity.getValue();
-    if (parentClass.isAssignableFrom(entityClass)) {
-      attrs.add(Search.orExactType(entity.getKey()));
+  try {
+    Map<String,Class> entities=(Map)Services.command(SecurityContext.getSuperUserInstance(),GetEntitiesCommand.class).execute();
+    Class parentClass=entities.get(searchString);
+    if (parentClass == null) {
+      return attrs;
     }
+    for (    Map.Entry<String,Class> entity : entities.entrySet()) {
+      Class entityClass=entity.getValue();
+      if (parentClass.isAssignableFrom(entityClass)) {
+        attrs.add(Search.orExactType(entity.getKey()));
+      }
+    }
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"Unable to add subtypes to search attributes",fex);
   }
   return attrs;
 }

@@ -12,16 +12,18 @@
     if (key.equals(Key.visibleToPublicUsers.name()) && dbNode.hasProperty("public")) {
       final Object oldValue=dbNode.getProperty("public");
       StructrTransaction transaction=new StructrTransaction(){
-        @Override public Object execute() throws Throwable {
+        @Override public Object execute() throws FrameworkException {
           dbNode.setProperty(Key.visibleToPublicUsers.name(),oldValue);
           dbNode.removeProperty("public");
           return null;
         }
       }
 ;
-      Services.command(securityContext,TransactionCommand.class).execute(transaction);
-      if (transaction.getCause() != null) {
-        logger.log(Level.WARNING,"Error while setting property",transaction.getCause());
+      try {
+        Services.command(securityContext,TransactionCommand.class).execute(transaction);
+      }
+ catch (      FrameworkException fex) {
+        logger.log(Level.WARNING,"Error while setting property",fex);
       }
     }
     if ((key != null) && (dbNode != null) && dbNode.hasProperty(key)) {
@@ -39,7 +41,12 @@ case OneToMany:
       break;
 case OneToOne:
 case ManyToOne:
-    value=notion.getAdapterForGetter(securityContext).adapt(rel.getRelatedNode(securityContext,this));
+    try {
+      value=notion.getAdapterForGetter(securityContext).adapt(rel.getRelatedNode(securityContext,this));
+    }
+ catch (    FrameworkException fex) {
+      logger.log(Level.WARNING,"Error while adapting related node",fex);
+    }
   break;
 }
 }

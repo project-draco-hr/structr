@@ -1,3 +1,9 @@
 {
-  return ((StructrRelationship)Services.command(securityContext,CreateRelationshipCommand.class).execute(startNode,endNode,relType));
+  try {
+    return ((StructrRelationship)Services.command(securityContext,CreateRelationshipCommand.class).execute(startNode,endNode,relType));
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"Unable to link nodes",fex);
+  }
+  return null;
 }

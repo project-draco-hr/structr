@@ -1,4 +1,10 @@
 {
   if (nodeId == null)   return null;
-  return (AbstractNode)Services.command(securityContext,FindNodeCommand.class).execute(nodeId);
+  try {
+    return (AbstractNode)Services.command(securityContext,FindNodeCommand.class).execute(nodeId);
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+  }
+  return null;
 }

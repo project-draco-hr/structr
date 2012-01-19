@@ -14,9 +14,14 @@
       if (inContent) {
         searchAttrs.add(Search.orContent(searchString));
       }
-      Command search=Services.command(securityContext,SearchNodeCommand.class);
-      List<AbstractNode> result=(List<AbstractNode>)search.execute(null,false,true,searchAttrs);
-      return result;
+      try {
+        Command search=Services.command(securityContext,SearchNodeCommand.class);
+        List<AbstractNode> result=(List<AbstractNode>)search.execute(null,false,true,searchAttrs);
+        return result;
+      }
+ catch (      FrameworkException fex) {
+        fex.printStackTrace();
+      }
     }
   }
   return null;

@@ -4,21 +4,26 @@
   Agent agent=null;
   Class agentClass=agentClassCache.get(taskClass);
   if (agentClass == null) {
-    Map<String,Class> agentClassesMap=(Map<String,Class>)Services.command(securityContext,GetAgentsCommand.class).execute();
-    for (    String className : agentClassesMap.keySet()) {
-      Class supportedAgentClass=agentClassesMap.get(className);
-      try {
-        Agent supportedAgent=(Agent)supportedAgentClass.newInstance();
-        Class supportedTaskClass=supportedAgent.getSupportedTaskType();
-        if (supportedTaskClass.equals(taskClass)) {
-          agentClass=supportedAgentClass;
+    try {
+      Map<String,Class> agentClassesMap=(Map<String,Class>)Services.command(securityContext,GetAgentsCommand.class).execute();
+      for (      String className : agentClassesMap.keySet()) {
+        Class supportedAgentClass=agentClassesMap.get(className);
+        try {
+          Agent supportedAgent=(Agent)supportedAgentClass.newInstance();
+          Class supportedTaskClass=supportedAgent.getSupportedTaskType();
+          if (supportedTaskClass.equals(taskClass)) {
+            agentClass=supportedAgentClass;
+          }
+          agentClassCache.put(supportedTaskClass,supportedAgentClass);
         }
-        agentClassCache.put(supportedTaskClass,supportedAgentClass);
+ catch (        IllegalAccessException iaex) {
+        }
+catch (        InstantiationException itex) {
+        }
       }
- catch (      IllegalAccessException iaex) {
-      }
-catch (      InstantiationException itex) {
-      }
+    }
+ catch (    FrameworkException fex) {
+      fex.printStackTrace();
     }
   }
   if (agentClass != null) {

@@ -1,18 +1,23 @@
 {
-  if (!(Services.isAvailable(LogService.class))) {
-    return;
+  try {
+    if (!(Services.isAvailable(LogService.class))) {
+      return;
+    }
+    User user=securityContext != null ? securityContext.getUser() : null;
+    Date now=new Date();
+    Activity activity=new Activity();
+    activity.setProperty(AbstractNode.Key.type.name(),Activity.class.getSimpleName());
+    if (user != null) {
+      activity.setProperty(AbstractNode.Key.name.name(),"User: " + user.getName() + ", Action: "+ action+ ", Date: "+ now);
+    }
+    activity.setProperty(Activity.Key.sessionId.name(),sessionId);
+    activity.setProperty(Activity.Key.startTimestamp.name(),now);
+    activity.setProperty(Activity.Key.endTimestamp.name(),now);
+    activity.setUser(user);
+    getSession(sessionId).setLastActivity(activity);
+    Services.command(securityContext,LogCommand.class).execute(activity);
   }
-  User user=securityContext != null ? securityContext.getUser() : null;
-  Date now=new Date();
-  Activity activity=new Activity();
-  activity.setProperty(AbstractNode.Key.type.name(),Activity.class.getSimpleName());
-  if (user != null) {
-    activity.setProperty(AbstractNode.Key.name.name(),"User: " + user.getName() + ", Action: "+ action+ ", Date: "+ now);
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
   }
-  activity.setProperty(Activity.Key.sessionId.name(),sessionId);
-  activity.setProperty(Activity.Key.startTimestamp.name(),now);
-  activity.setProperty(Activity.Key.endTimestamp.name(),now);
-  activity.setUser(user);
-  getSession(sessionId).setLastActivity(activity);
-  Services.command(securityContext,LogCommand.class).execute(activity);
 }

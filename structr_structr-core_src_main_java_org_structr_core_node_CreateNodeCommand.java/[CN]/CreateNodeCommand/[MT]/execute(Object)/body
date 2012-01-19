@@ -29,17 +29,8 @@
     logger.log(Level.FINE,"Node {0} created",node.getId());
     node.setProperty(AbstractNode.Key.type.name(),nodeType);
     attrs.remove(AbstractNode.Key.type.name());
-    ErrorBuffer errorBuffer=new ErrorBuffer();
     for (    Entry<String,Object> attr : attrs.entrySet()) {
-      try {
-        node.setProperty(attr.getKey(),attr.getValue());
-      }
- catch (      Throwable t) {
-        errorBuffer.add(t.getMessage());
-      }
-    }
-    if (errorBuffer.hasError()) {
-      throw new IllegalArgumentException(errorBuffer.toString());
+      node.setProperty(attr.getKey(),attr.getValue());
     }
     attrs.clear();
     if ((user != null) && !(user instanceof SuperUser)) {

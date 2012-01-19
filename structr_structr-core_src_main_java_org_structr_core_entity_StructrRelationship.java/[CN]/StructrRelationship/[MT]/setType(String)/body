@@ -1,18 +1,23 @@
 {
   if (type != null) {
-    Command transacted=Services.command(securityContext,TransactionCommand.class);
-    transacted.execute(new StructrTransaction(){
-      @Override public Object execute() throws Throwable {
-        Command deleteRel=Services.command(securityContext,DeleteRelationshipCommand.class);
-        Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
-        Command nodeFactory=Services.command(securityContext,NodeFactoryCommand.class);
-        AbstractNode startNode=(AbstractNode)nodeFactory.execute(getStartNode());
-        AbstractNode endNode=(AbstractNode)nodeFactory.execute(getEndNode());
-        deleteRel.execute(dbRelationship);
-        dbRelationship=((StructrRelationship)createRel.execute(type,startNode,endNode)).getRelationship();
-        return (null);
+    try {
+      Command transacted=Services.command(securityContext,TransactionCommand.class);
+      transacted.execute(new StructrTransaction(){
+        @Override public Object execute() throws FrameworkException {
+          Command deleteRel=Services.command(securityContext,DeleteRelationshipCommand.class);
+          Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
+          Command nodeFactory=Services.command(securityContext,NodeFactoryCommand.class);
+          AbstractNode startNode=(AbstractNode)nodeFactory.execute(getStartNode());
+          AbstractNode endNode=(AbstractNode)nodeFactory.execute(getEndNode());
+          deleteRel.execute(dbRelationship);
+          dbRelationship=((StructrRelationship)createRel.execute(type,startNode,endNode)).getRelationship();
+          return (null);
+        }
       }
-    }
 );
+    }
+ catch (    FrameworkException fex) {
+      logger.log(Level.WARNING,"Unable to set relationship type",fex);
+    }
   }
 }

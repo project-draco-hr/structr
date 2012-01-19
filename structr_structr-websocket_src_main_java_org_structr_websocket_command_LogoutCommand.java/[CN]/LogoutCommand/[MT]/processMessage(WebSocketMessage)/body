@@ -1,7 +1,12 @@
 {
   User user=getWebSocket().getCurrentUser();
   if (user != null) {
-    user.setProperty(User.Key.sessionId,null);
+    try {
+      user.setProperty(User.Key.sessionId,null);
+    }
+ catch (    FrameworkException fex) {
+      fex.printStackTrace();
+    }
     getWebSocket().setAuthenticated(null);
   }
 }

@@ -2,14 +2,19 @@
   List<AbstractNode> nodes=new LinkedList<AbstractNode>();
   AbstractNode parentNode=getParentNode();
   if (parentNode != null) {
-    Command nodeFactory=Services.command(securityContext,NodeFactoryCommand.class);
-    Command relsCommand=Services.command(securityContext,NodeRelationshipsCommand.class);
-    List<StructrRelationship> rels=(List<StructrRelationship>)relsCommand.execute(parentNode,RelType.HAS_CHILD,Direction.OUTGOING);
-    for (    StructrRelationship r : rels) {
-      AbstractNode s=(AbstractNode)nodeFactory.execute(r.getEndNode());
-      if (securityContext.isAllowed(s,Permission.Read)) {
-        nodes.add(s);
+    try {
+      Command nodeFactory=Services.command(securityContext,NodeFactoryCommand.class);
+      Command relsCommand=Services.command(securityContext,NodeRelationshipsCommand.class);
+      List<StructrRelationship> rels=(List<StructrRelationship>)relsCommand.execute(parentNode,RelType.HAS_CHILD,Direction.OUTGOING);
+      for (      StructrRelationship r : rels) {
+        AbstractNode s=(AbstractNode)nodeFactory.execute(r.getEndNode());
+        if (securityContext.isAllowed(s,Permission.Read)) {
+          nodes.add(s);
+        }
       }
+    }
+ catch (    FrameworkException fex) {
+      logger.log(Level.WARNING,"Unable to get sibling nodes",fex);
     }
   }
   return nodes;

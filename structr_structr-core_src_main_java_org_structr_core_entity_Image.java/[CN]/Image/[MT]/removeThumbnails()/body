@@ -7,8 +7,13 @@
       logger.log(Level.SEVERE,"Attempted to remove me as thumbnail!!");
       continue;
     }
-    deleteRelationship.execute(s);
-    deleteNode.execute(thumbnail,new SuperUser());
+    try {
+      deleteRelationship.execute(s);
+      deleteNode.execute(thumbnail,new SuperUser());
+    }
+ catch (    FrameworkException fex) {
+      logger.log(Level.WARNING,"Unable to remove thumbnail",fex);
+    }
   }
   thumbnailRelationships=null;
 }

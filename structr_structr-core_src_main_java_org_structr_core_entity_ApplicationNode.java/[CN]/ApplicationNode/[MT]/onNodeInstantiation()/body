@@ -1,12 +1,17 @@
 {
   if (!getNode().hasRelationship(Direction.OUTGOING)) {
-    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-      @Override public Object execute() throws Throwable {
-        buildTestCase();
-        return (null);
+    try {
+      Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+        @Override public Object execute() throws FrameworkException {
+          buildTestCase();
+          return (null);
+        }
       }
-    }
 );
-    this.setProperty("type","Folder");
+      this.setProperty("type","Folder");
+    }
+ catch (    FrameworkException fex) {
+      logger.log(Level.WARNING,"Unable to build test case",fex);
+    }
   }
 }

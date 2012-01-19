@@ -1,11 +1,16 @@
 {
   if (target != null) {
-    AbstractNode newLocation=(AbstractNode)Services.command(securityContext,FindNodeCommand.class).execute(currentNode,target);
-    if (newLocation != null) {
-      for (      Callback callback : callbacks) {
-        callback.callback(newLocation.getId());
+    try {
+      AbstractNode newLocation=(AbstractNode)Services.command(securityContext,FindNodeCommand.class).execute(currentNode,target);
+      if (newLocation != null) {
+        for (        Callback callback : callbacks) {
+          callback.callback(newLocation.getId());
+        }
+        return (true);
       }
-      return (true);
+    }
+ catch (    FrameworkException fex) {
+      fex.printStackTrace();
     }
   }
  else {

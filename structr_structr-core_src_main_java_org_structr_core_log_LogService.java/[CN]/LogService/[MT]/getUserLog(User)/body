@@ -11,17 +11,22 @@
         return userLogNodeList;
       }
     }
-    userLogNodeList=(LogNodeList)Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-      @Override public Object execute() throws Throwable {
-        Command createNode=Services.command(securityContext,CreateNodeCommand.class);
-        Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
-        LogNodeList<Activity> newLogNodeList=(LogNodeList<Activity>)createNode.execute(new NodeAttribute(AbstractNode.Key.type.name(),LogNodeList.class.getSimpleName()),new NodeAttribute(AbstractNode.Key.name.name(),user.getName() + "'s Activity Log"));
-        createRel.execute(user,newLogNodeList,RelType.HAS_CHILD);
-        return (newLogNodeList);
+    try {
+      userLogNodeList=(LogNodeList)Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+        @Override public Object execute() throws FrameworkException {
+          Command createNode=Services.command(securityContext,CreateNodeCommand.class);
+          Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
+          LogNodeList<Activity> newLogNodeList=(LogNodeList<Activity>)createNode.execute(new NodeAttribute(AbstractNode.Key.type.name(),LogNodeList.class.getSimpleName()),new NodeAttribute(AbstractNode.Key.name.name(),user.getName() + "'s Activity Log"));
+          createRel.execute(user,newLogNodeList,RelType.HAS_CHILD);
+          return (newLogNodeList);
+        }
       }
-    }
 );
-    loggerCache.put(user,userLogNodeList);
+      loggerCache.put(user,userLogNodeList);
+    }
+ catch (    FrameworkException fex) {
+      logger.log(Level.WARNING,"Unable to create user log node list",fex);
+    }
   }
   return userLogNodeList;
 }

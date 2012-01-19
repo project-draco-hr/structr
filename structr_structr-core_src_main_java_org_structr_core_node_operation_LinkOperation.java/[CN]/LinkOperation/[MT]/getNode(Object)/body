@@ -5,15 +5,20 @@
     throw new InvalidParameterException("LINK does not take multiple arguments");
   }
  else {
-    Object findNodeReturnValue=findNodeCommand.execute(currentNode,parameter);
-    if (findNodeReturnValue instanceof Collection) {
-      throw new InvalidParameterException("LINK does not support wildcards");
-    }
- else     if (findNodeReturnValue instanceof AbstractNode) {
-      ret=(AbstractNode)findNodeReturnValue;
-    }
+    try {
+      Object findNodeReturnValue=findNodeCommand.execute(currentNode,parameter);
+      if (findNodeReturnValue instanceof Collection) {
+        throw new InvalidParameterException("LINK does not support wildcards");
+      }
+ else       if (findNodeReturnValue instanceof AbstractNode) {
+        ret=(AbstractNode)findNodeReturnValue;
+      }
  else {
-      throw new InvalidParameterException("Node " + parameter.toString() + " not found");
+        throw new InvalidParameterException("Node " + parameter.toString() + " not found");
+      }
+    }
+ catch (    FrameworkException fex) {
+      fex.printStackTrace();
     }
   }
   return (ret);

@@ -35,13 +35,11 @@
     response.getWriter().flush();
     response.getWriter().close();
   }
-catch (  IllegalArgumentException illegalArgumentException) {
-    handleValidationError(illegalArgumentException,response);
-  }
-catch (  PathException pathException) {
-    int code=pathException.getStatus();
-    response.setStatus(code);
-    response.getWriter().append(jsonError(code,pathException.getMessage()));
+catch (  FrameworkException frameworkException) {
+    response.setStatus(frameworkException.getStatus());
+    gson.toJson(frameworkException,response.getWriter());
+    response.getWriter().flush();
+    response.getWriter().close();
   }
 catch (  JsonSyntaxException jsex) {
     logger.log(Level.WARNING,"JsonSyntaxException in GET",jsex);

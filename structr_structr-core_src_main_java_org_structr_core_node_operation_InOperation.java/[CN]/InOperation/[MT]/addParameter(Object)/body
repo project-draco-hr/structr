@@ -7,12 +7,17 @@
       parentNodeId=Long.parseLong(parameter.toString());
     }
  catch (    Throwable t) {
-      AbstractNode findNode=(AbstractNode)Services.command(securityContext,FindNodeCommand.class).execute(parameter);
-      if (findNode != null) {
-        parentNodeId=findNode.getId();
-      }
+      try {
+        AbstractNode findNode=(AbstractNode)Services.command(securityContext,FindNodeCommand.class).execute(parameter);
+        if (findNode != null) {
+          parentNodeId=findNode.getId();
+        }
  else {
-        parentNodeId=-1;
+          parentNodeId=-1;
+        }
+      }
+ catch (      FrameworkException fex) {
+        fex.printStackTrace();
       }
     }
     if (parentNodeId == -1) {

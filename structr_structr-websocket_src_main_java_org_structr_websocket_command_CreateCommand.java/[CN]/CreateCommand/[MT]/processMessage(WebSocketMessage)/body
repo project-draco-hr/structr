@@ -1,16 +1,12 @@
 {
   StructrTransaction transaction=new StructrTransaction(){
-    @Override public Object execute() throws Throwable {
+    @Override public Object execute() throws FrameworkException {
       return Services.command(SecurityContext.getSuperUserInstance(),CreateNodeCommand.class).execute(webSocketData.getData());
     }
   }
 ;
-  AbstractNode newNode=(AbstractNode)Services.command(SecurityContext.getSuperUserInstance(),TransactionCommand.class).execute(transaction);
-  if (transaction.getCause() != null) {
-    logger.log(Level.WARNING,"Could not create node.",transaction.getCause());
-    getWebSocket().send(MessageBuilder.status().code(400).message(transaction.getCause().getMessage()).build(),true);
-  }
- else {
+  try {
+    AbstractNode newNode=(AbstractNode)Services.command(SecurityContext.getSuperUserInstance(),TransactionCommand.class).execute(transaction);
     if (newNode instanceof File) {
       File fileNode=(File)newNode;
       String uuid=newNode.getStringProperty(AbstractNode.Key.uuid);
@@ -18,5 +14,9 @@
       fileNode.setRelativeFilePath(directory + "/" + uuid);
       getWebSocket().handleFileCreation((File)newNode);
     }
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"Could not create node.",fex);
+    getWebSocket().send(MessageBuilder.status().code(fex.getStatus()).message(fex.getMessage()).build(),true);
   }
 }

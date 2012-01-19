@@ -4,7 +4,12 @@
     throw new UnsupportedArgumentError("Source node is null!");
   }
   if (sourceNode instanceof CsvFile) {
-    Services.command(securityContext,ConvertCsvToNodeListCommand.class).execute(user,sourceNode,targetClass);
+    try {
+      Services.command(securityContext,ConvertCsvToNodeListCommand.class).execute(user,sourceNode,targetClass);
+    }
+ catch (    FrameworkException fex) {
+      fex.printStackTrace();
+    }
   }
  else {
     throw new UnsupportedArgumentError("Source node type " + sourceNode.getType() + " not supported. This agent can convert only CSV files.");

@@ -1,13 +1,19 @@
 {
-  Boolean returnValue=(Boolean)transaction.execute(new StructrTransaction(){
-    @Override public Object execute() throws Throwable {
-      boolean ret=false;
-      for (      AbstractNode node : nodes) {
-        ret|=appendNodeToList(node.getNode());
+  try {
+    Boolean returnValue=(Boolean)transaction.execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        boolean ret=false;
+        for (        AbstractNode node : nodes) {
+          ret|=appendNodeToList(node.getNode());
+        }
+        return (ret);
       }
-      return (ret);
     }
-  }
 );
-  return (returnValue.booleanValue());
+    return (returnValue.booleanValue());
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"Unable to add nodes to this list",fex);
+  }
+  return false;
 }

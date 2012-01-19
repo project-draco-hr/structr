@@ -1,26 +1,16 @@
 {
-  StringBuilder msgBuffer=new StringBuilder();
   if (source instanceof PropertySet) {
     List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
     for (    NodeAttribute attr : ((PropertySet)source).getAttributes()) {
       String key=attr.getKey();
       String value=(String)attr.getValue();
       attrs.add(Search.andExactProperty(key,value));
-      msgBuffer.append(key).append(" = '").append(value).append("', ");
     }
     List<AbstractNode> nodes=(List<AbstractNode>)Services.command(securityContext,SearchNodeCommand.class).execute(null,false,false,attrs);
-    ErrorBuffer buf=new ErrorBuffer();
-    int size=nodes.size();
-switch (size) {
-case 0:
-      buf.add(type.getSimpleName()," with ",msgBuffer," not found.");
-    break;
-case 1:
-  return nodes.get(0);
-default :
-buf.add(type.getSimpleName()," with ",msgBuffer," is ambiguous.");
-}
-throw new IllegalArgumentException(buf.toString());
-}
-return null;
+    if (nodes.size() == 1) {
+      return nodes.get(0);
+    }
+    throw new FrameworkException(type.getSimpleName(),new PropertiesNotFoundToken(attrs));
+  }
+  return null;
 }

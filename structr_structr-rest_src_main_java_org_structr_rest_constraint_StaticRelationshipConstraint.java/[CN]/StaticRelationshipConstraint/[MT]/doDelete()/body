@@ -7,7 +7,7 @@
       if (startNode != null) {
         final List<StructrRelationship> rels=startNode.getRelationships(staticRel.getRelType(),staticRel.getDirection());
         StructrTransaction transaction=new StructrTransaction(){
-          @Override public Object execute() throws Throwable {
+          @Override public Object execute() throws FrameworkException {
             for (            StructrRelationship rel : rels) {
               rel.delete(securityContext);
             }
@@ -16,9 +16,6 @@
         }
 ;
         Services.command(securityContext,TransactionCommand.class).execute(transaction);
-        if (transaction.getCause() != null) {
-          throw transaction.getCause();
-        }
       }
     }
   }

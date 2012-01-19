@@ -5,7 +5,7 @@
     for (    Entry<String,JsonElement> entry : obj.entrySet()) {
       String key=entry.getKey();
       JsonElement elem=entry.getValue();
-      if (idProperty != null && "id".equals(key)) {
+      if ((idProperty != null) && "id".equals(key)) {
         key=idProperty;
       }
       if (elem.isJsonNull()) {
@@ -15,7 +15,7 @@
         wrapper.add(key,deserializeFlatNameValue(elem,typeOfT,context));
       }
  else       if (elem.isJsonPrimitive()) {
-        wrapper.add(key,elem.getAsString());
+        wrapper.add(key,fromPrimitive((JsonPrimitive)elem));
       }
     }
   }

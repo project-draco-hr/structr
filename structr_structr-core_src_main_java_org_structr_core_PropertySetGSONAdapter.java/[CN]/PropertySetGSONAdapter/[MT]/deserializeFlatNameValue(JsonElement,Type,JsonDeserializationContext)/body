@@ -14,6 +14,16 @@
  else       if (elem.isJsonObject()) {
         wrapper.add(key,deserializeFlatNameValue(elem,typeOfT,context));
       }
+ else       if (elem.isJsonArray()) {
+        JsonArray array=elem.getAsJsonArray();
+        List list=new LinkedList();
+        for (        JsonElement element : array) {
+          if (element.isJsonPrimitive()) {
+            list.add(fromPrimitive((element.getAsJsonPrimitive())));
+          }
+        }
+        wrapper.add(key,list);
+      }
  else       if (elem.isJsonPrimitive()) {
         wrapper.add(key,fromPrimitive((JsonPrimitive)elem));
       }

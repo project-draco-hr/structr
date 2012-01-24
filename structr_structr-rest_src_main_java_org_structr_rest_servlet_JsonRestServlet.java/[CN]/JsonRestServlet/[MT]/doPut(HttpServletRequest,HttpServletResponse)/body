@@ -8,10 +8,7 @@
     if (securityContext != null) {
       List<ResourceConstraint> chain=parsePath(securityContext,request);
       ResourceConstraint resourceConstraint=optimizeConstraintChain(chain);
-      Map<String,Object> properties=new LinkedHashMap<String,Object>();
-      for (      NodeAttribute attr : propertySet.getAttributes()) {
-        properties.put(attr.getKey(),attr.getValue());
-      }
+      Map<String,Object> properties=convertPropertySetToMap(propertySet);
       RestMethodResult result=resourceConstraint.doPut(properties);
       result.commitResponse(gson,response);
     }

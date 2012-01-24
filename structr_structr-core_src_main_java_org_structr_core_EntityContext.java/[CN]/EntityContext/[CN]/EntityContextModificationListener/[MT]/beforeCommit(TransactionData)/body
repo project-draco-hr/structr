@@ -43,11 +43,11 @@
       AbstractNode entity=factory.createNode(securityContext,entry.entity());
       String key=entry.key();
       Object value=entry.value();
-      PropertyValidator validator=EntityContext.getPropertyValidator(securityContext,entity.getClass(),key);
-      if (validator != null) {
-        logger.log(Level.FINE,"Using validator of type {0} for property {1}",new Object[]{validator.getClass().getSimpleName(),key});
-        Value parameter=EntityContext.getPropertyValidationParameter(entity.getClass(),key);
-        hasError|=!(validator.isValid(entity,key,value,parameter,errorBuffer));
+      Set<PropertyValidator> validators=EntityContext.getPropertyValidators(securityContext,entity.getClass(),key);
+      if (validators != null) {
+        for (        PropertyValidator validator : validators) {
+          hasError|=!(validator.isValid(entity,key,value,errorBuffer));
+        }
       }
       hasError|=propertyModified(securityContext,transactionKey,errorBuffer,entity,key,entry.previouslyCommitedValue(),value);
       indexCommand.execute(entity,key);

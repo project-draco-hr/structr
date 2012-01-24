@@ -1,0 +1,11 @@
+{
+  Map<String,Set<PropertyValidator>> validatorMap=null;
+  Set<PropertyValidator> validators=null;
+  Class localType=type;
+  while ((validators == null) && !localType.equals(Object.class)) {
+    validatorMap=getPropertyValidatorMapForType(localType);
+    validators=validatorMap.get(propertyKey);
+    localType=localType.getSuperclass();
+  }
+  return validators;
+}

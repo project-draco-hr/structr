@@ -2,32 +2,23 @@
   StructrTransaction transaction=new StructrTransaction(){
     @Override public Object execute() throws FrameworkException {
       AbstractNode sourceNode=typedIdConstraint.getIdConstraint().getNode();
-      DirectedRelationship rel=EntityContext.getDirectedRelationship(sourceNode.getClass(),typeConstraint.getRawType());
-      if (rel != null) {
-        Adapter<Object,GraphObject> adapter=rel.getNotion().getAdapterForSetter(securityContext);
-        for (        Entry<String,Object> entry : propertySet.entrySet()) {
-          Object value=entry.getValue();
-          if (value instanceof Collection) {
-            Collection collection=(Collection)value;
-            for (            Object obj : collection) {
-              GraphObject otherNode=adapter.adapt(obj);
-              if (otherNode != null) {
-                rel.createRelationship(securityContext,sourceNode,otherNode);
-              }
-            }
-          }
- else {
-            GraphObject otherNode=adapter.adapt(value);
-            if (otherNode != null) {
-              rel.createRelationship(securityContext,sourceNode,otherNode);
-            }
-          }
-        }
+      AbstractNode newNode=typeConstraint.createNode(propertySet);
+      DirectedRelationship rel=EntityContext.getDirectedRelationship(sourceNode.getClass(),newNode.getClass());
+      if ((sourceNode != null) && (newNode != null) && (rel != null)) {
+        rel.createRelationship(securityContext,sourceNode,newNode);
+        return newNode;
       }
-      return null;
+ else {
+        logger.log(Level.WARNING,"Unable to create nested node, source node type {0}, new node type {1}, relationship type {2}",new Object[]{sourceNode != null ? sourceNode.getType() : "null",newNode != null ? newNode.getType() : "null",rel != null ? rel.getRelType() : "null"});
+      }
+      throw new IllegalPathException();
     }
   }
 ;
-  Services.command(securityContext,TransactionCommand.class).execute(transaction);
-  return new RestMethodResult(HttpServletResponse.SC_OK);
+  AbstractNode newNode=(AbstractNode)Services.command(securityContext,TransactionCommand.class).execute(transaction);
+  RestMethodResult result=new RestMethodResult(HttpServletResponse.SC_CREATED);
+  if (newNode != null) {
+    result.addHeader("Location",buildLocationHeader(newNode));
+  }
+  return result;
 }

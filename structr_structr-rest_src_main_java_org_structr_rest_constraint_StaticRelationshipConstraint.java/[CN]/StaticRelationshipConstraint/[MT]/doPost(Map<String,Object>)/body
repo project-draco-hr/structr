@@ -3,31 +3,50 @@
     @Override public Object execute() throws FrameworkException {
       AbstractNode sourceNode=typedIdConstraint.getIdConstraint().getNode();
       DirectedRelationship rel=EntityContext.getDirectedRelationship(sourceNode.getClass(),typeConstraint.getRawType());
-      if (rel != null) {
-        Adapter<Object,GraphObject> adapter=rel.getNotion().getAdapterForSetter(securityContext);
-        for (        Entry<String,Object> entry : propertySet.entrySet()) {
-          Object value=entry.getValue();
-          if (value instanceof Collection) {
-            Collection collection=(Collection)value;
-            for (            Object obj : collection) {
-              GraphObject otherNode=adapter.adapt(obj);
+      if (sourceNode != null && rel != null) {
+        Notion notion=rel.getNotion();
+        PropertyKey primaryPropertyKey=notion.getPrimaryPropertyKey();
+        if (primaryPropertyKey != null && propertySet.containsKey(primaryPropertyKey.name())) {
+          Adapter<Object,GraphObject> deserializationStrategy=notion.getAdapterForSetter(securityContext);
+          Object keySource=propertySet.get(primaryPropertyKey.name());
+          if (keySource != null) {
+            if (keySource instanceof Collection) {
+              Collection collection=(Collection)keySource;
+              for (              Object key : collection) {
+                GraphObject otherNode=deserializationStrategy.adapt(key);
+                if (otherNode != null) {
+                  rel.createRelationship(securityContext,sourceNode,otherNode);
+                }
+              }
+            }
+ else {
+              GraphObject otherNode=deserializationStrategy.adapt(keySource);
               if (otherNode != null) {
                 rel.createRelationship(securityContext,sourceNode,otherNode);
               }
             }
           }
  else {
-            GraphObject otherNode=adapter.adapt(value);
-            if (otherNode != null) {
-              rel.createRelationship(securityContext,sourceNode,otherNode);
-            }
+            logger.log(Level.INFO,"Key {0} not found in {1}",new Object[]{primaryPropertyKey.name(),propertySet.toString()});
+          }
+          return null;
+        }
+ else {
+          AbstractNode otherNode=typeConstraint.createNode(propertySet);
+          if (otherNode != null) {
+            rel.createRelationship(securityContext,sourceNode,otherNode);
+            return otherNode;
           }
         }
       }
-      return null;
+      throw new IllegalPathException();
     }
   }
 ;
-  Services.command(securityContext,TransactionCommand.class).execute(transaction);
-  return new RestMethodResult(HttpServletResponse.SC_OK);
+  AbstractNode newNode=(AbstractNode)Services.command(securityContext,TransactionCommand.class).execute(transaction);
+  RestMethodResult result=new RestMethodResult(HttpServletResponse.SC_CREATED);
+  if (newNode != null) {
+    result.addHeader("Location",buildLocationHeader(newNode));
+  }
+  return result;
 }

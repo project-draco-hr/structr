@@ -4,27 +4,33 @@
       AbstractNode sourceNode=typedIdConstraint.getIdConstraint().getNode();
       DirectedRelationship rel=EntityContext.getDirectedRelationship(sourceNode.getClass(),typeConstraint.getRawType());
       if (sourceNode != null && rel != null) {
+        if (EntityContext.isReadOnlyProperty(sourceNode.getClass(),typeConstraint.getRawType())) {
+          logger.log(Level.INFO,"Read-only property on {0}: {1}",new Object[]{sourceNode.getClass(),typeConstraint.getRawType()});
+          return null;
+        }
         Notion notion=rel.getNotion();
         PropertyKey primaryPropertyKey=notion.getPrimaryPropertyKey();
         if (primaryPropertyKey != null && propertySet.containsKey(primaryPropertyKey.name())) {
           Adapter<Object,GraphObject> deserializationStrategy=notion.getAdapterForSetter(securityContext);
           Object keySource=propertySet.get(primaryPropertyKey.name());
           if (keySource != null) {
+            GraphObject otherNode=null;
             if (keySource instanceof Collection) {
               Collection collection=(Collection)keySource;
               for (              Object key : collection) {
-                GraphObject otherNode=deserializationStrategy.adapt(key);
+                otherNode=deserializationStrategy.adapt(key);
                 if (otherNode != null) {
                   rel.createRelationship(securityContext,sourceNode,otherNode);
                 }
               }
             }
  else {
-              GraphObject otherNode=deserializationStrategy.adapt(keySource);
+              otherNode=deserializationStrategy.adapt(keySource);
               if (otherNode != null) {
                 rel.createRelationship(securityContext,sourceNode,otherNode);
               }
             }
+            return otherNode;
           }
  else {
             logger.log(Level.INFO,"Key {0} not found in {1}",new Object[]{primaryPropertyKey.name(),propertySet.toString()});
@@ -44,9 +50,13 @@
   }
 ;
   AbstractNode newNode=(AbstractNode)Services.command(securityContext,TransactionCommand.class).execute(transaction);
-  RestMethodResult result=new RestMethodResult(HttpServletResponse.SC_CREATED);
+  RestMethodResult result;
   if (newNode != null) {
+    result=new RestMethodResult(HttpServletResponse.SC_CREATED);
     result.addHeader("Location",buildLocationHeader(newNode));
+  }
+ else {
+    result=new RestMethodResult(HttpServletResponse.SC_FORBIDDEN);
   }
   return result;
 }

@@ -6,7 +6,7 @@
     String[] parts=externalProviderName.split("[, ]+");
     for (    String part : parts) {
       try {
-        logger.log(Level.INFO,"Injecting constraints from provider {0}",part);
+        logger.log(Level.FINE,"Injecting constraints from provider {0}",part);
         Class providerClass=Class.forName(part);
         ResourceConstraintProvider provider=(ResourceConstraintProvider)providerClass.newInstance();
         constraintMap.putAll(provider.getConstraints());
@@ -18,12 +18,12 @@
   }
   String defaultPropertyViewName=this.getInitParameter(SERVLET_PARAMETER_DEFAULT_PROPERTY_VIEW);
   if (defaultPropertyViewName != null) {
-    logger.log(Level.INFO,"Setting default property view to {0}",defaultPropertyViewName);
+    logger.log(Level.FINE,"Setting default property view to {0}",defaultPropertyViewName);
     this.defaultPropertyView=defaultPropertyViewName;
   }
   String defaultIdPropertyName=this.getInitParameter(SERVLET_PARAMETER_ID_PROPERTY);
   if (defaultIdPropertyName != null) {
-    logger.log(Level.INFO,"Setting default id property to {0}",defaultIdPropertyName);
+    logger.log(Level.FINE,"Setting default id property to {0}",defaultIdPropertyName);
     this.defaultIdProperty=defaultIdPropertyName;
   }
   PropertyFormat propertyFormat=initializePropertyFormat();

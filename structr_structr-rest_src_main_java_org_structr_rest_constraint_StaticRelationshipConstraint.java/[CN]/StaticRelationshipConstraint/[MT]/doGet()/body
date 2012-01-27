@@ -10,31 +10,43 @@
           return relatedNodes;
         }
       }
-      String rawType=typeConstraint.getRawType();
-      Object value=sourceNode.getProperty(rawType);
-      StringBuilder msgBuilder=new StringBuilder();
-      msgBuilder.append("Property result on type ");
-      msgBuilder.append(sourceNode.getClass().getSimpleName());
-      msgBuilder.append(", key ");
-      msgBuilder.append(rawType);
-      msgBuilder.append(" is not an Iterable<GraphObject>!");
-      String msg=msgBuilder.toString();
-      if (value != null && value instanceof Iterable) {
-        List<GraphObject> propertyListResult=new LinkedList<GraphObject>();
-        Iterable sourceIterable=(Iterable)value;
-        for (        Object o : sourceIterable) {
-          if (o instanceof GraphObject) {
-            propertyListResult.add((GraphObject)o);
+      Class type=sourceNode.getClass();
+      String key=typeConstraint.getRawType();
+      PropertyConverter converter=EntityContext.getPropertyConverter(securityContext,type,key);
+      if (converter != null) {
+        Value conversionValue=EntityContext.getPropertyConversionParameter(type,key);
+        converter.setCurrentNode(sourceNode);
+        converter.setRawMode(true);
+        Object value=converter.convertForGetter(null,conversionValue);
+        StringBuilder msgBuilder=new StringBuilder();
+        msgBuilder.append("Property result on type ");
+        msgBuilder.append(sourceNode.getClass().getSimpleName());
+        msgBuilder.append(", key ");
+        msgBuilder.append(key);
+        msgBuilder.append(" is not an Iterable<GraphObject>!");
+        String msg=msgBuilder.toString();
+        if (value != null) {
+          if (value instanceof List && !((List)value).isEmpty() && ((List)value).get(0) instanceof GraphObject) {
+            return (List<GraphObject>)value;
           }
+ else           if (value instanceof Iterable) {
+            List<GraphObject> propertyListResult=new LinkedList<GraphObject>();
+            Iterable sourceIterable=(Iterable)value;
+            for (            Object o : sourceIterable) {
+              if (o instanceof GraphObject) {
+                propertyListResult.add((GraphObject)o);
+              }
  else {
-            throw new SystemException(msg);
+                throw new SystemException(msg);
+              }
+            }
+            return propertyListResult;
           }
         }
-        return propertyListResult;
-      }
  else {
-        logger.log(Level.SEVERE,msg);
-        throw new SystemException(msg);
+          logger.log(Level.SEVERE,msg);
+          throw new SystemException(msg);
+        }
       }
     }
   }

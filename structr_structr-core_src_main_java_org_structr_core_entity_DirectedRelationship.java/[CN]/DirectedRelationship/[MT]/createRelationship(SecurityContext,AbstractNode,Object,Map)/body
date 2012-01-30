@@ -11,37 +11,51 @@
     final AbstractNode finalTargetNode=targetNode;
     StructrTransaction transaction=new StructrTransaction(){
       @Override public Object execute() throws FrameworkException {
-        if (cardinality.equals(Cardinality.ManyToOne) || cardinality.equals(Cardinality.OneToOne)) {
-          String destType=finalTargetNode.getType();
-          List<StructrRelationship> rels=sourceNode.getRelationships(relType,direction);
+switch (cardinality) {
+case ManyToOne:
+case OneToOne:
+{
+            String destType=finalTargetNode.getType();
+            List<StructrRelationship> rels=sourceNode.getRelationships(relType,Direction.INCOMING);
+            for (            StructrRelationship rel : rels) {
+              if (rel.getOtherNode(sourceNode).getType().equals(destType)) {
+                rel.delete(securityContext);
+              }
+            }
+            break;
+          }
+case OneToMany:
+{
+          List<StructrRelationship> rels=finalTargetNode.getRelationships(relType,Direction.INCOMING);
           for (          StructrRelationship rel : rels) {
-            if (rel.getOtherNode(sourceNode).getType().equals(destType)) {
+            if (rel.getOtherNode(finalTargetNode).getType().equals(sourceNode.getType())) {
               rel.delete(securityContext);
             }
           }
         }
-        StructrRelationship newRel;
-        if (direction.equals(Direction.OUTGOING)) {
-          newRel=(StructrRelationship)createRel.execute(sourceNode,finalTargetNode,relType);
-        }
- else {
-          newRel=(StructrRelationship)createRel.execute(finalTargetNode,sourceNode,relType);
-        }
-        newRel.setProperties(properties);
-        return newRel;
-      }
     }
+    StructrRelationship newRel;
+    if (direction.equals(Direction.OUTGOING)) {
+      newRel=(StructrRelationship)createRel.execute(sourceNode,finalTargetNode,relType);
+    }
+ else {
+      newRel=(StructrRelationship)createRel.execute(finalTargetNode,sourceNode,relType);
+    }
+    newRel.setProperties(properties);
+    return newRel;
+  }
+}
 ;
-    Services.command(securityContext,TransactionCommand.class).execute(transaction);
-  }
+Services.command(securityContext,TransactionCommand.class).execute(transaction);
+}
  else {
-    String type="unknown";
-    if (sourceNode != null) {
-      type=sourceNode.getType();
-    }
- else     if (targetNode != null) {
-      type=targetNode.getType();
-    }
-    throw new FrameworkException(type,new IdNotFoundToken(value));
-  }
+String type="unknown";
+if (sourceNode != null) {
+  type=sourceNode.getType();
+}
+ else if (targetNode != null) {
+  type=targetNode.getType();
+}
+throw new FrameworkException(type,new IdNotFoundToken(value));
+}
 }

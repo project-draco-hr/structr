@@ -18,17 +18,11 @@
           Set<ErrorToken> list=mapEntry.getValue();
           String key=mapEntry.getKey();
           if (!list.isEmpty()) {
-            if (list.size() == 1) {
-              ErrorToken token=list.iterator().next();
-              typeEntry.add(key,token.getContent());
+            JsonArray array=new JsonArray();
+            for (            ErrorToken token : list) {
+              array.add(token.getContent());
             }
- else {
-              JsonArray array=new JsonArray();
-              for (              ErrorToken token : list) {
-                array.add(token.getContent());
-              }
-              typeEntry.add(key,array);
-            }
+            typeEntry.add(key,array);
           }
         }
       }

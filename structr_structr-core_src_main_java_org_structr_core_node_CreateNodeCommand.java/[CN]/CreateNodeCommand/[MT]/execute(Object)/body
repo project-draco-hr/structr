@@ -34,7 +34,8 @@
     }
     attrs.clear();
     if ((user != null) && !(user instanceof SuperUser)) {
-      createRel.execute(user,node,RelType.OWNS);
+      DirectedRelationship rel=new DirectedRelationship(null,RelType.OWNS,Direction.OUTGOING,Cardinality.OneToMany,null);
+      rel.createRelationship(securityContext,user,node);
       logger.log(Level.FINEST,"Relationship to owner {0} added",user.getName());
       Principal principal;
       Group group=user.getGroupNode();
@@ -44,7 +45,7 @@
  else {
         principal=user;
       }
-      StructrRelationship securityRel=(StructrRelationship)createRel.execute(principal,node,RelType.SECURITY);
+      StructrRelationship securityRel=(StructrRelationship)createRel.execute(principal,node,RelType.SECURITY,true);
       securityRel.setAllowed(StructrRelationship.Permission.values());
       logger.log(Level.FINEST,"All permissions given to {0}",principal.getName());
       node.unlockReadOnlyPropertiesOnce();

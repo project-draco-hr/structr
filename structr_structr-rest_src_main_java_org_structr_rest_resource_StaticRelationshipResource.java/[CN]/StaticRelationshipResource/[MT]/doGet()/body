@@ -1,0 +1,54 @@
+{
+  List<GraphObject> results=typedIdResource.doGet();
+  if (results != null) {
+    AbstractNode sourceNode=typedIdResource.getTypesafeNode();
+    if (sourceNode != null) {
+      DirectedRelationship staticRel=findDirectedRelationship(typedIdResource,typeResource);
+      if (staticRel != null) {
+        List<AbstractNode> relatedNodes=staticRel.getRelatedNodes(securityContext,sourceNode);
+        if (!relatedNodes.isEmpty()) {
+          return relatedNodes;
+        }
+      }
+      Class type=sourceNode.getClass();
+      String key=CaseHelper.toLowerCamelCase(typeResource.getRawType());
+      PropertyConverter converter=EntityContext.getPropertyConverter(securityContext,type,key);
+      if (converter != null) {
+        Value conversionValue=EntityContext.getPropertyConversionParameter(type,key);
+        converter.setCurrentNode(sourceNode);
+        converter.setRawMode(true);
+        Object value=converter.convertForGetter(null,conversionValue);
+        StringBuilder msgBuilder=new StringBuilder();
+        msgBuilder.append("Property result on type ");
+        msgBuilder.append(sourceNode.getClass().getSimpleName());
+        msgBuilder.append(", key ");
+        msgBuilder.append(key);
+        msgBuilder.append(" is not an Iterable<GraphObject>!");
+        String msg=msgBuilder.toString();
+        if (value != null) {
+          if ((value instanceof List) && !((List)value).isEmpty() && ((List)value).get(0) instanceof GraphObject) {
+            return (List<GraphObject>)value;
+          }
+ else           if (value instanceof Iterable) {
+            List<GraphObject> propertyListResult=new LinkedList<GraphObject>();
+            Iterable sourceIterable=(Iterable)value;
+            for (            Object o : sourceIterable) {
+              if (o instanceof GraphObject) {
+                propertyListResult.add((GraphObject)o);
+              }
+ else {
+                throw new SystemException(msg);
+              }
+            }
+            return propertyListResult;
+          }
+        }
+ else {
+          logger.log(Level.SEVERE,msg);
+          throw new SystemException(msg);
+        }
+      }
+    }
+  }
+  return Collections.emptyList();
+}

@@ -1,0 +1,19 @@
+{
+  this.traversalDescription=Traversal.description().depthFirst().uniqueness(Uniqueness.NODE_GLOBAL).evaluator(Evaluators.excludeStartPosition());
+  this.visitedRelationships=new LinkedHashSet<DirectedRelationship>();
+  this.securityContext=securityContext;
+  this.idSet=new LinkedHashSet<Object>();
+  this.uriParts=new LinkedList<String>();
+  traversalDescription=traversalDescription.evaluator(this);
+  firstResource=typedIdResource;
+  lastResource=typedIdResource;
+  IdResource idConstraint=typedIdResource.getIdResource();
+  if (idConstraint instanceof UuidResource) {
+    logger.log(Level.FINE,"Adding id {0} to id set",idConstraint.getUriPart());
+    idSet.add(((UuidResource)idConstraint).getUriPart());
+  }
+ else {
+    logger.log(Level.FINE,"Adding id {0} to id set",idConstraint.getUriPart());
+    idSet.add(idConstraint.getId());
+  }
+}

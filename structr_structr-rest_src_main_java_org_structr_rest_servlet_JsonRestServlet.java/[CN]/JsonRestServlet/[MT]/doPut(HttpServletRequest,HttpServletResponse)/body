@@ -6,8 +6,8 @@
     final PropertySet propertySet=gson.fromJson(request.getReader(),PropertySet.class);
     SecurityContext securityContext=getSecurityContext(request);
     if (securityContext != null) {
-      List<ResourceConstraint> chain=parsePath(securityContext,request);
-      ResourceConstraint resourceConstraint=optimizeConstraintChain(chain);
+      List<Resource> chain=parsePath(securityContext,request);
+      Resource resourceConstraint=optimizeConstraintChain(chain);
       Map<String,Object> properties=convertPropertySetToMap(propertySet);
       RestMethodResult result=resourceConstraint.doPut(properties);
       result.commitResponse(gson,response);

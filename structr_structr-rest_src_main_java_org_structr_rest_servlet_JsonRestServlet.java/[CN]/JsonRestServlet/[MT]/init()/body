@@ -1,18 +1,18 @@
 {
-  this.constraintMap=new LinkedHashMap<Pattern,Class>();
+  this.resourceMap=new LinkedHashMap<Pattern,Class>();
   this.propertyView=new ThreadLocalPropertyView();
-  String externalProviderName=this.getInitParameter(SERVLET_PARAMETER_CONSTRAINT_PROVIDER);
+  String externalProviderName=this.getInitParameter(SERVLET_PARAMETER_RESOURCE_PROVIDER);
   if (externalProviderName != null) {
     String[] parts=externalProviderName.split("[, ]+");
     for (    String part : parts) {
       try {
-        logger.log(Level.FINE,"Injecting constraints from provider {0}",part);
+        logger.log(Level.FINE,"Injecting resources from provider {0}",part);
         Class providerClass=Class.forName(part);
-        ResourceConstraintProvider provider=(ResourceConstraintProvider)providerClass.newInstance();
-        constraintMap.putAll(provider.getConstraints());
+        ResourceProvider provider=(ResourceProvider)providerClass.newInstance();
+        resourceMap.putAll(provider.getResources());
       }
  catch (      Throwable t) {
-        logger.log(Level.WARNING,"Unable to inject external resource constraints",t);
+        logger.log(Level.WARNING,"Unable to inject external resources",t);
       }
     }
   }

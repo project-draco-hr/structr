@@ -28,6 +28,16 @@
     if (results.isEmpty()) {
       result.add("result",new JsonArray());
     }
+ else     if (src.isPrimitiveArray()) {
+      JsonArray resultArray=new JsonArray();
+      for (      GraphObject graphObject : results) {
+        Object value=graphObject.getProperty(AbstractNode.Key.uuid.name());
+        if (value != null) {
+          resultArray.add(new JsonPrimitive(value.toString()));
+        }
+      }
+      result.add("result",resultArray);
+    }
  else {
       if (results.size() > 1 && !src.isCollectionResource()) {
         throw new IllegalStateException(src.getClass().getSimpleName() + " is not a collection resource, but result set has size " + results.size());

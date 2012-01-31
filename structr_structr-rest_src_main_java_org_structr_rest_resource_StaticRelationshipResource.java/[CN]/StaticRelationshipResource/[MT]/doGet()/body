@@ -6,6 +6,14 @@
       DirectedRelationship staticRel=findDirectedRelationship(typedIdResource,typeResource);
       if (staticRel != null) {
         List<AbstractNode> relatedNodes=staticRel.getRelatedNodes(securityContext,sourceNode);
+        List<SearchAttribute> dummyList=new LinkedList<SearchAttribute>();
+        if (typeResource.hasSearchableAttributes(dummyList)) {
+          List<GraphObject> typeNodes=typeResource.doGet();
+          List intersection=ListUtils.intersection(relatedNodes,typeNodes);
+          if (!intersection.isEmpty()) {
+            return intersection;
+          }
+        }
         if (!relatedNodes.isEmpty()) {
           return relatedNodes;
         }

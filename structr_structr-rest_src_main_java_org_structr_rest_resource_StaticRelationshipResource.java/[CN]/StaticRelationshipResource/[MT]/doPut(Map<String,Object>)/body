@@ -1,4 +1,53 @@
 {
-  doDelete();
-  return doPost(propertySet);
+  List<GraphObject> results=typedIdResource.doGet();
+  final Command searchNode=Services.command(securityContext,SearchNodeCommand.class);
+  if (results != null) {
+    final DirectedRelationship staticRel=findDirectedRelationship(typedIdResource,typeResource);
+    if (staticRel != null) {
+      final AbstractNode startNode=typedIdResource.getTypesafeNode();
+      if (startNode != null) {
+        if (EntityContext.isReadOnlyProperty(startNode.getClass(),typeResource.getRawType())) {
+          logger.log(Level.INFO,"Read-only property on {1}: {0}",new Object[]{startNode.getClass(),typeResource.getRawType()});
+          return new RestMethodResult(HttpServletResponse.SC_FORBIDDEN);
+        }
+        final List<StructrRelationship> rels=startNode.getRelationships(staticRel.getRelType(),staticRel.getDirection());
+        StructrTransaction transaction=new StructrTransaction(){
+          @Override public Object execute() throws FrameworkException {
+            for (            StructrRelationship rel : rels) {
+              AbstractNode otherNode=rel.getOtherNode(startNode);
+              String id=otherNode.getStringProperty(AbstractNode.Key.uuid.name());
+              if (!propertySet.containsValue(id)) {
+                rel.delete(securityContext);
+              }
+ else {
+                propertySet.remove(id);
+              }
+            }
+            for (            Object obj : propertySet.values()) {
+              String uuid=(String)obj;
+              List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
+              attrs.add(Search.andExactUuid(uuid));
+              List<AbstractNode> results=(List<AbstractNode>)searchNode.execute(null,false,false,attrs);
+              if (results.isEmpty()) {
+                throw new NotFoundException();
+              }
+              if (results.size() > 1) {
+                throw new SystemException("More than one result found for uuid " + uuid + "!");
+              }
+              AbstractNode targetNode=(AbstractNode)results.get(0);
+              String type=EntityContext.normalizeEntityName(typeResource.getRawType());
+              if (!type.equals(targetNode.getType())) {
+                throw new FrameworkException(startNode.getType(),new TypeToken(uuid,type));
+              }
+              staticRel.createRelationship(securityContext,startNode,targetNode);
+            }
+            return null;
+          }
+        }
+;
+        Services.command(securityContext,TransactionCommand.class).execute(transaction);
+      }
+    }
+  }
+  return new RestMethodResult(HttpServletResponse.SC_OK);
 }

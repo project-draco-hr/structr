@@ -1,2 +1,19 @@
 {
+  SecurityContext securityContext=SecurityContext.getSuperUserInstance();
+  for (  Relationship rel : data.createdRelationships()) {
+    String startNodeType=(String)rel.getStartNode().getProperty(AbstractNode.Key.type.name());
+    String endNodeType=(String)rel.getEndNode().getProperty(AbstractNode.Key.type.name());
+    Set<Transformation<StructrRelationship>> transformations=EntityContext.getRelationshipCreationTransformations(rel.getType(),startNodeType,endNodeType);
+    if (transformations != null) {
+      for (      Transformation<StructrRelationship> transformation : transformations) {
+        StructrRelationship strucrtRelationship=new StructrRelationship(securityContext,rel);
+        try {
+          transformation.apply(securityContext,strucrtRelationship);
+        }
+ catch (        FrameworkException fex) {
+          logger.log(Level.WARNING,"Unable to execute relationship creation transformation",fex);
+        }
+      }
+    }
+  }
 }

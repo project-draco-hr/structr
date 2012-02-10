@@ -1,11 +1,11 @@
 {
   Command indexCommand=Services.command(SecurityContext.getSuperUserInstance(),IndexNodeCommand.class);
+  SecurityContext securityContext=securityContextMap.get(Thread.currentThread());
   long transactionKey=transactionKeyMap.get(Thread.currentThread());
   try {
     ErrorBuffer errorBuffer=new ErrorBuffer();
     boolean hasError=false;
     Map<Node,Map<String,Object>> removedProperties=new LinkedHashMap<Node,Map<String,Object>>();
-    SecurityContext securityContext=SecurityContext.getSuperUserInstance();
     StructrNodeFactory factory=new StructrNodeFactory(securityContext);
     Set<AbstractNode> modifiedNodes=new LinkedHashSet<AbstractNode>();
     Set<AbstractNode> createdNodes=new LinkedHashSet<AbstractNode>();

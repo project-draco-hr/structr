@@ -18,14 +18,16 @@
       }
  finally {
         long transactionKey=nextLong();
+        EntityContext.setSecurityContext(securityContext);
         EntityContext.setTransactionKey(transactionKey);
         try {
           tx.finish();
         }
  catch (        Throwable t) {
           exception=EntityContext.getFrameworkException(transactionKey);
-          EntityContext.removeTransactionKey();
         }
+        EntityContext.removeTransactionKey();
+        EntityContext.removeSecurityContext();
       }
     }
   }

@@ -5,6 +5,17 @@
   if ((parameters.length > 0) && (parameters[0] instanceof StructrTransaction)) {
     StructrTransaction transaction=(StructrTransaction)parameters[0];
     if (graphDb != null) {
+      if (threadDebugging) {
+synchronized (TransactionCommand.class) {
+          int indent=getIndent();
+          System.out.print("################################# ");
+          System.out.print(StringUtils.leftPad(new Long(Thread.currentThread().getId()).toString(),5));
+          System.out.print(" ");
+          for (int i=0; i < indent; i++)           System.out.print("  ");
+          System.out.println("Starting  transaction " + transaction.toString() + " at "+ System.currentTimeMillis());
+          incIndent();
+        }
+      }
       Transaction tx=graphDb.beginTx();
       try {
         ret=transaction.execute();
@@ -15,6 +26,10 @@
         tx.failure();
         logger.log(Level.WARNING,"Transaction failure",frameworkException);
         exception=frameworkException;
+      }
+catch (      DeadlockDetectedException ddex) {
+        tx.failure();
+        logger.log(Level.SEVERE,"Neo4j detected a deadlock, enable thread debugging here and try to modify entity/relationship creation order!",ddex.getMessage());
       }
  finally {
         long transactionKey=nextLong();
@@ -28,6 +43,17 @@
         }
         EntityContext.removeTransactionKey();
         EntityContext.removeSecurityContext();
+      }
+      if (threadDebugging) {
+synchronized (TransactionCommand.class) {
+          decIndent();
+          int indent=getIndent();
+          System.out.print("################################# ");
+          System.out.print(StringUtils.leftPad(new Long(Thread.currentThread().getId()).toString(),5));
+          System.out.print(" ");
+          for (int i=0; i < indent; i++)           System.out.print("  ");
+          System.out.println("Finishing transaction " + transaction.toString() + " at "+ System.currentTimeMillis());
+        }
       }
     }
   }

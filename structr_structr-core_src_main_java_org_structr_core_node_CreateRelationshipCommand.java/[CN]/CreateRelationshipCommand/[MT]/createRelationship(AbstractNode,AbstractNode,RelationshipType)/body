@@ -1,11 +1,12 @@
 {
-  final Command transactionCommand=Services.command(securityContext,TransactionCommand.class);
-  StructrRelationship newRelationship=(StructrRelationship)transactionCommand.execute(new StructrTransaction(){
+  return (StructrRelationship)Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
     @Override public Object execute() throws FrameworkException {
-      StructrRelationship relationship=new StructrRelationship(securityContext,fromNode.getNode().createRelationshipTo(toNode.getNode(),relType));
-      return relationship;
+      Relationship neoRelationship=null;
+      Node startNode=fromNode.getNode();
+      Node endNode=toNode.getNode();
+      neoRelationship=startNode.createRelationshipTo(endNode,relType);
+      return new StructrRelationship(securityContext,neoRelationship);
     }
   }
 );
-  return newRelationship;
 }

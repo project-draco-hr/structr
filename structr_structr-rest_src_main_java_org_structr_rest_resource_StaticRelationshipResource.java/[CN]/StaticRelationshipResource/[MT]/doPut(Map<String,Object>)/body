@@ -15,8 +15,9 @@
           @Override public Object execute() throws FrameworkException {
             for (            StructrRelationship rel : rels) {
               AbstractNode otherNode=rel.getOtherNode(startNode);
+              String otherNodeType=otherNode.getType();
               String id=otherNode.getStringProperty(AbstractNode.Key.uuid.name());
-              if (!propertySet.containsValue(id)) {
+              if (staticRel.getDestType().equals(otherNodeType) && !propertySet.containsValue(id)) {
                 rel.delete(securityContext);
               }
  else {

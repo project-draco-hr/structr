@@ -2,15 +2,16 @@
   boolean hasSearchableAttributes=false;
   if (rawType != null && request != null && !request.getParameterMap().isEmpty()) {
     boolean looseSearch=parseInteger(request.getParameter(JsonRestServlet.REQUEST_PARAMETER_LOOSE_SEARCH)) == 1;
-    Set<String> searchableAttributes;
+    Set<String> searchableProperties=null;
     if (looseSearch) {
-      searchableAttributes=EntityContext.getSearchableProperties(rawType,NodeIndex.fulltext.name());
+      searchableProperties=EntityContext.getSearchableProperties(rawType,NodeIndex.fulltext.name());
     }
  else {
-      searchableAttributes=EntityContext.getSearchableProperties(rawType,NodeIndex.keyword.name());
+      searchableProperties=EntityContext.getSearchableProperties(rawType,NodeIndex.keyword.name());
     }
-    if (searchableAttributes != null) {
-      for (      String key : searchableAttributes) {
+    checkForIllegalSearchKeys(searchableProperties);
+    if (searchableProperties != null) {
+      for (      String key : searchableProperties) {
         String searchValue=request.getParameter(key);
         if (searchValue != null) {
           if (looseSearch) {

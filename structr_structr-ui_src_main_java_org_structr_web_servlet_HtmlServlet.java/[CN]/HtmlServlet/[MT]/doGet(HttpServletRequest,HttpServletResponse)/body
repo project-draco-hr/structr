@@ -1,6 +1,7 @@
 {
   SecurityContext securityContext=SecurityContext.getSuperUserInstance();
   edit=false;
+  tidy=false;
   if (request.getParameter("create") != null) {
     try {
       createTestStructure();
@@ -21,6 +22,9 @@
   }
   if (request.getParameter("edit") != null) {
     edit=true;
+  }
+  if (request.getParameter("tidy") != null) {
+    tidy=true;
   }
   try {
     request.setCharacterEncoding("UTF-8");
@@ -64,7 +68,16 @@
  else {
         response.setContentType("text/html; charset=utf-8");
       }
-      response.getWriter().append(content);
+      if (tidy) {
+        StringWriter tidyOutput=new StringWriter();
+        Tidy tidy=new Tidy();
+        Properties tidyProps=new Properties();
+        tidyProps.setProperty("indent","auto");
+        tidy.getConfiguration().addProps(tidyProps);
+        tidy.parse(new StringReader(content),tidyOutput);
+        content=tidyOutput.toString();
+      }
+      response.getWriter().append("<!DOCTYPE html>\n").append(content);
       response.getWriter().flush();
       response.getWriter().close();
       response.setStatus(HttpServletResponse.SC_OK);

@@ -1,0 +1,53 @@
+{
+  AbstractNode node=root.getData();
+  String content=null;
+  String tag=null;
+  StructrRelationship link=null;
+  if (node != null) {
+    if (node instanceof Content) {
+      content=node.getStringProperty("content");
+      List<StructrRelationship> links=node.getOutgoingLinkRelationships();
+      if ((links != null) && !links.isEmpty()) {
+        link=links.get(0);
+      }
+    }
+    if (link != null) {
+      buffer.append("<a href=\"").append(link.getEndNode().getName()).append("\">");
+    }
+    tag=node.getStringProperty("tag");
+    if (inBody && (tag == null) && (node instanceof Content)) {
+      tag="div";
+    }
+    if (tag != null) {
+      if (tag.equals("body")) {
+        inBody=true;
+      }
+      String id=node.getStringProperty("uuid");
+      buffer.append("<").append(tag);
+      if (edit && (id != null)) {
+        buffer.append(" structr_id='").append(id).append("'");
+      }
+      if (node instanceof HtmlElement) {
+        for (        String attribute : EntityContext.getPropertySet(node.getClass(),PropertyView.Html)) {
+          if (node.getProperty(attribute) != null) {
+            String key=attribute.substring(PropertyView.Html.length());
+            buffer.append(" ").append(key).append("=\"").append(node.getProperty(attribute)).append("\"");
+          }
+        }
+      }
+      buffer.append(">");
+    }
+    if (content != null) {
+      buffer.append(content);
+    }
+  }
+  for (  TreeNode subNode : root.getChildren()) {
+    printNodes(buffer,subNode,depth + 1,inBody);
+  }
+  if (tag != null) {
+    buffer.append("</").append(tag).append(">");
+  }
+  if (link != null) {
+    buffer.append("</a>");
+  }
+}

@@ -5,6 +5,10 @@
   boolean includeDeleted=false;
   boolean publicOnly=false;
   if (rawType != null) {
+    Map cachedEntities=(Map<String,Class>)Services.command(securityContext,GetEntitiesCommand.class).execute();
+    if (!cachedEntities.containsKey(EntityContext.normalizeEntityName(rawType))) {
+      throw new NotFoundException();
+    }
     searchAttributes.add(Search.andExactType(EntityContext.normalizeEntityName(rawType)));
     hasSearchableAttributes=hasSearchableAttributes(searchAttributes);
     List<GraphObject> results=(List<GraphObject>)Services.command(securityContext,SearchNodeCommand.class).execute(topNode,includeDeleted,publicOnly,searchAttributes);
@@ -15,10 +19,5 @@
  else {
     logger.log(Level.WARNING,"type was null");
   }
-  if (hasSearchableAttributes) {
-    throw new NotFoundException();
-  }
- else {
-    return Collections.emptyList();
-  }
+  return Collections.emptyList();
 }

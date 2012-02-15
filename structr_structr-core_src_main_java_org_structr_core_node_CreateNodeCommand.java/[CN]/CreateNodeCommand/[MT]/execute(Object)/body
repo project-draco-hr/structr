@@ -24,13 +24,16 @@
       }
     }
     Object typeObject=attrs.get(AbstractNode.Key.type.name());
-    String nodeType=typeObject != null ? typeObject.toString() : "GenericNode";
+    String nodeType=(typeObject != null) ? typeObject.toString() : "GenericNode";
     node=nodeFactory.createNode(securityContext,graphDb.createNode(),nodeType);
     logger.log(Level.FINE,"Node {0} created",node.getId());
     node.setProperty(AbstractNode.Key.type.name(),nodeType);
     attrs.remove(AbstractNode.Key.type.name());
     for (    Entry<String,Object> attr : attrs.entrySet()) {
-      node.setProperty(attr.getKey(),attr.getValue());
+      Object value=attr.getValue();
+      if (value != null) {
+        node.setProperty(attr.getKey(),value);
+      }
     }
     attrs.clear();
     if ((user != null) && !(user instanceof SuperUser)) {

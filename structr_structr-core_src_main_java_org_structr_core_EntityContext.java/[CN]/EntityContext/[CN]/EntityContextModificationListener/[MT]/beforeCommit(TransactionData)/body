@@ -58,6 +58,21 @@
         hasError|=graphObjectModified(securityContext,transactionKey,errorBuffer,node);
       }
     }
+    for (    StructrRelationship rel : createdRels) {
+      String startNodeType=(String)rel.getStartNode().getProperty(AbstractNode.Key.type.name());
+      String endNodeType=(String)rel.getEndNode().getProperty(AbstractNode.Key.type.name());
+      Set<Transformation<StructrRelationship>> transformations=EntityContext.getRelationshipCreationTransformations(rel.getRelType(),startNodeType,endNodeType);
+      if (transformations != null) {
+        for (        Transformation<StructrRelationship> transformation : transformations) {
+          try {
+            transformation.apply(securityContext,rel);
+          }
+ catch (          FrameworkException fex) {
+            logger.log(Level.WARNING,"Unable to execute relationship creation transformation",fex);
+          }
+        }
+      }
+    }
     hasError|=commit(securityContext,transactionKey,errorBuffer);
     if (hasError) {
       throw new FrameworkException(422,errorBuffer);

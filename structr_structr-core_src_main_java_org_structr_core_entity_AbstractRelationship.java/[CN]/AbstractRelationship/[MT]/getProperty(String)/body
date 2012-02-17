@@ -1,3 +1,17 @@
 {
-  return dbRelationship.getProperty(key,null);
+  Class type=this.getClass();
+  Object value=null;
+  PropertyGroup propertyGroup=EntityContext.getPropertyGroup(type,key);
+  if (propertyGroup != null) {
+    return propertyGroup.getGroupedProperties(this);
+  }
+  if (dbRelationship.hasProperty(key)) {
+    value=dbRelationship.getProperty(key);
+  }
+  PropertyConverter converter=EntityContext.getPropertyConverter(securityContext,type,key);
+  if (converter != null) {
+    Value conversionValue=EntityContext.getPropertyConversionParameter(type,key);
+    value=converter.convertForGetter(value,conversionValue);
+  }
+  return value;
 }

@@ -1,13 +1,15 @@
 {
-  Class relClass=(Class)Services.command(securityContext,GetEntityClassCommand.class).execute(relType);
   AbstractRelationship newRel=null;
-  if (relClass != null) {
-    try {
+  try {
+    String sourceNodeType=(String)relationship.getStartNode().getProperty(AbstractNode.Key.type.name());
+    String destNodeType=(String)relationship.getStartNode().getProperty(AbstractNode.Key.type.name());
+    Class relClass=EntityContext.getNamedRelationClass(sourceNodeType,destNodeType,relType);
+    if (relClass != null) {
       newRel=(AbstractRelationship)relClass.newInstance();
     }
- catch (    Throwable t) {
-      newRel=null;
-    }
+  }
+ catch (  Throwable t) {
+    newRel=null;
   }
   if (newRel == null) {
     newRel=new GenericRelationship();

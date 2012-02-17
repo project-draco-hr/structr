@@ -1,17 +1,11 @@
 {
-  List<? extends GraphObject> results=relationshipResource.doGet();
-  long desiredId=idResource.getId();
-  GraphObject desiredObject=null;
-  for (  GraphObject obj : results) {
-    if (obj.getId() == desiredId) {
-      desiredObject=obj;
-      break;
-    }
+  List<GraphObject> uuidResult=new LinkedList<GraphObject>();
+  AbstractRelationship rel=idResource.getRelationship();
+  if (rel != null) {
+    uuidResult.add(rel);
+    return uuidResult;
   }
-  if (desiredObject != null) {
-    List<GraphObject> resultList=new LinkedList<GraphObject>();
-    resultList.add(desiredObject);
-    return resultList;
+ else {
+    throw new NotFoundException();
   }
-  throw new NotFoundException();
 }

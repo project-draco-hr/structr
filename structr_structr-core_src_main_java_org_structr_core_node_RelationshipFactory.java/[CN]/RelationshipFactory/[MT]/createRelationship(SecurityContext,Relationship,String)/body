@@ -1,0 +1,17 @@
+{
+  Class relClass=(Class)Services.command(securityContext,GetEntityClassCommand.class).execute(relType);
+  AbstractRelationship newRel=null;
+  if (relClass != null) {
+    try {
+      newRel=(AbstractRelationship)relClass.newInstance();
+    }
+ catch (    Throwable t) {
+      newRel=null;
+    }
+  }
+  if (newRel == null) {
+    newRel=new GenericRelationship();
+  }
+  newRel.init(securityContext,relationship);
+  return newRel;
+}

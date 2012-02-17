@@ -1,6 +1,6 @@
 {
   GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
-  StructrNodeFactory nodeFactory=(StructrNodeFactory)arguments.get("nodeFactory");
+  NodeFactory nodeFactory=(NodeFactory)arguments.get("nodeFactory");
   User user=securityContext.getUser();
   AbstractNode node=null;
   if (graphDb != null) {
@@ -48,8 +48,8 @@
  else {
         principal=user;
       }
-      StructrRelationship securityRel=(StructrRelationship)createRel.execute(principal,node,RelType.SECURITY,true);
-      securityRel.setAllowed(StructrRelationship.Permission.values());
+      AbstractRelationship securityRel=(AbstractRelationship)createRel.execute(principal,node,RelType.SECURITY,true);
+      securityRel.setAllowed(AbstractRelationship.Permission.values());
       logger.log(Level.FINEST,"All permissions given to {0}",principal.getName());
       node.unlockReadOnlyPropertiesOnce();
       node.setProperty(AbstractNode.Key.createdBy.name(),user.getProperty(AbstractNode.Key.uuid),false);

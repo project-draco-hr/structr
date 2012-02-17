@@ -16,8 +16,8 @@ case ManyToOne:
 case OneToOne:
 {
             String destType=finalTargetNode.getType();
-            List<StructrRelationship> rels=sourceNode.getRelationships(relType,direction);
-            for (            StructrRelationship rel : rels) {
+            List<AbstractRelationship> rels=sourceNode.getRelationships(relType,direction);
+            for (            AbstractRelationship rel : rels) {
               if (rel.getOtherNode(sourceNode).getType().equals(destType)) {
                 rel.delete(securityContext);
               }
@@ -26,20 +26,20 @@ case OneToOne:
           }
 case OneToMany:
 {
-          List<StructrRelationship> rels=finalTargetNode.getRelationships(relType,Direction.INCOMING);
-          for (          StructrRelationship rel : rels) {
+          List<AbstractRelationship> rels=finalTargetNode.getRelationships(relType,Direction.INCOMING);
+          for (          AbstractRelationship rel : rels) {
             if (rel.getOtherNode(finalTargetNode).getType().equals(sourceNode.getType())) {
               rel.delete(securityContext);
             }
           }
         }
     }
-    StructrRelationship newRel;
+    AbstractRelationship newRel;
     if (direction.equals(Direction.OUTGOING)) {
-      newRel=(StructrRelationship)createRel.execute(sourceNode,finalTargetNode,relType);
+      newRel=(AbstractRelationship)createRel.execute(sourceNode,finalTargetNode,relType);
     }
  else {
-      newRel=(StructrRelationship)createRel.execute(finalTargetNode,sourceNode,relType);
+      newRel=(AbstractRelationship)createRel.execute(finalTargetNode,sourceNode,relType);
     }
     newRel.setProperties(properties);
     return newRel;

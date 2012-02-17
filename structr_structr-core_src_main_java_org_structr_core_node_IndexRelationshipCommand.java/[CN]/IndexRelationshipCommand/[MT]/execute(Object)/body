@@ -1,53 +1,50 @@
 {
-  for (  Enum indexName : (NodeIndex[])arguments.get("indices")) {
+  Command findRel=Services.command(securityContext,FindRelationshipCommand.class);
+  for (  Enum indexName : (RelationshipIndex[])arguments.get("relationshipIndices")) {
     indices.put(indexName.name(),(Index<Node>)arguments.get(indexName.name()));
   }
   long id=0;
-  AbstractNode node=null;
+  AbstractRelationship rel=null;
   String key=null;
 switch (parameters.length) {
 case 1:
     if (parameters[0] instanceof Long) {
       id=((Long)parameters[0]).longValue();
-      Command findRel=Services.command(securityContext,FindRelationshipCommand.class);
-      node=(AbstractNode)findRel.execute(id);
-      indexNode(node);
+      rel=(AbstractRelationship)findRel.execute(id);
+      indexRelationship(rel);
     }
  else     if (parameters[0] instanceof String) {
       id=Long.parseLong((String)parameters[0]);
-      Command findNode=Services.command(securityContext,FindNodeCommand.class);
-      node=(AbstractNode)findNode.execute(id);
-      indexNode(node);
+      rel=(AbstractRelationship)findRel.execute(id);
+      indexRelationship(rel);
     }
- else     if (parameters[0] instanceof AbstractNode) {
-      node=(AbstractNode)parameters[0];
-      indexNode(node);
+ else     if (parameters[0] instanceof AbstractRelationship) {
+      rel=(AbstractRelationship)parameters[0];
+      indexRelationship(rel);
     }
  else     if (parameters[0] instanceof List) {
-      indexNodes((List<AbstractNode>)parameters[0]);
+      indexRelationships((List<AbstractRelationship>)parameters[0]);
     }
   break;
 case 2:
 if (parameters[0] instanceof Long) {
   id=((Long)parameters[0]).longValue();
-  Command findNode=Services.command(securityContext,FindNodeCommand.class);
-  node=(AbstractNode)findNode.execute(id);
+  rel=(AbstractRelationship)findRel.execute(id);
 }
  else if (parameters[0] instanceof String) {
   id=Long.parseLong((String)parameters[0]);
-  Command findNode=Services.command(securityContext,FindNodeCommand.class);
-  node=(AbstractNode)findNode.execute(id);
+  rel=(AbstractRelationship)findRel.execute(id);
 }
  else if (parameters[0] instanceof AbstractNode) {
-  node=(AbstractNode)parameters[0];
+  rel=(AbstractRelationship)parameters[0];
 }
 if (parameters[1] instanceof String) {
 key=(String)parameters[1];
 }
-indexProperty(node,key);
+indexProperty(rel,key);
 break;
 default :
-logger.log(Level.SEVERE,"Wrong number of parameters for the index property command: {0}",parameters);
+logger.log(Level.SEVERE,"Wrong number of parameters for the index relationship command: {0}",parameters);
 return null;
 }
 return null;

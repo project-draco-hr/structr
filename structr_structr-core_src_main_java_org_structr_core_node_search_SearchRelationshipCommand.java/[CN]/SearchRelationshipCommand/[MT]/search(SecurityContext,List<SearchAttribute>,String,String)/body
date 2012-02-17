@@ -1,8 +1,8 @@
 {
   GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
-  Index<Node> index;
-  NodeFactory nodeFactory=(NodeFactory)arguments.get("nodeFactory");
-  List<AbstractNode> finalResult=new LinkedList<AbstractNode>();
+  Index<Relationship> index;
+  RelationshipFactory relationshipFactory=(RelationshipFactory)arguments.get("relationshipFactory");
+  List<AbstractRelationship> finalResult=new LinkedList<AbstractRelationship>();
   boolean allExactMatch=true;
   if (graphDb != null) {
     BooleanQuery query=new BooleanQuery();
@@ -42,57 +42,52 @@
         booleanAttributes.add((BooleanSearchAttribute)attr);
       }
     }
-    List<AbstractNode> intermediateResult;
+    List<AbstractRelationship> intermediateResult;
     if (searchAttrs.isEmpty() || StringUtils.isBlank(textualQueryString)) {
-      if (topNode != null) {
-        intermediateResult=topNode.getAllChildren();
-      }
- else {
-        intermediateResult=new LinkedList<AbstractNode>();
-      }
+      intermediateResult=new LinkedList<AbstractRelationship>();
     }
  else {
       long t0=System.currentTimeMillis();
       logger.log(Level.FINE,"Textual Query String: {0}",textualQueryString);
       QueryContext queryContext=new QueryContext(textualQueryString);
       IndexHits hits;
-      if ((textualAttributes.size() == 1) && textualAttributes.get(0).getKey().equals(AbstractNode.Key.uuid.name())) {
-        index=(Index<Node>)arguments.get(NodeIndex.uuid.name());
+      if ((textualAttributes.size() == 1) && textualAttributes.get(0).getKey().equals(AbstractRelationship.Key.uuid.name())) {
+        index=(Index<Relationship>)arguments.get(RelationshipIndex.rel_uuid.name());
         hits=index.get(AbstractNode.Key.uuid.name(),decodeExactMatch(textualAttributes.get(0).getValue()));
       }
  else       if ((textualAttributes.size() > 1) && allExactMatch) {
-        index=(Index<Node>)arguments.get(NodeIndex.keyword.name());
+        index=(Index<Relationship>)arguments.get(RelationshipIndex.rel_keyword.name());
         hits=index.query(queryContext);
       }
  else {
-        index=(Index<Node>)arguments.get(NodeIndex.fulltext.name());
+        index=(Index<Relationship>)arguments.get(RelationshipIndex.rel_fulltext.name());
         hits=index.query(queryContext);
       }
       long t1=System.currentTimeMillis();
       logger.log(Level.FINE,"Querying index took {0} ms, {1} results retrieved.",new Object[]{t1 - t0,hits.size()});
-      intermediateResult=nodeFactory.createNodes(securityContext,hits,includeDeleted,publicOnly);
+      intermediateResult=relationshipFactory.createRelationships(securityContext,hits);
       long t2=System.currentTimeMillis();
-      logger.log(Level.FINE,"Creating structr nodes took {0} ms, {1} nodes made.",new Object[]{t2 - t1,intermediateResult.size()});
+      logger.log(Level.FINE,"Creating structr relationships took {0} ms, {1} relationships made.",new Object[]{t2 - t1,intermediateResult.size()});
     }
     long t2=System.currentTimeMillis();
     if (!booleanAttributes.isEmpty()) {
-      for (      AbstractNode node : intermediateResult) {
+      for (      AbstractRelationship rel : intermediateResult) {
         for (        BooleanSearchAttribute attr : booleanAttributes) {
           String key=attr.getKey();
           Boolean searchValue=attr.getValue();
           SearchOperator op=attr.getSearchOperator();
-          Object nodeValue=node.getProperty(key);
+          Object nodeValue=rel.getProperty(key);
           if (op.equals(SearchOperator.NOT)) {
             if ((nodeValue != null) && !(nodeValue.equals(searchValue))) {
-              attr.addToResult(node);
+              attr.addToResult(rel);
             }
           }
  else {
             if ((nodeValue == null) && (searchValue == null)) {
-              attr.addToResult(node);
+              attr.addToResult(rel);
             }
             if ((nodeValue != null) && nodeValue.equals(searchValue)) {
-              attr.addToResult(node);
+              attr.addToResult(rel);
             }
           }
         }
@@ -118,6 +113,6 @@
   long t4=System.currentTimeMillis();
   Collections.sort(finalResult);
   long t5=System.currentTimeMillis();
-  logger.log(Level.FINE,"Sorting nodes took {0} ms.",new Object[]{t5 - t4});
+  logger.log(Level.FINE,"Sorting relationships took {0} ms.",new Object[]{t5 - t4});
   return finalResult;
 }

@@ -1,11 +1,15 @@
 {
+  List<GraphObject> relationResults=new LinkedList<GraphObject>();
   if (wrappedResource != null) {
     List<? extends GraphObject> results=wrappedResource.doGet();
-    List<GraphObject> relationResults=new LinkedList<GraphObject>();
     for (    GraphObject obj : results) {
       relationResults.addAll(namedRelation.getRelationships(obj));
     }
-    return relationResults;
   }
-  throw new IllegalPathException();
+ else {
+    List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
+    searchAttributes.add(Search.andRelType(namedRelation));
+    relationResults.addAll((List<AbstractRelationship>)Services.command(securityContext,SearchRelationshipCommand.class).execute(searchAttributes));
+  }
+  return relationResults;
 }

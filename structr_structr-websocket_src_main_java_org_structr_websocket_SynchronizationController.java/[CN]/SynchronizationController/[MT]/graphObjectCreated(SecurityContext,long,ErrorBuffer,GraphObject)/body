@@ -1,14 +1,19 @@
 {
-  WebSocketMessage message=messageMap.get(transactionKey);
-  if (message != null) {
-    message.setCommand("CREATE");
-    message.setGraphObject(graphObject);
-    List<GraphObject> list=new LinkedList<GraphObject>();
-    list.add(graphObject);
-    message.setResult(list);
+  if (graphObject instanceof AbstractRelationship) {
+    return relationshipCreated(securityContext,transactionKey,errorBuffer,(AbstractRelationship)graphObject);
   }
  else {
-    logger.log(Level.WARNING,"No message found for transaction key {0}",transactionKey);
+    WebSocketMessage message=messageMap.get(transactionKey);
+    if (message != null) {
+      message.setCommand("CREATE");
+      message.setGraphObject(graphObject);
+      List<GraphObject> list=new LinkedList<GraphObject>();
+      list.add(graphObject);
+      message.setResult(list);
+    }
+ else {
+      logger.log(Level.WARNING,"No message found for transaction key {0}",transactionKey);
+    }
+    return false;
   }
-  return false;
 }

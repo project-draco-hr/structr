@@ -1,0 +1,11 @@
+{
+  Notion startNodeNotion=new RelationshipNotion(getStartNodeIdentifier());
+  startNodeNotion.setType(namedRelation.getSourceType());
+  PropertyKey startNodeIdentifier=startNodeNotion.getPrimaryPropertyKey();
+  if (startNodeIdentifier != null) {
+    Object identifierValue=propertySet.get(startNodeIdentifier.name());
+    propertySet.remove(startNodeIdentifier.name());
+    return (AbstractNode)startNodeNotion.getAdapterForSetter(securityContext).adapt(identifierValue);
+  }
+  return null;
+}

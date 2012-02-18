@@ -1,5 +1,6 @@
 {
   GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
+  RelationshipFactory factory=new RelationshipFactory(securityContext);
   List<AbstractRelationship> result=new LinkedList<AbstractRelationship>();
   if (parameters.length == 3) {
     Object arg0=parameters[0];
@@ -32,7 +33,7 @@
     }
     try {
       for (      Relationship r : rels) {
-        result.add(new GenericRelationship(securityContext,r));
+        result.add(factory.createRelationship(securityContext,r));
       }
     }
  catch (    RuntimeException e) {

@@ -5,8 +5,8 @@
     try {
       Command nodeFactory=Services.command(securityContext,NodeFactoryCommand.class);
       Command relsCommand=Services.command(securityContext,NodeRelationshipsCommand.class);
-      List<StructrRelationship> rels=(List<StructrRelationship>)relsCommand.execute(parentNode,RelType.HAS_CHILD,Direction.OUTGOING);
-      for (      StructrRelationship r : rels) {
+      List<AbstractRelationship> rels=(List<AbstractRelationship>)relsCommand.execute(parentNode,RelType.HAS_CHILD,Direction.OUTGOING);
+      for (      AbstractRelationship r : rels) {
         AbstractNode s=(AbstractNode)nodeFactory.execute(r.getEndNode());
         if (securityContext.isAllowed(s,Permission.Read)) {
           nodes.add(s);

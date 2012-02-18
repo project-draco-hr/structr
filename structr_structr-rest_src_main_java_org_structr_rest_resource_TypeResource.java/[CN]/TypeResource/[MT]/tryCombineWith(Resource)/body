@@ -1,9 +1,11 @@
 {
-  if (next instanceof IdResource) {
-    TypedIdResource constraint=new TypedIdResource(securityContext,(IdResource)next,this);
+  if (next instanceof UuidResource) {
+    TypedIdResource constraint=new TypedIdResource(securityContext,(UuidResource)next,this);
     constraint.configureIdProperty(idProperty);
     return constraint;
   }
- else   if (next instanceof TypeResource)   throw new IllegalPathException();
+ else   if (next instanceof TypeResource) {
+    throw new IllegalPathException();
+  }
   return super.tryCombineWith(next);
 }

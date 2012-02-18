@@ -1,8 +1,8 @@
 {
   final SecurityContext securityContext=SecurityContext.getSuperUserInstance();
   AbstractNode rootNode=getNode(webSocketData.getId());
-  TraversalDescription localDesc=Traversal.description().depthFirst().uniqueness(Uniqueness.RELATIONSHIP_PATH).expand(new ResourceExpander(rootNode.getStringProperty(AbstractNode.Key.uuid.name())));
-  final StructrNodeFactory factory=new StructrNodeFactory(securityContext);
+  TraversalDescription localDesc=Traversal.description().depthFirst().uniqueness(Uniqueness.NODE_GLOBAL).expand(new ResourceExpander(rootNode.getStringProperty(AbstractNode.Key.uuid.name())));
+  final NodeFactory factory=new NodeFactory(securityContext);
   final TreeNode root=new TreeNode(null);
   localDesc=localDesc.evaluator(new Evaluator(){
     @Override public Evaluation evaluate(    Path path){

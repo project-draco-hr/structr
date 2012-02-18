@@ -1,6 +1,6 @@
 {
   GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
-  StructrNodeFactory nodeFactory=(StructrNodeFactory)arguments.get("nodeFactory");
+  NodeFactory nodeFactory=(NodeFactory)arguments.get("nodeFactory");
   User user=securityContext.getUser();
   AbstractNode node=null;
   if (graphDb != null) {
@@ -24,17 +24,20 @@
       }
     }
     Object typeObject=attrs.get(AbstractNode.Key.type.name());
-    String nodeType=typeObject != null ? typeObject.toString() : "GenericNode";
+    String nodeType=(typeObject != null) ? typeObject.toString() : "GenericNode";
     node=nodeFactory.createNode(securityContext,graphDb.createNode(),nodeType);
     logger.log(Level.FINE,"Node {0} created",node.getId());
     node.setProperty(AbstractNode.Key.type.name(),nodeType);
     attrs.remove(AbstractNode.Key.type.name());
     for (    Entry<String,Object> attr : attrs.entrySet()) {
-      node.setProperty(attr.getKey(),attr.getValue());
+      Object value=attr.getValue();
+      if (value != null) {
+        node.setProperty(attr.getKey(),value);
+      }
     }
     attrs.clear();
     if ((user != null) && !(user instanceof SuperUser)) {
-      DirectedRelationship rel=new DirectedRelationship(null,RelType.OWNS,Direction.OUTGOING,Cardinality.OneToMany,null);
+      DirectedRelation rel=new DirectedRelation(null,RelType.OWNS,Direction.OUTGOING,Cardinality.OneToMany,null);
       rel.createRelationship(securityContext,user,node);
       logger.log(Level.FINEST,"Relationship to owner {0} added",user.getName());
       Principal principal;
@@ -45,8 +48,8 @@
  else {
         principal=user;
       }
-      StructrRelationship securityRel=(StructrRelationship)createRel.execute(principal,node,RelType.SECURITY,true);
-      securityRel.setAllowed(StructrRelationship.Permission.values());
+      AbstractRelationship securityRel=(AbstractRelationship)createRel.execute(principal,node,RelType.SECURITY,true);
+      securityRel.setAllowed(AbstractRelationship.Permission.values());
       logger.log(Level.FINEST,"All permissions given to {0}",principal.getName());
       node.unlockReadOnlyPropertiesOnce();
       node.setProperty(AbstractNode.Key.createdBy.name(),user.getProperty(AbstractNode.Key.uuid),false);
@@ -57,7 +60,7 @@
   }
   if (node != null) {
     node.onNodeCreation();
-    for (    Transformation<AbstractNode> transformation : EntityContext.getEntityCreationTransformations(node.getClass())) {
+    for (    Transformation<GraphObject> transformation : EntityContext.getEntityCreationTransformations(node.getClass())) {
       transformation.apply(securityContext,node);
     }
   }

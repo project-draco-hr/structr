@@ -1,0 +1,24 @@
+{
+  if (data == null) {
+    logger.log(Level.SEVERE,"Could not create relationship: Empty data container.");
+    return null;
+  }
+  Map properties=data.getProperties();
+  String nodeType=properties.containsKey(AbstractNode.Key.type.name()) ? (String)properties.get(AbstractNode.Key.type.name()) : null;
+  Class nodeClass=(Class)Services.command(securityContext,GetEntityClassCommand.class).execute(nodeType);
+  AbstractRelationship newRel=null;
+  if (nodeClass != null) {
+    try {
+      newRel=(AbstractRelationship)nodeClass.newInstance();
+    }
+ catch (    Throwable t) {
+      newRel=null;
+    }
+  }
+  if (newRel == null) {
+    newRel=new GenericRelationship();
+  }
+  newRel.init(securityContext,data);
+  newRel.commit();
+  return newRel;
+}

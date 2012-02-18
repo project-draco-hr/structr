@@ -1,0 +1,42 @@
+{
+  Relationship dbRel=rel.getRelationship();
+  long id=rel.getId();
+  if (key == null) {
+    logger.log(Level.SEVERE,"Relationship {0} has null key",new Object[]{id});
+    return;
+  }
+  boolean emptyKey=StringUtils.isEmpty((String)key);
+  if (emptyKey) {
+    logger.log(Level.SEVERE,"Relationship {0} has empty, not-null key, removing property",new Object[]{id});
+    dbRel.removeProperty(key);
+    return;
+  }
+  if (!(dbRel.hasProperty(key))) {
+    removeRelationshipPropertyFromAllIndices(dbRel,key);
+    logger.log(Level.FINE,"Relationship {0} has no key {1}, to be sure, it was removed from all indices",new Object[]{id,key});
+    return;
+  }
+  Object value=dbRel.getProperty(key);
+  Object valueForIndexing=rel.getPropertyForIndexing(key);
+  boolean emptyValue=((value instanceof String) && StringUtils.isEmpty((String)value));
+  if (value == null) {
+    logger.log(Level.FINE,"Node {0} has null value for key {1}, removing property",new Object[]{id,key});
+    dbRel.removeProperty(key);
+    removeRelationshipPropertyFromAllIndices(dbRel,key);
+  }
+ else   if (emptyValue) {
+    logger.log(Level.FINE,"Node {0} has empty, non-null value for key {1}, removing property",new Object[]{id,key});
+    dbRel.removeProperty(key);
+    removeRelationshipPropertyFromAllIndices(dbRel,key);
+  }
+ else {
+    removeRelationshipPropertyFromAllIndices(dbRel,key);
+    logger.log(Level.FINE,"Node {0}: Old value for key {1} removed from all indices",new Object[]{id,key});
+    addRelationshipPropertyToFulltextIndex(dbRel,key,valueForIndexing);
+    addRelationshipPropertyToKeywordIndex(dbRel,key,valueForIndexing);
+    if (key.equals(AbstractRelationship.Key.uuid.name())) {
+      addRelationshipPropertyToUuidIndex(dbRel,key,valueForIndexing);
+    }
+    logger.log(Level.FINE,"Node {0}: New value {2} added for key {1}",new Object[]{id,key,value});
+  }
+}

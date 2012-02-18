@@ -6,7 +6,7 @@
   Integer origHeight=originalImage.getHeight();
   if ((origWidth != null) && (origHeight != null)) {
     if ((thumbnailRelationships != null) && !(thumbnailRelationships.isEmpty())) {
-      for (      StructrRelationship r : thumbnailRelationships) {
+      for (      AbstractRelationship r : thumbnailRelationships) {
         Integer w=(Integer)r.getProperty(Key.width.name());
         Integer h=(Integer)r.getProperty(Key.height.name());
         if ((w != null) && (h != null)) {
@@ -36,7 +36,7 @@
         if (thumbnailData != null) {
           Image thumbnail=(Image)createNode.execute(originalImage.getOwnerNode(),typeAttr,contentTypeAttr,isHiddenAttr,isPublicAttr,isVisibleForAuthenticatedUsersAttr,false);
           if (thumbnail != null) {
-            StructrRelationship thumbnailRelationship=(StructrRelationship)createRel.execute(originalImage,thumbnail,RelType.THUMBNAIL);
+            AbstractRelationship thumbnailRelationship=(AbstractRelationship)createRel.execute(originalImage,thumbnail,RelType.THUMBNAIL);
             thumbnailRelationships.add(thumbnailRelationship);
             String relativeFilePath=thumbnail.getId() + "_" + System.currentTimeMillis();
             String path=Services.getFilesPath() + "/" + relativeFilePath;

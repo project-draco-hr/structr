@@ -4,7 +4,12 @@
   for (  Entry<String,Object> entry : attributes.entrySet()) {
     String key=entry.getKey();
     Object value=entry.getValue();
-    vals.add(key,new JsonPrimitive(value.toString()));
+    if (value == null) {
+      vals.add(key,new JsonNull());
+    }
+ else {
+      vals.add(key,new JsonPrimitive(value.toString()));
+    }
   }
   obj.add(getErrorToken(),vals);
   return obj;

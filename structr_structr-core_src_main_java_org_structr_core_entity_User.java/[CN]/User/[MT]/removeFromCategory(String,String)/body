@@ -21,16 +21,16 @@
       logger.log(Level.SEVERE,"Category not found!");
       return;
     }
-    StructrRelationship relationshipToRemove=null;
-    List<StructrRelationship> outgoingRelationships=cat.getOutgoingLinkRelationships();
-    for (    StructrRelationship rel : outgoingRelationships) {
+    AbstractRelationship relationshipToRemove=null;
+    List<AbstractRelationship> outgoingRelationships=cat.getOutgoingLinkRelationships();
+    for (    AbstractRelationship rel : outgoingRelationships) {
       AbstractNode endNode=rel.getEndNode();
       if (endNode.equals(object)) {
         relationshipToRemove=rel;
       }
     }
     if (relationshipToRemove != null) {
-      final StructrRelationship relToDel=relationshipToRemove;
+      final AbstractRelationship relToDel=relationshipToRemove;
       Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
         @Override public Object execute() throws FrameworkException {
           Services.command(securityContext,DeleteRelationshipCommand.class).execute(relToDel);

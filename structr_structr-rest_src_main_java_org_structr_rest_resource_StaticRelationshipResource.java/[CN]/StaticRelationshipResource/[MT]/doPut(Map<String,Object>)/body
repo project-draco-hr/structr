@@ -2,7 +2,7 @@
   List<GraphObject> results=typedIdResource.doGet();
   final Command searchNode=Services.command(securityContext,SearchNodeCommand.class);
   if (results != null) {
-    final DirectedRelationship staticRel=findDirectedRelationship(typedIdResource,typeResource);
+    final DirectedRelation staticRel=findDirectedRelation(typedIdResource,typeResource);
     if (staticRel != null) {
       final AbstractNode startNode=typedIdResource.getTypesafeNode();
       if (startNode != null) {
@@ -10,10 +10,10 @@
           logger.log(Level.INFO,"Read-only property on {1}: {0}",new Object[]{startNode.getClass(),typeResource.getRawType()});
           return new RestMethodResult(HttpServletResponse.SC_FORBIDDEN);
         }
-        final List<StructrRelationship> rels=startNode.getRelationships(staticRel.getRelType(),staticRel.getDirection());
+        final List<AbstractRelationship> rels=startNode.getRelationships(staticRel.getRelType(),staticRel.getDirection());
         StructrTransaction transaction=new StructrTransaction(){
           @Override public Object execute() throws FrameworkException {
-            for (            StructrRelationship rel : rels) {
+            for (            AbstractRelationship rel : rels) {
               AbstractNode otherNode=rel.getOtherNode(startNode);
               String otherNodeType=otherNode.getType();
               String id=otherNode.getStringProperty(AbstractNode.Key.uuid.name());

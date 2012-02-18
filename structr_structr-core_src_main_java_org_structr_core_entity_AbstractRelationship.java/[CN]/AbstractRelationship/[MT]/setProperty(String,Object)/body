@@ -1,0 +1,51 @@
+{
+  Class type=this.getClass();
+  if (EntityContext.isReadOnlyProperty(type,key) || (EntityContext.isWriteOnceProperty(type,key) && (dbRelationship != null) && dbRelationship.hasProperty(key))) {
+    if (readOnlyPropertiesUnlocked) {
+      readOnlyPropertiesUnlocked=false;
+    }
+ else {
+      throw new FrameworkException(type.getSimpleName(),new ReadOnlyPropertyToken(key));
+    }
+  }
+  PropertyGroup propertyGroup=EntityContext.getPropertyGroup(type,key);
+  if (propertyGroup != null) {
+    propertyGroup.setGroupedProperties(value,this);
+    return;
+  }
+  PropertyConverter converter=EntityContext.getPropertyConverter(securityContext,type,key);
+  final Object convertedValue;
+  if (converter != null) {
+    Value conversionValue=EntityContext.getPropertyConversionParameter(type,key);
+    convertedValue=converter.convertForSetter(value,conversionValue);
+  }
+ else {
+    convertedValue=value;
+  }
+  final Object oldValue=getProperty(key);
+  if (((convertedValue == null) && (oldValue == null)) || ((convertedValue != null) && (oldValue != null) && convertedValue.equals(oldValue))) {
+    return;
+  }
+  StructrTransaction transaction=new StructrTransaction(){
+    @Override public Object execute() throws FrameworkException {
+      try {
+        if (convertedValue == null) {
+          dbRelationship.removeProperty(key);
+        }
+ else {
+          if (convertedValue instanceof Date) {
+            dbRelationship.setProperty(key,((Date)convertedValue).getTime());
+          }
+ else {
+            dbRelationship.setProperty(key,convertedValue);
+          }
+        }
+      }
+  finally {
+      }
+      return null;
+    }
+  }
+;
+  Services.command(securityContext,TransactionCommand.class).execute(transaction);
+}

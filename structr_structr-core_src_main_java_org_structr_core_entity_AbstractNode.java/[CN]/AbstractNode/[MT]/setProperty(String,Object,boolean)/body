@@ -17,10 +17,25 @@
     propertyGroup.setGroupedProperties(value,this);
     return;
   }
-  DirectedRelationship rel=EntityContext.getDirectedRelationship(type,key);
+  DirectedRelation rel=EntityContext.getDirectedRelation(type,key);
   if (rel != null) {
-    GraphObject graphObject=rel.getNotion().getAdapterForSetter(securityContext).adapt(value);
-    rel.createRelationship(securityContext,this,graphObject);
+    if (value != null) {
+      GraphObject graphObject=rel.getNotion().getAdapterForSetter(securityContext).adapt(value);
+      rel.createRelationship(securityContext,this,graphObject);
+    }
+ else {
+      Object existingValue=getProperty(key);
+      if (existingValue instanceof IterableAdapter) {
+        for (        Object val : ((IterableAdapter)existingValue)) {
+          GraphObject graphObject=rel.getNotion().getAdapterForSetter(securityContext).adapt(val);
+          rel.removeRelationship(securityContext,this,graphObject);
+        }
+      }
+ else {
+        GraphObject graphObject=rel.getNotion().getAdapterForSetter(securityContext).adapt(existingValue);
+        rel.removeRelationship(securityContext,this,graphObject);
+      }
+    }
   }
  else {
     PropertyConverter converter=EntityContext.getPropertyConverter(securityContext,type,key);

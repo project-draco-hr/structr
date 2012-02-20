@@ -11,12 +11,12 @@
   if (this.equals(principal)) {
     return true;
   }
-  StructrRelationship r=getSecurityRelationship(principal);
+  AbstractRelationship r=getSecurityRelationship(principal);
   if ((r != null) && r.isAllowed(permission)) {
     return true;
   }
-  List<StructrRelationship> rels=principal.getIncomingChildRelationships();
-  for (  StructrRelationship sr : rels) {
+  List<AbstractRelationship> rels=principal.getIncomingChildRelationships();
+  for (  AbstractRelationship sr : rels) {
     AbstractNode node=sr.getStartNode();
     if (!(node instanceof Group)) {
       continue;

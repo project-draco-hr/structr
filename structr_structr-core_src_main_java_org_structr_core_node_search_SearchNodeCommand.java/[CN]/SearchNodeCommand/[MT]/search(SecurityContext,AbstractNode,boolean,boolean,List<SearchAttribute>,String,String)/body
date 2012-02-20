@@ -1,7 +1,7 @@
 {
   GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
   Index<Node> index;
-  StructrNodeFactory nodeFactory=(StructrNodeFactory)arguments.get("nodeFactory");
+  NodeFactory nodeFactory=(NodeFactory)arguments.get("nodeFactory");
   List<AbstractNode> finalResult=new LinkedList<AbstractNode>();
   boolean allExactMatch=true;
   if (graphDb != null) {
@@ -99,7 +99,7 @@
       }
       for (      BooleanSearchAttribute attr : booleanAttributes) {
         SearchOperator op=attr.getSearchOperator();
-        List<AbstractNode> result=attr.getResult();
+        List<GraphObject> result=attr.getResult();
         if (op.equals(SearchOperator.AND)) {
           intermediateResult=ListUtils.intersection(intermediateResult,result);
         }

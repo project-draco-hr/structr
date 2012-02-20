@@ -1,14 +1,12 @@
 {
-  return (StructrRelationship)Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+  return (AbstractRelationship)Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
     @Override public Object execute() throws FrameworkException {
-      StructrRelationship newRel=null;
-      Relationship neoRelationship=null;
       Node startNode=fromNode.getNode();
       Node endNode=toNode.getNode();
-      neoRelationship=startNode.createRelationshipTo(endNode,relType);
-      newRel=new StructrRelationship(securityContext,neoRelationship);
+      Relationship rel=startNode.createRelationshipTo(endNode,relType);
+      AbstractRelationship newRel=relationshipFactory.createRelationship(securityContext,rel);
       if (newRel != null) {
-        for (        Transformation<StructrRelationship> transformation : EntityContext.getRelationshipCreationTransformations(relType,fromNode.getClass(),toNode.getClass())) {
+        for (        Transformation<GraphObject> transformation : EntityContext.getEntityCreationTransformations(newRel.getClass())) {
           transformation.apply(securityContext,newRel);
         }
       }

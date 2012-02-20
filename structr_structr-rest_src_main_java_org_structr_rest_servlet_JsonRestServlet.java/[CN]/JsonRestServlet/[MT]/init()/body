@@ -1,6 +1,9 @@
 {
   this.resourceMap=new LinkedHashMap<Pattern,Class>();
   this.propertyView=new ThreadLocalPropertyView();
+  for (  NamedRelation namedRelation : EntityContext.getNamedRelations()) {
+    resourceMap.put(Pattern.compile(namedRelation.getName()),NamedRelationResource.class);
+  }
   String externalProviderName=this.getInitParameter(SERVLET_PARAMETER_RESOURCE_PROVIDER);
   if (externalProviderName != null) {
     String[] parts=externalProviderName.split("[, ]+");

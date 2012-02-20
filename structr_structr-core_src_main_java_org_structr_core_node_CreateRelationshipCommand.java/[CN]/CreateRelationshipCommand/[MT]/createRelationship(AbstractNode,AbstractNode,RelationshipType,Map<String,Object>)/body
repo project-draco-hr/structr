@@ -6,6 +6,9 @@
       Relationship rel=startNode.createRelationshipTo(endNode,relType);
       AbstractRelationship newRel=relationshipFactory.createRelationship(securityContext,rel);
       if (newRel != null) {
+        if (properties != null && !properties.isEmpty()) {
+          newRel.setProperties(properties);
+        }
         for (        Transformation<GraphObject> transformation : EntityContext.getEntityCreationTransformations(newRel.getClass())) {
           transformation.apply(securityContext,newRel);
         }

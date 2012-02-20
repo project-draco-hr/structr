@@ -18,7 +18,7 @@
     if ((arg0 instanceof AbstractNode) && (arg1 instanceof AbstractNode)) {
       AbstractNode startNode=(AbstractNode)arg0;
       AbstractNode endNode=(AbstractNode)arg1;
-      return createRelationship(startNode,endNode,relType);
+      return createRelationship(startNode,endNode,relType,null);
     }
  else {
       throw new UnsupportedArgumentError("Wrong argument type(s).");
@@ -29,6 +29,7 @@
     Object arg1=parameters[1];
     Object arg2=parameters[2];
     Object arg3=parameters[3];
+    Map<String,Object> properties=null;
     RelationshipType relType=null;
     if (arg2 instanceof String) {
       relType=getRelationshipTypeFor((String)arg2);
@@ -43,6 +44,9 @@
     if (arg3 instanceof Boolean) {
       checkDuplicates=((Boolean)arg3) == true;
     }
+ else     if (arg3 instanceof Map) {
+      properties=(Map<String,Object>)arg3;
+    }
     if ((arg0 instanceof AbstractNode) && (arg1 instanceof AbstractNode)) {
       AbstractNode startNode=(AbstractNode)arg0;
       AbstractNode endNode=(AbstractNode)arg1;
@@ -55,7 +59,7 @@
           }
         }
       }
-      return createRelationship(startNode,endNode,relType);
+      return createRelationship(startNode,endNode,relType,properties);
     }
  else {
       throw new UnsupportedArgumentError("Wrong argument type(s).");

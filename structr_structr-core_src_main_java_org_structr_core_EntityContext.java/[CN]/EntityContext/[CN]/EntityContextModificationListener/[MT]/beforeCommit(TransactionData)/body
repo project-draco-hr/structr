@@ -12,6 +12,7 @@
     RelationshipFactory relFactory=new RelationshipFactory(securityContext);
     Set<AbstractNode> modifiedNodes=new LinkedHashSet<AbstractNode>();
     Set<AbstractNode> createdNodes=new LinkedHashSet<AbstractNode>();
+    Set<AbstractRelationship> modifiedRels=new LinkedHashSet<AbstractRelationship>();
     Set<AbstractRelationship> createdRels=new LinkedHashSet<AbstractRelationship>();
     Set<AbstractRelationship> deletedRels=new LinkedHashSet<AbstractRelationship>();
     begin(securityContext,transactionKey,errorBuffer);
@@ -65,13 +66,29 @@
       indexNodeCommand.execute(entity,key);
       modifiedNodes.add(entity);
     }
+    for (    PropertyEntry<Relationship> entry : data.assignedRelationshipProperties()) {
+      AbstractRelationship entity=relFactory.createRelationship(securityContext,entry.entity());
+      String key=entry.key();
+      Object value=entry.value();
+      Set<PropertyValidator> validators=EntityContext.getPropertyValidators(securityContext,entity.getClass(),key);
+      if (validators != null) {
+        for (        PropertyValidator validator : validators) {
+          hasError|=!(validator.isValid(entity,key,value,errorBuffer));
+        }
+      }
+      hasError|=propertyModified(securityContext,transactionKey,errorBuffer,entity,key,entry.previouslyCommitedValue(),value);
+      indexRelationshipCommand.execute(entity,key);
+      modifiedRels.add(entity);
+    }
     for (    AbstractNode node : modifiedNodes) {
       if (!createdNodes.contains(node)) {
         hasError|=graphObjectModified(securityContext,transactionKey,errorBuffer,node);
       }
     }
-    for (    AbstractRelationship rel : createdRels) {
-      indexRelationshipCommand.execute(rel);
+    for (    AbstractRelationship rel : modifiedRels) {
+      if (!createdRels.contains(rel)) {
+        hasError|=graphObjectModified(securityContext,transactionKey,errorBuffer,rel);
+      }
     }
     hasError|=commit(securityContext,transactionKey,errorBuffer);
     if (hasError) {

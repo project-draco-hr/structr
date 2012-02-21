@@ -1,0 +1,18 @@
+{
+  final SecurityContext securityContext=SecurityContext.getSuperUserInstance();
+  Command transactionCommand=Services.command(securityContext,TransactionCommand.class);
+  Long nodes=(Long)transactionCommand.execute(new StructrTransaction(){
+    @Override public Object execute() throws FrameworkException {
+      long rels=0;
+      Command indexer=Services.command(securityContext,IndexRelationshipCommand.class);
+      List<AbstractRelationship> allRelationships=(List<AbstractRelationship>)Services.command(securityContext,GetAllRelationships.class).execute();
+      for (      AbstractRelationship s : allRelationships) {
+        indexer.execute(s);
+        rels++;
+      }
+      return rels;
+    }
+  }
+);
+  return nodes;
+}

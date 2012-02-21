@@ -41,12 +41,12 @@
     }
     for (    Relationship rel : data.createdRelationships()) {
       AbstractRelationship relationship=relFactory.createRelationship(securityContext,rel);
-      hasError|=graphObjectCreated(securityContext,transactionKey,errorBuffer,relationship);
+      hasError|=relationshipCreated(securityContext,transactionKey,errorBuffer,relationship);
       createdRels.add(relationship);
     }
     for (    Relationship rel : data.deletedRelationships()) {
       AbstractRelationship relationship=relFactory.createRelationship(securityContext,rel);
-      hasError|=graphObjectDeleted(securityContext,transactionKey,errorBuffer,removedRelProperties.get(rel));
+      hasError|=relationshipDeleted(securityContext,transactionKey,errorBuffer,relationship);
       deletedRels.add(relationship);
     }
     for (    Node node : data.deletedNodes()) {

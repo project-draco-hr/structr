@@ -8,11 +8,14 @@
         Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
         Command nodeFactory=Services.command(securityContext,NodeFactoryCommand.class);
         AbstractNode startNode=(AbstractNode)nodeFactory.execute(getStartNode());
-        AbstractNode newEndNode=(AbstractNode)findNode.execute(endNodeId);
+        AbstractNode newEndNode=getNodeByUuid(endNodeId);
         if (newEndNode != null) {
           RelationshipType type=dbRelationship.getType();
+          properties=getProperties();
           deleteRel.execute(dbRelationship);
-          dbRelationship=((AbstractRelationship)createRel.execute(type,startNode,newEndNode)).getRelationship();
+          AbstractRelationship newRel=(AbstractRelationship)createRel.execute(startNode,newEndNode,type);
+          newRel.setProperties(properties);
+          dbRelationship=newRel.getRelationship();
         }
         return (null);
       }

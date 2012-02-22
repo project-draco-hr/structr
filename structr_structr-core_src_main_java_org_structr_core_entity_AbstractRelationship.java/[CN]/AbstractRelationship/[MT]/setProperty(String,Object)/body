@@ -1,4 +1,14 @@
 {
+  PropertyKey startNodeIdKey=getStartNodeIdKey();
+  PropertyKey endNodeIdKey=getEndNodeIdKey();
+  if (startNodeIdKey != null && key.equals(startNodeIdKey.name())) {
+    setStartNodeId((String)value);
+    return;
+  }
+  if (endNodeIdKey != null && key.equals(endNodeIdKey.name())) {
+    setEndNodeId((String)value);
+    return;
+  }
   Class type=this.getClass();
   if (EntityContext.isReadOnlyProperty(type,key) || (EntityContext.isWriteOnceProperty(type,key) && (dbRelationship != null) && dbRelationship.hasProperty(key))) {
     if (readOnlyPropertiesUnlocked) {
@@ -17,6 +27,7 @@
   final Object convertedValue;
   if (converter != null) {
     Value conversionValue=EntityContext.getPropertyConversionParameter(type,key);
+    converter.setCurrentObject(this);
     convertedValue=converter.convertForSetter(value,conversionValue);
   }
  else {

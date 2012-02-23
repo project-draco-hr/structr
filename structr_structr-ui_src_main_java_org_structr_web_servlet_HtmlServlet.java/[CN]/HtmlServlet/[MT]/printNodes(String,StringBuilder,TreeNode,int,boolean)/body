@@ -25,11 +25,15 @@
       String id=node.getStringProperty("uuid");
       buffer.append("<").append(tag);
       if (edit && (id != null)) {
+        if (depth == 1) {
+          buffer.append(" structr_resource_id='").append(resourceId).append("'");
+        }
         if (node instanceof Content) {
           buffer.append(" class=\"structr-content-container\" structr_content_id='").append(id).append("'");
         }
  else {
-          buffer.append(" class=\"structr-element-container ").append(node.getProperty("_html_class")).append("\" structr_element_id='").append(id).append("'");
+          String htmlClass=node.getStringProperty("_html_class");
+          buffer.append(" class=\"structr-element-container ").append(htmlClass != null ? htmlClass : "").append("\" structr_element_id='").append(id).append("'");
         }
       }
       if (node instanceof HtmlElement) {
@@ -47,7 +51,7 @@
     }
   }
   for (  TreeNode subNode : root.getChildren()) {
-    printNodes(buffer,subNode,depth + 1,inBody);
+    printNodes(resourceId,buffer,subNode,depth + 1,inBody);
   }
   if (tag != null) {
     buffer.append("</").append(tag).append(">");

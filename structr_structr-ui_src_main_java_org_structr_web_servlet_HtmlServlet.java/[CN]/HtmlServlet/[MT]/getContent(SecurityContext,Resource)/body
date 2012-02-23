@@ -1,7 +1,7 @@
 {
   TraversalDescription localDesc=desc.expand(new ResourceExpander(resource.getStringProperty(AbstractNode.Key.uuid.name())));
   final NodeFactory factory=new NodeFactory(securityContext);
-  final TreeNode root=new TreeNode(null);
+  final TreeNode root=new TreeNode(resource);
   localDesc=localDesc.evaluator(new Evaluator(){
     @Override public Evaluation evaluate(    Path path){
       Node node=path.endNode();
@@ -41,9 +41,8 @@
   }
 );
   for (  Node node : localDesc.traverse(resource.getNode()).nodes()) {
-    String name=node.hasProperty("name") ? (String)node.getProperty("name") : "unknown";
   }
   StringBuilder buffer=new StringBuilder(10000);
-  printNodes(buffer,root,0,false);
+  printNodes(resource.getStringProperty(Resource.Key.uuid),buffer,root,0,false);
   return buffer.toString();
 }

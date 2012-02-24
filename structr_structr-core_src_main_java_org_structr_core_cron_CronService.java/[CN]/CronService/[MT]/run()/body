@@ -11,6 +11,7 @@
           Services.command(securityContext,ProcessTaskCommand.class).execute(task);
           cronEntries.add(entry);
           logger.log(Level.FINEST,"Task {0} re-inserted, queue now contains {1} entries.",new Object[]{taskClassName,cronEntries.size()});
+          Thread.sleep(GRANULARITY_UNIT.toMillis(GRANULARITY));
         }
  catch (        Throwable t) {
           logger.log(Level.WARNING,"Could not start task {0}: {1}",new Object[]{taskClassName,t.getMessage()});

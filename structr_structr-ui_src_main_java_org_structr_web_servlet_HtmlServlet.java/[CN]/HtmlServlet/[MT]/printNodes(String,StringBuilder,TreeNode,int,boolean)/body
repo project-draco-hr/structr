@@ -15,7 +15,7 @@
       buffer.append("<a href=\"").append(link.getEndNode().getName()).append("\">");
     }
     tag=node.getStringProperty("tag");
-    if (edit && inBody && (tag == null)&& (node instanceof Content)) {
+    if (edit && inBody && (node instanceof Content)) {
       tag="div";
     }
     if (tag != null) {
@@ -35,6 +35,8 @@
           String htmlClass=node.getStringProperty("_html_class");
           buffer.append(" class=\"structr-element-container ").append(htmlClass != null ? htmlClass : "").append("\" structr_element_id='").append(id).append("'");
         }
+        buffer.append(" structr_type='").append(node.getType()).append("'");
+        buffer.append(" structr_name='").append(node.getName()).append("'");
       }
       if (node instanceof HtmlElement) {
         for (        String attribute : EntityContext.getPropertySet(node.getClass(),PropertyView.Html)) {

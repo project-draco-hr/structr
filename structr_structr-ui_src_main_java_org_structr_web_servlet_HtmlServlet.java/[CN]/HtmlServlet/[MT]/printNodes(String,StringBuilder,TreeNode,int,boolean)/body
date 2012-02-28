@@ -33,7 +33,7 @@
         }
  else {
           String htmlClass=node.getStringProperty("_html_class");
-          buffer.append(" class=\"structr-element-container ").append(htmlClass != null ? htmlClass : "").append("\" structr_element_id='").append(id).append("'");
+          buffer.append(" class=\"structr-element-container ").append((htmlClass != null) ? htmlClass : "").append("\" structr_element_id='").append(id).append("'");
         }
         buffer.append(" structr_type='").append(node.getType()).append("'");
         buffer.append(" structr_name='").append(node.getName()).append("'");
@@ -55,7 +55,7 @@
   for (  TreeNode subNode : root.getChildren()) {
     printNodes(resourceId,buffer,subNode,depth + 1,inBody);
   }
-  if (tag != null) {
+  if ((tag != null) && !(ArrayUtils.contains(html5VoidTags,tag))) {
     buffer.append("</").append(tag).append(">");
   }
   if (link != null) {

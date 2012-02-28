@@ -7,7 +7,7 @@
     String content=null;
     String id=null;
     StringBuilder classString=new StringBuilder();
-    if (type.equals("#declaration") || type.equals("#comment") || type.equals("#data")) {
+    if (ArrayUtils.contains(ignoreElementNames,type)) {
       continue;
     }
     if (node instanceof Element) {
@@ -17,6 +17,14 @@
         classString.append(cls).append(" ");
       }
       id=el.id();
+    }
+    if (type.equals("#data")) {
+      type="Content";
+      tag="";
+      content=((DataNode)node).getWholeData();
+      if (StringUtils.isBlank(content)) {
+        continue;
+      }
     }
     if (type.equals("#text")) {
       type="Content";
@@ -35,7 +43,7 @@
       attrs.add(new NodeAttribute(PropertyView.Html + "id",id));
     }
     if (StringUtils.isNotBlank(classString.toString())) {
-      attrs.add(new NodeAttribute(PropertyView.Html + "class",classString.toString()));
+      attrs.add(new NodeAttribute(PropertyView.Html + "class",StringUtils.trim(classString.toString())));
     }
     for (    Attribute nodeAttr : node.attributes()) {
       attrs.add(new NodeAttribute(PropertyView.Html + nodeAttr.getKey(),nodeAttr.getValue()));

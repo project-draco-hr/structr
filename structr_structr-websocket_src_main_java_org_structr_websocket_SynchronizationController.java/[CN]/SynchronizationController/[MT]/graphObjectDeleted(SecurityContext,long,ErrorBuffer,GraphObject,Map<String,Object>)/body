@@ -1,12 +1,12 @@
 {
   AbstractRelationship relationship;
-  if (graphObject instanceof AbstractRelationship) {
-    relationship=(AbstractRelationship)graphObject;
+  if (obj != null && obj instanceof AbstractRelationship) {
+    relationship=(AbstractRelationship)obj;
     AbstractNode startNode=relationship.getStartNode();
     AbstractNode endNode=relationship.getEndNode();
     WebSocketMessage message=messageMap.get(transactionKey);
     if (message != null) {
-      message.setCommand("ADD");
+      message.setCommand("REMOVE");
       message.setGraphObject(relationship);
       message.setId(startNode.getStringProperty("uuid"));
       message.setData("id",endNode.getStringProperty("uuid"));
@@ -20,11 +20,9 @@
  else {
     WebSocketMessage message=messageMap.get(transactionKey);
     if (message != null) {
-      message.setCommand("CREATE");
-      message.setGraphObject(graphObject);
-      List<GraphObject> list=new LinkedList<GraphObject>();
-      list.add(graphObject);
-      message.setResult(list);
+      String uuid=properties.get("uuid").toString();
+      message.setId(uuid);
+      message.setCommand("DELETE");
     }
  else {
       logger.log(Level.WARNING,"No message found for transaction key {0}",transactionKey);

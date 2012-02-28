@@ -1,0 +1,17 @@
+{
+  final Document page;
+  try {
+    page=Jsoup.parse(new URL(address),timeout);
+  }
+ catch (  IOException ioe) {
+    throw new FrameworkException(500,"Error while importing content from " + address);
+  }
+  Services.command(SecurityContext.getSuperUserInstance(),TransactionCommand.class).execute(new StructrTransaction(){
+    @Override public Object execute() throws FrameworkException {
+      AbstractNode page1=createNode("Resource",name);
+      createChildNodes(page,page1,page1.getStringProperty(AbstractNode.Key.uuid));
+      return null;
+    }
+  }
+);
+}

@@ -1,0 +1,28 @@
+{
+  Command transaction=Services.command(securityContext,TransactionCommand.class);
+  try {
+    transaction.execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        Command findNode=Services.command(securityContext,FindNodeCommand.class);
+        Command deleteRel=Services.command(securityContext,DeleteRelationshipCommand.class);
+        Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
+        Command nodeFactory=Services.command(securityContext,NodeFactoryCommand.class);
+        AbstractNode startNode=(AbstractNode)nodeFactory.execute(getStartNode());
+        AbstractNode newEndNode=getNodeByUuid(endNodeId);
+        if (newEndNode != null) {
+          RelationshipType type=dbRelationship.getType();
+          properties=getProperties();
+          deleteRel.execute(dbRelationship);
+          AbstractRelationship newRel=(AbstractRelationship)createRel.execute(startNode,newEndNode,type);
+          newRel.setProperties(properties);
+          dbRelationship=newRel.getRelationship();
+        }
+        return (null);
+      }
+    }
+);
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"Unable to set end node id",fex);
+  }
+}

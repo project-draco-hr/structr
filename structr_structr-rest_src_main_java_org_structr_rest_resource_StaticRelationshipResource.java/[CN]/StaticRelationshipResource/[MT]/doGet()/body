@@ -3,7 +3,7 @@
   if (results != null) {
     AbstractNode sourceNode=typedIdResource.getTypesafeNode();
     if (sourceNode != null) {
-      DirectedRelationship staticRel=findDirectedRelationship(typedIdResource,typeResource);
+      DirectedRelation staticRel=findDirectedRelation(typedIdResource,typeResource);
       if (staticRel != null) {
         List<AbstractNode> relatedNodes=staticRel.getRelatedNodes(securityContext,sourceNode);
         List<SearchAttribute> dummyList=new LinkedList<SearchAttribute>();
@@ -23,7 +23,7 @@
       PropertyConverter converter=EntityContext.getPropertyConverter(securityContext,type,key);
       if (converter != null) {
         Value conversionValue=EntityContext.getPropertyConversionParameter(type,key);
-        converter.setCurrentNode(sourceNode);
+        converter.setCurrentObject(sourceNode);
         converter.setRawMode(true);
         Object value=converter.convertForGetter(null,conversionValue);
         StringBuilder msgBuilder=new StringBuilder();

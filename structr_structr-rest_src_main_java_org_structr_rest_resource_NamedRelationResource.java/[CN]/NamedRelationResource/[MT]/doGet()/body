@@ -1,0 +1,17 @@
+{
+  List<GraphObject> relationResults=new LinkedList<GraphObject>();
+  if (wrappedResource != null) {
+    List<? extends GraphObject> results=wrappedResource.doGet();
+    for (    GraphObject obj : results) {
+      if (obj instanceof AbstractNode) {
+        relationResults.addAll(namedRelation.getRelationships((AbstractNode)obj));
+      }
+    }
+  }
+ else {
+    List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
+    searchAttributes.add(Search.andRelType(namedRelation));
+    relationResults.addAll((List<AbstractRelationship>)Services.command(securityContext,SearchRelationshipCommand.class).execute(searchAttributes));
+  }
+  return relationResults;
+}

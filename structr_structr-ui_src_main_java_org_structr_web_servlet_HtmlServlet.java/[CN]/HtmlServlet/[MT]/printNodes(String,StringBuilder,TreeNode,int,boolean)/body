@@ -1,0 +1,64 @@
+{
+  AbstractNode node=root.getData();
+  String content=null;
+  String tag=null;
+  AbstractRelationship link=null;
+  if (node != null) {
+    if (node instanceof Content) {
+      content=node.getStringProperty("content");
+      List<AbstractRelationship> links=node.getOutgoingLinkRelationships();
+      if ((links != null) && !links.isEmpty()) {
+        link=links.get(0);
+      }
+    }
+    if (link != null) {
+      buffer.append("<a href=\"").append(link.getEndNode().getName()).append("\">");
+    }
+    tag=node.getStringProperty("tag");
+    if (edit && inBody && (node instanceof Content)) {
+      tag="div";
+    }
+    if (tag != null) {
+      if (tag.equals("body")) {
+        inBody=true;
+      }
+      String id=node.getStringProperty("uuid");
+      buffer.append("<").append(tag);
+      if (edit && (id != null)) {
+        if (depth == 1) {
+          buffer.append(" structr_resource_id='").append(resourceId).append("'");
+        }
+        if (node instanceof Content) {
+          buffer.append(" class=\"structr-content-container\" structr_content_id='").append(id).append("'");
+        }
+ else {
+          String htmlClass=node.getStringProperty("_html_class");
+          buffer.append(" class=\"structr-element-container ").append((htmlClass != null) ? htmlClass : "").append("\" structr_element_id='").append(id).append("'");
+        }
+        buffer.append(" structr_type='").append(node.getType()).append("'");
+        buffer.append(" structr_name='").append(node.getName()).append("'");
+      }
+      if (node instanceof HtmlElement) {
+        for (        String attribute : EntityContext.getPropertySet(node.getClass(),PropertyView.Html)) {
+          if (node.getProperty(attribute) != null) {
+            String key=attribute.substring(PropertyView.Html.length());
+            buffer.append(" ").append(key).append("=\"").append(node.getProperty(attribute)).append("\"");
+          }
+        }
+      }
+      buffer.append(">");
+    }
+    if (content != null) {
+      buffer.append(content);
+    }
+  }
+  for (  TreeNode subNode : root.getChildren()) {
+    printNodes(resourceId,buffer,subNode,depth + 1,inBody);
+  }
+  if ((tag != null) && !(ArrayUtils.contains(html5VoidTags,tag))) {
+    buffer.append("</").append(tag).append(">");
+  }
+  if (link != null) {
+    buffer.append("</a>");
+  }
+}

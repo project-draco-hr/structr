@@ -1,0 +1,19 @@
+{
+  AbstractRelationship newRel=null;
+  try {
+    String sourceNodeType=(String)relationship.getStartNode().getProperty(AbstractNode.Key.type.name());
+    String destNodeType=(String)relationship.getEndNode().getProperty(AbstractNode.Key.type.name());
+    Class relClass=EntityContext.getNamedRelationClass(sourceNodeType,destNodeType,relType);
+    if (relClass != null) {
+      newRel=(AbstractRelationship)relClass.newInstance();
+    }
+  }
+ catch (  Throwable t) {
+    newRel=null;
+  }
+  if (newRel == null) {
+    newRel=new GenericRelationship();
+  }
+  newRel.init(securityContext,relationship);
+  return newRel;
+}

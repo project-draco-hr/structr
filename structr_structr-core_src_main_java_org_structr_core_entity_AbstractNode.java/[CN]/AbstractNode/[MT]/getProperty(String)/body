@@ -1,6 +1,13 @@
 {
   Object value=null;
   Class type=this.getClass();
+  if (key == null) {
+    logger.log(Level.SEVERE,"Invalid property key: null");
+    return null;
+  }
+  if (dbNode == null) {
+    return null;
+  }
   PropertyGroup propertyGroup=EntityContext.getPropertyGroup(type,key);
   if (propertyGroup != null) {
     return propertyGroup.getGroupedProperties(this);
@@ -26,12 +33,12 @@
         logger.log(Level.WARNING,"Error while setting property",fex);
       }
     }
-    if ((key != null) && (dbNode != null) && dbNode.hasProperty(key)) {
+    if ((key != null) && (dbNode != null)) {
       value=dbNode.getProperty(key);
     }
   }
  else {
-    DirectedRelationship rel=EntityContext.getDirectedRelationship(type,key);
+    DirectedRelation rel=EntityContext.getDirectedRelation(type,key);
     if (rel != null) {
       Notion notion=rel.getNotion();
 switch (rel.getCardinality()) {
@@ -51,10 +58,13 @@ case ManyToOne:
 }
 }
 }
+if (value == null) {
+value=EntityContext.getDefaultValue(type,key);
+}
 PropertyConverter converter=EntityContext.getPropertyConverter(securityContext,type,key);
 if (converter != null) {
 Value conversionValue=EntityContext.getPropertyConversionParameter(type,key);
-converter.setCurrentNode(this);
+converter.setCurrentObject(this);
 value=converter.convertForGetter(value,conversionValue);
 }
 return value;

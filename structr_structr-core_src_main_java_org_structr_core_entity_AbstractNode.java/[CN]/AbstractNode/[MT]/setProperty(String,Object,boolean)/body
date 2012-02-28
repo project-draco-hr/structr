@@ -17,7 +17,7 @@
     propertyGroup.setGroupedProperties(value,this);
     return;
   }
-  DirectedRelationship rel=EntityContext.getDirectedRelationship(type,key);
+  DirectedRelation rel=EntityContext.getDirectedRelation(type,key);
   if (rel != null) {
     if (value != null) {
       GraphObject graphObject=rel.getNotion().getAdapterForSetter(securityContext).adapt(value);
@@ -25,6 +25,7 @@
     }
  else {
       Object existingValue=getProperty(key);
+      if (existingValue == null)       return;
       if (existingValue instanceof IterableAdapter) {
         for (        Object val : ((IterableAdapter)existingValue)) {
           GraphObject graphObject=rel.getNotion().getAdapterForSetter(securityContext).adapt(val);
@@ -42,7 +43,7 @@
     final Object convertedValue;
     if (converter != null) {
       Value conversionValue=EntityContext.getPropertyConversionParameter(type,key);
-      converter.setCurrentNode(this);
+      converter.setCurrentObject(this);
       convertedValue=converter.convertForSetter(value,conversionValue);
     }
  else {

@@ -1,14 +1,34 @@
 {
-  WebSocketMessage message=messageMap.get(transactionKey);
-  if (message != null) {
-    message.setCommand("CREATE");
-    message.setGraphObject(graphObject);
-    List<GraphObject> list=new LinkedList<GraphObject>();
-    list.add(graphObject);
-    message.setResult(list);
+  AbstractRelationship relationship;
+  if (graphObject instanceof AbstractRelationship) {
+    relationship=(AbstractRelationship)graphObject;
+    AbstractNode startNode=relationship.getStartNode();
+    AbstractNode endNode=relationship.getEndNode();
+    WebSocketMessage message=messageMap.get(transactionKey);
+    if (message != null) {
+      message.setCommand("ADD");
+      message.setGraphObject(relationship);
+      message.setId(startNode.getStringProperty("uuid"));
+      message.setData("id",endNode.getStringProperty("uuid"));
+    }
+ else {
+      logger.log(Level.WARNING,"No message found for transaction key {0}",transactionKey);
+    }
+    logger.log(Level.INFO,"{0} -> {1}",new Object[]{startNode.getId(),endNode.getId()});
+    return false;
   }
  else {
-    logger.log(Level.WARNING,"No message found for transaction key {0}",transactionKey);
+    WebSocketMessage message=messageMap.get(transactionKey);
+    if (message != null) {
+      message.setCommand("CREATE");
+      message.setGraphObject(graphObject);
+      List<GraphObject> list=new LinkedList<GraphObject>();
+      list.add(graphObject);
+      message.setResult(list);
+    }
+ else {
+      logger.log(Level.WARNING,"No message found for transaction key {0}",transactionKey);
+    }
+    return false;
   }
-  return false;
 }

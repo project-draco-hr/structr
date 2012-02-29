@@ -1,0 +1,97 @@
+{
+  List<Node> children=startNode.childNodes();
+  int localIndex=0;
+  for (  Node node : children) {
+    String tag=node.nodeName();
+    String type=CaseHelper.toUpperCamelCase(tag);
+    String content=null;
+    String id=null;
+    StringBuilder classString=new StringBuilder();
+    if (ArrayUtils.contains(ignoreElementNames,type)) {
+      continue;
+    }
+    if (node instanceof Element) {
+      Element el=((Element)node);
+      Set<String> classes=el.classNames();
+      for (      String cls : classes) {
+        classString.append(cls).append(" ");
+      }
+      id=el.id();
+      String downloadAddressAttr=(ArrayUtils.contains(srcElements,tag) ? "src" : ArrayUtils.contains(hrefElements,tag) ? "href" : null);
+      if (downloadAddressAttr != null) {
+        final String downloadAddress=node.attr(downloadAddressAttr);
+        final String uuid=UUID.randomUUID().toString().replaceAll("[\\-]+","");
+        String contentType;
+        String relativeFilePath=org.structr.core.entity.File.getDirectoryPath(uuid) + "/" + uuid;
+        String filePath=Services.getFilePath(Path.Files,relativeFilePath);
+        java.io.File fileOnDisk=new java.io.File(filePath);
+        fileOnDisk.getParentFile().mkdirs();
+        try {
+          String urlString="";
+          if (downloadAddress.startsWith("http")) {
+            urlString=downloadAddress;
+          }
+ else {
+            urlString=address + "/" + downloadAddress;
+          }
+          FileUtils.copyURLToFile(new URL(urlString),fileOnDisk);
+        }
+ catch (        IOException ioe) {
+          logger.log(Level.WARNING,"Unable to download from " + downloadAddress,ioe);
+        }
+        contentType=FileHelper.getContentMimeType(fileOnDisk);
+        if (contentType.equals("text/plain")) {
+          contentType=contentTypeForExtension.get(StringUtils.substringAfterLast(downloadAddress,"."));
+        }
+        final String ct=contentType;
+        StructrTransaction transaction=new StructrTransaction(){
+          @Override public Object execute() throws FrameworkException {
+            return Services.command(SecurityContext.getSuperUserInstance(),CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.Key.uuid.name(),uuid),new NodeAttribute(AbstractNode.Key.type.name(),File.class.getSimpleName()),new NodeAttribute(AbstractNode.Key.name.name(),StringUtils.substringAfterLast(downloadAddress,"/")),new NodeAttribute(File.Key.contentType.name(),ct));
+          }
+        }
+;
+        try {
+          File fileNode=(File)Services.command(SecurityContext.getSuperUserInstance(),TransactionCommand.class).execute(transaction);
+          fileNode.setRelativeFilePath(relativeFilePath);
+        }
+ catch (        FrameworkException fex) {
+          logger.log(Level.WARNING,"Could not create node.",fex);
+        }
+      }
+    }
+    if (type.equals("#data")) {
+      type="Content";
+      tag="";
+      content=((DataNode)node).getWholeData();
+      if (StringUtils.isBlank(content)) {
+        continue;
+      }
+    }
+    if (type.equals("#text")) {
+      type="Content";
+      tag="";
+      content=((TextNode)node).text();
+      if (StringUtils.isBlank(content)) {
+        continue;
+      }
+    }
+    List<NodeAttribute> attrs=new LinkedList<NodeAttribute>();
+    if (content != null) {
+      attrs.add(new NodeAttribute("content",content));
+    }
+    attrs.add(new NodeAttribute("tag",tag));
+    if (StringUtils.isNotBlank(id)) {
+      attrs.add(new NodeAttribute(PropertyView.Html + "id",id));
+    }
+    if (StringUtils.isNotBlank(classString.toString())) {
+      attrs.add(new NodeAttribute(PropertyView.Html + "class",StringUtils.trim(classString.toString())));
+    }
+    for (    Attribute nodeAttr : node.attributes()) {
+      attrs.add(new NodeAttribute(PropertyView.Html + nodeAttr.getKey(),nodeAttr.getValue()));
+    }
+    AbstractNode newNode=createNode(type,"New " + type + " "+ Math.random(),(NodeAttribute[])attrs.toArray(new NodeAttribute[attrs.size()]));
+    linkNodes(parent,newNode,resourceId,localIndex);
+    createChildNodes(node,newNode,resourceId,address);
+    localIndex++;
+  }
+}

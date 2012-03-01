@@ -18,7 +18,7 @@
       }
       id=el.id();
       String downloadAddressAttr=(ArrayUtils.contains(srcElements,tag) ? "src" : ArrayUtils.contains(hrefElements,tag) ? "href" : null);
-      if (downloadAddressAttr != null) {
+      if ((downloadAddressAttr != null) && StringUtils.isNotBlank(node.attr(downloadAddressAttr))) {
         final String downloadAddress=node.attr(downloadAddressAttr);
         final String uuid=UUID.randomUUID().toString().replaceAll("[\\-]+","");
         String contentType;
@@ -27,14 +27,8 @@
         java.io.File fileOnDisk=new java.io.File(filePath);
         fileOnDisk.getParentFile().mkdirs();
         try {
-          String urlString="";
-          if (downloadAddress.startsWith("http")) {
-            urlString=downloadAddress;
-          }
- else {
-            urlString=address + "/" + downloadAddress;
-          }
-          FileUtils.copyURLToFile(new URL(urlString),fileOnDisk);
+          URL downloadUrl=new URL(url,downloadAddress);
+          FileUtils.copyURLToFile(downloadUrl,fileOnDisk);
         }
  catch (        IOException ioe) {
           logger.log(Level.WARNING,"Unable to download from " + downloadAddress,ioe);
@@ -44,17 +38,21 @@
           contentType=contentTypeForExtension.get(StringUtils.substringAfterLast(downloadAddress,"."));
         }
         final String ct=contentType;
+        final String name=(downloadAddress.indexOf("/") > 0) ? StringUtils.substringAfterLast(downloadAddress,"/") : downloadAddress;
         StructrTransaction transaction=new StructrTransaction(){
           @Override public Object execute() throws FrameworkException {
-            return Services.command(SecurityContext.getSuperUserInstance(),CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.Key.uuid.name(),uuid),new NodeAttribute(AbstractNode.Key.type.name(),File.class.getSimpleName()),new NodeAttribute(AbstractNode.Key.name.name(),StringUtils.substringAfterLast(downloadAddress,"/")),new NodeAttribute(File.Key.contentType.name(),ct));
+            return Services.command(SecurityContext.getSuperUserInstance(),CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.Key.uuid.name(),uuid),new NodeAttribute(AbstractNode.Key.type.name(),File.class.getSimpleName()),new NodeAttribute(AbstractNode.Key.name.name(),name),new NodeAttribute(File.Key.contentType.name(),ct));
           }
         }
 ;
         try {
-          File fileNode=(File)Services.command(SecurityContext.getSuperUserInstance(),TransactionCommand.class).execute(transaction);
-          fileNode.setRelativeFilePath(relativeFilePath);
+          if (!(fileExists(name,FileUtils.checksumCRC32(fileOnDisk)))) {
+            File fileNode=(File)Services.command(SecurityContext.getSuperUserInstance(),TransactionCommand.class).execute(transaction);
+            fileNode.setRelativeFilePath(relativeFilePath);
+            fileNode.getChecksum();
+          }
         }
- catch (        FrameworkException fex) {
+ catch (        Exception fex) {
           logger.log(Level.WARNING,"Could not create node.",fex);
         }
       }
@@ -91,7 +89,7 @@
     }
     AbstractNode newNode=createNode(type,"New " + type + " "+ Math.random(),(NodeAttribute[])attrs.toArray(new NodeAttribute[attrs.size()]));
     linkNodes(parent,newNode,resourceId,localIndex);
-    createChildNodes(node,newNode,resourceId,address);
+    createChildNodes(node,newNode,resourceId,url);
     localIndex++;
   }
 }

@@ -6,12 +6,19 @@
  catch (  IOException ioe) {
     throw new FrameworkException(500,"Error while importing content from " + address);
   }
-  Services.command(SecurityContext.getSuperUserInstance(),TransactionCommand.class).execute(new StructrTransaction(){
-    @Override public Object execute() throws FrameworkException {
-      AbstractNode page1=createNode("Resource",name);
-      createChildNodes(page,page1,page1.getStringProperty(AbstractNode.Key.uuid),address);
-      return null;
+  final URL baseUrl;
+  try {
+    baseUrl=new URL(address);
+    Services.command(SecurityContext.getSuperUserInstance(),TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        AbstractNode page1=createNode("Resource",name);
+        createChildNodes(page,page1,page1.getStringProperty(AbstractNode.Key.uuid),baseUrl);
+        return null;
+      }
     }
-  }
 );
+  }
+ catch (  MalformedURLException ex) {
+    logger.log(Level.SEVERE,"Could not resolve address " + address,ex);
+  }
 }

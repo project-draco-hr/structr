@@ -26,6 +26,9 @@
     Object typeObject=attrs.get(AbstractNode.Key.type.name());
     String nodeType=(typeObject != null) ? typeObject.toString() : "GenericNode";
     node=nodeFactory.createNode(securityContext,graphDb.createNode(),nodeType);
+    node.unlockReadOnlyPropertiesOnce();
+    node.setProperty(AbstractNode.Key.createdDate.name(),now,false);
+    node.setProperty(AbstractNode.Key.lastModifiedDate.name(),now,false);
     logger.log(Level.FINE,"Node {0} created",node.getId());
     node.setProperty(AbstractNode.Key.type.name(),nodeType);
     attrs.remove(AbstractNode.Key.type.name());
@@ -54,9 +57,6 @@
       node.unlockReadOnlyPropertiesOnce();
       node.setProperty(AbstractNode.Key.createdBy.name(),user.getProperty(AbstractNode.Key.uuid),false);
     }
-    node.unlockReadOnlyPropertiesOnce();
-    node.setProperty(AbstractNode.Key.createdDate.name(),now,false);
-    node.setProperty(AbstractNode.Key.lastModifiedDate.name(),now,false);
   }
   if (node != null) {
     node.onNodeCreation();

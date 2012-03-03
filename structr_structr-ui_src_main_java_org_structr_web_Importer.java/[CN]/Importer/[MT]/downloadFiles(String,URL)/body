@@ -1,0 +1,47 @@
+{
+  final String uuid=UUID.randomUUID().toString().replaceAll("[\\-]+","");
+  String contentType;
+  String relativeFilePath=org.structr.core.entity.File.getDirectoryPath(uuid) + "/" + uuid;
+  String filePath=Services.getFilePath(Path.Files,relativeFilePath);
+  java.io.File fileOnDisk=new java.io.File(filePath);
+  fileOnDisk.getParentFile().mkdirs();
+  URL downloadUrl=null;
+  try {
+    downloadUrl=new URL(baseUrl,downloadAddress);
+    logger.log(Level.INFO,"Starting download from {0}",downloadUrl);
+    FileUtils.copyURLToFile(downloadUrl,fileOnDisk);
+  }
+ catch (  IOException ioe) {
+    logger.log(Level.WARNING,"Unable to download from " + downloadAddress,ioe);
+    return;
+  }
+  contentType=FileHelper.getContentMimeType(fileOnDisk);
+  downloadAddress=StringUtils.substringBefore(downloadAddress,"?");
+  final String name=(downloadAddress.indexOf("/") > -1) ? StringUtils.substringAfterLast(downloadAddress,"/") : downloadAddress;
+  if (contentType.equals("text/plain")) {
+    contentType=contentTypeForExtension.get(StringUtils.substringAfterLast(name,"."));
+  }
+  final String ct=contentType;
+  StructrTransaction transaction=new StructrTransaction(){
+    @Override public Object execute() throws FrameworkException {
+      return Services.command(SecurityContext.getSuperUserInstance(),CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.Key.uuid.name(),uuid),new NodeAttribute(AbstractNode.Key.type.name(),File.class.getSimpleName()),new NodeAttribute(AbstractNode.Key.name.name(),name),new NodeAttribute(File.Key.contentType.name(),ct));
+    }
+  }
+;
+  try {
+    if (!(fileExists(name,FileUtils.checksumCRC32(fileOnDisk)))) {
+      File fileNode=(File)Services.command(SecurityContext.getSuperUserInstance(),TransactionCommand.class).execute(transaction);
+      fileNode.setRelativeFilePath(relativeFilePath);
+      fileNode.getChecksum();
+      if (contentType.equals("text/css")) {
+        processsCssFileNode(fileNode,downloadUrl);
+      }
+    }
+ else {
+      fileOnDisk.delete();
+    }
+  }
+ catch (  Exception fex) {
+    logger.log(Level.WARNING,"Could not create node.",fex);
+  }
+}

@@ -12,7 +12,10 @@
     baseUrl=new URL(address);
     Services.command(SecurityContext.getSuperUserInstance(),TransactionCommand.class).execute(new StructrTransaction(){
       @Override public Object execute() throws FrameworkException {
-        AbstractNode page1=createNode("Resource",name);
+        List<NodeAttribute> attrs=new LinkedList<NodeAttribute>();
+        attrs.add(new NodeAttribute("type","Resource"));
+        attrs.add(new NodeAttribute("name",name));
+        AbstractNode page1=createNode(attrs);
         createChildNodes(page,page1,page1.getStringProperty(AbstractNode.Key.uuid),baseUrl);
         return null;
       }

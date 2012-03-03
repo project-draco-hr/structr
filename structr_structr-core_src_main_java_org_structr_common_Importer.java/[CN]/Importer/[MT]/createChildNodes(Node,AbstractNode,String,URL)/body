@@ -19,7 +19,7 @@
       id=el.id();
       String downloadAddressAttr=(ArrayUtils.contains(srcElements,tag) ? "src" : ArrayUtils.contains(hrefElements,tag) ? "href" : null);
       if ((downloadAddressAttr != null) && StringUtils.isNotBlank(node.attr(downloadAddressAttr))) {
-        final String downloadAddress=node.attr(downloadAddressAttr);
+        String downloadAddress=node.attr(downloadAddressAttr);
         final String uuid=UUID.randomUUID().toString().replaceAll("[\\-]+","");
         String contentType;
         String relativeFilePath=org.structr.core.entity.File.getDirectoryPath(uuid) + "/" + uuid;
@@ -34,11 +34,12 @@
           logger.log(Level.WARNING,"Unable to download from " + downloadAddress,ioe);
         }
         contentType=FileHelper.getContentMimeType(fileOnDisk);
+        downloadAddress=StringUtils.substringBefore(downloadAddress,"?");
+        final String name=(downloadAddress.indexOf("/") > -1) ? StringUtils.substringAfterLast(downloadAddress,"/") : downloadAddress;
         if (contentType.equals("text/plain")) {
-          contentType=contentTypeForExtension.get(StringUtils.substringAfterLast(downloadAddress,"."));
+          contentType=contentTypeForExtension.get(StringUtils.substringAfterLast(name,"."));
         }
         final String ct=contentType;
-        final String name=(downloadAddress.indexOf("/") > 0) ? StringUtils.substringAfterLast(downloadAddress,"/") : downloadAddress;
         StructrTransaction transaction=new StructrTransaction(){
           @Override public Object execute() throws FrameworkException {
             return Services.command(SecurityContext.getSuperUserInstance(),CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.Key.uuid.name(),uuid),new NodeAttribute(AbstractNode.Key.type.name(),File.class.getSimpleName()),new NodeAttribute(AbstractNode.Key.name.name(),name),new NodeAttribute(File.Key.contentType.name(),ct));
@@ -50,6 +51,9 @@
             File fileNode=(File)Services.command(SecurityContext.getSuperUserInstance(),TransactionCommand.class).execute(transaction);
             fileNode.setRelativeFilePath(relativeFilePath);
             fileNode.getChecksum();
+          }
+ else {
+            fileOnDisk.delete();
           }
         }
  catch (        Exception fex) {

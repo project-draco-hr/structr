@@ -2,24 +2,6 @@
   SecurityContext securityContext=SecurityContext.getSuperUserInstance();
   edit=false;
   tidy=false;
-  if (request.getParameter("create") != null) {
-    try {
-      createTestStructure();
-    }
- catch (    FrameworkException fex) {
-    }
-    response.setStatus(HttpServletResponse.SC_CREATED);
-    return;
-  }
-  if (request.getParameter("editor") != null) {
-    try {
-      createEditorStructure();
-    }
- catch (    FrameworkException fex) {
-    }
-    response.setStatus(HttpServletResponse.SC_CREATED);
-    return;
-  }
   if (request.getParameter("edit") != null) {
     edit=true;
   }
@@ -37,7 +19,7 @@
     logger.log(Level.INFO,"Path info {0}",path);
     String name=path.substring(path.lastIndexOf("/") + 1);
     if (name.length() > 0) {
-      logger.log(Level.INFO,"File name {0}",name);
+      logger.log(Level.FINE,"File name {0}",name);
       List<SearchAttribute> searchAttrs=new LinkedList<SearchAttribute>();
       searchAttrs.add(Search.andExactName(name));
       SearchAttributeGroup group=new SearchAttributeGroup(SearchOperator.AND);
@@ -46,7 +28,7 @@
       group.add(Search.orExactType(Image.class.getSimpleName()));
       searchAttrs.add(group);
       List<AbstractNode> results=(List<AbstractNode>)Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class).execute(null,false,false,searchAttrs);
-      logger.log(Level.INFO,"{0} results",results.size());
+      logger.log(Level.FINE,"{0} results",results.size());
       if (!results.isEmpty()) {
         AbstractNode node=results.get(0);
         if (node instanceof Resource) {

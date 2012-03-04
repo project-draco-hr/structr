@@ -1,0 +1,42 @@
+{
+  List<SearchAttribute> searchAttrs=new LinkedList<SearchAttribute>();
+  for (  NodeAttribute attr : attrs) {
+    searchAttrs.add(Search.andExactProperty(attr.getKey(),attr.getValue().toString()));
+  }
+  List<AbstractNode> nodes=(List<AbstractNode>)searchNode.execute(null,false,false,searchAttrs);
+  AbstractNode foundNode;
+  if (nodes.size() > 0) {
+    logger.log(Level.WARNING,"More than one node found, returning only the first one.");
+    foundNode=nodes.get(0);
+  }
+ else   if (nodes.size() == 1) {
+    foundNode=nodes.get(0);
+  }
+ else {
+    return null;
+  }
+  if (foundNode == null) {
+    return null;
+  }
+  if (!foundNode.hasRelationship(RelType.CONTAINS,Direction.INCOMING)) {
+    logger.log(Level.INFO,"No INCOMING CONTAINS relationships.");
+    return null;
+  }
+  List<AbstractRelationship> rels=foundNode.getRelationships(RelType.CONTAINS,Direction.INCOMING);
+  if (rels.isEmpty()) {
+    logger.log(Level.INFO,"No INCOMING CONTAINS relationships.");
+    return null;
+  }
+ else   if (rels.size() > 1) {
+    logger.log(Level.INFO,"Too many INCOMING CONTAINS relationships: {0}",rels.size());
+    return null;
+  }
+ else {
+    String parentId=rels.get(0).getStartNode().getStringProperty(AbstractNode.Key.uuid);
+    if (parentId.equals(parentNodeId)) {
+      return foundNode;
+    }
+    logger.log(Level.INFO,"Parent node id doesn't match");
+    return null;
+  }
+}

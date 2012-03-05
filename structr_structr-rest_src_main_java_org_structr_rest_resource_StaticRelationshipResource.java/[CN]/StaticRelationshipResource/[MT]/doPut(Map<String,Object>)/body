@@ -10,6 +10,7 @@
           logger.log(Level.INFO,"Read-only property on {1}: {0}",new Object[]{startNode.getClass(),typeResource.getRawType()});
           return new RestMethodResult(HttpServletResponse.SC_FORBIDDEN);
         }
+        final Command deleteRel=Services.command(securityContext,DeleteRelationshipCommand.class);
         final List<AbstractRelationship> rels=startNode.getRelationships(staticRel.getRelType(),staticRel.getDirection());
         StructrTransaction transaction=new StructrTransaction(){
           @Override public Object execute() throws FrameworkException {
@@ -18,7 +19,7 @@
               String otherNodeType=otherNode.getType();
               String id=otherNode.getStringProperty(AbstractNode.Key.uuid.name());
               if (staticRel.getDestType().equals(otherNodeType) && !propertySet.containsValue(id)) {
-                rel.delete(securityContext);
+                deleteRel.execute(rel);
               }
  else {
                 propertySet.values().remove(id);

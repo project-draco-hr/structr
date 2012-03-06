@@ -4,39 +4,20 @@
     searchAttrs.add(Search.andExactProperty(attr.getKey(),attr.getValue().toString()));
   }
   List<AbstractNode> nodes=(List<AbstractNode>)searchNode.execute(null,false,false,searchAttrs);
-  AbstractNode foundNode;
-  if (nodes.size() > 0) {
-    logger.log(Level.WARNING,"More than one node found, returning only the first one.");
-    foundNode=nodes.get(0);
+  if (nodes.size() > 1) {
+    logger.log(Level.WARNING,"More than one node found.");
   }
- else   if (nodes.size() == 1) {
-    foundNode=nodes.get(0);
-  }
- else {
+  if (nodes.isEmpty()) {
     return null;
   }
-  if (foundNode == null) {
-    return null;
-  }
-  if (!foundNode.hasRelationship(RelType.CONTAINS,Direction.INCOMING)) {
-    logger.log(Level.INFO,"No INCOMING CONTAINS relationships.");
-    return null;
-  }
-  List<AbstractRelationship> rels=foundNode.getRelationships(RelType.CONTAINS,Direction.INCOMING);
-  if (rels.isEmpty()) {
-    logger.log(Level.INFO,"No INCOMING CONTAINS relationships.");
-    return null;
-  }
- else   if (rels.size() > 1) {
-    logger.log(Level.INFO,"Too many INCOMING CONTAINS relationships: {0}",rels.size());
-    return null;
-  }
- else {
-    String parentId=rels.get(0).getStartNode().getStringProperty(AbstractNode.Key.uuid);
-    if (parentId.equals(parentNodeId)) {
+  for (  AbstractNode foundNode : nodes) {
+    String foundNodePath=foundNode.getStringProperty(HtmlElement.UiKey.path);
+    logger.log(Level.INFO,"Found a node with path {0}",foundNodePath);
+    if (foundNodePath.equals(nodePath)) {
+      logger.log(Level.INFO,"MATCH!");
       return foundNode;
     }
-    logger.log(Level.INFO,"Parent node id doesn't match");
-    return null;
   }
+  logger.log(Level.INFO,"Does not match expected path {0}",nodePath);
+  return null;
 }

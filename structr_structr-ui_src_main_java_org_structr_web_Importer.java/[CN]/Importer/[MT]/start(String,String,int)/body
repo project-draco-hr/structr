@@ -1,4 +1,5 @@
 {
+  logger.log(Level.INFO,"##### Start fetching {0} for resource {1} #####",new Object[]{address,name});
   SecurityContext securityContext=SecurityContext.getSuperUserInstance();
   searchNode=Services.command(securityContext,SearchNodeCommand.class);
   createNode=Services.command(securityContext,CreateNodeCommand.class);
@@ -18,7 +19,7 @@
         List<NodeAttribute> attrs=new LinkedList<NodeAttribute>();
         attrs.add(new NodeAttribute("type","Resource"));
         attrs.add(new NodeAttribute("name",name));
-        AbstractNode page1=findOrCreateNode(attrs,"/");
+        AbstractNode page1=findOrCreateNode("Resource",attrs,"/");
         createChildNodes(page,page1,page1.getStringProperty(AbstractNode.Key.uuid),baseUrl);
         return null;
       }
@@ -28,4 +29,5 @@
  catch (  MalformedURLException ex) {
     logger.log(Level.SEVERE,"Could not resolve address " + address,ex);
   }
+  logger.log(Level.INFO,"##### Finished fetching {0} for resource {1} #####",new Object[]{address,name});
 }

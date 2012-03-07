@@ -19,7 +19,7 @@
   downloadAddress=StringUtils.substringBefore(downloadAddress,"?");
   final String name=(downloadAddress.indexOf("/") > -1) ? StringUtils.substringAfterLast(downloadAddress,"/") : downloadAddress;
   if (contentType.equals("text/plain")) {
-    contentType=contentTypeForExtension.get(StringUtils.substringAfterLast(name,"."));
+    contentType=StringUtils.defaultIfBlank(contentTypeForExtension.get(StringUtils.substringAfterLast(name,".")),"text/plain");
   }
   final String ct=contentType;
   StructrTransaction transaction=new StructrTransaction(){

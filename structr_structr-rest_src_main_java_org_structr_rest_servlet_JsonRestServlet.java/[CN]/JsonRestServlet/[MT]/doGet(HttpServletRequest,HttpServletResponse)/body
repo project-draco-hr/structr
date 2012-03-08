@@ -9,13 +9,7 @@
     double queryTimeEnd=System.nanoTime();
     Result result=new Result(resource.doGet(),resource.isCollectionResource(),resource.isPrimitiveArray());
     if (result != null) {
-      if (resource instanceof PagingResource) {
-        PagingResource pagingResource=(PagingResource)resource;
-        result.setResultCount(pagingResource.getResultCount());
-        result.setPage(pagingResource.getPage());
-        result.setPageSize(pagingResource.getPageSize());
-        result.setPageCount(pagingResource.getPageCount());
-      }
+      resource.postProcessResultSet(result);
       DecimalFormat decimalFormat=new DecimalFormat("0.000000000",DecimalFormatSymbols.getInstance(Locale.ENGLISH));
       result.setQueryTime(decimalFormat.format((queryTimeEnd - queryTimeStart) / 1000000000.0));
       Writer writer=response.getWriter();

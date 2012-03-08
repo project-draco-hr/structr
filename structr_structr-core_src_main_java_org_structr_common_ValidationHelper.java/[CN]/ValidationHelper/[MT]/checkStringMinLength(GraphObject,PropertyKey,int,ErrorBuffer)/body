@@ -1,0 +1,13 @@
+{
+  String value=node.getStringProperty(key.name());
+  String type=node.getType();
+  if (StringUtils.isNotBlank(value)) {
+    if (value.length() >= minLength) {
+      return false;
+    }
+    errorBuffer.add(type,new TooShortToken(key.name(),minLength));
+    return true;
+  }
+  errorBuffer.add(type,new EmptyPropertyToken(key.name()));
+  return true;
+}

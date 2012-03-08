@@ -1,32 +1,25 @@
 {
+  messageStack=messageStackMap.get(transactionKey);
   AbstractRelationship relationship;
   if ((obj != null) && (obj instanceof AbstractRelationship)) {
     relationship=(AbstractRelationship)obj;
     AbstractNode startNode=relationship.getStartNode();
     AbstractNode endNode=relationship.getEndNode();
-    WebSocketMessage message=messageMap.get(transactionKey);
-    if (message != null) {
-      message.setCommand("REMOVE");
-      message.setGraphObject(relationship);
-      message.setId(startNode.getStringProperty("uuid"));
-      message.setData("id",endNode.getStringProperty("uuid"));
-    }
- else {
-      logger.log(Level.WARNING,"No message found for transaction key {0}",transactionKey);
-    }
+    WebSocketMessage message=new WebSocketMessage();
+    message.setCommand("REMOVE");
+    message.setGraphObject(relationship);
+    message.setId(startNode.getStringProperty("uuid"));
+    message.setData("id",endNode.getStringProperty("uuid"));
+    messageStack.add(message);
     logger.log(Level.FINE,"{0} -> {1}",new Object[]{startNode.getId(),endNode.getId()});
     return false;
   }
  else {
-    WebSocketMessage message=messageMap.get(transactionKey);
-    if (message != null) {
-      String uuid=properties.get("uuid").toString();
-      message.setId(uuid);
-      message.setCommand("DELETE");
-    }
- else {
-      logger.log(Level.WARNING,"No message found for transaction key {0}",transactionKey);
-    }
+    WebSocketMessage message=new WebSocketMessage();
+    String uuid=properties.get("uuid").toString();
+    message.setId(uuid);
+    message.setCommand("DELETE");
+    messageStack.add(message);
     return false;
   }
 }

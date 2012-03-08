@@ -1,0 +1,14 @@
+{
+  logger.log(Level.INFO,"##### Start fetching {0} for resource {1} #####",new Object[]{address,name});
+  SecurityContext securityContext=SecurityContext.getSuperUserInstance();
+  searchNode=Services.command(securityContext,SearchNodeCommand.class);
+  createNode=Services.command(securityContext,CreateNodeCommand.class);
+  createRel=Services.command(securityContext,CreateRelationshipCommand.class);
+  try {
+    parsedDocument=Jsoup.parse(new URL(address),timeout);
+    return true;
+  }
+ catch (  IOException ioe) {
+    throw new FrameworkException(500,"Error while importing content from " + address);
+  }
+}

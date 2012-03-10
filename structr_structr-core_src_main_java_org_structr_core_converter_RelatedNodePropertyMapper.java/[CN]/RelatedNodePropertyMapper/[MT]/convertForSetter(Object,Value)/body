@@ -1,0 +1,20 @@
+{
+  if (value != null) {
+    Object param=value.get();
+    if (param != null && param instanceof ParameterHolder) {
+      ParameterHolder holder=(ParameterHolder)param;
+      PropertyKey targetKey=holder.getTargetKey();
+      Class targetType=holder.getTargetType();
+      AbstractNode relatedNode=getRelatedNode(targetType);
+      if (relatedNode != null) {
+        try {
+          relatedNode.setProperty(targetKey,source);
+        }
+ catch (        FrameworkException fex) {
+          logger.log(Level.WARNING,"Unable to set remote node property {0} on type {1}",new Object[]{targetKey.name(),targetType});
+        }
+      }
+    }
+  }
+  return null;
+}

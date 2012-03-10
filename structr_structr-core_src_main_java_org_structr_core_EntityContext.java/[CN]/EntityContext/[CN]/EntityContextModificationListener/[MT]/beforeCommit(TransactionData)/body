@@ -84,6 +84,9 @@
       if (!createdNodes.contains(node)) {
         hasError|=graphObjectModified(securityContext,transactionKey,errorBuffer,node);
       }
+ else {
+        indexNodeCommand.execute(node);
+      }
     }
     for (    AbstractRelationship rel : modifiedRels) {
       if (!createdRels.contains(rel)) {
@@ -92,6 +95,12 @@
  else {
         indexRelationshipCommand.execute(rel);
       }
+    }
+    for (    AbstractNode node : createdNodes) {
+      indexNodeCommand.execute(node);
+    }
+    for (    AbstractRelationship rel : createdRels) {
+      indexRelationshipCommand.execute(rel);
     }
     hasError|=commit(securityContext,transactionKey,errorBuffer);
     if (hasError) {

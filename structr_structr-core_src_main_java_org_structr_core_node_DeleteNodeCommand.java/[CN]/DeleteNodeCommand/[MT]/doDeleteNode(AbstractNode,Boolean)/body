@@ -1,0 +1,30 @@
+{
+  final Command transactionCommand=Services.command(securityContext,TransactionCommand.class);
+  transactionCommand.execute(new StructrTransaction(){
+    @Override public Object execute() throws FrameworkException {
+      if (cascade) {
+        List<AbstractRelationship> relationships=node.getOutgoingRelationships();
+        for (        AbstractRelationship rel : relationships) {
+          if (rel.cascadeDelete()) {
+            doDeleteNode(rel.getEndNode(),cascade);
+          }
+        }
+      }
+      List<AbstractRelationship> rels=node.getRelationships();
+      for (      AbstractRelationship r : rels) {
+        r.getRelationship().delete();
+      }
+      try {
+        node.onNodeDeletion();
+      }
+ catch (      Throwable t) {
+        logger.log(Level.WARNING,"Exception while calling onDeletion callback: {0}",t);
+      }
+      node.getNode().delete();
+      setExitCode(Command.exitCode.SUCCESS);
+      return null;
+    }
+  }
+);
+  return null;
+}

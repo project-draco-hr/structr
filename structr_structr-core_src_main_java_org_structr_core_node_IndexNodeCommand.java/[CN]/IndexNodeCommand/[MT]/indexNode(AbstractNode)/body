@@ -1,5 +1,8 @@
 {
-  for (  String key : node.getPropertyKeys()) {
-    indexProperty(node,key);
+  for (  Enum index : (NodeIndex[])arguments.get("indices")) {
+    Set<String> properties=EntityContext.getSearchableProperties(node.getClass(),index.name());
+    for (    String key : properties) {
+      indexProperty(node,key,index.name());
+    }
   }
 }

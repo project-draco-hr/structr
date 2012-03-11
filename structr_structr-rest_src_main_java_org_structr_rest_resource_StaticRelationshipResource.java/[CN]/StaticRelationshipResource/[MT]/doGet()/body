@@ -5,16 +5,16 @@
     if (sourceNode != null) {
       DirectedRelation staticRel=findDirectedRelation(typedIdResource,typeResource);
       if (staticRel != null) {
-        List<AbstractNode> relatedNodes=staticRel.getRelatedNodes(securityContext,sourceNode);
+        List relatedNodes=staticRel.getRelatedNodes(securityContext,sourceNode);
         List<SearchAttribute> dummyList=new LinkedList<SearchAttribute>();
         if (typeResource.hasSearchableAttributes(dummyList)) {
           List<GraphObject> typeNodes=typeResource.doGet();
           List intersection=ListUtils.intersection(relatedNodes,typeNodes);
-          if (!intersection.isEmpty()) {
-            return intersection;
-          }
+          applyDefaultSorting(intersection);
+          return intersection;
         }
         if (!relatedNodes.isEmpty()) {
+          applyDefaultSorting(relatedNodes);
           return relatedNodes;
         }
       }
@@ -35,7 +35,9 @@
         String msg=msgBuilder.toString();
         if (value != null) {
           if ((value instanceof List) && !((List)value).isEmpty() && ((List)value).get(0) instanceof GraphObject) {
-            return (List<GraphObject>)value;
+            List<GraphObject> list=(List<GraphObject>)value;
+            applyDefaultSorting(list);
+            return list;
           }
  else           if (value instanceof Iterable) {
             List<GraphObject> propertyListResult=new LinkedList<GraphObject>();

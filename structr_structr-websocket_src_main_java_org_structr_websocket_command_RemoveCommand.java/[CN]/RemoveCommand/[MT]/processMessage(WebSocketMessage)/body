@@ -6,14 +6,15 @@
     final AbstractNode sourceNode=getNode(sourceId);
     final AbstractNode targetNode=getNode(targetId);
     if ((sourceNode != null) && (targetNode != null)) {
-      DirectedRelation rel=EntityContext.getDirectedRelation(sourceNode.getClass(),targetNode.getClass());
+      DirectedRelation rel=EntityContext.getDirectedRelationship(sourceNode.getClass(),targetNode.getClass());
       if (rel != null) {
         final List<AbstractRelationship> rels=sourceNode.getRelationships(rel.getRelType(),rel.getDirection());
         StructrTransaction transaction=new StructrTransaction(){
           @Override public Object execute() throws FrameworkException {
+            Command deleteRel=Services.command(securityContext,DeleteRelationshipCommand.class);
             for (            AbstractRelationship rel : rels) {
               if (rel.getOtherNode(sourceNode).equals(targetNode)) {
-                rel.delete(securityContext);
+                deleteRel.execute(rel);
               }
             }
             return null;

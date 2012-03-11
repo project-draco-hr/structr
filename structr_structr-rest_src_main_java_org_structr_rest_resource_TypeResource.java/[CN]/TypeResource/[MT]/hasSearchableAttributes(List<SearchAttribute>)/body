@@ -1,29 +1,3 @@
 {
-  boolean hasSearchableAttributes=false;
-  if ((rawType != null) && (request != null) && !request.getParameterMap().isEmpty()) {
-    boolean looseSearch=parseInteger(request.getParameter(JsonRestServlet.REQUEST_PARAMETER_LOOSE_SEARCH)) == 1;
-    Set<String> searchableProperties=null;
-    if (looseSearch) {
-      searchableProperties=EntityContext.getSearchableProperties(rawType,NodeIndex.fulltext.name());
-    }
- else {
-      searchableProperties=EntityContext.getSearchableProperties(rawType,NodeIndex.keyword.name());
-    }
-    if (searchableProperties != null) {
-      checkForIllegalSearchKeys(searchableProperties);
-      for (      String key : searchableProperties) {
-        String searchValue=request.getParameter(key);
-        if (searchValue != null) {
-          if (looseSearch) {
-            searchAttributes.add(Search.andProperty(key,searchValue));
-          }
- else {
-            searchAttributes.add(Search.andExactProperty(key,searchValue));
-          }
-          hasSearchableAttributes=true;
-        }
-      }
-    }
-  }
-  return hasSearchableAttributes;
+  return hasSearchableAttributes(rawType,request,attributes);
 }

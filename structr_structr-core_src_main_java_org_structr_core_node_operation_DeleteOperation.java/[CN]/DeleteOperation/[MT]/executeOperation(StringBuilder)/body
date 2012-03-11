@@ -19,10 +19,7 @@
         }
         for (        AbstractNode node : toDelete) {
           try {
-            deleteCommand.execute(node,currentNode,recursive,securityContext.getUser());
-            if (deleteCommand.getExitCode().equals(Command.exitCode.FAILURE)) {
-              stdOut.append(deleteCommand.getErrorMessage());
-            }
+            throw new NodeCommandException("DeleteCommand has changed. This command has to be re-implemented");
           }
  catch (          Throwable t) {
             stdOut.append(t.getMessage());
@@ -35,7 +32,9 @@
     }
   }
   if (newParentNode != null) {
-    for (    Callback callback : callbacks)     callback.callback(newParentNode.getId());
+    for (    Callback callback : callbacks) {
+      callback.callback(newParentNode.getId());
+    }
     return (true);
   }
   return (false);

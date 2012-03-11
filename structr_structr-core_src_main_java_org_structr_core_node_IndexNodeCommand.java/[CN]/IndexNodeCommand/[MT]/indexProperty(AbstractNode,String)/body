@@ -1,45 +1,8 @@
 {
-  Node dbNode=node.getNode();
-  long id=node.getId();
-  if (key == null) {
-    logger.log(Level.SEVERE,"Node {0} has null key",new Object[]{id});
-    return;
-  }
-  boolean emptyKey=StringUtils.isEmpty((String)key);
-  if (emptyKey) {
-    logger.log(Level.SEVERE,"Node {0} has empty, not-null key, removing property",new Object[]{id});
-    dbNode.removeProperty(key);
-    return;
-  }
-  if (!(dbNode.hasProperty(key))) {
-    removeNodePropertyFromAllIndices(dbNode,key);
-    logger.log(Level.FINE,"Node {0} has no key {1}, to be sure, it was removed from all indices",new Object[]{id,key});
-    return;
-  }
-  Object value=dbNode.getProperty(key);
-  Object valueForIndexing=node.getPropertyForIndexing(key);
-  boolean emptyValue=((value instanceof String) && StringUtils.isEmpty((String)value));
-  if (value == null) {
-    logger.log(Level.FINE,"Node {0} has null value for key {1}, removing property",new Object[]{id,key});
-    dbNode.removeProperty(key);
-    removeNodePropertyFromAllIndices(dbNode,key);
-  }
- else   if (emptyValue) {
-    logger.log(Level.FINE,"Node {0} has empty, non-null value for key {1}, removing property",new Object[]{id,key});
-    dbNode.removeProperty(key);
-    removeNodePropertyFromAllIndices(dbNode,key);
-  }
- else {
-    removeNodePropertyFromAllIndices(dbNode,key);
-    logger.log(Level.FINE,"Node {0}: Old value for key {1} removed from all indices",new Object[]{id,key});
-    addNodePropertyToFulltextIndex(dbNode,key,valueForIndexing);
-    addNodePropertyToKeywordIndex(dbNode,key,valueForIndexing);
-    if ((node instanceof User) && (key.equals(AbstractNode.Key.name.name()) || key.equals(Person.Key.email.name()))) {
-      addNodePropertyToUserIndex(dbNode,key,valueForIndexing);
+  for (  Enum index : (NodeIndex[])arguments.get("indices")) {
+    Set<String> properties=EntityContext.getSearchableProperties(node.getClass(),index.name());
+    if ((properties != null) && properties.contains(key)) {
+      indexProperty(node,key,index.name());
     }
-    if (key.equals(AbstractNode.Key.uuid.name())) {
-      addNodePropertyToUuidIndex(dbNode,key,valueForIndexing);
-    }
-    logger.log(Level.FINE,"Node {0}: New value {2} added for key {1}",new Object[]{id,key,value});
   }
 }

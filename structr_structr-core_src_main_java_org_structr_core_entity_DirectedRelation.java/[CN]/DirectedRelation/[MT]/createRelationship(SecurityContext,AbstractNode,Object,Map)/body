@@ -1,6 +1,7 @@
 {
   final Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
-  AbstractNode targetNode=null;
+  final Command deleteRel=Services.command(securityContext,DeleteRelationshipCommand.class);
+  AbstractNode targetNode;
   if (value instanceof AbstractNode) {
     targetNode=(AbstractNode)value;
   }
@@ -19,7 +20,7 @@ case OneToOne:
             List<AbstractRelationship> rels=sourceNode.getRelationships(relType,direction);
             for (            AbstractRelationship rel : rels) {
               if (rel.getOtherNode(sourceNode).getType().equals(destType)) {
-                rel.delete(securityContext);
+                deleteRel.execute(rel);
               }
             }
             break;
@@ -29,7 +30,7 @@ case OneToMany:
           List<AbstractRelationship> rels=finalTargetNode.getRelationships(relType,Direction.INCOMING);
           for (          AbstractRelationship rel : rels) {
             if (rel.getOtherNode(finalTargetNode).getType().equals(sourceNode.getType())) {
-              rel.delete(securityContext);
+              deleteRel.execute(rel);
             }
           }
         }

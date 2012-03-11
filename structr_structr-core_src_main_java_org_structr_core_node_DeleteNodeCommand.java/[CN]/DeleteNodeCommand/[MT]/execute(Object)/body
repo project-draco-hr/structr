@@ -1,7 +1,6 @@
 {
   AbstractNode node=null;
-  AbstractNode parentNode=null;
-  Boolean recursive=false;
+  Boolean cascade=false;
   Command findNode=Services.command(securityContext,FindNodeCommand.class);
 switch (parameters.length) {
 case 1:
@@ -29,46 +28,11 @@ if (parameters[0] instanceof Long) {
   long id=Long.parseLong((String)parameters[0]);
   node=(AbstractNode)findNode.execute(id);
 }
-if (parameters[1] instanceof Long) {
-long id=((Long)parameters[1]).longValue();
-parentNode=(AbstractNode)findNode.execute(id);
+if (parameters[1] instanceof String) {
+cascade=Boolean.parseBoolean((String)parameters[2]);
 }
- else if (parameters[1] instanceof AbstractNode) {
-parentNode=(AbstractNode)parameters[1];
-}
- else if (parameters[1] instanceof String) {
-long id=Long.parseLong((String)parameters[1]);
-parentNode=(AbstractNode)findNode.execute(id);
-}
-break;
-case 3:
-if (parameters[0] instanceof Long) {
-long id=((Long)parameters[0]).longValue();
-node=(AbstractNode)findNode.execute(id);
-}
- else if (parameters[0] instanceof AbstractNode) {
-node=((AbstractNode)parameters[0]);
-}
- else if (parameters[0] instanceof String) {
-long id=Long.parseLong((String)parameters[0]);
-node=(AbstractNode)findNode.execute(id);
-}
-if (parameters[1] instanceof Long) {
-long id=((Long)parameters[1]).longValue();
-parentNode=(AbstractNode)findNode.execute(id);
-}
- else if (parameters[1] instanceof AbstractNode) {
-parentNode=(AbstractNode)parameters[1];
-}
- else if (parameters[1] instanceof String) {
-long id=Long.parseLong((String)parameters[1]);
-parentNode=(AbstractNode)findNode.execute(id);
-}
-if (parameters[2] instanceof String) {
-recursive=Boolean.parseBoolean((String)parameters[2]);
-}
- else if (parameters[2] instanceof Boolean) {
-recursive=(Boolean)parameters[2];
+ else if (parameters[1] instanceof Boolean) {
+cascade=(Boolean)parameters[1];
 }
 break;
 default :
@@ -86,6 +50,6 @@ setErrorMessage("Deleting the root node is not allowed.");
 logger.log(Level.WARNING,getErrorMessage());
 return null;
 }
-AbstractNode newParentNode=doDeleteNode(node,parentNode,recursive);
-return newParentNode;
+doDeleteNode(node,cascade);
+return null;
 }

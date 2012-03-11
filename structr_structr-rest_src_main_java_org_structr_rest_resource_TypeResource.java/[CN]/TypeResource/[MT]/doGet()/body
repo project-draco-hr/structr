@@ -9,7 +9,7 @@
       throw new NotFoundException();
     }
     searchAttributes.add(Search.andExactType(EntityContext.normalizeEntityName(rawType)));
-    hasSearchableAttributes(searchAttributes);
+    hasSearchableAttributes(rawType,request,searchAttributes);
     List<GraphObject> results=(List<GraphObject>)Services.command(securityContext,SearchNodeCommand.class).execute(topNode,includeDeleted,publicOnly,searchAttributes);
     if (!results.isEmpty()) {
       applyDefaultSorting(results);

@@ -1,0 +1,14 @@
+{
+  return (AbstractNode)Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+    @Override public Object execute() throws FrameworkException {
+      AbstractNode relatedNode=(AbstractNode)Services.command(securityContext,CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.Key.type.name(),getDestType()));
+      Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
+      AbstractRelationship newRel=(AbstractRelationship)createRel.execute(node,relatedNode,getRelType());
+      if (cascadeDelete > 0) {
+        newRel.setProperty(AbstractRelationship.HiddenKey.cascadeDelete,cascadeDelete);
+      }
+      return relatedNode;
+    }
+  }
+);
+}

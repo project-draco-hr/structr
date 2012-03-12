@@ -6,7 +6,12 @@
         List<AbstractRelationship> relationships=node.getOutgoingRelationships();
         for (        AbstractRelationship rel : relationships) {
           if (rel.cascadeDelete()) {
-            doDeleteNode(rel.getEndNode(),cascade);
+            try {
+              doDeleteNode(rel.getEndNode(),cascade);
+            }
+ catch (            Throwable t) {
+              logger.log(Level.WARNING,"Exception while deleting connected node: {0}",t);
+            }
           }
         }
       }

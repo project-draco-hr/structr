@@ -3,11 +3,24 @@
   transactionCommand.execute(new StructrTransaction(){
     @Override public Object execute() throws FrameworkException {
       if (cascade) {
-        List<AbstractRelationship> relationships=node.getOutgoingRelationships();
-        for (        AbstractRelationship rel : relationships) {
-          if (rel.cascadeDelete()) {
+        List<AbstractRelationship> outgoingRels=node.getOutgoingRelationships();
+        for (        AbstractRelationship rel : outgoingRels) {
+          int cascadeDelete=rel.cascadeDelete();
+          if (cascadeDelete == RelationClass.DELETE_OUTGOING || cascadeDelete == RelationClass.DELETE_BOTH) {
             try {
               doDeleteNode(rel.getEndNode(),cascade);
+            }
+ catch (            Throwable t) {
+              logger.log(Level.WARNING,"Exception while deleting connected node: {0}",t);
+            }
+          }
+        }
+        List<AbstractRelationship> incomingRels=node.getIncomingRelationships();
+        for (        AbstractRelationship rel : incomingRels) {
+          int cascadeDelete=rel.cascadeDelete();
+          if (cascadeDelete == RelationClass.DELETE_INCOMING || cascadeDelete == RelationClass.DELETE_INCOMING) {
+            try {
+              doDeleteNode(rel.getStartNode(),cascade);
             }
  catch (            Throwable t) {
               logger.log(Level.WARNING,"Exception while deleting connected node: {0}",t);

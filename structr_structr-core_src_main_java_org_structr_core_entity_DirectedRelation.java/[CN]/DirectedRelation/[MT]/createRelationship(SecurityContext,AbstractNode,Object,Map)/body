@@ -43,6 +43,9 @@ case OneToMany:
       newRel=(AbstractRelationship)createRel.execute(finalTargetNode,sourceNode,relType);
     }
     newRel.setProperties(properties);
+    if (cascadeDelete) {
+      newRel.setProperty(AbstractRelationship.HiddenKey.cascadeDelete,true);
+    }
     return newRel;
   }
 }

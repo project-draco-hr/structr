@@ -17,19 +17,30 @@
   }
   contentType=FileHelper.getContentMimeType(fileOnDisk);
   downloadAddress=StringUtils.substringBefore(downloadAddress,"?");
-  final String name=(downloadAddress.indexOf("/") > -1) ? StringUtils.substringAfterLast(downloadAddress,"/") : downloadAddress;
+  final String fileName=(downloadAddress.indexOf("/") > -1) ? StringUtils.substringAfterLast(downloadAddress,"/") : downloadAddress;
+  String httpPrefix="http://";
+  String path=StringUtils.substringBefore(((downloadAddress.indexOf(httpPrefix) > -1) ? StringUtils.substringAfter(downloadAddress,"http://") : downloadAddress),fileName);
   if (contentType.equals("text/plain")) {
-    contentType=StringUtils.defaultIfBlank(contentTypeForExtension.get(StringUtils.substringAfterLast(name,".")),"text/plain");
+    contentType=StringUtils.defaultIfBlank(contentTypeForExtension.get(StringUtils.substringAfterLast(fileName,".")),"text/plain");
   }
   final String ct=contentType;
   try {
-    if (!(fileExists(name,FileUtils.checksumCRC32(fileOnDisk)))) {
-      File fileNode=(File)createNode.execute(new NodeAttribute(AbstractNode.Key.uuid.name(),uuid),new NodeAttribute(AbstractNode.Key.type.name(),File.class.getSimpleName()),new NodeAttribute(AbstractNode.Key.name.name(),name),new NodeAttribute(File.Key.contentType.name(),ct));
-      fileNode.setRelativeFilePath(relativeFilePath);
-      fileNode.getChecksum();
-      indexNode.execute(fileNode);
-      if (contentType.equals("text/css")) {
-        processsCssFileNode(fileNode,downloadUrl);
+    if (!(fileExists(fileName,FileUtils.checksumCRC32(fileOnDisk)))) {
+      File fileNode;
+      if (ImageHelper.isImageType(fileName)) {
+        fileNode=createImageNode(uuid,fileName,ct);
+      }
+ else {
+        fileNode=createFileNode(uuid,fileName,ct);
+      }
+      if (fileNode != null) {
+        Folder parent=createFolderPath(path);
+        if (parent != null) {
+          createRel.execute(parent,fileNode,RelType.HAS_CHILD);
+        }
+        if (contentType.equals("text/css")) {
+          processCssFileNode(fileNode,downloadUrl);
+        }
       }
     }
  else {
@@ -37,6 +48,6 @@
     }
   }
  catch (  Exception fex) {
-    logger.log(Level.WARNING,"Could not create node.",fex);
+    logger.log(Level.WARNING,"Could not create file node.",fex);
   }
 }

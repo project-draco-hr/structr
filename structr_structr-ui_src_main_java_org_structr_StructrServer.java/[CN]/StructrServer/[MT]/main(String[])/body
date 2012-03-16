@@ -1,6 +1,7 @@
 {
   String appName="structr UI 0.4.8";
   String host=System.getProperty("host","0.0.0.0");
+  String keyStorePath=System.getProperty("keyStorePath","keystore.jks");
   int port=Integer.parseInt(System.getProperty("port","8080"));
   int maxIdleTime=Integer.parseInt(System.getProperty("maxIdleTime","30000"));
   int requestHeaderSize=Integer.parseInt(System.getProperty("requestHeaderSize","8192"));
@@ -11,11 +12,17 @@
   Server server=new Server(port);
   HandlerCollection handlers=new HandlerCollection();
   ContextHandlerCollection contexts=new ContextHandlerCollection();
-  SelectChannelConnector connector0=new SelectChannelConnector();
-  connector0.setHost(host);
-  connector0.setPort(port);
-  connector0.setMaxIdleTime(maxIdleTime);
-  connector0.setRequestHeaderSize(requestHeaderSize);
+  SslContextFactory factory=new SslContextFactory(keyStorePath);
+  factory.setKeyStorePassword("structrKeystore");
+  SslSelectChannelConnector httpsConnector=new SslSelectChannelConnector(factory);
+  httpsConnector.setHost(host);
+  httpsConnector.setPort(port);
+  httpsConnector.setMaxIdleTime(maxIdleTime);
+  httpsConnector.setRequestHeaderSize(requestHeaderSize);
+  httpsConnector.setHost(host);
+  httpsConnector.setPort(port);
+  httpsConnector.setMaxIdleTime(maxIdleTime);
+  httpsConnector.setRequestHeaderSize(requestHeaderSize);
   String basePath=System.getProperty("home","");
   File baseDir=new File(basePath);
   basePath=baseDir.getAbsolutePath();
@@ -138,7 +145,7 @@
   contexts.setHandlers(new Handler[]{webapp,requestLogHandler});
   handlers.setHandlers(new Handler[]{contexts,new DefaultHandler(),requestLogHandler});
   server.setHandler(handlers);
-  server.setConnectors(new Connector[]{connector0});
+  server.setConnectors(new Connector[]{httpsConnector});
   server.setGracefulShutdown(1000);
   server.setStopAtShutdown(true);
   System.out.println();

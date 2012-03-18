@@ -1,0 +1,39 @@
+{
+  AndroidHttpClient httpClient=getHttpClient();
+  HttpPost httpPost=new HttpPost(path);
+  HttpResponse response=null;
+  Throwable throwable=null;
+  int responseCode=0;
+  try {
+    StringBuilder buf=new StringBuilder();
+    gson.toJson(entity,type,buf);
+    StringEntity body=new StringEntity(buf.toString(),"UTF-8");
+    body.setContentType("application/json");
+    httpPost.setEntity(body);
+    configureRequest(httpPost);
+    response=httpClient.execute(httpPost);
+    responseCode=response.getStatusLine().getStatusCode();
+    if (responseCode == 201) {
+      String location=response.getFirstHeader("Location").getValue();
+      String newId=getIdFromLocation(location);
+      if (entity.getId() == null) {
+        entity.setId(newId);
+      }
+    }
+ else {
+      throw new StructrException(response.getStatusLine().getStatusCode(),response.getStatusLine().getReasonPhrase());
+    }
+  }
+ catch (  Throwable t) {
+    throwable=t;
+  }
+ finally {
+    if (response != null) {
+      response.getEntity().consumeContent();
+    }
+  }
+  if (throwable != null) {
+    throw throwable;
+  }
+  return responseCode;
+}

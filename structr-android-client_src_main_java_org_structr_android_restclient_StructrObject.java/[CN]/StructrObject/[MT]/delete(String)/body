@@ -1,0 +1,25 @@
+{
+  AndroidHttpClient httpClient=getHttpClient();
+  HttpDelete delete=new HttpDelete(path);
+  configureRequest(delete);
+  HttpResponse response=null;
+  Throwable throwable=null;
+  int responseCode=0;
+  try {
+    response=httpClient.execute(delete);
+    responseCode=response.getStatusLine().getStatusCode();
+  }
+ catch (  Throwable t) {
+    throwable=t;
+    delete.abort();
+  }
+ finally {
+    if (response != null) {
+      response.getEntity().consumeContent();
+    }
+  }
+  if (throwable != null) {
+    throw throwable;
+  }
+  return responseCode;
+}

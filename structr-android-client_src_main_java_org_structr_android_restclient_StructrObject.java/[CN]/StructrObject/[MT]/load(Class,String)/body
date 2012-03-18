@@ -1,0 +1,36 @@
+{
+  AndroidHttpClient httpClient=getHttpClient();
+  HttpGet httpGet=new HttpGet(path);
+  configureRequest(httpGet);
+  HttpResponse response=null;
+  StructrObject result=null;
+  Throwable throwable=null;
+  try {
+    response=httpClient.execute(httpGet);
+    if (response.getStatusLine().getStatusCode() == 200) {
+      BufferedReader reader=new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+      StructrEntityResult<StructrObject> entityResult=(StructrEntityResult)gson.fromJson(reader,getEntityTypeToken(type));
+      reader.close();
+      if (entityResult != null) {
+        result=entityResult.getResult();
+        result.onDbLoad();
+      }
+    }
+ else {
+      throw new StructrException(response.getStatusLine().getStatusCode(),response.getStatusLine().getReasonPhrase());
+    }
+  }
+ catch (  Throwable t) {
+    throwable=t;
+    httpGet.abort();
+  }
+ finally {
+    if (response != null) {
+      response.getEntity().consumeContent();
+    }
+  }
+  if (throwable != null) {
+    throw throwable;
+  }
+  return result;
+}

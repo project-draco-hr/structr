@@ -1,0 +1,16 @@
+{
+  try {
+    KeyStore trusted=KeyStore.getInstance("BKS");
+    InputStream in=context.getResources().openRawResource(resourceId);
+    try {
+      trusted.load(in,keyStorePassword.toCharArray());
+    }
+  finally {
+      in.close();
+    }
+    return new SSLSocketFactory(trusted);
+  }
+ catch (  Exception e) {
+    throw new AssertionError(e);
+  }
+}

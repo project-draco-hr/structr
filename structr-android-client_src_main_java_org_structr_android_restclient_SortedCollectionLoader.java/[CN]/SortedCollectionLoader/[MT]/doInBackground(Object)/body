@@ -1,0 +1,27 @@
+{
+  List<Param> params=new ArrayList<Param>();
+  String sortKey="id";
+  Boolean asc=true;
+  Class type=null;
+  try {
+    for (    Object obj : parameters) {
+      if (obj instanceof Class) {
+        type=(Class)obj;
+      }
+ else       if (obj instanceof String) {
+        sortKey=(String)obj;
+      }
+ else       if (obj instanceof Boolean) {
+        asc=(Boolean)obj;
+      }
+ else       if (obj instanceof Param) {
+        params.add((Param)obj);
+      }
+    }
+    return StructrObject.dbList(type,sortKey,asc,params.toArray());
+  }
+ catch (  Throwable t) {
+    publishProgress(new Progress(t));
+  }
+  return null;
+}

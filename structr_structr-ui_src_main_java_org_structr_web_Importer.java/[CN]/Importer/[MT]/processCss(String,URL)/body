@@ -1,8 +1,8 @@
 {
-  Pattern pattern=Pattern.compile("url\\((.*)\\)");
+  Pattern pattern=Pattern.compile("(url\\(['|\"]?)([^'|\"]*)");
   Matcher matcher=pattern.matcher(css);
   while (matcher.find()) {
-    String url=StringUtils.strip(matcher.group(1),"'\"");
+    String url=matcher.group(2);
     logger.log(Level.INFO,"Trying to download form URL found in CSS: {0}",url);
     downloadFiles(url,baseUrl);
   }

@@ -1,0 +1,10 @@
+{
+  List<SearchAttribute> searchAttrs=new LinkedList<SearchAttribute>();
+  searchAttrs.add(Search.andExactProperty(AbstractNode.Key.name.name(),name));
+  searchAttrs.add(Search.andExactType(Folder.class.getSimpleName()));
+  List<Folder> folders=(List<Folder>)searchNode.execute(null,false,false,searchAttrs);
+  if (!folders.isEmpty()) {
+    return folders.get(0);
+  }
+  return (Folder)createNode.execute(new NodeAttribute(AbstractNode.Key.type.name(),Folder.class.getSimpleName()),new NodeAttribute(AbstractNode.Key.name.name(),name));
+}

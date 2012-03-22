@@ -8,7 +8,7 @@
     if (!cachedEntities.containsKey(EntityContext.normalizeEntityName(rawType))) {
       throw new NotFoundException();
     }
-    searchAttributes.add(Search.andExactType(EntityContext.normalizeEntityName(rawType)));
+    searchAttributes.addAll(Search.andExactTypeAndSubtypes(EntityContext.normalizeEntityName(rawType)));
     hasSearchableAttributes(rawType,request,searchAttributes);
     List<GraphObject> results=(List<GraphObject>)Services.command(securityContext,SearchNodeCommand.class).execute(topNode,includeDeleted,publicOnly,searchAttributes);
     if (!results.isEmpty()) {

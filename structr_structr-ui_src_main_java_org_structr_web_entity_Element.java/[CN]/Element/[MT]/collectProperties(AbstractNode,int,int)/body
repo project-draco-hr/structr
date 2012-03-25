@@ -1,0 +1,19 @@
+{
+  if (depth > maxDepth) {
+    return;
+  }
+  String dataClass=startNode.getStringProperty("_html_data-class");
+  if (dataClass != null && !dataClass.isEmpty()) {
+    test.put("data-class",dataClass);
+  }
+  if (test.containsKey("data-class")) {
+    String dataKey=startNode.getStringProperty("data-key");
+    if (dataKey != null) {
+      test.put(dataKey,getChildContent(startNode));
+    }
+    for (    AbstractRelationship rel : startNode.getOutgoingRelationships(RelType.CONTAINS)) {
+      AbstractNode endNode=rel.getEndNode();
+      collectProperties(endNode,depth,maxDepth + 1);
+    }
+  }
+}

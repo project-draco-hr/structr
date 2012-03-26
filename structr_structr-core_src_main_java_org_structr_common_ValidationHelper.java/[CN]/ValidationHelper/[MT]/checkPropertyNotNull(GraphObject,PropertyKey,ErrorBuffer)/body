@@ -1,6 +1,10 @@
 {
-  Object value=node.getProperty(key.name());
   String type=node.getType();
+  if (key == null) {
+    errorBuffer.add(type,new EmptyPropertyToken("unknown type"));
+    return true;
+  }
+  Object value=node.getProperty(key.name());
   if (value != null) {
     if (value instanceof IterableAdapter) {
       if (((IterableAdapter)value).iterator().hasNext()) {

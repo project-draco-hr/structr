@@ -4,6 +4,7 @@
   String tag=null;
   AbstractRelationship link=null;
   if (node != null) {
+    String id=node.getStringProperty("uuid");
     if (node instanceof Content) {
       content=node.getStringProperty("content");
       List<AbstractRelationship> links=node.getOutgoingLinkRelationships();
@@ -16,27 +17,26 @@
     }
     tag=node.getStringProperty("tag");
     if (edit && inBody && (node instanceof Content)) {
-      tag="div";
+      buffer.delete(buffer.length() - 1,buffer.length());
+      buffer.append(" structr_content_id=\"").append(id).append("\">");
     }
     if (StringUtils.isNotBlank(tag)) {
       if (tag.equals("body")) {
         inBody=true;
       }
-      String id=node.getStringProperty("uuid");
       buffer.append("<").append(tag);
       if (edit && (id != null)) {
         if (depth == 1) {
           buffer.append(" structr_resource_id='").append(resourceId).append("'");
         }
         if (node instanceof Content) {
-          buffer.append(" class=\"structr-content-container\" structr_content_id='").append(id).append("'");
         }
  else {
           String htmlClass=node.getStringProperty("_html_class");
           buffer.append(" class=\"structr-element-container ").append((htmlClass != null) ? htmlClass : "").append("\" structr_element_id='").append(id).append("'");
+          buffer.append(" structr_type='").append(node.getType()).append("'");
+          buffer.append(" structr_name='").append(node.getName()).append("'");
         }
-        buffer.append(" structr_type='").append(node.getType()).append("'");
-        buffer.append(" structr_name='").append(node.getName()).append("'");
       }
       if (node instanceof HtmlElement) {
         for (        String attribute : EntityContext.getPropertySet(node.getClass(),PropertyView.Html)) {

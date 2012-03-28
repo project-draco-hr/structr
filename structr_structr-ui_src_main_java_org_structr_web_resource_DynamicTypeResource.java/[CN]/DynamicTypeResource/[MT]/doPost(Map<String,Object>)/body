@@ -1,3 +1,39 @@
 {
-  throw new IllegalMethodException();
+  List<GraphObject> templates=doGet();
+  if (!templates.isEmpty()) {
+    final Element template=(Element)templates.get(0);
+    final Map<String,AbstractNode> contentNodes=template.getContentNodes();
+    final Command createNodeCommand=Services.command(securityContext,CreateNodeCommand.class);
+    final Command createRelCommand=Services.command(securityContext,CreateRelationshipCommand.class);
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        if (!propertySet.isEmpty()) {
+          for (          String key : propertySet.keySet()) {
+            AbstractNode node=contentNodes.get(key);
+            if (node != null && node instanceof Content) {
+              Content content=(Content)node;
+              AbstractNode newNode=(AbstractNode)createNodeCommand.execute(new NodeAttribute(AbstractNode.Key.type.name(),content.getType()));
+              for (              Entry<String,Object> entry : propertySet.entrySet()) {
+                newNode.setProperty(entry.getKey(),entry.getValue());
+              }
+              AbstractRelationship parentRel=content.getRelToParent();
+              Element parent=content.getParent();
+              AbstractRelationship newRel=(AbstractRelationship)createRelCommand.execute(parent,content,RelType.CONTAINS);
+              for (              Entry<String,Object> entry : parentRel.getProperties().entrySet()) {
+                newRel.setProperty(entry.getKey(),entry.getValue());
+              }
+              newRel.setProperty(template.getStringProperty(AbstractNode.Key.uuid),0);
+            }
+          }
+        }
+        return null;
+      }
+    }
+);
+    RestMethodResult result=new RestMethodResult(201);
+    return result;
+  }
+ else {
+    return super.doPost(propertySet);
+  }
 }

@@ -2,10 +2,7 @@
   List<SearchAttribute> searchAttrs=new LinkedList<SearchAttribute>();
   for (  NodeAttribute attr : attrs) {
     String key=attr.getKey();
-    String value=attr.getValue().toString();
-    if (type.equals("Content") && key.equals(Content.UiKey.content.name())) {
-      value=Search.escapeForLucene(value);
-    }
+    String value=Search.escapeForLucene(attr.getValue().toString());
     if (!key.equals(PropertyView.Html.concat("data"))) {
       searchAttrs.add(Search.andExactProperty(key,value));
     }

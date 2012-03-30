@@ -34,7 +34,7 @@
     if (type.equals("#text")) {
       type="Content";
       tag="";
-      content=((TextNode)node).text();
+      content=((TextNode)node).toString();
       if (StringUtils.isBlank(content)) {
         continue;
       }
@@ -53,7 +53,10 @@
       attrs.add(new NodeAttribute(PropertyView.Html + "class",StringUtils.trim(classString.toString())));
     }
     for (    Attribute nodeAttr : node.attributes()) {
-      attrs.add(new NodeAttribute(PropertyView.Html + nodeAttr.getKey(),nodeAttr.getValue()));
+      String key=nodeAttr.getKey();
+      if (!key.equals("text")) {
+        attrs.add(new NodeAttribute(PropertyView.Html + nodeAttr.getKey(),nodeAttr.getValue()));
+      }
     }
     String nodePath=getNodePath(node);
     AbstractNode newNode=findOrCreateNode(type,attrs,nodePath);

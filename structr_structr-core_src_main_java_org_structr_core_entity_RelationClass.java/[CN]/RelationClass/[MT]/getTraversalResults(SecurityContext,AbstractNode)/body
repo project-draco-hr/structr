@@ -1,41 +1,34 @@
 {
-  try {
-    final Class realType=(Class)Services.command(securityContext,GetEntityClassCommand.class).execute(StringUtils.capitalize(destType));
-    final NodeFactory nodeFactory=new NodeFactory<AbstractNode>(securityContext);
-    final List<AbstractNode> nodeList=new LinkedList<AbstractNode>();
-    Iterable<Node> nodes=Traversal.description().uniqueness(Uniqueness.NODE_PATH).breadthFirst().relationships(relType,direction).evaluator(new Evaluator(){
-      @Override public Evaluation evaluate(      Path path){
-        int len=path.length();
-        if (len <= 1) {
-          if (len == 0) {
-            return Evaluation.EXCLUDE_AND_CONTINUE;
+  final NodeFactory nodeFactory=new NodeFactory<AbstractNode>(securityContext);
+  final List<AbstractNode> nodeList=new LinkedList<AbstractNode>();
+  Iterable<Node> nodes=Traversal.description().uniqueness(Uniqueness.NODE_PATH).breadthFirst().relationships(relType,direction).evaluator(new Evaluator(){
+    @Override public Evaluation evaluate(    Path path){
+      int len=path.length();
+      if (len <= 1) {
+        if (len == 0) {
+          return Evaluation.EXCLUDE_AND_CONTINUE;
+        }
+ else {
+          try {
+            AbstractNode abstractNode=(AbstractNode)nodeFactory.createNode(securityContext,path.endNode());
+            if ((destType != null) && destType.isAssignableFrom(abstractNode.getClass())) {
+              nodeList.add(abstractNode);
+              return Evaluation.INCLUDE_AND_CONTINUE;
+            }
+ else {
+              return Evaluation.EXCLUDE_AND_CONTINUE;
+            }
           }
- else {
-            try {
-              AbstractNode abstractNode=(AbstractNode)nodeFactory.createNode(securityContext,path.endNode());
-              if ((realType != null) && realType.equals(abstractNode.getClass())) {
-                nodeList.add(abstractNode);
-                return Evaluation.INCLUDE_AND_CONTINUE;
-              }
- else {
-                return Evaluation.EXCLUDE_AND_CONTINUE;
-              }
-            }
- catch (            FrameworkException fex) {
-              logger.log(Level.WARNING,"Unable to instantiate node",fex);
-            }
+ catch (          FrameworkException fex) {
+            logger.log(Level.WARNING,"Unable to instantiate node",fex);
           }
         }
-        return Evaluation.EXCLUDE_AND_PRUNE;
       }
+      return Evaluation.EXCLUDE_AND_PRUNE;
     }
+  }
 ).traverse(node.getNode()).nodes();
-    for (    Node n : nodes) {
-    }
-    return nodeList;
+  for (  Node n : nodes) {
   }
- catch (  FrameworkException fex) {
-    logger.log(Level.WARNING,"Unable to get traversal results",fex);
-  }
-  return Collections.emptyList();
+  return nodeList;
 }

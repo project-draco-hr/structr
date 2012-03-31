@@ -4,12 +4,12 @@
     return null;
   }
   Map properties=data.getProperties();
-  String nodeType=properties.containsKey(AbstractNode.Key.type.name()) ? (String)properties.get(AbstractNode.Key.type.name()) : null;
-  Class nodeClass=(Class)Services.command(securityContext,GetEntityClassCommand.class).execute(nodeType);
+  String combinedRelType=properties.containsKey(AbstractRelationship.HiddenKey.type.name()) ? (String)properties.get(AbstractRelationship.HiddenKey.type.name()) : null;
+  Class relClass=EntityContext.getNamedRelationClass(combinedRelType);
   AbstractRelationship newRel=null;
-  if (nodeClass != null) {
+  if (relClass != null) {
     try {
-      newRel=(AbstractRelationship)nodeClass.newInstance();
+      newRel=(AbstractRelationship)relClass.newInstance();
     }
  catch (    Throwable t) {
       newRel=null;

@@ -4,8 +4,7 @@
   boolean includeDeleted=false;
   boolean publicOnly=false;
   if (rawType != null) {
-    Map cachedEntities=(Map<String,Class>)Services.command(securityContext,GetEntitiesCommand.class).execute();
-    if (!cachedEntities.containsKey(EntityContext.normalizeEntityName(rawType))) {
+    if (entityClass == null) {
       throw new NotFoundException();
     }
     searchAttributes.add(Search.andExactType(EntityContext.normalizeEntityName(rawType)));

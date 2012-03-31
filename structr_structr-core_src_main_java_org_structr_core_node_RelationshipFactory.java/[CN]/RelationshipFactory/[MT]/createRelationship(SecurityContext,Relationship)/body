@@ -1,3 +1,33 @@
 {
-  return createRelationship(securityContext,relationship,relationship.getType().name());
+  AbstractRelationship newRel=null;
+  Class relClass;
+  try {
+    String sourceNodeType=(String)relationship.getStartNode().getProperty(AbstractNode.Key.type.name());
+    String destNodeType=(String)relationship.getEndNode().getProperty(AbstractNode.Key.type.name());
+    relClass=EntityContext.getNamedRelationClass(sourceNodeType,destNodeType,relationship.getType().name());
+    if (relClass != null) {
+      try {
+        newRel=(AbstractRelationship)relClass.newInstance();
+      }
+ catch (      Throwable t2) {
+        newRel=null;
+      }
+    }
+ else {
+      if (relationship.hasProperty(AbstractRelationship.HiddenKey.type.name())) {
+        String combinedRelType=(String)relationship.getProperty(AbstractRelationship.HiddenKey.type.name());
+        relClass=EntityContext.getNamedRelationClass(combinedRelType);
+        if (relClass != null) {
+          newRel=createRelationship(securityContext,combinedRelType);
+        }
+      }
+    }
+  }
+ catch (  Throwable t) {
+  }
+  if (newRel == null) {
+    newRel=new GenericRelationship();
+  }
+  newRel.init(securityContext,relationship);
+  return newRel;
 }

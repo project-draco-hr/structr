@@ -9,6 +9,9 @@
         Comparator<AbstractNode> comparator=traverserInterface.getComparator();
         try {
           List<AbstractNode> nodes=getTraversalResults(comparator,description,currentNode);
+          if (traverserInterface.collapseSingleResult() && nodes.isEmpty()) {
+            return null;
+          }
           List<GraphObject> transformedNodes=traverserInterface.transformResult(nodes);
           Notion notion=traverserInterface.getNotion();
           if (notion != null && !rawMode) {
@@ -18,7 +21,7 @@
               results.add(adapter.adapt(obj));
             }
             traverserInterface.cleanup();
-            return results;
+            return (traverserInterface.collapseSingleResult() && results.size() == 1) ? results.get(0) : results;
           }
  else {
             return transformedNodes;

@@ -1,0 +1,17 @@
+{
+  Object result=this.currentObject.getProperty((((PropertyKey)value.get()).name()));
+  if (result == null)   return 0;
+  if (result instanceof List) {
+    return ((List)result).size();
+  }
+  if (result instanceof IterableAdapter) {
+    int count=0;
+    Iterator it=((IterableAdapter)result).iterator();
+    while (it.hasNext()) {
+      it.next();
+      count++;
+    }
+    return count;
+  }
+  return 1;
+}

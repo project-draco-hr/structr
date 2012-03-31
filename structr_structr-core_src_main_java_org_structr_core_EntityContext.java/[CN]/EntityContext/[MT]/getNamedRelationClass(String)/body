@@ -1,0 +1,10 @@
+{
+  Class namedRelationClass=globalRelationshipClassMap.get(combinedRelationshipType);
+  Class destType=getDestType(combinedRelationshipType);
+  while ((namedRelationClass == null) && !(destType.equals(Object.class))) {
+    combinedRelationshipType=createCombinedRelationshipType(combinedRelationshipType,destType);
+    namedRelationClass=globalRelationshipClassMap.get(combinedRelationshipType);
+    destType=destType.getSuperclass();
+  }
+  return namedRelationClass;
+}

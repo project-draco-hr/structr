@@ -16,7 +16,7 @@
           @Override public Object execute() throws FrameworkException {
             for (            AbstractRelationship rel : rels) {
               AbstractNode otherNode=rel.getOtherNode(startNode);
-              String otherNodeType=otherNode.getType();
+              Class otherNodeType=otherNode.getClass();
               String id=otherNode.getStringProperty(AbstractNode.Key.uuid.name());
               if (staticRel.getDestType().equals(otherNodeType) && !propertySet.containsValue(id)) {
                 deleteRel.execute(rel);
@@ -37,9 +37,9 @@
                 throw new SystemException("More than one result found for uuid " + uuid + "!");
               }
               AbstractNode targetNode=(AbstractNode)results.get(0);
-              String type=staticRel.getDestType();
-              if (!type.equals(targetNode.getType())) {
-                throw new FrameworkException(startNode.getType(),new TypeToken(uuid,type));
+              Class type=staticRel.getDestType();
+              if (!type.equals(targetNode.getClass())) {
+                throw new FrameworkException(startNode.getClass().getSimpleName(),new TypeToken(uuid,type.getSimpleName()));
               }
               staticRel.createRelationship(securityContext,startNode,targetNode);
             }

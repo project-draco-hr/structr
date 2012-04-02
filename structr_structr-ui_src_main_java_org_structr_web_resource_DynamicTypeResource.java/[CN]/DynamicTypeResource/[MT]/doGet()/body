@@ -4,19 +4,12 @@
   boolean includeDeleted=false;
   boolean publicOnly=false;
   if (rawType != null) {
-    if (entityClass == null) {
-      throw new NotFoundException();
-    }
-    searchAttributes.addAll(Search.andExactTypeAndSubtypes(EntityContext.normalizeEntityName(rawType)));
+    searchAttributes.add(Search.andExactProperty(HtmlElement.UiKey.structrclass.name(),EntityContext.normalizeEntityName(rawType)));
     hasSearchableAttributes(rawType,request,searchAttributes);
     List<GraphObject> results=(List<GraphObject>)Services.command(securityContext,SearchNodeCommand.class).execute(topNode,includeDeleted,publicOnly,searchAttributes);
     if (!results.isEmpty()) {
-      applyDefaultSorting(results);
       return results;
     }
   }
- else {
-    logger.log(Level.WARNING,"type was null");
-  }
-  return Collections.emptyList();
+  return super.doGet();
 }

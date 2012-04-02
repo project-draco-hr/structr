@@ -2,6 +2,10 @@
   if (isSuperUser()) {
     return true;
   }
+  user=getUser();
+  if (user != null && (user.equals(node) || user.equals(node.getOwnerNode()))) {
+    return true;
+  }
   boolean isAllowed=false;
 switch (accessMode) {
 case Backend:
@@ -12,7 +16,6 @@ isAllowed=isAllowedInFrontend(node,permission);
 break;
 }
 if (node != null) {
-user=getUser();
 logger.log(Level.FINEST,"Returning {0} for user {1}, access mode {2}, node {3}, permission {4}",new Object[]{isAllowed,(user != null) ? user.getName() : "null",accessMode,node,permission});
 }
 return isAllowed;

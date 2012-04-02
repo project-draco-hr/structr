@@ -1,12 +1,12 @@
 {
-  final SecurityContext securityContext=SecurityContext.getSuperUserInstance();
+  final SecurityContext securityContext=getWebSocket().getSecurityContext();
   Map<String,Object> properties=webSocketData.getData();
   final String address=(String)properties.get("address");
   final String name=(String)properties.get("name");
   final int timeout=Integer.parseInt((String)properties.get("timeout"));
   StructrTransaction transaction=new StructrTransaction(){
     @Override public Object execute() throws FrameworkException {
-      Importer pageImporter=new Importer(address,name,timeout);
+      Importer pageImporter=new Importer(securityContext,address,name,timeout);
       boolean parseOk=pageImporter.parse();
       if (parseOk) {
         logger.log(Level.INFO,"Sucessfully parsed {0}",address);

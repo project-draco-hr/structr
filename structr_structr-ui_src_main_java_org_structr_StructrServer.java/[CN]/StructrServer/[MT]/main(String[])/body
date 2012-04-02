@@ -91,8 +91,8 @@
     config.add("modules.path = " + basePath + "/modules");
     config.add("smtp.host = localhost");
     config.add("smtp.port = 25");
-    config.add("superuser.username = admin");
-    config.add("superuser.password = admin");
+    config.add("superuser.username = superadmin");
+    config.add("superuser.password = s3hrg3h37m");
     config.add("configured.services = ModuleService NodeService AgentService");
     confFile.createNewFile();
     FileUtils.writeLines(confFile,"UTF-8",config);
@@ -105,9 +105,8 @@
   Map<String,String> initParams=new HashMap<String,String>();
   initParams.put("RequestLogging","true");
   initParams.put("PropertyFormat","FlatNameValue");
-  initParams.put("ResourceProvider","org.structr.rest.resource.StructrResourceProvider");
-  initParams.put("Authenticator","org.structr.rest.auth.RestAuthenticator");
-  initParams.put("DefaultPropertyView","default");
+  initParams.put("ResourceProvider","org.structr.web.common.UiResourceProvider");
+  initParams.put("Authenticator","org.structr.web.auth.UiRestAuthenticator");
   initParams.put("IdProperty","uuid");
   holder.setInitParameters(initParams);
   holder.setInitOrder(2);
@@ -116,7 +115,7 @@
   HtmlServlet htmlServlet=new HtmlServlet();
   ServletHolder htmlServletHolder=new ServletHolder(htmlServlet);
   Map<String,String> htmlInitParams=new HashMap<String,String>();
-  htmlInitParams.put("Authenticator","org.structr.core.auth.StructrAuthenticator");
+  htmlInitParams.put("Authenticator","org.structr.web.auth.HttpAuthenticator");
   htmlInitParams.put("IdProperty","uuid");
   htmlServletHolder.setInitParameters(htmlInitParams);
   htmlServletHolder.setInitOrder(3);
@@ -125,7 +124,7 @@
   WebSocketServlet wsServlet=new WebSocketServlet();
   ServletHolder wsServletHolder=new ServletHolder(wsServlet);
   Map<String,String> wsInitParams=new HashMap<String,String>();
-  wsInitParams.put("Authenticator","org.structr.core.auth.StructrAuthenticator");
+  wsInitParams.put("Authenticator","org.structr.web.auth.UiWsAuthenticator");
   wsInitParams.put("IdProperty","uuid");
   wsServletHolder.setInitParameters(wsInitParams);
   wsServletHolder.setInitOrder(4);

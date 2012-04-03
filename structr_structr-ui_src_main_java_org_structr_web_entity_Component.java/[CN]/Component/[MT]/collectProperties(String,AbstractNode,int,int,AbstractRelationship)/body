@@ -1,0 +1,17 @@
+{
+  if (depth > maxDepth) {
+    return;
+  }
+  if (ref != null) {
+    if (componentId.equals(ref.getStringProperty("componentId"))) {
+      String dataKey=startNode.getStringProperty("data-key");
+      if (dataKey != null) {
+        contentNodes.put(dataKey,startNode);
+      }
+    }
+  }
+  for (  AbstractRelationship rel : startNode.getOutgoingRelationships(RelType.CONTAINS)) {
+    AbstractNode endNode=rel.getEndNode();
+    collectProperties(componentId,endNode,depth,maxDepth + 1,rel);
+  }
+}

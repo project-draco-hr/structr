@@ -1,7 +1,47 @@
 {
   List<GraphObject> templates=doGet();
-  if (!templates.isEmpty()) {
+  if (parentResults) {
+    return super.doPost(propertySet);
+  }
+ else   if (!templates.isEmpty()) {
+    final Command createNodeCommand=Services.command(securityContext,CreateNodeCommand.class);
+    final Map<String,Object> templateProperties=new LinkedHashMap<String,Object>();
+    final String componentId=UUID.randomUUID().toString().replaceAll("[\\-]+","");
+    final Component template=(Component)templates.get(0);
+    final int position=templates.size();
+    templateProperties.put(AbstractNode.Key.type.name(),Component.class.getSimpleName());
+    templateProperties.put("structrclass",template.getStringProperty("structrclass"));
+    templateProperties.put("uuid",componentId);
+    Component newComponent=(Component)Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        Component comp=(Component)createNodeCommand.execute(templateProperties);
+        copyRelationships(template,comp,componentId,position);
+        Map<String,Object> contentTemplateProperties=new LinkedHashMap<String,Object>();
+        for (        AbstractNode node : template.getContentNodes().values()) {
+          if (node instanceof Content) {
+            Content contentTemplate=(Content)node;
+            String dataKey=contentTemplate.getStringProperty("data-key");
+            contentTemplateProperties.clear();
+            contentTemplateProperties.put(AbstractNode.Key.type.name(),"Content");
+            contentTemplateProperties.put("data-key",dataKey);
+            contentTemplateProperties.put("content",propertySet.get(dataKey));
+            Content newContent=(Content)createNodeCommand.execute(contentTemplateProperties);
+            copyRelationships(contentTemplate,newContent,componentId,position);
+          }
+        }
+        return comp;
+      }
+    }
+);
+    if (newComponent != null) {
+      for (      String key : propertySet.keySet()) {
+        newComponent.setProperty(key,propertySet.get(key));
+      }
+    }
     RestMethodResult result=new RestMethodResult(201);
+    if (newComponent != null) {
+      result.addHeader("Location",buildLocationHeader(newComponent));
+    }
     return result;
   }
  else {

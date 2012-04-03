@@ -4,12 +4,14 @@
   boolean includeDeleted=false;
   boolean publicOnly=false;
   if (rawType != null) {
-    searchAttributes.add(Search.andExactProperty(HtmlElement.UiKey.structrclass.name(),EntityContext.normalizeEntityName(rawType)));
+    searchAttributes.add(Search.andExactProperty(Component.UiKey.structrclass.name(),EntityContext.normalizeEntityName(rawType)));
+    searchAttributes.add(Search.andExactType(Component.class.getSimpleName()));
     hasSearchableAttributes(rawType,request,searchAttributes);
     List<GraphObject> results=(List<GraphObject>)Services.command(securityContext,SearchNodeCommand.class).execute(topNode,includeDeleted,publicOnly,searchAttributes);
     if (!results.isEmpty()) {
       return results;
     }
   }
+  parentResults=true;
   return super.doGet();
 }

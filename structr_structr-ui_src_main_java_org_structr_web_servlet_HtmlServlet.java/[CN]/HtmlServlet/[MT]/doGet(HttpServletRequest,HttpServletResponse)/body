@@ -1,5 +1,4 @@
 {
-  SecurityContext securityContext=SecurityContext.getSuperUserInstance();
   edit=false;
   tidy=false;
   if (request.getParameter("edit") != null) {
@@ -14,7 +13,6 @@
     double start=System.nanoTime();
     Resource resource=null;
     org.structr.core.entity.File file=null;
-    Image image=null;
     String path=request.getPathInfo();
     logger.log(Level.INFO,"Path info {0}",path);
     path=StringUtils.stripEnd(path,"/");
@@ -41,7 +39,11 @@
       }
     }
     if (resource != null) {
-      String content=getContent(securityContext,resource);
+      String uuid=resource.getStringProperty(Resource.Key.uuid);
+      final Set<String> componentIds=new LinkedHashSet<String>();
+      final StringBuilder buffer=new StringBuilder(10000);
+      getContent(uuid,componentIds,buffer,resource,0,false);
+      String content=buffer.toString();
       double end=System.nanoTime();
       logger.log(Level.INFO,"Content collected in {0} seconds",decimalFormat.format((end - start) / 1000000000.0));
       String contentType=resource.getStringProperty(Resource.UiKey.contentType);

@@ -1,9 +1,13 @@
 {
   Class namedRelationClass=null;
-  Class superClass=sourceType;
-  while ((namedRelationClass == null) && !superClass.equals(Object.class)) {
-    namedRelationClass=globalRelationshipClassMap.get(createCombinedRelationshipType(superClass,relType,destType));
-    superClass=superClass.getSuperclass();
+  Class sourceSuperClass=sourceType;
+  Class destSuperClass=destType;
+  while ((namedRelationClass == null) && !sourceSuperClass.equals(Object.class) && !destSuperClass.equals(Object.class)) {
+    namedRelationClass=globalRelationshipClassMap.get(createCombinedRelationshipType(sourceSuperClass,relType,destSuperClass));
+    sourceSuperClass=sourceSuperClass.getSuperclass();
+  }
+  if (namedRelationClass != null) {
+    return namedRelationClass;
   }
   return globalRelationshipClassMap.get(createCombinedRelationshipType(sourceType,relType,destType));
 }

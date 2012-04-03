@@ -1,0 +1,50 @@
+{
+  final Relationship rel=relationship.getRelationship();
+  Integer position=0;
+  try {
+    Map<Integer,Relationship> sortedRelationshipMap=new TreeMap<Integer,Relationship>();
+    Object prop=null;
+    final String key;
+    if (rel.hasProperty("*")) {
+      prop=rel.getProperty("*");
+      key="*";
+    }
+ else     if (rel.hasProperty(resourceId)) {
+      prop=rel.getProperty(resourceId);
+      key=resourceId;
+    }
+ else {
+      key=null;
+    }
+    if ((key != null) && (prop != null)) {
+      if (prop instanceof Integer) {
+        position=(Integer)prop;
+      }
+ else       if (prop instanceof String) {
+        position=Integer.parseInt((String)prop);
+      }
+ else {
+        throw new java.lang.IllegalArgumentException("Expected Integer or String");
+      }
+      Integer originalPos=position;
+      while (sortedRelationshipMap.containsKey(position)) {
+        position++;
+      }
+      sortedRelationshipMap.put(position,rel);
+      if (originalPos != position) {
+        final Integer newPos=position;
+        Services.command(SecurityContext.getSuperUserInstance(),TransactionCommand.class).execute(new StructrTransaction(){
+          @Override public Object execute() throws FrameworkException {
+            rel.setProperty(key,newPos);
+            return null;
+          }
+        }
+);
+      }
+    }
+  }
+ catch (  Throwable t) {
+    logger.log(Level.SEVERE,"While reading property " + resourceId,t);
+  }
+  return position;
+}

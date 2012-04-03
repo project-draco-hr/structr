@@ -1,5 +1,5 @@
 {
-  AbstractNode node=root.getData();
+  String componentId=null;
   String content=null;
   String tag=null;
   AbstractRelationship link=null;
@@ -11,6 +11,10 @@
       if ((links != null) && !links.isEmpty()) {
         link=links.get(0);
       }
+    }
+    if (node instanceof Component) {
+      componentId=node.getStringProperty(AbstractNode.Key.uuid);
+      componentIds.add(componentId);
     }
     if (link != null) {
       buffer.append("<a href=\"").append(link.getEndNode().getName()).append("\">");
@@ -52,13 +56,35 @@
       buffer.append(content);
     }
   }
-  for (  TreeNode subNode : root.getChildren()) {
-    printNodes(resourceId,buffer,subNode,depth + 1,inBody);
+  List<AbstractRelationship> rels=new LinkedList<AbstractRelationship>();
+  for (  AbstractRelationship abstractRelationship : node.getOutgoingRelationships(RelType.CONTAINS)) {
+    Relationship rel=abstractRelationship.getRelationship();
+    boolean hasComponentId=rel.hasProperty("componentId");
+    if (rel.hasProperty(resourceId) || rel.hasProperty("*") || !componentIds.isEmpty()) {
+      if (!hasComponentId || (hasComponentId && componentIds.contains((String)rel.getProperty("componentId")))) {
+        rels.add(abstractRelationship);
+      }
+    }
+  }
+  Collections.sort(rels,new Comparator<AbstractRelationship>(){
+    @Override public int compare(    AbstractRelationship o1,    AbstractRelationship o2){
+      Integer pos1=getPosition(o1,resourceId);
+      Integer pos2=getPosition(o2,resourceId);
+      return pos1.compareTo(pos2);
+    }
+  }
+);
+  for (  AbstractRelationship rel : rels) {
+    AbstractNode subNode=rel.getEndNode();
+    getContent(resourceId,componentIds,buffer,subNode,depth + 1,inBody);
   }
   if (StringUtils.isNotBlank(tag) && !(ArrayUtils.contains(html5VoidTags,tag))) {
     buffer.append("</").append(tag).append(">");
   }
   if (link != null) {
     buffer.append("</a>");
+  }
+  if (componentId != null) {
+    componentIds.remove(componentId);
   }
 }

@@ -1,0 +1,17 @@
+{
+  if (depth > maxDepth) {
+    return;
+  }
+  String dataClass=startNode.getStringProperty(HtmlElement.UiKey.structrclass.name());
+  if (dataClass != null && !dataClass.isEmpty()) {
+    contentNodes.put(HtmlElement.UiKey.structrclass.name(),startNode);
+  }
+  String dataKey=startNode.getStringProperty("data-key");
+  if (dataKey != null) {
+    contentNodes.put(dataKey,startNode);
+  }
+  for (  AbstractRelationship rel : startNode.getOutgoingRelationships(RelType.CONTAINS)) {
+    AbstractNode endNode=rel.getEndNode();
+    collectProperties(endNode,depth,maxDepth + 1);
+  }
+}

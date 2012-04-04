@@ -1,3 +1,14 @@
 {
-  return getUser(securityContext,request);
+  User user=AuthHelper.getUserForUsernameAndPassword(securityContext,userName,password);
+  if (user != null) {
+    request.getSession().setAttribute(SESSION_USER,user);
+    securityContext.setUser(user);
+    try {
+      request.login(userName,password);
+    }
+ catch (    ServletException ex) {
+      Logger.getLogger(HttpAuthenticator.class.getName()).log(Level.SEVERE,null,ex);
+    }
+  }
+  return user;
 }

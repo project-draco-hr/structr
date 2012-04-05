@@ -10,10 +10,10 @@
     }
   }
   if ((stringValue == null) || stringValue.startsWith("\"") || stringValue.startsWith("[")|| stringValue.startsWith("NOT")|| stringValue.startsWith("AND")|| stringValue.startsWith("OR")) {
-    return " " + key + ":"+ value+ " ";
+    return " " + key + ":"+ stringValue+ " ";
   }
   String result="( ";
-  stringValue=Search.clean(stringValue);
+  stringValue=Search.escapeForLuceneExact(stringValue);
   String[] words=StringUtils.split(stringValue," ");
   int i=1;
   for (  String word : words) {

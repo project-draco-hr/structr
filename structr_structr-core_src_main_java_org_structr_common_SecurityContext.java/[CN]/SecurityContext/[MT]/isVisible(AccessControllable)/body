@@ -1,16 +1,17 @@
 {
-  boolean ret=false;
+  boolean visible=false;
 switch (accessMode) {
 case Backend:
-    ret=isVisibleInBackend(node);
+    visible=isVisibleInBackend(node);
   break;
 case Frontend:
-ret=isVisibleInFrontend(node);
+visible=isVisibleInFrontend(node);
 break;
 }
+if (visible) return visible;
 if (node != null) {
 user=getUser();
-logger.log(Level.FINEST,"Returning {0} for user {1}, access mode {2}, node {3}",new Object[]{ret,(user != null) ? user.getName() : "null",accessMode,node});
+logger.log(Level.FINEST,"Returning {0} for user {1}, access mode {2}, node {3}",new Object[]{visible,(user != null) ? user.getName() : "null",accessMode,node});
 }
-return (ret);
+return visible;
 }

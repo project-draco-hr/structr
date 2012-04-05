@@ -9,11 +9,11 @@
       return "";
     }
   }
-  if ((stringValue == null) || stringValue.startsWith("\"") || stringValue.startsWith("[")|| stringValue.startsWith("NOT")|| stringValue.startsWith("AND")|| stringValue.startsWith("OR")) {
+  if ((stringValue.length() > 1) && (stringValue.startsWith("\"") && stringValue.endsWith("\"")) || (stringValue.startsWith("[") && stringValue.endsWith("]")) || stringValue.startsWith("NOT") || stringValue.startsWith("AND") || stringValue.startsWith("OR")) {
     return " " + key + ":"+ stringValue+ " ";
   }
   String result="( ";
-  stringValue=Search.escapeForLuceneExact(stringValue);
+  stringValue=Search.escapeForLucene(stringValue);
   String[] words=StringUtils.split(stringValue," ");
   int i=1;
   for (  String word : words) {

@@ -1,5 +1,5 @@
 {
-  String componentId=null;
+  String localComponentId=componentId;
   String content=null;
   String tag=null;
   AbstractRelationship link=null;
@@ -13,8 +13,7 @@
       }
     }
     if (node instanceof Component) {
-      componentId=node.getStringProperty(AbstractNode.Key.uuid);
-      componentIds.add(componentId);
+      localComponentId=node.getStringProperty(AbstractNode.Key.uuid);
     }
     if (link != null) {
       buffer.append("<a href=\"").append(link.getEndNode().getName()).append("\">");
@@ -59,9 +58,14 @@
   List<AbstractRelationship> rels=new LinkedList<AbstractRelationship>();
   for (  AbstractRelationship abstractRelationship : node.getOutgoingRelationships(RelType.CONTAINS)) {
     Relationship rel=abstractRelationship.getRelationship();
-    boolean hasComponentId=rel.hasProperty("componentId");
-    if (rel.hasProperty(resourceId) || rel.hasProperty("*") || !componentIds.isEmpty()) {
-      if (!hasComponentId || (hasComponentId && componentIds.contains((String)rel.getProperty("componentId")))) {
+    if (rel.hasProperty(resourceId) || rel.hasProperty("*")) {
+      AbstractNode endNode=abstractRelationship.getEndNode();
+      if (localComponentId != null && (endNode instanceof Content || endNode instanceof Component)) {
+        if (rel.hasProperty(localComponentId)) {
+          rels.add(abstractRelationship);
+        }
+      }
+ else {
         rels.add(abstractRelationship);
       }
     }
@@ -76,15 +80,12 @@
 );
   for (  AbstractRelationship rel : rels) {
     AbstractNode subNode=rel.getEndNode();
-    getContent(resourceId,componentIds,buffer,subNode,depth + 1,inBody);
+    getContent(resourceId,localComponentId,buffer,subNode,depth + 1,inBody);
   }
   if (StringUtils.isNotBlank(tag) && !(ArrayUtils.contains(html5VoidTags,tag))) {
     buffer.append("</").append(tag).append(">");
   }
   if (link != null) {
     buffer.append("</a>");
-  }
-  if (componentId != null) {
-    componentIds.remove(componentId);
   }
 }

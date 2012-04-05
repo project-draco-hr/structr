@@ -6,12 +6,9 @@
     AbstractRelationship newInRel=(AbstractRelationship)createRel.execute(startNode,targetNode,relType);
     newInRel.setProperty("type",in.getStringProperty("type"));
     if (componentId != null) {
-      newInRel.setProperty("componentId",componentId);
+      newInRel.setProperty(componentId,"*");
     }
-    String resourceId=in.getStringProperty("resourceId");
     if (resourceId != null) {
-      newInRel.setProperty("resourceId",resourceId);
-      Integer pos=in.getIntProperty(resourceId);
       newInRel.setProperty(resourceId,position);
     }
   }
@@ -20,10 +17,10 @@
     RelationshipType relType=out.getRelType();
     AbstractRelationship newOutRel=(AbstractRelationship)createRel.execute(targetNode,endNode,relType);
     newOutRel.setProperty("type",out.getStringProperty("type"));
-    newOutRel.setProperty("componentId",componentId);
-    String resourceId=out.getStringProperty("resourceId");
+    if (componentId != null) {
+      newOutRel.setProperty(componentId,"*");
+    }
     if (resourceId != null) {
-      newOutRel.setProperty("resourceId",resourceId);
       newOutRel.setProperty(resourceId,position);
     }
   }

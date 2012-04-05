@@ -1,0 +1,23 @@
+{
+  User user;
+  String auth=request.getHeader("Authorization");
+  if (auth == null) {
+    sendBasicAuthResponse(response);
+    return null;
+  }
+  if (!auth.toUpperCase().startsWith("BASIC ")) {
+    sendBasicAuthResponse(response);
+    return null;
+  }
+  String usernameAndPassword=new String(Base64.decodeBase64(auth.substring(6)));
+  logger.log(Level.INFO,"Decoded user and pass: {0}",usernameAndPassword);
+  String[] userAndPass=StringUtils.split(usernameAndPassword,":");
+  try {
+    user=AuthHelper.getUserForUsernameAndPassword(SecurityContext.getSuperUserInstance(),userAndPass[0],userAndPass[1]);
+  }
+ catch (  AuthenticationException ex) {
+    sendBasicAuthResponse(response);
+    return null;
+  }
+  return user;
+}

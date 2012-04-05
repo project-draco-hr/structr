@@ -8,7 +8,7 @@
     tidy=true;
   }
   try {
-    SecurityContext securityContext=SecurityContext.getInstance(this.getServletConfig(),request,AccessMode.Frontend);
+    SecurityContext securityContext=SecurityContext.getInstance(this.getServletConfig(),request,response,AccessMode.Frontend);
     request.setCharacterEncoding("UTF-8");
     DecimalFormat decimalFormat=new DecimalFormat("0.000000000",DecimalFormatSymbols.getInstance(Locale.ENGLISH));
     double start=System.nanoTime();
@@ -27,7 +27,7 @@
       group.add(Search.orExactType(org.structr.core.entity.File.class.getSimpleName()));
       group.add(Search.orExactType(Image.class.getSimpleName()));
       searchAttrs.add(group);
-      List<AbstractNode> results=(List<AbstractNode>)Services.command(securityContext,SearchNodeCommand.class).execute(null,false,false,searchAttrs);
+      List<AbstractNode> results=(List<AbstractNode>)Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class).execute(null,false,false,searchAttrs);
       logger.log(Level.FINE,"{0} results",results.size());
       if (!results.isEmpty()) {
         AbstractNode node=results.get(0);
@@ -39,7 +39,7 @@
         }
       }
     }
-    if (resource != null && securityContext.isVisible(resource)) {
+    if ((resource != null) && securityContext.isVisible(resource)) {
       String uuid=resource.getStringProperty(Resource.Key.uuid);
       final Set<String> componentIds=new LinkedHashSet<String>();
       final StringBuilder buffer=new StringBuilder(10000);
@@ -69,7 +69,7 @@
       response.getWriter().close();
       response.setStatus(HttpServletResponse.SC_OK);
     }
- else     if (file != null) {
+ else     if ((file != null) && securityContext.isVisible(file)) {
       InputStream in=file.getInputStream();
       OutputStream out=response.getOutputStream();
       String contentType=file.getContentType();

@@ -1,17 +1,23 @@
 {
-  if (depth > maxDepth) {
+  if (depth > MAX_DEPTH) {
     return;
   }
   if (ref != null) {
-    if (componentId.equals(ref.getStringProperty("componentId"))) {
+    if (ref.getRelationship().hasProperty(componentId)) {
       String dataKey=startNode.getStringProperty("data-key");
       if (dataKey != null) {
         contentNodes.put(dataKey,startNode);
+        return;
       }
     }
   }
   for (  AbstractRelationship rel : startNode.getOutgoingRelationships(RelType.CONTAINS)) {
     AbstractNode endNode=rel.getEndNode();
-    collectProperties(componentId,endNode,depth,maxDepth + 1,rel);
+    if (endNode instanceof Component) {
+      subTypes.add(endNode.getStringProperty(Component.UiKey.structrclass));
+    }
+ else {
+      collectProperties(componentId,endNode,depth + 1,rel);
+    }
   }
 }

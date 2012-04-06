@@ -1,4 +1,7 @@
 {
+  if (uuidResource != null) {
+    throw new IllegalPathException();
+  }
   List<GraphObject> templates=doGet();
   if (parentResults) {
     return super.doPost(propertySet);
@@ -15,7 +18,7 @@
     Component newComponent=(Component)Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
       @Override public Object execute() throws FrameworkException {
         Component comp=(Component)createNodeCommand.execute(templateProperties);
-        copyRelationships(template,comp,null,position);
+        copyRelationships(template,comp,getResourceId(),null,position);
         Map<String,Object> contentTemplateProperties=new LinkedHashMap<String,Object>();
         for (        AbstractNode node : template.getContentNodes().values()) {
           if (node instanceof Content) {
@@ -26,7 +29,7 @@
             contentTemplateProperties.put("data-key",dataKey);
             contentTemplateProperties.put("content",propertySet.get(dataKey));
             Content newContent=(Content)createNodeCommand.execute(contentTemplateProperties);
-            copyRelationships(contentTemplate,newContent,componentId,position);
+            copyRelationships(contentTemplate,newContent,getResourceId(),componentId,position);
           }
         }
         return comp;

@@ -1,0 +1,13 @@
+{
+  Map<String,String[]> parameterMap=request.getParameterMap();
+  String path=clean(request.getPathInfo());
+  postToRestUrl(request,path,convert(parameterMap));
+  String name=null;
+  try {
+    name=getParts(path)[0];
+    response.sendRedirect("/" + name);
+  }
+ catch (  IOException ex) {
+    logger.log(Level.SEVERE,"Could not redirect to " + name,ex);
+  }
+}

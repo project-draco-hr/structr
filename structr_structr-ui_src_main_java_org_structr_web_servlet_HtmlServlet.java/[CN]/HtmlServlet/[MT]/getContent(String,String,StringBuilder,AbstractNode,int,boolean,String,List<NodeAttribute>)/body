@@ -4,7 +4,20 @@
   String tag=null;
   AbstractRelationship link=null;
   if (node != null) {
+    String structrClass=node.getStringProperty(Component.UiKey.structrclass);
+    if (structrClass != null && structrClass.equals(EntityContext.normalizeEntityName(searchClass)) && attrs != null) {
+      for (      NodeAttribute attr : attrs) {
+        String key=attr.getKey();
+        Object val=attr.getValue();
+        if (!val.equals(node.getProperty(key))) {
+          return;
+        }
+      }
+    }
     String id=node.getStringProperty("uuid");
+    for (int d=0; d < depth; d++) {
+      System.out.print(" ");
+    }
     if (node instanceof Content) {
       content=node.getStringProperty("content");
       List<AbstractRelationship> links=node.getOutgoingLinkRelationships();
@@ -43,7 +56,7 @@
       }
       if (node instanceof HtmlElement) {
         for (        String attribute : EntityContext.getPropertySet(node.getClass(),PropertyView.Html)) {
-          if (node.getProperty(attribute) != null) {
+          if (StringUtils.isNotBlank(node.getStringProperty(attribute))) {
             String key=attribute.substring(PropertyView.Html.length());
             buffer.append(" ").append(key).append("=\"").append(node.getProperty(attribute)).append("\"");
           }
@@ -60,7 +73,7 @@
     Relationship rel=abstractRelationship.getRelationship();
     if (rel.hasProperty(resourceId) || rel.hasProperty("*")) {
       AbstractNode endNode=abstractRelationship.getEndNode();
-      if (localComponentId != null && (endNode instanceof Content || endNode instanceof Component)) {
+      if ((localComponentId != null) && ((endNode instanceof Content) || (endNode instanceof Component))) {
         if (rel.hasProperty(localComponentId)) {
           rels.add(abstractRelationship);
         }
@@ -80,7 +93,7 @@
 );
   for (  AbstractRelationship rel : rels) {
     AbstractNode subNode=rel.getEndNode();
-    getContent(resourceId,localComponentId,buffer,subNode,depth + 1,inBody);
+    getContent(resourceId,localComponentId,buffer,subNode,depth + 1,inBody,searchClass,attrs);
   }
   if (StringUtils.isNotBlank(tag) && !(ArrayUtils.contains(html5VoidTags,tag))) {
     buffer.append("</").append(tag).append(">");

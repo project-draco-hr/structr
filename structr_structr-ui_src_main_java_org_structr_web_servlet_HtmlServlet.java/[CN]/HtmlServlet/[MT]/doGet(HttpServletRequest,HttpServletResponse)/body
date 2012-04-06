@@ -1,4 +1,17 @@
 {
+  String path=clean(request.getPathInfo());
+  logger.log(Level.INFO,"Path info {0}",path);
+  String[] urlParts=getParts(path);
+  String searchFor=null;
+  if (urlParts.length > 1) {
+    searchFor=StringUtils.substringBefore(urlParts[1],"?");
+  }
+  String name=getParts(path)[0];
+  List<NodeAttribute> attrs=new LinkedList<NodeAttribute>();
+  Map<String,String[]> parameterMap=request.getParameterMap();
+  if ((parameterMap != null) && (parameterMap.size() > 0)) {
+    attrs=convertToNodeAttributes(parameterMap);
+  }
   edit=false;
   tidy=false;
   if (request.getParameter("edit") != null) {
@@ -14,10 +27,6 @@
     double start=System.nanoTime();
     Resource resource=null;
     org.structr.core.entity.File file=null;
-    String path=request.getPathInfo();
-    logger.log(Level.INFO,"Path info {0}",path);
-    path=StringUtils.stripEnd(path,"/");
-    String name=StringUtils.substringAfterLast(path,"/");
     if (name.length() > 0) {
       logger.log(Level.FINE,"File name {0}",name);
       List<SearchAttribute> searchAttrs=new LinkedList<SearchAttribute>();
@@ -42,7 +51,7 @@
     if ((resource != null) && securityContext.isVisible(resource)) {
       String uuid=resource.getStringProperty(Resource.Key.uuid);
       final StringBuilder buffer=new StringBuilder(10000);
-      getContent(uuid,null,buffer,resource,0,false);
+      getContent(uuid,null,buffer,resource,0,false,searchFor,attrs);
       String content=buffer.toString();
       double end=System.nanoTime();
       logger.log(Level.INFO,"Content collected in {0} seconds",decimalFormat.format((end - start) / 1000000000.0));
@@ -63,10 +72,7 @@
         tidy.parse(new StringReader(content),tidyOutput);
         content=tidyOutput.toString();
       }
-      response.getWriter().append(content);
-      response.getWriter().flush();
-      response.getWriter().close();
-      response.setStatus(HttpServletResponse.SC_OK);
+      HttpAuthenticator.writeContent(content,response);
     }
  else     if ((file != null) && securityContext.isVisible(file)) {
       InputStream in=file.getInputStream();
@@ -83,8 +89,16 @@
       out.close();
       response.setStatus(HttpServletResponse.SC_OK);
     }
+ else {
+      if (response.getStatus() == HttpServletResponse.SC_UNAUTHORIZED) {
+        HttpAuthenticator.writeUnauthorized(response);
+      }
+ else {
+        HttpAuthenticator.writeNotFound(response);
+      }
+    }
   }
  catch (  Throwable t) {
-    logger.log(Level.WARNING,"Exception while processing request",t);
+    HttpAuthenticator.writeInternalServerError(response);
   }
 }

@@ -3,16 +3,18 @@
   AbstractRelationship relationship;
   if (graphObject instanceof AbstractRelationship) {
     relationship=(AbstractRelationship)graphObject;
-    AbstractNode startNode=relationship.getStartNode();
-    AbstractNode endNode=relationship.getEndNode();
-    WebSocketMessage message=new WebSocketMessage();
-    message.setCommand("ADD");
-    message.setGraphObject(relationship);
-    message.setId(startNode.getStringProperty("uuid"));
-    message.setData("id",endNode.getStringProperty("uuid"));
-    message.setData("tag",endNode.getStringProperty("tag"));
-    messageStack.add(message);
-    logger.log(Level.FINE,"Relationship created: {0}({1} -> {2}{3}",new Object[]{startNode.getId(),startNode.getStringProperty(AbstractNode.Key.uuid),endNode.getStringProperty(AbstractNode.Key.uuid)});
+    if (relationship.getRelType().equals(RelType.CONTAINS) || relationship.getRelType().equals(RelType.HAS_CHILD)) {
+      AbstractNode startNode=relationship.getStartNode();
+      AbstractNode endNode=relationship.getEndNode();
+      WebSocketMessage message=new WebSocketMessage();
+      message.setCommand("ADD");
+      message.setGraphObject(relationship);
+      message.setId(startNode.getStringProperty("uuid"));
+      message.setNodeData("id",endNode.getStringProperty("uuid"));
+      message.setNodeData("tag",endNode.getStringProperty("tag"));
+      messageStack.add(message);
+      logger.log(Level.FINE,"Relationship created: {0}({1} -> {2}{3}",new Object[]{startNode.getId(),startNode.getStringProperty(AbstractNode.Key.uuid),endNode.getStringProperty(AbstractNode.Key.uuid)});
+    }
     return false;
   }
  else {

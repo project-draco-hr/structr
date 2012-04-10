@@ -6,7 +6,7 @@
   if (urlParts.length > 1) {
     searchFor=StringUtils.substringBefore(urlParts[1],"?");
   }
-  String name=getParts(path)[0];
+  String name=getName(getParts(path)[0]);
   List<NodeAttribute> attrs=new LinkedList<NodeAttribute>();
   Map<String,String[]> parameterMap=request.getParameterMap();
   if ((parameterMap != null) && (parameterMap.size() > 0)) {
@@ -25,28 +25,14 @@
     request.setCharacterEncoding("UTF-8");
     DecimalFormat decimalFormat=new DecimalFormat("0.000000000",DecimalFormatSymbols.getInstance(Locale.ENGLISH));
     double start=System.nanoTime();
+    AbstractNode node=findEntryPoint(name);
     Resource resource=null;
     org.structr.core.entity.File file=null;
-    if (name.length() > 0) {
-      logger.log(Level.FINE,"File name {0}",name);
-      List<SearchAttribute> searchAttrs=new LinkedList<SearchAttribute>();
-      searchAttrs.add(Search.andExactName(name));
-      SearchAttributeGroup group=new SearchAttributeGroup(SearchOperator.AND);
-      group.add(Search.orExactType(Resource.class.getSimpleName()));
-      group.add(Search.orExactType(org.structr.core.entity.File.class.getSimpleName()));
-      group.add(Search.orExactType(Image.class.getSimpleName()));
-      searchAttrs.add(group);
-      List<AbstractNode> results=(List<AbstractNode>)Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class).execute(null,false,false,searchAttrs);
-      logger.log(Level.FINE,"{0} results",results.size());
-      if (!results.isEmpty()) {
-        AbstractNode node=results.get(0);
-        if (node instanceof Resource) {
-          resource=(Resource)node;
-        }
- else         if (node instanceof org.structr.core.entity.File) {
-          file=(org.structr.core.entity.File)node;
-        }
-      }
+    if (node instanceof Resource) {
+      resource=(Resource)node;
+    }
+ else     if (node instanceof org.structr.core.entity.File) {
+      file=(org.structr.core.entity.File)node;
     }
     if ((resource != null) && securityContext.isVisible(resource)) {
       String uuid=resource.getStringProperty(Resource.Key.uuid);

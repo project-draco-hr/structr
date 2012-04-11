@@ -1,21 +1,12 @@
 {
   Command saveImage=Services.command(securityContext,SaveImageFromUrl.class);
   List<Image> result=new LinkedList<Image>();
-  try {
-    Parser parser=new Parser(urlString);
-    NodeList imgNodes=parser.extractAllNodesThatMatch(new TagNameFilter("img"));
-    Node[] nodeArray=imgNodes.toNodeArray();
-    for (    Node imgNode : nodeArray) {
-      if (imgNode instanceof ImageTag) {
-        ImageTag imageTag=(ImageTag)imgNode;
-        String imageUrl=imageTag.getImageURL();
-        Image newImageNode=(Image)saveImage.execute(user,imageUrl,parentNode);
-        result.add(newImageNode);
-      }
-    }
-  }
- catch (  ParserException ex) {
-    logger.log(Level.SEVERE,null,ex);
+  Document doc=Jsoup.parse(urlString);
+  Elements elements=doc.getElementsByTag("img");
+  for (  Element el : elements) {
+    String imageUrl=el.attr("src");
+    Image newImageNode=(Image)saveImage.execute(user,imageUrl,parentNode);
+    result.add(newImageNode);
   }
   return result;
 }

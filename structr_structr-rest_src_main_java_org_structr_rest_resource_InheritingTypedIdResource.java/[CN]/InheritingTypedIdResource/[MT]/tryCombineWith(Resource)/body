@@ -1,0 +1,19 @@
+{
+  if (next instanceof TypeResource) {
+    return new StaticRelationshipResource(securityContext,this,(TypeResource)next);
+  }
+ else   if (next instanceof InheritingTypedIdResource) {
+    RelationshipFollowingResource constraint=new RelationshipFollowingResource(securityContext,this);
+    constraint.addTypedIdResource((InheritingTypedIdResource)next);
+    return constraint;
+  }
+ else   if (next instanceof RelationshipResource) {
+    ((RelationshipResource)next).wrapResource(this);
+    return next;
+  }
+ else   if (next instanceof RelationshipIdResource) {
+    ((RelationshipIdResource)next).getRelationshipResource().wrapResource(this);
+    return next;
+  }
+  return super.tryCombineWith(next);
+}

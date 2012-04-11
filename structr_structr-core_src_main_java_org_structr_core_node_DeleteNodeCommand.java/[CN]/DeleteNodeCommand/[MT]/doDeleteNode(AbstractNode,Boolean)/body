@@ -1,0 +1,48 @@
+{
+  final Command transactionCommand=Services.command(securityContext,TransactionCommand.class);
+  transactionCommand.execute(new StructrTransaction(){
+    @Override public Object execute() throws FrameworkException {
+      if (cascade) {
+        List<AbstractRelationship> outgoingRels=node.getOutgoingRelationships();
+        for (        AbstractRelationship rel : outgoingRels) {
+          int cascadeDelete=rel.cascadeDelete();
+          if (cascadeDelete == RelationClass.DELETE_OUTGOING || cascadeDelete == RelationClass.DELETE_BOTH) {
+            try {
+              doDeleteNode(rel.getEndNode(),cascade);
+            }
+ catch (            Throwable t) {
+              logger.log(Level.WARNING,"Exception while deleting connected node: {0}",t);
+            }
+          }
+        }
+        List<AbstractRelationship> incomingRels=node.getIncomingRelationships();
+        for (        AbstractRelationship rel : incomingRels) {
+          int cascadeDelete=rel.cascadeDelete();
+          if (cascadeDelete == RelationClass.DELETE_INCOMING || cascadeDelete == RelationClass.DELETE_INCOMING) {
+            try {
+              doDeleteNode(rel.getStartNode(),cascade);
+            }
+ catch (            Throwable t) {
+              logger.log(Level.WARNING,"Exception while deleting connected node: {0}",t);
+            }
+          }
+        }
+      }
+      List<AbstractRelationship> rels=node.getRelationships();
+      for (      AbstractRelationship r : rels) {
+        r.getRelationship().delete();
+      }
+      try {
+        node.onNodeDeletion();
+      }
+ catch (      Throwable t) {
+        logger.log(Level.WARNING,"Exception while calling onDeletion callback: {0}",t);
+      }
+      node.getNode().delete();
+      setExitCode(Command.exitCode.SUCCESS);
+      return null;
+    }
+  }
+);
+  return null;
+}

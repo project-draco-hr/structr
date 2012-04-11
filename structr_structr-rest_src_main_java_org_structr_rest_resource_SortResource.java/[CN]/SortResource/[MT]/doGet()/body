@@ -1,0 +1,13 @@
+{
+  if (wrappedResource != null) {
+    List<? extends GraphObject> results=wrappedResource.doGet();
+    try {
+      Collections.sort(results,new GraphObjectComparator(sortKey,sortOrder));
+    }
+ catch (    Throwable t) {
+      throw new FrameworkException("base",new InvalidSortKey(sortKey));
+    }
+    return results;
+  }
+  throw new IllegalPathException();
+}

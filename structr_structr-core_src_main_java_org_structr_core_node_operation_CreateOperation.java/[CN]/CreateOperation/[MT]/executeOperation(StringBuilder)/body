@@ -1,37 +1,42 @@
 {
-  final AbstractNode parent=(AbstractNode)Services.command(securityContext,FindNodeCommand.class).execute(nodeParent);
   boolean ret=false;
-  if (parent != null) {
-    Boolean retValue=(Boolean)Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-      @Override public Object execute() throws Throwable {
-        Command createRelCommand=Services.command(securityContext,CreateRelationshipCommand.class);
-        Command createNodeCommand=Services.command(securityContext,CreateNodeCommand.class);
-        List<Long> newNodeIds=new LinkedList<Long>();
-        int count=0;
-        for (        String nodeName : nodeNames) {
-          AbstractNode newNode=(AbstractNode)createNodeCommand.execute(securityContext.getUser(),nodeAttributes);
-          newNode.setName(nodeName);
-          newNode.setType(nodeType);
-          createRelCommand.execute(parent,newNode,RelType.HAS_CHILD);
-          newNodeIds.add(newNode.getId());
-          count++;
-        }
-        if (newNodeIds.size() == 1) {
-          stdOut.append("Node ").append(newNodeIds).append(" with type ").append(nodeType).append(" created");
-        }
+  try {
+    final AbstractNode parent=(AbstractNode)Services.command(securityContext,FindNodeCommand.class).execute(nodeParent);
+    if (parent != null) {
+      Boolean retValue=(Boolean)Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+        @Override public Object execute() throws FrameworkException {
+          Command createRelCommand=Services.command(securityContext,CreateRelationshipCommand.class);
+          Command createNodeCommand=Services.command(securityContext,CreateNodeCommand.class);
+          List<Long> newNodeIds=new LinkedList<Long>();
+          int count=0;
+          for (          String nodeName : nodeNames) {
+            AbstractNode newNode=(AbstractNode)createNodeCommand.execute(securityContext.getUser(),nodeAttributes);
+            newNode.setName(nodeName);
+            newNode.setType(nodeType);
+            createRelCommand.execute(parent,newNode,RelType.HAS_CHILD);
+            newNodeIds.add(newNode.getId());
+            count++;
+          }
+          if (newNodeIds.size() == 1) {
+            stdOut.append("Node ").append(newNodeIds).append(" with type ").append(nodeType).append(" created");
+          }
  else {
-          stdOut.append("Nodes ").append(newNodeIds).append(" with type ").append(nodeType).append(" created");
+            stdOut.append("Nodes ").append(newNodeIds).append(" with type ").append(nodeType).append(" created");
+          }
+          return (true);
         }
-        return (true);
+      }
+);
+      if (retValue != null) {
+        ret=retValue.booleanValue();
       }
     }
-);
-    if (retValue != null) {
-      ret=retValue.booleanValue();
+ else {
+      throw new NodeCommandException("Creation parent node not found");
     }
   }
- else {
-    throw new NodeCommandException("Creation parent node not found");
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
   }
   return (ret);
 }

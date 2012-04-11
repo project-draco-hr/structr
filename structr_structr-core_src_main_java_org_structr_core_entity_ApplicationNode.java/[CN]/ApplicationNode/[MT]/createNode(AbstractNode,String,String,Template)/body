@@ -3,12 +3,18 @@
   List<NodeAttribute> attrs=new LinkedList<NodeAttribute>();
   attrs.add(new NodeAttribute(Key.type.name(),nodeType));
   attrs.add(new NodeAttribute(Key.name.name(),name));
-  AbstractNode ret=(AbstractNode)createNodeCommand.execute(attrs);
-  if (parent != null) {
-    linkNodes(parent,ret,RelType.HAS_CHILD);
+  try {
+    AbstractNode ret=(AbstractNode)createNodeCommand.execute(attrs);
+    if (parent != null) {
+      linkNodes(parent,ret,RelType.HAS_CHILD);
+    }
+    if (template != null) {
+      linkNodes(ret,template,RelType.USE_TEMPLATE);
+    }
+    return (ret);
   }
-  if (template != null) {
-    linkNodes(ret,template,RelType.USE_TEMPLATE);
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"Unable to create node",fex);
   }
-  return (ret);
+  return null;
 }

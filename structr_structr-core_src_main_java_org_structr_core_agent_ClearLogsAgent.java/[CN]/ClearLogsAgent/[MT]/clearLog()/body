@@ -3,13 +3,13 @@
   final Command deleteNode=Services.command(securityContext,DeleteNodeCommand.class);
   Command transactionCommand=Services.command(securityContext,TransactionCommand.class);
   Long numberOfLogNodes=(Long)transactionCommand.execute(new StructrTransaction(){
-    @Override public Object execute() throws Throwable {
+    @Override public Object execute() throws FrameworkException {
       long count=0;
       List<AbstractNode> allNodes=(List<AbstractNode>)Services.command(securityContext,GetAllNodes.class).execute();
       for (      AbstractNode s : allNodes) {
         if (s instanceof Activity) {
           try {
-            deleteNode.execute(s,null,true,new SuperUser());
+            deleteNode.execute(s,true);
             count++;
           }
  catch (          Throwable ignore) {

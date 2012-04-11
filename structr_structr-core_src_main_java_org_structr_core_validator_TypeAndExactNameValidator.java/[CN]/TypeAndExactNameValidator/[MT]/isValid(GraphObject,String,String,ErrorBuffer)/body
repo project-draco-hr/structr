@@ -1,0 +1,25 @@
+{
+  if (key == null) {
+    return false;
+  }
+  if (StringUtils.isBlank(value)) {
+    errorBuffer.add(object.getType(),new EmptyPropertyToken(key));
+    return false;
+  }
+  List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
+  attrs.add(Search.andExactName(value));
+  attrs.add(Search.andType(type));
+  try {
+    List<AbstractNode> nodes=(List<AbstractNode>)Services.command(securityContext,SearchNodeCommand.class).execute(null,false,false,attrs);
+    if (nodes != null && !nodes.isEmpty()) {
+      return true;
+    }
+ else {
+      errorBuffer.add(object.getType(),new PropertyNotFoundToken(key,value));
+      return false;
+    }
+  }
+ catch (  FrameworkException fex) {
+  }
+  return false;
+}

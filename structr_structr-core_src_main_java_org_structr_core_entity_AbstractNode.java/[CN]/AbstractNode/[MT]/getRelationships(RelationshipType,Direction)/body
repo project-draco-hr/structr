@@ -1,3 +1,9 @@
 {
-  return (List<StructrRelationship>)Services.command(securityContext,NodeRelationshipsCommand.class).execute(this,type,dir);
+  try {
+    return (List<AbstractRelationship>)Services.command(securityContext,NodeRelationshipsCommand.class).execute(this,type,dir);
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"Unable to get relationships",fex);
+  }
+  return null;
 }

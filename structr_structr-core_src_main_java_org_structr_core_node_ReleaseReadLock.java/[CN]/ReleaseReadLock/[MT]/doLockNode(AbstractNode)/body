@@ -2,7 +2,7 @@
   final GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
   final Node node=graphDb.getNodeById(structrNode.getId());
   Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-    @Override public Object execute() throws Throwable {
+    @Override public Object execute() throws FrameworkException {
       if ((lockType == LockType.READ) && (graphDb instanceof AbstractGraphDatabase)) {
         ((AbstractGraphDatabase)graphDb).getConfig().getLockManager().releaseReadLock(node,null);
       }

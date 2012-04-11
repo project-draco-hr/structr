@@ -1,4 +1,10 @@
 {
   T t=(T)object.getProperty(propertyKey);
-  return predicate.evaluate(t,value.get());
+  if (t != null) {
+    return predicate.evaluate(t,value.get());
+  }
+ else {
+    logger.log(Level.WARNING,"Null property for key {0} on ID {1}",new Object[]{propertyKey,object.getProperty(AbstractNode.Key.uuid.name())});
+  }
+  return false;
 }

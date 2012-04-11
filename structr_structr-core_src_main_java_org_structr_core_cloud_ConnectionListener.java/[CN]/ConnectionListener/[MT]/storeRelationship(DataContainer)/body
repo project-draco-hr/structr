@@ -1,6 +1,6 @@
 {
   RelationshipDataContainer receivedRelationshipData=(RelationshipDataContainer)receivedData;
-  StructrRelationship newRelationship=null;
+  AbstractRelationship newRelationship=null;
   long sourceStartNodeId=receivedRelationshipData.getSourceStartNodeId();
   long sourceEndNodeId=receivedRelationshipData.getSourceEndNodeId();
   Long targetStartNodeIdValue=idMap.get(sourceStartNodeId);
@@ -12,7 +12,7 @@
     AbstractNode targetEndNode=(AbstractNode)findNode.execute(targetEndNodeId);
     String name=receivedRelationshipData.getName();
     if (targetStartNode != null && targetEndNode != null && StringUtils.isNotEmpty(name)) {
-      newRelationship=(StructrRelationship)createRel.execute(targetStartNode,targetEndNode,name);
+      newRelationship=(AbstractRelationship)createRel.execute(targetStartNode,targetEndNode,name);
       for (      Entry<String,Object> entry : receivedRelationshipData.getProperties().entrySet()) {
         newRelationship.setProperty(entry.getKey(),entry.getValue());
       }

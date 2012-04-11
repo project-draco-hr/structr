@@ -20,7 +20,12 @@
   superuserUsername=getConfigValue(context,Services.SUPERUSER_USERNAME,"superadmin");
   superuserPassword=getConfigValue(context,Services.SUPERUSER_PASSWORD,"");
   logger.log(Level.INFO,"Starting services");
-  Services.command(null,InitializeModuleServiceCommand.class).execute();
+  try {
+    Services.command(null,InitializeModuleServiceCommand.class).execute();
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+  }
   for (  Class serviceClass : registeredServiceClasses) {
     if (Service.class.isAssignableFrom(serviceClass) && isConfigured(serviceClass)) {
       try {
@@ -33,5 +38,6 @@
   }
   logger.log(Level.INFO,"{0} service(s) processed",serviceCache.size());
   registeredServiceClasses.clear();
+  EntityContext.init();
   logger.log(Level.INFO,"Initialization complete");
 }

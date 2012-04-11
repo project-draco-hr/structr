@@ -1,12 +1,11 @@
 {
   try {
-    logRequest("DELETE",request);
     request.setCharacterEncoding("UTF-8");
     response.setContentType("application/json; charset=utf-8");
     SecurityContext securityContext=getSecurityContext(request);
     if (securityContext != null) {
-      List<ResourceConstraint> chain=parsePath(securityContext,request);
-      ResourceConstraint resourceConstraint=optimizeConstraintChain(chain);
+      List<Resource> chain=parsePath(securityContext,request);
+      Resource resourceConstraint=optimizeConstraintChain(chain);
       RestMethodResult result=resourceConstraint.doDelete();
       result.commitResponse(gson,response);
     }
@@ -15,13 +14,12 @@
       result.commitResponse(gson,response);
     }
   }
- catch (  IllegalArgumentException illegalArgumentException) {
-    handleValidationError(illegalArgumentException,response);
-  }
-catch (  PathException pathException) {
-    int code=pathException.getStatus();
-    response.setStatus(code);
-    response.getWriter().append(jsonError(code,pathException.getMessage()));
+ catch (  FrameworkException frameworkException) {
+    response.setStatus(frameworkException.getStatus());
+    gson.toJson(frameworkException,response.getWriter());
+    response.getWriter().println();
+    response.getWriter().flush();
+    response.getWriter().close();
   }
 catch (  JsonSyntaxException jsex) {
     logger.log(Level.WARNING,"JsonSyntaxException in DELETE",jsex);

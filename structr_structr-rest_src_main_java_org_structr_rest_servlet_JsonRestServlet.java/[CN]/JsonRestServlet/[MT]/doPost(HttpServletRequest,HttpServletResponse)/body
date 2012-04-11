@@ -1,19 +1,13 @@
 {
   try {
-    logRequest("POST",request);
     request.setCharacterEncoding("UTF-8");
     response.setContentType("application/json; charset=UTF-8");
     final PropertySet propertySet=gson.fromJson(request.getReader(),PropertySet.class);
     SecurityContext securityContext=getSecurityContext(request);
     if (securityContext != null) {
-      List<ResourceConstraint> chain=parsePath(securityContext,request);
-      ResourceConstraint resourceConstraint=optimizeConstraintChain(chain);
-      Map<String,Object> properties=new LinkedHashMap<String,Object>();
-      if (propertySet != null) {
-        for (        NodeAttribute attr : propertySet.getAttributes()) {
-          properties.put(attr.getKey(),attr.getValue());
-        }
-      }
+      List<Resource> chain=parsePath(securityContext,request);
+      Resource resourceConstraint=optimizeConstraintChain(chain);
+      Map<String,Object> properties=convertPropertySetToMap(propertySet);
       RestMethodResult result=resourceConstraint.doPost(properties);
       propertyView.set(defaultPropertyView);
       result.commitResponse(gson,response);
@@ -23,13 +17,12 @@
       result.commitResponse(gson,response);
     }
   }
- catch (  IllegalArgumentException illegalArgumentException) {
-    handleValidationError(illegalArgumentException,response);
-  }
-catch (  PathException pathException) {
-    int code=pathException.getStatus();
-    response.setStatus(code);
-    response.getWriter().append(jsonError(code,pathException.getMessage()));
+ catch (  FrameworkException frameworkException) {
+    response.setStatus(frameworkException.getStatus());
+    gson.toJson(frameworkException,response.getWriter());
+    response.getWriter().println();
+    response.getWriter().flush();
+    response.getWriter().close();
   }
 catch (  JsonSyntaxException jsex) {
     logger.log(Level.WARNING,"JsonSyntaxException in POST",jsex);

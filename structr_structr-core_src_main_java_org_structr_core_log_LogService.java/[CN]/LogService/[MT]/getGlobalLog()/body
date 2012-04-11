@@ -8,7 +8,7 @@
     Command factory=Services.command(securityContext,NodeFactoryCommand.class);
     final AbstractNode rootNode=(AbstractNode)factory.execute(graphDb.getReferenceNode());
     if (rootNode != null) {
-      for (      StructrRelationship rel : rootNode.getOutgoingChildRelationships()) {
+      for (      AbstractRelationship rel : rootNode.getOutgoingChildRelationships()) {
         if (rel.getEndNode() instanceof LogNodeList) {
           globalLogNodeList=(LogNodeList)rel.getEndNode();
           return globalLogNodeList;
@@ -20,7 +20,7 @@
       return null;
     }
     globalLogNodeList=(LogNodeList)Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-      @Override public Object execute() throws Throwable {
+      @Override public Object execute() throws FrameworkException {
         LogNodeList newGlobalLogNodeList=null;
         Command createNode=Services.command(securityContext,CreateNodeCommand.class);
         Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);

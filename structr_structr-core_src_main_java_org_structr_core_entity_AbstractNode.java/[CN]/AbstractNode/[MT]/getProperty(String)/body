@@ -1,6 +1,13 @@
 {
   Object value=null;
   Class type=this.getClass();
+  if (key == null) {
+    logger.log(Level.SEVERE,"Invalid property key: null");
+    return null;
+  }
+  if (dbNode == null) {
+    return null;
+  }
   PropertyGroup propertyGroup=EntityContext.getPropertyGroup(type,key);
   if (propertyGroup != null) {
     return propertyGroup.getGroupedProperties(this);
@@ -12,24 +19,26 @@
     if (key.equals(Key.visibleToPublicUsers.name()) && dbNode.hasProperty("public")) {
       final Object oldValue=dbNode.getProperty("public");
       StructrTransaction transaction=new StructrTransaction(){
-        @Override public Object execute() throws Throwable {
+        @Override public Object execute() throws FrameworkException {
           dbNode.setProperty(Key.visibleToPublicUsers.name(),oldValue);
           dbNode.removeProperty("public");
           return null;
         }
       }
 ;
-      Services.command(securityContext,TransactionCommand.class).execute(transaction);
-      if (transaction.getCause() != null) {
-        logger.log(Level.WARNING,"Error while setting property",transaction.getCause());
+      try {
+        Services.command(securityContext,TransactionCommand.class).execute(transaction);
+      }
+ catch (      FrameworkException fex) {
+        logger.log(Level.WARNING,"Error while setting property",fex);
       }
     }
-    if ((key != null) && (dbNode != null) && dbNode.hasProperty(key)) {
+    if ((key != null) && (dbNode != null)) {
       value=dbNode.getProperty(key);
     }
   }
  else {
-    DirectedRelationship rel=EntityContext.getDirectedRelationship(type,key);
+    RelationClass rel=EntityContext.getRelationClass(type,key);
     if (rel != null) {
       Notion notion=rel.getNotion();
 switch (rel.getCardinality()) {
@@ -39,15 +48,23 @@ case OneToMany:
       break;
 case OneToOne:
 case ManyToOne:
-    value=notion.getAdapterForGetter(securityContext).adapt(rel.getRelatedNode(securityContext,this));
+    try {
+      value=notion.getAdapterForGetter(securityContext).adapt(rel.getRelatedNode(securityContext,this));
+    }
+ catch (    FrameworkException fex) {
+      logger.log(Level.WARNING,"Error while adapting related node",fex);
+    }
   break;
 }
 }
 }
+if (value == null) {
+value=EntityContext.getDefaultValue(type,key);
+}
 PropertyConverter converter=EntityContext.getPropertyConverter(securityContext,type,key);
 if (converter != null) {
 Value conversionValue=EntityContext.getPropertyConversionParameter(type,key);
-converter.setCurrentNode(this);
+converter.setCurrentObject(this);
 value=converter.convertForGetter(value,conversionValue);
 }
 return value;

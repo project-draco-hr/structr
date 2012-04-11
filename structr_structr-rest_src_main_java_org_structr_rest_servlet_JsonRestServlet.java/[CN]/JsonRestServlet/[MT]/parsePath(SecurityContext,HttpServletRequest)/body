@@ -4,22 +4,23 @@
     throw new NoResultsException();
   }
   String[] pathParts=path.split("[/]+");
-  List<ResourceConstraint> constraintChain=new ArrayList<ResourceConstraint>(pathParts.length);
+  List<Resource> constraintChain=new ArrayList<Resource>(pathParts.length);
   for (int i=0; i < pathParts.length; i++) {
     String part=pathParts[i].trim();
     if (part.length() > 0) {
       boolean found=false;
-      for (      Entry<Pattern,Class> entry : constraintMap.entrySet()) {
+      for (      Entry<Pattern,Class> entry : resourceMap.entrySet()) {
         Pattern pattern=entry.getKey();
         Matcher matcher=pattern.matcher(pathParts[i]);
         if (matcher.matches()) {
           try {
             Class type=entry.getValue();
-            ResourceConstraint constraint=(ResourceConstraint)type.newInstance();
+            Resource constraint=(Resource)type.newInstance();
             constraint.setSecurityContext(securityContext);
             if (constraint.checkAndConfigure(part,securityContext,request)) {
               logger.log(Level.FINE,"{0} matched, adding constraint of type {1} for part {2}",new Object[]{matcher.pattern(),type.getName(),part});
               constraint.configurePropertyView(propertyView);
+              constraint.configureIdProperty(defaultIdProperty);
               constraintChain.add(constraint);
               found=true;
               break;

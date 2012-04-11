@@ -1,0 +1,19 @@
+{
+  AbstractNode relatedNode=null;
+  if ((currentObject != null) && (currentObject instanceof AbstractNode)) {
+    AbstractNode localNode=(AbstractNode)currentObject;
+    RelationClass rel=EntityContext.getRelationClass(localNode.getClass(),targetType);
+    if (rel != null) {
+      relatedNode=rel.getRelatedNode(securityContext,localNode);
+      if (relatedNode == null) {
+        try {
+          relatedNode=rel.addRelatedNode(securityContext,localNode);
+        }
+ catch (        FrameworkException ex) {
+          logger.log(Level.WARNING,"Could not add related node",ex);
+        }
+      }
+    }
+  }
+  return relatedNode;
+}

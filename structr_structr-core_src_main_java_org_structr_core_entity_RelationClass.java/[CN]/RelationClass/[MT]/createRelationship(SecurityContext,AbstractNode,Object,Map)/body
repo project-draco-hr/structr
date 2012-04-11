@@ -1,0 +1,65 @@
+{
+  final Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
+  final Command deleteRel=Services.command(securityContext,DeleteRelationshipCommand.class);
+  AbstractNode targetNode;
+  if (value instanceof AbstractNode) {
+    targetNode=(AbstractNode)value;
+  }
+ else {
+    targetNode=(AbstractNode)Services.command(securityContext,FindNodeCommand.class).execute(value);
+  }
+  if ((sourceNode != null) && (targetNode != null)) {
+    final AbstractNode finalTargetNode=targetNode;
+    StructrTransaction transaction=new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+switch (cardinality) {
+case ManyToOne:
+case OneToOne:
+{
+            String destType=finalTargetNode.getType();
+            List<AbstractRelationship> rels=sourceNode.getRelationships(relType,direction);
+            for (            AbstractRelationship rel : rels) {
+              if (rel.getOtherNode(sourceNode).getType().equals(destType)) {
+                deleteRel.execute(rel);
+              }
+            }
+            break;
+          }
+case OneToMany:
+{
+          List<AbstractRelationship> rels=finalTargetNode.getRelationships(relType,Direction.INCOMING);
+          for (          AbstractRelationship rel : rels) {
+            if (rel.getOtherNode(finalTargetNode).getType().equals(sourceNode.getType())) {
+              deleteRel.execute(rel);
+            }
+          }
+        }
+    }
+    AbstractRelationship newRel;
+    if (direction.equals(Direction.OUTGOING)) {
+      newRel=(AbstractRelationship)createRel.execute(sourceNode,finalTargetNode,relType);
+    }
+ else {
+      newRel=(AbstractRelationship)createRel.execute(finalTargetNode,sourceNode,relType);
+    }
+    newRel.setProperties(properties);
+    if (cascadeDelete > 0) {
+      newRel.setProperty(AbstractRelationship.HiddenKey.cascadeDelete,cascadeDelete);
+    }
+    return newRel;
+  }
+}
+;
+Services.command(securityContext,TransactionCommand.class).execute(transaction);
+}
+ else {
+String type="unknown";
+if (sourceNode != null) {
+  type=sourceNode.getType();
+}
+ else if (targetNode != null) {
+  type=targetNode.getType();
+}
+throw new FrameworkException(type,new IdNotFoundToken(value));
+}
+}

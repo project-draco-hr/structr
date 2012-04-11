@@ -1,0 +1,37 @@
+{
+  if (currentObject != null && value != null) {
+    Object valueObject=value.get();
+    if (valueObject != null) {
+      if (valueObject instanceof TraverserInterface) {
+        TraverserInterface traverserInterface=(TraverserInterface)valueObject;
+        TraversalDescription description=traverserInterface.getTraversalDescription(source);
+        AbstractNode currentNode=(AbstractNode)currentObject;
+        Comparator<AbstractNode> comparator=traverserInterface.getComparator();
+        try {
+          List<AbstractNode> nodes=getTraversalResults(comparator,description,currentNode);
+          if (traverserInterface.collapseSingleResult() && nodes.isEmpty()) {
+            return null;
+          }
+          List<GraphObject> transformedNodes=traverserInterface.transformResult(nodes);
+          Notion notion=traverserInterface.getNotion();
+          if (notion != null && !rawMode) {
+            Adapter<GraphObject,Object> adapter=notion.getAdapterForGetter(securityContext);
+            List<Object> results=new LinkedList<Object>();
+            for (            GraphObject obj : transformedNodes) {
+              results.add(adapter.adapt(obj));
+            }
+            traverserInterface.cleanup();
+            return (traverserInterface.collapseSingleResult() && results.size() == 1) ? results.get(0) : results;
+          }
+ else {
+            return transformedNodes;
+          }
+        }
+ catch (        FrameworkException fex) {
+          logger.log(Level.WARNING,"Error while converting property",fex);
+        }
+      }
+    }
+  }
+  return null;
+}

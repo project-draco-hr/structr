@@ -1,11 +1,16 @@
 {
-  transaction.execute(new StructrTransaction(){
-    @Override public Object execute() throws Throwable {
-      for (      Node node : getRawNodes()) {
-        removeNodeFromList(node);
+  try {
+    transaction.execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        for (        Node node : getRawNodes()) {
+          removeNodeFromList(node);
+        }
+        return (null);
       }
-      return (null);
     }
-  }
 );
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"Unable to clear this list",fex);
+  }
 }

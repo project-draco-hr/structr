@@ -1,0 +1,13 @@
+{
+  String key=singleAttribute.getKey();
+  Object value=singleAttribute.getValue();
+  if ((key == null) || (value == null)) {
+    return null;
+  }
+  boolean valueIsNoStringAndNotNull=((value != null) && !(value instanceof String));
+  boolean valueIsNoBlankString=((value != null) && (value instanceof String) && StringUtils.isNotBlank((String)value));
+  if (StringUtils.isNotBlank(key) && (valueIsNoBlankString || valueIsNoStringAndNotNull)) {
+    return new TermQuery(new Term(key,value.toString()));
+  }
+  return null;
+}

@@ -68,10 +68,17 @@
       logger.log(Level.FINE,"Class {0} instantiated: {1}",new Object[]{className,clazz});
       if (!Modifier.isAbstract(clazz.getModifiers())) {
         if (AbstractNode.class.isAssignableFrom(clazz)) {
+          EntityContext.init(clazz);
           String simpleName=clazz.getSimpleName();
           String fullName=clazz.getName();
-          entityClassCache.put(simpleName,clazz);
-          entityPackages.add(fullName.substring(0,fullName.lastIndexOf(".")));
+          nodeEntityClassCache.put(simpleName,clazz);
+          nodeEntityPackages.add(fullName.substring(0,fullName.lastIndexOf(".")));
+        }
+        if (AbstractRelationship.class.isAssignableFrom(clazz)) {
+          String simpleName=clazz.getSimpleName();
+          String fullName=clazz.getName();
+          relationshipClassCache.put(simpleName,clazz);
+          relationshipPackages.add(fullName.substring(0,fullName.lastIndexOf(".")));
         }
         if (Service.class.isAssignableFrom(clazz)) {
           Services.registerServiceClass(clazz);

@@ -1,6 +1,7 @@
 {
   GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
-  if (graphDb != null && parameters.length == 3) {
+  relationshipFactory=(RelationshipFactory)arguments.get("relationshipFactory");
+  if ((graphDb != null) && (parameters.length == 3)) {
     Object arg0=parameters[0];
     Object arg1=parameters[1];
     Object arg2=parameters[2];
@@ -14,20 +15,21 @@
  else {
       throw new UnsupportedArgumentError("Wrong argument type(s).");
     }
-    if (arg0 instanceof AbstractNode && arg1 instanceof AbstractNode) {
+    if ((arg0 instanceof AbstractNode) && (arg1 instanceof AbstractNode)) {
       AbstractNode startNode=(AbstractNode)arg0;
       AbstractNode endNode=(AbstractNode)arg1;
-      return createRelationship(startNode,endNode,relType);
+      return createRelationship(startNode,endNode,relType,null);
     }
  else {
       throw new UnsupportedArgumentError("Wrong argument type(s).");
     }
   }
- else   if (graphDb != null && parameters.length == 4) {
+ else   if ((graphDb != null) && (parameters.length == 4)) {
     Object arg0=parameters[0];
     Object arg1=parameters[1];
     Object arg2=parameters[2];
     Object arg3=parameters[3];
+    Map<String,Object> properties=null;
     RelationshipType relType=null;
     if (arg2 instanceof String) {
       relType=getRelationshipTypeFor((String)arg2);
@@ -42,19 +44,22 @@
     if (arg3 instanceof Boolean) {
       checkDuplicates=((Boolean)arg3) == true;
     }
-    if (arg0 instanceof AbstractNode && arg1 instanceof AbstractNode) {
+ else     if (arg3 instanceof Map) {
+      properties=(Map<String,Object>)arg3;
+    }
+    if ((arg0 instanceof AbstractNode) && (arg1 instanceof AbstractNode)) {
       AbstractNode startNode=(AbstractNode)arg0;
       AbstractNode endNode=(AbstractNode)arg1;
       if (checkDuplicates) {
-        List<StructrRelationship> incomingRels=endNode.getIncomingLinkRelationships();
-        for (        StructrRelationship rel : incomingRels) {
+        List<AbstractRelationship> incomingRels=endNode.getIncomingRelationships();
+        for (        AbstractRelationship rel : incomingRels) {
           if (rel.getRelType().equals(relType) && rel.getStartNode().equals(startNode)) {
             logger.log(Level.WARNING,"Creation of duplicate relationship was blocked");
             return null;
           }
         }
       }
-      return createRelationship(startNode,endNode,relType);
+      return createRelationship(startNode,endNode,relType,properties);
     }
  else {
       throw new UnsupportedArgumentError("Wrong argument type(s).");

@@ -1,15 +1,15 @@
 {
   try {
-    logRequest("GET",request);
     request.setCharacterEncoding("UTF-8");
     response.setContentType("application/json; charset=utf-8");
     SecurityContext securityContext=getSecurityContext(request);
     propertyView.set(defaultPropertyView);
     double queryTimeStart=System.nanoTime();
-    ResourceConstraint resourceConstraint=addSortingAndPaging(request,securityContext,optimizeConstraintChain(parsePath(securityContext,request)));
+    Resource resource=addSortingAndPaging(request,securityContext,optimizeConstraintChain(parsePath(securityContext,request)));
+    Result result=new Result(resource.doGet(),resource.isCollectionResource(),resource.isPrimitiveArray());
     double queryTimeEnd=System.nanoTime();
-    Result result=new Result(resourceConstraint.doGet(),resourceConstraint.isCollectionResource());
     if (result != null) {
+      resource.postProcessResultSet(result);
       DecimalFormat decimalFormat=new DecimalFormat("0.000000000",DecimalFormatSymbols.getInstance(Locale.ENGLISH));
       result.setQueryTime(decimalFormat.format((queryTimeEnd - queryTimeStart) / 1000000000.0));
       Writer writer=response.getWriter();
@@ -28,20 +28,12 @@
       response.getWriter().close();
     }
   }
- catch (  MessageException msgException) {
-    int code=msgException.getStatus();
-    response.setStatus(code);
-    response.getWriter().append(jsonMsg(msgException.getMessage()));
+ catch (  FrameworkException frameworkException) {
+    response.setStatus(frameworkException.getStatus());
+    gson.toJson(frameworkException,response.getWriter());
+    response.getWriter().println();
     response.getWriter().flush();
     response.getWriter().close();
-  }
-catch (  IllegalArgumentException illegalArgumentException) {
-    handleValidationError(illegalArgumentException,response);
-  }
-catch (  PathException pathException) {
-    int code=pathException.getStatus();
-    response.setStatus(code);
-    response.getWriter().append(jsonError(code,pathException.getMessage()));
   }
 catch (  JsonSyntaxException jsex) {
     logger.log(Level.WARNING,"JsonSyntaxException in GET",jsex);

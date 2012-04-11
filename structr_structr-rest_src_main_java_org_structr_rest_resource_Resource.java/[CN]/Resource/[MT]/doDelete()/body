@@ -1,0 +1,31 @@
+{
+  final Command deleteNode=Services.command(securityContext,DeleteNodeCommand.class);
+  final Command deleteRel=Services.command(securityContext,DeleteRelationshipCommand.class);
+  Iterable<? extends GraphObject> results;
+  try {
+    results=doGet();
+  }
+ catch (  NoResultsException nre) {
+    results=null;
+  }
+  if (results != null) {
+    final Iterable<? extends GraphObject> finalResults=results;
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        for (        GraphObject obj : finalResults) {
+          if (obj instanceof AbstractRelationship) {
+            Services.command(securityContext,RemoveRelationshipFromIndex.class).execute(obj);
+            deleteRel.execute(obj);
+          }
+ else           if (obj instanceof AbstractNode) {
+            Services.command(securityContext,RemoveNodeFromIndex.class).execute(obj);
+            deleteNode.execute(obj,true);
+          }
+        }
+        return null;
+      }
+    }
+);
+  }
+  return new RestMethodResult(HttpServletResponse.SC_OK);
+}

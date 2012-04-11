@@ -1,4 +1,10 @@
 {
-  Command findNode=Services.command(securityContext,FindNodeCommand.class);
-  return ((List<AbstractNode>)findNode.execute(this));
+  try {
+    Command findNode=Services.command(securityContext,FindNodeCommand.class);
+    return ((List<AbstractNode>)findNode.execute(this));
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"Unable to get child nodes",fex);
+  }
+  return null;
 }

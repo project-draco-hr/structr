@@ -4,34 +4,40 @@
     logger.log(Level.SEVERE,"Empty category name!");
     return null;
   }
-  final AbstractNode object=(AbstractNode)Services.command(securityContext,FindNodeCommand.class).execute(objectId);
-  if (object == null) {
-    logger.log(Level.SEVERE,"Object not found!");
-    return null;
-  }
-  Category cat=null;
-  List<AbstractNode> children=this.getDirectChildNodes();
-  for (  AbstractNode child : children) {
-    if ((child instanceof Category) && categoryName.equals(child.getName())) {
-      cat=(Category)child;
-    }
-  }
-  final Category category=cat;
-  final Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
-  Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-    Category cat=null;
-    @Override public Object execute(){
-      if (category == null) {
-        cat=(Category)Services.command(securityContext,CreateNodeCommand.class).execute(user,new NodeAttribute(AbstractNode.Key.name.name(),categoryName),new NodeAttribute(AbstractNode.Key.type.name(),Category.class.getSimpleName()),true);
-        createRel.execute(user,cat,RelType.HAS_CHILD,true);
-      }
- else {
-        cat=category;
-      }
-      createRel.execute(cat,object,RelType.LINK,true);
+  try {
+    final AbstractNode object=(AbstractNode)Services.command(securityContext,FindNodeCommand.class).execute(objectId);
+    if (object == null) {
+      logger.log(Level.SEVERE,"Object not found!");
       return null;
     }
-  }
+    Category cat=null;
+    List<AbstractNode> children=this.getDirectChildNodes();
+    for (    AbstractNode child : children) {
+      if ((child instanceof Category) && categoryName.equals(child.getName())) {
+        cat=(Category)child;
+      }
+    }
+    final Category category=cat;
+    final Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      Category cat=null;
+      @Override public Object execute() throws FrameworkException {
+        if (category == null) {
+          cat=(Category)Services.command(securityContext,CreateNodeCommand.class).execute(user,new NodeAttribute(AbstractNode.Key.name.name(),categoryName),new NodeAttribute(AbstractNode.Key.type.name(),Category.class.getSimpleName()),true);
+          createRel.execute(user,cat,RelType.HAS_CHILD,true);
+        }
+ else {
+          cat=category;
+        }
+        createRel.execute(cat,object,RelType.LINK,true);
+        return null;
+      }
+    }
 );
-  return object;
+    return object;
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"Unable to add node to category",fex);
+  }
+  return null;
 }

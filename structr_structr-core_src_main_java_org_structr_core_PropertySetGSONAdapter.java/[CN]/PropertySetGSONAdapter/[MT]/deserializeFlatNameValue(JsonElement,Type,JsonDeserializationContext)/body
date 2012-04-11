@@ -5,7 +5,7 @@
     for (    Entry<String,JsonElement> entry : obj.entrySet()) {
       String key=entry.getKey();
       JsonElement elem=entry.getValue();
-      if (idProperty != null && "id".equals(key)) {
+      if ((idProperty != null) && "id".equals(key)) {
         key=idProperty;
       }
       if (elem.isJsonNull()) {
@@ -14,8 +14,35 @@
  else       if (elem.isJsonObject()) {
         wrapper.add(key,deserializeFlatNameValue(elem,typeOfT,context));
       }
+ else       if (elem.isJsonArray()) {
+        JsonArray array=elem.getAsJsonArray();
+        List list=new LinkedList();
+        for (        JsonElement element : array) {
+          if (element.isJsonPrimitive()) {
+            list.add(fromPrimitive((element.getAsJsonPrimitive())));
+          }
+ else           if (element.isJsonObject()) {
+            list.add(deserializeFlatNameValue(element,typeOfT,context));
+          }
+        }
+        wrapper.add(key,list);
+      }
  else       if (elem.isJsonPrimitive()) {
-        wrapper.add(key,elem.getAsString());
+        wrapper.add(key,fromPrimitive((JsonPrimitive)elem));
+      }
+    }
+  }
+ else   if (json.isJsonArray()) {
+    JsonArray array=json.getAsJsonArray();
+    for (    JsonElement elem : array) {
+      if (elem.isJsonPrimitive()) {
+        wrapper.add(elem.toString(),((JsonPrimitive)elem).getAsString());
+      }
+ else       if (elem.isJsonObject()) {
+        wrapper.add(elem.toString(),deserializeFlatNameValue(elem,typeOfT,context));
+      }
+ else       if (elem.isJsonArray()) {
+        wrapper.add(elem.toString(),deserializeFlatNameValue(elem,typeOfT,context));
       }
     }
   }

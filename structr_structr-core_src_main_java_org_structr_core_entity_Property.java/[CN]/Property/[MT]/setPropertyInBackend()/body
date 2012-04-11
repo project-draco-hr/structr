@@ -1,16 +1,21 @@
 {
-  Command transaction=Services.command(securityContext,TransactionCommand.class);
-  transaction.execute(new StructrTransaction(){
-    @Override public Object execute() throws Throwable {
-      if (key.equals(AbstractNode.Key.createdDate.name()) || key.equals(AbstractNode.Key.lastModifiedDate.name())) {
-        Date d=(Date)value;
-        dbNode.setProperty(key,d.getTime());
-      }
+  try {
+    Command transaction=Services.command(securityContext,TransactionCommand.class);
+    transaction.execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        if (key.equals(AbstractNode.Key.createdDate.name()) || key.equals(AbstractNode.Key.lastModifiedDate.name())) {
+          Date d=(Date)value;
+          dbNode.setProperty(key,d.getTime());
+        }
  else {
-        dbNode.setProperty(key,value);
+          dbNode.setProperty(key,value);
+        }
+        return (null);
       }
-      return (null);
     }
-  }
 );
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"Unable to set property in backend",fex);
+  }
 }

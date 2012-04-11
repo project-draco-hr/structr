@@ -15,8 +15,8 @@
     if ((sourceNode != null) && (resourceNode != null)) {
       try {
         Command transactionCommand=Services.command(SecurityContext.getSuperUserInstance(),TransactionCommand.class);
-        List<StructrRelationship> relsIn=sourceNode.getIncomingRelationships();
-        for (        StructrRelationship relIn : relsIn) {
+        List<AbstractRelationship> relsIn=sourceNode.getIncomingRelationships();
+        for (        AbstractRelationship relIn : relsIn) {
           if (relIn.getType().equals(RelType.CONTAINS.name())) {
             Map<String,Object> sourceRelationshipProperties=relIn.getProperties();
             for (            String resourceIdFromRel : sourceRelationshipProperties.keySet()) {
@@ -28,7 +28,7 @@
                 attrsFirstNode.add(new NodeAttribute("content",content.substring(0,startOffset)));
               }
               StructrTransaction transaction=new StructrTransaction(){
-                @Override public Object execute() throws Throwable {
+                @Override public Object execute() throws FrameworkException {
                   return Services.command(SecurityContext.getSuperUserInstance(),CreateNodeCommand.class).execute(attrsFirstNode);
                 }
               }
@@ -42,7 +42,7 @@
                 attrsSecondNode.add(new NodeAttribute("content",content.substring(startOffset,endOffset)));
               }
               transaction=new StructrTransaction(){
-                @Override public Object execute() throws Throwable {
+                @Override public Object execute() throws FrameworkException {
                   return Services.command(SecurityContext.getSuperUserInstance(),CreateNodeCommand.class).execute(attrsSecondNode);
                 }
               }
@@ -56,13 +56,13 @@
                 attrsThirdNode.add(new NodeAttribute("content",content.substring(endOffset,content.length())));
               }
               transaction=new StructrTransaction(){
-                @Override public Object execute() throws Throwable {
+                @Override public Object execute() throws FrameworkException {
                   return Services.command(SecurityContext.getSuperUserInstance(),CreateNodeCommand.class).execute(attrsThirdNode);
                 }
               }
 ;
               thirdNode=(AbstractNode)transactionCommand.execute(transaction);
-              DirectedRelationship rel=new DirectedRelationship(null,RelType.CONTAINS,Direction.OUTGOING,Cardinality.ManyToMany,null);
+              RelationClass rel=new RelationClass(null,RelType.CONTAINS,Direction.OUTGOING,Cardinality.ManyToMany,null,RelationClass.DELETE_NONE);
               Map<String,Object> newRelationshipProperties=new HashMap<String,Object>();
               newRelationshipProperties.put(resourceIdFromRel,0);
               rel.createRelationship(securityContext,sourceNode,firstNode,newRelationshipProperties);
@@ -70,7 +70,7 @@
               rel.createRelationship(securityContext,sourceNode,secondNode,newRelationshipProperties);
               newRelationshipProperties.put(resourceIdFromRel,2);
               rel.createRelationship(securityContext,sourceNode,thirdNode,newRelationshipProperties);
-              rel=new DirectedRelationship(resourceNode.getType(),RelType.LINK,Direction.OUTGOING,Cardinality.ManyToMany,null);
+              rel=new RelationClass(resourceNode.getClass(),RelType.LINK,Direction.OUTGOING,Cardinality.ManyToMany,null,RelationClass.DELETE_NONE);
               rel.createRelationship(securityContext,secondNode,resourceNode);
             }
           }

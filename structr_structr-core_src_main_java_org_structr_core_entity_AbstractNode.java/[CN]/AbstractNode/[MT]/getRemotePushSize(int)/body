@@ -1,22 +1,28 @@
 {
-  Command findNode=Services.command(securityContext,FindNodeCommand.class);
-  List<AbstractNode> list=((List<AbstractNode>)findNode.execute(this));
-  int size=0;
-  for (  AbstractNode node : list) {
-    if (node instanceof File) {
-      File file=(File)node;
-      size+=(file.getSize() / chunkSize);
-      size+=3;
-    }
+  try {
+    Command findNode=Services.command(securityContext,FindNodeCommand.class);
+    List<AbstractNode> list=((List<AbstractNode>)findNode.execute(this));
+    int size=0;
+    for (    AbstractNode node : list) {
+      if (node instanceof File) {
+        File file=(File)node;
+        size+=(file.getSize() / chunkSize);
+        size+=3;
+      }
  else {
-      size++;
-    }
-    List<StructrRelationship> rels=node.getOutgoingRelationships();
-    for (    StructrRelationship r : rels) {
-      if (list.contains(r.getStartNode()) && list.contains(r.getEndNode())) {
         size++;
       }
+      List<AbstractRelationship> rels=node.getOutgoingRelationships();
+      for (      AbstractRelationship r : rels) {
+        if (list.contains(r.getStartNode()) && list.contains(r.getEndNode())) {
+          size++;
+        }
+      }
     }
+    return size;
   }
-  return (size);
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"Unable to get remote push size",fex);
+  }
+  return 0;
 }

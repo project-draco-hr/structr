@@ -1,0 +1,62 @@
+{
+  StructrTransaction transaction=new StructrTransaction(){
+    @Override public Object execute() throws FrameworkException {
+      AbstractNode sourceNode=typedIdResource.getIdResource().getNode();
+      RelationClass rel=EntityContext.getRelationClass(sourceNode.getClass(),typeResource.getEntityClass());
+      if ((sourceNode != null) && (rel != null)) {
+        if (EntityContext.isReadOnlyProperty(sourceNode.getClass(),typeResource.getRawType())) {
+          logger.log(Level.INFO,"Read-only property on {0}: {1}",new Object[]{sourceNode.getClass(),typeResource.getRawType()});
+          return null;
+        }
+        Notion notion=rel.getNotion();
+        PropertyKey primaryPropertyKey=notion.getPrimaryPropertyKey();
+        if ((primaryPropertyKey != null) && (propertySet.containsKey(primaryPropertyKey.name()) && (propertySet.size() == 1))) {
+          Adapter<Object,GraphObject> deserializationStrategy=notion.getAdapterForSetter(securityContext);
+          Object keySource=propertySet.get(primaryPropertyKey.name());
+          if (keySource != null) {
+            GraphObject otherNode=null;
+            if (keySource instanceof Collection) {
+              Collection collection=(Collection)keySource;
+              for (              Object key : collection) {
+                otherNode=deserializationStrategy.adapt(key);
+                if (otherNode != null) {
+                  rel.createRelationship(securityContext,sourceNode,otherNode);
+                }
+              }
+            }
+ else {
+              otherNode=deserializationStrategy.adapt(keySource);
+              if (otherNode != null) {
+                rel.createRelationship(securityContext,sourceNode,otherNode);
+              }
+            }
+            return otherNode;
+          }
+ else {
+            logger.log(Level.INFO,"Key {0} not found in {1}",new Object[]{primaryPropertyKey.name(),propertySet.toString()});
+          }
+          return null;
+        }
+ else {
+          AbstractNode otherNode=typeResource.createNode(propertySet);
+          if (otherNode != null) {
+            rel.createRelationship(securityContext,sourceNode,otherNode);
+            return otherNode;
+          }
+        }
+      }
+      throw new IllegalPathException();
+    }
+  }
+;
+  AbstractNode newNode=(AbstractNode)Services.command(securityContext,TransactionCommand.class).execute(transaction);
+  RestMethodResult result;
+  if (newNode != null) {
+    result=new RestMethodResult(HttpServletResponse.SC_CREATED);
+    result.addHeader("Location",buildLocationHeader(newNode));
+  }
+ else {
+    result=new RestMethodResult(HttpServletResponse.SC_FORBIDDEN);
+  }
+  return result;
+}

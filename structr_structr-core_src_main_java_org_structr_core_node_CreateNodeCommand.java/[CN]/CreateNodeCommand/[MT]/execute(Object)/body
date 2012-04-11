@@ -1,6 +1,6 @@
 {
   GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
-  StructrNodeFactory nodeFactory=(StructrNodeFactory)arguments.get("nodeFactory");
+  NodeFactory nodeFactory=(NodeFactory)arguments.get("nodeFactory");
   User user=securityContext.getUser();
   AbstractNode node=null;
   if (graphDb != null) {
@@ -24,26 +24,24 @@
       }
     }
     Object typeObject=attrs.get(AbstractNode.Key.type.name());
-    String nodeType=typeObject != null ? typeObject.toString() : "GenericNode";
+    String nodeType=(typeObject != null) ? typeObject.toString() : "GenericNode";
     node=nodeFactory.createNode(securityContext,graphDb.createNode(),nodeType);
+    node.unlockReadOnlyPropertiesOnce();
+    node.setProperty(AbstractNode.Key.createdDate.name(),now,false);
+    node.setProperty(AbstractNode.Key.lastModifiedDate.name(),now,false);
     logger.log(Level.FINE,"Node {0} created",node.getId());
     node.setProperty(AbstractNode.Key.type.name(),nodeType);
     attrs.remove(AbstractNode.Key.type.name());
-    ErrorBuffer errorBuffer=new ErrorBuffer();
     for (    Entry<String,Object> attr : attrs.entrySet()) {
-      try {
-        node.setProperty(attr.getKey(),attr.getValue());
+      Object value=attr.getValue();
+      if (value != null) {
+        node.setProperty(attr.getKey(),value);
       }
- catch (      Throwable t) {
-        errorBuffer.add(t.getMessage());
-      }
-    }
-    if (errorBuffer.hasError()) {
-      throw new IllegalArgumentException(errorBuffer.toString());
     }
     attrs.clear();
     if ((user != null) && !(user instanceof SuperUser)) {
-      createRel.execute(user,node,RelType.OWNS);
+      RelationClass rel=new RelationClass(null,RelType.OWNS,Direction.OUTGOING,Cardinality.OneToMany,null,RelationClass.DELETE_NONE);
+      rel.createRelationship(securityContext,user,node);
       logger.log(Level.FINEST,"Relationship to owner {0} added",user.getName());
       Principal principal;
       Group group=user.getGroupNode();
@@ -53,19 +51,16 @@
  else {
         principal=user;
       }
-      StructrRelationship securityRel=(StructrRelationship)createRel.execute(principal,node,RelType.SECURITY);
-      securityRel.setAllowed(StructrRelationship.Permission.values());
+      AbstractRelationship securityRel=(AbstractRelationship)createRel.execute(principal,node,RelType.SECURITY,true);
+      securityRel.setAllowed(AbstractRelationship.Permission.values());
       logger.log(Level.FINEST,"All permissions given to {0}",principal.getName());
       node.unlockReadOnlyPropertiesOnce();
       node.setProperty(AbstractNode.Key.createdBy.name(),user.getProperty(AbstractNode.Key.uuid),false);
     }
-    node.unlockReadOnlyPropertiesOnce();
-    node.setProperty(AbstractNode.Key.createdDate.name(),now,false);
-    node.setProperty(AbstractNode.Key.lastModifiedDate.name(),now,false);
   }
   if (node != null) {
     node.onNodeCreation();
-    for (    Transformation<AbstractNode> transformation : EntityContext.getPostCreationTransformations(node.getClass())) {
+    for (    Transformation<GraphObject> transformation : EntityContext.getEntityCreationTransformations(node.getClass())) {
       transformation.apply(securityContext,node);
     }
   }

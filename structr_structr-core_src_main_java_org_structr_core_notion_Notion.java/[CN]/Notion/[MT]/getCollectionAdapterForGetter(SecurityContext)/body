@@ -1,0 +1,15 @@
+{
+  return new Adapter<Collection<GraphObject>,Object>(){
+    @Override public Object adapt(    Collection<GraphObject> s) throws FrameworkException {
+      List list=new LinkedList();
+      if (s instanceof Iterable) {
+        Iterable<GraphObject> iterable=(Iterable)s;
+        for (        GraphObject o : iterable) {
+          list.add(serializationStrategy.serialize(securityContext,type,o));
+        }
+      }
+      return list;
+    }
+  }
+;
+}

@@ -1,13 +1,18 @@
 {
-  Command findNode=Services.command(securityContext,FindNodeCommand.class);
-  Template templateNode=(Template)findNode.execute(value);
-  List<StructrRelationship> templateRels=this.getOutgoingRelationships(RelType.USE_TEMPLATE);
-  Command delRel=Services.command(securityContext,DeleteRelationshipCommand.class);
-  if (templateRels != null) {
-    for (    StructrRelationship r : templateRels) {
-      delRel.execute(r);
+  try {
+    Command findNode=Services.command(securityContext,FindNodeCommand.class);
+    Template templateNode=(Template)findNode.execute(value);
+    List<AbstractRelationship> templateRels=this.getOutgoingRelationships(RelType.USE_TEMPLATE);
+    Command delRel=Services.command(securityContext,DeleteRelationshipCommand.class);
+    if (templateRels != null) {
+      for (      AbstractRelationship r : templateRels) {
+        delRel.execute(r);
+      }
     }
+    Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
+    createRel.execute(this,templateNode,RelType.USE_TEMPLATE);
   }
-  Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
-  createRel.execute(this,templateNode,RelType.USE_TEMPLATE);
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"Unable to set template id",fex);
+  }
 }

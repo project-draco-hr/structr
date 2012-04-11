@@ -1,0 +1,24 @@
+{
+  if ((parameters == null) || (parameters.length < 2)) {
+    logger.log(Level.WARNING,"Two parameters are required for query search.");
+    return Collections.emptyList();
+  }
+  NodeIndex whichIndex=null;
+  Query query=null;
+  if (!(parameters[0] instanceof NodeIndex)) {
+    logger.log(Level.WARNING,"NodeQueryCommand needs an index identifier as its first parameter.");
+  }
+ else {
+    whichIndex=(NodeIndex)parameters[0];
+  }
+  if (!(parameters[1] instanceof Query)) {
+    logger.log(Level.WARNING,"NodeQueryCommand needs a lucene query as its second parameter.");
+  }
+ else {
+    query=(Query)parameters[1];
+  }
+  if (whichIndex == null || query == null) {
+    return Collections.emptyList();
+  }
+  return search(securityContext,whichIndex,query);
+}

@@ -10,8 +10,8 @@
       logger.log(Level.SEVERE,"Relationship {0} not found, cannot delete.",id);
     }
   }
- else   if (argument instanceof StructrRelationship) {
-    StructrRelationship r=(StructrRelationship)argument;
+ else   if (argument instanceof AbstractRelationship) {
+    AbstractRelationship r=(AbstractRelationship)argument;
     rel=r.getRelationship();
   }
  else   if (argument instanceof Relationship) {
@@ -21,7 +21,7 @@
     final Relationship relToDelete=rel;
     final Command transactionCommand=Services.command(securityContext,TransactionCommand.class);
     transactionCommand.execute(new StructrTransaction(){
-      @Override public Object execute() throws Throwable {
+      @Override public Object execute() throws FrameworkException {
         relToDelete.delete();
         return null;
       }

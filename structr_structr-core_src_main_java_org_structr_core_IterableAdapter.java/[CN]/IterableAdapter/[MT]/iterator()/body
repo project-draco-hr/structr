@@ -4,7 +4,13 @@
       return (sourceIterator.hasNext());
     }
     @Override public T next(){
-      return (adapter.adapt(sourceIterator.next()));
+      try {
+        return (adapter.adapt(sourceIterator.next()));
+      }
+ catch (      FrameworkException fex) {
+        logger.log(Level.WARNING,"Error in iterable adapter",fex);
+      }
+      return null;
     }
     @Override public void remove(){
       sourceIterator.remove();

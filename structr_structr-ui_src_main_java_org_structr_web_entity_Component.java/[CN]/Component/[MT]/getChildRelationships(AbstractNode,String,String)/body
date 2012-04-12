@@ -2,10 +2,10 @@
   List<AbstractRelationship> rels=new LinkedList<AbstractRelationship>();
   for (  AbstractRelationship abstractRelationship : node.getOutgoingRelationships(RelType.CONTAINS)) {
     Relationship rel=abstractRelationship.getRelationship();
-    if (rel.hasProperty(resourceId) || rel.hasProperty("*")) {
+    if (resourceId == null || (resourceId != null && rel.hasProperty(resourceId)) || rel.hasProperty("*")) {
       AbstractNode endNode=abstractRelationship.getEndNode();
-      if ((localComponentId != null) && ((endNode instanceof Content) || (endNode instanceof Component))) {
-        if (rel.hasProperty(localComponentId)) {
+      if ((componentId != null) && ((endNode instanceof Content) || (endNode instanceof Component))) {
+        if (componentId.equals(abstractRelationship.getStringProperty(Key.componentId.name()))) {
           rels.add(abstractRelationship);
         }
       }

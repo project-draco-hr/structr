@@ -15,10 +15,11 @@
     templateProperties.put(AbstractNode.Key.type.name(),Component.class.getSimpleName());
     templateProperties.put("structrclass",template.getStringProperty("structrclass"));
     templateProperties.put("uuid",componentId);
+    final String parentComponentId=template.getComponentId();
     Component newComponent=(Component)Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
       @Override public Object execute() throws FrameworkException {
         Component comp=(Component)createNodeCommand.execute(templateProperties);
-        copyRelationships(template,comp,getResourceId(),null,position);
+        copyRelationships(template,comp,getResourceId(),parentComponentId,position);
         Map<String,Object> contentTemplateProperties=new LinkedHashMap<String,Object>();
         for (        AbstractNode node : template.getContentNodes().values()) {
           if (node instanceof Content) {

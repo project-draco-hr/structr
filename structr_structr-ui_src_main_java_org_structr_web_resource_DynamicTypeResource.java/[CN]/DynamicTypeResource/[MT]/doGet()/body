@@ -1,6 +1,7 @@
 {
+  List<GraphObject> uuidResults=null;
   if (uuidResource != null) {
-    return (List<GraphObject>)uuidResource.doGet();
+    uuidResults=(List<GraphObject>)uuidResource.doGet();
   }
   List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
   AbstractNode topNode=null;
@@ -12,6 +13,14 @@
     hasSearchableAttributes(rawType,request,searchAttributes);
     List<GraphObject> results=(List<GraphObject>)Services.command(securityContext,SearchNodeCommand.class).execute(topNode,includeDeleted,publicOnly,searchAttributes);
     if (!results.isEmpty()) {
+      if (uuidResults != null) {
+        results=ListUtils.intersection(results,uuidResults);
+      }
+      for (      DynamicTypeResource res : nestedResources) {
+        if (res.doGet().isEmpty()) {
+          throw new NotFoundException();
+        }
+      }
       return results;
     }
   }

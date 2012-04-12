@@ -14,7 +14,10 @@
   for (  AbstractRelationship rel : startNode.getOutgoingRelationships(RelType.CONTAINS)) {
     AbstractNode endNode=rel.getEndNode();
     if (endNode instanceof Component) {
-      subTypes.add(endNode.getStringProperty(Component.UiKey.structrclass));
+      String subType=endNode.getStringProperty(Component.UiKey.structrclass);
+      if (subType != null) {
+        subTypes.add(subType);
+      }
     }
  else {
       collectProperties(componentId,endNode,depth + 1,rel);

@@ -68,29 +68,7 @@
       buffer.append(content);
     }
   }
-  List<AbstractRelationship> rels=new LinkedList<AbstractRelationship>();
-  for (  AbstractRelationship abstractRelationship : node.getOutgoingRelationships(RelType.CONTAINS)) {
-    Relationship rel=abstractRelationship.getRelationship();
-    if (rel.hasProperty(resourceId) || rel.hasProperty("*")) {
-      AbstractNode endNode=abstractRelationship.getEndNode();
-      if ((localComponentId != null) && ((endNode instanceof Content) || (endNode instanceof Component))) {
-        if (rel.hasProperty(localComponentId)) {
-          rels.add(abstractRelationship);
-        }
-      }
- else {
-        rels.add(abstractRelationship);
-      }
-    }
-  }
-  Collections.sort(rels,new Comparator<AbstractRelationship>(){
-    @Override public int compare(    AbstractRelationship o1,    AbstractRelationship o2){
-      Integer pos1=getPosition(o1,resourceId);
-      Integer pos2=getPosition(o2,resourceId);
-      return pos1.compareTo(pos2);
-    }
-  }
-);
+  List<AbstractRelationship> rels=Component.getChildRelationships(node,resourceId,localComponentId);
   for (  AbstractRelationship rel : rels) {
     AbstractNode subNode=rel.getEndNode();
     getContent(resourceId,localComponentId,buffer,subNode,depth + 1,inBody,searchClass,attrs);

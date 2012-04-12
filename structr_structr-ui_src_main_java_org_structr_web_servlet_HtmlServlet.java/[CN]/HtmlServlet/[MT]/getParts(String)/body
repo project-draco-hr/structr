@@ -1,4 +1,13 @@
 {
   path=clean(path);
-  return new String[]{StringUtils.substringBefore(path,REST_PATH_SEP),StringUtils.substringAfter(path,REST_PATH_SEP)};
+  boolean hasSep=StringUtils.contains(path,REST_PATH_SEP);
+  String firstPart, secondPart="";
+  if (!hasSep) {
+    firstPart=path;
+  }
+ else {
+    firstPart=StringUtils.substringBefore(path,REST_PATH_SEP);
+    secondPart=StringUtils.substringAfter(path,REST_PATH_SEP);
+  }
+  return new String[]{firstPart,secondPart};
 }

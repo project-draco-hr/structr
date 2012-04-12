@@ -15,11 +15,23 @@
     templateProperties.put(AbstractNode.Key.type.name(),Component.class.getSimpleName());
     templateProperties.put("structrclass",template.getStringProperty("structrclass"));
     templateProperties.put("uuid",componentId);
-    final String parentComponentId=template.getComponentId();
+    String parentComponentId=template.getComponentId();
+    String parentResourceId=template.getResourceId();
+    if (wrappedResource != null && wrappedResource instanceof UuidResource) {
+      parentComponentId=((UuidResource)wrappedResource).getUuid();
+    }
+ else     if (!nestedResources.isEmpty()) {
+      DynamicTypeResource nested=nestedResources.get(nestedResources.size() - 1);
+      if (nested.uuidResource != null) {
+        parentComponentId=nested.uuidResource.getUuid();
+      }
+    }
+    final String finalParentComponentId=parentComponentId;
+    final String finalParentResourceId=parentResourceId;
     Component newComponent=(Component)Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
       @Override public Object execute() throws FrameworkException {
         Component comp=(Component)createNodeCommand.execute(templateProperties);
-        copyRelationships(template,comp,getResourceId(),parentComponentId,position);
+        copyRelationships(template,comp,finalParentResourceId,finalParentComponentId,position);
         Map<String,Object> contentTemplateProperties=new LinkedHashMap<String,Object>();
         for (        AbstractNode node : template.getContentNodes().values()) {
           if (node instanceof Content) {
@@ -31,7 +43,7 @@
             contentTemplateProperties.put("content",propertySet.get(dataKey));
             Content newContent=(Content)createNodeCommand.execute(contentTemplateProperties);
             propertySet.remove(dataKey);
-            copyRelationships(contentTemplate,newContent,getResourceId(),componentId,position);
+            copyRelationships(contentTemplate,newContent,finalParentResourceId,componentId,position);
           }
         }
         return comp;

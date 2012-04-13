@@ -1,0 +1,13 @@
+{
+  long pos=0;
+  for (  GraphObject template : templates) {
+    if (template instanceof Component) {
+      Component component=(Component)template;
+      List<AbstractRelationship> rels=component.getRelationships(RelType.CONTAINS,Direction.INCOMING);
+      for (      AbstractRelationship rel : rels) {
+        pos=Math.max(pos,rel.getLongProperty(resourceId));
+      }
+    }
+  }
+  return pos;
+}

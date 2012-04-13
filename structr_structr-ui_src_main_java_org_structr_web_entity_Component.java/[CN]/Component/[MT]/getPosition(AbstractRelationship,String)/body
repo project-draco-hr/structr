@@ -1,45 +1,31 @@
 {
-  final Relationship rel=relationship.getRelationship();
-  Integer position=0;
+  long position=0;
   try {
-    Map<Integer,Relationship> sortedRelationshipMap=new TreeMap<Integer,Relationship>();
     Object prop=null;
     final String key;
-    if (rel.hasProperty("*")) {
-      prop=rel.getProperty("*");
+    if (relationship.getProperty("*") != null) {
+      prop=relationship.getProperty("*");
       key="*";
     }
- else     if (rel.hasProperty(resourceId)) {
-      prop=rel.getProperty(resourceId);
+ else     if (relationship.getProperty(resourceId) != null) {
+      prop=relationship.getLongProperty(resourceId);
       key=resourceId;
     }
  else {
       key=null;
     }
     if ((key != null) && (prop != null)) {
-      if (prop instanceof Integer) {
-        position=(Integer)prop;
+      if (prop instanceof Long) {
+        position=(Long)prop;
+      }
+ else       if (prop instanceof Integer) {
+        position=((Integer)prop).longValue();
       }
  else       if (prop instanceof String) {
-        position=Integer.parseInt((String)prop);
+        position=Long.parseLong((String)prop);
       }
  else {
-        throw new java.lang.IllegalArgumentException("Expected Integer or String");
-      }
-      Integer originalPos=position;
-      while (sortedRelationshipMap.containsKey(position)) {
-        position++;
-      }
-      sortedRelationshipMap.put(position,rel);
-      if (originalPos != position) {
-        final Integer newPos=position;
-        Services.command(SecurityContext.getSuperUserInstance(),TransactionCommand.class).execute(new StructrTransaction(){
-          @Override public Object execute() throws FrameworkException {
-            rel.setProperty(key,newPos);
-            return null;
-          }
-        }
-);
+        throw new java.lang.IllegalArgumentException("Expected Long, Integer or String");
       }
     }
   }

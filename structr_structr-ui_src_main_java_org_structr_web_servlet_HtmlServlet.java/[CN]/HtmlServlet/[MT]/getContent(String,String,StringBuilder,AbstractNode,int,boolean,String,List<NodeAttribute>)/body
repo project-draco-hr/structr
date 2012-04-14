@@ -55,10 +55,17 @@
         }
       }
       if (node instanceof HtmlElement) {
+        HtmlElement htmlElement=(HtmlElement)node;
         for (        String attribute : EntityContext.getPropertySet(node.getClass(),PropertyView.Html)) {
-          if (StringUtils.isNotBlank(node.getStringProperty(attribute))) {
-            String key=attribute.substring(PropertyView.Html.length());
-            buffer.append(" ").append(key).append("=\"").append(node.getProperty(attribute)).append("\"");
+          try {
+            String value=htmlElement.getReferencedProperty(resourceId,localComponentId,attribute);
+            if (value != null && StringUtils.isNotBlank(value)) {
+              String key=attribute.substring(PropertyView.Html.length());
+              buffer.append(" ").append(key).append("=\"").append(value).append("\"");
+            }
+          }
+ catch (          Throwable t) {
+            t.printStackTrace();
           }
         }
       }

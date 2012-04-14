@@ -1,0 +1,26 @@
+{
+  String resourceId=webSocketData.getId();
+  AbstractNode node=getNode(resourceId);
+  Map<String,Object> nodeData=webSocketData.getNodeData();
+  if (node != null) {
+    for (    String id : nodeData.keySet()) {
+      AbstractNode nodeToSort=getNode(id);
+      Long pos=Long.parseLong((String)nodeData.get(id));
+      for (      AbstractRelationship rel : nodeToSort.getRelationships(RelType.CONTAINS,Direction.INCOMING)) {
+        Long oldPos=rel.getLongProperty(resourceId);
+        if ((oldPos != null) && !(oldPos.equals(pos))) {
+          try {
+            rel.setProperty(resourceId,pos);
+          }
+ catch (          FrameworkException fex) {
+            fex.printStackTrace();
+          }
+        }
+      }
+    }
+  }
+ else {
+    logger.log(Level.WARNING,"Node with uuid {0} not found.",webSocketData.getId());
+    getWebSocket().send(MessageBuilder.status().code(404).build(),true);
+  }
+}

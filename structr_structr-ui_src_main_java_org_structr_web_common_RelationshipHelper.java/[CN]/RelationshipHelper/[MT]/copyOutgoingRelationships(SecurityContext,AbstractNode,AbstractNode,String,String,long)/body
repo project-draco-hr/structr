@@ -1,0 +1,16 @@
+{
+  Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
+  for (  AbstractRelationship out : sourceNode.getOutgoingRelationships()) {
+    AbstractNode endNode=out.getEndNode();
+    RelationshipType relType=out.getRelType();
+    AbstractRelationship newOutRel=(AbstractRelationship)createRel.execute(targetNode,endNode,relType);
+    newOutRel.setProperty("type",out.getStringProperty("type"));
+    if (componentId != null) {
+      newOutRel.setProperty(Component.Key.componentId,componentId);
+    }
+    if (resourceId != null) {
+      newOutRel.setProperty(Component.Key.resourceId,resourceId);
+      newOutRel.setProperty(resourceId,position);
+    }
+  }
+}

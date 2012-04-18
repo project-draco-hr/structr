@@ -1,0 +1,21 @@
+{
+  Matcher functionMatcher=functionPattern.matcher(source);
+  if (functionMatcher.matches()) {
+    String functionGroup=functionMatcher.group(1);
+    String parameter=functionMatcher.group(2);
+    String function=functionGroup.substring(0,functionGroup.length());
+    Adapter<String,String> adapter=functions.get(function);
+    if (adapter != null) {
+      return adapter.adapt(extractFunctions(resourceId,componentId,parameter));
+    }
+  }
+  if (source.startsWith("\"") && source.endsWith("\"")) {
+    return source.substring(1,source.length() - 1);
+  }
+ else   if (source.startsWith("'") && source.endsWith("'")) {
+    return source.substring(1,source.length() - 1);
+  }
+ else {
+    return convertValueForHtml(getReferencedProperty(securityContext,this,resourceId,componentId,source));
+  }
+}

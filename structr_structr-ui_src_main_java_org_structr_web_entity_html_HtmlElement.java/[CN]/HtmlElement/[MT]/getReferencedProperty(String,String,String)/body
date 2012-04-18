@@ -6,29 +6,8 @@
     Matcher matcher=templatePattern.matcher(value);
     while (matcher.find()) {
       String group=matcher.group();
-      String refKey=group.substring(2,group.length() - 1);
-      boolean md5=false;
-      if (refKey.startsWith("md5(") && refKey.endsWith(")")) {
-        refKey=StringUtils.stripStart(refKey,"md5(");
-        refKey=StringUtils.stripEnd(refKey,")");
-        md5=true;
-      }
-      String partValue=convertValueForHtml(getReferencedProperty(securityContext,this,resourceId,componentId,refKey));
-      if (md5) {
-        Method function=functions.get("md5");
-        try {
-          partValue=(String)function.invoke(HtmlElement.class,partValue);
-        }
- catch (        IllegalAccessException ex) {
-          Logger.getLogger(HtmlElement.class.getName()).log(Level.SEVERE,null,ex);
-        }
-catch (        IllegalArgumentException ex) {
-          Logger.getLogger(HtmlElement.class.getName()).log(Level.SEVERE,null,ex);
-        }
-catch (        InvocationTargetException ex) {
-          Logger.getLogger(HtmlElement.class.getName()).log(Level.SEVERE,null,ex);
-        }
-      }
+      String source=group.substring(2,group.length() - 1);
+      String partValue=extractFunctions(resourceId,componentId,source);
       if (partValue != null) {
         value=value.replace(group,partValue);
       }

@@ -12,6 +12,27 @@
       node=getNodeById(securityContext,resourceId);
       continue;
     }
+    if ("link".equals(part.toLowerCase())) {
+      for (      AbstractRelationship rel : node.getRelationships(RelType.LINK,Direction.OUTGOING)) {
+        node=rel.getEndNode();
+        break;
+      }
+      continue;
+    }
+    if ("parent".equals(part.toLowerCase())) {
+      for (      AbstractRelationship rel : node.getRelationships(RelType.CONTAINS,Direction.INCOMING)) {
+        node=rel.getStartNode();
+        break;
+      }
+      continue;
+    }
+    if ("owner".equals(part.toLowerCase())) {
+      for (      AbstractRelationship rel : node.getRelationships(RelType.OWNS,Direction.INCOMING)) {
+        node=rel.getStartNode();
+        break;
+      }
+      continue;
+    }
   }
   if (node != null) {
     return node.getProperty(referenceKey);

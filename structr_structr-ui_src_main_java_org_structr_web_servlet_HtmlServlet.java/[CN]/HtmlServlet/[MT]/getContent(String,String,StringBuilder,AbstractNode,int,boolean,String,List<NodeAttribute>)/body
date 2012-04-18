@@ -45,13 +45,10 @@
         if (depth == 1) {
           buffer.append(" structr_resource_id='").append(resourceId).append("'");
         }
-        if (node instanceof Content) {
-        }
- else {
-          String htmlClass=node.getStringProperty("_html_class");
-          buffer.append(" class=\"structr-element-container ").append((htmlClass != null) ? htmlClass : "").append("\" structr_element_id='").append(id).append("'");
-          buffer.append(" structr_type='").append(node.getType()).append("'");
-          buffer.append(" structr_name='").append(node.getName()).append("'");
+        if (!(node instanceof Content)) {
+          buffer.append(" structr_element_id=\"").append(id).append("\"");
+          buffer.append(" structr_type=\"").append(node.getType()).append("\"");
+          buffer.append(" structr_name=\"").append(node.getName()).append("\"");
         }
       }
       if (node instanceof HtmlElement) {
@@ -59,7 +56,7 @@
         for (        String attribute : EntityContext.getPropertySet(node.getClass(),PropertyView.Html)) {
           try {
             String value=htmlElement.getReferencedProperty(resourceId,localComponentId,attribute);
-            if (value != null && StringUtils.isNotBlank(value)) {
+            if ((value != null) && StringUtils.isNotBlank(value)) {
               String key=attribute.substring(PropertyView.Html.length());
               buffer.append(" ").append(key).append("=\"").append(value).append("\"");
             }

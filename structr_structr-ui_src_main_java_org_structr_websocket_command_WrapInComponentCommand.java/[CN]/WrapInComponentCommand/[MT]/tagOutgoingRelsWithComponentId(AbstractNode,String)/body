@@ -1,7 +1,9 @@
 {
   for (  AbstractRelationship rel : node.getRelationships(RelType.CONTAINS,Direction.OUTGOING)) {
-    rel.setProperty("componentId",componentId);
-    AbstractNode endNode=rel.getEndNode();
-    tagOutgoingRelsWithComponentId(endNode,componentId);
+    String existingComponentId=rel.getStringProperty(Component.Key.componentId);
+    if (StringUtils.isBlank(existingComponentId)) {
+      rel.setProperty("componentId",componentId);
+    }
+    tagOutgoingRelsWithComponentId(rel.getEndNode(),componentId);
   }
 }

@@ -3,6 +3,10 @@
   StructrTransaction transaction=new StructrTransaction(){
     @Override public Object execute() throws FrameworkException {
       for (      AbstractRelationship out : node.getOutgoingRelationships()) {
+        RelationshipType origRelType=out.getRelType();
+        if (!relType.name().equals(origRelType.name())) {
+          continue;
+        }
         delRel.execute(out);
       }
       return null;

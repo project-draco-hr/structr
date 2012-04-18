@@ -2,9 +2,11 @@
   Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
   for (  AbstractRelationship out : sourceNode.getOutgoingRelationships()) {
     AbstractNode endNode=out.getEndNode();
-    RelationshipType relType=out.getRelType();
-    AbstractRelationship newOutRel=(AbstractRelationship)createRel.execute(targetNode,endNode,relType);
-    newOutRel.setProperty("type",out.getStringProperty("type"));
+    RelationshipType origRelType=out.getRelType();
+    if (!relType.name().equals(origRelType.name())) {
+      continue;
+    }
+    AbstractRelationship newOutRel=(AbstractRelationship)createRel.execute(cloneNode,endNode,relType,out.getProperties());
     if (componentId != null) {
       newOutRel.setProperty(Component.Key.componentId,componentId);
     }

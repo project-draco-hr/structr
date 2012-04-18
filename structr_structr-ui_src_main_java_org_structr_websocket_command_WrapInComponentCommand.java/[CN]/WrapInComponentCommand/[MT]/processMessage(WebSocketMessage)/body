@@ -13,7 +13,7 @@
       @Override public Object execute() throws FrameworkException {
         Component newComponent=(Component)Services.command(securityContext,CreateNodeCommand.class).execute(nodeData);
         String componentId=newComponent.getStringProperty(AbstractNode.Key.uuid);
-        RelationshipHelper.moveIncomingRelationships(securityContext,nodeToWrap,newComponent,resourceId,newComponent.getStringProperty(AbstractNode.Key.uuid),position);
+        RelationshipHelper.moveIncomingRelationships(securityContext,nodeToWrap,newComponent,RelType.CONTAINS,resourceId,newComponent.getStringProperty(AbstractNode.Key.uuid),position);
         if ((parentNode != null) && (newComponent != null)) {
           RelationClass rel=EntityContext.getRelationClass(parentNode.getClass(),newComponent.getClass());
           if (rel != null) {

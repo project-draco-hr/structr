@@ -1,0 +1,20 @@
+{
+  GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
+  NodeFactory nodeFactory=(NodeFactory)arguments.get("nodeFactory");
+  if (graphDb != null) {
+    final List<AbstractNode> allNodes=(List<AbstractNode>)nodeFactory.createNodes(securityContext,GlobalGraphOperations.at(graphDb).getAllNodes());
+    final Command transactionCommand=Services.command(securityContext,TransactionCommand.class);
+    final Command delRel=Services.command(securityContext,DeleteRelationshipCommand.class);
+    final Command delNode=Services.command(securityContext,DeleteNodeCommand.class);
+    transactionCommand.execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        for (        AbstractNode node : allNodes) {
+          delNode.execute(node);
+        }
+        return null;
+      }
+    }
+);
+  }
+  return null;
+}

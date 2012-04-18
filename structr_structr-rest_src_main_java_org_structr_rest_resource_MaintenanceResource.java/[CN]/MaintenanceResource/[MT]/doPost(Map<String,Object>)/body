@@ -1,9 +1,17 @@
 {
-  if (securityContext != null && securityContext.isSuperUser()) {
-    if (this.taskClass != null) {
+  if ((securityContext != null) && securityContext.isSuperUser()) {
+    if (this.taskOrCommand != null) {
       try {
-        Task task=(Task)taskClass.newInstance();
-        Services.command(securityContext,ProcessTaskCommand.class).execute(task);
+        if (Task.class.isAssignableFrom(taskOrCommand)) {
+          Task task=(Task)taskOrCommand.newInstance();
+          Services.command(securityContext,ProcessTaskCommand.class).execute(task);
+        }
+ else         if (Command.class.isAssignableFrom(taskOrCommand)) {
+          Services.command(securityContext,taskOrCommand).execute();
+        }
+ else {
+          return new RestMethodResult(HttpServletResponse.SC_NOT_FOUND);
+        }
         return new RestMethodResult(HttpServletResponse.SC_OK);
       }
  catch (      InstantiationException iex) {
@@ -18,7 +26,7 @@ catch (      IllegalAccessException iaex) {
     }
   }
  else {
-    logger.log(Level.INFO,"SecurityContext is {0}, user is {1}",new Object[]{securityContext != null ? "non-null" : "null",securityContext != null && securityContext.getUser() != null ? securityContext.getUser().getName() : "null"});
+    logger.log(Level.INFO,"SecurityContext is {0}, user is {1}",new Object[]{(securityContext != null) ? "non-null" : "null",((securityContext != null) && (securityContext.getUser() != null)) ? securityContext.getUser().getName() : "null"});
     throw new NotAllowedException();
   }
 }

@@ -19,7 +19,7 @@
       System.out.print(" ");
     }
     if (node instanceof Content) {
-      content=node.getStringProperty("content");
+      content=(((Content)node).getPropertyWithVariableReplacement(resourceId,componentId,Content.UiKey.content.name()));
       List<AbstractRelationship> links=node.getOutgoingLinkRelationships();
       if ((links != null) && !links.isEmpty()) {
         link=links.get(0);
@@ -55,7 +55,7 @@
         HtmlElement htmlElement=(HtmlElement)node;
         for (        String attribute : EntityContext.getPropertySet(node.getClass(),PropertyView.Html)) {
           try {
-            String value=htmlElement.getReferencedProperty(resourceId,localComponentId,attribute);
+            String value=htmlElement.getPropertyWithVariableReplacement(resourceId,localComponentId,attribute);
             if ((value != null) && StringUtils.isNotBlank(value)) {
               String key=attribute.substring(PropertyView.Html.length());
               buffer.append(" ").append(key).append("=\"").append(value).append("\"");

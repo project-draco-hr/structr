@@ -1,8 +1,8 @@
 {
   String resourceId=(String)webSocketData.getNodeData().get("resourceId");
   AbstractNode node=getNode(webSocketData.getId());
-  List<GraphObject> result=new LinkedList<GraphObject>();
   List<AbstractRelationship> rels=node.getOutgoingRelationships(RelType.CONTAINS);
+  Map<Long,GraphObject> sortMap=new TreeMap<Long,GraphObject>();
   for (  AbstractRelationship out : rels) {
     Long pos=null;
     if (out.getLongProperty(resourceId) != null) {
@@ -13,9 +13,10 @@
     }
     if (pos != null) {
       AbstractNode endNode=out.getEndNode();
-      result.add(endNode);
+      sortMap.put(pos,endNode);
     }
   }
+  List<GraphObject> result=new ArrayList<GraphObject>(sortMap.values());
   webSocketData.setResult(result);
   getWebSocket().send(webSocketData,true);
 }

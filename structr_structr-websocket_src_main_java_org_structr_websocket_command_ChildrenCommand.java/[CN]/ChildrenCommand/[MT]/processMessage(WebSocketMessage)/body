@@ -1,0 +1,21 @@
+{
+  String resourceId=(String)webSocketData.getNodeData().get("resourceId");
+  AbstractNode node=getNode(webSocketData.getId());
+  List<GraphObject> result=new LinkedList<GraphObject>();
+  List<AbstractRelationship> rels=node.getOutgoingRelationships(RelType.CONTAINS);
+  for (  AbstractRelationship out : rels) {
+    Long pos=null;
+    if (out.getLongProperty(resourceId) != null) {
+      pos=out.getLongProperty(resourceId);
+    }
+ else {
+      pos=out.getLongProperty("*");
+    }
+    if (pos != null) {
+      AbstractNode endNode=out.getEndNode();
+      result.add(endNode);
+    }
+  }
+  webSocketData.setResult(result);
+  getWebSocket().send(webSocketData,true);
+}

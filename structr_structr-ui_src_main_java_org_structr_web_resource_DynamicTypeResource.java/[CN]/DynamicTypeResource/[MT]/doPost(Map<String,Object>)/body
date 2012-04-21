@@ -32,6 +32,7 @@
       @Override public Object execute() throws FrameworkException {
         Component comp=(Component)createNodeCommand.execute(templateProperties);
         RelationshipHelper.copyRelationships(securityContext,template,comp,RelType.CONTAINS,finalParentResourceId,finalParentComponentId,position);
+        RelationshipHelper.copyIncomingRelationships(securityContext,template,comp,RelType.DATA,null,null,0);
         Map<String,Object> contentTemplateProperties=new LinkedHashMap<String,Object>();
         for (        AbstractNode node : template.getContentNodes().values()) {
           if (node instanceof Content) {
@@ -53,6 +54,32 @@
     if (newComponent != null) {
       for (      String key : propertySet.keySet()) {
         newComponent.setProperty(key,propertySet.get(key));
+      }
+    }
+    newComponent.onNodeInstantiation();
+    for (    AbstractRelationship rel : newComponent.getRelationships(RelType.DATA,Direction.INCOMING)) {
+      logger.log(Level.INFO,"#### Processing DATA relationship {0}",rel.getStringProperty(AbstractRelationship.Key.uuid));
+      AbstractNode dataNode=rel.getStartNode();
+      if (dataNode instanceof Component) {
+        logger.log(Level.INFO,"###### Found Component instance");
+        Component linkedComponent=(Component)dataNode;
+        Map<String,Object> postPropertySet=new LinkedHashMap<String,Object>();
+        String rawNames=rel.getStringProperty("names");
+        String[] names=rawNames.split("[, ]+");
+        for (        String key : names) {
+          logger.log(Level.INFO,"######## Copying key {0}",key);
+          Object value=newComponent.getProperty(key);
+          if (value != null) {
+            logger.log(Level.INFO,"######## Adding {0} = {1}",new Object[]{key,value});
+            postPropertySet.put(key,value);
+          }
+        }
+        DynamicTypeResource linkedDTR=new DynamicTypeResource();
+        String linkedName=linkedComponent.getStringProperty(Component.UiKey.structrclass).toLowerCase();
+        logger.log(Level.INFO,"###### POSTing on linked DynamicTypeResource with rawType {0}",linkedName);
+        linkedDTR.checkAndConfigure(linkedName,securityContext,request);
+        RestMethodResult result=linkedDTR.doPost(postPropertySet);
+        logger.log(Level.INFO,"###### Result: {0}",result.getHeaders().toString());
       }
     }
     RestMethodResult result=new RestMethodResult(201);

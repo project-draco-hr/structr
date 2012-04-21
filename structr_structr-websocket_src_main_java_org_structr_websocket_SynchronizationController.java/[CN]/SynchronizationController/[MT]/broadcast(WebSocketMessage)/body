@@ -1,11 +1,21 @@
 {
   logger.log(Level.FINE,"Broadcasting message to {0} clients..",clients.size());
   webSocketData.setSessionValid(true);
-  String message=gson.toJson(webSocketData,WebSocketMessage.class);
-  logger.log(Level.FINE,"############################################################ SENDING \n{0}",message);
+  String message;
   for (  StructrWebSocket socket : clients) {
     Connection socketConnection=socket.getConnection();
     if ((socketConnection != null) && socket.isAuthenticated()) {
+      List<GraphObject> result=webSocketData.getResult();
+      if (result != null && result.size() > 0 && webSocketData.getCommand().equals("UPDATE") || webSocketData.getCommand().equals("ADD") || webSocketData.getCommand().equals("CREATE")) {
+        WebSocketMessage clientData=webSocketData.copy();
+        SecurityContext securityContext=socket.getSecurityContext();
+        clientData.setResult(filter(securityContext,result));
+        message=gson.toJson(clientData,WebSocketMessage.class);
+      }
+ else {
+        message=gson.toJson(webSocketData,WebSocketMessage.class);
+      }
+      logger.log(Level.FINE,"############################################################ SENDING \n{0}",message);
       try {
         socketConnection.sendMessage(message);
       }

@@ -1,0 +1,46 @@
+{
+  final List<GraphObject> templates=getComponents(securityContext,getSearchAttributes(rawType));
+  final Command createNodeCommand=Services.command(securityContext,CreateNodeCommand.class);
+  final Map<String,Object> templateProperties=new LinkedHashMap<String,Object>();
+  final String componentId=UUID.randomUUID().toString().replaceAll("[\\-]+","");
+  final Component template=(Component)templates.get(0);
+  templateProperties.put(AbstractNode.Key.type.name(),Component.class.getSimpleName());
+  templateProperties.put("structrclass",template.getStringProperty("structrclass"));
+  templateProperties.put("uuid",componentId);
+  String parentComponentId=template.getComponentId();
+  String parentResourceId=template.getResourceId();
+  final long position=getMaxPosition(templates,parentResourceId) + 1;
+  if (parentComponentId == null && surroundingComponentId != null) {
+    parentComponentId=surroundingComponentId;
+  }
+  final String finalParentComponentId=parentComponentId;
+  final String finalParentResourceId=parentResourceId;
+  Component newComponent=(Component)Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+    @Override public Object execute() throws FrameworkException {
+      Component comp=(Component)createNodeCommand.execute(templateProperties);
+      RelationshipHelper.copyRelationships(securityContext,template,comp,RelType.CONTAINS,finalParentResourceId,finalParentComponentId,position);
+      Map<String,Object> contentTemplateProperties=new LinkedHashMap<String,Object>();
+      for (      AbstractNode node : template.getContentNodes().values()) {
+        if (node instanceof Content) {
+          Content contentTemplate=(Content)node;
+          String dataKey=contentTemplate.getStringProperty("data-key");
+          contentTemplateProperties.clear();
+          contentTemplateProperties.put(AbstractNode.Key.type.name(),"Content");
+          contentTemplateProperties.put("data-key",dataKey);
+          contentTemplateProperties.put("content",propertySet.get(dataKey));
+          Content newContent=(Content)createNodeCommand.execute(contentTemplateProperties);
+          propertySet.remove(dataKey);
+          RelationshipHelper.copyRelationships(securityContext,contentTemplate,newContent,RelType.CONTAINS,finalParentResourceId,componentId,position);
+        }
+      }
+      return comp;
+    }
+  }
+);
+  if (newComponent != null) {
+    for (    String key : propertySet.keySet()) {
+      newComponent.setProperty(key,propertySet.get(key));
+    }
+  }
+  return newComponent;
+}

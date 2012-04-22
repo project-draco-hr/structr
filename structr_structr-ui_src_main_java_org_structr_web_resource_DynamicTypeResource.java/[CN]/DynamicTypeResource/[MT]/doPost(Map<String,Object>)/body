@@ -7,81 +7,17 @@
     return super.doPost(propertySet);
   }
  else   if (!templates.isEmpty()) {
-    final Command createNodeCommand=Services.command(securityContext,CreateNodeCommand.class);
-    final Map<String,Object> templateProperties=new LinkedHashMap<String,Object>();
-    final String componentId=UUID.randomUUID().toString().replaceAll("[\\-]+","");
-    final Component template=(Component)templates.get(0);
-    templateProperties.put(AbstractNode.Key.type.name(),Component.class.getSimpleName());
-    templateProperties.put("structrclass",template.getStringProperty("structrclass"));
-    templateProperties.put("uuid",componentId);
-    String parentComponentId=template.getComponentId();
-    String parentResourceId=template.getResourceId();
-    final long position=getMaxPosition(templates,parentResourceId) + 1;
+    String surroundingComponentId=null;
     if ((wrappedResource != null) && (wrappedResource instanceof UuidResource)) {
-      parentComponentId=((UuidResource)wrappedResource).getUuid();
+      surroundingComponentId=((UuidResource)wrappedResource).getUuid();
     }
  else     if (!nestedResources.isEmpty()) {
       DynamicTypeResource nested=nestedResources.get(nestedResources.size() - 1);
       if (nested.uuidResource != null) {
-        parentComponentId=nested.uuidResource.getUuid();
+        surroundingComponentId=nested.uuidResource.getUuid();
       }
     }
-    final String finalParentComponentId=parentComponentId;
-    final String finalParentResourceId=parentResourceId;
-    Component newComponent=(Component)Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-      @Override public Object execute() throws FrameworkException {
-        Component comp=(Component)createNodeCommand.execute(templateProperties);
-        RelationshipHelper.copyRelationships(securityContext,template,comp,RelType.CONTAINS,finalParentResourceId,finalParentComponentId,position);
-        RelationshipHelper.copyIncomingRelationships(securityContext,template,comp,RelType.DATA,null,null,0);
-        Map<String,Object> contentTemplateProperties=new LinkedHashMap<String,Object>();
-        for (        AbstractNode node : template.getContentNodes().values()) {
-          if (node instanceof Content) {
-            Content contentTemplate=(Content)node;
-            String dataKey=contentTemplate.getStringProperty("data-key");
-            contentTemplateProperties.clear();
-            contentTemplateProperties.put(AbstractNode.Key.type.name(),"Content");
-            contentTemplateProperties.put("data-key",dataKey);
-            contentTemplateProperties.put("content",propertySet.get(dataKey));
-            Content newContent=(Content)createNodeCommand.execute(contentTemplateProperties);
-            propertySet.remove(dataKey);
-            RelationshipHelper.copyRelationships(securityContext,contentTemplate,newContent,RelType.CONTAINS,finalParentResourceId,componentId,position);
-          }
-        }
-        return comp;
-      }
-    }
-);
-    if (newComponent != null) {
-      for (      String key : propertySet.keySet()) {
-        newComponent.setProperty(key,propertySet.get(key));
-      }
-    }
-    newComponent.onNodeInstantiation();
-    for (    AbstractRelationship rel : newComponent.getRelationships(RelType.DATA,Direction.INCOMING)) {
-      logger.log(Level.INFO,"#### Processing DATA relationship {0}",rel.getStringProperty(AbstractRelationship.Key.uuid));
-      AbstractNode dataNode=rel.getStartNode();
-      if (dataNode instanceof Component) {
-        logger.log(Level.INFO,"###### Found Component instance");
-        Component linkedComponent=(Component)dataNode;
-        Map<String,Object> postPropertySet=new LinkedHashMap<String,Object>();
-        String rawNames=rel.getStringProperty("names");
-        String[] names=rawNames.split("[, ]+");
-        for (        String key : names) {
-          logger.log(Level.INFO,"######## Copying key {0}",key);
-          Object value=newComponent.getProperty(key);
-          if (value != null) {
-            logger.log(Level.INFO,"######## Adding {0} = {1}",new Object[]{key,value});
-            postPropertySet.put(key,value);
-          }
-        }
-        DynamicTypeResource linkedDTR=new DynamicTypeResource();
-        String linkedName=linkedComponent.getStringProperty(Component.UiKey.structrclass).toLowerCase();
-        logger.log(Level.INFO,"###### POSTing on linked DynamicTypeResource with rawType {0}",linkedName);
-        linkedDTR.checkAndConfigure(linkedName,securityContext,request);
-        RestMethodResult result=linkedDTR.doPost(postPropertySet);
-        logger.log(Level.INFO,"###### Result: {0}",result.getHeaders().toString());
-      }
-    }
+    Component newComponent=duplicateComponent(securityContext,propertySet,rawType,surroundingComponentId);
     RestMethodResult result=new RestMethodResult(201);
     if (newComponent != null) {
       result.addHeader("Location",buildLocationHeader(newComponent));

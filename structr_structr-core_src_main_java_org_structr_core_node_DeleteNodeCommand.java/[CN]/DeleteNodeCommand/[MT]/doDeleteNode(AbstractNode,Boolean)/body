@@ -28,15 +28,15 @@
           }
         }
       }
-      List<AbstractRelationship> rels=node.getRelationships();
-      for (      AbstractRelationship r : rels) {
-        r.getRelationship().delete();
-      }
       try {
         node.onNodeDeletion();
       }
  catch (      Throwable t) {
         logger.log(Level.WARNING,"Exception while calling onDeletion callback: {0}",t);
+      }
+      List<AbstractRelationship> rels=node.getRelationships();
+      for (      AbstractRelationship r : rels) {
+        r.getRelationship().delete();
       }
       node.getNode().delete();
       setExitCode(Command.exitCode.SUCCESS);

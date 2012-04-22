@@ -4,6 +4,9 @@
     Relationship rel=abstractRelationship.getRelationship();
     if ((resourceId == null) || ((resourceId != null) && rel.hasProperty(resourceId)) || rel.hasProperty("*")) {
       AbstractNode endNode=abstractRelationship.getEndNode();
+      if (endNode instanceof Component && !isVisible(request,endNode,abstractRelationship)) {
+        continue;
+      }
       if ((componentId != null) && ((endNode instanceof Content) || (endNode instanceof Component))) {
         if (componentId.equals(abstractRelationship.getStringProperty(Key.componentId.name()))) {
           rels.add(abstractRelationship);

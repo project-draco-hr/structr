@@ -75,7 +75,7 @@
   if (node instanceof View) {
     List<GraphObject> components=((View)node).getComponents();
     for (    GraphObject component : components) {
-      List<AbstractRelationship> rels=Component.getChildRelationships(node,resourceId,localComponentId);
+      List<AbstractRelationship> rels=Component.getChildRelationships(request,node,resourceId,localComponentId);
       for (      AbstractRelationship rel : rels) {
         if (condition == null || (condition != null && condition.isSatisfied(request,rel))) {
           AbstractNode subNode=rel.getEndNode();
@@ -85,7 +85,7 @@
     }
   }
  else   if (node instanceof Condition) {
-    List<AbstractRelationship> rels=Component.getChildRelationships(node,resourceId,localComponentId);
+    List<AbstractRelationship> rels=Component.getChildRelationships(request,node,resourceId,localComponentId);
     Condition newCondition=(Condition)node;
     for (    AbstractRelationship rel : rels) {
       AbstractNode subNode=rel.getEndNode();
@@ -93,7 +93,7 @@
     }
   }
  else {
-    List<AbstractRelationship> rels=Component.getChildRelationships(node,resourceId,localComponentId);
+    List<AbstractRelationship> rels=Component.getChildRelationships(request,node,resourceId,localComponentId);
     for (    AbstractRelationship rel : rels) {
       if (condition == null || (condition != null && condition.isSatisfied(request,rel))) {
         AbstractNode subNode=rel.getEndNode();

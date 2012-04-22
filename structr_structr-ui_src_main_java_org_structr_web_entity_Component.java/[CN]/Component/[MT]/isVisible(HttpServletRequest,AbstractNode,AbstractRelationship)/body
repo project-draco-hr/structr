@@ -1,0 +1,19 @@
+{
+  if (node instanceof Component) {
+    String structrClass=node.getStringProperty(Component.UiKey.structrclass);
+    String componentId=node.getStringProperty(AbstractNode.Key.uuid);
+    if (structrClass != null) {
+      String singleClass=structrClass.toLowerCase();
+      String listClass=singleClass.concat("s");
+      if (request.getAttribute(singleClass) != null) {
+        if (request.getAttribute(componentId) != null) {
+          return true;
+        }
+      }
+ else       if (request.getAttribute(listClass) != null) {
+        return true;
+      }
+    }
+  }
+  return false;
+}

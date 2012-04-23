@@ -26,10 +26,15 @@
       }
     }
     if ((containedNode != null) && (containingNode != null)) {
+      String originalResourceId=(String)nodeData.get("sourceResourceId");
+      String newResourceId=(String)nodeData.get("targetResourceId");
       RelationClass rel=EntityContext.getRelationClass(containingNode.getClass(),containedNode.getClass());
       if (rel != null) {
         try {
           rel.createRelationship(securityContext,containingNode,containedNode,relData);
+          if (originalResourceId != null && newResourceId != null && !originalResourceId.equals(newResourceId)) {
+            tagOutgoingRelsWithResourceId(containedNode,containedNode,originalResourceId,newResourceId);
+          }
         }
  catch (        Throwable t) {
           getWebSocket().send(MessageBuilder.status().code(400).message(t.getMessage()).build(),true);

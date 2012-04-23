@@ -1,13 +1,13 @@
 {
-  String path=clean(request.getPathInfo());
+  String path=PathHelper.clean(request.getPathInfo());
   logger.log(Level.INFO,"Path info {0}",path);
-  String[] urlParts=getParts(path);
+  String[] urlParts=PathHelper.getParts(path);
   String searchFor=null;
   if (urlParts.length > 1) {
     searchFor=StringUtils.substringBefore(urlParts[1],"?");
   }
-  String[] pathParts=getParts(path);
-  String name=getName(pathParts[0]);
+  String[] pathParts=PathHelper.getParts(path);
+  String name=PathHelper.getName(pathParts[0]);
   List<NodeAttribute> attrs=new LinkedList<NodeAttribute>();
   Map<String,String[]> parameterMap=request.getParameterMap();
   if ((parameterMap != null) && (parameterMap.size() > 0)) {

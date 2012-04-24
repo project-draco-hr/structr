@@ -2,10 +2,8 @@
   String dbPath=Services.getDatabasePath();
   try {
     logger.log(Level.INFO,"Initializing database ({0}) ...",dbPath);
-    Map<String,String> configuration=null;
     try {
-      configuration=EmbeddedGraphDatabase.loadConfigurations(dbPath + "/neo4j.conf");
-      graphDb=new EmbeddedGraphDatabase(dbPath,configuration);
+      graphDb=new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(dbPath).loadPropertiesFromFile(dbPath + "neo4j.conf").newGraphDatabase();
     }
  catch (    Throwable t) {
       logger.log(Level.INFO,"Database config {0}/neo4j.conf not found",dbPath);

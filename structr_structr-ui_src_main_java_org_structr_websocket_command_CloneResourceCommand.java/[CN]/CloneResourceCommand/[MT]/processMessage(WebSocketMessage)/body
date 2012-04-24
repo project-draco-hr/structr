@@ -2,10 +2,18 @@
   final SecurityContext securityContext=getWebSocket().getSecurityContext();
   String nodeId=webSocketData.getId();
   final AbstractNode nodeToClone=getNode(nodeId);
+  final Map<String,Object> nodeData=webSocketData.getNodeData();
+  final String newName;
+  if (nodeData.containsKey(AbstractNode.Key.name.name())) {
+    newName=(String)nodeData.get(AbstractNode.Key.name.name());
+  }
+ else {
+    newName="unknown";
+  }
   if (nodeToClone != null) {
     StructrTransaction transaction=new StructrTransaction(){
       @Override public Object execute() throws FrameworkException {
-        Resource newResource=(Resource)Services.command(securityContext,CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.Key.type.name(),Resource.class.getSimpleName()));
+        Resource newResource=(Resource)Services.command(securityContext,CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.Key.type.name(),Resource.class.getSimpleName()),new NodeAttribute(AbstractNode.Key.name.name(),newName));
         if (newResource != null) {
           String resourceId=newResource.getStringProperty(AbstractNode.Key.uuid);
           List<AbstractRelationship> relsOut=nodeToClone.getOutgoingRelationships(RelType.CONTAINS);

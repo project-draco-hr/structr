@@ -1,0 +1,23 @@
+{
+  GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
+  NodeFactory nodeFactory=(NodeFactory)arguments.get("nodeFactory");
+  ExecutionEngine engine=new ExecutionEngine(graphDb);
+  if (parameters.length < 1) {
+    throw new UnsupportedArgumentError("No parameters given. Required parameters: String query");
+  }
+  if (parameters[0] instanceof String) {
+    List<AbstractNode> resultList=new LinkedList<AbstractNode>();
+    ExecutionResult result=engine.execute((String)parameters[0]);
+    for (    String column : result.columns()) {
+      for (      Object o : IteratorUtil.asIterable(result.columnAs(column))) {
+        if (o instanceof Node) {
+          resultList.add(nodeFactory.createNode(securityContext,(Node)o));
+        }
+      }
+    }
+    return resultList;
+  }
+ else {
+    throw new UnsupportedArgumentError("First argument must be of type String!");
+  }
+}

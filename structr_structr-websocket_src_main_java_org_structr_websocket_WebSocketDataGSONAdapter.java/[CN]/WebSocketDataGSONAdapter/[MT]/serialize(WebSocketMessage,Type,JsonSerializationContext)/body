@@ -40,6 +40,14 @@
   if (src.getPage() > 0) {
     root.add("page",new JsonPrimitive(src.getPage()));
   }
+  JsonArray nodesWithChildren=new JsonArray();
+  Set<String> nwc=src.getNodesWithChildren();
+  if ((nwc != null) && !src.getNodesWithChildren().isEmpty()) {
+    for (    String nodeId : nwc) {
+      nodesWithChildren.add(new JsonPrimitive(nodeId));
+    }
+    root.add("nodesWithChildren",nodesWithChildren);
+  }
   root.add("sessionValid",new JsonPrimitive(src.isSessionValid()));
   if ((src.getGraphObject() != null) && !src.getModifiedProperties().isEmpty()) {
     GraphObject graphObject=src.getGraphObject();

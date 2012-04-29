@@ -3,21 +3,25 @@
   AbstractNode node=getNode(webSocketData.getId());
   List<AbstractRelationship> rels=node.getOutgoingRelationships(RelType.CONTAINS);
   Map<Long,GraphObject> sortMap=new TreeMap<Long,GraphObject>();
-  for (  AbstractRelationship out : rels) {
+  Set<String> nodesWithChildren=new HashSet<String>();
+  for (  AbstractRelationship rel : rels) {
     Long pos=null;
-    if (out.getLongProperty(resourceId) != null) {
-      pos=out.getLongProperty(resourceId);
+    if (rel.getLongProperty(resourceId) != null) {
+      pos=rel.getLongProperty(resourceId);
     }
  else {
-      pos=out.getLongProperty("*");
+      pos=rel.getLongProperty("*");
     }
     if (pos != null) {
-      AbstractNode endNode=out.getEndNode();
+      AbstractNode endNode=rel.getEndNode();
+      List<AbstractRelationship> childRels=endNode.getOutgoingRelationships(RelType.CONTAINS);
+      nodesWithChildren.addAll(RelationshipHelper.getChildrenInResource(endNode,resourceId));
       sortMap.put(pos,endNode);
     }
   }
   List<GraphObject> result=new ArrayList<GraphObject>(sortMap.values());
   webSocketData.setView(PropertyView.Ui);
   webSocketData.setResult(result);
+  webSocketData.setNodesWithChildren(nodesWithChildren);
   getWebSocket().send(webSocketData,true);
 }

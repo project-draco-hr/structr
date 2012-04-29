@@ -2,6 +2,7 @@
   final SecurityContext securityContext=getWebSocket().getSecurityContext();
   String type=(String)webSocketData.getNodeData().get("type");
   List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
+  Set<String> nodesWithChildren=new HashSet<String>();
   searchAttributes.add(Search.andExactType(CaseHelper.toUpperCamelCase(type)));
   AbstractNode topNode=null;
   boolean includeDeleted=false;
@@ -40,6 +41,13 @@
  catch (      Throwable t) {
       }
     }
+    for (    GraphObject obj : results) {
+      AbstractNode node=(AbstractNode)obj;
+      if ((obj instanceof AbstractNode) && RelationshipHelper.hasChildren(node,node.getUuid())) {
+        nodesWithChildren.add(node.getUuid());
+      }
+    }
+    webSocketData.setNodesWithChildren(nodesWithChildren);
     if (webSocketData.getPageSize() > 0) {
       int pageSize=webSocketData.getPageSize();
       int page=webSocketData.getPage();

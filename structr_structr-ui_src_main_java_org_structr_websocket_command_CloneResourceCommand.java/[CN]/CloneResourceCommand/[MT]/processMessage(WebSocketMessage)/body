@@ -13,7 +13,7 @@
   if (nodeToClone != null) {
     StructrTransaction transaction=new StructrTransaction(){
       @Override public Object execute() throws FrameworkException {
-        Resource newResource=(Resource)Services.command(securityContext,CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.Key.type.name(),Resource.class.getSimpleName()),new NodeAttribute(AbstractNode.Key.name.name(),newName));
+        Resource newResource=(Resource)Services.command(securityContext,CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.Key.type.name(),Resource.class.getSimpleName()),new NodeAttribute(AbstractNode.Key.name.name(),newName),new NodeAttribute(AbstractNode.Key.visibleToAuthenticatedUsers.name(),true));
         if (newResource != null) {
           String resourceId=newResource.getStringProperty(AbstractNode.Key.uuid);
           List<AbstractRelationship> relsOut=nodeToClone.getOutgoingRelationships(RelType.CONTAINS);

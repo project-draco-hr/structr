@@ -2,7 +2,6 @@
   String localComponentId=componentId;
   String content=null;
   String tag=null;
-  AbstractRelationship link=null;
   if (startNode != null) {
     String structrClass=startNode.getStringProperty(Component.UiKey.structrclass);
     if ((structrClass != null) && structrClass.equals(EntityContext.normalizeEntityName(searchClass)) && (attrs != null)) {
@@ -20,21 +19,13 @@
     }
     if (startNode instanceof Content) {
       content=(((Content)startNode).getPropertyWithVariableReplacement(resource,resourceId,componentId,viewComponent,Content.UiKey.content.name()));
-      List<AbstractRelationship> links=startNode.getOutgoingLinkRelationships();
-      if ((links != null) && !links.isEmpty()) {
-        link=links.get(0);
-      }
     }
     if (startNode instanceof Component) {
       localComponentId=startNode.getStringProperty(AbstractNode.Key.uuid);
     }
-    if (link != null) {
-      buffer.append("<a href=\"").append(link.getEndNode().getName()).append("\">");
-    }
     tag=startNode.getStringProperty("tag");
     if (edit && inBody && (startNode instanceof Content)) {
-      buffer.delete(buffer.length() - 1,buffer.length());
-      buffer.append(" structr_content_id=\"").append(id).append("\">");
+      tag="span";
     }
     if (StringUtils.isNotBlank(tag)) {
       if (tag.equals("body")) {
@@ -49,6 +40,9 @@
           buffer.append(" structr_element_id=\"").append(id).append("\"");
           buffer.append(" structr_type=\"").append(startNode.getType()).append("\"");
           buffer.append(" structr_name=\"").append(startNode.getName()).append("\"");
+        }
+ else {
+          buffer.append(" structr_content_id=\"").append(id).append("\"");
         }
       }
       if (startNode instanceof HtmlElement) {
@@ -103,8 +97,5 @@
   }
   if (StringUtils.isNotBlank(tag) && !(ArrayUtils.contains(html5VoidTags,tag))) {
     buffer.append("</").append(tag).append(">");
-  }
-  if (link != null) {
-    buffer.append("</a>");
   }
 }

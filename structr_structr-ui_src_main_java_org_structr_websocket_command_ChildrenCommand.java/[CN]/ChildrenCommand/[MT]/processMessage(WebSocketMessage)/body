@@ -1,5 +1,6 @@
 {
   String resourceId=(String)webSocketData.getNodeData().get("resourceId");
+  String componentId=(String)webSocketData.getNodeData().get("componentId");
   AbstractNode node=getNode(webSocketData.getId());
   List<AbstractRelationship> rels=node.getOutgoingRelationships(RelType.CONTAINS);
   Map<Long,GraphObject> sortMap=new TreeMap<Long,GraphObject>();
@@ -12,11 +13,13 @@
  else {
       pos=rel.getLongProperty("*");
     }
+    String relCompId=rel.getStringProperty("componentId");
     if (pos != null) {
       AbstractNode endNode=rel.getEndNode();
-      List<AbstractRelationship> childRels=endNode.getOutgoingRelationships(RelType.CONTAINS);
-      nodesWithChildren.addAll(RelationshipHelper.getChildrenInResource(endNode,resourceId));
-      sortMap.put(pos,endNode);
+      if (componentId == null || (!endNode.getType().equals(Content.class.getSimpleName()) || (relCompId != null && relCompId.equals(componentId)))) {
+        nodesWithChildren.addAll(RelationshipHelper.getChildrenInResource(endNode,resourceId));
+        sortMap.put(pos,endNode);
+      }
     }
   }
   List<GraphObject> result=new ArrayList<GraphObject>(sortMap.values());

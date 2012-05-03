@@ -5,9 +5,20 @@
       indexProperty(node,key,index.name());
     }
   }
-  Node dbNode=node.getNode();
-  if ((dbNode.hasProperty(Location.Key.latitude.name())) && (dbNode.hasProperty(Location.Key.longitude.name()))) {
-    LayerNodeIndex layerIndex=(LayerNodeIndex)indices.get(NodeIndex.layer.name());
-    layerIndex.add(node.getNode(),"","");
+  try {
+    Double lat=node.getDoubleProperty(Location.Key.latitude);
+    Double lon=node.getDoubleProperty(Location.Key.longitude);
+    if ((lat != null) && (lon != null)) {
+      Node dbNode=node.getNode();
+      if (!(dbNode.hasProperty(Location.Key.latitude.name())) && (dbNode.hasProperty(Location.Key.longitude.name()))) {
+        dbNode.setProperty(Location.Key.latitude.name(),lat);
+        dbNode.setProperty(Location.Key.longitude.name(),lon);
+      }
+      LayerNodeIndex layerIndex=(LayerNodeIndex)indices.get(NodeIndex.layer.name());
+      layerIndex.add(node.getNode(),"","");
+    }
   }
+ catch (  Exception ignore) {
+  }
+  ;
 }

@@ -6,7 +6,7 @@
   boolean allExactMatch=true;
   if (graphDb != null) {
     BooleanQuery query=new BooleanQuery();
-    List<FilterSearchAttribute> booleanAttributes=new LinkedList<FilterSearchAttribute>();
+    List<FilterSearchAttribute> filters=new LinkedList<FilterSearchAttribute>();
     List<TextualSearchAttribute> textualAttributes=new LinkedList<TextualSearchAttribute>();
     String textualQueryString="";
     for (    SearchAttribute attr : searchAttrs) {
@@ -39,7 +39,7 @@
         allExactMatch&=isExactMatch(((TextualSearchAttribute)attr).getValue());
       }
  else       if (attr instanceof FilterSearchAttribute) {
-        booleanAttributes.add((FilterSearchAttribute)attr);
+        filters.add((FilterSearchAttribute)attr);
       }
     }
     List<AbstractRelationship> intermediateResult;
@@ -70,9 +70,9 @@
       logger.log(Level.FINE,"Creating structr relationships took {0} ms, {1} relationships made.",new Object[]{t2 - t1,intermediateResult.size()});
     }
     long t2=System.currentTimeMillis();
-    if (!booleanAttributes.isEmpty()) {
+    if (!filters.isEmpty()) {
       for (      AbstractRelationship rel : intermediateResult) {
-        for (        FilterSearchAttribute attr : booleanAttributes) {
+        for (        FilterSearchAttribute attr : filters) {
           String key=attr.getKey();
           Object searchValue=attr.getValue();
           SearchOperator op=attr.getSearchOperator();
@@ -92,13 +92,13 @@
           }
         }
       }
-      for (      FilterSearchAttribute attr : booleanAttributes) {
+      for (      FilterSearchAttribute attr : filters) {
         SearchOperator op=attr.getSearchOperator();
         List<GraphObject> result=attr.getResult();
         if (op.equals(SearchOperator.AND)) {
           intermediateResult=ListUtils.intersection(intermediateResult,result);
         }
- else         if (op.equals(SearchOperator.AND)) {
+ else         if (op.equals(SearchOperator.OR)) {
           intermediateResult=ListUtils.sum(intermediateResult,result);
         }
  else         if (op.equals(SearchOperator.NOT)) {

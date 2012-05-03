@@ -6,11 +6,19 @@
   boolean allExactMatch=true;
   if (graphDb != null) {
     BooleanQuery query=new BooleanQuery();
-    List<BooleanSearchAttribute> booleanAttributes=new LinkedList<BooleanSearchAttribute>();
+    List<FilterSearchAttribute> booleanAttributes=new LinkedList<FilterSearchAttribute>();
     List<TextualSearchAttribute> textualAttributes=new LinkedList<TextualSearchAttribute>();
     String textualQueryString="";
+    DistanceSearchAttribute distanceSearch=null;
+    Coordinates coords=null;
+    Double dist=null;
     for (    SearchAttribute attr : searchAttrs) {
-      if (attr instanceof SearchAttributeGroup) {
+      if (attr instanceof DistanceSearchAttribute) {
+        distanceSearch=(DistanceSearchAttribute)attr;
+        coords=GeoHelper.geocode(distanceSearch.getKey());
+        dist=distanceSearch.getValue();
+      }
+ else       if (attr instanceof SearchAttributeGroup) {
         SearchAttributeGroup attributeGroup=(SearchAttributeGroup)attr;
         List<SearchAttribute> groupedAttributes=attributeGroup.getSearchAttributes();
         String subQueryString="";
@@ -38,12 +46,12 @@
         textualQueryString+=toQueryString((TextualSearchAttribute)attr,StringUtils.isBlank(textualQueryString));
         allExactMatch&=isExactMatch(((TextualSearchAttribute)attr).getValue());
       }
- else       if (attr instanceof BooleanSearchAttribute) {
-        booleanAttributes.add((BooleanSearchAttribute)attr);
+ else       if (attr instanceof FilterSearchAttribute) {
+        booleanAttributes.add((FilterSearchAttribute)attr);
       }
     }
     List<AbstractNode> intermediateResult;
-    if (searchAttrs.isEmpty() || StringUtils.isBlank(textualQueryString)) {
+    if (searchAttrs.isEmpty() && StringUtils.isBlank(textualQueryString)) {
       if (topNode != null) {
         intermediateResult=topNode.getAllChildren();
       }
@@ -64,6 +72,13 @@
         index=(Index<Node>)arguments.get(NodeIndex.keyword.name());
         hits=index.query(queryContext);
       }
+ else       if (distanceSearch != null) {
+        Map<String,Object> params=new HashMap<String,Object>();
+        params.put(LayerNodeIndex.POINT_PARAMETER,coords.toArray());
+        params.put(LayerNodeIndex.DISTANCE_IN_KM_PARAMETER,dist);
+        index=(LayerNodeIndex)arguments.get(NodeIndex.layer.name());
+        hits=index.query(LayerNodeIndex.WITHIN_DISTANCE_QUERY,params);
+      }
  else {
         index=(Index<Node>)arguments.get(NodeIndex.fulltext.name());
         hits=index.query(queryContext);
@@ -77,9 +92,9 @@
     long t2=System.currentTimeMillis();
     if (!booleanAttributes.isEmpty()) {
       for (      AbstractNode node : intermediateResult) {
-        for (        BooleanSearchAttribute attr : booleanAttributes) {
+        for (        FilterSearchAttribute attr : booleanAttributes) {
           String key=attr.getKey();
-          Boolean searchValue=attr.getValue();
+          Object searchValue=attr.getValue();
           SearchOperator op=attr.getSearchOperator();
           Object nodeValue=node.getProperty(key);
           if (op.equals(SearchOperator.NOT)) {
@@ -97,7 +112,7 @@
           }
         }
       }
-      for (      BooleanSearchAttribute attr : booleanAttributes) {
+      for (      FilterSearchAttribute attr : booleanAttributes) {
         SearchOperator op=attr.getSearchOperator();
         List<GraphObject> result=attr.getResult();
         if (op.equals(SearchOperator.AND)) {
@@ -110,6 +125,8 @@
           intermediateResult=ListUtils.subtract(intermediateResult,result);
         }
       }
+    }
+    if (coords != null) {
     }
     finalResult.addAll(intermediateResult);
     long t3=System.currentTimeMillis();

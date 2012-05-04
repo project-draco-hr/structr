@@ -6,7 +6,7 @@
   boolean allExactMatch=true;
   if (graphDb != null) {
     BooleanQuery query=new BooleanQuery();
-    List<BooleanSearchAttribute> booleanAttributes=new LinkedList<BooleanSearchAttribute>();
+    List<FilterSearchAttribute> filters=new LinkedList<FilterSearchAttribute>();
     List<TextualSearchAttribute> textualAttributes=new LinkedList<TextualSearchAttribute>();
     String textualQueryString="";
     for (    SearchAttribute attr : searchAttrs) {
@@ -38,8 +38,8 @@
         textualQueryString+=toQueryString((TextualSearchAttribute)attr,StringUtils.isBlank(textualQueryString));
         allExactMatch&=isExactMatch(((TextualSearchAttribute)attr).getValue());
       }
- else       if (attr instanceof BooleanSearchAttribute) {
-        booleanAttributes.add((BooleanSearchAttribute)attr);
+ else       if (attr instanceof FilterSearchAttribute) {
+        filters.add((FilterSearchAttribute)attr);
       }
     }
     List<AbstractRelationship> intermediateResult;
@@ -70,11 +70,11 @@
       logger.log(Level.FINE,"Creating structr relationships took {0} ms, {1} relationships made.",new Object[]{t2 - t1,intermediateResult.size()});
     }
     long t2=System.currentTimeMillis();
-    if (!booleanAttributes.isEmpty()) {
+    if (!filters.isEmpty()) {
       for (      AbstractRelationship rel : intermediateResult) {
-        for (        BooleanSearchAttribute attr : booleanAttributes) {
+        for (        FilterSearchAttribute attr : filters) {
           String key=attr.getKey();
-          Boolean searchValue=attr.getValue();
+          Object searchValue=attr.getValue();
           SearchOperator op=attr.getSearchOperator();
           Object nodeValue=rel.getProperty(key);
           if (op.equals(SearchOperator.NOT)) {
@@ -92,13 +92,13 @@
           }
         }
       }
-      for (      BooleanSearchAttribute attr : booleanAttributes) {
+      for (      FilterSearchAttribute attr : filters) {
         SearchOperator op=attr.getSearchOperator();
         List<GraphObject> result=attr.getResult();
         if (op.equals(SearchOperator.AND)) {
           intermediateResult=ListUtils.intersection(intermediateResult,result);
         }
- else         if (op.equals(SearchOperator.AND)) {
+ else         if (op.equals(SearchOperator.OR)) {
           intermediateResult=ListUtils.sum(intermediateResult,result);
         }
  else         if (op.equals(SearchOperator.NOT)) {

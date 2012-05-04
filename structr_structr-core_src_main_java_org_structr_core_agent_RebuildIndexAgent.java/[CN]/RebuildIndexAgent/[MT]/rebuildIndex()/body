@@ -5,10 +5,15 @@
     @Override public Object execute() throws FrameworkException {
       long nodes=0;
       Command indexer=Services.command(securityContext,IndexNodeCommand.class);
+      logger.log(Level.INFO,"Get all nodes ...");
       List<AbstractNode> allNodes=(List<AbstractNode>)Services.command(securityContext,GetAllNodes.class).execute();
+      logger.log(Level.INFO,"... done. Got {0} nodes.",allNodes.size());
       for (      AbstractNode s : allNodes) {
         indexer.execute(s);
         nodes++;
+        if (nodes % 100 == 0) {
+          logger.log(Level.INFO,"Indexed {0} nodes",nodes);
+        }
       }
       return nodes;
     }

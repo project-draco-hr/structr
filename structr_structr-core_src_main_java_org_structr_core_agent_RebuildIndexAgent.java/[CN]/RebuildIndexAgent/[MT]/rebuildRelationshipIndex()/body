@@ -5,10 +5,15 @@
     @Override public Object execute() throws FrameworkException {
       long rels=0;
       Command indexer=Services.command(securityContext,IndexRelationshipCommand.class);
+      logger.log(Level.INFO,"Get all relationships ...");
       List<AbstractRelationship> allRelationships=(List<AbstractRelationship>)Services.command(securityContext,GetAllRelationships.class).execute();
+      logger.log(Level.INFO,"... done. Got {0} relationships.",allRelationships.size());
       for (      AbstractRelationship s : allRelationships) {
         indexer.execute(s);
         rels++;
+        if (rels % 100 == 0) {
+          logger.log(Level.INFO,"Indexed {0} relationships",rels);
+        }
       }
       return rels;
     }

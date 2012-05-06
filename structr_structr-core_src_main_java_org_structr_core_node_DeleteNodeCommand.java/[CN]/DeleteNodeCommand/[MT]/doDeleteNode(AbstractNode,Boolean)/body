@@ -1,14 +1,18 @@
 {
   final Command transactionCommand=Services.command(securityContext,TransactionCommand.class);
+  final Command removeNodeFromIndex=Services.command(securityContext,RemoveNodeFromIndex.class);
+  final Command deleteRel=Services.command(securityContext,DeleteRelationshipCommand.class);
   transactionCommand.execute(new StructrTransaction(){
     @Override public Object execute() throws FrameworkException {
       if (cascade) {
         List<AbstractRelationship> outgoingRels=node.getOutgoingRelationships();
         for (        AbstractRelationship rel : outgoingRels) {
           int cascadeDelete=rel.cascadeDelete();
-          if (cascadeDelete == RelationClass.DELETE_OUTGOING || cascadeDelete == RelationClass.DELETE_BOTH) {
+          if ((cascadeDelete == RelationClass.DELETE_OUTGOING) || (cascadeDelete == RelationClass.DELETE_BOTH)) {
             try {
-              doDeleteNode(rel.getEndNode(),cascade);
+              AbstractNode endNode=rel.getEndNode();
+              removeNodeFromIndex.execute(endNode);
+              doDeleteNode(endNode,cascade);
             }
  catch (            Throwable t) {
               logger.log(Level.WARNING,"Exception while deleting connected node: {0}",t);
@@ -18,8 +22,11 @@
         List<AbstractRelationship> incomingRels=node.getIncomingRelationships();
         for (        AbstractRelationship rel : incomingRels) {
           int cascadeDelete=rel.cascadeDelete();
-          if (cascadeDelete == RelationClass.DELETE_INCOMING || cascadeDelete == RelationClass.DELETE_INCOMING) {
+          if ((cascadeDelete == RelationClass.DELETE_INCOMING) || (cascadeDelete == RelationClass.DELETE_INCOMING)) {
             try {
+              AbstractNode startNode=rel.getStartNode();
+              removeNodeFromIndex.execute(startNode);
+              doDeleteNode(startNode,cascade);
               doDeleteNode(rel.getStartNode(),cascade);
             }
  catch (            Throwable t) {
@@ -36,8 +43,9 @@
       }
       List<AbstractRelationship> rels=node.getRelationships();
       for (      AbstractRelationship r : rels) {
-        r.getRelationship().delete();
+        deleteRel.execute(r);
       }
+      removeNodeFromIndex.execute(node);
       node.getNode().delete();
       setExitCode(Command.exitCode.SUCCESS);
       return null;

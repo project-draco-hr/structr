@@ -22,6 +22,7 @@
     final Command transactionCommand=Services.command(securityContext,TransactionCommand.class);
     transactionCommand.execute(new StructrTransaction(){
       @Override public Object execute() throws FrameworkException {
+        Services.command(securityContext,RemoveRelationshipFromIndex.class).execute(relToDelete);
         relToDelete.delete();
         return null;
       }

@@ -51,7 +51,7 @@
                     if (childNode instanceof org.structr.core.entity.File) {
                       writeFile(childNode,input);
                     }
-                    createRel.execute(parentNode,childNode,RelType.HAS_CHILD);
+                    createRel.execute(parentNode,childNode,RelType.CONTAINS);
                     parentNode=childNode;
                     createdPaths.put(path.toString(),parentNode);
                   }
@@ -66,7 +66,7 @@
                 NodeAttribute sizeAttr=new NodeAttribute(File.Key.size.name(),size);
                 NodeAttribute nameAttr=new NodeAttribute(AbstractNode.Key.name.name(),name);
                 AbstractNode fileNode=(AbstractNode)createNode.execute(nameAttr,typeAttr,sizeAttr,user);
-                createRel.execute(targetNode,fileNode,RelType.HAS_CHILD);
+                createRel.execute(targetNode,fileNode,RelType.CONTAINS);
                 writeFile(fileNode,input);
               }
             }

@@ -15,31 +15,8 @@ case 1:
         }
       }
     break;
-case 2:
-  if ((parameters[0] instanceof String) && (parameters[1] instanceof String)) {
-    String userName=(String)parameters[0];
-    String rootNodePath=(String)parameters[1];
-    List<AbstractNode> nodes=(List<AbstractNode>)findNode.execute(new XPath(rootNodePath));
-    if ((nodes != null) && (nodes.size() > 0)) {
-      AbstractNode r=nodes.get(0);
-      Node startNode=null;
-      if (r != null) {
-        startNode=r.getNode();
-        if (startNode != null) {
-          startNode=graphDb.getReferenceNode();
-        }
-        for (        Node n : getSubnodes(startNode)) {
-          AbstractNode s=(AbstractNode)findNode.execute(n);
-          if (s.getType().equals(User.class.getSimpleName()) && userName.equals(s.getName())) {
-            return s;
-          }
-        }
-      }
-    }
-  }
-break;
 default :
-break;
+  break;
 }
 }
 return null;

@@ -8,7 +8,7 @@
     BooleanQuery query=new BooleanQuery();
     List<FilterSearchAttribute> filters=new LinkedList<FilterSearchAttribute>();
     List<TextualSearchAttribute> textualAttributes=new LinkedList<TextualSearchAttribute>();
-    String textualQueryString="";
+    StringBuilder textualQueryString=new StringBuilder();
     DistanceSearchAttribute distanceSearch=null;
     Coordinates coords=null;
     Double dist=null;
@@ -21,29 +21,29 @@
  else       if (attr instanceof SearchAttributeGroup) {
         SearchAttributeGroup attributeGroup=(SearchAttributeGroup)attr;
         List<SearchAttribute> groupedAttributes=attributeGroup.getSearchAttributes();
-        String subQueryString="";
+        StringBuilder subQueryString=new StringBuilder();
         if (!(groupedAttributes.isEmpty())) {
           BooleanQuery subQuery=new BooleanQuery();
-          String subQueryPrefix=(StringUtils.isBlank(textualQueryString) ? "" : attributeGroup.getSearchOperator()) + " ( ";
+          String subQueryPrefix=(StringUtils.isBlank(textualQueryString.toString()) ? "" : attributeGroup.getSearchOperator()) + " ( ";
           for (          SearchAttribute groupedAttr : groupedAttributes) {
             if (groupedAttr instanceof TextualSearchAttribute) {
               textualAttributes.add((TextualSearchAttribute)groupedAttr);
               subQuery.add(toQuery((TextualSearchAttribute)groupedAttr),translateToBooleanClauseOccur(groupedAttr.getSearchOperator()));
-              subQueryString+=toQueryString((TextualSearchAttribute)groupedAttr,StringUtils.isBlank(subQueryString));
+              subQueryString.append(toQueryString((TextualSearchAttribute)groupedAttr,StringUtils.isBlank(subQueryString.toString())));
               allExactMatch&=isExactMatch(((TextualSearchAttribute)groupedAttr).getValue());
             }
           }
           query.add(subQuery,translateToBooleanClauseOccur(attributeGroup.getSearchOperator()));
           String subQuerySuffix=" ) ";
-          if (StringUtils.isNotBlank(subQueryString)) {
-            textualQueryString+=subQueryPrefix + subQueryString + subQuerySuffix;
+          if (StringUtils.isNotBlank(subQueryString.toString())) {
+            textualQueryString.append(subQueryPrefix).append(subQueryString).append(subQuerySuffix);
           }
         }
       }
  else       if (attr instanceof TextualSearchAttribute) {
         textualAttributes.add((TextualSearchAttribute)attr);
         query.add(toQuery((TextualSearchAttribute)attr),translateToBooleanClauseOccur(attr.getSearchOperator()));
-        textualQueryString+=toQueryString((TextualSearchAttribute)attr,StringUtils.isBlank(textualQueryString));
+        textualQueryString.append(toQueryString((TextualSearchAttribute)attr,StringUtils.isBlank(textualQueryString.toString())));
         allExactMatch&=isExactMatch(((TextualSearchAttribute)attr).getValue());
       }
  else       if (attr instanceof FilterSearchAttribute) {
@@ -51,7 +51,7 @@
       }
     }
     List<AbstractNode> intermediateResult;
-    if (searchAttrs.isEmpty() && StringUtils.isBlank(textualQueryString)) {
+    if (searchAttrs.isEmpty() && StringUtils.isBlank(textualQueryString.toString())) {
       intermediateResult=new LinkedList<AbstractNode>();
     }
  else {
@@ -81,7 +81,7 @@
         hits=index.query(queryContext);
       }
       long t1=System.currentTimeMillis();
-      logger.log(Level.FINE,"Querying index took {0} ms, {1} results retrieved.",new Object[]{t1 - t0,hits != null ? hits.size() : 0});
+      logger.log(Level.FINE,"Querying index took {0} ms, {1} results retrieved.",new Object[]{t1 - t0,(hits != null) ? hits.size() : 0});
       intermediateResult=nodeFactory.createNodes(securityContext,hits,includeDeleted,publicOnly);
       long t2=System.currentTimeMillis();
       logger.log(Level.FINE,"Creating structr nodes took {0} ms, {1} nodes made.",new Object[]{t2 - t1,intermediateResult.size()});

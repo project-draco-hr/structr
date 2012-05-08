@@ -16,6 +16,10 @@
     if (graphDb != null) {
       graphDb.registerTransactionEventHandler(EntityContext.getTransactionEventHandler());
     }
+    if (graphDb == null) {
+      logger.log(Level.SEVERE,"Database could not be started ({0}) ...",dbPath);
+      return;
+    }
     String filesPath=Services.getFilesPath();
     File files=new File(filesPath);
     if (!files.exists()) {

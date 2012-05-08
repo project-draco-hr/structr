@@ -1,8 +1,6 @@
 {
   if (node.getStringProperty(AbstractNode.Key.uuid) == null) {
-    setExitCode(Command.exitCode.FAILURE);
-    setErrorMessage("Will not delete node which has no UUID");
-    logger.log(Level.WARNING,getErrorMessage());
+    logger.log(Level.WARNING,"Will not delete node which has no UUID");
     return null;
   }
   final Command transactionCommand=Services.command(securityContext,TransactionCommand.class);
@@ -24,7 +22,7 @@
           List<AbstractRelationship> incomingRels=node.getIncomingRelationships();
           for (          AbstractRelationship rel : incomingRels) {
             int cascadeDelete=rel.cascadeDelete();
-            if ((cascadeDelete == RelationClass.DELETE_INCOMING) || (cascadeDelete == RelationClass.DELETE_INCOMING)) {
+            if ((cascadeDelete == RelationClass.DELETE_INCOMING) || (cascadeDelete == RelationClass.DELETE_BOTH)) {
               AbstractNode startNode=rel.getStartNode();
               removeNodeFromIndex.execute(startNode);
               doDeleteNode(startNode,cascade);
@@ -39,7 +37,6 @@
         }
         removeNodeFromIndex.execute(node);
         node.getNode().delete();
-        setExitCode(Command.exitCode.SUCCESS);
       }
  catch (      Throwable t) {
         logger.log(Level.WARNING,"Exception while deleting node: {0}",t);

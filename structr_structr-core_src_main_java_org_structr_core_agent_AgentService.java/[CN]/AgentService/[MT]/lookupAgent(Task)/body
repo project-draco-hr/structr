@@ -6,8 +6,8 @@
   if (agentClass == null) {
     try {
       Map<String,Class> agentClassesMap=(Map<String,Class>)Services.command(securityContext,GetAgentsCommand.class).execute();
-      for (      String className : agentClassesMap.keySet()) {
-        Class supportedAgentClass=agentClassesMap.get(className);
+      for (      Entry classEntry : agentClassesMap.entrySet()) {
+        Class supportedAgentClass=agentClassesMap.get((String)classEntry.getKey());
         try {
           Agent supportedAgent=(Agent)supportedAgentClass.newInstance();
           Class supportedTaskClass=supportedAgent.getSupportedTaskType();

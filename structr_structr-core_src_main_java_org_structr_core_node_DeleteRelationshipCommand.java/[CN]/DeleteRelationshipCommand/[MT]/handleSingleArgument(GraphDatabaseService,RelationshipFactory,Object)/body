@@ -1,5 +1,4 @@
 {
-  setExitCode(exitCode.FAILURE);
   AbstractRelationship rel=null;
   if (argument instanceof Long) {
     long id=((Long)argument).longValue();
@@ -18,9 +17,7 @@
   }
   if (rel != null) {
     if (rel.getStringProperty(AbstractRelationship.Key.uuid) == null) {
-      setExitCode(Command.exitCode.FAILURE);
-      setErrorMessage("Will not delete relationship which has no UUID");
-      logger.log(Level.WARNING,getErrorMessage());
+      logger.log(Level.WARNING,"Will not delete relationship which has no UUID");
       return null;
     }
     final Relationship relToDelete=rel.getRelationship();
@@ -38,7 +35,6 @@
       }
     }
 );
-    setExitCode(exitCode.SUCCESS);
   }
   return null;
 }

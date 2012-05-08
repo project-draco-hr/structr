@@ -2,24 +2,22 @@
   if (StringUtils.isBlank(key)) {
     return "";
   }
-  String stringValue=null;
   String escapedKey=Search.escapeForLucene(key);
-  if (value instanceof String) {
-    stringValue=(String)value;
-    if (StringUtils.isBlank(stringValue)) {
-      return "";
-    }
+  String stringValue=(String)value;
+  if (StringUtils.isBlank(stringValue)) {
+    return "";
   }
   if ((stringValue.length() > 1) && (stringValue.startsWith("\"") && stringValue.endsWith("\"")) || (stringValue.startsWith("[") && stringValue.endsWith("]")) || stringValue.startsWith("NOT") || stringValue.startsWith("AND") || stringValue.startsWith("OR")) {
     return " " + escapedKey + ":"+ stringValue+ " ";
   }
-  String result="( ";
+  StringBuilder result=new StringBuilder();
+  result.append("( ");
   String[] words=StringUtils.split(stringValue," ");
   int i=1;
   for (  String word : words) {
     word=Search.escapeForLucene(word);
-    result+=" (" + escapedKey + ":*"+ word+ "* OR "+ escapedKey+ ":\""+ word+ "\")"+ ((i < words.length) ? " AND " : " ) ");
+    result.append(" (").append(escapedKey).append(":*").append(word).append("* OR ").append(escapedKey).append(":\"").append(word).append("\")").append((i < words.length) ? " AND " : " ) ");
     i++;
   }
-  return result;
+  return result.toString();
 }

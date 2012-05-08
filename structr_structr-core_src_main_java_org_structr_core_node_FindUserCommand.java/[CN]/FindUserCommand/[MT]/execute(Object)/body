@@ -3,14 +3,14 @@
   Command searchNode=Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class);
   if (graphDb != null) {
     List<SearchAttribute> searchAttrs=new LinkedList<SearchAttribute>();
-    searchAttrs.add(Search.andExactType(User.class.getSimpleName()));
+    searchAttrs.add(Search.andExactType(Principal.class.getSimpleName()));
 switch (parameters.length) {
 case 0:
-      List<User> users=new LinkedList<User>();
+      List<Principal> users=new LinkedList<Principal>();
     List<AbstractNode> result=(List<AbstractNode>)searchNode.execute(null,false,false,searchAttrs);
   for (  AbstractNode n : result) {
-    if (n instanceof User) {
-      users.add((User)n);
+    if (n instanceof Principal) {
+      users.add((Principal)n);
     }
   }
 return users;
@@ -19,8 +19,8 @@ if (parameters[0] instanceof String) {
 String userName=(String)parameters[0];
 searchAttrs.add(Search.andExactName(userName));
 List<AbstractNode> usersFound=(List<AbstractNode>)searchNode.execute(null,false,false,searchAttrs);
-if ((usersFound != null) && (usersFound.size() > 0) && (usersFound.get(0) instanceof User)) {
-  return (User)usersFound.get(0);
+if ((usersFound != null) && (usersFound.size() > 0) && (usersFound.get(0) instanceof Principal)) {
+  return (Principal)usersFound.get(0);
 }
  else {
   logger.log(Level.FINE,"No user with name {0} found.",userName);
@@ -33,8 +33,8 @@ String userName=(String)parameters[0];
 AbstractNode topNode=(AbstractNode)parameters[1];
 searchAttrs.add(Search.andExactName(userName));
 List<AbstractNode> usersFound=(List<AbstractNode>)searchNode.execute(topNode,false,false,searchAttrs);
-if ((usersFound != null) && (usersFound.size() > 0) && (usersFound.get(0) instanceof User)) {
-return (User)usersFound.get(0);
+if ((usersFound != null) && (usersFound.size() > 0) && (usersFound.get(0) instanceof Principal)) {
+return (Principal)usersFound.get(0);
 }
  else {
 logger.log(Level.FINE,"No user with name {0} found.",userName);

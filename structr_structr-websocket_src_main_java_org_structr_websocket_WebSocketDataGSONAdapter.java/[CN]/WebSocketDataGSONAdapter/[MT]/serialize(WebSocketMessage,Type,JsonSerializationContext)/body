@@ -40,18 +40,26 @@
   if (src.getPage() > 0) {
     root.add("page",new JsonPrimitive(src.getPage()));
   }
+  JsonArray nodesWithChildren=new JsonArray();
+  Set<String> nwc=src.getNodesWithChildren();
+  if ((nwc != null) && !src.getNodesWithChildren().isEmpty()) {
+    for (    String nodeId : nwc) {
+      nodesWithChildren.add(new JsonPrimitive(nodeId));
+    }
+    root.add("nodesWithChildren",nodesWithChildren);
+  }
   root.add("sessionValid",new JsonPrimitive(src.isSessionValid()));
   if ((src.getGraphObject() != null) && !src.getModifiedProperties().isEmpty()) {
     GraphObject graphObject=src.getGraphObject();
     for (    String modifiedKey : src.getModifiedProperties()) {
       Object newValue=graphObject.getProperty(modifiedKey);
       if (newValue != null) {
-        src.getData().put(modifiedKey,newValue.toString());
+        src.getNodeData().put(modifiedKey,newValue);
       }
     }
   }
-  if (src.getData() != null) {
-    for (    Entry<String,Object> entry : src.getData().entrySet()) {
+  if (src.getNodeData() != null) {
+    for (    Entry<String,Object> entry : src.getNodeData().entrySet()) {
       Object value=entry.getValue();
       String key=entry.getKey();
       if (value != null) {

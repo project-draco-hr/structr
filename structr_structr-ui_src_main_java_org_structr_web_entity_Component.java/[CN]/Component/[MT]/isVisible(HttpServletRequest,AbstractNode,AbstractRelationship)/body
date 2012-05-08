@@ -1,0 +1,22 @@
+{
+  if (request == null) {
+    return true;
+  }
+  if (node instanceof Component) {
+    String structrClass=node.getStringProperty(Component.UiKey.structrclass);
+    String componentId=node.getStringProperty(AbstractNode.Key.uuid);
+    if (structrClass != null) {
+      String singleClass=CaseHelper.toUnderscore(structrClass,false);
+      String listClass=CaseHelper.toUnderscore(structrClass,true);
+      if (request.getAttribute(singleClass) != null) {
+        if (request.getAttribute(componentId) != null) {
+          return true;
+        }
+      }
+ else       if (request.getAttribute(listClass) != null) {
+        return true;
+      }
+    }
+  }
+  return false;
+}

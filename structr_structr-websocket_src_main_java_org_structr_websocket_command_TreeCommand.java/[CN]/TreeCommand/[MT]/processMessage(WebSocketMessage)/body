@@ -1,5 +1,5 @@
 {
-  final SecurityContext securityContext=SecurityContext.getSuperUserInstance();
+  final SecurityContext securityContext=getWebSocket().getSecurityContext();
   AbstractNode rootNode=getNode(webSocketData.getId());
   TraversalDescription localDesc=Traversal.description().depthFirst().uniqueness(Uniqueness.NODE_GLOBAL).expand(new ResourceExpander(rootNode.getStringProperty(AbstractNode.Key.uuid.name())));
   final NodeFactory factory=new NodeFactory(securityContext);
@@ -28,7 +28,7 @@
           }
  else {
             root.addChild(newTreeNode);
-            logger.log(Level.INFO,"Added {0} to root",newTreeNode);
+            logger.log(Level.FINE,"Added {0} to root",newTreeNode);
           }
           return Evaluation.INCLUDE_AND_CONTINUE;
         }
@@ -41,7 +41,6 @@
   }
 );
   for (  Node node : localDesc.traverse(rootNode.getNode()).nodes()) {
-    System.out.println(node.getProperty("type") + "[" + node.getProperty("uuid")+ "]: "+ node.getProperty("name"));
   }
   webSocketData.setResultTree(root);
   getWebSocket().send(webSocketData,true);

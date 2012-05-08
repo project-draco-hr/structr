@@ -1,19 +1,36 @@
 {
+  messageStack=messageStackMap.get(transactionKey);
+  AbstractRelationship relationship;
   if (graphObject instanceof AbstractRelationship) {
-    return relationshipCreated(securityContext,transactionKey,errorBuffer,(AbstractRelationship)graphObject);
+    relationship=(AbstractRelationship)graphObject;
+    if (relationship.getRelType().equals(RelType.CONTAINS) || relationship.getRelType().equals(RelType.MEMBER_OF)) {
+      AbstractNode startNode=relationship.getStartNode();
+      AbstractNode endNode=relationship.getEndNode();
+      WebSocketMessage message=new WebSocketMessage();
+      message.setCommand("ADD");
+      message.setGraphObject(relationship);
+      message.setId(startNode.getStringProperty("uuid"));
+      message.setResult(Arrays.asList(new GraphObject[]{endNode}));
+      String resourceId=relationship.getStringProperty("resourceId");
+      if (resourceId != null) {
+        Map<String,Object> props=new LinkedHashMap<String,Object>();
+        props.put("resourceId",resourceId);
+        message.setNodeData(props);
+      }
+      messageStack.add(message);
+      logger.log(Level.FINE,"Relationship created: {0}({1} -> {2}{3}",new Object[]{startNode.getId(),startNode.getStringProperty(AbstractNode.Key.uuid),endNode.getStringProperty(AbstractNode.Key.uuid)});
+    }
+    return false;
   }
  else {
-    WebSocketMessage message=messageMap.get(transactionKey);
-    if (message != null) {
-      message.setCommand("CREATE");
-      message.setGraphObject(graphObject);
-      List<GraphObject> list=new LinkedList<GraphObject>();
-      list.add(graphObject);
-      message.setResult(list);
-    }
- else {
-      logger.log(Level.WARNING,"No message found for transaction key {0}",transactionKey);
-    }
+    WebSocketMessage message=new WebSocketMessage();
+    message.setCommand("CREATE");
+    message.setGraphObject(graphObject);
+    List<GraphObject> list=new LinkedList<GraphObject>();
+    list.add(graphObject);
+    message.setResult(list);
+    messageStack.add(message);
+    logger.log(Level.FINE,"Node created: {0}",((AbstractNode)graphObject).getStringProperty(AbstractNode.Key.uuid));
     return false;
   }
 }

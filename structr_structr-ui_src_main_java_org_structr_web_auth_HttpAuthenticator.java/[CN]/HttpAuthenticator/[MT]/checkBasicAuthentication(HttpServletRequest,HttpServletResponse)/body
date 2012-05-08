@@ -1,0 +1,24 @@
+{
+  Principal user;
+  String auth=request.getHeader("Authorization");
+  if (auth == null) {
+    sendBasicAuthResponse(response);
+    return null;
+  }
+  if (!auth.toUpperCase().startsWith("BASIC ")) {
+    sendBasicAuthResponse(response);
+    return null;
+  }
+  String[] userAndPass=getUsernameAndPassword(request);
+  try {
+    if ((userAndPass == null) || (userAndPass.length != 2)) {
+      writeUnauthorized(response);
+    }
+    user=AuthHelper.getUserForUsernameAndPassword(SecurityContext.getSuperUserInstance(),userAndPass[0],userAndPass[1]);
+  }
+ catch (  Exception ex) {
+    sendBasicAuthResponse(response);
+    return null;
+  }
+  return user;
+}

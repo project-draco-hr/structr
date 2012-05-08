@@ -1,19 +1,20 @@
 {
   SecurityContext securityContext=SecurityContext.getSuperUserInstance();
-  String username=(String)webSocketData.getData().get("username");
-  String password=(String)webSocketData.getData().get("password");
-  User user=null;
+  String username=(String)webSocketData.getNodeData().get("username");
+  String password=(String)webSocketData.getNodeData().get("password");
+  Principal user=null;
   if ((username != null) && (password != null)) {
     try {
       StructrWebSocket socket=this.getWebSocket();
       Authenticator auth=(Authenticator)Services.command(securityContext,AuthenticatorCommand.class).execute(socket.getConfig());
-      user=auth.doLogin(securityContext,socket.getRequest(),username,password);
+      user=auth.doLogin(securityContext,socket.getRequest(),null,username,password);
       if (user != null) {
         String token=StructrWebSocket.secureRandomString();
-        user.setProperty(User.Key.sessionId,token);
-        webSocketData.getData().clear();
+        user.setProperty(Principal.Key.sessionId,token);
+        webSocketData.getNodeData().clear();
         webSocketData.setToken(token);
-        this.getWebSocket().setAuthenticated(token);
+        webSocketData.getNodeData().put("username",user.getStringProperty(AbstractNode.Key.name));
+        this.getWebSocket().setAuthenticated(token,user);
         this.getWebSocket().send(webSocketData,false);
       }
     }

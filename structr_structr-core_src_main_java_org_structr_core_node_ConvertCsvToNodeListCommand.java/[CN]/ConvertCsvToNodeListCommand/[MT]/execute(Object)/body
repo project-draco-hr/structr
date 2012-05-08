@@ -7,7 +7,7 @@
   Class targetClass=null;
   CsvFile csvFileNode=null;
   String filePath=null;
-  User user=null;
+  Principal user=null;
   for (  Object o : parameters) {
     if (o instanceof CsvFile) {
       csvFileNode=(CsvFile)o;
@@ -24,8 +24,8 @@
     if (o instanceof Class) {
       targetClass=(Class)o;
     }
-    if (o instanceof User) {
-      user=(User)o;
+    if (o instanceof Principal) {
+      user=(Principal)o;
     }
   }
   try {
@@ -49,7 +49,7 @@
       String v=entry.getValue();
       System.out.println("v: " + v + ", i: "+ i);
     }
-    final User userCopy=user;
+    final Principal userCopy=user;
     final AbstractNode sourceNodeCopy=csvFileNode;
     final Command transactionCommand=Services.command(securityContext,TransactionCommand.class);
     final Command createNode=Services.command(securityContext,CreateNodeCommand.class);
@@ -57,7 +57,7 @@
     final NodeList<AbstractNode> nodeListNode=(NodeList<AbstractNode>)transactionCommand.execute(new StructrTransaction(){
       @Override public Object execute() throws FrameworkException {
         NodeList<AbstractNode> result=(NodeList)createNode.execute(userCopy,new NodeAttribute(AbstractNode.Key.type.name(),NodeList.class.getSimpleName()),new NodeAttribute(AbstractNode.Key.name.name(),sourceNodeCopy.getName() + " List"));
-        createRel.execute(sourceNodeCopy,result,RelType.HAS_CHILD);
+        createRel.execute(sourceNodeCopy,result,RelType.CONTAINS);
         return result;
       }
     }

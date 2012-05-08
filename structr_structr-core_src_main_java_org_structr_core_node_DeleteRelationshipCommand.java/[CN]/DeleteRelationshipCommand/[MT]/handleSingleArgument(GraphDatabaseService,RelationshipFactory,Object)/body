@@ -1,0 +1,40 @@
+{
+  AbstractRelationship rel=null;
+  if (argument instanceof Long) {
+    long id=((Long)argument).longValue();
+    try {
+      rel=relationshipFactory.createRelationship(securityContext,(Relationship)graphDb.getRelationshipById(id));
+    }
+ catch (    NotFoundException nfe) {
+      logger.log(Level.SEVERE,"Relationship {0} not found, cannot delete.",id);
+    }
+  }
+ else   if (argument instanceof AbstractRelationship) {
+    rel=(AbstractRelationship)argument;
+  }
+ else   if (argument instanceof Relationship) {
+    rel=relationshipFactory.createRelationship(securityContext,(Relationship)argument);
+  }
+  if (rel != null) {
+    if (rel.getStringProperty(AbstractRelationship.Key.uuid) == null) {
+      logger.log(Level.WARNING,"Will not delete relationship which has no UUID");
+      return null;
+    }
+    final Relationship relToDelete=rel.getRelationship();
+    final Command transactionCommand=Services.command(securityContext,TransactionCommand.class);
+    transactionCommand.execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        try {
+          Services.command(securityContext,RemoveRelationshipFromIndex.class).execute(relToDelete);
+          relToDelete.delete();
+        }
+ catch (        IllegalStateException ise) {
+          logger.log(Level.WARNING,ise.getMessage());
+        }
+        return null;
+      }
+    }
+);
+  }
+  return null;
+}

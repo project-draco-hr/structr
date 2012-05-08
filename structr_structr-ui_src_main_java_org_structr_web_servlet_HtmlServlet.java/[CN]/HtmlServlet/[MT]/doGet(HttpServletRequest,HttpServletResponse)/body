@@ -1,75 +1,73 @@
 {
-  SecurityContext securityContext=SecurityContext.getSuperUserInstance();
+  String path=PathHelper.clean(request.getPathInfo());
+  logger.log(Level.INFO,"Path info {0}",path);
+  String[] urlParts=PathHelper.getParts(path);
+  String searchFor=null;
+  if (urlParts.length > 1) {
+    searchFor=StringUtils.substringBefore(urlParts[1],"?");
+  }
+  String[] pathParts=PathHelper.getParts(path);
+  String name=PathHelper.getName(pathParts[0]);
+  List<NodeAttribute> attrs=new LinkedList<NodeAttribute>();
+  Map<String,String[]> parameterMap=request.getParameterMap();
+  if ((parameterMap != null) && (parameterMap.size() > 0)) {
+    attrs=convertToNodeAttributes(parameterMap);
+  }
   edit=false;
-  if (request.getParameter("create") != null) {
-    try {
-      createTestStructure();
-    }
- catch (    FrameworkException fex) {
-    }
-    response.setStatus(HttpServletResponse.SC_CREATED);
-    return;
-  }
-  if (request.getParameter("editor") != null) {
-    try {
-      createEditorStructure();
-    }
- catch (    FrameworkException fex) {
-    }
-    response.setStatus(HttpServletResponse.SC_CREATED);
-    return;
-  }
+  tidy=false;
   if (request.getParameter("edit") != null) {
     edit=true;
   }
+  if (request.getParameter("tidy") != null) {
+    tidy=true;
+  }
+  for (int i=1; i < pathParts.length; i++) {
+    String[] parts=pathParts[i].split("[/]+");
+    for (int j=0; j < parts.length; j++) {
+      request.setAttribute(parts[j],j);
+    }
+  }
   try {
+    SecurityContext securityContext=SecurityContext.getInstance(this.getServletConfig(),request,response,AccessMode.Frontend);
     request.setCharacterEncoding("UTF-8");
     DecimalFormat decimalFormat=new DecimalFormat("0.000000000",DecimalFormatSymbols.getInstance(Locale.ENGLISH));
     double start=System.nanoTime();
+    AbstractNode node=findEntryPoint(name);
     Resource resource=null;
     org.structr.core.entity.File file=null;
-    Image image=null;
-    String path=request.getPathInfo();
-    logger.log(Level.INFO,"Path info {0}",path);
-    String name=path.substring(path.lastIndexOf("/") + 1);
-    if (name.length() > 0) {
-      logger.log(Level.INFO,"File name {0}",name);
-      List<SearchAttribute> searchAttrs=new LinkedList<SearchAttribute>();
-      searchAttrs.add(Search.andExactName(name));
-      SearchAttributeGroup group=new SearchAttributeGroup(SearchOperator.AND);
-      group.add(Search.orExactType(Resource.class.getSimpleName()));
-      group.add(Search.orExactType(org.structr.core.entity.File.class.getSimpleName()));
-      group.add(Search.orExactType(Image.class.getSimpleName()));
-      searchAttrs.add(group);
-      List<AbstractNode> results=(List<AbstractNode>)Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class).execute(null,false,false,searchAttrs);
-      logger.log(Level.INFO,"{0} results",results.size());
-      if (!results.isEmpty()) {
-        AbstractNode node=results.get(0);
-        if (node instanceof Resource) {
-          resource=(Resource)node;
-        }
- else         if (node instanceof org.structr.core.entity.File) {
-          file=(org.structr.core.entity.File)node;
-        }
-      }
+    if (node instanceof Resource) {
+      resource=(Resource)node;
     }
-    if (resource != null) {
-      String content=getContent(securityContext,resource);
+ else     if (node instanceof org.structr.core.entity.File) {
+      file=(org.structr.core.entity.File)node;
+    }
+    if ((resource != null) && securityContext.isVisible(resource)) {
+      String uuid=resource.getStringProperty(AbstractNode.Key.uuid);
+      final StringBuilder buffer=new StringBuilder(10000);
+      getContent(request,uuid,null,buffer,resource,resource,0,false,searchFor,attrs,null,null);
+      String content=buffer.toString();
       double end=System.nanoTime();
       logger.log(Level.INFO,"Content collected in {0} seconds",decimalFormat.format((end - start) / 1000000000.0));
-      String contentType=resource.getContentType();
+      String contentType=resource.getStringProperty(Resource.UiKey.contentType);
       if (contentType != null) {
         response.setContentType(contentType);
       }
  else {
         response.setContentType("text/html; charset=utf-8");
+        response.getWriter().append("<!DOCTYPE html>\n");
       }
-      response.getWriter().append(content);
-      response.getWriter().flush();
-      response.getWriter().close();
-      response.setStatus(HttpServletResponse.SC_OK);
+      if (tidy) {
+        StringWriter tidyOutput=new StringWriter();
+        Tidy tidy=new Tidy();
+        Properties tidyProps=new Properties();
+        tidyProps.setProperty("indent","auto");
+        tidy.getConfiguration().addProps(tidyProps);
+        tidy.parse(new StringReader(content),tidyOutput);
+        content=tidyOutput.toString();
+      }
+      HttpAuthenticator.writeContent(content,response);
     }
- else     if (file != null) {
+ else     if ((file != null) && securityContext.isVisible(file)) {
       InputStream in=file.getInputStream();
       OutputStream out=response.getOutputStream();
       String contentType=file.getContentType();
@@ -84,8 +82,16 @@
       out.close();
       response.setStatus(HttpServletResponse.SC_OK);
     }
+ else {
+      if (response.getStatus() == HttpServletResponse.SC_UNAUTHORIZED) {
+        HttpAuthenticator.writeUnauthorized(response);
+      }
+ else {
+        HttpAuthenticator.writeNotFound(response);
+      }
+    }
   }
  catch (  Throwable t) {
-    logger.log(Level.WARNING,"Exception while processing request",t);
+    HttpAuthenticator.writeInternalServerError(response);
   }
 }

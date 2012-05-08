@@ -1,0 +1,30 @@
+{
+  final GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
+  final NodeFactory nodeFactory=(NodeFactory)arguments.get("nodeFactory");
+  if (graphDb != null) {
+    final Command transactionCommand=Services.command(securityContext,TransactionCommand.class);
+    final Command delNode=Services.command(securityContext,DeleteNodeCommand.class);
+    transactionCommand.execute(new BatchTransaction(){
+      @Override public Object execute(      Transaction tx) throws FrameworkException {
+        long nodes=0L;
+        List<AbstractNode> allNodes=(List<AbstractNode>)nodeFactory.createNodes(securityContext,GlobalGraphOperations.at(graphDb).getAllNodes());
+        for (        AbstractNode node : allNodes) {
+          if (node.getStringProperty(AbstractNode.Key.uuid) != null) {
+            delNode.execute(node);
+            if (nodes % 100 == 0) {
+              logger.log(Level.INFO,"Deleted {0} nodes, committing results to database.",nodes);
+              tx.success();
+              tx.finish();
+              tx=graphDb.beginTx();
+              logger.log(Level.FINE,"######## committed ########",nodes);
+            }
+            nodes++;
+          }
+        }
+        return null;
+      }
+    }
+);
+  }
+  return null;
+}

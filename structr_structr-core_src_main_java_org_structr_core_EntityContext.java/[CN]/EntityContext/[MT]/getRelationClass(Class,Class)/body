@@ -5,5 +5,12 @@
     relation=getRelationClassMapForType(localType).get(destType);
     localType=localType.getSuperclass();
   }
+  if (relation == null) {
+    localType=destType;
+    while ((relation == null) && !localType.equals(Object.class)) {
+      relation=getRelationClassMapForType(sourceType).get(localType);
+      localType=localType.getSuperclass();
+    }
+  }
   return relation;
 }

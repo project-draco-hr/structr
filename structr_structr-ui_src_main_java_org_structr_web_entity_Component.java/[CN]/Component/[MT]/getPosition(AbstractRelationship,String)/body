@@ -1,0 +1,36 @@
+{
+  long position=0;
+  try {
+    Object prop=null;
+    final String key;
+    if (relationship.getProperty("*") != null) {
+      prop=relationship.getProperty("*");
+      key="*";
+    }
+ else     if (relationship.getProperty(resourceId) != null) {
+      prop=relationship.getLongProperty(resourceId);
+      key=resourceId;
+    }
+ else {
+      key=null;
+    }
+    if ((key != null) && (prop != null)) {
+      if (prop instanceof Long) {
+        position=(Long)prop;
+      }
+ else       if (prop instanceof Integer) {
+        position=((Integer)prop).longValue();
+      }
+ else       if (prop instanceof String) {
+        position=Long.parseLong((String)prop);
+      }
+ else {
+        throw new java.lang.IllegalArgumentException("Expected Long, Integer or String");
+      }
+    }
+  }
+ catch (  Throwable t) {
+    logger.log(Level.SEVERE,"While reading property " + resourceId,t);
+  }
+  return position;
+}

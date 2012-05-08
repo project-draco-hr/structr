@@ -1,18 +1,16 @@
 {
+  RelationshipFactory relationshipFactory=(RelationshipFactory)arguments.get("relationshipFactory");
   GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
   Object ret=null;
   if (graphDb != null) {
 switch (parameters.length) {
 case 0:
-      setExitCode(exitCode.FAILURE);
-    String errorMsg="No arguments supplied";
-  setErrorMessage(errorMsg);
-throw new UnsupportedArgumentError(errorMsg);
+      throw new UnsupportedArgumentError("No arguments supplied");
 case 1:
-return (handleSingleArgument(graphDb,parameters[0]));
+    return (handleSingleArgument(graphDb,relationshipFactory,parameters[0]));
+default :
+  throw new UnsupportedArgumentError("Too many arguments supplied");
 }
 }
-setExitCode(exitCode.FAILURE);
-setErrorMessage("Too many arguments, or database was null");
 return ret;
 }

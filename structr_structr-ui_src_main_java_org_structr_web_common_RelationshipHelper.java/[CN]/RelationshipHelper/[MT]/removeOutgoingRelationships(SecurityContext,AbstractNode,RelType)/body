@@ -1,0 +1,17 @@
+{
+  final Command delRel=Services.command(securityContext,DeleteRelationshipCommand.class);
+  StructrTransaction transaction=new StructrTransaction(){
+    @Override public Object execute() throws FrameworkException {
+      for (      AbstractRelationship out : node.getOutgoingRelationships()) {
+        RelationshipType origRelType=out.getRelType();
+        if (!relType.name().equals(origRelType.name())) {
+          continue;
+        }
+        delRel.execute(out);
+      }
+      return null;
+    }
+  }
+;
+  Services.command(securityContext,TransactionCommand.class).execute(transaction);
+}

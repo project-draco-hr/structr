@@ -3,7 +3,7 @@
   ZipFile zipFile=new ZipFile(modulePath);
   Set<String> libraries=module.getLibraries();
   for (  String library : libraries) {
-    String destinationPath=createResourceFileName(servletContext,"WEB-INF/lib",library);
+    String destinationPath=createResourceFileName(servletContextRealRootPath,"WEB-INF/lib",library);
     try {
       ZipEntry entry=zipFile.getEntry(library);
       InputStream inputStream=zipFile.getInputStream(entry);
@@ -19,7 +19,7 @@
     logger.log(Level.FINE,"Deploying class {0} ",className);
     try {
       String sourcePath=className.replaceAll("[\\.]+","/").concat(".class");
-      String destinationFile=createResourceFileName(servletContext,"WEB-INF/classes",sourcePath);
+      String destinationFile=createResourceFileName(servletContextRealRootPath,"WEB-INF/classes",sourcePath);
       logger.log(Level.FINE,"sourcePath: {0}, destinationFile: {1}",new Object[]{sourcePath,destinationFile});
       ZipEntry entry=zipFile.getEntry(sourcePath);
       if (entry != null) {
@@ -42,7 +42,7 @@
   for (  final String propertiesName : properties) {
     try {
       String sourcePath=propertiesName.replaceAll("[\\.]+","/").concat(".properties");
-      String destinationFile=createResourceFileName(servletContext,"WEB-INF/classes",sourcePath);
+      String destinationFile=createResourceFileName(servletContextRealRootPath,"WEB-INF/classes",sourcePath);
       ZipEntry entry=zipFile.getEntry(sourcePath);
       if (entry != null) {
         InputStream inputStream=zipFile.getInputStream(entry);
@@ -102,7 +102,7 @@
     }
     Set<String> resources=module.getResources();
     for (    String resource : resources) {
-      String destinationPath=createResourceFileName(servletContext,resource);
+      String destinationPath=createResourceFileName(servletContextRealRootPath,resource);
       try {
         ZipEntry entry=zipFile.getEntry(resource);
         InputStream inputStream=zipFile.getInputStream(entry);

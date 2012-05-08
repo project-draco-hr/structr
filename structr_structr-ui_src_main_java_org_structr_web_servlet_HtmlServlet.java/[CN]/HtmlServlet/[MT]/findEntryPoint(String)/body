@@ -1,0 +1,18 @@
+{
+  if (name.length() > 0) {
+    logger.log(Level.FINE,"File name {0}",name);
+    List<SearchAttribute> searchAttrs=new LinkedList<SearchAttribute>();
+    searchAttrs.add(Search.andExactName(name));
+    SearchAttributeGroup group=new SearchAttributeGroup(SearchOperator.AND);
+    group.add(Search.orExactType(Resource.class.getSimpleName()));
+    group.add(Search.orExactType(org.structr.core.entity.File.class.getSimpleName()));
+    group.add(Search.orExactType(Image.class.getSimpleName()));
+    searchAttrs.add(group);
+    List<AbstractNode> results=(List<AbstractNode>)Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class).execute(null,false,false,searchAttrs);
+    logger.log(Level.FINE,"{0} results",results.size());
+    if (!results.isEmpty()) {
+      return results.get(0);
+    }
+  }
+  return null;
+}

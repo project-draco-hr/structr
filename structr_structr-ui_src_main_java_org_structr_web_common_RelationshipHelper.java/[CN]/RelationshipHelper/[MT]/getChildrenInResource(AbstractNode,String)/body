@@ -1,0 +1,17 @@
+{
+  Set<String> nodesWithChildren=new HashSet<String>();
+  List<AbstractRelationship> childRels=parentNode.getOutgoingRelationships(RelType.CONTAINS);
+  for (  AbstractRelationship childRel : childRels) {
+    Long childPos=null;
+    if (childRel.getLongProperty(resourceId) != null) {
+      childPos=childRel.getLongProperty(resourceId);
+    }
+ else {
+      childPos=childRel.getLongProperty("*");
+    }
+    if (childPos != null) {
+      nodesWithChildren.add(parentNode.getUuid());
+    }
+  }
+  return nodesWithChildren;
+}

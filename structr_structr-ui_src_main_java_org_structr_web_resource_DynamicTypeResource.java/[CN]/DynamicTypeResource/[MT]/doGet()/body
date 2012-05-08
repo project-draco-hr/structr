@@ -1,0 +1,22 @@
+{
+  List<GraphObject> uuidResults=null;
+  if (uuidResource != null) {
+    uuidResults=(List<GraphObject>)uuidResource.doGet();
+  }
+  List<SearchAttribute> searchAttributes=getSearchAttributes(rawType);
+  hasSearchableAttributes(rawType,request,searchAttributes);
+  List<GraphObject> results=getComponents(securityContext,searchAttributes);
+  if (!results.isEmpty()) {
+    if (uuidResults != null) {
+      results=ListUtils.intersection(results,uuidResults);
+    }
+    for (    DynamicTypeResource res : nestedResources) {
+      if (res.doGet().isEmpty()) {
+        throw new NotFoundException();
+      }
+    }
+    return results;
+  }
+  parentResults=true;
+  return super.doGet();
+}

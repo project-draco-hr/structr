@@ -1,8 +1,16 @@
 {
+  Thread t=Thread.currentThread();
+  if (!transactionKeyMap.containsKey(t)) {
+    return -1L;
+  }
+  long transactionKey=transactionKeyMap.get(Thread.currentThread());
+  if (!Services.isReady(NodeService.class)) {
+    logger.log(Level.WARNING,"Node service is not ready yet.");
+    return transactionKey;
+  }
   SecurityContext securityContext=securityContextMap.get(Thread.currentThread());
   Command indexNodeCommand=Services.command(securityContext,IndexNodeCommand.class);
   Command indexRelationshipCommand=Services.command(securityContext,IndexRelationshipCommand.class);
-  long transactionKey=transactionKeyMap.get(Thread.currentThread());
   try {
     ErrorBuffer errorBuffer=new ErrorBuffer();
     boolean hasError=false;
@@ -14,7 +22,6 @@
     Set<AbstractNode> createdNodes=new LinkedHashSet<AbstractNode>();
     Set<AbstractRelationship> modifiedRels=new LinkedHashSet<AbstractRelationship>();
     Set<AbstractRelationship> createdRels=new LinkedHashSet<AbstractRelationship>();
-    Set<AbstractRelationship> deletedRels=new LinkedHashSet<AbstractRelationship>();
     begin(securityContext,transactionKey,errorBuffer);
     for (    PropertyEntry<Node> entry : data.removedNodeProperties()) {
       Node node=entry.entity();
@@ -47,7 +54,6 @@
     for (    Relationship rel : data.deletedRelationships()) {
       AbstractRelationship relationship=relFactory.createRelationship(securityContext,rel);
       hasError|=graphObjectDeleted(securityContext,transactionKey,errorBuffer,relationship,removedRelProperties.get(rel));
-      deletedRels.add(relationship);
     }
     for (    Node node : data.deletedNodes()) {
       hasError|=graphObjectDeleted(securityContext,transactionKey,errorBuffer,null,removedNodeProperties.get(node));

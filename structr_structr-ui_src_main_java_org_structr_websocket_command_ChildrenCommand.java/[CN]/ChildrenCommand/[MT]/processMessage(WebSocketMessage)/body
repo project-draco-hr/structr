@@ -1,0 +1,30 @@
+{
+  String resourceId=(String)webSocketData.getNodeData().get("resourceId");
+  String componentId=(String)webSocketData.getNodeData().get("componentId");
+  AbstractNode node=getNode(webSocketData.getId());
+  List<AbstractRelationship> rels=node.getOutgoingRelationships(RelType.CONTAINS);
+  Map<Long,GraphObject> sortMap=new TreeMap<Long,GraphObject>();
+  Set<String> nodesWithChildren=new HashSet<String>();
+  for (  AbstractRelationship rel : rels) {
+    Long pos=null;
+    if (rel.getLongProperty(resourceId) != null) {
+      pos=rel.getLongProperty(resourceId);
+    }
+ else {
+      pos=rel.getLongProperty("*");
+    }
+    String relCompId=rel.getStringProperty("componentId");
+    if (pos != null) {
+      AbstractNode endNode=rel.getEndNode();
+      if (componentId == null || (!endNode.getType().equals(Content.class.getSimpleName()) || (relCompId != null && relCompId.equals(componentId)))) {
+        nodesWithChildren.addAll(RelationshipHelper.getChildrenInResource(endNode,resourceId));
+        sortMap.put(pos,endNode);
+      }
+    }
+  }
+  List<GraphObject> result=new ArrayList<GraphObject>(sortMap.values());
+  webSocketData.setView(PropertyView.Ui);
+  webSocketData.setResult(result);
+  webSocketData.setNodesWithChildren(nodesWithChildren);
+  getWebSocket().send(webSocketData,true);
+}

@@ -1,11 +1,13 @@
 {
-  WebSocketMessage message=messageMap.get(transactionKey);
-  if (message != null) {
-    broadcast(message);
+  messageStack=messageStackMap.get(transactionKey);
+  if (messageStack != null) {
+    for (    WebSocketMessage message : messageStack) {
+      broadcast(message);
+    }
   }
  else {
     logger.log(Level.WARNING,"No message found for transaction key {0}",transactionKey);
   }
-  messageMap.remove(transactionKey);
+  messageStackMap.remove(transactionKey);
   return false;
 }

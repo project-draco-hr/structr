@@ -1,0 +1,27 @@
+{
+  List<SearchAttribute> searchAttrs=new LinkedList<SearchAttribute>();
+  for (  NodeAttribute attr : attrs) {
+    String key=attr.getKey();
+    String value=attr.getValue().toString();
+    if (!key.equals(PropertyView.Html.concat("data"))) {
+      searchAttrs.add(Search.andExactProperty(key,value));
+    }
+  }
+  List<AbstractNode> nodes=(List<AbstractNode>)searchNode.execute(null,false,false,searchAttrs);
+  if (nodes.size() > 1) {
+    logger.log(Level.WARNING,"More than one node found.");
+  }
+  if (nodes.isEmpty()) {
+    return null;
+  }
+  for (  AbstractNode foundNode : nodes) {
+    String foundNodePath=foundNode.getStringProperty(HtmlElement.UiKey.path);
+    logger.log(Level.INFO,"Found a node with path {0}",foundNodePath);
+    if (foundNodePath.equals(nodePath)) {
+      logger.log(Level.INFO,"MATCH!");
+      return foundNode;
+    }
+  }
+  logger.log(Level.INFO,"Does not match expected path {0}",nodePath);
+  return null;
+}

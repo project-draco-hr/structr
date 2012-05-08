@@ -2,7 +2,8 @@
   WebSocketMessage webSocketData=new WebSocketMessage();
   if (json instanceof JsonObject) {
     JsonObject root=json.getAsJsonObject();
-    JsonObject data=root.getAsJsonObject("data");
+    JsonObject nodeData=root.getAsJsonObject("data");
+    JsonObject relData=root.getAsJsonObject("relData");
     if (root.has("command")) {
       webSocketData.setCommand(root.getAsJsonPrimitive("command").getAsString());
     }
@@ -36,9 +37,14 @@
     if (root.has("page")) {
       webSocketData.setPage(root.getAsJsonPrimitive("page").getAsInt());
     }
-    if (data != null) {
-      for (      Entry<String,JsonElement> entry : data.entrySet()) {
-        webSocketData.setData(entry.getKey(),entry.getValue().getAsString());
+    if (nodeData != null) {
+      for (      Entry<String,JsonElement> entry : nodeData.entrySet()) {
+        webSocketData.setNodeData(entry.getKey(),entry.getValue().getAsString());
+      }
+    }
+    if (relData != null) {
+      for (      Entry<String,JsonElement> entry : relData.entrySet()) {
+        webSocketData.setRelData(entry.getKey(),entry.getValue().getAsString());
       }
     }
   }

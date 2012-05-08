@@ -1,10 +1,11 @@
 {
-  WebSocketMessage message=messageMap.get(transactionKey);
-  if (message != null) {
-    message.getModifiedProperties().add(key);
-  }
- else {
-    logger.log(Level.WARNING,"No message found for transaction key {0}",transactionKey);
-  }
+  messageStack=messageStackMap.get(transactionKey);
+  WebSocketMessage message=new WebSocketMessage();
+  message.setCommand("UPDATE");
+  String uuid=graphObject.getStringProperty(AbstractNode.Key.uuid.name());
+  message.setId(uuid);
+  message.setGraphObject(graphObject);
+  message.getModifiedProperties().add(key);
+  messageStack.add(message);
   return false;
 }

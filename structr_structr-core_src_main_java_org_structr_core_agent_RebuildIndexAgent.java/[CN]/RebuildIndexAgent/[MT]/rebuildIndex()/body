@@ -1,18 +1,29 @@
 {
   final SecurityContext securityContext=SecurityContext.getSuperUserInstance();
   Command transactionCommand=Services.command(securityContext,TransactionCommand.class);
-  Long nodes=(Long)transactionCommand.execute(new StructrTransaction(){
-    @Override public Object execute() throws FrameworkException {
+  Command graphDbCommand=Services.command(securityContext,GraphDatabaseCommand.class);
+  final GraphDatabaseService graphDb=(GraphDatabaseService)graphDbCommand.execute();
+  Long noOfNodes=(Long)transactionCommand.execute(new BatchTransaction(){
+    @Override public Object execute(    Transaction tx) throws FrameworkException {
       long nodes=0;
       Command indexer=Services.command(securityContext,IndexNodeCommand.class);
+      logger.log(Level.INFO,"Get all nodes ...");
       List<AbstractNode> allNodes=(List<AbstractNode>)Services.command(securityContext,GetAllNodes.class).execute();
+      logger.log(Level.INFO,"... done. Start indexing {0} nodes ...",allNodes.size());
       for (      AbstractNode s : allNodes) {
         indexer.execute(s);
         nodes++;
+        if (nodes % 100 == 0) {
+          logger.log(Level.INFO,"Indexed {0} nodes, committing results to database.",nodes);
+          tx.success();
+          tx.finish();
+          tx=graphDb.beginTx();
+          logger.log(Level.FINE,"######## committed ########",nodes);
+        }
       }
       return nodes;
     }
   }
 );
-  return nodes;
+  return noOfNodes;
 }

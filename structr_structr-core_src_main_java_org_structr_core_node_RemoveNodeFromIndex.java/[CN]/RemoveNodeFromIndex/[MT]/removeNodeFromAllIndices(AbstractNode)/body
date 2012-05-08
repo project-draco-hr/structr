@@ -1,5 +1,10 @@
 {
+  if (node.getStringProperty(AbstractNode.Key.uuid) == null) {
+    logger.log(Level.WARNING,"Will not remove node from indices which has no UUID");
+    return;
+  }
   for (  Enum indexName : (NodeIndex[])arguments.get("indices")) {
-    indices.get(indexName).remove(node.getNode());
+    Index<Node> index=indices.get(indexName);
+    index.remove(node.getNode());
   }
 }

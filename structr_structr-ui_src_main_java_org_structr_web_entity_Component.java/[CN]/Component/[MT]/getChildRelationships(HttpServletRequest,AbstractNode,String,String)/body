@@ -1,0 +1,31 @@
+{
+  List<AbstractRelationship> rels=new LinkedList<AbstractRelationship>();
+  for (  AbstractRelationship abstractRelationship : node.getOutgoingRelationships(RelType.CONTAINS)) {
+    Relationship rel=abstractRelationship.getRelationship();
+    if ((resourceId == null) || ((resourceId != null) && rel.hasProperty(resourceId)) || rel.hasProperty("*")) {
+      AbstractNode endNode=abstractRelationship.getEndNode();
+      if ((endNode instanceof Component) && !isVisible(request,endNode,abstractRelationship)) {
+        continue;
+      }
+      if ((componentId != null) && ((endNode instanceof Content) || (endNode instanceof Component))) {
+        if (componentId.equals(abstractRelationship.getStringProperty(Key.componentId.name()))) {
+          rels.add(abstractRelationship);
+        }
+      }
+ else {
+        rels.add(abstractRelationship);
+      }
+    }
+  }
+  if (resourceId != null) {
+    Collections.sort(rels,new Comparator<AbstractRelationship>(){
+      @Override public int compare(      AbstractRelationship o1,      AbstractRelationship o2){
+        Long pos1=getPosition(o1,resourceId);
+        Long pos2=getPosition(o2,resourceId);
+        return pos1.compareTo(pos2);
+      }
+    }
+);
+  }
+  return rels;
+}

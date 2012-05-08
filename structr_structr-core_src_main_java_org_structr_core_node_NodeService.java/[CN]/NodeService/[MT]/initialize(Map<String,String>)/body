@@ -1,0 +1,69 @@
+{
+  String dbPath=Services.getDatabasePath();
+  try {
+    logger.log(Level.INFO,"Initializing database ({0}) ...",dbPath);
+    if (graphDb != null) {
+      logger.log(Level.INFO,"Database already running ({0}) ...",dbPath);
+      return;
+    }
+    try {
+      graphDb=new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(dbPath).loadPropertiesFromFile(dbPath + "/neo4j.conf").newGraphDatabase();
+    }
+ catch (    Throwable t) {
+      logger.log(Level.INFO,"Database config {0}/neo4j.conf not found",dbPath);
+      graphDb=new EmbeddedGraphDatabase(dbPath);
+    }
+    if (graphDb != null) {
+      graphDb.registerTransactionEventHandler(EntityContext.getTransactionEventHandler());
+    }
+    if (graphDb == null) {
+      logger.log(Level.SEVERE,"Database could not be started ({0}) ...",dbPath);
+      return;
+    }
+    String filesPath=Services.getFilesPath();
+    File files=new File(filesPath);
+    if (!files.exists()) {
+      files.mkdir();
+    }
+    logger.log(Level.INFO,"Database ready.");
+    logger.log(Level.FINE,"Initializing UUID index...");
+    uuidIndex=graphDb.index().forNodes("uuidAllNodes",LuceneIndexImplementation.EXACT_CONFIG);
+    logger.log(Level.FINE,"UUID index ready.");
+    logger.log(Level.FINE,"Initializing user index...");
+    userIndex=graphDb.index().forNodes("nameEmailAllUsers",LuceneIndexImplementation.EXACT_CONFIG);
+    logger.log(Level.FINE,"UUID index ready.");
+    logger.log(Level.FINE,"Initializing fulltext index...");
+    fulltextIndex=graphDb.index().forNodes("fulltextAllNodes",LuceneIndexImplementation.FULLTEXT_CONFIG);
+    logger.log(Level.FINE,"Fulltext index ready.");
+    logger.log(Level.FINE,"Initializing keyword index...");
+    keywordIndex=graphDb.index().forNodes("keywordAllNodes",LuceneIndexImplementation.EXACT_CONFIG);
+    logger.log(Level.FINE,"Keyword index ready.");
+    logger.log(Level.FINE,"Initializing layer index...");
+    final Map<String,String> config=new HashMap<String,String>();
+    config.put(LayerNodeIndex.LAT_PROPERTY_KEY,Location.Key.latitude.name());
+    config.put(LayerNodeIndex.LON_PROPERTY_KEY,Location.Key.longitude.name());
+    config.put(SpatialIndexProvider.GEOMETRY_TYPE,LayerNodeIndex.POINT_PARAMETER);
+    layerIndex=new LayerNodeIndex("layerIndex",graphDb,config);
+    logger.log(Level.FINE,"Layer index ready.");
+    logger.log(Level.FINE,"Initializing node factory...");
+    nodeFactory=new NodeFactory();
+    logger.log(Level.FINE,"Node factory ready.");
+    logger.log(Level.FINE,"Initializing relationship UUID index...");
+    relUuidIndex=graphDb.index().forRelationships("uuidAllRelationships",LuceneIndexImplementation.EXACT_CONFIG);
+    logger.log(Level.FINE,"Relationship relationship UUID index ready.");
+    logger.log(Level.FINE,"Initializing relationship index...");
+    relFulltextIndex=graphDb.index().forRelationships("fulltextAllRelationships",LuceneIndexImplementation.FULLTEXT_CONFIG);
+    logger.log(Level.FINE,"Relationship index ready.");
+    logger.log(Level.FINE,"Initializing relationship keyword index...");
+    relKeywordIndex=graphDb.index().forRelationships("keywordAllRelationships",LuceneIndexImplementation.EXACT_CONFIG);
+    logger.log(Level.FINE,"Relationship keyword index ready.");
+    logger.log(Level.FINE,"Initializing relationship factory...");
+    relationshipFactory=new RelationshipFactory();
+    logger.log(Level.FINE,"Relationship factory ready.");
+  }
+ catch (  Exception e) {
+    logger.log(Level.SEVERE,"Database could not be initialized. {0}",e.getMessage());
+    e.printStackTrace(System.out);
+  }
+  isInitialized=true;
+}

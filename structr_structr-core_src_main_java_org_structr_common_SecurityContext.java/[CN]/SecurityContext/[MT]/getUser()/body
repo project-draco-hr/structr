@@ -1,3 +1,11 @@
 {
-  return authenticator.getUser(this,request);
+  try {
+    if (user == null) {
+      user=authenticator.getUser(this,request,response);
+    }
+  }
+ catch (  FrameworkException ex) {
+    logger.log(Level.WARNING,"No user found",ex);
+  }
+  return user;
 }

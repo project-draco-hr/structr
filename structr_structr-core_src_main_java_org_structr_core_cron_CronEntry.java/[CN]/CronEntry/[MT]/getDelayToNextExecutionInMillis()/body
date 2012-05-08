@@ -12,12 +12,6 @@
   int minDaysNext=days.getStartValue();
   int minDowNext=dow.getStartValue();
   int minMonthsNext=months.getStartValue();
-  int stepSeconds=seconds.getStep();
-  int stepMinutes=minutes.getStep();
-  int stepHours=hours.getStep();
-  int stepDays=days.getStep();
-  int stepDow=dow.getStep();
-  int stepMonths=months.getStep();
   int diffSeconds=minSecondsNext - nowSeconds;
   int diffMinutes=minMinutesNext - nowMinutes;
   int diffHours=minHoursNext - nowHours;
@@ -43,11 +37,23 @@
     diffMonths+=30;
   }
   long next=0;
-  if (!seconds.isInside(nowSeconds))   next+=(diffSeconds) * (1000L);
-  if (!minutes.isInside(nowMinutes))   next+=(diffMinutes) * (1000L * 60L);
-  if (!hours.isInside(nowHours))   next+=(diffHours) * (1000L * 60L * 60L);
-  if (!days.isInside(nowDays))   next+=(diffDays) * (1000L * 60L * 60L* 24L);
-  if (!dow.isInside(nowDow))   next+=(diffDow) * (1000L * 60L * 60L* 24L* 7L);
-  if (!months.isInside(nowMonths))   next+=(diffMonths) * (1000L * 60L * 60L* 24L* 30L);
+  if (!seconds.isInside(nowSeconds)) {
+    next+=(diffSeconds) * (1000L);
+  }
+  if (!minutes.isInside(nowMinutes)) {
+    next+=(diffMinutes) * (1000L * 60L);
+  }
+  if (!hours.isInside(nowHours)) {
+    next+=(diffHours) * (1000L * 60L * 60L);
+  }
+  if (!days.isInside(nowDays)) {
+    next+=(diffDays) * (1000L * 60L * 60L* 24L);
+  }
+  if (!dow.isInside(nowDow)) {
+    next+=(diffDow) * (1000L * 60L * 60L* 24L* 7L);
+  }
+  if (!months.isInside(nowMonths)) {
+    next+=(diffMonths) * (1000L * 60L * 60L* 24L* 30L);
+  }
   return next;
 }

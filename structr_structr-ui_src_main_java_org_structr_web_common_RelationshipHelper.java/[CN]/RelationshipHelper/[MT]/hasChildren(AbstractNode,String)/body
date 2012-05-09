@@ -1,5 +1,8 @@
 {
   List<AbstractRelationship> childRels=node.getOutgoingRelationships(RelType.CONTAINS);
+  if ((node instanceof Group) || (node instanceof Folder)) {
+    return !childRels.isEmpty();
+  }
   for (  AbstractRelationship childRel : childRels) {
     Long childPos=null;
     if (childRel.getLongProperty(resourceId) != null) {

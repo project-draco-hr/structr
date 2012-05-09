@@ -1,14 +1,14 @@
 {
   final SecurityContext securityContext=getWebSocket().getSecurityContext();
   final Map<String,Object> nodeData=webSocketData.getNodeData();
-  String containedNodeId=(String)nodeData.get("id");
+  String nodeToAddId=(String)nodeData.get("id");
   final Map<String,Object> relData=webSocketData.getRelData();
-  String containingNodeId=webSocketData.getId();
-  if (containingNodeId != null) {
-    AbstractNode containedNode=null;
-    AbstractNode containingNode=getNode(containingNodeId);
-    if (containedNodeId != null) {
-      containedNode=getNode(containedNodeId);
+  String parentId=webSocketData.getId();
+  if (parentId != null) {
+    AbstractNode nodeToAdd=null;
+    AbstractNode parentNode=getNode(parentId);
+    if (nodeToAddId != null) {
+      nodeToAdd=getNode(nodeToAddId);
     }
  else {
       StructrTransaction transaction=new StructrTransaction(){
@@ -18,22 +18,22 @@
       }
 ;
       try {
-        containedNode=(AbstractNode)Services.command(securityContext,TransactionCommand.class).execute(transaction);
+        nodeToAdd=(AbstractNode)Services.command(securityContext,TransactionCommand.class).execute(transaction);
       }
  catch (      FrameworkException fex) {
         logger.log(Level.WARNING,"Could not create node.",fex);
         getWebSocket().send(MessageBuilder.status().code(fex.getStatus()).message(fex.getMessage()).build(),true);
       }
     }
-    if ((containedNode != null) && (containingNode != null)) {
+    if ((nodeToAdd != null) && (parentNode != null)) {
       String originalResourceId=(String)nodeData.get("sourceResourceId");
       String newResourceId=(String)nodeData.get("targetResourceId");
-      RelationClass rel=EntityContext.getRelationClass(containingNode.getClass(),containedNode.getClass());
+      RelationClass rel=EntityContext.getRelationClass(parentNode.getClass(),nodeToAdd.getClass());
       if (rel != null) {
         try {
-          rel.createRelationship(securityContext,containingNode,containedNode,relData);
+          rel.createRelationship(securityContext,parentNode,nodeToAdd,relData);
           if ((originalResourceId != null) && (newResourceId != null) && !originalResourceId.equals(newResourceId)) {
-            RelationshipHelper.tagOutgoingRelsWithResourceId(containedNode,containedNode,originalResourceId,newResourceId);
+            RelationshipHelper.tagOutgoingRelsWithResourceId(nodeToAdd,nodeToAdd,originalResourceId,newResourceId);
           }
         }
  catch (        Throwable t) {

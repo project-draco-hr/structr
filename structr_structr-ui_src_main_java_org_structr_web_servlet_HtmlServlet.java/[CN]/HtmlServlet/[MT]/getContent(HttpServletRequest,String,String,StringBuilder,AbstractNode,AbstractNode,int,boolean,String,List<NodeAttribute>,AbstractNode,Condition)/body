@@ -4,6 +4,8 @@
   String tag=null;
   if (startNode != null) {
     String structrClass=startNode.getStringProperty(Component.UiKey.structrclass);
+    String id=startNode.getStringProperty(AbstractNode.Key.uuid);
+    tag=startNode.getStringProperty(Element.UiKey.tag);
     if ((structrClass != null) && structrClass.equals(EntityContext.normalizeEntityName(searchClass)) && (attrs != null)) {
       for (      NodeAttribute attr : attrs) {
         String key=attr.getKey();
@@ -13,17 +15,25 @@
         }
       }
     }
-    String id=startNode.getStringProperty("uuid");
-    for (int d=0; d < depth; d++) {
-      System.out.print(" ");
-    }
     if (startNode instanceof Content) {
-      content=(((Content)startNode).getPropertyWithVariableReplacement(resource,resourceId,componentId,viewComponent,Content.UiKey.content.name()));
+      Content contentNode=(Content)startNode;
+      content=contentNode.getPropertyWithVariableReplacement(resource,resourceId,componentId,viewComponent,Content.UiKey.content.name());
+      String contentType=contentNode.getStringProperty(Content.UiKey.contentType);
+      if (contentType != null) {
+        Adapter<String,String> converter=contentConverters.get(contentType);
+        if (converter != null) {
+          try {
+            content=converter.adapt(content);
+          }
+ catch (          FrameworkException fex) {
+            logger.log(Level.WARNING,"Unable to convert content: {0}",fex.getMessage());
+          }
+        }
+      }
     }
     if (startNode instanceof Component) {
       localComponentId=startNode.getStringProperty(AbstractNode.Key.uuid);
     }
-    tag=startNode.getStringProperty("tag");
     if (edit && inBody && (startNode instanceof Content)) {
       tag="span";
     }
@@ -95,7 +105,7 @@
       }
     }
   }
-  if (StringUtils.isNotBlank(tag) && !(ArrayUtils.contains(html5VoidTags,tag))) {
+  if (StringUtils.isNotBlank(tag) && !html5VoidTags.contains(tag)) {
     buffer.append("</").append(tag).append(">");
   }
 }

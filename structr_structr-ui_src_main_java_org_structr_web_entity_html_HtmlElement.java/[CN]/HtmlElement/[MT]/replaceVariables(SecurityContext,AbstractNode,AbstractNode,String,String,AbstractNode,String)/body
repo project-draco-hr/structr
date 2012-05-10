@@ -2,7 +2,8 @@
   String value=null;
   if ((rawValue != null) && (rawValue instanceof String)) {
     value=(String)rawValue;
-    Matcher matcher=templatePattern.matcher(value);
+    Matcher matcher=threadLocalTemplateMatcher.get();
+    matcher.reset(value);
     while (matcher.find()) {
       String group=matcher.group();
       String source=group.substring(2,group.length() - 1);

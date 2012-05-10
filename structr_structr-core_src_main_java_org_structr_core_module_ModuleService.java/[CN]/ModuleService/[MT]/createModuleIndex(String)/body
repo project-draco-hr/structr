@@ -4,9 +4,7 @@
     return null;
   }
   String modulePath=libPath.concat("/").concat(moduleName);
-  String indexPath=createIndexFileName(moduleName);
   File moduleFile=new File(modulePath);
-  File indexFile=new File(indexPath);
   ClickModule ret=new ClickModule(modulePath);
   Set<String> classes=ret.getClasses();
   Set<String> properties=ret.getProperties();
@@ -38,15 +36,5 @@
   }
   File classesDir=new File(servletContextRealRootPath.concat("/WEB-INF/classes"));
   addClassesRecursively(classesDir,classes);
-  try {
-    indexFile.getParentFile().mkdirs();
-    ObjectOutputStream ois=new ObjectOutputStream(new FileOutputStream(indexFile));
-    ois.writeObject(ret);
-    ois.flush();
-    ois.close();
-  }
- catch (  Throwable t) {
-    logger.log(Level.WARNING,"Unable to write module index from {0}: {1}",new Object[]{indexPath,t});
-  }
-  return (ret);
+  return ret;
 }

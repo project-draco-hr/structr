@@ -1,21 +1,34 @@
 {
   final SecurityContext securityContext=getWebSocket().getSecurityContext();
-  String sourceId=webSocketData.getId();
-  String targetId=(String)webSocketData.getNodeData().get("id");
-  if ((sourceId != null) && (targetId != null)) {
-    final AbstractNode sourceNode=getNode(sourceId);
-    final AbstractNode targetNode=getNode(targetId);
-    if ((sourceNode != null) && (targetNode != null)) {
-      RelationClass rel=EntityContext.getRelationClass(sourceNode.getClass(),targetNode.getClass());
+  String id=webSocketData.getId();
+  String parentId=(String)webSocketData.getNodeData().get("id");
+  final String componentId=(String)webSocketData.getNodeData().get("componentId");
+  final String resourceId=(String)webSocketData.getNodeData().get("resourceId");
+  String position=(String)webSocketData.getNodeData().get("position");
+  if ((id != null) && (parentId != null)) {
+    final AbstractNode nodeToRemove=getNode(id);
+    final AbstractNode parentNode=getNode(parentId);
+    final Long pos=(position != null) ? Long.parseLong(position) : null;
+    if ((nodeToRemove != null) && (parentNode != null)) {
+      RelationClass rel=EntityContext.getRelationClass(nodeToRemove.getClass(),parentNode.getClass());
       if (rel != null) {
-        final List<AbstractRelationship> rels=sourceNode.getRelationships(rel.getRelType(),rel.getDirection());
+        final List<AbstractRelationship> rels=nodeToRemove.getRelationships(rel.getRelType(),rel.getDirection());
         StructrTransaction transaction=new StructrTransaction(){
           @Override public Object execute() throws FrameworkException {
             Command deleteRel=Services.command(securityContext,DeleteRelationshipCommand.class);
+            List<AbstractRelationship> relsToShift=new LinkedList<AbstractRelationship>();
             for (            AbstractRelationship rel : rels) {
-              if (rel.getOtherNode(sourceNode).equals(targetNode)) {
-                deleteRel.execute(rel);
+              if (rel.getOtherNode(nodeToRemove).equals(parentNode) && ((componentId == null) || componentId.equals(rel.getStringProperty("componentId"))) && ((resourceId == null) || (rel.getProperty(resourceId) != null))) {
+                relsToShift.add(rel);
+                if (pos.equals(rel.getLongProperty(resourceId))) {
+                  deleteRel.execute(rel);
+                  relsToShift.remove(rel);
+                  break;
+                }
               }
+            }
+            if (pos != null) {
+              moveUpRels(relsToShift,resourceId);
             }
             return null;
           }

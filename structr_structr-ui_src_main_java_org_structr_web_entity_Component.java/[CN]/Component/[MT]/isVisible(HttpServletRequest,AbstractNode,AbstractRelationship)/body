@@ -3,19 +3,20 @@
     return true;
   }
   if (node instanceof Component) {
-    String structrClass=node.getStringProperty(Component.UiKey.structrclass);
+    Boolean requestContainsUuidsValue=(Boolean)request.getAttribute(REQUEST_CONTAINS_UUID_IDENTIFIER);
+    boolean requestContainsUuids=false;
+    if (requestContainsUuidsValue != null) {
+      requestContainsUuids=requestContainsUuidsValue.booleanValue();
+    }
     String componentId=node.getStringProperty(AbstractNode.Key.uuid);
-    if (structrClass != null) {
-      String singleClass=CaseHelper.toUnderscore(structrClass,false);
-      String listClass=CaseHelper.toUnderscore(structrClass,true);
-      if (request.getAttribute(singleClass) != null) {
-        if (request.getAttribute(componentId) != null) {
-          return true;
-        }
-      }
- else       if (request.getAttribute(listClass) != null) {
+    if (requestContainsUuids) {
+      if (request.getAttribute(componentId) != null) {
         return true;
       }
+      return false;
+    }
+ else {
+      return true;
     }
   }
   return false;

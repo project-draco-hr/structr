@@ -21,12 +21,17 @@
   if (request.getParameter("tidy") != null) {
     tidy=true;
   }
+  Matcher matcher=threadLocalUUIDMatcher.get();
+  boolean requestUriContainsUuids=false;
   for (int i=1; i < pathParts.length; i++) {
     String[] parts=pathParts[i].split("[/]+");
     for (int j=0; j < parts.length; j++) {
       request.setAttribute(parts[j],j);
+      matcher.reset(parts[j]);
+      requestUriContainsUuids|=matcher.matches();
     }
   }
+  request.setAttribute(Component.REQUEST_CONTAINS_UUID_IDENTIFIER,requestUriContainsUuids);
   try {
     SecurityContext securityContext=SecurityContext.getInstance(this.getServletConfig(),request,response,AccessMode.Frontend);
     request.setCharacterEncoding("UTF-8");
@@ -92,6 +97,7 @@
     }
   }
  catch (  Throwable t) {
+    t.printStackTrace();
     HttpAuthenticator.writeInternalServerError(response);
   }
 }

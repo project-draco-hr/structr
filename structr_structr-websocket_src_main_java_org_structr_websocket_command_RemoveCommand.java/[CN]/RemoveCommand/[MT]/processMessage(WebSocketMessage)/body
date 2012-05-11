@@ -10,15 +10,15 @@
     final AbstractNode parentNode=getNode(parentId);
     final Long pos=(position != null) ? Long.parseLong(position) : null;
     if ((nodeToRemove != null) && (parentNode != null)) {
-      RelationClass rel=EntityContext.getRelationClass(nodeToRemove.getClass(),parentNode.getClass());
+      RelationClass rel=EntityContext.getRelationClass(parentNode.getClass(),nodeToRemove.getClass());
       if (rel != null) {
-        final List<AbstractRelationship> rels=nodeToRemove.getRelationships(rel.getRelType(),rel.getDirection());
+        final List<AbstractRelationship> rels=parentNode.getRelationships(rel.getRelType(),rel.getDirection());
         StructrTransaction transaction=new StructrTransaction(){
           @Override public Object execute() throws FrameworkException {
             Command deleteRel=Services.command(securityContext,DeleteRelationshipCommand.class);
             List<AbstractRelationship> relsToShift=new LinkedList<AbstractRelationship>();
             for (            AbstractRelationship rel : rels) {
-              if (rel.getOtherNode(nodeToRemove).equals(parentNode) && ((componentId == null) || componentId.equals(rel.getStringProperty("componentId"))) && ((resourceId == null) || (rel.getProperty(resourceId) != null))) {
+              if (rel.getOtherNode(parentNode).equals(nodeToRemove) && ((componentId == null) || componentId.equals(rel.getStringProperty("componentId"))) && ((resourceId == null) || (rel.getProperty(resourceId) != null))) {
                 relsToShift.add(rel);
                 if (pos.equals(rel.getLongProperty(resourceId))) {
                   deleteRel.execute(rel);

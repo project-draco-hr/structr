@@ -1,9 +1,14 @@
 {
-  Class nodeClass=(Class)Services.command(securityContext,GetEntityClassCommand.class).execute(nodeType);
+  Class nodeClass=(Class)getEntityClassCommand.get().execute(nodeType);
   AbstractNode newNode=null;
   if (nodeClass != null) {
     try {
-      newNode=(AbstractNode)nodeClass.newInstance();
+      Constructor constructor=constructors.get(nodeClass);
+      if (constructor == null) {
+        constructor=nodeClass.getConstructor();
+        constructors.put(nodeClass,constructor);
+      }
+      newNode=(AbstractNode)constructor.newInstance();
     }
  catch (    Throwable t) {
       newNode=null;

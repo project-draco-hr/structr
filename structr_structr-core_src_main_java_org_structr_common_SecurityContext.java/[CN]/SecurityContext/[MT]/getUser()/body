@@ -1,11 +1,11 @@
 {
-  try {
-    if (user == null) {
-      user=authenticator.getUser(this,request,response);
+  if (cachedUser == null) {
+    try {
+      cachedUser=authenticator.getUser(this,request,response);
+    }
+ catch (    FrameworkException ex) {
+      logger.log(Level.WARNING,"No user found",ex);
     }
   }
- catch (  FrameworkException ex) {
-    logger.log(Level.WARNING,"No user found",ex);
-  }
-  return user;
+  return cachedUser;
 }

@@ -19,7 +19,7 @@
   }
   RelationClass rel=EntityContext.getRelationClass(type,key);
   if (rel != null) {
-    if (value != null) {
+    if (value != null && (!(value instanceof Iterable) || ((Iterable)value).iterator().hasNext())) {
       if (value instanceof Iterable) {
         Collection<GraphObject> collection=rel.getNotion().getCollectionAdapterForSetter(securityContext).adapt(value);
         for (        GraphObject graphObject : collection) {

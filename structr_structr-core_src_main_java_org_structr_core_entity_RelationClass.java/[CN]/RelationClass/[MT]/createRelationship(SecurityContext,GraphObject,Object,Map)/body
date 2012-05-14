@@ -38,14 +38,16 @@ case OneToMany:
     }
     AbstractRelationship newRel;
     if (direction.equals(Direction.OUTGOING)) {
-      newRel=(AbstractRelationship)createRel.execute(sourceNode,finalTargetNode,relType);
+      newRel=(AbstractRelationship)createRel.execute(sourceNode,finalTargetNode,relType,true);
     }
  else {
       newRel=(AbstractRelationship)createRel.execute(finalTargetNode,sourceNode,relType);
     }
-    newRel.setProperties(properties);
-    if (cascadeDelete > 0) {
-      newRel.setProperty(AbstractRelationship.HiddenKey.cascadeDelete,cascadeDelete);
+    if (newRel != null) {
+      newRel.setProperties(properties);
+      if (cascadeDelete > 0) {
+        newRel.setProperty(AbstractRelationship.HiddenKey.cascadeDelete,cascadeDelete);
+      }
     }
     return newRel;
   }

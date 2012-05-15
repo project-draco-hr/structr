@@ -31,6 +31,9 @@
         removedNodeProperties.put(node,propertyMap);
       }
       propertyMap.put(entry.key(),entry.previouslyCommitedValue());
+      if (!data.isDeleted(node)) {
+        modifiedNodes.add(nodeFactory.createNode(securityContext,node));
+      }
     }
     for (    PropertyEntry<Relationship> entry : data.removedRelationshipProperties()) {
       Relationship rel=entry.entity();
@@ -40,6 +43,9 @@
         removedRelProperties.put(rel,propertyMap);
       }
       propertyMap.put(entry.key(),entry.previouslyCommitedValue());
+      if (!data.isDeleted(rel)) {
+        modifiedRels.add(relFactory.createRelationship(securityContext,rel));
+      }
     }
     for (    Node node : data.createdNodes()) {
       AbstractNode entity=nodeFactory.createNode(securityContext,node);

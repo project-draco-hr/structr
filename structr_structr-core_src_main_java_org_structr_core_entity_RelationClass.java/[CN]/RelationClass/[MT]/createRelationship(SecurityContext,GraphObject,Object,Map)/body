@@ -13,18 +13,18 @@
     final AbstractNode finalSourceNode=(AbstractNode)sourceNode;
     StructrTransaction transaction=new StructrTransaction(){
       @Override public Object execute() throws FrameworkException {
+        Map<String,Object> props=new HashMap(properties);
+        if (cascadeDelete > 0) {
+          props.put(AbstractRelationship.HiddenKey.cascadeDelete.name(),new Integer(cascadeDelete));
+        }
         AbstractRelationship newRel;
         if (direction.equals(Direction.OUTGOING)) {
-          newRel=(AbstractRelationship)createRel.execute(sourceNode,finalTargetNode,relType,true);
+          newRel=(AbstractRelationship)createRel.execute(sourceNode,finalTargetNode,relType,props,true);
         }
  else {
-          newRel=(AbstractRelationship)createRel.execute(finalTargetNode,sourceNode,relType);
+          newRel=(AbstractRelationship)createRel.execute(finalTargetNode,sourceNode,relType,props,false);
         }
         if (newRel != null) {
-          newRel.setProperties(properties);
-          if (cascadeDelete > 0) {
-            newRel.setProperty(AbstractRelationship.HiddenKey.cascadeDelete,cascadeDelete);
-          }
 switch (cardinality) {
 case ManyToOne:
 case OneToOne:

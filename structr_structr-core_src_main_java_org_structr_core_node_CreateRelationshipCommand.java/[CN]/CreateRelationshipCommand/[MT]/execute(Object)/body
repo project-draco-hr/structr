@@ -24,11 +24,12 @@
       throw new UnsupportedArgumentError("Wrong argument type(s).");
     }
   }
- else   if ((graphDb != null) && (parameters.length == 4)) {
+ else   if ((graphDb != null) && (parameters.length == 5)) {
     Object arg0=parameters[0];
     Object arg1=parameters[1];
     Object arg2=parameters[2];
     Object arg3=parameters[3];
+    Object arg4=parameters[4];
     Map<String,Object> properties=null;
     RelationshipType relType=null;
     if (arg2 instanceof String) {
@@ -40,12 +41,12 @@
  else {
       throw new UnsupportedArgumentError("Wrong argument type(s).");
     }
-    boolean checkDuplicates=false;
-    if (arg3 instanceof Boolean) {
-      checkDuplicates=((Boolean)arg3) == true;
-    }
- else     if (arg3 instanceof Map) {
+    if (arg3 instanceof Map) {
       properties=(Map<String,Object>)arg3;
+    }
+    boolean checkDuplicates=false;
+    if (arg4 instanceof Boolean) {
+      checkDuplicates=((Boolean)arg4) == true;
     }
     if ((arg0 instanceof AbstractNode) && (arg1 instanceof AbstractNode)) {
       AbstractNode startNode=(AbstractNode)arg0;
@@ -54,8 +55,20 @@
         List<AbstractRelationship> incomingRels=endNode.getIncomingRelationships();
         for (        AbstractRelationship rel : incomingRels) {
           if (rel.getRelType().equals(relType) && rel.getStartNode().equals(startNode)) {
-            logger.log(Level.WARNING,"Creation of duplicate relationship was blocked");
-            return null;
+            Map<String,Object> relProps=rel.getProperties();
+            boolean propsEqual=true;
+            for (            Entry entry : properties.entrySet()) {
+              String key=(String)entry.getKey();
+              Object val=entry.getValue();
+              if (!relProps.containsKey(key) || !relProps.get(key).equals(val)) {
+                propsEqual=false;
+                break;
+              }
+            }
+            if (propsEqual) {
+              logger.log(Level.WARNING,"Creation of duplicate relationship was blocked");
+              return null;
+            }
           }
         }
       }

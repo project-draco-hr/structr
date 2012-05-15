@@ -25,29 +25,30 @@
           if (cascadeDelete > 0) {
             newRel.setProperty(AbstractRelationship.HiddenKey.cascadeDelete,cascadeDelete);
           }
-        }
 switch (cardinality) {
 case ManyToOne:
 case OneToOne:
 {
-            Class destType=finalTargetNode.getClass();
-            List<AbstractRelationship> rels=finalSourceNode.getRelationships(relType,direction);
+              Class destType=finalTargetNode.getClass();
+              List<AbstractRelationship> rels=finalSourceNode.getRelationships(relType,direction);
+              for (              AbstractRelationship rel : rels) {
+                if ((!rel.equals(newRel) && ((!(rel instanceof GenericRelationship) && newRel.getClass().isAssignableFrom(rel.getClass())) || destType.isAssignableFrom(rel.getOtherNode(finalSourceNode).getClass())))) {
+                  deleteRel.execute(rel);
+                }
+              }
+              break;
+            }
+case OneToMany:
+{
+            Class sourceType=finalSourceNode.getClass();
+            List<AbstractRelationship> rels=finalTargetNode.getRelationships(relType,Direction.INCOMING);
             for (            AbstractRelationship rel : rels) {
-              if (!rel.equals(newRel) && newRel.getClass().isAssignableFrom(rel.getClass())) {
+              if ((!rel.equals(newRel) && ((!(rel instanceof GenericRelationship) && newRel.getClass().isAssignableFrom(rel.getClass())) || sourceType.isAssignableFrom(rel.getOtherNode(finalTargetNode).getClass())))) {
                 deleteRel.execute(rel);
               }
             }
-            break;
           }
-case OneToMany:
-{
-          List<AbstractRelationship> rels=finalTargetNode.getRelationships(relType,Direction.INCOMING);
-          for (          AbstractRelationship rel : rels) {
-            if (!rel.equals(newRel) && newRel.getClass().isAssignableFrom(rel.getClass())) {
-              deleteRel.execute(rel);
-            }
-          }
-        }
+      }
     }
     return newRel;
   }

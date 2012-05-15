@@ -56,7 +56,7 @@
     }
  else {
       long t0=System.currentTimeMillis();
-      logger.log(Level.INFO,"Textual Query String: {0}",textualQueryString);
+      logger.log(Level.FINE,"Textual Query String: {0}",textualQueryString);
       QueryContext queryContext=new QueryContext(textualQueryString);
       IndexHits hits=null;
       if ((textualAttributes.size() == 1) && textualAttributes.get(0).getKey().equals(AbstractNode.Key.uuid.name())) {
@@ -81,10 +81,10 @@
         hits=index.query(queryContext);
       }
       long t1=System.currentTimeMillis();
-      logger.log(Level.INFO,"Querying index took {0} ms, {1} results retrieved.",new Object[]{t1 - t0,(hits != null) ? hits.size() : 0});
+      logger.log(Level.FINE,"Querying index took {0} ms, {1} results retrieved.",new Object[]{t1 - t0,(hits != null) ? hits.size() : 0});
       intermediateResult=nodeFactory.createNodes(securityContext,hits,includeDeleted,publicOnly);
       long t2=System.currentTimeMillis();
-      logger.log(Level.INFO,"Creating structr nodes took {0} ms, {1} nodes made.",new Object[]{t2 - t1,intermediateResult.size()});
+      logger.log(Level.FINE,"Creating structr nodes took {0} ms, {1} nodes made.",new Object[]{t2 - t1,intermediateResult.size()});
     }
     long t2=System.currentTimeMillis();
     if (!filters.isEmpty()) {
@@ -127,11 +127,11 @@
     }
     finalResult.addAll(intermediateResult);
     long t3=System.currentTimeMillis();
-    logger.log(Level.INFO,"Filtering nodes took {0} ms. Result size now {1}.",new Object[]{t3 - t2,finalResult.size()});
+    logger.log(Level.FINE,"Filtering nodes took {0} ms. Result size now {1}.",new Object[]{t3 - t2,finalResult.size()});
   }
   long t4=System.currentTimeMillis();
   Collections.sort(finalResult);
   long t5=System.currentTimeMillis();
-  logger.log(Level.INFO,"Sorting nodes took {0} ms.",new Object[]{t5 - t4});
+  logger.log(Level.FINE,"Sorting nodes took {0} ms.",new Object[]{t5 - t4});
   return finalResult;
 }

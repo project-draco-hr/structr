@@ -13,14 +13,27 @@
     final AbstractNode finalSourceNode=(AbstractNode)sourceNode;
     StructrTransaction transaction=new StructrTransaction(){
       @Override public Object execute() throws FrameworkException {
+        AbstractRelationship newRel;
+        if (direction.equals(Direction.OUTGOING)) {
+          newRel=(AbstractRelationship)createRel.execute(sourceNode,finalTargetNode,relType,true);
+        }
+ else {
+          newRel=(AbstractRelationship)createRel.execute(finalTargetNode,sourceNode,relType);
+        }
+        if (newRel != null) {
+          newRel.setProperties(properties);
+          if (cascadeDelete > 0) {
+            newRel.setProperty(AbstractRelationship.HiddenKey.cascadeDelete,cascadeDelete);
+          }
+        }
 switch (cardinality) {
 case ManyToOne:
 case OneToOne:
 {
-            String destType=finalTargetNode.getType();
+            Class destType=finalTargetNode.getClass();
             List<AbstractRelationship> rels=finalSourceNode.getRelationships(relType,direction);
             for (            AbstractRelationship rel : rels) {
-              if (rel.getOtherNode(finalSourceNode).getType().equals(destType)) {
+              if (!rel.equals(newRel) && newRel.getClass().isAssignableFrom(rel.getClass())) {
                 deleteRel.execute(rel);
               }
             }
@@ -30,24 +43,11 @@ case OneToMany:
 {
           List<AbstractRelationship> rels=finalTargetNode.getRelationships(relType,Direction.INCOMING);
           for (          AbstractRelationship rel : rels) {
-            if (rel.getOtherNode(finalTargetNode).getType().equals(sourceNode.getType())) {
+            if (!rel.equals(newRel) && newRel.getClass().isAssignableFrom(rel.getClass())) {
               deleteRel.execute(rel);
             }
           }
         }
-    }
-    AbstractRelationship newRel;
-    if (direction.equals(Direction.OUTGOING)) {
-      newRel=(AbstractRelationship)createRel.execute(sourceNode,finalTargetNode,relType,true);
-    }
- else {
-      newRel=(AbstractRelationship)createRel.execute(finalTargetNode,sourceNode,relType);
-    }
-    if (newRel != null) {
-      newRel.setProperties(properties);
-      if (cascadeDelete > 0) {
-        newRel.setProperty(AbstractRelationship.HiddenKey.cascadeDelete,cascadeDelete);
-      }
     }
     return newRel;
   }

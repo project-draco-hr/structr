@@ -128,10 +128,12 @@
     finalResult.addAll(intermediateResult);
     long t3=System.currentTimeMillis();
     logger.log(Level.FINE,"Filtering nodes took {0} ms. Result size now {1}.",new Object[]{t3 - t2,finalResult.size()});
+    long t4=System.currentTimeMillis();
+    if (distanceSearch == null) {
+      Collections.sort(finalResult);
+    }
+    long t5=System.currentTimeMillis();
+    logger.log(Level.FINE,"Sorting nodes took {0} ms.",new Object[]{t5 - t4});
   }
-  long t4=System.currentTimeMillis();
-  Collections.sort(finalResult);
-  long t5=System.currentTimeMillis();
-  logger.log(Level.FINE,"Sorting nodes took {0} ms.",new Object[]{t5 - t4});
   return finalResult;
 }

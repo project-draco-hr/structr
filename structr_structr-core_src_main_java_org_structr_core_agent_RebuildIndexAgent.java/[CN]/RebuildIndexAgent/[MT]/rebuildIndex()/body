@@ -13,7 +13,7 @@
       for (      AbstractNode s : allNodes) {
         indexer.execute(s);
         nodes++;
-        if (nodes % 100 == 0) {
+        if (nodes > 1000 && nodes % 1000 == 0) {
           logger.log(Level.INFO,"Indexed {0} nodes, committing results to database.",nodes);
           tx.success();
           tx.finish();
@@ -21,6 +21,7 @@
           logger.log(Level.FINE,"######## committed ########",nodes);
         }
       }
+      logger.log(Level.INFO,"Finished indexing {0} nodes",nodes);
       return nodes;
     }
   }

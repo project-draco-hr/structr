@@ -13,21 +13,24 @@
         Pattern pattern=entry.getKey();
         Matcher matcher=pattern.matcher(pathParts[i]);
         if (matcher.matches()) {
+          Class type=entry.getValue();
+          Resource resource=null;
           try {
-            Class type=entry.getValue();
-            Resource constraint=(Resource)type.newInstance();
-            constraint.setSecurityContext(securityContext);
-            if (constraint.checkAndConfigure(part,securityContext,request)) {
-              logger.log(Level.FINE,"{0} matched, adding constraint of type {1} for part {2}",new Object[]{matcher.pattern(),type.getName(),part});
-              constraint.configurePropertyView(propertyView);
-              constraint.configureIdProperty(defaultIdProperty);
-              constraintChain.add(constraint);
-              found=true;
-              break;
-            }
+            resource=(Resource)type.newInstance();
           }
  catch (          Throwable t) {
             logger.log(Level.WARNING,"Error instantiating constraint class",t);
+          }
+          if (resource != null) {
+            resource.setSecurityContext(securityContext);
+            if (resource.checkAndConfigure(part,securityContext,request)) {
+              logger.log(Level.FINE,"{0} matched, adding constraint of type {1} for part {2}",new Object[]{matcher.pattern(),type.getName(),part});
+              resource.configurePropertyView(propertyView);
+              resource.configureIdProperty(defaultIdProperty);
+              constraintChain.add(resource);
+              found=true;
+              break;
+            }
           }
         }
       }

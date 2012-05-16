@@ -29,17 +29,16 @@ catch (  DocumentException de) {
   }
   Element root=xmlDoc.getRootElement();
   String status=root.element("status").getTextTrim();
-  boolean ok="OK".equals(status);
-  if (!ok) {
-    logger.log(Level.WARNING,"Status not OK for address {0}: {1}",new Object[]{address,status});
-    return null;
+  if ("OK".equals(status)) {
+    try {
+      return new GeoCodingResult(address,root);
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"Unable to find geocoding for address {0}: {1}",new Object[]{address,t.getMessage()});
+    }
   }
  else {
-    String latitude=root.element("result").element("geometry").element("location").element("lat").getTextTrim();
-    String longitude=root.element("result").element("geometry").element("location").element("lng").getTextTrim();
-    double lat=Double.parseDouble(latitude);
-    double lon=Double.parseDouble(longitude);
-    logger.log(Level.INFO,"Coordinates found for address {0}: lat= {1}, lon={2}",new Object[]{address,lat,lon});
-    return new Coordinates(lat,lon);
+    logger.log(Level.WARNING,"Status not OK for address {0}: {1}",new Object[]{address,status});
   }
+  return null;
 }

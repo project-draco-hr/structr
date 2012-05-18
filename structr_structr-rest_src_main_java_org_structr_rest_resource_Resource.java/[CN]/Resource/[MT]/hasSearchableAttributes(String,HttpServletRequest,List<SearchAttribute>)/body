@@ -15,6 +15,12 @@
         String searchValue=request.getParameter(key);
         if (searchValue != null) {
           if (looseSearch) {
+            if (searchValue.contains("\"")) {
+              searchValue=searchValue.replaceAll("[\"]+","");
+            }
+            if (searchValue.contains("'")) {
+              searchValue=searchValue.replaceAll("[']+","");
+            }
             searchAttributes.add(Search.andProperty(key,searchValue));
           }
  else {

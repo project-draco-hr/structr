@@ -1,0 +1,39 @@
+{
+  Command search=Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class);
+  List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
+  AbstractNode topNode=null;
+  boolean includeDeleted=false;
+  boolean publicOnly=false;
+  String uriPart=this.getUriPart();
+  ResourceAccess grant=null;
+  searchAttributes.add(Search.andExactType(ResourceAccess.class.getSimpleName()));
+  searchAttributes.add(Search.andExactProperty(ResourceAccess.Key.uri,uriPart));
+  List<AbstractNode> nodes=(List<AbstractNode>)search.execute(topNode,includeDeleted,publicOnly,searchAttributes);
+  if (nodes.isEmpty()) {
+    final Command create=Services.command(SecurityContext.getSuperUserInstance(),CreateNodeCommand.class);
+    final Map<String,Object> newGrantAttributes=new LinkedHashMap<String,Object>();
+    newGrantAttributes.put(AbstractNode.Key.type.name(),ResourceAccess.class.getSimpleName());
+    newGrantAttributes.put(ResourceAccess.Key.uri.name(),uriPart);
+    grant=(ResourceAccess)Services.command(SecurityContext.getSuperUserInstance(),TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        return create.execute(newGrantAttributes);
+      }
+    }
+);
+  }
+ else {
+    if (nodes.size() == 1) {
+      AbstractNode node=nodes.get(0);
+      if (node instanceof ResourceAccess) {
+        grant=(ResourceAccess)node;
+      }
+ else {
+        logger.log(Level.SEVERE,"Grant for URI {0} has wrong type!",new Object[]{uriPart,node.getClass().getName()});
+      }
+    }
+ else {
+      logger.log(Level.SEVERE,"Found {0} grants for URI {1}!",new Object[]{nodes.size(),uriPart});
+    }
+  }
+  return grant;
+}

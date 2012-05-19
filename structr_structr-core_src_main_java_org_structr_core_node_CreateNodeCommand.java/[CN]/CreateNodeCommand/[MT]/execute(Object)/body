@@ -28,6 +28,11 @@
     node=nodeFactory.createNode(securityContext,graphDb.createNode(),nodeType);
     if ((user != null) && !(user instanceof SuperUser)) {
       node.setOwner(user);
+      AbstractRelationship securityRel=(AbstractRelationship)createRel.execute(user,node,RelType.SECURITY,null,true);
+      securityRel.setAllowed(AbstractRelationship.Permission.values());
+      logger.log(Level.FINEST,"All permissions given to user {0}",user.getStringProperty(AbstractNode.Key.name));
+      node.unlockReadOnlyPropertiesOnce();
+      node.setProperty(AbstractNode.Key.createdBy.name(),user.getProperty(AbstractNode.Key.uuid),false);
     }
     node.unlockReadOnlyPropertiesOnce();
     node.setProperty(AbstractNode.Key.createdDate.name(),now,false);

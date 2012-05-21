@@ -43,10 +43,10 @@
     DecimalFormat decimalFormat=new DecimalFormat("0.000000000",DecimalFormatSymbols.getInstance(Locale.ENGLISH));
     double start=System.nanoTime();
     AbstractNode node=findEntryPoint(name);
-    Resource resource=null;
+    Page resource=null;
     org.structr.core.entity.File file=null;
-    if (node instanceof Resource) {
-      resource=(Resource)node;
+    if (node instanceof Page) {
+      resource=(Page)node;
     }
  else     if (node instanceof org.structr.core.entity.File) {
       file=(org.structr.core.entity.File)node;
@@ -58,7 +58,7 @@
       String content=buffer.toString();
       double end=System.nanoTime();
       logger.log(Level.INFO,"Content collected in {0} seconds",decimalFormat.format((end - start) / 1000000000.0));
-      String contentType=resource.getStringProperty(Resource.UiKey.contentType);
+      String contentType=resource.getStringProperty(Page.UiKey.contentType);
       if (contentType != null) {
         response.setContentType(contentType);
       }

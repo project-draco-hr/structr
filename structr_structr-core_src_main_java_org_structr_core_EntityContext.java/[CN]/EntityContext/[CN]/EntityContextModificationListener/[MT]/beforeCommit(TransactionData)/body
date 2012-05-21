@@ -20,8 +20,10 @@
     RelationshipFactory relFactory=new RelationshipFactory(securityContext);
     Set<AbstractNode> modifiedNodes=new LinkedHashSet<AbstractNode>();
     Set<AbstractNode> createdNodes=new LinkedHashSet<AbstractNode>();
+    Set<AbstractNode> deletedNodes=new LinkedHashSet<AbstractNode>();
     Set<AbstractRelationship> modifiedRels=new LinkedHashSet<AbstractRelationship>();
     Set<AbstractRelationship> createdRels=new LinkedHashSet<AbstractRelationship>();
+    Set<AbstractRelationship> deletedRels=new LinkedHashSet<AbstractRelationship>();
     begin(securityContext,transactionKey,errorBuffer);
     for (    PropertyEntry<Node> entry : data.removedNodeProperties()) {
       Node node=entry.entity();
@@ -45,6 +47,8 @@
       propertyMap.put(entry.key(),entry.previouslyCommitedValue());
       if (!data.isDeleted(rel)) {
         modifiedRels.add(relFactory.createRelationship(securityContext,rel));
+        AbstractRelationship relationship=relFactory.createRelationship(securityContext,rel);
+        hasError|=propertyRemoved(securityContext,transactionKey,errorBuffer,relationship,entry.key(),entry.previouslyCommitedValue());
       }
     }
     for (    Node node : data.createdNodes()) {
@@ -60,6 +64,7 @@
     for (    Relationship rel : data.deletedRelationships()) {
       AbstractRelationship relationship=relFactory.createRelationship(securityContext,rel);
       hasError|=graphObjectDeleted(securityContext,transactionKey,errorBuffer,relationship,removedRelProperties.get(rel));
+      deletedRels.add(relationship);
     }
     for (    Node node : data.deletedNodes()) {
       hasError|=graphObjectDeleted(securityContext,transactionKey,errorBuffer,null,removedNodeProperties.get(node));
@@ -93,7 +98,7 @@
       modifiedRels.add(entity);
     }
     for (    AbstractNode node : modifiedNodes) {
-      if (!createdNodes.contains(node)) {
+      if (!createdNodes.contains(node) && !deletedNodes.contains(node)) {
         hasError|=graphObjectModified(securityContext,transactionKey,errorBuffer,node);
       }
  else {
@@ -101,7 +106,7 @@
       }
     }
     for (    AbstractRelationship rel : modifiedRels) {
-      if (!createdRels.contains(rel)) {
+      if (!createdRels.contains(rel) && !deletedRels.contains(rel)) {
         hasError|=graphObjectModified(securityContext,transactionKey,errorBuffer,rel);
       }
  else {

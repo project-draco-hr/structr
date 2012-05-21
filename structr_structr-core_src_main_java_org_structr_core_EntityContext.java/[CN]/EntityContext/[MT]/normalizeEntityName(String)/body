@@ -1,18 +1,40 @@
 {
-  if (possibleEntityName == null) {
+  if (possibleEntityString == null) {
     return null;
   }
-  String normalizedType=normalizedEntityNameCache.get(possibleEntityName);
-  if (normalizedType == null) {
-    normalizedType=StringUtils.capitalize(CaseHelper.toUpperCamelCase(possibleEntityName));
-    if (normalizedType.endsWith("ies")) {
-      normalizedType=normalizedType.substring(0,normalizedType.length() - 3).concat("y");
+  StringBuilder result=new StringBuilder();
+  if (possibleEntityString.contains("/")) {
+    String[] names=StringUtils.split(possibleEntityString,"/");
+    for (    String possibleEntityName : names) {
+      String normalizedType=normalizedEntityNameCache.get(possibleEntityName);
+      if (normalizedType == null) {
+        normalizedType=StringUtils.capitalize(CaseHelper.toUpperCamelCase(possibleEntityName));
+        if (normalizedType.endsWith("ies")) {
+          normalizedType=normalizedType.substring(0,normalizedType.length() - 3).concat("y");
+        }
+ else         if (!normalizedType.endsWith("ss") && normalizedType.endsWith("s")) {
+          logger.log(Level.FINEST,"Removing trailing plural 's' from type {0}",normalizedType);
+          normalizedType=normalizedType.substring(0,normalizedType.length() - 1);
+        }
+        normalizedEntityNameCache.put(possibleEntityName,normalizedType);
+      }
+      result.append(normalizedType).append("/");
     }
- else     if (!normalizedType.endsWith("ss") && normalizedType.endsWith("s")) {
-      logger.log(Level.FINEST,"Removing trailing plural 's' from type {0}",normalizedType);
-      normalizedType=normalizedType.substring(0,normalizedType.length() - 1);
-    }
-    normalizedEntityNameCache.put(possibleEntityName,normalizedType);
+    return StringUtils.removeEnd(result.toString(),"/");
   }
-  return normalizedType;
+ else {
+    String normalizedType=normalizedEntityNameCache.get(possibleEntityString);
+    if (normalizedType == null) {
+      normalizedType=StringUtils.capitalize(CaseHelper.toUpperCamelCase(possibleEntityString));
+      if (normalizedType.endsWith("ies")) {
+        normalizedType=normalizedType.substring(0,normalizedType.length() - 3).concat("y");
+      }
+ else       if (!normalizedType.endsWith("ss") && normalizedType.endsWith("s")) {
+        logger.log(Level.FINEST,"Removing trailing plural 's' from type {0}",normalizedType);
+        normalizedType=normalizedType.substring(0,normalizedType.length() - 1);
+      }
+      normalizedEntityNameCache.put(possibleEntityString,normalizedType);
+    }
+    return normalizedType;
+  }
 }

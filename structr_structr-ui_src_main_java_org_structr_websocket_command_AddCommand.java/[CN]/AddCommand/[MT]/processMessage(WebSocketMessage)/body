@@ -5,6 +5,7 @@
   String childContent=(String)nodeData.get("childContent");
   final Map<String,Object> relData=webSocketData.getRelData();
   String parentId=webSocketData.getId();
+  boolean newNodeCreated=false;
   if (parentId != null) {
     AbstractNode nodeToAdd=null;
     AbstractNode parentNode=getNode(parentId);
@@ -20,6 +21,7 @@
 ;
       try {
         nodeToAdd=(AbstractNode)Services.command(securityContext,TransactionCommand.class).execute(transaction);
+        newNodeCreated=true;
       }
  catch (      FrameworkException fex) {
         logger.log(Level.WARNING,"Could not create node.",fex);
@@ -32,7 +34,17 @@
       RelationClass rel=EntityContext.getRelationClass(parentNode.getClass(),nodeToAdd.getClass());
       if (rel != null) {
         try {
-          rel.createRelationship(securityContext,parentNode,nodeToAdd,relData);
+          if (newNodeCreated) {
+            rel.createRelationship(securityContext,parentNode,nodeToAdd,relData);
+          }
+ else {
+            for (            AbstractRelationship r : parentNode.getOutgoingRelationships(RelType.CONTAINS)) {
+              Long pos=r.getLongProperty(originalResourceId);
+              if (pos != null) {
+                r.setProperty(newResourceId,Long.parseLong((String)relData.get(newResourceId)));
+              }
+            }
+          }
           if ((originalResourceId != null) && (newResourceId != null) && !originalResourceId.equals(newResourceId)) {
             RelationshipHelper.tagOutgoingRelsWithResourceId(nodeToAdd,nodeToAdd,originalResourceId,newResourceId);
           }

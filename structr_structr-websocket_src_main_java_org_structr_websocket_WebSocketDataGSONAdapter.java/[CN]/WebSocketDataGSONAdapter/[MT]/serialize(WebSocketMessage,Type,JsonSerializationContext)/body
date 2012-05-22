@@ -1,6 +1,9 @@
 {
   JsonObject root=new JsonObject();
-  JsonObject data=new JsonObject();
+  JsonObject jsonNodeData=new JsonObject();
+  JsonObject jsonRelData=new JsonObject();
+  JsonArray removedProperties=new JsonArray();
+  JsonArray modifiedProperties=new JsonArray();
   if (src.getCommand() != null) {
     root.add("command",new JsonPrimitive(src.getCommand()));
   }
@@ -49,13 +52,28 @@
     root.add("nodesWithChildren",nodesWithChildren);
   }
   root.add("sessionValid",new JsonPrimitive(src.isSessionValid()));
-  if ((src.getGraphObject() != null) && !src.getModifiedProperties().isEmpty()) {
+  if ((src.getGraphObject() != null)) {
     GraphObject graphObject=src.getGraphObject();
-    for (    String modifiedKey : src.getModifiedProperties()) {
-      Object newValue=graphObject.getProperty(modifiedKey);
-      if (newValue != null) {
-        src.getNodeData().put(modifiedKey,newValue);
+    if (!src.getModifiedProperties().isEmpty()) {
+      for (      String modifiedKey : src.getModifiedProperties()) {
+        modifiedProperties.add(toJsonPrimitive(modifiedKey));
+        Object newValue=graphObject.getProperty(modifiedKey);
+        if (newValue != null) {
+          if (graphObject instanceof AbstractNode) {
+            src.getNodeData().put(modifiedKey,newValue);
+          }
+ else {
+            src.getRelData().put(modifiedKey,newValue);
+          }
+        }
       }
+      root.add("modifiedProperties",modifiedProperties);
+    }
+    if (!src.getRemovedProperties().isEmpty()) {
+      for (      String removedKey : src.getRemovedProperties()) {
+        removedProperties.add(toJsonPrimitive(removedKey));
+      }
+      root.add("removedProperties",removedProperties);
     }
   }
   if (src.getNodeData() != null) {
@@ -63,26 +81,20 @@
       Object value=entry.getValue();
       String key=entry.getKey();
       if (value != null) {
-        JsonPrimitive jp;
-        if (value instanceof String) {
-          jp=new JsonPrimitive((String)value);
-        }
- else         if (value instanceof Number) {
-          jp=new JsonPrimitive((Number)value);
-        }
- else         if (value instanceof Boolean) {
-          jp=new JsonPrimitive((Boolean)value);
-        }
- else         if (value instanceof Character) {
-          jp=new JsonPrimitive((Character)value);
-        }
- else {
-          jp=new JsonPrimitive(value.toString());
-        }
-        data.add(key,jp);
+        jsonNodeData.add(key,toJsonPrimitive(value));
       }
     }
-    root.add("data",data);
+    root.add("data",jsonNodeData);
+  }
+  if (src.getRelData() != null) {
+    for (    Entry<String,Object> entry : src.getRelData().entrySet()) {
+      Object value=entry.getValue();
+      String key=entry.getKey();
+      if (value != null) {
+        jsonRelData.add(key,toJsonPrimitive(value));
+      }
+    }
+    root.add("relData",jsonRelData);
   }
   if (src.getResult() != null) {
     if (src.getView() != null) {

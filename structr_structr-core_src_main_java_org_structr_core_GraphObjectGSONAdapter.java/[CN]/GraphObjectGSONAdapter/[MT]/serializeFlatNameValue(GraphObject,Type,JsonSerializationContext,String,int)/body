@@ -20,25 +20,7 @@
         key="id";
       }
       if (value instanceof Iterable) {
-        JsonArray property=new JsonArray();
-        for (        Object o : (Iterable)value) {
-          if (o != null) {
-            if (o instanceof GraphObject) {
-              GraphObject obj=(GraphObject)o;
-              JsonElement recursiveSerializedValue=this.serializeFlatNameValue(obj,typeOfSrc,context,localPropertyView,depth + 1);
-              if (recursiveSerializedValue != null) {
-                property.add(recursiveSerializedValue);
-              }
-            }
- else             if (o instanceof Map) {
-              property.add(serializeMap((Map)o,typeOfSrc,context,localPropertyView,false,false,depth));
-            }
- else {
-              property.add(primitive(o));
-            }
-          }
-        }
-        jsonObject.add(key,property);
+        jsonObject.add(key,serializeIterable((Iterable)value,typeOfSrc,context,localPropertyView,depth));
       }
  else       if (value instanceof GraphObject) {
         GraphObject graphObject=(GraphObject)value;

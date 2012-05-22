@@ -34,16 +34,16 @@
       RelationClass rel=EntityContext.getRelationClass(parentNode.getClass(),nodeToAdd.getClass());
       if (rel != null) {
         try {
-          if (newNodeCreated || (originalResourceId == null && newResourceId == null)) {
-            rel.createRelationship(securityContext,parentNode,nodeToAdd,relData);
-          }
- else {
-            for (            AbstractRelationship r : parentNode.getOutgoingRelationships(RelType.CONTAINS)) {
-              Long pos=r.getLongProperty(originalResourceId);
-              if (pos != null) {
-                r.setProperty(newResourceId,Long.parseLong((String)relData.get(newResourceId)));
-              }
+          boolean addedResourceIdProperty=false;
+          for (          AbstractRelationship r : parentNode.getOutgoingRelationships(RelType.CONTAINS)) {
+            if (r.getEndNode().equals(nodeToAdd) && r.getLongProperty(originalResourceId) != null) {
+              r.setProperty(newResourceId,Long.parseLong((String)relData.get(newResourceId)));
+              addedResourceIdProperty=true;
+              break;
             }
+          }
+          if (!addedResourceIdProperty) {
+            rel.createRelationship(securityContext,parentNode,nodeToAdd,relData);
           }
           if ((originalResourceId != null) && (newResourceId != null) && !originalResourceId.equals(newResourceId)) {
             RelationshipHelper.tagOutgoingRelsWithResourceId(nodeToAdd,nodeToAdd,originalResourceId,newResourceId);

@@ -2,12 +2,12 @@
   Map<String,String[]> parameterMap=request.getParameterMap();
   String path=PathHelper.clean(request.getPathInfo());
   String[] parts=PathHelper.getParts(path);
-  String resourcePath=parts[parts.length - 1];
-  postToRestUrl(request,resourcePath,convert(parameterMap));
+  String pagePath=parts[parts.length - 1];
+  postToRestUrl(request,pagePath,convert(parameterMap));
   String name=null;
   try {
     name=PathHelper.getParts(path)[0];
-    response.sendRedirect("/" + name + "//"+ resourcePath);
+    response.sendRedirect("/" + name + "//"+ pagePath);
   }
  catch (  IOException ex) {
     logger.log(Level.SEVERE,"Could not redirect to " + path,ex);

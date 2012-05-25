@@ -3,7 +3,7 @@
   String id=webSocketData.getId();
   String parentId=(String)webSocketData.getNodeData().get("id");
   final String componentId=(String)webSocketData.getNodeData().get("componentId");
-  final String resourceId=(String)webSocketData.getNodeData().get("resourceId");
+  final String pageId=(String)webSocketData.getNodeData().get("pageId");
   String position=(String)webSocketData.getNodeData().get("position");
   if ((id != null) && (parentId != null)) {
     final AbstractNode nodeToRemove=getNode(id);
@@ -17,18 +17,18 @@
           @Override public Object execute() throws FrameworkException {
             Command deleteRel=Services.command(securityContext,DeleteRelationshipCommand.class);
             List<AbstractRelationship> relsToShift=new LinkedList<AbstractRelationship>();
-            boolean hasResourceIds=true;
+            boolean hasPageId=true;
             for (            AbstractRelationship rel : rels) {
-              if (rel.getOtherNode(parentNode).equals(nodeToRemove) && ((componentId == null) || componentId.equals(rel.getStringProperty("componentId"))) && ((resourceId == null) || (rel.getProperty(resourceId) != null))) {
+              if (rel.getOtherNode(parentNode).equals(nodeToRemove) && ((componentId == null) || componentId.equals(rel.getStringProperty("componentId"))) && ((pageId == null) || (rel.getProperty(pageId) != null))) {
                 if (pos == null) {
                   deleteRel.execute(rel);
                 }
  else {
-                  if (pos.equals(rel.getLongProperty(resourceId))) {
-                    rel.removeProperty(resourceId);
-                    RelationshipHelper.untagOutgoingRelsFromResourceId(nodeToRemove,nodeToRemove,resourceId,resourceId);
-                    hasResourceIds=hasResourceIds(securityContext,rel);
-                    if (!hasResourceIds) {
+                  if (pos.equals(rel.getLongProperty(pageId))) {
+                    rel.removeProperty(pageId);
+                    RelationshipHelper.untagOutgoingRelsFromPageId(nodeToRemove,nodeToRemove,pageId,pageId);
+                    hasPageId=hasPageIds(securityContext,rel);
+                    if (!hasPageId) {
                       deleteRel.execute(rel);
                     }
                   }

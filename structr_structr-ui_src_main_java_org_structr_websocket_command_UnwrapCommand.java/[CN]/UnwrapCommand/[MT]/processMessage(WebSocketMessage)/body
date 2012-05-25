@@ -4,22 +4,22 @@
   final AbstractNode nodeToWrap=getNode(nodeId);
   final Map<String,Object> nodeData=webSocketData.getNodeData();
   final Map<String,Object> relData=webSocketData.getRelData();
-  final String resourceId=(String)relData.get("resourceId");
+  final String pageId=(String)relData.get("pageId");
   final String parentId=(String)nodeData.get("parentId");
   final AbstractNode parentNode=getNode(parentId);
-  final Long position=Long.parseLong((String)relData.get(resourceId));
+  final Long position=Long.parseLong((String)relData.get(pageId));
   if (nodeToWrap != null) {
     StructrTransaction transaction=new StructrTransaction(){
       @Override public Object execute() throws FrameworkException {
         Component newComponent=(Component)Services.command(securityContext,CreateNodeCommand.class).execute(nodeData);
         String componentId=newComponent.getStringProperty(AbstractNode.Key.uuid);
-        RelationshipHelper.moveIncomingRelationships(securityContext,nodeToWrap,newComponent,RelType.CONTAINS,resourceId,newComponent.getStringProperty(AbstractNode.Key.uuid),position);
+        RelationshipHelper.moveIncomingRelationships(securityContext,nodeToWrap,newComponent,RelType.CONTAINS,pageId,newComponent.getStringProperty(AbstractNode.Key.uuid),position);
         if ((parentNode != null) && (newComponent != null)) {
           RelationClass rel=EntityContext.getRelationClass(parentNode.getClass(),newComponent.getClass());
           if (rel != null) {
             Map<String,Object> relProps=new LinkedHashMap<String,Object>();
-            relProps.put(resourceId,0);
-            relProps.put("resourceId",resourceId);
+            relProps.put(pageId,0);
+            relProps.put("pageId",pageId);
             relProps.put("componentId",componentId);
             try {
               rel.createRelationship(securityContext,newComponent,nodeToWrap,relProps);

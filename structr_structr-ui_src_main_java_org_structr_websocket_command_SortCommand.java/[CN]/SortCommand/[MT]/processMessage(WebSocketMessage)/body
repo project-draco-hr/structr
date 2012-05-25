@@ -1,16 +1,16 @@
 {
-  String resourceId=webSocketData.getId();
-  AbstractNode node=getNode(resourceId);
+  String pageId=webSocketData.getId();
+  AbstractNode node=getNode(pageId);
   Map<String,Object> nodeData=webSocketData.getNodeData();
   if (node != null) {
     for (    String id : nodeData.keySet()) {
       AbstractNode nodeToSort=getNode(id);
       Long pos=Long.parseLong((String)nodeData.get(id));
       for (      AbstractRelationship rel : nodeToSort.getRelationships(RelType.CONTAINS,Direction.INCOMING)) {
-        Long oldPos=rel.getLongProperty(resourceId);
+        Long oldPos=rel.getLongProperty(pageId);
         if ((oldPos != null) && !(oldPos.equals(pos))) {
           try {
-            rel.setProperty(resourceId,pos);
+            rel.setProperty(pageId,pos);
           }
  catch (          FrameworkException fex) {
             fex.printStackTrace();

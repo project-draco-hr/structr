@@ -29,24 +29,24 @@
       }
     }
     if ((nodeToAdd != null) && (parentNode != null)) {
-      String originalResourceId=(String)nodeData.get("sourceResourceId");
-      String newResourceId=(String)nodeData.get("targetResourceId");
+      String originalPageId=(String)nodeData.get("sourcePageId");
+      String newPageId=(String)nodeData.get("targetPageId");
       RelationClass rel=EntityContext.getRelationClass(parentNode.getClass(),nodeToAdd.getClass());
       if (rel != null) {
         try {
-          boolean addedResourceIdProperty=false;
+          boolean addedPageIdProperty=false;
           for (          AbstractRelationship r : parentNode.getOutgoingRelationships(RelType.CONTAINS)) {
-            if (r.getEndNode().equals(nodeToAdd) && r.getLongProperty(originalResourceId) != null) {
-              r.setProperty(newResourceId,Long.parseLong((String)relData.get(newResourceId)));
-              addedResourceIdProperty=true;
+            if (r.getEndNode().equals(nodeToAdd) && r.getLongProperty(originalPageId) != null) {
+              r.setProperty(newPageId,Long.parseLong((String)relData.get(newPageId)));
+              addedPageIdProperty=true;
               break;
             }
           }
-          if (!addedResourceIdProperty) {
+          if (!addedPageIdProperty) {
             rel.createRelationship(securityContext,parentNode,nodeToAdd,relData);
           }
-          if ((originalResourceId != null) && (newResourceId != null) && !originalResourceId.equals(newResourceId)) {
-            RelationshipHelper.tagOutgoingRelsWithResourceId(nodeToAdd,nodeToAdd,originalResourceId,newResourceId);
+          if ((originalPageId != null) && (newPageId != null) && !originalPageId.equals(newPageId)) {
+            RelationshipHelper.tagOutgoingRelsWithPageId(nodeToAdd,nodeToAdd,originalPageId,newPageId);
           }
         }
  catch (        Throwable t) {
@@ -74,10 +74,10 @@
         }
         if (contentNode != null) {
           try {
-            relData.put(newResourceId,0L);
+            relData.put(newPageId,0L);
             rel.createRelationship(securityContext,nodeToAdd,contentNode,relData);
-            if ((originalResourceId != null) && (newResourceId != null) && !originalResourceId.equals(newResourceId)) {
-              RelationshipHelper.tagOutgoingRelsWithResourceId(contentNode,contentNode,originalResourceId,newResourceId);
+            if ((originalPageId != null) && (newPageId != null) && !originalPageId.equals(newPageId)) {
+              RelationshipHelper.tagOutgoingRelsWithPageId(contentNode,contentNode,originalPageId,newPageId);
             }
           }
  catch (          Throwable t) {

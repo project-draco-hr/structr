@@ -1,0 +1,12 @@
+{
+  Command getNode=Services.command(getSecurityContext(),GetNodeByIdCommand.class);
+  try {
+    File file=(File)getNode.execute(uuid);
+    if (file != null) {
+      uploads.put(uuid,new FileUploadHandler(file));
+    }
+  }
+ catch (  FrameworkException ex) {
+    logger.log(Level.WARNING,"File not found with id " + uuid,ex);
+  }
+}

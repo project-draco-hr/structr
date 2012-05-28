@@ -15,6 +15,7 @@
     getWebSocket().handleFileChunk(uuid,sequenceNumber,chunkSize,data);
   }
  catch (  Throwable t) {
-    getWebSocket().send(MessageBuilder.status().code(400).message("Invalid chunk: ".concat(t.getMessage())).build(),true);
+    String msg=t.getMessage();
+    getWebSocket().send(MessageBuilder.status().code(400).message("Invalid chunk: ".concat(msg != null ? msg : "")).build(),true);
   }
 }

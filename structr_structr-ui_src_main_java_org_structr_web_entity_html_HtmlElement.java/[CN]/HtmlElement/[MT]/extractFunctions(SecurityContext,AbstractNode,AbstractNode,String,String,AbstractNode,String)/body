@@ -2,11 +2,14 @@
   Matcher functionMatcher=threadLocalFunctionMatcher.get();
   functionMatcher.reset(source);
   if (functionMatcher.matches()) {
+    String viewComponentId=viewComponent != null ? viewComponent.getStringProperty(AbstractNode.Key.uuid) : null;
     String functionGroup=functionMatcher.group(1);
     String parameter=functionMatcher.group(2);
     String functionName=functionGroup.substring(0,functionGroup.length());
     Function<String,String> function=functions.get(functionName);
     if (function != null) {
+      function.setDataId(viewComponentId);
+      function.setPageId(pageId);
       if (parameter.contains(",")) {
         String[] parameters=split(parameter);
         String[] results=new String[parameters.length];

@@ -4,6 +4,12 @@
   String referenceKey=parts[parts.length - 1];
   for (int i=0; (i < parts.length) && (node != null); i++) {
     String part=parts[i];
+    if ("request".equals(part.toLowerCase())) {
+      HttpServletRequest request=securityContext.getRequest();
+      if (request != null) {
+        return request.getParameter(referenceKey);
+      }
+    }
     if ("component".equals(part.toLowerCase())) {
       node=getNodeById(securityContext,componentId);
       continue;

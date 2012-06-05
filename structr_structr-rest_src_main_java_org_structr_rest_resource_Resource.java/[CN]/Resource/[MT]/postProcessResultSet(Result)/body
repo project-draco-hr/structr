@@ -1,2 +1,17 @@
 {
+  if (result != null && result.getResults() != null && !result.getResults().isEmpty()) {
+    Class type=result.getResults().get(0).getClass();
+    String propertyView=result.getPropertyView();
+    if (type != null && propertyView != null) {
+      Transformation<List<? extends GraphObject>> transformation=EntityContext.getViewTransformation(type,propertyView);
+      if (transformation != null) {
+        try {
+          transformation.apply(securityContext,result.getResults());
+        }
+ catch (        Throwable t) {
+          t.printStackTrace();
+        }
+      }
+    }
+  }
 }

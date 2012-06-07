@@ -8,6 +8,14 @@
     clazz=converterMap.get(propertyKey);
     localType=localType.getSuperclass();
   }
+  if (clazz == null) {
+    for (    Class interfaceClass : type.getInterfaces()) {
+      clazz=getPropertyConverterMapForType(interfaceClass).get(propertyKey);
+      if (clazz != null) {
+        break;
+      }
+    }
+  }
   if (clazz != null) {
     try {
       propertyConverter=(PropertyConverter)clazz.newInstance();

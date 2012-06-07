@@ -5,5 +5,12 @@
     isWriteOnce=getWriteOncePropertySetForType(localType).contains(key);
     localType=localType.getSuperclass();
   }
+  if (!isWriteOnce) {
+    for (    Class interfaceClass : type.getInterfaces()) {
+      if (getWriteOncePropertySetForType(interfaceClass).contains(key)) {
+        return true;
+      }
+    }
+  }
   return isWriteOnce;
 }

@@ -5,5 +5,12 @@
     isReadOnly=getReadOnlyPropertySetForType(localType).contains(key);
     localType=localType.getSuperclass();
   }
+  if (!isReadOnly) {
+    for (    Class interfaceClass : type.getInterfaces()) {
+      if (getReadOnlyPropertySetForType(interfaceClass).contains(key)) {
+        return true;
+      }
+    }
+  }
   return isReadOnly;
 }

@@ -1,9 +1,17 @@
 {
   List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
   try {
-    Map<String,Class> entities=(Map)Services.command(SecurityContext.getSuperUserInstance(),GetEntitiesCommand.class).execute();
+    SecurityContext superUserContext=SecurityContext.getSuperUserInstance();
+    Map<String,Class> entities=(Map)Services.command(superUserContext,GetEntitiesCommand.class).execute();
     Class parentClass=entities.get(searchString);
     if (parentClass == null) {
+      ModuleService moduleService=(ModuleService)Services.command(superUserContext,GetModuleServiceCommand.class).execute();
+      Set<Class> classesForInterface=moduleService.getClassesForInterface(EntityContext.normalizeEntityName(searchString));
+      if (classesForInterface != null) {
+        for (        Class clazz : classesForInterface) {
+          attrs.addAll(andExactTypeAndSubtypes(clazz.getSimpleName()));
+        }
+      }
       return attrs;
     }
     for (    Map.Entry<String,Class> entity : entities.entrySet()) {

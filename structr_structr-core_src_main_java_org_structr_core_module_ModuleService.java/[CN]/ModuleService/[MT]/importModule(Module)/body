@@ -73,6 +73,15 @@
           String fullName=clazz.getName();
           nodeEntityClassCache.put(simpleName,clazz);
           nodeEntityPackages.add(fullName.substring(0,fullName.lastIndexOf(".")));
+          for (          Class interfaceClass : clazz.getInterfaces()) {
+            String interfaceName=interfaceClass.getSimpleName();
+            Set<Class> classesForInterface=interfaceCache.get(interfaceName);
+            if (classesForInterface == null) {
+              classesForInterface=new LinkedHashSet<Class>();
+              interfaceCache.put(interfaceName,classesForInterface);
+            }
+            classesForInterface.add(clazz);
+          }
         }
         if (AbstractRelationship.class.isAssignableFrom(clazz)) {
           String simpleName=clazz.getSimpleName();

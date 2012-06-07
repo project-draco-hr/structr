@@ -5,5 +5,13 @@
     relation=getPropertyRelationshipMapForType(localType).get(propertyKey);
     localType=localType.getSuperclass();
   }
+  if (relation == null) {
+    for (    Class interfaceClass : sourceType.getInterfaces()) {
+      relation=getPropertyRelationshipMapForType(interfaceClass).get(propertyKey);
+      if (relation != null) {
+        return relation;
+      }
+    }
+  }
   return relation;
 }

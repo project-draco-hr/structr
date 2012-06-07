@@ -6,15 +6,15 @@
   while ((clazz == null) && !localType.equals(Object.class)) {
     converterMap=getPropertyConverterMapForType(localType);
     clazz=converterMap.get(propertyKey);
-    localType=localType.getSuperclass();
-  }
-  if (clazz == null) {
-    for (    Class interfaceClass : getInterfacesForType(type)) {
-      clazz=getPropertyConverterMapForType(interfaceClass).get(propertyKey);
-      if (clazz != null) {
-        break;
+    if (clazz == null) {
+      for (      Class interfaceClass : getInterfacesForType(type)) {
+        clazz=getPropertyConverterMapForType(interfaceClass).get(propertyKey);
+        if (clazz != null) {
+          break;
+        }
       }
     }
+    localType=localType.getSuperclass();
   }
   if (clazz != null) {
     try {

@@ -1,14 +1,20 @@
 {
+  Set<PropertyValidator> validators=new LinkedHashSet<PropertyValidator>();
   Map<String,Set<PropertyValidator>> validatorMap=null;
-  Set<PropertyValidator> validators=null;
   Class localType=type;
-  while ((validators == null) && !localType.equals(Object.class)) {
+  while (!localType.equals(Object.class)) {
     validatorMap=getPropertyValidatorMapForType(localType);
-    validators=validatorMap.get(propertyKey);
+    Set<PropertyValidator> classValidators=validatorMap.get(propertyKey);
+    if (classValidators != null) {
+      validators.addAll(validatorMap.get(propertyKey));
+    }
     localType=localType.getSuperclass();
   }
-  for (  Class interfaceClass : type.getInterfaces()) {
-    validators.addAll(getPropertyValidatorMapForType(interfaceClass).get(propertyKey));
+  for (  Class interfaceClass : getInterfacesForType(type)) {
+    Set<PropertyValidator> interfaceValidators=getPropertyValidatorMapForType(interfaceClass).get(propertyKey);
+    if (interfaceValidators != null) {
+      validators.addAll(interfaceValidators);
+    }
   }
   return validators;
 }

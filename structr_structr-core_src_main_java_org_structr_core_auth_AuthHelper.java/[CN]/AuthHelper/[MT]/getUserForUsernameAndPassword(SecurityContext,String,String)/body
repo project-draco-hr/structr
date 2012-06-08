@@ -23,7 +23,8 @@
           errorMsg="You should enter a password.";
         }
         String encryptedPasswordValue=DigestUtils.sha512Hex(password);
-        if (!encryptedPasswordValue.equals(user.getEncryptedPassword())) {
+        String pw=user.getEncryptedPassword();
+        if (pw == null || !encryptedPasswordValue.equals(pw)) {
           logger.log(Level.INFO,"Wrong password for user {0}",user);
           errorMsg=STANDARD_ERROR_MSG;
         }

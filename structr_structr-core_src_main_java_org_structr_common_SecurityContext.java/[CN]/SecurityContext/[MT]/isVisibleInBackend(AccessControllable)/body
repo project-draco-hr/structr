@@ -1,19 +1,16 @@
 {
   if (node == null) {
-    return (false);
+    return false;
   }
   Principal user=getUser();
   if (user == null) {
-    return (false);
+    return false;
   }
   if (user instanceof SuperUser) {
     return true;
   }
-  if (!user.isBackendUser()) {
-    return (false);
+  if (isAllowedInBackend(node,Permission.read)) {
+    return true;
   }
-  if (isAllowedInBackend(node,Permission.Read)) {
-    return (true);
-  }
-  return (false);
+  return false;
 }

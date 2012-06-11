@@ -1,23 +1,31 @@
 {
   RelationClass relation=null;
   Class localType=sourceType;
-  while ((relation == null) && !localType.equals(Object.class)) {
+  while ((relation == null) && localType != null && !localType.equals(Object.class)) {
     relation=getRelationClassMapForType(localType).get(destType);
-    if (relation == null) {
-      for (      Class interfaceClass : getInterfacesForType(localType)) {
-        relation=getRelationClassMapForType(interfaceClass).get(destType);
-        if (relation != null) {
-          break;
-        }
-      }
-    }
     localType=localType.getSuperclass();
   }
   if (relation == null) {
+    for (    Class interfaceClass : getInterfacesForType(sourceType)) {
+      relation=getRelationClassMapForType(interfaceClass).get(destType);
+      if (relation != null) {
+        break;
+      }
+    }
+  }
+  if (relation == null) {
     localType=destType;
-    while ((relation == null) && !localType.equals(Object.class)) {
+    while ((relation == null) && localType != null && !localType.equals(Object.class)) {
       relation=getRelationClassMapForType(sourceType).get(localType);
       localType=localType.getSuperclass();
+    }
+  }
+  if (relation == null) {
+    for (    Class interfaceClass : getInterfacesForType(destType)) {
+      relation=getRelationClassMapForType(sourceType).get(interfaceClass);
+      if (relation != null) {
+        break;
+      }
     }
   }
   return relation;

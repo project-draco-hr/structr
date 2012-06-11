@@ -6,9 +6,13 @@
     if (input.iterator().hasNext()) {
       for (      Node node : input) {
         AbstractNode n=createNode(securityContext,graphDb.getNodeById((Long)node.getProperty("id")));
-        addIfReadable(securityContext,n,nodes,includeDeleted,publicOnly);
+        if (n != null && isReadable(securityContext,n,includeDeleted,publicOnly)) {
+          nodes.add(n);
+        }
         for (        AbstractNode nodeAt : getNodesAt(n)) {
-          addIfReadable(securityContext,nodeAt,nodes,includeDeleted,publicOnly);
+          if (nodeAt != null && isReadable(securityContext,nodeAt,includeDeleted,publicOnly)) {
+            nodes.add(nodeAt);
+          }
         }
       }
     }
@@ -17,7 +21,9 @@
     if ((input != null) && input.iterator().hasNext()) {
       for (      Node node : input) {
         AbstractNode n=createNode(securityContext,(Node)node);
-        addIfReadable(securityContext,n,nodes,includeDeleted,publicOnly);
+        if (n != null && isReadable(securityContext,n,includeDeleted,publicOnly)) {
+          nodes.add(n);
+        }
       }
     }
   }

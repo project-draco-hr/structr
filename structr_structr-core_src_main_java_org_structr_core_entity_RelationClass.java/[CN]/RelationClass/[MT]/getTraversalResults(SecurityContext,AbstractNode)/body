@@ -1,5 +1,5 @@
 {
-  final NodeFactory nodeFactory=new NodeFactory<AbstractNode>(securityContext);
+  final NodeFactory nodeFactory=new NodeFactory<AbstractNode>();
   final List<AbstractNode> nodeList=new LinkedList<AbstractNode>();
   Iterable<Node> nodes=Traversal.description().uniqueness(Uniqueness.NODE_PATH).breadthFirst().relationships(relType,direction).evaluator(new Evaluator(){
     @Override public Evaluation evaluate(    Path path){
@@ -11,16 +11,18 @@
  else {
           try {
             AbstractNode abstractNode=(AbstractNode)nodeFactory.createNode(securityContext,path.endNode());
-            if ((destType != null) && destType.isAssignableFrom(abstractNode.getClass())) {
-              nodeList.add(abstractNode);
-              return Evaluation.INCLUDE_AND_CONTINUE;
-            }
+            if (abstractNode != null) {
+              if ((destType != null) && destType.isAssignableFrom(abstractNode.getClass())) {
+                nodeList.add(abstractNode);
+                return Evaluation.INCLUDE_AND_CONTINUE;
+              }
  else {
-              return Evaluation.EXCLUDE_AND_CONTINUE;
+                return Evaluation.EXCLUDE_AND_CONTINUE;
+              }
             }
           }
  catch (          FrameworkException fex) {
-            logger.log(Level.WARNING,"Unable to instantiate node",fex);
+            logger.log(Level.WARNING,"Unable to instaniate node: {0}",fex.getMessage());
           }
         }
       }

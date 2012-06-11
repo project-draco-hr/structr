@@ -1,3 +1,9 @@
 {
-  return (new IterableAdapter<Node,AbstractNode>(getRawNodes(),new NodeFactory()));
+  try {
+    return new NodeFactory().createNodes(securityContext,getRawNodes());
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"Unable to instantiate nodes: {0}",fex.getMessage());
+  }
+  return Collections.emptyList();
 }

@@ -1,0 +1,18 @@
+{
+  if (node.isHidden()) {
+    return false;
+  }
+  if (node.isDeleted() && !includeDeleted) {
+    return false;
+  }
+  if (node.isVisibleToPublicUsers()) {
+    return true;
+  }
+  if (publicOnly) {
+    return false;
+  }
+  if (securityContext.isAllowed(node,Permission.read)) {
+    return true;
+  }
+  return false;
+}

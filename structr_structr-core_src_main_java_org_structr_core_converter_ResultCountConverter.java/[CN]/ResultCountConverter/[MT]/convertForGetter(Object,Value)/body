@@ -1,17 +1,23 @@
 {
-  Object result=this.currentObject.getProperty((((PropertyKey)value.get()).name()));
-  if (result == null)   return 0;
-  if (result instanceof List) {
-    return ((List)result).size();
-  }
-  if (result instanceof IterableAdapter) {
-    int count=0;
-    Iterator it=((IterableAdapter)result).iterator();
-    while (it.hasNext()) {
-      it.next();
-      count++;
+  int count=0;
+  if (currentObject != null && value != null) {
+    Object val=value.get();
+    if (val != null) {
+      Object toCount=currentObject.getProperty(val.toString());
+      if (toCount != null) {
+        if (toCount instanceof Collection) {
+          count=((Collection)toCount).size();
+        }
+ else         if (toCount instanceof Iterable) {
+          for (          Object o : ((Iterable)toCount)) {
+            count++;
+          }
+        }
+ else {
+          count=1;
+        }
+      }
     }
-    return count;
   }
-  return 1;
+  return count;
 }

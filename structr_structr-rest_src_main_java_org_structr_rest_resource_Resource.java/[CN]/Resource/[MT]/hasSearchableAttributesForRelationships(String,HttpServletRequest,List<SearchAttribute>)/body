@@ -1,0 +1,35 @@
+{
+  boolean hasSearchableAttributes=false;
+  if ((rawType != null) && (request != null) && !request.getParameterMap().isEmpty()) {
+    boolean looseSearch=parseInteger(request.getParameter(JsonRestServlet.REQUEST_PARAMETER_LOOSE_SEARCH)) == 1;
+    Set<String> searchableProperties=null;
+    if (looseSearch) {
+      searchableProperties=EntityContext.getSearchableProperties(rawType,NodeService.RelationshipIndex.rel_fulltext.name());
+    }
+ else {
+      searchableProperties=EntityContext.getSearchableProperties(rawType,NodeService.RelationshipIndex.rel_keyword.name());
+    }
+    if (searchableProperties != null) {
+      checkForIllegalSearchKeys(request,searchableProperties);
+      for (      String key : searchableProperties) {
+        String searchValue=request.getParameter(key);
+        if (searchValue != null) {
+          if (looseSearch) {
+            if (searchValue.contains("\"")) {
+              searchValue=searchValue.replaceAll("[\"]+","");
+            }
+            if (searchValue.contains("'")) {
+              searchValue=searchValue.replaceAll("[']+","");
+            }
+            searchAttributes.add(Search.andProperty(key,searchValue));
+          }
+ else {
+            searchAttributes.add(Search.andExactProperty(key,searchValue));
+          }
+          hasSearchableAttributes=true;
+        }
+      }
+    }
+  }
+  return hasSearchableAttributes;
+}

@@ -1,9 +1,9 @@
 {
   GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
-  Index<Relationship> index;
   RelationshipFactory relationshipFactory=(RelationshipFactory)arguments.get("relationshipFactory");
   List<AbstractRelationship> finalResult=new LinkedList<AbstractRelationship>();
   boolean allExactMatch=true;
+  final Index<Relationship> index;
   if (graphDb != null) {
     BooleanQuery query=new BooleanQuery();
     List<FilterSearchAttribute> filters=new LinkedList<FilterSearchAttribute>();
@@ -53,19 +53,26 @@
       IndexHits hits;
       if ((textualAttributes.size() == 1) && textualAttributes.get(0).getKey().equals(AbstractRelationship.Key.uuid.name())) {
         index=(Index<Relationship>)arguments.get(RelationshipIndex.rel_uuid.name());
-        hits=index.get(AbstractNode.Key.uuid.name(),decodeExactMatch(textualAttributes.get(0).getValue()));
+synchronized (index) {
+          hits=index.get(AbstractNode.Key.uuid.name(),decodeExactMatch(textualAttributes.get(0).getValue()));
+        }
       }
  else       if ((textualAttributes.size() > 1) && allExactMatch) {
         index=(Index<Relationship>)arguments.get(RelationshipIndex.rel_keyword.name());
-        hits=index.query(queryContext);
+synchronized (index) {
+          hits=index.query(queryContext);
+        }
       }
  else {
         index=(Index<Relationship>)arguments.get(RelationshipIndex.rel_fulltext.name());
-        hits=index.query(queryContext);
+synchronized (index) {
+          hits=index.query(queryContext);
+        }
       }
       long t1=System.currentTimeMillis();
       logger.log(Level.FINE,"Querying index took {0} ms, size() says {1} results.",new Object[]{t1 - t0,hits.size()});
       intermediateResult=relationshipFactory.createRelationships(securityContext,hits);
+      hits.close();
       long t2=System.currentTimeMillis();
       logger.log(Level.FINE,"Creating structr relationships took {0} ms, {1} relationships made.",new Object[]{t2 - t1,intermediateResult.size()});
     }

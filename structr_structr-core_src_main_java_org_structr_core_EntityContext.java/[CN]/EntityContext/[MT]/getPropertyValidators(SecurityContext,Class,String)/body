@@ -8,13 +8,13 @@
     if (classValidators != null) {
       validators.addAll(validatorMap.get(propertyKey));
     }
-    localType=localType.getSuperclass();
-  }
-  for (  Class interfaceClass : getInterfacesForType(type)) {
-    Set<PropertyValidator> interfaceValidators=getPropertyValidatorMapForType(interfaceClass).get(propertyKey);
-    if (interfaceValidators != null) {
-      validators.addAll(interfaceValidators);
+    for (    Class interfaceClass : getInterfacesForType(localType)) {
+      Set<PropertyValidator> interfaceValidators=getPropertyValidatorMapForType(interfaceClass).get(propertyKey);
+      if (interfaceValidators != null) {
+        validators.addAll(interfaceValidators);
+      }
     }
+    localType=localType.getSuperclass();
   }
   return validators;
 }

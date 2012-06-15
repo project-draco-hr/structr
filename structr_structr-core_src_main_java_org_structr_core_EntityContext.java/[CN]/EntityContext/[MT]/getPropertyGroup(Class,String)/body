@@ -1,3 +1,17 @@
 {
-  return getPropertyGroupMapForType(type).get(key);
+  PropertyGroup group=null;
+  Class localType=type;
+  while (group == null && localType != null && !localType.equals(Object.class)) {
+    group=getPropertyGroupMapForType(localType).get(key);
+    localType=localType.getSuperclass();
+  }
+  if (group == null) {
+    for (    Class interfaceClass : getInterfacesForType(type)) {
+      group=getPropertyGroupMapForType(interfaceClass).get(key);
+      if (group != null) {
+        break;
+      }
+    }
+  }
+  return group;
 }

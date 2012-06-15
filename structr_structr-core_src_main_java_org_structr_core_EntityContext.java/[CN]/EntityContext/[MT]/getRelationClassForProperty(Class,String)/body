@@ -3,15 +3,15 @@
   Class localType=sourceType;
   while ((relation == null) && !localType.equals(Object.class)) {
     relation=getPropertyRelationshipMapForType(localType).get(propertyKey);
-    localType=localType.getSuperclass();
-  }
-  if (relation == null) {
-    for (    Class interfaceClass : getInterfacesForType(sourceType)) {
-      relation=getPropertyRelationshipMapForType(interfaceClass).get(propertyKey);
-      if (relation != null) {
-        return relation;
+    if (relation == null) {
+      for (      Class interfaceClass : getInterfacesForType(localType)) {
+        relation=getPropertyRelationshipMapForType(interfaceClass).get(propertyKey);
+        if (relation != null) {
+          return relation;
+        }
       }
     }
+    localType=localType.getSuperclass();
   }
   return relation;
 }

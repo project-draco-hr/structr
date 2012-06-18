@@ -2,7 +2,6 @@
   try {
     String rawQuery=getStringProperty("query");
     String query=rawQuery;
-    boolean matchedKey=false;
     if (request != null) {
       Pattern pattern=Pattern.compile("\\$\\{request.(.*)\\}");
       Matcher matcher=pattern.matcher(rawQuery);
@@ -11,15 +10,11 @@
         System.out.println("key: " + key);
         String value=request.getParameter(key);
         if (StringUtils.isNotEmpty(value)) {
-          query=StringUtils.replace(query,"${request." + key + "}",value);
-          matchedKey=true;
+          query=StringUtils.replace(rawQuery,"${request." + key + "}",value);
         }
       }
-      if (matchedKey) {
-        return (List<GraphObject>)Services.command(securityContext,CypherQueryCommand.class).execute(query);
-      }
     }
-    return Collections.EMPTY_LIST;
+    return (List<GraphObject>)Services.command(securityContext,CypherQueryCommand.class).execute(query);
   }
  catch (  Throwable t) {
     t.printStackTrace();

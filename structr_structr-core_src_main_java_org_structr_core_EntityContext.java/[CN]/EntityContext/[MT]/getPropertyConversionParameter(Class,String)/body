@@ -5,15 +5,15 @@
   while ((value == null) && !localType.equals(Object.class)) {
     conversionParameterMap=getPropertyConversionParameterMapForType(localType);
     value=conversionParameterMap.get(propertyKey);
-    localType=localType.getSuperclass();
-  }
-  if (value == null) {
-    for (    Class interfaceClass : getInterfacesForType(type)) {
-      value=getPropertyConversionParameterMapForType(interfaceClass).get(propertyKey);
-      if (value != null) {
-        break;
+    if (value == null) {
+      for (      Class interfaceClass : getInterfacesForType(localType)) {
+        value=getPropertyConversionParameterMapForType(interfaceClass).get(propertyKey);
+        if (value != null) {
+          break;
+        }
       }
     }
+    localType=localType.getSuperclass();
   }
   return value;
 }

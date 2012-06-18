@@ -3,13 +3,13 @@
   for (  String property : propertySet) {
     properties.add(((viewPrefix != null) ? viewPrefix : "").concat(property));
   }
-  Class superClass=type.getSuperclass();
-  while ((superClass != null) && !superClass.equals(Object.class)) {
-    Set<String> superProperties=getPropertySet(superClass,propertyView);
+  Class localType=type.getSuperclass();
+  while ((localType != null) && !localType.equals(Object.class)) {
+    Set<String> superProperties=getPropertySet(localType,propertyView);
     properties.addAll(superProperties);
-    superClass=superClass.getSuperclass();
-  }
-  for (  Class interfaceClass : getInterfacesForType(type)) {
-    properties.addAll(getPropertySet(interfaceClass,propertyView));
+    for (    Class interfaceClass : getInterfacesForType(localType)) {
+      properties.addAll(getPropertySet(interfaceClass,propertyView));
+    }
+    localType=localType.getSuperclass();
   }
 }

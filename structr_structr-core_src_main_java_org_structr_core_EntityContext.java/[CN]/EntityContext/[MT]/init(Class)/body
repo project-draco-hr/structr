@@ -7,14 +7,14 @@
       searchablePropertySet=new LinkedHashSet<String>();
       searchablePropertyMapForType.put(indexName,searchablePropertySet);
     }
-    Class superClass=type.getSuperclass();
-    while ((superClass != null) && !superClass.equals(Object.class)) {
-      Set<String> superProperties=getSearchableProperties(superClass,indexName);
+    Class localType=type.getSuperclass();
+    while ((localType != null) && !localType.equals(Object.class)) {
+      Set<String> superProperties=getSearchableProperties(localType,indexName);
       searchablePropertySet.addAll(superProperties);
-      superClass=superClass.getSuperclass();
-    }
-    for (    Class interfaceClass : getInterfacesForType(type)) {
-      searchablePropertySet.addAll(getSearchableProperties(interfaceClass,indexName));
+      for (      Class interfaceClass : getInterfacesForType(localType)) {
+        searchablePropertySet.addAll(getSearchableProperties(interfaceClass,indexName));
+      }
+      localType=localType.getSuperclass();
     }
   }
 }

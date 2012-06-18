@@ -1,12 +1,19 @@
 {
-  Resource pagedSortedConstraint=finalConstraint;
+  Resource pagedSortedResource=finalResource;
+  Class type=finalResource.getEntityClass();
+  if (type != null) {
+    Transformation<List<? extends GraphObject>> transformation=EntityContext.getViewTransformation(type,propertyView.get());
+    if (transformation != null) {
+      pagedSortedResource=pagedSortedResource.tryCombineWith(new TransformationResource(securityContext,transformation));
+    }
+  }
   String sortKey=request.getParameter(REQUEST_PARAMETER_SORT_KEY);
   if (sortKey != null) {
     String sortOrder=request.getParameter(REQUEST_PARAMETER_SORT_ORDER);
     if (sortOrder == null) {
       sortOrder=DEFAULT_VALUE_SORT_ORDER;
     }
-    pagedSortedConstraint=pagedSortedConstraint.tryCombineWith(new SortResource(securityContext,sortKey,sortOrder));
+    pagedSortedResource=pagedSortedResource.tryCombineWith(new SortResource(securityContext,sortKey,sortOrder));
   }
   String pageSizeParameter=request.getParameter(REQUEST_PARAMETER_PAGE_SIZE);
   if (pageSizeParameter != null) {
@@ -16,7 +23,7 @@
     if (pageSize <= 0) {
       throw new IllegalPathException();
     }
-    pagedSortedConstraint=pagedSortedConstraint.tryCombineWith(new PagingResource(securityContext,page,pageSize));
+    pagedSortedResource=pagedSortedResource.tryCombineWith(new PagingResource(securityContext,page,pageSize));
   }
-  return pagedSortedConstraint;
+  return pagedSortedResource;
 }

@@ -1,0 +1,15 @@
+{
+  if (wrappedResource != null) {
+    List<? extends GraphObject> results=wrappedResource.doGet();
+    if (transformation != null) {
+      try {
+        transformation.apply(securityContext,results);
+      }
+ catch (      Throwable t) {
+        t.printStackTrace();
+      }
+    }
+    return results;
+  }
+  return Collections.emptyList();
+}

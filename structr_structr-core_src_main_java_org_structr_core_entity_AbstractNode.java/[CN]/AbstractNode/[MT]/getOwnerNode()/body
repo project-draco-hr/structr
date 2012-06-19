@@ -2,6 +2,10 @@
   if (cachedOwnerNode == null) {
     for (    AbstractRelationship s : getRelationships(RelType.OWNS,Direction.INCOMING)) {
       AbstractNode n=s.getStartNode();
+      if (n == null) {
+        logger.log(Level.WARNING,"Could not determine owner node!");
+        return null;
+      }
       if (n instanceof Principal) {
         cachedOwnerNode=(Principal)n;
         break;

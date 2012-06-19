@@ -3,6 +3,9 @@
     securityRelationships=new HashMap<Long,AbstractRelationship>();
   }
   for (  AbstractRelationship r : getRelationships(RelType.SECURITY,Direction.INCOMING)) {
-    securityRelationships.put(r.getStartNode().getId(),r);
+    Principal owner=(Principal)r.getStartNode();
+    if (owner != null) {
+      securityRelationships.put(owner.getId(),r);
+    }
   }
 }

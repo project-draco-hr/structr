@@ -7,8 +7,15 @@
   }
  else {
     try {
-      Command findUser=Services.command(securityContext,FindUserCommand.class);
-      user=(Principal)findUser.execute(userName);
+      ;
+      Command findNode=Services.command(securityContext,SearchNodeCommand.class);
+      List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
+      attrs.add(Search.andExactTypeAndSubtypes(Principal.class.getSimpleName()));
+      attrs.add(Search.andExactName(userName));
+      List<Principal> userList=(List<Principal>)findNode.execute(null,false,false,attrs);
+      if (!userList.isEmpty()) {
+        user=userList.get(0);
+      }
       if (user == null) {
         logger.log(Level.INFO,"No user found for name {0}",userName);
         errorMsg=STANDARD_ERROR_MSG;

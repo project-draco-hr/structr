@@ -1,17 +1,18 @@
 {
-  if (source != null) {
-    try {
-      if (source instanceof Boolean) {
-        return ((Boolean)source);
-      }
- else       if (source instanceof String) {
-        return BooleanUtils.toBoolean((String)source,"true","false");
-      }
+  if (source == null) {
+    return false;
+  }
+  try {
+    if (source instanceof Boolean) {
+      return ((Boolean)source);
     }
- catch (    Throwable t) {
-      logger.log(Level.WARNING,"Exception while parsing boolean",t);
-      return null;
+ else     if (source instanceof String) {
+      return BooleanUtils.toBoolean((String)source,"true","false");
     }
+  }
+ catch (  Throwable t) {
+    logger.log(Level.WARNING,"Exception while parsing boolean",t);
+    return null;
   }
   return source;
 }

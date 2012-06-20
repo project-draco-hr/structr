@@ -31,7 +31,7 @@
         }
       }
       if ((contentType == null || contentType.equals("text/plain")) && (content != null) && !content.isEmpty()) {
-        content=content.replaceAll("[\\n]{1}","<br>");
+        content=content.replaceAll("[\\n]{1}","<br>\n");
       }
     }
     if (startNode instanceof Component) {
@@ -43,6 +43,9 @@
     if (StringUtils.isNotBlank(tag)) {
       if (tag.equals("body")) {
         inBody=true;
+      }
+      for (int d=1; d < depth; d++) {
+        buffer.append("  ");
       }
       buffer.append("<").append(tag);
       if (edit && (id != null)) {
@@ -73,10 +76,13 @@
           }
         }
       }
-      buffer.append(">");
+      buffer.append(">\n");
     }
     if (content != null) {
-      buffer.append(content);
+      for (int d=1; d < depth; d++) {
+        buffer.append("  ");
+      }
+      buffer.append(content).append("\n");
     }
   }
   if (startNode instanceof View) {
@@ -108,7 +114,10 @@
       }
     }
   }
-  if (StringUtils.isNotBlank(tag) && !html5VoidTags.contains(tag)) {
-    buffer.append("</").append(tag).append(">");
+  if (StringUtils.isNotBlank(tag) && startNode instanceof HtmlElement && !((HtmlElement)startNode).isVoidElement()) {
+    for (int d=1; d < depth; d++) {
+      buffer.append("  ");
+    }
+    buffer.append("</").append(tag).append(">\n");
   }
 }

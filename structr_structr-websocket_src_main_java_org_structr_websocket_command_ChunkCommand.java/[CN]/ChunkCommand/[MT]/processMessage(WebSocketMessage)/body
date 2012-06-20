@@ -13,9 +13,10 @@
       }
     }
     getWebSocket().handleFileChunk(uuid,sequenceNumber,chunkSize,data);
+    getWebSocket().send(MessageBuilder.status().code(200).message("File saved successfully!").build(),true);
   }
  catch (  Throwable t) {
-    String msg=t.getMessage();
-    getWebSocket().send(MessageBuilder.status().code(400).message("Invalid chunk: ".concat(msg != null ? msg : "")).build(),true);
+    String msg=t.toString();
+    getWebSocket().send(MessageBuilder.status().code(400).message("Could not process chunk data: ".concat((msg != null) ? msg : "")).build(),true);
   }
 }

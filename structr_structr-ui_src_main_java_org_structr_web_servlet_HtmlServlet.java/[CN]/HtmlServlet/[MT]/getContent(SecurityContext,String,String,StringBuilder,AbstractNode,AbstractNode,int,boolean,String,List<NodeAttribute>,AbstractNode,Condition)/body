@@ -3,6 +3,7 @@
   String content=null;
   String tag=null;
   StringBuilder indent=new StringBuilder();
+  HttpServletRequest request=securityContext.getRequest();
   for (int d=1; d < depth; d++) {
     indent.append("  ");
   }
@@ -82,14 +83,28 @@
       buffer.append(ind).append(content).append("\n");
     }
   }
-  if (startNode instanceof View) {
-    List<GraphObject> components=((View)startNode).getGraphObjects(request);
-    for (    GraphObject component : components) {
+  if (startNode instanceof SearchResultView) {
+    String searchString=(String)request.getParameter("search");
+    if (request != null && StringUtils.isNotBlank(searchString)) {
+      for (      Page resultPage : getResultPages(securityContext,(Page)page)) {
+        List<AbstractRelationship> rels=Component.getChildRelationships(request,startNode,pageId,localComponentId);
+        for (        AbstractRelationship rel : rels) {
+          if ((condition == null) || ((condition != null) && condition.isSatisfied(request,rel))) {
+            AbstractNode subNode=rel.getEndNode();
+            getContent(securityContext,pageId,localComponentId,buffer,page,subNode,depth,inBody,searchClass,attrs,resultPage,condition);
+          }
+        }
+      }
+    }
+  }
+ else   if (startNode instanceof View) {
+    List<GraphObject> results=((View)startNode).getGraphObjects(request);
+    for (    GraphObject result : results) {
       List<AbstractRelationship> rels=Component.getChildRelationships(request,startNode,pageId,localComponentId);
       for (      AbstractRelationship rel : rels) {
         if ((condition == null) || ((condition != null) && condition.isSatisfied(request,rel))) {
           AbstractNode subNode=rel.getEndNode();
-          getContent(request,pageId,localComponentId,buffer,page,subNode,depth,inBody,searchClass,attrs,(AbstractNode)component,condition);
+          getContent(securityContext,pageId,localComponentId,buffer,page,subNode,depth,inBody,searchClass,attrs,(AbstractNode)result,condition);
         }
       }
     }
@@ -99,7 +114,7 @@
     Condition newCondition=(Condition)startNode;
     for (    AbstractRelationship rel : rels) {
       AbstractNode subNode=rel.getEndNode();
-      getContent(request,pageId,localComponentId,buffer,page,subNode,depth + 1,inBody,searchClass,attrs,viewComponent,newCondition);
+      getContent(securityContext,pageId,localComponentId,buffer,page,subNode,depth + 1,inBody,searchClass,attrs,viewComponent,newCondition);
     }
   }
  else {
@@ -107,7 +122,7 @@
     for (    AbstractRelationship rel : rels) {
       if ((condition == null) || ((condition != null) && condition.isSatisfied(request,rel))) {
         AbstractNode subNode=rel.getEndNode();
-        getContent(request,pageId,localComponentId,buffer,page,subNode,depth + 1,inBody,searchClass,attrs,viewComponent,condition);
+        getContent(securityContext,pageId,localComponentId,buffer,page,subNode,depth + 1,inBody,searchClass,attrs,viewComponent,condition);
       }
     }
   }

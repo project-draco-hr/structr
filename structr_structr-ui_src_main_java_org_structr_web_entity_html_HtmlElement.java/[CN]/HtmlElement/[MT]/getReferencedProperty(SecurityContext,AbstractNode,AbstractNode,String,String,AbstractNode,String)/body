@@ -7,7 +7,7 @@
     if ("request".equals(part.toLowerCase())) {
       HttpServletRequest request=securityContext.getRequest();
       if (request != null) {
-        return request.getParameter(referenceKey);
+        return StringUtils.defaultString(request.getParameter(referenceKey));
       }
     }
     if ("component".equals(part.toLowerCase())) {
@@ -56,6 +56,13 @@
       }
       node=pages.get(0);
       continue;
+    }
+    if ("result_size".equals(part.toLowerCase())) {
+      Set<Page> pages=HtmlServlet.getResultPages(securityContext,(Page)page);
+      if (!pages.isEmpty()) {
+        return pages.size();
+      }
+      return 0;
     }
   }
   if (node != null) {

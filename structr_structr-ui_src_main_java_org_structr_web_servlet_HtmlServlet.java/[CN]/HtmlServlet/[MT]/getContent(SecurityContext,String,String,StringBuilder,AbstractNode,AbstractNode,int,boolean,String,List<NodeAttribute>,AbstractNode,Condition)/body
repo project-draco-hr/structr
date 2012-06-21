@@ -2,12 +2,16 @@
   String localComponentId=componentId;
   String content=null;
   String tag=null;
-  StringBuilder indent=new StringBuilder();
+  String ind="";
   HttpServletRequest request=securityContext.getRequest();
-  for (int d=1; d < depth; d++) {
-    indent.append("  ");
+  HtmlElement el=null;
+  boolean isVoid=startNode instanceof HtmlElement && ((HtmlElement)startNode).isVoidElement();
+  if (startNode instanceof HtmlElement) {
+    el=(HtmlElement)startNode;
+    if (!el.avoidWhitespace()) {
+      ind=indent(depth,true);
+    }
   }
-  String ind=indent.toString();
   if (startNode != null) {
     String kind=startNode.getStringProperty(Component.UiKey.kind);
     String id=startNode.getStringProperty(AbstractNode.Key.uuid);
@@ -46,41 +50,47 @@
     if (edit && inBody && (startNode instanceof Content)) {
       tag="span";
     }
-    if (StringUtils.isNotBlank(tag) && (startNode instanceof HtmlElement)) {
+    if (StringUtils.isNotBlank(tag)) {
       if (tag.equals("body")) {
         inBody=true;
       }
-      buffer.append(ind).append("<").append(tag);
-      if (edit && (id != null)) {
-        if (depth == 1) {
-          buffer.append(" structr_page_id='").append(pageId).append("'");
-        }
-        if (!(startNode instanceof Content)) {
-          buffer.append(" structr_element_id=\"").append(id).append("\"");
-          buffer.append(" structr_type=\"").append(startNode.getType()).append("\"");
-          buffer.append(" structr_name=\"").append(startNode.getName()).append("\"");
-        }
+      if (startNode instanceof Content || startNode instanceof HtmlElement) {
+        buffer.append("<").append(tag);
+        if (edit && (id != null)) {
+          if (depth == 1) {
+            buffer.append(" structr_page_id='").append(pageId).append("'");
+          }
+          if (el != null) {
+            buffer.append(" structr_element_id=\"").append(id).append("\"");
+            buffer.append(" structr_type=\"").append(startNode.getType()).append("\"");
+            buffer.append(" structr_name=\"").append(startNode.getName()).append("\"");
+          }
  else {
-          buffer.append(" structr_content_id=\"").append(id).append("\"");
-        }
-      }
-      HtmlElement htmlElement=(HtmlElement)startNode;
-      for (      String attribute : EntityContext.getPropertySet(startNode.getClass(),PropertyView.Html)) {
-        try {
-          String value=htmlElement.getPropertyWithVariableReplacement(page,pageId,localComponentId,viewComponent,attribute);
-          if ((value != null) && StringUtils.isNotBlank(value)) {
-            String key=attribute.substring(PropertyView.Html.length());
-            buffer.append(" ").append(key).append("=\"").append(value).append("\"");
+            buffer.append(" structr_content_id=\"").append(id).append("\"");
           }
         }
- catch (        Throwable t) {
-          t.printStackTrace();
+        if (el != null) {
+          for (          String attribute : EntityContext.getPropertySet(startNode.getClass(),PropertyView.Html)) {
+            try {
+              String value=el.getPropertyWithVariableReplacement(page,pageId,localComponentId,viewComponent,attribute);
+              if ((value != null) && StringUtils.isNotBlank(value)) {
+                String key=attribute.substring(PropertyView.Html.length());
+                buffer.append(" ").append(key).append("=\"").append(value).append("\"");
+              }
+            }
+ catch (            Throwable t) {
+              t.printStackTrace();
+            }
+          }
+        }
+        buffer.append(">");
+        if (!isVoid) {
+          buffer.append(ind);
         }
       }
-      buffer.append(">\n");
     }
     if (content != null) {
-      buffer.append(ind).append(content).append("\n");
+      buffer.append(content);
     }
   }
   if (startNode instanceof SearchResultView) {
@@ -126,7 +136,19 @@
       }
     }
   }
-  if (StringUtils.isNotBlank(tag) && (startNode instanceof HtmlElement) && !((HtmlElement)startNode).isVoidElement()) {
-    buffer.append(ind).append("</").append(tag).append(">\n");
+  boolean whitespaceOnly=StringUtils.isBlank(buffer.substring(buffer.lastIndexOf("\n")));
+  if (el != null && !el.avoidWhitespace()) {
+    if (whitespaceOnly) {
+      buffer.replace(buffer.length() - 2,buffer.length(),"");
+    }
+ else {
+      buffer.append(indent(depth - 1,true));
+    }
+  }
+  if (StringUtils.isNotBlank(tag) && (startNode instanceof Content || !isVoid)) {
+    buffer.append("</").append(tag).append(">");
+    if (el != null && !el.avoidWhitespace()) {
+      buffer.append(indent(depth - 1,true));
+    }
   }
 }

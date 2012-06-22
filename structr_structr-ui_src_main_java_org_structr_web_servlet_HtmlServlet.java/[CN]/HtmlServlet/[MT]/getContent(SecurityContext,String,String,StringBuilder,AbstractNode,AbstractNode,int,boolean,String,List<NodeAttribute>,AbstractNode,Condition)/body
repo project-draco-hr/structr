@@ -5,7 +5,7 @@
   String ind="";
   HttpServletRequest request=securityContext.getRequest();
   HtmlElement el=null;
-  boolean isVoid=startNode instanceof HtmlElement && ((HtmlElement)startNode).isVoidElement();
+  boolean isVoid=(startNode instanceof HtmlElement) && ((HtmlElement)startNode).isVoidElement();
   if (startNode instanceof HtmlElement) {
     el=(HtmlElement)startNode;
     if (!el.avoidWhitespace()) {
@@ -54,7 +54,7 @@
       if (tag.equals("body")) {
         inBody=true;
       }
-      if (startNode instanceof Content || startNode instanceof HtmlElement) {
+      if ((startNode instanceof Content) || (startNode instanceof HtmlElement)) {
         buffer.append("<").append(tag);
         if (edit && (id != null)) {
           if (depth == 1) {
@@ -92,63 +92,71 @@
     if (content != null) {
       buffer.append(content);
     }
-  }
-  if (startNode instanceof SearchResultView) {
-    String searchString=(String)request.getParameter("search");
-    if (request != null && StringUtils.isNotBlank(searchString)) {
-      for (      Page resultPage : getResultPages(securityContext,(Page)page)) {
-        List<AbstractRelationship> rels=Component.getChildRelationships(request,startNode,pageId,localComponentId);
-        for (        AbstractRelationship rel : rels) {
-          if ((condition == null) || ((condition != null) && condition.isSatisfied(request,rel))) {
-            AbstractNode subNode=rel.getEndNode();
-            getContent(securityContext,pageId,localComponentId,buffer,page,subNode,depth,inBody,searchClass,attrs,resultPage,condition);
+    if (startNode instanceof SearchResultView) {
+      String searchString=(String)request.getParameter("search");
+      if ((request != null) && StringUtils.isNotBlank(searchString)) {
+        for (        Page resultPage : getResultPages(securityContext,(Page)page)) {
+          List<AbstractRelationship> rels=Component.getChildRelationships(request,startNode,pageId,localComponentId);
+          for (          AbstractRelationship rel : rels) {
+            if ((condition == null) || ((condition != null) && condition.isSatisfied(request,rel))) {
+              AbstractNode subNode=rel.getEndNode();
+              if (subNode.isNotDeleted() && subNode.isNotDeleted()) {
+                getContent(securityContext,pageId,localComponentId,buffer,page,subNode,depth,inBody,searchClass,attrs,resultPage,condition);
+              }
+            }
           }
         }
       }
     }
-  }
- else   if (startNode instanceof View) {
-    List<GraphObject> results=((View)startNode).getGraphObjects(request);
-    for (    GraphObject result : results) {
+ else     if (startNode instanceof View) {
+      List<GraphObject> results=((View)startNode).getGraphObjects(request);
+      for (      GraphObject result : results) {
+        List<AbstractRelationship> rels=Component.getChildRelationships(request,startNode,pageId,localComponentId);
+        for (        AbstractRelationship rel : rels) {
+          if ((condition == null) || ((condition != null) && condition.isSatisfied(request,rel))) {
+            AbstractNode subNode=rel.getEndNode();
+            if (subNode.isNotDeleted() && subNode.isNotDeleted()) {
+              getContent(securityContext,pageId,localComponentId,buffer,page,subNode,depth,inBody,searchClass,attrs,(AbstractNode)result,condition);
+            }
+          }
+        }
+      }
+    }
+ else     if (startNode instanceof Condition) {
+      List<AbstractRelationship> rels=Component.getChildRelationships(request,startNode,pageId,localComponentId);
+      Condition newCondition=(Condition)startNode;
+      for (      AbstractRelationship rel : rels) {
+        AbstractNode subNode=rel.getEndNode();
+        if (subNode.isNotDeleted() && subNode.isNotDeleted()) {
+          getContent(securityContext,pageId,localComponentId,buffer,page,subNode,depth + 1,inBody,searchClass,attrs,viewComponent,newCondition);
+        }
+      }
+    }
+ else {
       List<AbstractRelationship> rels=Component.getChildRelationships(request,startNode,pageId,localComponentId);
       for (      AbstractRelationship rel : rels) {
         if ((condition == null) || ((condition != null) && condition.isSatisfied(request,rel))) {
           AbstractNode subNode=rel.getEndNode();
-          getContent(securityContext,pageId,localComponentId,buffer,page,subNode,depth,inBody,searchClass,attrs,(AbstractNode)result,condition);
+          if (subNode.isNotDeleted() && subNode.isNotDeleted()) {
+            getContent(securityContext,pageId,localComponentId,buffer,page,subNode,depth + 1,inBody,searchClass,attrs,viewComponent,condition);
+          }
         }
       }
     }
-  }
- else   if (startNode instanceof Condition) {
-    List<AbstractRelationship> rels=Component.getChildRelationships(request,startNode,pageId,localComponentId);
-    Condition newCondition=(Condition)startNode;
-    for (    AbstractRelationship rel : rels) {
-      AbstractNode subNode=rel.getEndNode();
-      getContent(securityContext,pageId,localComponentId,buffer,page,subNode,depth + 1,inBody,searchClass,attrs,viewComponent,newCondition);
-    }
-  }
+    boolean whitespaceOnly=StringUtils.isBlank(buffer.substring(buffer.lastIndexOf("\n")));
+    if ((el != null) && !el.avoidWhitespace()) {
+      if (whitespaceOnly) {
+        buffer.replace(buffer.length() - 2,buffer.length(),"");
+      }
  else {
-    List<AbstractRelationship> rels=Component.getChildRelationships(request,startNode,pageId,localComponentId);
-    for (    AbstractRelationship rel : rels) {
-      if ((condition == null) || ((condition != null) && condition.isSatisfied(request,rel))) {
-        AbstractNode subNode=rel.getEndNode();
-        getContent(securityContext,pageId,localComponentId,buffer,page,subNode,depth + 1,inBody,searchClass,attrs,viewComponent,condition);
+        buffer.append(indent(depth - 1,true));
       }
     }
-  }
-  boolean whitespaceOnly=StringUtils.isBlank(buffer.substring(buffer.lastIndexOf("\n")));
-  if (el != null && !el.avoidWhitespace()) {
-    if (whitespaceOnly) {
-      buffer.replace(buffer.length() - 2,buffer.length(),"");
-    }
- else {
-      buffer.append(indent(depth - 1,true));
-    }
-  }
-  if (StringUtils.isNotBlank(tag) && (startNode instanceof Content || !isVoid)) {
-    buffer.append("</").append(tag).append(">");
-    if (el != null && !el.avoidWhitespace()) {
-      buffer.append(indent(depth - 1,true));
+    if (StringUtils.isNotBlank(tag) && ((startNode instanceof Content) || !isVoid)) {
+      buffer.append("</").append(tag).append(">");
+      if ((el != null) && !el.avoidWhitespace()) {
+        buffer.append(indent(depth - 1,true));
+      }
     }
   }
 }

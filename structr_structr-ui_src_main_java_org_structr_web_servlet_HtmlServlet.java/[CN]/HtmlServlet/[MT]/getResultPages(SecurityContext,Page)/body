@@ -1,0 +1,34 @@
+{
+  HttpServletRequest request=securityContext.getRequest();
+  String search=request.getParameter("search");
+  if (request == null || StringUtils.isEmpty(search)) {
+    return Collections.EMPTY_SET;
+  }
+  if (request != null) {
+    resultPages=(Set<Page>)request.getAttribute("searchResults");
+    if (resultPages != null && !resultPages.isEmpty()) {
+      return resultPages;
+    }
+  }
+  if (resultPages == null) {
+    resultPages=new HashSet<Page>();
+  }
+  Command searchNode=Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class);
+  List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
+  AbstractNode topNode=null;
+  boolean includeDeletedAndHidden=false;
+  boolean publicOnly=false;
+  searchAttributes.add(Search.andContent(search));
+  searchAttributes.add(Search.andExactType(Content.class.getSimpleName()));
+  try {
+    List<Content> contentNodes=(List<Content>)searchNode.execute(topNode,includeDeletedAndHidden,publicOnly,searchAttributes);
+    for (    Content contentNode : contentNodes) {
+      resultPages.addAll(HtmlElement.getPages(securityContext,contentNode));
+    }
+    resultPages.remove((Page)displayPage);
+  }
+ catch (  FrameworkException fe) {
+    logger.log(Level.WARNING,"Error while searching in content",fe);
+  }
+  return resultPages;
+}

@@ -16,12 +16,12 @@
   Command searchNode=Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class);
   List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
   AbstractNode topNode=null;
-  boolean includeDeleted=false;
+  boolean includeDeletedAndHidden=false;
   boolean publicOnly=false;
   searchAttributes.add(Search.andContent(search));
   searchAttributes.add(Search.andExactType(Content.class.getSimpleName()));
   try {
-    List<Content> contentNodes=(List<Content>)searchNode.execute(topNode,includeDeleted,publicOnly,searchAttributes);
+    List<Content> contentNodes=(List<Content>)searchNode.execute(topNode,includeDeletedAndHidden,publicOnly,searchAttributes);
     for (    Content contentNode : contentNodes) {
       resultPages.addAll(HtmlElement.getPages(securityContext,contentNode));
     }

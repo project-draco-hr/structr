@@ -3,12 +3,12 @@
   String uriPart=EntityContext.normalizeEntityName(this.getResourceSignature());
   List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
   AbstractNode topNode=null;
-  boolean includeDeleted=false;
+  boolean includeDeletedAndHidden=false;
   boolean publicOnly=false;
   ResourceAccess grant=null;
   searchAttributes.add(Search.andExactType(ResourceAccess.class.getSimpleName()));
   searchAttributes.add(Search.andExactProperty(ResourceAccess.Key.uri,uriPart));
-  List<AbstractNode> nodes=(List<AbstractNode>)search.execute(topNode,includeDeleted,publicOnly,searchAttributes);
+  List<AbstractNode> nodes=(List<AbstractNode>)search.execute(topNode,includeDeletedAndHidden,publicOnly,searchAttributes);
   if (nodes.isEmpty()) {
     logger.log(Level.FINE,"No resource access object found for {0}",uriPart);
   }

@@ -1,7 +1,7 @@
 {
   List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
   AbstractNode topNode=null;
-  boolean includeDeleted=false;
+  boolean includeDeletedAndHidden=false;
   boolean publicOnly=false;
   if (rawType != null) {
     if (entityClass == null) {
@@ -16,7 +16,7 @@
       searchAttributes.add(Search.andExactTypeAndSubtypes(EntityContext.normalizeEntityName(rawType)));
       hasSearchableAttributesForNodes(rawType,request,searchAttributes);
     }
-    List<GraphObject> results=(List<GraphObject>)Services.command(securityContext,SearchNodeCommand.class).execute(topNode,includeDeleted,publicOnly,searchAttributes);
+    List<GraphObject> results=(List<GraphObject>)Services.command(securityContext,SearchNodeCommand.class).execute(topNode,includeDeletedAndHidden,publicOnly,searchAttributes);
     if (!results.isEmpty()) {
       if (distanceSearch == null) {
         applyDefaultSorting(results);

@@ -5,12 +5,12 @@
     GraphDatabaseService graphDb=(GraphDatabaseService)graphDbCommand.execute();
     if (input.iterator().hasNext()) {
       for (      Node node : input) {
-        AbstractNode n=createNode(securityContext,graphDb.getNodeById((Long)node.getProperty("id")));
-        if (n != null && isReadable(securityContext,n,includeDeleted,publicOnly)) {
+        AbstractNode n=createNode(securityContext,graphDb.getNodeById((Long)node.getProperty("id")),includeDeletedAndHidden,publicOnly);
+        if (n != null) {
           nodes.add(n);
         }
         for (        AbstractNode nodeAt : getNodesAt(n)) {
-          if (nodeAt != null && isReadable(securityContext,nodeAt,includeDeleted,publicOnly)) {
+          if (nodeAt != null && isReadable(securityContext,nodeAt,includeDeletedAndHidden,publicOnly)) {
             nodes.add(nodeAt);
           }
         }
@@ -20,8 +20,8 @@
  else {
     if ((input != null) && input.iterator().hasNext()) {
       for (      Node node : input) {
-        AbstractNode n=createNode(securityContext,(Node)node);
-        if (n != null && isReadable(securityContext,n,includeDeleted,publicOnly)) {
+        AbstractNode n=createNode(securityContext,(Node)node,includeDeletedAndHidden,publicOnly);
+        if (n != null) {
           nodes.add(n);
         }
       }

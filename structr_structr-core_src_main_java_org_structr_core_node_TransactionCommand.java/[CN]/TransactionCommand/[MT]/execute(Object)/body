@@ -1,10 +1,12 @@
 {
   GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
+  boolean topLevelTransaction=false;
   FrameworkException exception=null;
   Object ret=null;
   if ((parameters.length > 0) && (parameters[0] instanceof StructrTransaction)) {
     StructrTransaction transaction=(StructrTransaction)parameters[0];
     Transaction tx=graphDb.beginTx();
+    topLevelTransaction=tx instanceof TopLevelTransaction;
     try {
       ret=transaction.execute();
       tx.success();
@@ -29,13 +31,12 @@ catch (    DeadlockDetectedException ddex) {
  catch (      Throwable t) {
         exception=EntityContext.getFrameworkException(transactionKey);
       }
-      EntityContext.removeTransactionKey();
-      EntityContext.removeSecurityContext();
     }
   }
  else   if ((parameters.length > 0) && (parameters[0] instanceof BatchTransaction)) {
     BatchTransaction transaction=(BatchTransaction)parameters[0];
     Transaction tx=graphDb.beginTx();
+    topLevelTransaction=tx instanceof TopLevelTransaction;
     try {
       ret=transaction.execute(tx);
       tx.success();
@@ -60,12 +61,36 @@ catch (    DeadlockDetectedException ddex) {
  catch (      Throwable t) {
         exception=EntityContext.getFrameworkException(transactionKey);
       }
-      EntityContext.removeTransactionKey();
-      EntityContext.removeSecurityContext();
     }
   }
   if (exception != null) {
     throw exception;
+  }
+  if (topLevelTransaction) {
+    Transaction postProcessingTransaction=graphDb.beginTx();
+    try {
+      afterCreation(securityContext,EntityContext.getCreatedNodes());
+      afterCreation(securityContext,EntityContext.getCreatedRelationships());
+      afterModification(securityContext,EntityContext.getModifiedNodes());
+      afterModification(securityContext,EntityContext.getModifiedRelationships());
+      EntityContext.clearTransactionData();
+      postProcessingTransaction.success();
+    }
+ catch (    Throwable t) {
+      postProcessingTransaction.failure();
+    }
+ finally {
+      long transactionKey=nextLong();
+      EntityContext.setSecurityContext(securityContext);
+      EntityContext.setTransactionKey(transactionKey);
+      try {
+        postProcessingTransaction.finish();
+      }
+ catch (      Throwable t) {
+        t.printStackTrace();
+      }
+      EntityContext.clearTransactionData();
+    }
   }
   return ret;
 }

@@ -1,6 +1,6 @@
 {
-  Thread t=Thread.currentThread();
-  if (!transactionKeyMap.containsKey(t)) {
+  Thread currentThread=Thread.currentThread();
+  if (!transactionKeyMap.containsKey(currentThread)) {
     return -1L;
   }
   long transactionKey=transactionKeyMap.get(Thread.currentThread());
@@ -8,12 +8,12 @@
     logger.log(Level.WARNING,"Node service is not ready yet.");
     return transactionKey;
   }
-  SecurityContext securityContext=securityContextMap.get(Thread.currentThread());
+  SecurityContext securityContext=securityContextMap.get(currentThread);
   Command indexNodeCommand=Services.command(securityContext,IndexNodeCommand.class);
   Command indexRelationshipCommand=Services.command(securityContext,IndexRelationshipCommand.class);
   try {
-    Map<Node,Map<String,Object>> removedNodeProperties=new LinkedHashMap<Node,Map<String,Object>>();
     Map<Relationship,Map<String,Object>> removedRelProperties=new LinkedHashMap<Relationship,Map<String,Object>>();
+    Map<Node,Map<String,Object>> removedNodeProperties=new LinkedHashMap<Node,Map<String,Object>>();
     RelationshipFactory relFactory=new RelationshipFactory(securityContext);
     Set<AbstractNode> modifiedNodes=new LinkedHashSet<AbstractNode>();
     Set<AbstractNode> createdNodes=new LinkedHashSet<AbstractNode>();
@@ -24,7 +24,6 @@
     ErrorBuffer errorBuffer=new ErrorBuffer();
     NodeFactory nodeFactory=new NodeFactory();
     boolean hasError=false;
-    begin(securityContext,transactionKey,errorBuffer);
     for (    PropertyEntry<Node> entry : data.removedNodeProperties()) {
       Node node=entry.entity();
       Map<String,Object> propertyMap=removedNodeProperties.get(node);
@@ -50,29 +49,35 @@
       propertyMap.put(entry.key(),entry.previouslyCommitedValue());
       if (!data.isDeleted(rel)) {
         modifiedRels.add(relFactory.createRelationship(securityContext,rel));
-        AbstractRelationship relationship=relFactory.createRelationship(securityContext,rel);
-        hasError|=propertyRemoved(securityContext,transactionKey,errorBuffer,relationship,entry.key(),entry.previouslyCommitedValue());
       }
     }
     for (    Node node : data.createdNodes()) {
       AbstractNode entity=nodeFactory.createNode(securityContext,node);
       if (entity != null) {
-        hasError|=graphObjectCreated(securityContext,transactionKey,errorBuffer,entity);
+        hasError|=!entity.beforeCreation(securityContext,errorBuffer);
         createdNodes.add(entity);
       }
     }
     for (    Relationship rel : data.createdRelationships()) {
-      AbstractRelationship relationship=relFactory.createRelationship(securityContext,rel);
-      hasError|=graphObjectCreated(securityContext,transactionKey,errorBuffer,relationship);
-      createdRels.add(relationship);
+      AbstractRelationship entity=relFactory.createRelationship(securityContext,rel);
+      if (entity != null) {
+        hasError|=!entity.beforeCreation(securityContext,errorBuffer);
+        createdRels.add(entity);
+      }
     }
     for (    Relationship rel : data.deletedRelationships()) {
-      AbstractRelationship relationship=relFactory.createRelationship(securityContext,rel);
-      hasError|=graphObjectDeleted(securityContext,transactionKey,errorBuffer,relationship,removedRelProperties.get(rel));
-      deletedRels.add(relationship);
+      AbstractRelationship entity=relFactory.createRelationship(securityContext,rel);
+      if (entity != null) {
+        hasError|=!entity.beforeDeletion(securityContext,errorBuffer,removedRelProperties.get(rel));
+        deletedRels.add(entity);
+      }
     }
     for (    Node node : data.deletedNodes()) {
-      hasError|=graphObjectDeleted(securityContext,transactionKey,errorBuffer,null,removedNodeProperties.get(node));
+      String type=(String)removedNodeProperties.get(node).get(AbstractNode.Key.type.name());
+      AbstractNode entity=nodeFactory.createDeletedNode(securityContext,node,type);
+      if (entity != null) {
+        hasError|=!entity.beforeDeletion(securityContext,errorBuffer,removedNodeProperties.get(node));
+      }
     }
     for (    PropertyEntry<Node> entry : data.assignedNodeProperties()) {
       AbstractNode entity=nodeFactory.createNode(securityContext,entry.entity());
@@ -85,38 +90,36 @@
             hasError|=!(validator.isValid(entity,key,value,errorBuffer));
           }
         }
-        hasError|=propertyModified(securityContext,transactionKey,errorBuffer,entity,key,entry.previouslyCommitedValue(),value);
         indexNodeCommand.execute(entity,key);
         modifiedNodes.add(entity);
       }
     }
     for (    PropertyEntry<Relationship> entry : data.assignedRelationshipProperties()) {
       AbstractRelationship entity=relFactory.createRelationship(securityContext,entry.entity());
-      String key=entry.key();
-      Object value=entry.value();
-      Set<PropertyValidator> validators=EntityContext.getPropertyValidators(securityContext,entity.getClass(),key);
-      if (validators != null) {
-        for (        PropertyValidator validator : validators) {
-          hasError|=!(validator.isValid(entity,key,value,errorBuffer));
+      if (entity != null) {
+        String key=entry.key();
+        Object value=entry.value();
+        Set<PropertyValidator> validators=EntityContext.getPropertyValidators(securityContext,entity.getClass(),key);
+        if (validators != null) {
+          for (          PropertyValidator validator : validators) {
+            hasError|=!(validator.isValid(entity,key,value,errorBuffer));
+          }
         }
+        indexRelationshipCommand.execute(entity,key);
+        modifiedRels.add(entity);
       }
-      hasError|=propertyModified(securityContext,transactionKey,errorBuffer,entity,key,entry.previouslyCommitedValue(),value);
-      indexRelationshipCommand.execute(entity,key);
-      modifiedRels.add(entity);
     }
     for (    AbstractNode node : modifiedNodes) {
       if (!createdNodes.contains(node) && !deletedNodes.contains(node)) {
-        hasError|=graphObjectModified(securityContext,transactionKey,errorBuffer,node);
+        hasError|=!node.beforeModification(securityContext,errorBuffer);
       }
       indexNodeCommand.execute(node);
     }
     for (    AbstractRelationship rel : modifiedRels) {
       if (!createdRels.contains(rel) && !deletedRels.contains(rel)) {
-        hasError|=graphObjectModified(securityContext,transactionKey,errorBuffer,rel);
+        hasError|=!rel.beforeModification(securityContext,errorBuffer);
       }
- else {
-        indexRelationshipCommand.execute(rel);
-      }
+      indexRelationshipCommand.execute(rel);
     }
     for (    AbstractNode node : createdNodes) {
       indexNodeCommand.execute(node);
@@ -124,10 +127,13 @@
     for (    AbstractRelationship rel : createdRels) {
       indexRelationshipCommand.execute(rel);
     }
-    hasError|=commit(securityContext,transactionKey,errorBuffer);
     if (hasError) {
       throw new FrameworkException(422,errorBuffer);
     }
+    getModifiedRelationships().addAll(modifiedRels);
+    getCreatedRelationships().addAll(createdRels);
+    getModifiedNodes().addAll(modifiedNodes);
+    getCreatedNodes().addAll(createdNodes);
   }
  catch (  FrameworkException fex) {
     exceptionMap.put(transactionKey,fex);

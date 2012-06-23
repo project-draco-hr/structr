@@ -20,6 +20,7 @@
             boolean hasPageId=true;
             for (            AbstractRelationship rel : rels) {
               if (rel.getOtherNode(parentNode).equals(nodeToRemove) && ((componentId == null) || componentId.equals(rel.getStringProperty("componentId"))) && ((pageId == null) || (rel.getProperty(pageId) != null))) {
+                relsToShift.add(rel);
                 if (pos == null) {
                   deleteRel.execute(rel);
                 }
@@ -30,6 +31,10 @@
                     hasPageId=hasPageIds(securityContext,rel);
                     if (!hasPageId) {
                       deleteRel.execute(rel);
+                      relsToShift.remove(rel);
+                      if (!hasPageId && pos != null) {
+                        reorderRels(rels,pageId);
+                      }
                       break;
                     }
                   }

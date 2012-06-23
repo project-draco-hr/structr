@@ -24,6 +24,9 @@
     ErrorBuffer errorBuffer=new ErrorBuffer();
     NodeFactory nodeFactory=new NodeFactory();
     boolean hasError=false;
+    for (    StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
+      listener.begin(securityContext,transactionKey);
+    }
     for (    PropertyEntry<Node> entry : data.removedNodeProperties()) {
       Node node=entry.entity();
       Map<String,Object> propertyMap=removedNodeProperties.get(node);
@@ -36,6 +39,9 @@
         AbstractNode modifiedNode=nodeFactory.createNode(securityContext,node);
         if (modifiedNode != null) {
           modifiedNodes.add(modifiedNode);
+          for (          StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
+            hasError|=!listener.propertyRemoved(securityContext,transactionKey,errorBuffer,modifiedNode,entry.key(),entry.previouslyCommitedValue());
+          }
         }
       }
     }
@@ -48,7 +54,13 @@
       }
       propertyMap.put(entry.key(),entry.previouslyCommitedValue());
       if (!data.isDeleted(rel)) {
-        modifiedRels.add(relFactory.createRelationship(securityContext,rel));
+        AbstractRelationship modifiedRel=relFactory.createRelationship(securityContext,rel);
+        if (modifiedRel != null) {
+          modifiedRels.add(modifiedRel);
+          for (          StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
+            hasError|=!listener.propertyRemoved(securityContext,transactionKey,errorBuffer,modifiedRel,entry.key(),entry.previouslyCommitedValue());
+          }
+        }
       }
     }
     for (    Node node : data.createdNodes()) {
@@ -56,6 +68,9 @@
       if (entity != null) {
         hasError|=!entity.beforeCreation(securityContext,errorBuffer);
         createdNodes.add(entity);
+        for (        StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
+          hasError|=!listener.graphObjectCreated(securityContext,transactionKey,errorBuffer,entity);
+        }
       }
     }
     for (    Relationship rel : data.createdRelationships()) {
@@ -63,12 +78,18 @@
       if (entity != null) {
         hasError|=!entity.beforeCreation(securityContext,errorBuffer);
         createdRels.add(entity);
+        for (        StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
+          hasError|=!listener.graphObjectCreated(securityContext,transactionKey,errorBuffer,entity);
+        }
       }
     }
     for (    Relationship rel : data.deletedRelationships()) {
       AbstractRelationship entity=relFactory.createRelationship(securityContext,rel);
       if (entity != null) {
         hasError|=!entity.beforeDeletion(securityContext,errorBuffer,removedRelProperties.get(rel));
+        for (        StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
+          hasError|=!listener.graphObjectDeleted(securityContext,transactionKey,errorBuffer,entity,removedRelProperties.get(rel));
+        }
         deletedRels.add(entity);
       }
     }
@@ -77,6 +98,9 @@
       AbstractNode entity=nodeFactory.createDeletedNode(securityContext,node,type);
       if (entity != null) {
         hasError|=!entity.beforeDeletion(securityContext,errorBuffer,removedNodeProperties.get(node));
+        for (        StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
+          hasError|=!listener.graphObjectDeleted(securityContext,transactionKey,errorBuffer,entity,removedNodeProperties.get(node));
+        }
       }
     }
     for (    PropertyEntry<Node> entry : data.assignedNodeProperties()) {
@@ -89,6 +113,9 @@
           for (          PropertyValidator validator : validators) {
             hasError|=!(validator.isValid(entity,key,value,errorBuffer));
           }
+        }
+        for (        StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
+          hasError|=!listener.propertyModified(securityContext,transactionKey,errorBuffer,entity,key,entry.previouslyCommitedValue(),value);
         }
         indexNodeCommand.execute(entity,key);
         modifiedNodes.add(entity);
@@ -105,6 +132,9 @@
             hasError|=!(validator.isValid(entity,key,value,errorBuffer));
           }
         }
+        for (        StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
+          hasError|=!listener.propertyModified(securityContext,transactionKey,errorBuffer,entity,key,entry.previouslyCommitedValue(),value);
+        }
         indexRelationshipCommand.execute(entity,key);
         modifiedRels.add(entity);
       }
@@ -112,12 +142,18 @@
     for (    AbstractNode node : modifiedNodes) {
       if (!createdNodes.contains(node) && !deletedNodes.contains(node)) {
         hasError|=!node.beforeModification(securityContext,errorBuffer);
+        for (        StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
+          hasError|=!listener.graphObjectModified(securityContext,transactionKey,errorBuffer,node);
+        }
       }
       indexNodeCommand.execute(node);
     }
     for (    AbstractRelationship rel : modifiedRels) {
       if (!createdRels.contains(rel) && !deletedRels.contains(rel)) {
         hasError|=!rel.beforeModification(securityContext,errorBuffer);
+        for (        StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
+          hasError|=!listener.graphObjectModified(securityContext,transactionKey,errorBuffer,rel);
+        }
       }
       indexRelationshipCommand.execute(rel);
     }
@@ -128,7 +164,13 @@
       indexRelationshipCommand.execute(rel);
     }
     if (hasError) {
+      for (      StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
+        listener.rollback(securityContext,transactionKey);
+      }
       throw new FrameworkException(422,errorBuffer);
+    }
+    for (    StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
+      listener.commit(securityContext,transactionKey);
     }
     getModifiedRelationships().addAll(modifiedRels);
     getCreatedRelationships().addAll(createdRels);

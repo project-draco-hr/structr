@@ -6,7 +6,7 @@
   }
   final Gson gson=new GsonBuilder().setPrettyPrinting().registerTypeAdapter(WebSocketMessage.class,new WebSocketDataGSONAdapter(idPropertyName)).create();
   syncController=new SynchronizationController(gson);
-  EntityContext.registerModificationListener(syncController);
+  EntityContext.registerTransactionListener(syncController);
   factory=new WebSocketFactory(new Acceptor(){
     @Override public WebSocket doWebSocketConnect(    final HttpServletRequest request,    final String protocol){
       if (STRUCTR_PROTOCOL.equals(protocol)) {

@@ -18,13 +18,16 @@
   hasSearchableAttributesForRelationships(namedRelation.getEntityClass().getSimpleName(),request,filterAttributes);
   if (!filterAttributes.isEmpty()) {
     Predicate<GraphObject> predicate=new Predicate<GraphObject>(){
-      @Override public boolean evaluate(      GraphObject obj){
-        for (        SearchAttribute attr : filterAttributes) {
-          String value=((TextualSearchAttribute)attr).getValue();
-          String key=((TextualSearchAttribute)attr).getKey();
-          Object val="\"" + obj.getProperty(key) + "\"";
-          if (val != null && val.equals(value)) {
-            return true;
+      @Override public boolean evaluate(      SecurityContext securityContext,      GraphObject... objs){
+        if (objs.length > 0) {
+          GraphObject obj=objs[0];
+          for (          SearchAttribute attr : filterAttributes) {
+            String value=((TextualSearchAttribute)attr).getValue();
+            String key=((TextualSearchAttribute)attr).getKey();
+            Object val="\"" + obj.getProperty(key) + "\"";
+            if (val != null && val.equals(value)) {
+              return true;
+            }
           }
         }
         return false;
@@ -32,7 +35,7 @@
     }
 ;
     for (Iterator<GraphObject> it=relationResults.iterator(); it.hasNext(); ) {
-      if (!predicate.evaluate(it.next())) {
+      if (!predicate.evaluate(securityContext,it.next())) {
         it.remove();
       }
     }

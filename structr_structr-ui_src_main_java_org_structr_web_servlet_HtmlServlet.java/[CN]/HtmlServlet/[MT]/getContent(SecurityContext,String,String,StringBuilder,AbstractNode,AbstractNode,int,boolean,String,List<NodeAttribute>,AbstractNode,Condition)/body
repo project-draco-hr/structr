@@ -143,7 +143,9 @@
         }
       }
     }
-    boolean whitespaceOnly=StringUtils.isBlank(buffer.substring(buffer.lastIndexOf("\n")));
+    boolean whitespaceOnly=false;
+    int lastNewline=buffer.lastIndexOf("\n");
+    whitespaceOnly=StringUtils.isBlank(lastNewline > -1 ? buffer.substring(lastNewline) : buffer.toString());
     if ((el != null) && !el.avoidWhitespace()) {
       if (whitespaceOnly) {
         buffer.replace(buffer.length() - 2,buffer.length(),"");

@@ -8,9 +8,9 @@
       List<Resource> chain=parsePath(securityContext,request);
       Resource resourceConstraint=optimizeConstraintChain(chain);
       Map<String,Object> properties=convertPropertySetToMap(propertySet);
-      securityContext.examineRequest(request,resourceConstraint.getResourceSignature(),resourceConstraint.getGrant(),propertyView.get());
+      securityContext.examineRequest(request,resourceConstraint.getResourceSignature(),resourceConstraint.getGrant(),propertyView.get(securityContext));
       RestMethodResult result=resourceConstraint.doPost(properties);
-      propertyView.set(defaultPropertyView);
+      propertyView.set(securityContext,defaultPropertyView);
       result.commitResponse(gson,response);
     }
  else {

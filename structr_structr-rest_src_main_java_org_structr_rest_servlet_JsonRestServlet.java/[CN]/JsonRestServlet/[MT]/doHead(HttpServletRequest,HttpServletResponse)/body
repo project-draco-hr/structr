@@ -5,7 +5,7 @@
     SecurityContext securityContext=getSecurityContext(request,response);
     List<Resource> chain=parsePath(securityContext,request);
     Resource resourceConstraint=optimizeConstraintChain(chain);
-    securityContext.examineRequest(request,resourceConstraint.getResourceSignature(),resourceConstraint.getGrant(),propertyView.get());
+    securityContext.examineRequest(request,resourceConstraint.getResourceSignature(),resourceConstraint.getGrant(),propertyView.get(securityContext));
     RestMethodResult result=resourceConstraint.doHead();
     result.commitResponse(gson,response);
   }

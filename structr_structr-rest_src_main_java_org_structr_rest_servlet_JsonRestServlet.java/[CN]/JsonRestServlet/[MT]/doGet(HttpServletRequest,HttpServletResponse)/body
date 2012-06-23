@@ -3,14 +3,14 @@
     request.setCharacterEncoding("UTF-8");
     response.setContentType("application/json; charset=utf-8");
     SecurityContext securityContext=getSecurityContext(request,response);
-    propertyView.set(defaultPropertyView);
+    propertyView.set(securityContext,defaultPropertyView);
     double queryTimeStart=System.nanoTime();
     Resource resource=addSortingAndPaging(request,securityContext,optimizeConstraintChain(parsePath(securityContext,request)));
-    securityContext.examineRequest(request,resource.getResourceSignature(),resource.getGrant(),propertyView.get());
+    securityContext.examineRequest(request,resource.getResourceSignature(),resource.getGrant(),propertyView.get(securityContext));
     Result result=new Result(resource.doGet(),resource.isCollectionResource(),resource.isPrimitiveArray());
     double queryTimeEnd=System.nanoTime();
     if (result != null) {
-      result.setPropertyView(propertyView.get());
+      result.setPropertyView(propertyView.get(securityContext));
       resource.postProcessResultSet(result);
       DecimalFormat decimalFormat=new DecimalFormat("0.000000000",DecimalFormatSymbols.getInstance(Locale.ENGLISH));
       result.setQueryTime(decimalFormat.format((queryTimeEnd - queryTimeStart) / 1000000000.0));

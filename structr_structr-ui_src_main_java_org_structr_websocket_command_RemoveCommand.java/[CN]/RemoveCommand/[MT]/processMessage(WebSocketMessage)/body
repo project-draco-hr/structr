@@ -10,47 +10,45 @@
     final AbstractNode parentNode=getNode(parentId);
     final Long pos=(position != null) ? Long.parseLong(position) : null;
     if ((nodeToRemove != null) && (parentNode != null)) {
-      RelationClass rel=EntityContext.getRelationClass(parentNode.getClass(),nodeToRemove.getClass());
-      if (rel != null) {
-        final List<AbstractRelationship> rels=parentNode.getRelationships(rel.getRelType(),rel.getDirection());
-        StructrTransaction transaction=new StructrTransaction(){
-          @Override public Object execute() throws FrameworkException {
-            Command deleteRel=Services.command(securityContext,DeleteRelationshipCommand.class);
-            List<AbstractRelationship> relsToShift=new LinkedList<AbstractRelationship>();
-            boolean hasPageId=true;
-            for (            AbstractRelationship rel : rels) {
-              if (rel.getOtherNode(parentNode).equals(nodeToRemove) && ((componentId == null) || componentId.equals(rel.getStringProperty("componentId"))) && ((pageId == null) || (rel.getProperty(pageId) != null))) {
-                relsToShift.add(rel);
-                if (pos == null) {
-                  deleteRel.execute(rel);
-                }
+      final List<AbstractRelationship> rels=parentNode.getRelationships(RelType.CONTAINS,Direction.OUTGOING);
+      StructrTransaction transaction=new StructrTransaction(){
+        @Override public Object execute() throws FrameworkException {
+          String removedRelId=null;
+          Command deleteRel=Services.command(securityContext,DeleteRelationshipCommand.class);
+          boolean hasPageId=true;
+          List<AbstractRelationship> relsToReorder=new ArrayList<AbstractRelationship>();
+          for (          AbstractRelationship rel : rels) {
+            if (pageId == null || rel.getProperty(pageId) != null) {
+              relsToReorder.add(rel);
+            }
+            if (rel.getEndNode().equals(nodeToRemove) && ((componentId == null) || componentId.equals(rel.getStringProperty("componentId"))) && ((pageId == null) || (rel.getProperty(pageId) != null))) {
+              if (pos == null) {
+                deleteRel.execute(rel);
+              }
  else {
-                  if (pos.equals(rel.getLongProperty(pageId))) {
-                    rel.removeProperty(pageId);
-                    RelationshipHelper.untagOutgoingRelsFromPageId(nodeToRemove,nodeToRemove,pageId,pageId);
-                    hasPageId=hasPageIds(securityContext,rel);
-                    if (!hasPageId) {
-                      deleteRel.execute(rel);
-                      relsToShift.remove(rel);
-                      if (!hasPageId && pos != null) {
-                        reorderRels(rels,pageId);
-                      }
-                      break;
-                    }
+                if (pos.equals(rel.getLongProperty(pageId))) {
+                  rel.removeProperty(pageId);
+                  RelationshipHelper.untagOutgoingRelsFromPageId(nodeToRemove,nodeToRemove,pageId,pageId);
+                  hasPageId=hasPageIds(securityContext,rel);
+                  if (!hasPageId) {
+                    relsToReorder.remove(rel);
+                    deleteRel.execute(rel);
+                    break;
                   }
                 }
               }
             }
-            return null;
           }
+          reorderRels(relsToReorder,pageId);
+          return null;
         }
+      }
 ;
-        try {
-          Services.command(securityContext,TransactionCommand.class).execute(transaction);
-        }
- catch (        FrameworkException fex) {
-          getWebSocket().send(MessageBuilder.status().code(400).message(fex.getMessage()).build(),true);
-        }
+      try {
+        Services.command(securityContext,TransactionCommand.class).execute(transaction);
+      }
+ catch (      FrameworkException fex) {
+        getWebSocket().send(MessageBuilder.status().code(400).message(fex.getMessage()).build(),true);
       }
     }
  else {

@@ -6,15 +6,13 @@
     for (    String id : nodeData.keySet()) {
       AbstractNode nodeToSort=getNode(id);
       Long pos=Long.parseLong((String)nodeData.get(id));
-      for (      AbstractRelationship rel : nodeToSort.getRelationships(RelType.CONTAINS,Direction.INCOMING)) {
-        Long oldPos=rel.getLongProperty(pageId);
-        if ((oldPos != null) && !(oldPos.equals(pos))) {
-          try {
-            rel.setProperty(pageId,pos);
-          }
- catch (          FrameworkException fex) {
-            fex.printStackTrace();
-          }
+      List<AbstractRelationship> rels=nodeToSort.getRelationships(RelType.CONTAINS,Direction.INCOMING);
+      for (      AbstractRelationship rel : rels) {
+        try {
+          rel.setProperty(pageId,pos);
+        }
+ catch (        FrameworkException fex) {
+          fex.printStackTrace();
         }
       }
     }

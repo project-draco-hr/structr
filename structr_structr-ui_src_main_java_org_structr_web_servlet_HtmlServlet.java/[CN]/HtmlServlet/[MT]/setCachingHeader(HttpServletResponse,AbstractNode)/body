@@ -6,8 +6,10 @@
   DateFormat httpDateFormat=new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z",Locale.US);
   httpDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
   response.addHeader("Expires",httpDateFormat.format(cal.getTime()));
-  Date lastModified=node.getLastModifiedDate();
-  if (lastModified != null) {
-    response.addHeader("Last-Modified",httpDateFormat.format(lastModified));
+  if (node != null) {
+    Date lastModified=node.getLastModifiedDate();
+    if (lastModified != null) {
+      response.addHeader("Last-Modified",httpDateFormat.format(lastModified));
+    }
   }
 }

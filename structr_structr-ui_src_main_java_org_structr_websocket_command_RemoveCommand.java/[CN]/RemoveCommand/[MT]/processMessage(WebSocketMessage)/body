@@ -13,29 +13,30 @@
       final List<AbstractRelationship> rels=parentNode.getRelationships(RelType.CONTAINS,Direction.OUTGOING);
       StructrTransaction transaction=new StructrTransaction(){
         @Override public Object execute() throws FrameworkException {
-          String removedRelId=null;
           Command deleteRel=Services.command(securityContext,DeleteRelationshipCommand.class);
-          boolean hasPageId=true;
+          boolean hasPageId;
           List<AbstractRelationship> relsToReorder=new ArrayList<AbstractRelationship>();
           for (          AbstractRelationship rel : rels) {
             if (pageId == null || rel.getProperty(pageId) != null) {
-              relsToReorder.add(rel);
-            }
-            if (rel.getEndNode().equals(nodeToRemove) && ((componentId == null) || componentId.equals(rel.getStringProperty("componentId"))) && ((pageId == null) || (rel.getProperty(pageId) != null))) {
-              if (pos == null) {
-                deleteRel.execute(rel);
-              }
+              if (rel.getEndNode().equals(nodeToRemove) && ((componentId == null) || componentId.equals(rel.getStringProperty("componentId")))) {
+                relsToReorder.remove(rel);
+                if (pos == null) {
+                  deleteRel.execute(rel);
+                }
  else {
-                if (pos.equals(rel.getLongProperty(pageId))) {
-                  rel.removeProperty(pageId);
-                  RelationshipHelper.untagOutgoingRelsFromPageId(nodeToRemove,nodeToRemove,pageId,pageId);
-                  hasPageId=hasPageIds(securityContext,rel);
-                  if (!hasPageId) {
-                    relsToReorder.remove(rel);
-                    deleteRel.execute(rel);
-                    break;
+                  if (pos.equals(rel.getLongProperty(pageId))) {
+                    rel.removeProperty(pageId);
+                    RelationshipHelper.untagOutgoingRelsFromPageId(nodeToRemove,nodeToRemove,pageId,pageId);
+                    hasPageId=hasPageIds(securityContext,rel);
+                    if (!hasPageId) {
+                      deleteRel.execute(rel);
+                      break;
+                    }
                   }
                 }
+              }
+ else {
+                relsToReorder.add(rel);
               }
             }
           }

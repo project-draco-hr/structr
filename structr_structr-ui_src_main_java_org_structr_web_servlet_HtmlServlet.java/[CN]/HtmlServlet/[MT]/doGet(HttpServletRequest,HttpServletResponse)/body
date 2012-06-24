@@ -45,6 +45,12 @@
     AbstractNode node=findEntryPoint(name);
     Page page=null;
     org.structr.core.entity.File file=null;
+    if (edit) {
+      response.setHeader("Pragma","no-cache");
+    }
+ else {
+      setCachingHeader(response,node);
+    }
     if (node instanceof Page) {
       page=(Page)node;
     }
@@ -64,7 +70,6 @@
       }
  else {
         response.setContentType("text/html; charset=utf-8");
-        response.getWriter().append("<!DOCTYPE html>\n");
       }
       if (tidy) {
         StringWriter tidyOutput=new StringWriter();
@@ -75,6 +80,7 @@
         tidy.parse(new StringReader(content),tidyOutput);
         content=tidyOutput.toString();
       }
+      response.getWriter().append("<!DOCTYPE html>\n");
       HttpAuthenticator.writeContent(content,response);
     }
  else     if ((file != null) && securityContext.isVisible(file)) {

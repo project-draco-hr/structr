@@ -48,6 +48,8 @@
   webapp.setWar(warPath);
   System.out.println("Using WAR file " + warPath);
   webapp.addFilter(UrlRewriteFilter.class,"/*",EnumSet.of(DispatcherType.REQUEST,DispatcherType.FORWARD));
+  FilterHolder gzipFilter=webapp.addFilter(GzipFilter.class,"/*",EnumSet.of(DispatcherType.REQUEST,DispatcherType.FORWARD));
+  gzipFilter.setInitParameter("mimeTypes","text/html,text/plain,text/css,text/javascript");
   String directoryName=warPath.substring(0,(warPath.length() - 4));
   File directoryWhichMustNotExist=new File(directoryName);
   if (directoryWhichMustNotExist.exists()) {

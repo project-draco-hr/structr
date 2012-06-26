@@ -7,12 +7,15 @@
     searchFor=StringUtils.substringBefore(urlParts[1],"?");
   }
   String[] pathParts=PathHelper.getParts(path);
-  if ((pathParts == null) && (pathParts.length == 0)) {
-    logger.log(Level.WARNING,"Could not get path parts from path {0}",path);
-    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-    return;
+  boolean tryIndexPage=false;
+  String name="";
+  if ((pathParts == null) || (pathParts.length == 0)) {
+    tryIndexPage=true;
+    logger.log(Level.INFO,"No path supplied, trying to find index page");
   }
-  String name=PathHelper.getName(pathParts[0]);
+ else {
+    name=PathHelper.getName(pathParts[0]);
+  }
   List<NodeAttribute> attrs=new LinkedList<NodeAttribute>();
   Map<String,String[]> parameterMap=request.getParameterMap();
   if ((parameterMap != null) && (parameterMap.size() > 0)) {
@@ -42,7 +45,7 @@
     request.setCharacterEncoding("UTF-8");
     DecimalFormat decimalFormat=new DecimalFormat("0.000000000",DecimalFormatSymbols.getInstance(Locale.ENGLISH));
     double start=System.nanoTime();
-    AbstractNode node=findEntryPoint(name);
+    AbstractNode node=tryIndexPage ? findIndexPage() : findEntryPoint(name);
     Page page=null;
     org.structr.core.entity.File file=null;
     if (edit) {

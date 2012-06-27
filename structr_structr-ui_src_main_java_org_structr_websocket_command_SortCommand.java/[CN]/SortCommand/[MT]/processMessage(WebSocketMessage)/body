@@ -9,7 +9,10 @@
       List<AbstractRelationship> rels=nodeToSort.getRelationships(RelType.CONTAINS,Direction.INCOMING);
       for (      AbstractRelationship rel : rels) {
         try {
-          rel.setProperty(pageId,pos);
+          Long oldPos=rel.getLongProperty(pageId);
+          if ((oldPos != null) && !(oldPos.equals(pos))) {
+            rel.setProperty(pageId,pos);
+          }
         }
  catch (        FrameworkException fex) {
           fex.printStackTrace();

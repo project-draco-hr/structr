@@ -1,9 +1,12 @@
 {
-  AbstractNode node=getNode(webSocketData.getId());
-  if (node != null) {
+  GraphObject obj=getNode(webSocketData.getId());
+  if (obj == null) {
+    obj=getRelationship(webSocketData.getId());
+  }
+  if (obj != null) {
     for (    Entry<String,Object> entry : webSocketData.getNodeData().entrySet()) {
       try {
-        node.setProperty(entry.getKey(),entry.getValue());
+        obj.setProperty(entry.getKey(),entry.getValue());
       }
  catch (      FrameworkException fex) {
         fex.printStackTrace();
@@ -11,7 +14,7 @@
     }
   }
  else {
-    logger.log(Level.WARNING,"Node with uuid {0} not found.",webSocketData.getId());
+    logger.log(Level.WARNING,"Graph object with uuid {0} not found.",webSocketData.getId());
     getWebSocket().send(MessageBuilder.status().code(404).build(),true);
   }
 }

@@ -3,7 +3,10 @@
   if (interfaces == null) {
     interfaces=new LinkedHashSet<Class>();
     interfaceMap.put(type,interfaces);
-    interfaces.addAll(Arrays.asList(type.getInterfaces()));
+    for (    Class iface : type.getInterfaces()) {
+      reverseInterfaceMap.put(iface.getSimpleName(),iface);
+      interfaces.add(iface);
+    }
   }
   return interfaces;
 }

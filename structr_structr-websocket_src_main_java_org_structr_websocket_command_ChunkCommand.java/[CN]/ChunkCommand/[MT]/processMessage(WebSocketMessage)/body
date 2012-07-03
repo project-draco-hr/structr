@@ -12,7 +12,11 @@
         logger.log(Level.FINEST,"Decoded data: {0}",data);
       }
     }
+    File file=(File)getNode(uuid);
+    file.setProperty(File.Key.size,(sequenceNumber * chunkSize) + data.length);
     getWebSocket().handleFileChunk(uuid,sequenceNumber,chunkSize,data);
+    file.setChecksum(0L);
+    file.getChecksum();
     getWebSocket().send(MessageBuilder.status().code(200).message("File saved successfully!").build(),true);
   }
  catch (  Throwable t) {

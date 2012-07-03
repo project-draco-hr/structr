@@ -1,4 +1,5 @@
 {
+  long t0=System.nanoTime();
   JsonObject result=new JsonObject();
   List<? extends GraphObject> results=src.getResults();
   Integer page=src.getPage();
@@ -63,5 +64,7 @@
   if (sortOrder != null) {
     result.add("sort_order",new JsonPrimitive(sortOrder));
   }
+  DecimalFormat decimalFormat=new DecimalFormat("0.000000000",DecimalFormatSymbols.getInstance(Locale.ENGLISH));
+  result.add("serialization_time",new JsonPrimitive(decimalFormat.format((System.nanoTime() - t0) / 1000000000.0)));
   return result;
 }

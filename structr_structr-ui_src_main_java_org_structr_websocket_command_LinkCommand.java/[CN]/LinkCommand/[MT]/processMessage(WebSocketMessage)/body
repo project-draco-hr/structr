@@ -10,8 +10,7 @@
       Command transactionCommand=Services.command(securityContext,TransactionCommand.class);
       StructrTransaction transaction=new StructrTransaction(){
         @Override public Object execute() throws FrameworkException {
-          RelationClass rel=new RelationClass(targetNode.getClass(),RelType.LINK,Direction.OUTGOING,Cardinality.ManyToOne,null,RelationClass.DELETE_NONE);
-          rel.createRelationship(securityContext,sourceNode,targetNode);
+          sourceNode.setProperty(Link.UiKey.linkable_id,targetNode.getUuid());
           return null;
         }
       }

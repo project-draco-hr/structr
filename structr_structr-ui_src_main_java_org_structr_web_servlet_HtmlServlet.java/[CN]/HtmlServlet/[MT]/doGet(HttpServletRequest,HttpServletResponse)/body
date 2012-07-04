@@ -110,7 +110,12 @@
     }
  else {
       if (response.getStatus() == HttpServletResponse.SC_UNAUTHORIZED) {
-        HttpAuthenticator.writeUnauthorized(response);
+        try {
+          HttpAuthenticator.writeUnauthorized(response);
+        }
+ catch (        IllegalStateException ise) {
+          ;
+        }
       }
  else {
         HttpAuthenticator.writeNotFound(response);
@@ -118,7 +123,6 @@
     }
   }
  catch (  Throwable t) {
-    t.printStackTrace();
     logger.log(Level.WARNING,"Exception while processing request",t);
     HttpAuthenticator.writeInternalServerError(response);
   }

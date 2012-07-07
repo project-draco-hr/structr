@@ -46,6 +46,9 @@
     DecimalFormat decimalFormat=new DecimalFormat("0.000000000",DecimalFormatSymbols.getInstance(Locale.ENGLISH));
     double start=System.nanoTime();
     AbstractNode node=tryIndexPage ? findIndexPage() : findEntryPoint(name);
+    if (node == null) {
+      HttpAuthenticator.writeNotFound(response);
+    }
     Page page=null;
     org.structr.core.entity.File file=null;
     if (node instanceof Page) {

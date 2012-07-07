@@ -24,7 +24,17 @@
             searchAttributes.add(Search.andProperty(key,searchValue));
           }
  else {
-            searchAttributes.add(Search.andExactProperty(key,searchValue));
+            if (StringUtils.startsWith(searchValue,"[") && StringUtils.endsWith(searchValue,"]")) {
+              String strippedValue=StringUtils.stripEnd(StringUtils.stripStart(searchValue,"["),"]");
+              searchAttributes.add(Search.andMatchExactValues(key,strippedValue,SearchOperator.OR));
+            }
+ else             if (StringUtils.startsWith(searchValue,"(") && StringUtils.endsWith(searchValue,")")) {
+              String strippedValue=StringUtils.stripEnd(StringUtils.stripStart(searchValue,"("),")");
+              searchAttributes.add(Search.andMatchExactValues(key,strippedValue,SearchOperator.AND));
+            }
+ else {
+              searchAttributes.add(Search.andExactProperty(key,searchValue));
+            }
           }
           hasSearchableAttributes=true;
         }

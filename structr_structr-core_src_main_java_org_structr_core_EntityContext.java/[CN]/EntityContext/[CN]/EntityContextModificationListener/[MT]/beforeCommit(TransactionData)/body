@@ -9,8 +9,9 @@
     return transactionKey;
   }
   SecurityContext securityContext=securityContextMap.get(currentThread);
-  Command indexNodeCommand=Services.command(securityContext,IndexNodeCommand.class);
-  Command indexRelationshipCommand=Services.command(securityContext,IndexRelationshipCommand.class);
+  SecurityContext superUserContext=SecurityContext.getSuperUserInstance();
+  Command indexNodeCommand=Services.command(superUserContext,IndexNodeCommand.class);
+  Command indexRelationshipCommand=Services.command(superUserContext,IndexRelationshipCommand.class);
   try {
     Map<Relationship,Map<String,Object>> removedRelProperties=new LinkedHashMap<Relationship,Map<String,Object>>();
     Map<Node,Map<String,Object>> removedNodeProperties=new LinkedHashMap<Node,Map<String,Object>>();

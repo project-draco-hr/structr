@@ -1,11 +1,5 @@
 {
   String destType=getPartsOfCombinedRelationshipType(combinedRelationshipType)[2];
-  Class realType=null;
-  try {
-    realType=(Class)Services.command(null,GetEntityClassCommand.class).execute(StringUtils.capitalize(destType));
-  }
- catch (  FrameworkException ex) {
-    logger.log(Level.WARNING,"No real type found for {0}",destType);
-  }
+  Class realType=getEntityClassForRawType(destType);
   return realType;
 }

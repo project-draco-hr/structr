@@ -12,7 +12,9 @@
     if (!(relType.name().equals(origRelType.name()))) {
       continue;
     }
-    AbstractRelationship newInRel=(AbstractRelationship)createRel.execute(startNode,cloneNode,relType,in.getProperties(),false);
+    Map<String,Object> props=in.getProperties();
+    props.remove(AbstractRelationship.Key.uuid.name());
+    AbstractRelationship newInRel=(AbstractRelationship)createRel.execute(startNode,cloneNode,relType,props,false);
     if ((componentId != null) && !(cloneNode.getStringProperty(AbstractNode.Key.uuid).equals(componentId))) {
       newInRel.setProperty(Component.Key.componentId,componentId);
     }

@@ -6,7 +6,9 @@
     if (!relType.name().equals(origRelType.name())) {
       continue;
     }
-    AbstractRelationship newOutRel=(AbstractRelationship)createRel.execute(cloneNode,endNode,relType,out.getProperties(),false);
+    Map<String,Object> props=out.getProperties();
+    props.remove(AbstractRelationship.Key.uuid.name());
+    AbstractRelationship newOutRel=(AbstractRelationship)createRel.execute(cloneNode,endNode,relType,props,false);
     if (componentId != null) {
       newOutRel.setProperty(Component.Key.componentId,componentId);
     }

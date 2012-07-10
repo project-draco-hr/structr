@@ -1,48 +1,45 @@
 {
-  String path=PathHelper.clean(request.getPathInfo());
-  logger.log(Level.FINE,"Path info {0}",path);
-  String[] urlParts=PathHelper.getParts(path);
-  String searchFor=null;
-  if (urlParts.length > 1) {
-    searchFor=StringUtils.substringBefore(urlParts[1],"?");
-  }
-  String[] pathParts=PathHelper.getParts(path);
-  boolean tryIndexPage=false;
-  String name="";
-  if ((pathParts == null) || (pathParts.length == 0)) {
-    tryIndexPage=true;
-    logger.log(Level.INFO,"No path supplied, trying to find index page");
-  }
- else {
-    name=PathHelper.getName(pathParts[0]);
-  }
-  List<NodeAttribute> attrs=new LinkedList<NodeAttribute>();
-  Map<String,String[]> parameterMap=request.getParameterMap();
-  if ((parameterMap != null) && (parameterMap.size() > 0)) {
-    attrs=convertToNodeAttributes(parameterMap);
-  }
-  edit=false;
-  tidy=false;
-  if (request.getParameter("edit") != null) {
-    edit=true;
-  }
-  if (request.getParameter("tidy") != null) {
-    tidy=true;
-  }
-  Matcher matcher=threadLocalUUIDMatcher.get();
-  boolean requestUriContainsUuids=false;
-  for (int i=1; i < pathParts.length; i++) {
-    String[] parts=pathParts[i].split("[/]+");
-    for (int j=0; j < parts.length; j++) {
-      request.setAttribute(parts[j],j);
-      matcher.reset(parts[j]);
-      requestUriContainsUuids|=matcher.matches();
-    }
-  }
-  request.setAttribute(Component.REQUEST_CONTAINS_UUID_IDENTIFIER,requestUriContainsUuids);
   try {
-    SecurityContext securityContext=SecurityContext.getInstance(this.getServletConfig(),request,response,AccessMode.Frontend);
     request.setCharacterEncoding("UTF-8");
+    response.setCharacterEncoding("UTF-8");
+    String path=PathHelper.clean(request.getPathInfo());
+    logger.log(Level.FINE,"Path info {0}",path);
+    String[] urlParts=PathHelper.getParts(path);
+    String searchFor=null;
+    if (urlParts.length > 1) {
+      searchFor=StringUtils.substringBefore(urlParts[1],"?");
+    }
+    String[] pathParts=PathHelper.getParts(path);
+    boolean tryIndexPage=false;
+    String name="";
+    if ((pathParts == null) || (pathParts.length == 0)) {
+      tryIndexPage=true;
+      logger.log(Level.INFO,"No path supplied, trying to find index page");
+    }
+ else {
+      name=PathHelper.getName(pathParts[0]);
+    }
+    List<NodeAttribute> attrs=new LinkedList<NodeAttribute>();
+    Map<String,String[]> parameterMap=request.getParameterMap();
+    if ((parameterMap != null) && (parameterMap.size() > 0)) {
+      attrs=convertToNodeAttributes(parameterMap);
+    }
+    edit=false;
+    if (request.getParameter("edit") != null) {
+      edit=true;
+    }
+    Matcher matcher=threadLocalUUIDMatcher.get();
+    boolean requestUriContainsUuids=false;
+    for (int i=1; i < pathParts.length; i++) {
+      String[] parts=pathParts[i].split("[/]+");
+      for (int j=0; j < parts.length; j++) {
+        request.setAttribute(parts[j],j);
+        matcher.reset(parts[j]);
+        requestUriContainsUuids|=matcher.matches();
+      }
+    }
+    request.setAttribute(Component.REQUEST_CONTAINS_UUID_IDENTIFIER,requestUriContainsUuids);
+    SecurityContext securityContext=SecurityContext.getInstance(this.getServletConfig(),request,response,AccessMode.Frontend);
     DecimalFormat decimalFormat=new DecimalFormat("0.000000000",DecimalFormatSymbols.getInstance(Locale.ENGLISH));
     double start=System.nanoTime();
     AbstractNode node=tryIndexPage ? findIndexPage() : findEntryPoint(name);
@@ -63,7 +60,7 @@
     }
  else {
       Date nodeLastMod=node.getLastModifiedDate();
-      if (lastModified == null || nodeLastMod.after(lastModified)) {
+      if ((lastModified == null) || nodeLastMod.after(lastModified)) {
         lastModified=nodeLastMod;
       }
     }
@@ -82,10 +79,13 @@
         logger.log(Level.INFO,"Content collected in {0} seconds",decimalFormat.format((end - start) / 1000000000.0));
         String contentType=page.getStringProperty(Page.UiKey.contentType);
         if (contentType != null) {
+          if (contentType.equals("text/html")) {
+            contentType=contentType.concat(";charset=UTF-8");
+          }
           response.setContentType(contentType);
         }
  else {
-          response.setContentType("text/html; charset=utf-8");
+          response.setContentType("text/html;charset=UTF-8");
         }
         out.append("<!DOCTYPE html>\n");
         HttpAuthenticator.writeContent(content,response);
@@ -104,7 +104,7 @@
           response.setContentType(contentType);
         }
  else {
-          response.setContentType("text/html; charset=utf-8");
+          response.setContentType("application/octet-stream");
         }
         IOUtils.copy(in,out);
         out.flush();

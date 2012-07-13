@@ -1,33 +1,3 @@
 {
-  PropertyKey startNodeIdKey=getStartNodeIdKey();
-  PropertyKey endNodeIdKey=getEndNodeIdKey();
-  if (startNodeIdKey != null) {
-    if (key.equals(startNodeIdKey.name())) {
-      return getStartNodeId();
-    }
-  }
-  if (endNodeIdKey != null) {
-    if (key.equals(endNodeIdKey.name())) {
-      return getEndNodeId();
-    }
-  }
-  Class type=this.getClass();
-  Object value=null;
-  PropertyGroup propertyGroup=EntityContext.getPropertyGroup(type,key);
-  if (propertyGroup != null) {
-    return propertyGroup.getGroupedProperties(this);
-  }
-  if (dbRelationship.hasProperty(key)) {
-    value=dbRelationship.getProperty(key);
-  }
-  if (value == null) {
-    value=EntityContext.getDefaultValue(type,key);
-  }
-  PropertyConverter converter=EntityContext.getPropertyConverter(securityContext,type,key);
-  if (converter != null) {
-    Value conversionValue=EntityContext.getPropertyConversionParameter(type,key);
-    converter.setCurrentObject(this);
-    value=converter.convertForGetter(value,conversionValue);
-  }
-  return value;
+  return getProperty(key,true);
 }

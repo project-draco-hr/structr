@@ -1,0 +1,44 @@
+{
+  Command searchNode=Services.command(securityContext,SearchNodeCommand.class);
+  List<Page> containingPages=new LinkedList<Page>();
+  List<AbstractRelationship> rels=((HtmlElement)currentObject).getIncomingRelationships(RelType.CONTAINS);
+  for (  AbstractRelationship rel : rels) {
+    Map<String,Object> props=rel.getProperties();
+    for (    Entry<String,Object> entry : props.entrySet()) {
+      String key=entry.getKey();
+      if (key.matches("[a-zA-Z0-9]{32}")) {
+        List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
+        attrs.add(Search.andExactType(Page.class.getSimpleName()));
+        attrs.add(Search.andExactUuid(key));
+        List<AbstractNode> results=null;
+        try {
+          results=(List<AbstractNode>)searchNode.execute(null,false,false,attrs);
+        }
+ catch (        Throwable ignore) {
+        }
+        if (results != null && !results.isEmpty()) {
+          containingPages.add((Page)results.get(0));
+        }
+      }
+    }
+  }
+  Set<String> paths=new HashSet<String>();
+  for (  Page page : containingPages) {
+    String pageId=page.getUuid();
+    String path="";
+    AbstractNode node=(AbstractNode)currentObject;
+    while (!(node instanceof Page)) {
+      List<AbstractRelationship> containsRels=node.getIncomingRelationships(RelType.CONTAINS);
+      for (      AbstractRelationship r : containsRels) {
+        Long pos=r.getLongProperty(pageId);
+        if (pos != null) {
+          path="_" + pos + path;
+          node=r.getStartNode();
+          break;
+        }
+      }
+    }
+    paths.add(pageId + path);
+  }
+  return paths;
+}

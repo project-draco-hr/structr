@@ -1,0 +1,34 @@
+{
+  if (currentObject != null && value != null && currentObject instanceof AbstractNode) {
+    Object aggregatorValue=value.get(securityContext);
+    if (aggregatorValue != null && aggregatorValue instanceof Aggregation) {
+      Aggregation aggregation=(Aggregation)aggregatorValue;
+      AbstractNode sourceNode=(AbstractNode)currentObject;
+      List<AbstractNode> nodes=new LinkedList<AbstractNode>();
+      for (      Class type : aggregation.getAggregationTypes()) {
+        nodes.addAll(sourceNode.getRelatedNodes(type));
+      }
+      Comparator<AbstractNode> comparator=aggregation.getComparator();
+      if (nodes.isEmpty() && comparator != null) {
+        Collections.sort(nodes,comparator);
+      }
+      List results=new LinkedList();
+      try {
+        for (        AbstractNode node : nodes) {
+          Notion notion=aggregation.getNotionForType(node.getClass());
+          if (notion != null) {
+            results.add(notion.getAdapterForGetter(securityContext).adapt(node));
+          }
+ else {
+            results.add(node);
+          }
+        }
+      }
+ catch (      Throwable t) {
+        t.printStackTrace();
+      }
+      return results;
+    }
+  }
+  return Collections.emptyList();
+}

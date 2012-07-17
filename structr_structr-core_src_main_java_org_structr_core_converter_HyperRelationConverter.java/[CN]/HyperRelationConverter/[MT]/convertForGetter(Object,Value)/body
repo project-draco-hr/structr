@@ -1,0 +1,13 @@
+{
+  if (currentObject != null && value != null) {
+    Object parameterObject=value.get(securityContext);
+    if (parameterObject instanceof HyperRelation) {
+      HyperRelation hyperRelation=(HyperRelation)parameterObject;
+      AbstractNode parent=(AbstractNode)currentObject;
+      Notion notion=hyperRelation.getNotion();
+      RelationClass parentRelation=new RelationClass(hyperRelation.getEntity(),hyperRelation.getRelType(),hyperRelation.getDirection(),RelationClass.Cardinality.ManyToMany,notion,0);
+      return parentRelation.getRelatedNodes(securityContext,parent);
+    }
+  }
+  return Collections.emptyList();
+}

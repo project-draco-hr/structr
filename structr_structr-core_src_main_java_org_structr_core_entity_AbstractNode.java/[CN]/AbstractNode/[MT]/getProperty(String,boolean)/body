@@ -1,6 +1,4 @@
 {
-  Object value=null;
-  Class type=this.getClass();
   if (key == null) {
     logger.log(Level.SEVERE,"Invalid property key: null");
     return null;
@@ -8,41 +6,46 @@
   if (dbNode == null) {
     return null;
   }
-  PropertyGroup propertyGroup=EntityContext.getPropertyGroup(type,key);
-  if (propertyGroup != null) {
-    return propertyGroup.getGroupedProperties(this);
-  }
-  if (dbNode.hasProperty(key)) {
-    if (isDirty) {
-      value=properties.get(key);
+  Object value=applyConverter ? cachedConvertedProperties.get(key) : cachedRawProperties.get(key);
+  Class type=this.getClass();
+  boolean schemaDefault=false;
+  if (value == null) {
+    PropertyGroup propertyGroup=EntityContext.getPropertyGroup(type,key);
+    if (propertyGroup != null) {
+      return propertyGroup.getGroupedProperties(this);
     }
-    if ((key != null) && (dbNode != null)) {
-      value=dbNode.getProperty(key);
+    if (dbNode.hasProperty(key)) {
+      if (isDirty) {
+        value=properties.get(key);
+      }
+      if ((key != null) && (dbNode != null)) {
+        value=dbNode.getProperty(key);
+      }
     }
-  }
  else {
-    RelationClass rel=EntityContext.getRelationClass(type,key);
-    if (rel != null) {
-      Notion notion=rel.getNotion();
+      RelationClass rel=EntityContext.getRelationClass(type,key);
+      if (rel != null) {
+        Notion notion=rel.getNotion();
 switch (rel.getCardinality()) {
 case ManyToMany:
 case OneToMany:
-        value=new IterableAdapter(rel.getRelatedNodes(securityContext,this),notion.getAdapterForGetter(securityContext));
-      break;
+          value=new IterableAdapter(rel.getRelatedNodes(securityContext,this),notion.getAdapterForGetter(securityContext));
+        break;
 case OneToOne:
 case ManyToOne:
-    try {
-      value=notion.getAdapterForGetter(securityContext).adapt(rel.getRelatedNode(securityContext,this));
-    }
- catch (    FrameworkException fex) {
-      logger.log(Level.WARNING,"Error while adapting related node",fex);
-    }
-  break;
+      try {
+        value=notion.getAdapterForGetter(securityContext).adapt(rel.getRelatedNode(securityContext,this));
+      }
+ catch (      FrameworkException fex) {
+        logger.log(Level.WARNING,"Error while adapting related node",fex);
+      }
+    break;
 }
 }
 }
 if (value == null) {
 value=EntityContext.getDefaultValue(type,key);
+schemaDefault=true;
 }
 if (applyConverter) {
 PropertyConverter converter=EntityContext.getPropertyConverter(securityContext,type,key);
@@ -50,6 +53,15 @@ if (converter != null) {
 Value conversionValue=EntityContext.getPropertyConversionParameter(type,key);
 converter.setCurrentObject(this);
 value=converter.convertForGetter(value,conversionValue);
+}
+}
+if (!schemaDefault) {
+if (applyConverter) {
+cachedConvertedProperties.put(key,value);
+}
+ else {
+cachedRawProperties.put(key,value);
+}
 }
 }
 return value;

@@ -1,34 +1,56 @@
 {
-  PropertyKey startNodeIdKey=getStartNodeIdKey();
-  PropertyKey endNodeIdKey=getEndNodeIdKey();
-  if (startNodeIdKey != null) {
-    if (key.equals(startNodeIdKey.name())) {
-      return getStartNodeId();
-    }
-  }
-  if (endNodeIdKey != null) {
-    if (key.equals(endNodeIdKey.name())) {
-      return getEndNodeId();
-    }
-  }
+  Object value=applyConverter ? cachedConvertedProperties.get(key) : cachedRawProperties.get(key);
+  boolean schemaDefault=false;
   Class type=this.getClass();
-  Object value=null;
-  PropertyGroup propertyGroup=EntityContext.getPropertyGroup(type,key);
-  if (propertyGroup != null) {
-    return propertyGroup.getGroupedProperties(this);
-  }
-  if (dbRelationship.hasProperty(key)) {
-    value=dbRelationship.getProperty(key);
-  }
-  if (value == null) {
-    value=EntityContext.getDefaultValue(type,key);
-  }
-  if (applyConverter) {
-    PropertyConverter converter=EntityContext.getPropertyConverter(securityContext,type,key);
-    if (converter != null) {
-      Value conversionValue=EntityContext.getPropertyConversionParameter(type,key);
-      converter.setCurrentObject(this);
-      value=converter.convertForGetter(value,conversionValue);
+  if (value == null || !applyConverter) {
+    PropertyKey startNodeIdKey=getStartNodeIdKey();
+    PropertyKey endNodeIdKey=getEndNodeIdKey();
+    if (startNodeIdKey != null && key.equals(startNodeIdKey.name())) {
+      value=getStartNodeId();
+      if (applyConverter) {
+        cachedConvertedProperties.put(key,value);
+      }
+ else {
+        cachedRawProperties.put(key,value);
+      }
+      return value;
+    }
+    if (endNodeIdKey != null && key.equals(endNodeIdKey.name())) {
+      value=getEndNodeId();
+      if (applyConverter) {
+        cachedConvertedProperties.put(key,value);
+      }
+ else {
+        cachedRawProperties.put(key,value);
+      }
+      return value;
+    }
+    PropertyGroup propertyGroup=EntityContext.getPropertyGroup(type,key);
+    if (propertyGroup != null) {
+      return propertyGroup.getGroupedProperties(this);
+    }
+    if (dbRelationship.hasProperty(key)) {
+      value=dbRelationship.getProperty(key);
+    }
+    if (value == null) {
+      value=EntityContext.getDefaultValue(type,key);
+      schemaDefault=true;
+    }
+    if (applyConverter) {
+      PropertyConverter converter=EntityContext.getPropertyConverter(securityContext,type,key);
+      if (converter != null) {
+        Value conversionValue=EntityContext.getPropertyConversionParameter(type,key);
+        converter.setCurrentObject(this);
+        value=converter.convertForGetter(value,conversionValue);
+      }
+    }
+    if (!schemaDefault) {
+      if (applyConverter) {
+        cachedConvertedProperties.put(key,value);
+      }
+ else {
+        cachedRawProperties.put(key,value);
+      }
     }
   }
   return value;

@@ -2,15 +2,23 @@
   final SecurityContext securityContext=getWebSocket().getSecurityContext();
   String id=webSocketData.getId();
   String parentId=(String)webSocketData.getNodeData().get("id");
-  final String componentId=(String)webSocketData.getNodeData().get("componentId");
-  final String pageId=(String)webSocketData.getNodeData().get("pageId");
-  String position=(String)webSocketData.getNodeData().get("position");
-  if ((id != null) && (parentId != null)) {
+  final String treeAddress=(String)webSocketData.getNodeData().get("treeAddress");
+  final String pageId;
+  String position;
+  if (StringUtils.isNotBlank(treeAddress)) {
+    pageId=treeAddress.substring(0,32);
+    int len=treeAddress.length();
+    position=treeAddress.substring(len - 1,len);
+  }
+ else {
+    pageId=(String)webSocketData.getNodeData().get("pageId");
+    position=(String)webSocketData.getNodeData().get("position");
+  }
+  if (id != null) {
     final AbstractNode nodeToRemove=getNode(id);
-    final AbstractNode parentNode=getNode(parentId);
     final Long pos=(position != null) ? Long.parseLong(position) : null;
-    if ((nodeToRemove != null) && (parentNode != null)) {
-      final List<AbstractRelationship> rels=parentNode.getRelationships(RelType.CONTAINS,Direction.OUTGOING);
+    if (nodeToRemove != null) {
+      final List<AbstractRelationship> rels=nodeToRemove.getRelationships(RelType.CONTAINS,Direction.INCOMING);
       StructrTransaction transaction=new StructrTransaction(){
         @Override public Object execute() throws FrameworkException {
           Command deleteRel=Services.command(securityContext,DeleteRelationshipCommand.class);

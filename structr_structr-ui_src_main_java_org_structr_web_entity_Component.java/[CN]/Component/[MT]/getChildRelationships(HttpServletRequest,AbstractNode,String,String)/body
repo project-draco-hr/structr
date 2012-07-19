@@ -4,7 +4,7 @@
     Relationship rel=abstractRelationship.getRelationship();
     if ((pageId == null) || ((pageId != null) && rel.hasProperty(pageId)) || rel.hasProperty("*")) {
       AbstractNode endNode=abstractRelationship.getEndNode();
-      if ((endNode instanceof Component) && !isVisible(request,endNode,abstractRelationship,componentId)) {
+      if (endNode == null || (endNode instanceof Component && !isVisible(request,endNode,abstractRelationship,componentId))) {
         continue;
       }
       if ((componentId != null) && ((endNode instanceof Content) || (endNode instanceof Component))) {

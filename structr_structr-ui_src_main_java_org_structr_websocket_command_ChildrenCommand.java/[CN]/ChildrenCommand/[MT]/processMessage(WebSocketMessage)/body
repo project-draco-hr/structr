@@ -2,7 +2,7 @@
   String pageId=(String)webSocketData.getNodeData().get("pageId");
   String componentId=(String)webSocketData.getNodeData().get("componentId");
   AbstractNode node=getNode(webSocketData.getId());
-  if (node == null) {
+  if (node == null || pageId == null) {
     return;
   }
   List<AbstractRelationship> rels=node.getOutgoingRelationships(RelType.CONTAINS);
@@ -11,7 +11,10 @@
   List<GraphObject> result=new LinkedList<GraphObject>();
   for (  AbstractRelationship rel : rels) {
     AbstractNode endNode=rel.getEndNode();
-    if (endNode != null && (node instanceof Group) || (node instanceof Folder)) {
+    if (endNode == null) {
+      continue;
+    }
+    if ((node instanceof Group) || (node instanceof Folder)) {
       result.add(endNode);
       nodesWithChildren.addAll(RelationshipHelper.getChildrenInPage(endNode,null));
       continue;
@@ -24,11 +27,13 @@
       pos=rel.getLongProperty("*");
     }
     String relCompId=rel.getStringProperty("componentId");
-    if (pos != null) {
-      if (endNode != null && (componentId == null || (!endNode.getType().equals(Content.class.getSimpleName()) || ((relCompId != null) && relCompId.equals(componentId))))) {
-        nodesWithChildren.addAll(RelationshipHelper.getChildrenInPage(endNode,pageId));
-        sortMap.put(pos,endNode);
-      }
+    boolean isComponent=endNode instanceof Component;
+    if (pos == null || (isComponent && relCompId != null && !relCompId.equals(componentId))) {
+      continue;
+    }
+    if ((componentId == null || !isComponent || (relCompId != null && relCompId.equals(componentId)))) {
+      nodesWithChildren.addAll(RelationshipHelper.getChildrenInPage(endNode,pageId));
+      sortMap.put(pos,endNode);
     }
   }
   if (!sortMap.isEmpty()) {

@@ -1,44 +1,24 @@
 {
-  Command searchNode=Services.command(securityContext,SearchNodeCommand.class);
-  List<Page> containingPages=new LinkedList<Page>();
-  List<AbstractRelationship> rels=((AbstractNode)currentObject).getIncomingRelationships(RelType.CONTAINS);
-  for (  AbstractRelationship rel : rels) {
-    Map<String,Object> props=rel.getProperties();
-    for (    Entry<String,Object> entry : props.entrySet()) {
-      String key=entry.getKey();
-      if (key.matches("[a-zA-Z0-9]{32}")) {
-        List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
-        attrs.add(Search.andExactType(Page.class.getSimpleName()));
-        attrs.add(Search.andExactUuid(key));
-        List<AbstractNode> results=null;
-        try {
-          results=(List<AbstractNode>)searchNode.execute(null,false,false,attrs);
-        }
- catch (        Throwable ignore) {
-        }
-        if (results != null && !results.isEmpty()) {
-          containingPages.add((Page)results.get(0));
-        }
+  AbstractNode startNode=(AbstractNode)currentObject;
+  TraversalDescription localDesc=Traversal.description().depthFirst().uniqueness(Uniqueness.NODE_PATH).relationships(RelType.CONTAINS,Direction.INCOMING);
+  Set<String> treeAddresses=new HashSet<String>();
+  for (  Path path : localDesc.traverse(startNode.getNode())) {
+    String pageId=(String)path.endNode().getProperty("uuid");
+    String treeAddress="";
+    boolean isConnected=false;
+    for (    Relationship r : path.relationships()) {
+      isConnected=true;
+      if (!r.hasProperty(pageId)) {
+        isConnected=false;
+        break;
       }
+      Integer pos=Integer.parseInt(r.getProperty(pageId).toString());
+      treeAddress="_" + pos + treeAddress;
+    }
+    if (isConnected) {
+      treeAddresses.add(pageId + treeAddress);
+      logger.log(Level.FINE,"{0}{1}",new Object[]{pageId,treeAddress});
     }
   }
-  Set<String> paths=new HashSet<String>();
-  for (  Page page : containingPages) {
-    String pageId=page.getUuid();
-    String path="";
-    AbstractNode node=(AbstractNode)currentObject;
-    while (node != null && !(node instanceof Page)) {
-      List<AbstractRelationship> containsRels=node.getIncomingRelationships(RelType.CONTAINS);
-      for (      AbstractRelationship r : containsRels) {
-        Long pos=r.getLongProperty(pageId);
-        if (pos != null) {
-          path="_" + pos + path;
-          node=r.getStartNode();
-          break;
-        }
-      }
-    }
-    paths.add(pageId + path);
-  }
-  return paths;
+  return treeAddresses;
 }

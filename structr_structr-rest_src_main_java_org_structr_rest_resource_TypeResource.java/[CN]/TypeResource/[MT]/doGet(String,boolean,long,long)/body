@@ -1,0 +1,39 @@
+{
+  List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
+  AbstractNode topNode=null;
+  boolean includeDeletedAndHidden=false;
+  boolean publicOnly=false;
+  if (rawType != null) {
+    if (entityClass == null) {
+      throw new NotFoundException();
+    }
+    DistanceSearchAttribute distanceSearch=getDistanceSearch(request);
+    if (distanceSearch != null) {
+      searchAttributes.add(distanceSearch);
+      searchAttributes.add(new FilterSearchAttribute(AbstractNode.Key.type.name(),EntityContext.normalizeEntityName(rawType),SearchOperator.AND));
+    }
+ else {
+      searchAttributes.add(Search.andExactTypeAndSubtypes(EntityContext.normalizeEntityName(rawType)));
+      hasSearchableAttributesForNodes(rawType,request,searchAttributes);
+    }
+    if (sortKey == null) {
+      try {
+        GraphObject templateEntity=((GraphObject)entityClass.newInstance());
+        PropertyKey sortKeyProperty=templateEntity.getDefaultSortKey();
+        sortDescending=GraphObjectComparator.DESCENDING.equals(templateEntity.getDefaultSortOrder());
+        if (sortKeyProperty != null) {
+          sortKey=sortKeyProperty.name();
+        }
+      }
+ catch (      Throwable t) {
+        sortKey="name";
+      }
+    }
+    List<GraphObject> results=(List<GraphObject>)Services.command(securityContext,SearchNodeCommand.class).execute(topNode,includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDescending,pageSize,page);
+    return results;
+  }
+ else {
+    logger.log(Level.WARNING,"type was null");
+  }
+  return Collections.emptyList();
+}

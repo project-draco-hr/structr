@@ -5,9 +5,16 @@
     SecurityContext securityContext=getSecurityContext(request,response);
     propertyView.set(securityContext,defaultPropertyView);
     double queryTimeStart=System.nanoTime();
-    Resource resource=addSortingAndPaging(request,securityContext,optimizeConstraintChain(parsePath(securityContext,request)));
+    Resource resource=applyViewTransformation(request,securityContext,optimizeConstraintChain(parsePath(securityContext,request)));
     securityContext.examineRequest(request,resource.getResourceSignature(),resource.getGrant(),propertyView.get(securityContext));
-    Result result=new Result(resource.doGet(),resource.isCollectionResource(),resource.isPrimitiveArray());
+    String pageSizeParameter=request.getParameter(REQUEST_PARAMETER_PAGE_SIZE);
+    String pageParameter=request.getParameter(REQUEST_PARAMETER_PAGE_NUMBER);
+    String sortOrder=request.getParameter(REQUEST_PARAMETER_SORT_ORDER);
+    String sortKey=request.getParameter(REQUEST_PARAMETER_SORT_KEY);
+    boolean sortDescending=(sortOrder != null && "desc".equals(sortOrder.toLowerCase()));
+    long pageSize=parseLong(pageSizeParameter,-1);
+    long page=parseLong(pageParameter,-1);
+    Result result=new Result(resource.doGet(sortKey,sortDescending,pageSize,page),resource.isCollectionResource(),resource.isPrimitiveArray());
     double queryTimeEnd=System.nanoTime();
     if (result != null) {
       result.setPropertyView(propertyView.get(securityContext));

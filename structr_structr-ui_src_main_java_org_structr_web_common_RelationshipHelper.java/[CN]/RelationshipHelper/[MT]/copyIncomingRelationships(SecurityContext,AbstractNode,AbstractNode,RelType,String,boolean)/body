@@ -14,10 +14,12 @@
     }
     Map<String,Object> props=in.getProperties();
     props.remove(AbstractRelationship.Key.uuid.name());
+    props.remove(AbstractRelationship.HiddenKey.createdDate.name());
+    props.put(AbstractRelationship.HiddenKey.combinedType.name(),EntityContext.createCombinedRelationshipType(in.getStringProperty(AbstractRelationship.HiddenKey.combinedType),cloneNode.getClass()));
     AbstractRelationship newInRel=(AbstractRelationship)createRel.execute(startNode,cloneNode,relType,props,false);
     if ((componentId != null) && !(cloneNode.getStringProperty(AbstractNode.Key.uuid).equals(componentId))) {
       newInRel.setProperty(Component.Key.componentId,componentId);
     }
-    setPositions(cloneNode,newInRel);
+    setPositions(cloneNode,newInRel,increasePosition);
   }
 }

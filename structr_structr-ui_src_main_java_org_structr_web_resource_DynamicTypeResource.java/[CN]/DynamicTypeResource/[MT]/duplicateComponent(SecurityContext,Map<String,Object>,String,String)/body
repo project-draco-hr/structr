@@ -18,7 +18,7 @@
   Component newComponent=(Component)Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
     @Override public Object execute() throws FrameworkException {
       Component comp=(Component)createNodeCommand.execute(templateProperties);
-      RelationshipHelper.copyRelationships(SecurityContext.getSuperUserInstance(),template,comp,RelType.CONTAINS,finalParentComponentId);
+      RelationshipHelper.copyRelationships(SecurityContext.getSuperUserInstance(),template,comp,RelType.CONTAINS,finalParentComponentId,true);
       Map<String,Object> contentTemplateProperties=new LinkedHashMap<String,Object>();
       for (      AbstractNode node : template.getContentNodes().values()) {
         if (node instanceof Content) {
@@ -32,7 +32,7 @@
           contentTemplateProperties.put(AbstractNode.Key.visibleToAuthenticatedUsers.name(),propertySet.get(AbstractNode.Key.visibleToAuthenticatedUsers.name()));
           Content newContent=(Content)createNodeCommand.execute(contentTemplateProperties);
           propertySet.remove(dataKey);
-          RelationshipHelper.copyRelationships(SecurityContext.getSuperUserInstance(),contentTemplate,newContent,RelType.CONTAINS,componentId);
+          RelationshipHelper.copyRelationships(SecurityContext.getSuperUserInstance(),contentTemplate,newContent,RelType.CONTAINS,componentId,false);
         }
       }
       return comp;
@@ -40,6 +40,8 @@
   }
 );
   if (newComponent != null) {
+    propertySet.remove(AbstractNode.Key.createdDate.name());
+    propertySet.remove(AbstractNode.Key.lastModifiedDate.name());
     for (    String key : propertySet.keySet()) {
       newComponent.setProperty(key,propertySet.get(key));
     }

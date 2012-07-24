@@ -4,7 +4,6 @@
     logger.log(Level.SEVERE,"Tried to set property with null key (action was denied)");
     throw new FrameworkException(type.getSimpleName(),new NullArgumentToken("base"));
   }
-  cachedConvertedProperties.remove(key);
   if (EntityContext.isReadOnlyProperty(type,key) || (EntityContext.isWriteOnceProperty(type,key) && (dbNode != null) && dbNode.hasProperty(key))) {
     if (readOnlyPropertiesUnlocked) {
       readOnlyPropertiesUnlocked=false;
@@ -98,4 +97,6 @@
       Services.command(securityContext,TransactionCommand.class).execute(transaction);
     }
   }
+  cachedConvertedProperties.remove(key);
+  cachedRawProperties.remove(key);
 }

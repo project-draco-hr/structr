@@ -1,0 +1,13 @@
+{
+  Pattern pattern=patterns.get(patternSource);
+  if (pattern == null) {
+    pattern=Pattern.compile(patternSource);
+    patterns.put(patternSource,pattern);
+    if (patterns.size() > MAX_PATTERNS) {
+      Iterator it=patterns.entrySet().iterator();
+      it.next();
+      it.remove();
+    }
+  }
+  return pattern.matcher(content);
+}

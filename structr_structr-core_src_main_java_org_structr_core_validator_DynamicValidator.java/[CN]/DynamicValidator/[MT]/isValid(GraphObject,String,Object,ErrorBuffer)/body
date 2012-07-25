@@ -1,0 +1,25 @@
+{
+  if (object != null) {
+    String regex=object.getStringProperty(regexKey);
+    if (value != null && regex != null) {
+      String content=value.toString();
+      Matcher matcher=getMatcher(regex,content);
+      if (!matcher.matches()) {
+        final String errorMessage=object.getStringProperty(msgKey);
+        if (errorMessage != null) {
+          errorBuffer.add(errorKey,new SemanticErrorToken(errorKey){
+            @Override public JsonElement getContent(){
+              return new JsonPrimitive(errorMessage);
+            }
+            @Override public String getErrorToken(){
+              return errorKey;
+            }
+          }
+);
+        }
+        return false;
+      }
+    }
+  }
+  return true;
+}

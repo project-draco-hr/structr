@@ -1,0 +1,35 @@
+{
+  if (object != null) {
+    if (object instanceof Content) {
+      TypeDefinition typeDefinition=((Content)object).getTypeDefinition();
+      if (typeDefinition != null) {
+        String regex=typeDefinition.getValidationExpression();
+        if (value != null && regex != null) {
+          Matcher matcher=getMatcher(regex,value.toString());
+          if (!matcher.matches()) {
+            final String errorMessage=typeDefinition.getValidationErrorMessage();
+            if (errorMessage != null) {
+              errorBuffer.add(errorKey,new SemanticErrorToken(errorKey){
+                @Override public JsonElement getContent(){
+                  return new JsonPrimitive(errorMessage);
+                }
+                @Override public String getErrorToken(){
+                  return errorKey;
+                }
+              }
+);
+            }
+            return false;
+          }
+        }
+      }
+ else {
+        logger.log(Level.WARNING,"No type definition for Content entity {0}",object.getStringProperty(AbstractNode.Key.uuid));
+      }
+    }
+ else {
+      logger.log(Level.WARNING,"Trying to validate node of type {0} which is not Content",object.getStringProperty(AbstractNode.Key.type));
+    }
+  }
+  return true;
+}

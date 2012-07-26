@@ -5,7 +5,10 @@
   String path=PathHelper.clean(request.getPathInfo());
   String[] parts=PathHelper.getParts(path);
   String pagePath=parts[parts.length - 1];
-  postToRestUrl(request,pagePath,convert(parameterMap));
+  String resp=postToRestUrl(request,pagePath,convert(parameterMap));
+  if (resp != null) {
+    request.getSession().setAttribute(REST_RESPONSE,resp);
+  }
   String name=null;
   try {
     name=PathHelper.getParts(path)[0];

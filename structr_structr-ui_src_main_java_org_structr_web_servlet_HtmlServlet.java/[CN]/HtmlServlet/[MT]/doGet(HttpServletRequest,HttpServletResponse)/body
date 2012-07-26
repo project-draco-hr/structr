@@ -1,5 +1,12 @@
 {
   try {
+    boolean dontCache=false;
+    String resp=(String)request.getSession().getAttribute(REST_RESPONSE);
+    if (resp != null) {
+      request.setAttribute(REST_RESPONSE,resp);
+      request.getSession().removeAttribute(REST_RESPONSE);
+      dontCache=true;
+    }
     request.setCharacterEncoding("UTF-8");
     response.setCharacterEncoding("UTF-8");
     String path=PathHelper.clean(request.getPathInfo());
@@ -55,7 +62,7 @@
  else     if (node instanceof org.structr.core.entity.File) {
       file=(org.structr.core.entity.File)node;
     }
-    if (edit) {
+    if (edit || dontCache) {
       response.setHeader("Pragma","no-cache");
     }
  else {
@@ -69,7 +76,7 @@
       String uuid=page.getStringProperty(AbstractNode.Key.uuid);
       final StringBuilder buffer=new StringBuilder(8192);
       getContent(securityContext,uuid,null,buffer,page,page,0,false,searchFor,attrs,null,null);
-      if (!edit && setCachingHeader(request,response,node)) {
+      if (!edit && !dontCache && setCachingHeader(request,response,node)) {
         out.flush();
         out.close();
       }

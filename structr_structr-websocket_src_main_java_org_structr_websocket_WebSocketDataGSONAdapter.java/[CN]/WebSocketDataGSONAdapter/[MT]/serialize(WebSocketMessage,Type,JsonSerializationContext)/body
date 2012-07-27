@@ -98,10 +98,20 @@
   }
   if (src.getResult() != null) {
     if (src.getView() != null) {
-      propertyView.set(null,src.getView());
+      try {
+        propertyView.set(null,src.getView());
+      }
+ catch (      FrameworkException fex) {
+        logger.log(Level.WARNING,"Unable to set property view",fex);
+      }
     }
  else {
-      propertyView.set(null,PropertyView.All);
+      try {
+        propertyView.set(null,PropertyView.All);
+      }
+ catch (      FrameworkException fex) {
+        logger.log(Level.WARNING,"Unable to set property view",fex);
+      }
     }
     JsonArray result=new JsonArray();
     for (    GraphObject obj : src.getResult()) {

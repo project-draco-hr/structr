@@ -3,18 +3,21 @@
   response.setCharacterEncoding("UTF-8");
   Map<String,String[]> parameterMap=request.getParameterMap();
   String path=PathHelper.clean(request.getPathInfo());
-  String[] parts=PathHelper.getParts(path);
-  String pagePath=parts[parts.length - 1];
-  String resp=postToRestUrl(request,pagePath,convert(parameterMap));
+  String restPath=StringUtils.substringAfter(path,PathHelper.PATH_SEP);
+  String resp=postToRestUrl(request,restPath,convert(parameterMap));
   if (resp != null) {
     request.getSession().setAttribute(REST_RESPONSE,resp);
   }
-  String name=null;
+  String redirect=null;
   try {
-    name=PathHelper.getParts(path)[0];
-    response.sendRedirect("/" + name + "//"+ pagePath);
+    redirect=request.getParameter(REDIRECT);
+    if (redirect == null) {
+      redirect=(String)request.getSession().getAttribute(LAST_GET_URL);
+      request.getSession().removeAttribute(LAST_GET_URL);
+    }
+    response.sendRedirect(redirect);
   }
  catch (  IOException ex) {
-    logger.log(Level.SEVERE,"Could not redirect to " + path,ex);
+    logger.log(Level.SEVERE,"Could not redirect to " + redirect,ex);
   }
 }

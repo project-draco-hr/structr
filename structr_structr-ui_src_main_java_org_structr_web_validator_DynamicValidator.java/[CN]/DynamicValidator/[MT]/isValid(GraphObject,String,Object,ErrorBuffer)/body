@@ -1,7 +1,14 @@
 {
   if (object != null) {
     if (object instanceof Content) {
-      TypeDefinition typeDefinition=((Content)object).getTypeDefinition();
+      Content content=(Content)object;
+      String dataKey=content.getStringProperty("data-key");
+      String parentComponentId=null;
+      Component component=content.getParentComponent();
+      if (component != null) {
+        parentComponentId=component.getComponentId();
+      }
+      TypeDefinition typeDefinition=content.getTypeDefinition();
       if (typeDefinition != null) {
         String regex=typeDefinition.getValidationExpression();
         if (value != null && regex != null) {
@@ -9,15 +16,13 @@
           if (!matcher.matches()) {
             final String errorMessage=typeDefinition.getValidationErrorMessage();
             if (errorMessage != null) {
-              errorBuffer.add(errorKey,new SemanticErrorToken(errorKey){
-                @Override public JsonElement getContent(){
-                  return new JsonPrimitive(errorMessage);
-                }
-                @Override public String getErrorToken(){
-                  return errorKey;
-                }
-              }
-);
+              Map<String,Object> attrs=new HashMap<String,Object>();
+              attrs.put("parentComponentId",parentComponentId);
+              attrs.put("data-key",dataKey);
+              attrs.put("regex",regex);
+              attrs.put("error",errorMessage);
+              attrs.put("value",value);
+              errorBuffer.add(errorKey,new DynamicValidationError(errorKey,attrs));
             }
             return false;
           }

@@ -22,15 +22,17 @@
         lastModified=nodeLastMod;
       }
     }
-    String kind=startNode.getStringProperty(Component.UiKey.kind);
-    String id=startNode.getStringProperty(AbstractNode.Key.uuid);
+    String id=startNode.getUuid();
     tag=startNode.getStringProperty(Element.UiKey.tag);
-    if ((kind != null) && kind.equals(EntityContext.normalizeEntityName(searchClass)) && (attrs != null)) {
-      for (      NodeAttribute attr : attrs) {
-        String key=attr.getKey();
-        Object val=attr.getValue();
-        if (!val.equals(startNode.getProperty(key))) {
-          return;
+    if (startNode instanceof Component && searchClass != null) {
+      String kind=startNode.getStringProperty(Component.UiKey.kind);
+      if ((kind != null) && kind.equals(EntityContext.normalizeEntityName(searchClass)) && (attrs != null)) {
+        for (        NodeAttribute attr : attrs) {
+          String key=attr.getKey();
+          Object val=attr.getValue();
+          if (!val.equals(startNode.getProperty(key))) {
+            return;
+          }
         }
       }
     }
@@ -118,7 +120,10 @@
       }
     }
  else     if (startNode instanceof View) {
+      double startView=System.nanoTime();
       List<GraphObject> results=((View)startNode).getGraphObjects(request);
+      double endView=System.nanoTime();
+      logger.log(Level.INFO,"Get graph objects for {0} in {1} seconds",new Object[]{startNode.getUuid(),decimalFormat.format((endView - startView) / 1000000000.0)});
       for (      GraphObject result : results) {
         List<AbstractRelationship> rels=Component.getChildRelationships(request,startNode,pageId,localComponentId);
         for (        AbstractRelationship rel : rels) {

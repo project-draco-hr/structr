@@ -1,5 +1,8 @@
 {
+  double start=System.nanoTime();
   try {
+    request.setCharacterEncoding("UTF-8");
+    response.setCharacterEncoding("UTF-8");
     boolean dontCache=false;
     String resp=(String)request.getSession().getAttribute(REST_RESPONSE);
     if (resp != null) {
@@ -7,83 +10,90 @@
       request.getSession().removeAttribute(REST_RESPONSE);
       dontCache=true;
     }
-    request.setCharacterEncoding("UTF-8");
-    response.setCharacterEncoding("UTF-8");
     String path=PathHelper.clean(request.getPathInfo());
     logger.log(Level.FINE,"Path info {0}",path);
-    String[] urlParts=PathHelper.getParts(path);
+    SecurityContext securityContext=SecurityContext.getInstance(this.getServletConfig(),request,response,AccessMode.Frontend);
+    org.structr.core.entity.File file=findFile(request,path);
+    Page page=null;
+    Component comp=null;
     String searchFor=null;
-    if (urlParts.length > 1) {
-      searchFor=StringUtils.substringBefore(urlParts[1],"?");
-    }
-    String[] pathParts=PathHelper.getParts(path);
-    boolean tryIndexPage=false;
-    String name="";
-    if ((pathParts == null) || (pathParts.length == 0)) {
-      tryIndexPage=true;
-      logger.log(Level.INFO,"No path supplied, trying to find index page");
-    }
+    if (file == null) {
+      String[] urlParts=PathHelper.getParts(path);
+      if (urlParts.length > 1) {
+        searchFor=StringUtils.substringBefore(urlParts[1],"?");
+      }
+      if ((urlParts == null) || (urlParts.length == 0)) {
+        page=findIndexPage(request,path);
+        logger.log(Level.INFO,"No path supplied, trying to find index page");
+      }
  else {
-      name=PathHelper.getName(pathParts[0]);
-    }
-    List<NodeAttribute> attrs=new LinkedList<NodeAttribute>();
-    Map<String,String[]> parameterMap=request.getParameterMap();
-    if ((parameterMap != null) && (parameterMap.size() > 0)) {
-      attrs=convertToNodeAttributes(parameterMap);
+        page=findPage(request,path);
+      }
+      Matcher matcher=threadLocalUUIDMatcher.get();
+      boolean requestUriContainsUuids=false;
+      for (int i=0; i < urlParts.length; i++) {
+        request.setAttribute(urlParts[i],i);
+        matcher.reset(urlParts[i]);
+        requestUriContainsUuids|=matcher.matches();
+      }
+      if (!requestUriContainsUuids) {
+        comp=findComponent(request,path);
+        if (comp != null) {
+          request.setAttribute(comp.getUuid(),0);
+          requestUriContainsUuids=true;
+        }
+      }
+ else {
+        AbstractNode n=(AbstractNode)Services.command(securityContext,GetNodeByIdCommand.class).execute(PathHelper.getName(path));
+        if (n != null && n instanceof Component) {
+          comp=(Component)n;
+        }
+      }
+      request.setAttribute(Component.REQUEST_CONTAINS_UUID_IDENTIFIER,requestUriContainsUuids);
     }
     edit=false;
     if (request.getParameter("edit") != null) {
       edit=true;
     }
-    Matcher matcher=threadLocalUUIDMatcher.get();
-    boolean requestUriContainsUuids=false;
-    for (int i=1; i < pathParts.length; i++) {
-      String[] parts=pathParts[i].split("[/]+");
-      for (int j=0; j < parts.length; j++) {
-        request.setAttribute(parts[j],j);
-        matcher.reset(parts[j]);
-        requestUriContainsUuids|=matcher.matches();
+    if (page == null && file == null) {
+      if (comp != null) {
+        request.removeAttribute(POSSIBLE_ENTRY_POINTS);
+        page=findPage(request,PathHelper.clean(StringUtils.substringBeforeLast(path,PathHelper.PATH_SEP)));
       }
     }
-    request.setAttribute(Component.REQUEST_CONTAINS_UUID_IDENTIFIER,requestUriContainsUuids);
-    SecurityContext securityContext=SecurityContext.getInstance(this.getServletConfig(),request,response,AccessMode.Frontend);
-    DecimalFormat decimalFormat=new DecimalFormat("0.000000000",DecimalFormatSymbols.getInstance(Locale.ENGLISH));
-    double start=System.nanoTime();
-    AbstractNode node=tryIndexPage ? findIndexPage() : findEntryPoint(name);
-    if (node == null) {
-      HttpAuthenticator.writeNotFound(response);
-      return;
-    }
-    Page page=null;
-    org.structr.core.entity.File file=null;
-    if (node instanceof Page) {
-      page=(Page)node;
-    }
- else     if (node instanceof org.structr.core.entity.File) {
-      file=(org.structr.core.entity.File)node;
-    }
+    AbstractNode node=file != null ? file : page != null ? page : null;
     if (edit || dontCache) {
       response.setHeader("Pragma","no-cache");
     }
  else {
-      Date nodeLastMod=node.getLastModifiedDate();
-      if ((lastModified == null) || nodeLastMod.after(lastModified)) {
-        lastModified=nodeLastMod;
+      if (node != null) {
+        Date nodeLastMod=node.getLastModifiedDate();
+        if ((lastModified == null) || nodeLastMod.after(lastModified)) {
+          lastModified=nodeLastMod;
+        }
       }
     }
     if ((page != null) && securityContext.isVisible(page)) {
+      request.getSession().setAttribute(LAST_GET_URL,request.getPathInfo());
       PrintWriter out=response.getWriter();
       String uuid=page.getStringProperty(AbstractNode.Key.uuid);
       final StringBuilder buffer=new StringBuilder(8192);
-      getContent(securityContext,uuid,null,buffer,page,page,0,false,searchFor,attrs,null,null);
+      List<NodeAttribute> attrs=new LinkedList<NodeAttribute>();
+      Map<String,String[]> parameterMap=request.getParameterMap();
+      if ((parameterMap != null) && (parameterMap.size() > 0)) {
+        attrs=convertToNodeAttributes(parameterMap);
+      }
+      double setup=System.nanoTime();
+      logger.log(Level.INFO,"Setup time: {0} seconds",decimalFormat.format((setup - start) / 1000000000.0));
       if (!edit && !dontCache && setCachingHeader(request,response,node)) {
         out.flush();
         out.close();
       }
  else {
+        getContent(securityContext,uuid,null,buffer,page,page,0,false,searchFor,attrs,null,null);
         String content=buffer.toString();
         double end=System.nanoTime();
-        logger.log(Level.INFO,"Content collected in {0} seconds",decimalFormat.format((end - start) / 1000000000.0));
+        logger.log(Level.INFO,"Content for path {0} in {1} seconds",new Object[]{path,decimalFormat.format((end - setup) / 1000000000.0)});
         String contentType=page.getStringProperty(Page.UiKey.contentType);
         if (contentType != null) {
           if (contentType.equals("text/html")) {

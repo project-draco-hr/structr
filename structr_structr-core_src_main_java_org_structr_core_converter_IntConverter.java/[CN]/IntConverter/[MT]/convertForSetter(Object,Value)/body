@@ -9,8 +9,11 @@
  else     if (source instanceof Float) {
       return Math.round((Float)source);
     }
- else {
-      return Math.round(Float.parseFloat((String)source));
+ else     if (source instanceof String) {
+      if (StringUtils.isBlank((String)source)) {
+        return null;
+      }
+      return NumberUtils.createInteger(((String)source));
     }
   }
   return source;

@@ -26,12 +26,12 @@
           String dataKey=contentTemplate.getStringProperty("data-key");
           contentTemplateProperties.clear();
           contentTemplateProperties.put(AbstractNode.Key.type.name(),Content.class.getSimpleName());
+          contentTemplateProperties.put(Content.UiKey.typeDefinitionId.name(),contentTemplate.getStringProperty(Content.UiKey.typeDefinitionId));
           contentTemplateProperties.put("data-key",dataKey);
-          contentTemplateProperties.put(Content.UiKey.content.name(),propertySet.get(dataKey));
           contentTemplateProperties.put(AbstractNode.Key.visibleToPublicUsers.name(),contentTemplate.getStringProperty(AbstractNode.Key.visibleToPublicUsers.name()));
           contentTemplateProperties.put(AbstractNode.Key.visibleToAuthenticatedUsers.name(),contentTemplate.getStringProperty(AbstractNode.Key.visibleToAuthenticatedUsers.name()));
-          contentTemplateProperties.put(Content.UiKey.typeDefinitionId.name(),contentTemplate.getStringProperty(Content.UiKey.typeDefinitionId));
           Content newContent=(Content)createNodeCommand.execute(contentTemplateProperties);
+          newContent.setProperty(Content.UiKey.content.name(),propertySet.get(dataKey));
           propertySet.remove(dataKey);
           RelationshipHelper.copyRelationships(SecurityContext.getSuperUserInstance(),contentTemplate,newContent,RelType.CONTAINS,componentId,false);
         }

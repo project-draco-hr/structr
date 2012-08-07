@@ -1,0 +1,29 @@
+{
+  if (currentObject != null && currentObject instanceof Content) {
+    Content content=(Content)currentObject;
+    TypeDefinition typeDefinition=content.getTypeDefinition();
+    if (typeDefinition != null) {
+      String converterProp=typeDefinition.getStringProperty(TypeDefinition.Key.converter);
+      if (converterProp != null) {
+        Class converterClass=null;
+        try {
+          converterClass=Class.forName(converterProp);
+        }
+ catch (        ClassNotFoundException ex) {
+          Logger.getLogger(DynamicConverter.class.getName()).log(Level.SEVERE,null,ex);
+        }
+        if (converterClass != null) {
+          try {
+            converter=(PropertyConverter)converterClass.newInstance();
+          }
+ catch (          InstantiationException ex) {
+            logger.log(Level.SEVERE,null,ex);
+          }
+catch (          IllegalAccessException ex) {
+            logger.log(Level.SEVERE,null,ex);
+          }
+        }
+      }
+    }
+  }
+}

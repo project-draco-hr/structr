@@ -5,12 +5,28 @@
     GraphDatabaseService graphDb=(GraphDatabaseService)graphDbCommand.execute();
     if (input.iterator().hasNext()) {
       for (      Node node : input) {
-        AbstractNode n=createNode(securityContext,graphDb.getNodeById((Long)node.getProperty("id")),includeDeletedAndHidden,publicOnly);
-        if (n != null) {
-          nodes.add(n);
-          for (          AbstractNode nodeAt : getNodesAt(n)) {
-            if (nodeAt != null && isReadable(securityContext,nodeAt,includeDeletedAndHidden,publicOnly)) {
-              nodes.add(nodeAt);
+        Long dbNodeId=null;
+        Node realNode=null;
+        if (node.hasProperty("id")) {
+          dbNodeId=(Long)node.getProperty("id");
+          try {
+            realNode=graphDb.getNodeById(dbNodeId);
+          }
+ catch (          NotFoundException nfe) {
+            logger.log(Level.SEVERE,"Node with id {0} not found.",dbNodeId);
+            for (            String key : node.getPropertyKeys()) {
+              logger.log(Level.FINE,"{0}={1}",new Object[]{key,node.getProperty(key)});
+            }
+          }
+        }
+        if (realNode != null) {
+          AbstractNode n=createNode(securityContext,realNode,includeDeletedAndHidden,publicOnly);
+          if (n != null) {
+            nodes.add(n);
+            for (            AbstractNode nodeAt : getNodesAt(n)) {
+              if (nodeAt != null && isReadable(securityContext,nodeAt,includeDeletedAndHidden,publicOnly)) {
+                nodes.add(nodeAt);
+              }
             }
           }
         }

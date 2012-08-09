@@ -1,0 +1,15 @@
+{
+  for (  AbstractRelationship in : getRelationships(RelType.CONTAINS,Direction.INCOMING)) {
+    String componentId=in.getStringProperty(Component.Key.componentId.name());
+    if (componentId != null) {
+      AbstractNode node=in.getStartNode();
+      while (!(node instanceof Page)) {
+        if (node instanceof Component) {
+          return (Component)node;
+        }
+        node=node.getIncomingRelationships(RelType.CONTAINS).get(0).getStartNode();
+      }
+    }
+  }
+  return null;
+}

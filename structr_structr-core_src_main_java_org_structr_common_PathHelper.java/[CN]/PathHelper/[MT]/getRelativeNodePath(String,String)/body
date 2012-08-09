@@ -2,11 +2,11 @@
   if (basePath.equals(targetPath)) {
     return ".";
   }
-  if (basePath.equals("/") && (targetPath.length() > 1)) {
+  if (basePath.equals(PATH_SEP) && (targetPath.length() > 1)) {
     return targetPath.substring(1);
   }
-  String[] baseAncestors=FilenameUtils.normalizeNoEndSeparator(basePath).split("/");
-  String[] targetAncestors=FilenameUtils.normalizeNoEndSeparator(targetPath).split("/");
+  String[] baseAncestors=FilenameUtils.normalizeNoEndSeparator(basePath).split(PATH_SEP);
+  String[] targetAncestors=FilenameUtils.normalizeNoEndSeparator(targetPath).split(PATH_SEP);
   int length=(baseAncestors.length < targetAncestors.length) ? baseAncestors.length : targetAncestors.length;
   int lastCommonRoot=-1;
   int i;
@@ -22,14 +22,14 @@
     StringBuilder newRelativePath=new StringBuilder();
     for (i=lastCommonRoot + 1; i < baseAncestors.length; i++) {
       if (baseAncestors[i].length() > 0) {
-        newRelativePath.append("../");
+        newRelativePath.append(".." + PATH_SEP);
       }
     }
     for (i=lastCommonRoot + 1; i < targetAncestors.length; i++) {
-      newRelativePath.append(targetAncestors[i]).append("/");
+      newRelativePath.append(targetAncestors[i]).append(PATH_SEP);
     }
     String result=newRelativePath.toString();
-    if (result.endsWith("/")) {
+    if (result.endsWith(PATH_SEP)) {
       result=result.substring(0,result.length() - 1);
     }
     return result;

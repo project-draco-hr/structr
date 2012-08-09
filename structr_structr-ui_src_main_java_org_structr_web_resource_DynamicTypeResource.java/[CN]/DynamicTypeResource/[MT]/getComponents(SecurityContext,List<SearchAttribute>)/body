@@ -2,5 +2,12 @@
   AbstractNode topNode=null;
   boolean includeDeletedAndHidden=false;
   boolean publicOnly=false;
-  return (List<GraphObject>)Services.command(securityContext,SearchNodeCommand.class).execute(topNode,includeDeletedAndHidden,publicOnly,searchAttributes);
+  List<GraphObject> searchResults=(List<GraphObject>)Services.command(securityContext,SearchNodeCommand.class).execute(topNode,includeDeletedAndHidden,publicOnly,searchAttributes);
+  List<GraphObject> filteredResults=new LinkedList<GraphObject>();
+  for (  GraphObject res : searchResults) {
+    if (((Component)res).hasRelationship(RelType.CONTAINS,Direction.INCOMING)) {
+      filteredResults.add(res);
+    }
+  }
+  return filteredResults;
 }

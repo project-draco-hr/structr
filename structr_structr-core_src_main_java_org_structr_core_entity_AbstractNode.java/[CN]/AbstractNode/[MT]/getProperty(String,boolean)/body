@@ -8,7 +8,7 @@
   }
   Object value=applyConverter ? cachedConvertedProperties.get(key) : cachedRawProperties.get(key);
   Class type=this.getClass();
-  boolean schemaDefault=false;
+  boolean dontCache=false;
   if (value == null) {
     PropertyGroup propertyGroup=EntityContext.getPropertyGroup(type,key);
     if (propertyGroup != null) {
@@ -30,22 +30,24 @@ switch (rel.getCardinality()) {
 case ManyToMany:
 case OneToMany:
           value=new IterableAdapter(rel.getRelatedNodes(securityContext,this),notion.getAdapterForGetter(securityContext));
-        break;
+        dontCache=true;
+      break;
 case OneToOne:
 case ManyToOne:
-      try {
-        value=notion.getAdapterForGetter(securityContext).adapt(rel.getRelatedNode(securityContext,this));
-      }
- catch (      FrameworkException fex) {
-        logger.log(Level.WARNING,"Error while adapting related node",fex);
-      }
-    break;
+    try {
+      value=notion.getAdapterForGetter(securityContext).adapt(rel.getRelatedNode(securityContext,this));
+      dontCache=true;
+    }
+ catch (    FrameworkException fex) {
+      logger.log(Level.WARNING,"Error while adapting related node",fex);
+    }
+  break;
 }
 }
 }
 if (value == null) {
 value=EntityContext.getDefaultValue(type,key);
-schemaDefault=true;
+dontCache=true;
 }
 if (applyConverter) {
 PropertyConverter converter=EntityContext.getPropertyConverter(securityContext,type,key);
@@ -55,7 +57,7 @@ converter.setCurrentObject(this);
 value=converter.convertForGetter(value,conversionValue);
 }
 }
-if (!schemaDefault) {
+if (!dontCache) {
 if (applyConverter) {
 cachedConvertedProperties.put(key,value);
 }

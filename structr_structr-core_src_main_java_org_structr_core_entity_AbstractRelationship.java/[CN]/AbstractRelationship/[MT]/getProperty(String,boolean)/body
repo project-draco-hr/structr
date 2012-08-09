@@ -1,6 +1,6 @@
 {
   Object value=applyConverter ? cachedConvertedProperties.get(key) : cachedRawProperties.get(key);
-  boolean schemaDefault=false;
+  boolean dontCache=false;
   Class type=this.getClass();
   if (value == null || !applyConverter) {
     PropertyKey startNodeIdKey=getStartNodeIdKey();
@@ -34,7 +34,7 @@
     }
     if (value == null) {
       value=EntityContext.getDefaultValue(type,key);
-      schemaDefault=true;
+      dontCache=true;
     }
     if (applyConverter) {
       PropertyConverter converter=EntityContext.getPropertyConverter(securityContext,type,key);
@@ -44,7 +44,7 @@
         value=converter.convertForGetter(value,conversionValue);
       }
     }
-    if (!schemaDefault) {
+    if (!dontCache) {
       if (applyConverter) {
         cachedConvertedProperties.put(key,value);
       }

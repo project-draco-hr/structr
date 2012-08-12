@@ -60,27 +60,9 @@
       QueryContext queryContext=new QueryContext(textualQueryString);
       IndexHits hits=null;
       if (sortKey != null) {
-        Integer type=sortKeyTypeMap.get(sortKey);
-        if (type != null) {
-          queryContext.sort(new Sort(new SortField(sortKey,type,sortDescending)));
-        }
- else {
-          queryContext.sort(new Sort(new SortField(sortKey,Locale.GERMAN,sortDescending)));
-        }
+        queryContext.sort(new Sort(new SortField(sortKey,Locale.getDefault(),sortDescending)));
       }
-      if ((textualAttributes.size() == 1) && textualAttributes.get(0).getKey().equals(AbstractNode.Key.uuid.name())) {
-        index=(Index<Node>)arguments.get(NodeIndex.uuid.name());
-synchronized (index) {
-          hits=index.get(AbstractNode.Key.uuid.name(),decodeExactMatch(textualAttributes.get(0).getValue()));
-        }
-      }
- else       if ((textualAttributes.size() > 1) && allExactMatch) {
-        index=(Index<Node>)arguments.get(NodeIndex.keyword.name());
-synchronized (index) {
-          hits=index.query(queryContext);
-        }
-      }
- else       if (distanceSearch != null) {
+      if (distanceSearch != null) {
         if (coords != null) {
           Map<String,Object> params=new HashMap<String,Object>();
           params.put(LayerNodeIndex.POINT_PARAMETER,coords.toArray());
@@ -89,6 +71,18 @@ synchronized (index) {
 synchronized (index) {
             hits=index.query(LayerNodeIndex.WITHIN_DISTANCE_QUERY,params);
           }
+        }
+      }
+ else       if ((textualAttributes.size() == 1) && textualAttributes.get(0).getKey().equals(AbstractNode.Key.uuid.name())) {
+        index=(Index<Node>)arguments.get(NodeIndex.uuid.name());
+synchronized (index) {
+          hits=index.get(AbstractNode.Key.uuid.name(),decodeExactMatch(textualAttributes.get(0).getValue()));
+        }
+      }
+ else       if (allExactMatch) {
+        index=(Index<Node>)arguments.get(NodeIndex.keyword.name());
+synchronized (index) {
+          hits=index.query(queryContext);
         }
       }
  else {

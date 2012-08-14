@@ -1,7 +1,7 @@
 {
   List<GraphObject> relationResults=new LinkedList<GraphObject>();
   if (wrappedResource != null) {
-    List<? extends GraphObject> results=wrappedResource.doGet(sortKey,sortDescending,pageSize,page);
+    List<? extends GraphObject> results=wrappedResource.doGet(sortKey,sortDescending,pageSize,page).getResults();
     for (    GraphObject obj : results) {
       if (obj instanceof AbstractNode) {
         relationResults.addAll(namedRelation.getRelationships((AbstractNode)obj));
@@ -40,5 +40,5 @@
       }
     }
   }
-  return relationResults;
+  return new Result(relationResults,isCollectionResource(),isPrimitiveArray());
 }

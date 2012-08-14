@@ -21,10 +21,11 @@
     }
     List<GraphObject> results=(List<GraphObject>)Services.command(securityContext,SearchNodeCommand.class).execute(topNode,includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDescending,pageSize,page);
     applyDefaultSorting(results);
-    return results;
+    return new Result(results,isCollectionResource(),isPrimitiveArray());
   }
  else {
     logger.log(Level.WARNING,"type was null");
   }
-  return Collections.emptyList();
+  List emptyList=Collections.emptyList();
+  return new Result(emptyList,isCollectionResource(),isPrimitiveArray());
 }

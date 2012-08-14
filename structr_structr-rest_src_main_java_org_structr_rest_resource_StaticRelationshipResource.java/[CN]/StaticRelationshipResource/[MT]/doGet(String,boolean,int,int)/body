@@ -1,5 +1,5 @@
 {
-  List<? extends GraphObject> results=typedIdResource.doGet(sortKey,sortDescending,pageSize,page);
+  List<? extends GraphObject> results=typedIdResource.doGet(sortKey,sortDescending,pageSize,page).getResults();
   if (results != null) {
     AbstractNode sourceNode=typedIdResource.getTypesafeNode();
     if (sourceNode != null) {
@@ -8,14 +8,14 @@
         List relatedNodes=staticRel.getRelatedNodes(securityContext,sourceNode);
         List<SearchAttribute> dummyList=new LinkedList<SearchAttribute>();
         if (typeResource.hasSearchableAttributes(dummyList)) {
-          List<? extends GraphObject> typeNodes=typeResource.doGet(sortKey,sortDescending,pageSize,page);
+          List<? extends GraphObject> typeNodes=typeResource.doGet(sortKey,sortDescending,pageSize,page).getResults();
           List intersection=ListUtils.intersection(relatedNodes,typeNodes);
           applyDefaultSorting(intersection);
-          return intersection;
+          return new Result(intersection,isCollectionResource(),isPrimitiveArray());
         }
         if (!relatedNodes.isEmpty()) {
           applyDefaultSorting(relatedNodes);
-          return relatedNodes;
+          return new Result(relatedNodes,isCollectionResource(),isPrimitiveArray());
         }
       }
       Class type=sourceNode.getClass();
@@ -37,7 +37,7 @@
           if ((value instanceof List) && !((List)value).isEmpty() && ((List)value).get(0) instanceof GraphObject) {
             List<GraphObject> list=(List<GraphObject>)value;
             applyDefaultSorting(list);
-            return list;
+            return new Result(list,isCollectionResource(),isPrimitiveArray());
           }
  else           if (value instanceof Iterable) {
             List<GraphObject> propertyListResult=new LinkedList<GraphObject>();
@@ -50,7 +50,7 @@
                 throw new SystemException(msg);
               }
             }
-            return propertyListResult;
+            return new Result(propertyListResult,isCollectionResource(),isPrimitiveArray());
           }
         }
  else {
@@ -60,5 +60,6 @@
       }
     }
   }
-  return Collections.emptyList();
+  List emptyList=Collections.emptyList();
+  return new Result(emptyList,isCollectionResource(),isPrimitiveArray());
 }

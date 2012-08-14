@@ -1,5 +1,5 @@
 {
-  List<? extends GraphObject> results=wrappedResource.doGet(sortKey,sortDescending,pageSize,page);
+  List<? extends GraphObject> results=wrappedResource.doGet(sortKey,sortDescending,pageSize,page).getResults();
   if (results != null && !results.isEmpty()) {
     try {
       List<GraphObject> resultList=new LinkedList<GraphObject>();
@@ -14,7 +14,7 @@
           }
         }
       }
-      return resultList;
+      return new Result(resultList,isCollectionResource(),isPrimitiveArray());
     }
  catch (    Throwable t) {
       logger.log(Level.WARNING,"Exception while fetching relationships",t);

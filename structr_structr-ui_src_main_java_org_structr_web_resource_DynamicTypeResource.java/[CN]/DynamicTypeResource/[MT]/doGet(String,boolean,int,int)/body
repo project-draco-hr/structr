@@ -2,7 +2,7 @@
   List<GraphObject> uuidResults=null;
   if (uuidResource != null) {
     uuidResource.setSecurityContext(this.securityContext);
-    uuidResults=(List<GraphObject>)uuidResource.doGet(sortKey,sortDescending,pageSize,page);
+    uuidResults=(List<GraphObject>)uuidResource.doGet(sortKey,sortDescending,pageSize,page).getResults();
   }
   List<SearchAttribute> searchAttributes=getSearchAttributes(rawType);
   hasSearchableAttributesForNodes(rawType,request,searchAttributes);
@@ -12,11 +12,11 @@
       results=ListUtils.intersection(results,uuidResults);
     }
     for (    DynamicTypeResource res : nestedResources) {
-      if (res.doGet(sortKey,sortDescending,pageSize,page).isEmpty()) {
+      if (res.doGet(sortKey,sortDescending,pageSize,page).getResults().isEmpty()) {
         throw new NotFoundException();
       }
     }
-    return results;
+    return new Result(results,isCollectionResource(),isPrimitiveArray());
   }
   parentResults=true;
   return super.doGet(sortKey,sortDescending,pageSize,page);

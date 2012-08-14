@@ -3,8 +3,8 @@
   if (source != null) {
     attrs.add(Search.andExactProperty(propertyKey,source.toString()));
   }
-  List<AbstractNode> nodes=(List<AbstractNode>)Services.command(securityContext,SearchNodeCommand.class).execute(null,false,false,attrs);
-  int resultCount=nodes.size();
+  Result result=(Result)Services.command(securityContext,SearchNodeCommand.class).execute(null,false,false,attrs);
+  int resultCount=result.size();
 switch (resultCount) {
 case 0:
     if ((source != null) && createIfNotExisting) {
@@ -18,11 +18,11 @@ case 0:
     }
   break;
 case 1:
-AbstractNode node=nodes.get(0);
-if (!type.isAssignableFrom(node.getClass())) {
+GraphObject obj=result.get(0);
+if (!type.isAssignableFrom(obj.getClass())) {
 throw new FrameworkException("base",new TypeToken(propertyKey.name(),type.getSimpleName()));
 }
-return node;
+return obj;
 }
 if (source != null) {
 Map<String,Object> attributes=new LinkedHashMap<String,Object>();

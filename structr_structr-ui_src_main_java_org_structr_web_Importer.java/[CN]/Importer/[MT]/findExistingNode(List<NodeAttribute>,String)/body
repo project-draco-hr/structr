@@ -7,14 +7,15 @@
       searchAttrs.add(Search.andExactProperty(key,value));
     }
   }
-  List<AbstractNode> nodes=(List<AbstractNode>)searchNode.execute(null,false,false,searchAttrs);
-  if (nodes.size() > 1) {
+  Result result=(Result)searchNode.execute(null,false,false,searchAttrs);
+  if (result.size() > 1) {
     logger.log(Level.WARNING,"More than one node found.");
   }
-  if (nodes.isEmpty()) {
+  if (result.isEmpty()) {
     return null;
   }
-  for (  AbstractNode foundNode : nodes) {
+  for (  GraphObject obj : result.getResults()) {
+    AbstractNode foundNode=(AbstractNode)obj;
     String foundNodePath=foundNode.getStringProperty(HtmlElement.UiKey.path);
     logger.log(Level.INFO,"Found a node with path {0}",foundNodePath);
     if (foundNodePath != null && foundNodePath.equals(nodePath)) {

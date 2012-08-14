@@ -13,10 +13,10 @@
     group.add(Search.orExactType(File.class.getSimpleName()));
     group.add(Search.orExactType(Image.class.getSimpleName()));
     searchAttrs.add(group);
-    List<AbstractNode> results=(List<AbstractNode>)searchNodesAsSuperuser.execute(null,false,false,searchAttrs);
+    Result results=(Result)searchNodesAsSuperuser.execute(null,false,false,searchAttrs);
     logger.log(Level.FINE,"{0} results",results.size());
-    request.setAttribute(POSSIBLE_ENTRY_POINTS,results);
-    return results;
+    request.setAttribute(POSSIBLE_ENTRY_POINTS,results.getResults());
+    return (List<AbstractNode>)results.getResults();
   }
   return Collections.EMPTY_LIST;
 }

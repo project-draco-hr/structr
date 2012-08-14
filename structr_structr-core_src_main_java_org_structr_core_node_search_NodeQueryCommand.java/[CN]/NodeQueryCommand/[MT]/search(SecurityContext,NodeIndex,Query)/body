@@ -4,10 +4,9 @@
   if (graphDb != null) {
     Index<Node> index=(Index<Node>)arguments.get(whichIndex.name());
     IndexHits hits=index.query(query.toString());
-    List<AbstractNode> nodes=nodeFactory.createNodes(securityContext,hits);
+    Result result=nodeFactory.createNodes(securityContext,hits);
     hits.close();
-    Collections.sort(nodes);
-    return nodes;
+    return result;
   }
-  return Collections.emptyList();
+  return new Result(new LinkedList<AbstractNode>(),null,false,false);
 }

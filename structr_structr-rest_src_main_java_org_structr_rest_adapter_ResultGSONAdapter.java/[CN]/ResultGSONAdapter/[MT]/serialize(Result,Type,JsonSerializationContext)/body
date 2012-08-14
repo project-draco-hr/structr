@@ -6,7 +6,7 @@
   Integer pageCount=src.getPageCount();
   Integer pageSize=src.getPageSize();
   String queryTime=src.getQueryTime();
-  Integer resultCount=src.getResultCount();
+  Integer resultCount=src.getRawResultCount();
   String searchString=src.getSearchString();
   String sortKey=src.getSortKey();
   String sortOrder=src.getSortOrder();
@@ -40,10 +40,10 @@
       result.add("result",resultArray);
     }
  else {
-      if (results.size() > 1 && !src.isCollectionResource()) {
+      if (results.size() > 1 && !src.isCollection()) {
         throw new IllegalStateException(src.getClass().getSimpleName() + " is not a collection resource, but result set has size " + results.size());
       }
-      if (src.isCollectionResource()) {
+      if (src.isCollection()) {
         JsonArray resultArray=new JsonArray();
         for (        GraphObject graphObject : results) {
           resultArray.add(graphObjectGsonAdapter.serialize(graphObject,GraphObject.class,context));

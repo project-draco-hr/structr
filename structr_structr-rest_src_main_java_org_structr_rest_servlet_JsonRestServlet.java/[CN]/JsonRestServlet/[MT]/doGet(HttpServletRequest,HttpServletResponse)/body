@@ -15,8 +15,8 @@
     int pageSize=parseInt(pageSizeParameter,-1);
     int page=parseInt(pageParameter,-1);
     Result result=resource.doGet(sortKey,sortDescending,pageSize,page);
-    PagingHelper.postProcessResultSet(result,(Integer)Services.getAttribute(NodeFactory.RAW_RESULT_COUNT + Thread.currentThread().getId()),pageSize,page);
-    Services.removeAttribute(NodeFactory.RAW_RESULT_COUNT + Thread.currentThread().getId());
+    result.setIsCollection(resource.isCollectionResource());
+    result.setIsPrimitiveArray(resource.isPrimitiveArray());
     double queryTimeEnd=System.nanoTime();
     if (result != null) {
       result.setPropertyView(propertyView.get(securityContext));

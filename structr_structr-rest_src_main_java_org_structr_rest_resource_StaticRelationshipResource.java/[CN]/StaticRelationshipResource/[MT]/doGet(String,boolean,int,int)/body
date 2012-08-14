@@ -11,11 +11,11 @@
           List<? extends GraphObject> typeNodes=typeResource.doGet(sortKey,sortDescending,pageSize,page).getResults();
           List intersection=ListUtils.intersection(relatedNodes,typeNodes);
           applyDefaultSorting(intersection);
-          return new Result(intersection,isCollectionResource(),isPrimitiveArray());
+          return new Result(intersection,null,isCollectionResource(),isPrimitiveArray());
         }
         if (!relatedNodes.isEmpty()) {
           applyDefaultSorting(relatedNodes);
-          return new Result(relatedNodes,isCollectionResource(),isPrimitiveArray());
+          return new Result(relatedNodes,null,isCollectionResource(),isPrimitiveArray());
         }
       }
       Class type=sourceNode.getClass();
@@ -37,7 +37,7 @@
           if ((value instanceof List) && !((List)value).isEmpty() && ((List)value).get(0) instanceof GraphObject) {
             List<GraphObject> list=(List<GraphObject>)value;
             applyDefaultSorting(list);
-            return new Result(list,isCollectionResource(),isPrimitiveArray());
+            return new Result(list,null,isCollectionResource(),isPrimitiveArray());
           }
  else           if (value instanceof Iterable) {
             List<GraphObject> propertyListResult=new LinkedList<GraphObject>();
@@ -50,7 +50,7 @@
                 throw new SystemException(msg);
               }
             }
-            return new Result(propertyListResult,isCollectionResource(),isPrimitiveArray());
+            return new Result(propertyListResult,null,isCollectionResource(),isPrimitiveArray());
           }
         }
  else {
@@ -61,5 +61,5 @@
     }
   }
   List emptyList=Collections.emptyList();
-  return new Result(emptyList,isCollectionResource(),isPrimitiveArray());
+  return new Result(emptyList,null,isCollectionResource(),isPrimitiveArray());
 }

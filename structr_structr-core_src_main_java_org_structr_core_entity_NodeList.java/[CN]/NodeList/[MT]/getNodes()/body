@@ -1,6 +1,8 @@
 {
   try {
-    return new NodeFactory().createNodes(securityContext,getRawNodes());
+    NodeFactory factory=new NodeFactory();
+    Result result=factory.createNodes(securityContext,getRawNodes());
+    return (List<AbstractNode>)result.getResults();
   }
  catch (  FrameworkException fex) {
     logger.log(Level.WARNING,"Unable to instantiate nodes: {0}",fex.getMessage());

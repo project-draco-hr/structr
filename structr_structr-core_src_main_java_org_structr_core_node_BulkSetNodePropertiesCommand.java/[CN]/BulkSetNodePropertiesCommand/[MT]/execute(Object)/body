@@ -11,17 +11,18 @@
     transactionCommand.execute(new BatchTransaction(){
       @Override public Object execute(      Transaction tx) throws FrameworkException {
         long n=0L;
-        List<AbstractNode> nodes=null;
+        Result result=null;
         if (properties.containsKey(AbstractNode.Key.type.name())) {
           List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
           attrs.add(Search.andExactType((String)properties.get(AbstractNode.Key.type.name())));
-          nodes=(List<AbstractNode>)searchNode.execute(null,false,false,attrs);
+          result=(Result)searchNode.execute(null,false,false,attrs);
           properties.remove(AbstractNode.Key.type.name());
         }
  else {
-          nodes=(List<AbstractNode>)nodeFactory.createNodes(securityContext,GlobalGraphOperations.at(graphDb).getAllNodes());
+          result=(Result)nodeFactory.createNodes(securityContext,GlobalGraphOperations.at(graphDb).getAllNodes());
         }
-        for (        AbstractNode node : nodes) {
+        for (        GraphObject obj : result.getResults()) {
+          AbstractNode node=(AbstractNode)obj;
           if (node.getStringProperty(AbstractNode.Key.uuid) != null) {
             for (            Entry entry : properties.entrySet()) {
               String key=(String)entry.getKey();

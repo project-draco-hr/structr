@@ -1,9 +1,10 @@
 {
   if (wrappedResource != null) {
-    Result result=wrappedResource.doGet(sortKey,sortDescending,pageSize,page);
+    Result result=wrappedResource.doGet(sortKey,sortDescending,-1,-1);
     if (transformation != null) {
       try {
         transformation.apply(securityContext,result.getResults());
+        result.setRawResultCount(result.size());
       }
  catch (      Throwable t) {
         t.printStackTrace();
@@ -12,5 +13,5 @@
     return result;
   }
   List emptyList=Collections.emptyList();
-  return new Result(emptyList,isCollectionResource(),isPrimitiveArray());
+  return new Result(emptyList,null,isCollectionResource(),isPrimitiveArray());
 }

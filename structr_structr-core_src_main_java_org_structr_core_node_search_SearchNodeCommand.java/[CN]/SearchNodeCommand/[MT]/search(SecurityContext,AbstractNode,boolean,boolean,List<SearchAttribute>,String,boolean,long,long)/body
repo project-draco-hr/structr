@@ -1,7 +1,7 @@
 {
   GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
   NodeFactory nodeFactory=(NodeFactory)arguments.get("nodeFactory");
-  List<AbstractNode> finalResult=new ArrayList<AbstractNode>();
+  Result finalResult=new Result(new ArrayList<AbstractNode>(),null,true,false);
   boolean allExactMatch=true;
   final Index<Node> index;
   if (graphDb != null) {
@@ -50,9 +50,9 @@
         filters.add((FilterSearchAttribute)attr);
       }
     }
-    List<AbstractNode> intermediateResult;
+    Result intermediateResult;
     if (searchAttrs.isEmpty() && StringUtils.isBlank(textualQueryString.toString())) {
-      intermediateResult=new ArrayList<AbstractNode>();
+      intermediateResult=new Result(new ArrayList<AbstractNode>(),null,false,false);
     }
  else {
       long t0=System.currentTimeMillis();
@@ -96,11 +96,13 @@ synchronized (index) {
       intermediateResult=nodeFactory.createNodes(securityContext,hits,includeDeletedAndHidden,publicOnly,pageSize,page);
       hits.close();
       long t2=System.currentTimeMillis();
-      logger.log(Level.FINE,"Creating structr nodes took {0} ms, {1} nodes made.",new Object[]{t2 - t1,intermediateResult.size()});
+      logger.log(Level.FINE,"Creating structr nodes took {0} ms, {1} nodes made.",new Object[]{t2 - t1,intermediateResult.getResults().size()});
     }
+    List<? extends GraphObject> intermediateResultList=intermediateResult.getResults();
     long t2=System.currentTimeMillis();
     if (!filters.isEmpty()) {
-      for (      AbstractNode node : intermediateResult) {
+      for (      GraphObject obj : intermediateResultList) {
+        AbstractNode node=(AbstractNode)obj;
         for (        FilterSearchAttribute attr : filters) {
           String key=attr.getKey();
           Object searchValue=attr.getValue();
@@ -123,23 +125,23 @@ synchronized (index) {
       }
       for (      FilterSearchAttribute attr : filters) {
         SearchOperator op=attr.getSearchOperator();
-        List<GraphObject> result=attr.getResult();
+        List<? extends GraphObject> result=attr.getResult();
         if (op.equals(SearchOperator.AND)) {
-          intermediateResult=ListUtils.intersection(intermediateResult,result);
+          intermediateResult=new Result(ListUtils.intersection(intermediateResultList,result),null,true,false);
         }
  else         if (op.equals(SearchOperator.OR)) {
-          intermediateResult=ListUtils.sum(intermediateResult,result);
+          intermediateResult=new Result(ListUtils.sum(intermediateResultList,result),null,true,false);
         }
  else         if (op.equals(SearchOperator.NOT)) {
-          intermediateResult=ListUtils.subtract(intermediateResult,result);
+          intermediateResult=new Result(ListUtils.subtract(intermediateResultList,result),null,true,false);
         }
       }
     }
     if (coords != null) {
     }
-    finalResult.addAll(intermediateResult);
+    finalResult=intermediateResult;
     long t3=System.currentTimeMillis();
-    logger.log(Level.FINE,"Filtering nodes took {0} ms. Result size now {1}.",new Object[]{t3 - t2,finalResult.size()});
+    logger.log(Level.FINE,"Filtering nodes took {0} ms. Result size now {1}.",new Object[]{t3 - t2,finalResult.getResults().size()});
   }
   return finalResult;
 }

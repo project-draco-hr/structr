@@ -3,55 +3,57 @@
   long offset=page > 0 ? (page - 1) * pageSize : 0;
   long position=0L;
   long count=0L;
-  if (input != null && input instanceof SpatialRecordHits) {
-    Command graphDbCommand=Services.command(securityContext,GraphDatabaseCommand.class);
-    GraphDatabaseService graphDb=(GraphDatabaseService)graphDbCommand.execute();
-    if (input.iterator().hasNext()) {
-      for (      Node node : input) {
-        Long dbNodeId=null;
-        Node realNode=null;
-        if (node.hasProperty("id")) {
-          dbNodeId=(Long)node.getProperty("id");
-          try {
-            realNode=graphDb.getNodeById(dbNodeId);
-          }
- catch (          NotFoundException nfe) {
-            logger.log(Level.SEVERE,"Node with id {0} not found.",dbNodeId);
-            for (            String key : node.getPropertyKeys()) {
-              logger.log(Level.FINE,"{0}={1}",new Object[]{key,node.getProperty(key)});
+  if (input != null) {
+    int size=input.size();
+    if (input instanceof SpatialRecordHits) {
+      Command graphDbCommand=Services.command(securityContext,GraphDatabaseCommand.class);
+      GraphDatabaseService graphDb=(GraphDatabaseService)graphDbCommand.execute();
+      if (input.iterator().hasNext()) {
+        for (        Node node : input) {
+          Long dbNodeId=null;
+          Node realNode=null;
+          if (node.hasProperty("id")) {
+            dbNodeId=(Long)node.getProperty("id");
+            try {
+              realNode=graphDb.getNodeById(dbNodeId);
+            }
+ catch (            NotFoundException nfe) {
+              logger.log(Level.SEVERE,"Node with id {0} not found.",dbNodeId);
+              for (              String key : node.getPropertyKeys()) {
+                logger.log(Level.FINE,"{0}={1}",new Object[]{key,node.getProperty(key)});
+              }
             }
           }
-        }
-        if (realNode != null) {
-          AbstractNode n=createNode(securityContext,realNode,includeDeletedAndHidden,publicOnly);
-          if (n != null) {
-            nodes.add(n);
-            for (            AbstractNode nodeAt : getNodesAt(n)) {
-              if (nodeAt != null && isReadable(securityContext,nodeAt,includeDeletedAndHidden,publicOnly)) {
-                nodes.add(nodeAt);
+          if (realNode != null) {
+            AbstractNode n=createNode(securityContext,realNode,includeDeletedAndHidden,publicOnly);
+            if (n != null) {
+              nodes.add(n);
+              for (              AbstractNode nodeAt : getNodesAt(n)) {
+                if (nodeAt != null && isReadable(securityContext,nodeAt,includeDeletedAndHidden,publicOnly)) {
+                  nodes.add(nodeAt);
+                }
               }
             }
           }
         }
       }
     }
-  }
  else {
-    int size=input.size();
-    Services.setAttribute(RAW_RESULT_COUNT + Thread.currentThread().getId(),size);
-    if ((input != null) && input.iterator().hasNext()) {
-      for (      Node node : input) {
-        AbstractNode n=createNode(securityContext,(Node)node,includeDeletedAndHidden,publicOnly);
-        if (n != null) {
-          if (++position > offset) {
-            if (pageSize > 0 && ++count > pageSize) {
-              return nodes;
+      if (input.iterator().hasNext()) {
+        for (        Node node : input) {
+          AbstractNode n=createNode(securityContext,(Node)node,includeDeletedAndHidden,publicOnly);
+          if (n != null) {
+            if (++position > offset) {
+              if (pageSize > 0 && ++count > pageSize) {
+                return new Result(nodes,size,true,false);
+              }
+              nodes.add(n);
             }
-            nodes.add(n);
           }
         }
       }
     }
+    return new Result(nodes,size,true,false);
   }
-  return nodes;
+  return null;
 }

@@ -1,5 +1,5 @@
 {
-  List<? extends GraphObject> results=typedIdResource.doGet(sortKey,sortDescending,pageSize,page).getResults();
+  List<? extends GraphObject> results=typedIdResource.doGet(sortKey,sortDescending,-1,-1).getResults();
   if (results != null) {
     AbstractNode sourceNode=typedIdResource.getTypesafeNode();
     if (sourceNode != null) {
@@ -8,7 +8,7 @@
         List relatedNodes=staticRel.getRelatedNodes(securityContext,sourceNode);
         List<SearchAttribute> dummyList=new LinkedList<SearchAttribute>();
         if (typeResource.hasSearchableAttributes(dummyList)) {
-          List<? extends GraphObject> typeNodes=typeResource.doGet(sortKey,sortDescending,pageSize,page).getResults();
+          List<? extends GraphObject> typeNodes=typeResource.doGet(sortKey,sortDescending,-1,-1).getResults();
           List intersection=ListUtils.intersection(relatedNodes,typeNodes);
           applyDefaultSorting(intersection);
           return new Result(PagingHelper.subList(intersection,pageSize,page),intersection.size(),isCollectionResource(),isPrimitiveArray());

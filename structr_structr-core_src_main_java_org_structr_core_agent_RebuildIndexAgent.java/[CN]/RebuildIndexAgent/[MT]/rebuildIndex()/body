@@ -8,10 +8,10 @@
       long nodes=0;
       Command indexer=Services.command(securityContext,IndexNodeCommand.class);
       logger.log(Level.INFO,"Get all nodes ...");
-      List<AbstractNode> allNodes=(List<AbstractNode>)Services.command(securityContext,GetAllNodes.class).execute();
+      Result allNodes=(Result)Services.command(securityContext,GetAllNodes.class).execute();
       logger.log(Level.INFO,"... done. Start indexing {0} nodes ...",allNodes.size());
-      for (      AbstractNode s : allNodes) {
-        indexer.execute(s);
+      for (      GraphObject obj : allNodes.getResults()) {
+        indexer.execute(obj);
         nodes++;
         if (nodes > 1000 && nodes % 1000 == 0) {
           logger.log(Level.INFO,"Indexed {0} nodes, committing results to database.",nodes);

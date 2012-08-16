@@ -1,13 +1,17 @@
 {
   List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
   attrs.add(Search.andExactUuid(uuid));
-  Result results=(Result)Services.command(securityContext,SearchNodeCommand.class).execute(null,true,false,attrs);
+  Result results=(Result)Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class).execute(null,true,false,attrs);
   int size=results.size();
 switch (size) {
 case 0:
     throw new NotFoundException();
 case 1:
-  return (AbstractNode)results.get(0);
+  AbstractNode node=(AbstractNode)results.get(0);
+if (!securityContext.isReadable(node,false,false)) {
+  throw new NotAllowedException();
+}
+return node;
 default :
 logger.log(Level.WARNING,"Got more than one result for UUID {0}, this is very likely to be a UUID collision!",uuid);
 return (AbstractNode)results.get(0);

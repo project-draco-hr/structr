@@ -11,11 +11,11 @@
           List<? extends GraphObject> typeNodes=typeResource.doGet(sortKey,sortDescending,pageSize,page).getResults();
           List intersection=ListUtils.intersection(relatedNodes,typeNodes);
           applyDefaultSorting(intersection);
-          return new Result(intersection,null,isCollectionResource(),isPrimitiveArray());
+          return new Result(PagingHelper.subList(intersection,pageSize,page),intersection.size(),isCollectionResource(),isPrimitiveArray());
         }
         if (!relatedNodes.isEmpty()) {
           applyDefaultSorting(relatedNodes);
-          return new Result(relatedNodes,null,isCollectionResource(),isPrimitiveArray());
+          return new Result(PagingHelper.subList(relatedNodes,pageSize,page),relatedNodes.size(),isCollectionResource(),isPrimitiveArray());
         }
       }
       Class type=sourceNode.getClass();
@@ -60,6 +60,5 @@
       }
     }
   }
-  List emptyList=Collections.emptyList();
-  return new Result(emptyList,null,isCollectionResource(),isPrimitiveArray());
+  return Result.EMPTY_RESULT;
 }

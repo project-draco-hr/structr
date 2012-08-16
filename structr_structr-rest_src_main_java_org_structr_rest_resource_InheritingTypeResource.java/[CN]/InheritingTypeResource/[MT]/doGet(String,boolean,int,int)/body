@@ -19,9 +19,9 @@
         sortKey="name";
       }
     }
-    List<GraphObject> results=(List<GraphObject>)Services.command(securityContext,SearchNodeCommand.class).execute(topNode,includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDescending,pageSize,page);
-    applyDefaultSorting(results);
-    return new Result(results,null,isCollectionResource(),isPrimitiveArray());
+    Result results=(Result)Services.command(securityContext,SearchNodeCommand.class).execute(topNode,includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDescending,pageSize,page);
+    applyDefaultSorting(results.getResults());
+    return results;
   }
  else {
     logger.log(Level.WARNING,"type was null");

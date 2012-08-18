@@ -102,6 +102,7 @@
         for (        StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
           hasError|=!listener.graphObjectDeleted(securityContext,transactionKey,errorBuffer,entity,removedNodeProperties.get(node));
         }
+        deletedNodes.add(entity);
       }
     }
     for (    PropertyEntry<Node> entry : data.assignedNodeProperties()) {
@@ -175,8 +176,10 @@
     }
     getModifiedRelationships().addAll(modifiedRels);
     getCreatedRelationships().addAll(createdRels);
+    getDeletedRelationships().addAll(deletedRels);
     getModifiedNodes().addAll(modifiedNodes);
     getCreatedNodes().addAll(createdNodes);
+    getDeletedNodes().addAll(deletedNodes);
   }
  catch (  FrameworkException fex) {
     exceptionMap.put(transactionKey,fex);

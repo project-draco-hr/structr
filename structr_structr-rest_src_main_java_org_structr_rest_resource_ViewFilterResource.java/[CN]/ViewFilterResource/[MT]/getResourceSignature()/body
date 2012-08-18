@@ -1,17 +1,23 @@
 {
-  String uriPart=getUriPart();
   StringBuilder uri=new StringBuilder();
+  String uriPart=getUriPart();
   if (uriPart.contains("/")) {
     String[] parts=StringUtils.split(uriPart,"/");
+    Matcher matcher=uuidPattern.matcher("");
     for (    String subPart : parts) {
-      if (!subPart.matches("[a-zA-Z0-9]{32}")) {
+      matcher.reset(subPart);
+      if (!matcher.matches()) {
         uri.append(subPart);
         uri.append("/");
       }
     }
-    return uri.toString();
   }
  else {
-    return uriPart;
+    uri.append(uriPart);
   }
+  if (propertyView != null) {
+    uri.append("/");
+    uri.append(EntityContext.normalizeEntityName(propertyView));
+  }
+  return uri.toString();
 }

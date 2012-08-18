@@ -1,0 +1,19 @@
+{
+  TxPageFile logDb=(TxPageFile)arguments.get("logDb");
+  if (logDb != null) {
+    Transaction tx=logDb.tx();
+    BTreeIndexFactory<String,String> indexFactory=new BTreeIndexFactory<String,String>();
+    SortedIndex<String,String> index=indexFactory.openOrCreate(tx);
+    if (parameters.length == 1) {
+      String timestamp=String.valueOf(System.nanoTime());
+      String value=parameters[0].toString();
+      index.put(timestamp,value);
+      logger.log(Level.INFO,"Logged '{0}':'{1}' to log database",new Object[]{timestamp,value});
+    }
+ else {
+      throw new IllegalArgumentException();
+    }
+    tx.commit();
+  }
+  return null;
+}

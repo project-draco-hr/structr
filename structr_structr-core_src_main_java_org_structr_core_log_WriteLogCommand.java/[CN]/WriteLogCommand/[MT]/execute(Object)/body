@@ -6,11 +6,13 @@
     IndexFactory<String,Object> indexFactory=new BTreeIndexFactory<String,Object>();
     if (parameters.length == 2) {
       String userId=(String)parameters[0];
-      SortedIndex<String,Object> index=(SortedIndex<String,Object>)multiIndexFactory.openOrCreate(userId,indexFactory);
-      String timestamp=String.valueOf(System.nanoTime());
-      String value=parameters[1].toString();
-      index.put(timestamp,value);
-      logger.log(Level.INFO,"Logged for user {0}: {1} {2}",new Object[]{userId,timestamp,value});
+      if (userId != null) {
+        SortedIndex<String,Object> index=(SortedIndex<String,Object>)multiIndexFactory.openOrCreate(userId,indexFactory);
+        String[] obj=(String[])parameters[1];
+        String uuid=UUID.randomUUID().toString().replaceAll("[\\-]+","");
+        index.put(uuid,obj);
+        logger.log(Level.INFO,"Logged for user {0}: {1} {2}",new Object[]{userId,StringUtils.join((String[])obj,",")});
+      }
     }
  else {
       throw new IllegalArgumentException();

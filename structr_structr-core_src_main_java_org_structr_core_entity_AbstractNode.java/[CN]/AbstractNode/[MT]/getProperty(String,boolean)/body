@@ -3,10 +3,14 @@
     logger.log(Level.SEVERE,"Invalid property key: null");
     return null;
   }
+  Object value;
+  if (isDirty) {
+    return properties.get(key);
+  }
   if (dbNode == null) {
     return null;
   }
-  Object value=applyConverter ? cachedConvertedProperties.get(key) : cachedRawProperties.get(key);
+  value=applyConverter ? cachedConvertedProperties.get(key) : cachedRawProperties.get(key);
   Class type=this.getClass();
   boolean dontCache=false;
   if (value == null) {
@@ -15,9 +19,6 @@
       return propertyGroup.getGroupedProperties(this);
     }
     if (dbNode.hasProperty(key)) {
-      if (isDirty) {
-        value=properties.get(key);
-      }
       if ((key != null) && (dbNode != null)) {
         value=dbNode.getProperty(key);
       }

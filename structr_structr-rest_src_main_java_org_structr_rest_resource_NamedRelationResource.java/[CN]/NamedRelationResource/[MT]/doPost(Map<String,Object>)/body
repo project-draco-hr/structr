@@ -6,11 +6,18 @@
     AbstractNode startNode=relationshipEntity.identifyStartNode(namedRelation,propertySet);
     AbstractNode endNode=relationshipEntity.identifyEndNode(namedRelation,propertySet);
     RelationshipType relType=namedRelation.getRelType();
+    ErrorBuffer errorBuffer=new ErrorBuffer();
+    boolean hasError=false;
     if (startNode == null) {
-      throw new FrameworkException(namedRelation.getName(),new EmptyPropertyToken(relationshipEntity.getStartNodeIdKey().name()));
+      errorBuffer.add(namedRelation.getName(),new EmptyPropertyToken(relationshipEntity.getStartNodeIdKey().name()));
+      hasError=true;
     }
     if (endNode == null) {
-      throw new FrameworkException(namedRelation.getName(),new EmptyPropertyToken(relationshipEntity.getEndNodeIdKey().name()));
+      errorBuffer.add(namedRelation.getName(),new EmptyPropertyToken(relationshipEntity.getEndNodeIdKey().name()));
+      hasError=true;
+    }
+    if (hasError) {
+      throw new FrameworkException(422,errorBuffer);
     }
     Class sourceType=namedRelation.getSourceType();
     Class destType=namedRelation.getDestType();

@@ -3,21 +3,48 @@
     logger.log(Level.WARNING,"4 or more parameters are required for advanced search.");
     return Collections.emptyList();
   }
-  AbstractNode topNode=null;
-  if (parameters[0] instanceof AbstractNode) {
-    topNode=(AbstractNode)parameters[0];
-  }
-  boolean includeDeletedAndHidden=false;
-  if (parameters[1] instanceof Boolean) {
-    includeDeletedAndHidden=(Boolean)parameters[1];
-  }
-  boolean publicOnly=false;
-  if (parameters[2] instanceof Boolean) {
-    publicOnly=(Boolean)parameters[2];
-  }
   List<SearchAttribute> searchAttrs=new ArrayList<SearchAttribute>();
-  if (parameters[3] instanceof List) {
-    searchAttrs=(List<SearchAttribute>)parameters[3];
+  AbstractNode topNode=null;
+  boolean includeDeletedAndHidden=false;
+  boolean publicOnly=false;
+  String sortKey=null;
+  boolean sortDescending=false;
+  long pageSize=-1;
+  long page=-1;
+switch (parameters.length) {
+case 8:
+    if (parameters[7] instanceof Number) {
+      page=((Number)parameters[7]).longValue();
+    }
+case 7:
+  if (parameters[6] instanceof Number) {
+    pageSize=((Number)parameters[6]).longValue();
   }
-  return search(securityContext,topNode,includeDeletedAndHidden,publicOnly,searchAttrs);
+case 6:
+if (parameters[5] instanceof Boolean) {
+  sortDescending=(Boolean)parameters[5];
+}
+case 5:
+if (parameters[4] instanceof String) {
+sortKey=(String)parameters[4];
+}
+ else if (parameters[4] instanceof PropertyKey) {
+sortKey=((PropertyKey)parameters[4]).name();
+}
+case 4:
+if (parameters[0] instanceof AbstractNode) {
+topNode=(AbstractNode)parameters[0];
+}
+if (parameters[1] instanceof Boolean) {
+includeDeletedAndHidden=(Boolean)parameters[1];
+}
+if (parameters[2] instanceof Boolean) {
+publicOnly=(Boolean)parameters[2];
+}
+if (parameters[3] instanceof List) {
+searchAttrs=(List<SearchAttribute>)parameters[3];
+}
+break;
+}
+return search(securityContext,topNode,includeDeletedAndHidden,publicOnly,searchAttrs,sortKey,sortDescending,pageSize,page);
 }

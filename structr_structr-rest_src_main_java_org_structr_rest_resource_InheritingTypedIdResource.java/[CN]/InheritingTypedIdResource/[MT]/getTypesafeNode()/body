@@ -1,9 +1,8 @@
 {
   AbstractNode node=idResource.getNode();
-  Class entityClass=node.getClass();
   String type=EntityContext.normalizeEntityName(typeResource.getRawType());
-  Map<String,Class> entities=(Map)Services.command(SecurityContext.getSuperUserInstance(),GetEntitiesCommand.class).execute();
-  Class parentClass=entities.get(type);
+  Class parentClass=EntityContext.getEntityClassForRawType(type);
+  Class entityClass=node.getClass();
   if (parentClass.isAssignableFrom(entityClass)) {
     return node;
   }

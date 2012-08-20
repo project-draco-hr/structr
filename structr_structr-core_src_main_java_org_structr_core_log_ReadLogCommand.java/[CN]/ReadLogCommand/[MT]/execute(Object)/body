@@ -1,0 +1,21 @@
+{
+  TxPageFile logDb=(TxPageFile)arguments.get("logDb");
+  Map<String,Object> result=new HashMap<String,Object>();
+  if (logDb != null) {
+    Transaction tx=logDb.tx();
+    MultiIndexFactory multiIndexFactory=new MultiIndexFactory(tx);
+    IndexFactory<String,Object> indexFactory=new BTreeIndexFactory<String,Object>();
+    if (parameters.length == 1) {
+      String userId=(String)parameters[0];
+      SortedIndex<String,Object> index=(SortedIndex<String,Object>)multiIndexFactory.openOrCreate(userId,indexFactory);
+      Iterator<Entry<String,Object>> it=index.iterator();
+      while (it.hasNext()) {
+        Entry<String,Object> entry=it.next();
+        String key=entry.getKey();
+        Object val=entry.getValue();
+        result.put(key,val);
+      }
+    }
+  }
+  return result;
+}

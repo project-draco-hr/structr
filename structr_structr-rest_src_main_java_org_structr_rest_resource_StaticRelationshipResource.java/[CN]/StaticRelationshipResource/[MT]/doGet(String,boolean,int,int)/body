@@ -1,0 +1,64 @@
+{
+  List<? extends GraphObject> results=typedIdResource.doGet(sortKey,sortDescending,-1,-1).getResults();
+  if (results != null) {
+    AbstractNode sourceNode=typedIdResource.getTypesafeNode();
+    if (sourceNode != null) {
+      RelationClass staticRel=findRelationClass(typedIdResource,typeResource);
+      if (staticRel != null) {
+        List relatedNodes=staticRel.getRelatedNodes(securityContext,sourceNode);
+        List<SearchAttribute> dummyList=new LinkedList<SearchAttribute>();
+        if (typeResource.hasSearchableAttributes(dummyList)) {
+          List<? extends GraphObject> typeNodes=typeResource.doGet(sortKey,sortDescending,-1,-1).getResults();
+          List intersection=ListUtils.intersection(relatedNodes,typeNodes);
+          applyDefaultSorting(intersection);
+          return new Result(PagingHelper.subList(intersection,pageSize,page),intersection.size(),isCollectionResource(),isPrimitiveArray());
+        }
+        if (!relatedNodes.isEmpty()) {
+          applyDefaultSorting(relatedNodes);
+          return new Result(PagingHelper.subList(relatedNodes,pageSize,page),relatedNodes.size(),isCollectionResource(),isPrimitiveArray());
+        }
+      }
+      Class type=sourceNode.getClass();
+      String key=typeResource.getRawType();
+      PropertyConverter converter=EntityContext.getPropertyConverter(securityContext,type,key);
+      if (converter != null) {
+        Value conversionValue=EntityContext.getPropertyConversionParameter(type,key);
+        converter.setCurrentObject(sourceNode);
+        converter.setRawMode(true);
+        Object value=converter.convertForGetter(null,conversionValue);
+        StringBuilder msgBuilder=new StringBuilder();
+        msgBuilder.append("Property result on type ");
+        msgBuilder.append(sourceNode.getClass().getSimpleName());
+        msgBuilder.append(", key ");
+        msgBuilder.append(key);
+        msgBuilder.append(" is not an Iterable<GraphObject>!");
+        String msg=msgBuilder.toString();
+        if (value != null) {
+          if ((value instanceof List) && !((List)value).isEmpty() && ((List)value).get(0) instanceof GraphObject) {
+            List<GraphObject> list=(List<GraphObject>)value;
+            applyDefaultSorting(list);
+            return new Result(list,null,isCollectionResource(),isPrimitiveArray());
+          }
+ else           if (value instanceof Iterable) {
+            List<GraphObject> propertyListResult=new LinkedList<GraphObject>();
+            Iterable sourceIterable=(Iterable)value;
+            for (            Object o : sourceIterable) {
+              if (o instanceof GraphObject) {
+                propertyListResult.add((GraphObject)o);
+              }
+ else {
+                throw new SystemException(msg);
+              }
+            }
+            return new Result(propertyListResult,null,isCollectionResource(),isPrimitiveArray());
+          }
+        }
+ else {
+          logger.log(Level.SEVERE,msg);
+          throw new SystemException(msg);
+        }
+      }
+    }
+  }
+  return Result.EMPTY_RESULT;
+}

@@ -4,7 +4,7 @@
   attrs.add(Search.andExactProperty(Principal.Key.sessionId,messageToken));
   attrs.add(Search.andExactType("User"));
   try {
-    List<AbstractNode> results=(List<AbstractNode>)Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class).execute(null,false,false,attrs);
+    Result results=(Result)Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class).execute(null,false,false,attrs);
     if (!results.isEmpty()) {
       user=(Principal)results.get(0);
       if ((user != null) && messageToken.equals(user.getProperty(Principal.Key.sessionId))) {

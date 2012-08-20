@@ -1,0 +1,17 @@
+{
+  Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
+  for (  AbstractRelationship out : sourceNode.getOutgoingRelationships()) {
+    AbstractNode endNode=out.getEndNode();
+    RelationshipType origRelType=out.getRelType();
+    if (!relType.name().equals(origRelType.name())) {
+      continue;
+    }
+    Map<String,Object> props=out.getProperties();
+    props.remove(AbstractRelationship.Key.uuid.name());
+    AbstractRelationship newOutRel=(AbstractRelationship)createRel.execute(cloneNode,endNode,relType,props,false);
+    if (componentId != null) {
+      newOutRel.setProperty(Component.Key.componentId,componentId);
+    }
+    setPositions(cloneNode,newOutRel,false);
+  }
+}

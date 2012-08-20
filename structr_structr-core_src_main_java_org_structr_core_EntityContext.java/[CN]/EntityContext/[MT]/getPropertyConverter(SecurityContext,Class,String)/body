@@ -1,21 +1,24 @@
 {
-  Map<String,Class<? extends PropertyConverter>> converterMap=null;
-  PropertyConverter propertyConverter=null;
-  Class localType=type;
-  Class clazz=null;
-  while ((clazz == null) && !localType.equals(Object.class)) {
-    converterMap=getPropertyConverterMapForType(localType);
-    clazz=converterMap.get(propertyKey);
-    if (clazz == null) {
-      for (      Class interfaceClass : getInterfacesForType(localType)) {
-        clazz=getPropertyConverterMapForType(interfaceClass).get(propertyKey);
-        if (clazz != null) {
-          break;
+  Class clazz=getAggregatedPropertyConverterMapForType(type).get(propertyKey);
+  if (clazz == null) {
+    Map<String,Class<? extends PropertyConverter>> converterMap=null;
+    Class localType=type;
+    while ((clazz == null) && !localType.equals(Object.class)) {
+      converterMap=getPropertyConverterMapForType(localType);
+      clazz=converterMap.get(propertyKey);
+      if (clazz == null) {
+        for (        Class interfaceClass : getInterfacesForType(localType)) {
+          clazz=getPropertyConverterMapForType(interfaceClass).get(propertyKey);
+          if (clazz != null) {
+            break;
+          }
         }
       }
+      localType=localType.getSuperclass();
     }
-    localType=localType.getSuperclass();
+    getAggregatedPropertyConverterMapForType(type).put(propertyKey,clazz);
   }
+  PropertyConverter propertyConverter=null;
   if (clazz != null) {
     try {
       propertyConverter=(PropertyConverter)clazz.newInstance();

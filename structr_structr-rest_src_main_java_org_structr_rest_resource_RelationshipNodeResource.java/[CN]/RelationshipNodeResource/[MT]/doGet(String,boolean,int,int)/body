@@ -1,0 +1,27 @@
+{
+  List<? extends GraphObject> results=wrappedResource.doGet(sortKey,sortDescending,pageSize,page).getResults();
+  if (results != null && !results.isEmpty()) {
+    try {
+      List<GraphObject> resultList=new LinkedList<GraphObject>();
+      for (      GraphObject obj : results) {
+        if (obj instanceof AbstractRelationship) {
+          AbstractRelationship rel=(AbstractRelationship)obj;
+          if (startNode) {
+            resultList.add(rel.getStartNode());
+          }
+ else {
+            resultList.add(rel.getEndNode());
+          }
+        }
+      }
+      return new Result(resultList,null,isCollectionResource(),isPrimitiveArray());
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"Exception while fetching relationships",t);
+    }
+  }
+ else {
+    logger.log(Level.INFO,"No results from parent..");
+  }
+  throw new IllegalPathException();
+}

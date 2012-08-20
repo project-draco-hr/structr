@@ -8,7 +8,8 @@
   boolean includeDeletedAndHidden=false;
   boolean publicOnly=false;
   try {
-    List<GraphObject> results=(List<GraphObject>)Services.command(securityContext,SearchNodeCommand.class).execute(topNode,includeDeletedAndHidden,publicOnly,searchAttributes);
+    Result result=(Result)Services.command(securityContext,SearchNodeCommand.class).execute(topNode,includeDeletedAndHidden,publicOnly,searchAttributes);
+    List<? extends GraphObject> resultList=result.getResults();
     if (webSocketData.getSortKey() != null) {
       final String sortOrder=webSocketData.getSortOrder();
       final String sortKey=webSocketData.getSortKey();
@@ -35,29 +36,31 @@
 ;
         }
         if (comparator != null) {
-          Collections.sort(results,comparator);
+          Collections.sort(resultList,comparator);
         }
       }
  catch (      Throwable t) {
       }
     }
-    for (    GraphObject obj : results) {
-      AbstractNode node=(AbstractNode)obj;
-      if ((obj instanceof AbstractNode) && RelationshipHelper.hasChildren(node,node.getUuid())) {
-        nodesWithChildren.add(node.getUuid());
+    for (    GraphObject obj : resultList) {
+      if (obj instanceof AbstractNode) {
+        AbstractNode node=(AbstractNode)obj;
+        if (RelationshipHelper.hasChildren(node,node.getUuid())) {
+          nodesWithChildren.add(node.getUuid());
+        }
       }
     }
     webSocketData.setNodesWithChildren(nodesWithChildren);
     if (webSocketData.getPageSize() > 0) {
       int pageSize=webSocketData.getPageSize();
       int page=webSocketData.getPage();
-      int resultCount=results.size();
+      int resultCount=result.size();
       int fromIndex=Math.min(resultCount,Math.max(0,(page - 1) * pageSize));
       int toIndex=Math.min(resultCount,page * pageSize);
-      webSocketData.setResult(results.subList(fromIndex,toIndex));
+      webSocketData.setResult(resultList.subList(fromIndex,toIndex));
     }
  else {
-      webSocketData.setResult(results);
+      webSocketData.setResult(resultList);
     }
     getWebSocket().send(webSocketData,true);
   }

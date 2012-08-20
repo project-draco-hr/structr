@@ -7,8 +7,9 @@
     transactionCommand.execute(new BatchTransaction(){
       @Override public Object execute(      Transaction tx) throws FrameworkException {
         long nodes=0L;
-        List<AbstractNode> allNodes=(List<AbstractNode>)nodeFactory.createNodes(securityContext,GlobalGraphOperations.at(graphDb).getAllNodes());
-        for (        AbstractNode node : allNodes) {
+        Result result=(Result)nodeFactory.createNodes(securityContext,GlobalGraphOperations.at(graphDb).getAllNodes());
+        for (        GraphObject obj : result.getResults()) {
+          AbstractNode node=(AbstractNode)obj;
           if (node.getStringProperty(AbstractNode.Key.uuid) != null) {
             delNode.execute(node);
             if (nodes > 1000 && nodes % 1000 == 0) {

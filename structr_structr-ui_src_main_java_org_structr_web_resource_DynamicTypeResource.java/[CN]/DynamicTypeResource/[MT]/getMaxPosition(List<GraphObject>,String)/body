@@ -2,10 +2,10 @@
   long pos=0;
   for (  GraphObject template : templates) {
     if (template instanceof Component) {
-      Component component=(Component)template;
-      List<AbstractRelationship> rels=component.getRelationships(RelType.CONTAINS,Direction.INCOMING);
-      for (      AbstractRelationship rel : rels) {
-        pos=Math.max(pos,rel.getLongProperty(pageId));
+      Set<String> paths=(Set<String>)template.getProperty(Component.UiKey.paths);
+      for (      String path : paths) {
+        Long p=Long.parseLong(StringUtils.substringAfterLast(path,"_"));
+        pos=Math.max(pos,(p == null ? 0 : p));
       }
     }
   }

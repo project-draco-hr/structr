@@ -1,13 +1,13 @@
 {
-  Command findNode=Services.command(securityContext,SearchNodeCommand.class);
+  Command searchNode=Services.command(securityContext,SearchNodeCommand.class);
   String userName=(String)request.getSession().getAttribute(USERNAME_KEY);
   List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
   attrs.add(Search.andExactTypeAndSubtypes(Principal.class.getSimpleName()));
   attrs.add(Search.andExactName(userName));
-  List<Principal> userList=(List<Principal>)findNode.execute(null,false,false,attrs);
+  Result userList=(Result)searchNode.execute(null,false,false,attrs);
   Principal user=null;
   if (!userList.isEmpty()) {
-    user=userList.get(0);
+    user=(Principal)userList.get(0);
   }
   return user;
 }

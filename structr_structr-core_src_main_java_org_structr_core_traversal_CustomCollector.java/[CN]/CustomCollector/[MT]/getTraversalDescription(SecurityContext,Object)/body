@@ -1,0 +1,25 @@
+{
+  TraversalDescription description=Traversal.description().breadthFirst().uniqueness(getUniqueness());
+  for (  Evaluator evaluator : getEvaluators()) {
+    description=description.evaluator(evaluator);
+  }
+  for (  final Predicate<Node> predicate : predicates) {
+    description=description.evaluator(new Evaluator(){
+      @Override public Evaluation evaluate(      Path path){
+        Node endNode=path.endNode();
+        if (predicate.evaluate(securityContext,endNode)) {
+          return Evaluation.EXCLUDE_AND_PRUNE;
+        }
+        return Evaluation.INCLUDE_AND_CONTINUE;
+      }
+    }
+);
+  }
+  int numRels=relTypes.size();
+  for (int i=0; i < numRels; i++) {
+    RelationshipType relType=relTypes.get(i);
+    Direction direction=directions.get(i);
+    description=description.relationships(relType,direction);
+  }
+  return description;
+}

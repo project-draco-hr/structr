@@ -1,0 +1,38 @@
+{
+  try {
+    List<GraphObject> resultList=new LinkedList<GraphObject>();
+    String query=getQuery(request);
+    String repositoryUrl=getStringProperty(Key.repositoryUrl);
+    String username=getStringProperty(Key.remoteUser);
+    String password=getStringProperty(Key.remotePassword);
+    RelationshipFactory relFactory=new RelationshipFactory(securityContext);
+    NodeFactory nodeFactory=new NodeFactory();
+    boolean includeHiddenAndDeleted=false;
+    boolean publicOnly=false;
+    GraphDatabaseService gds=new RestGraphDatabase(repositoryUrl,username,password);
+    ExecutionEngine engine=new ExecutionEngine(gds);
+    ExecutionResult result=engine.execute(query);
+    for (    String column : result.columns()) {
+      for (      Object o : IteratorUtil.asIterable(result.columnAs(column))) {
+        if (o instanceof Node) {
+          AbstractNode node=nodeFactory.createNode(securityContext,(Node)o,includeHiddenAndDeleted,publicOnly);
+          if (node != null) {
+            resultList.add(node);
+          }
+        }
+ else         if (o instanceof Relationship) {
+          AbstractRelationship rel=relFactory.createRelationship(securityContext,(Relationship)o);
+          if (rel != null) {
+            resultList.add(rel);
+          }
+        }
+      }
+    }
+    gds.shutdown();
+    return resultList;
+  }
+ catch (  Throwable t) {
+    t.printStackTrace();
+  }
+  return Collections.emptyList();
+}

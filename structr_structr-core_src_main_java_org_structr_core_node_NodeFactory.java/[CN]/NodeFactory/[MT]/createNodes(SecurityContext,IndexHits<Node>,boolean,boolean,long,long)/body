@@ -27,10 +27,16 @@
           if (realNode != null) {
             AbstractNode n=createNode(securityContext,realNode,includeDeletedAndHidden,publicOnly);
             if (n != null) {
-              nodes.add(n);
-              for (              AbstractNode nodeAt : getNodesAt(n)) {
+              List<AbstractNode> nodesAt=getNodesAt(n);
+              size+=nodesAt.size();
+              for (              AbstractNode nodeAt : nodesAt) {
                 if (nodeAt != null && securityContext.isReadable(nodeAt,includeDeletedAndHidden,publicOnly)) {
-                  nodes.add(nodeAt);
+                  if (++position > offset) {
+                    if (pageSize > 0 && ++count > pageSize) {
+                      return new Result(nodes,size,true,false);
+                    }
+                    nodes.add(nodeAt);
+                  }
                 }
               }
             }

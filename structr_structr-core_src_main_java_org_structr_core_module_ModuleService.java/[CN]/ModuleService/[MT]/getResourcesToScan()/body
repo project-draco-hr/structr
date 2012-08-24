@@ -1,0 +1,15 @@
+{
+  String classPath=System.getProperty("java.class.path");
+  Set<String> ret=new LinkedHashSet<String>();
+  Pattern pattern=Pattern.compile(".*(structr).*(war|jar)");
+  Matcher matcher=pattern.matcher("");
+  for (  String jarPath : classPath.split("[:]+")) {
+    String lowerPath=jarPath.toLowerCase();
+    String moduleName=lowerPath.substring(lowerPath.lastIndexOf("/") + 1);
+    matcher.reset(moduleName);
+    if (matcher.matches()) {
+      ret.add(jarPath);
+    }
+  }
+  return (ret);
+}

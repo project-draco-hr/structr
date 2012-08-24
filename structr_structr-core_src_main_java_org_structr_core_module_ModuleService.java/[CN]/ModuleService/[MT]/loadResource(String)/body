@@ -1,0 +1,15 @@
+{
+  DefaultModule ret=new DefaultModule(resource);
+  Set<String> classes=ret.getClasses();
+  ZipFile zipFile=new ZipFile(new File(resource),ZipFile.OPEN_READ);
+  for (Enumeration<? extends ZipEntry> entries=zipFile.entries(); entries.hasMoreElements(); ) {
+    ZipEntry entry=entries.nextElement();
+    String entryName=entry.getName();
+    if (entryName.endsWith(".class")) {
+      String fileEntry=entry.getName().replaceAll("[/]+",".");
+      classes.add(fileEntry.substring(0,fileEntry.length() - 6));
+    }
+  }
+  zipFile.close();
+  return ret;
+}

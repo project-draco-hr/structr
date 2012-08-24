@@ -1,0 +1,127 @@
+{
+  File baseDir=new File(System.getProperty("home",""));
+  String basePath=baseDir.getAbsolutePath();
+  File confFile=checkStructrConf(basePath);
+  Properties configuration=getConfiguration(confFile);
+  checkPrerequisites(configuration);
+  Server server=new Server(restPort);
+  String sourceJarName=app.getProtectionDomain().getCodeSource().getLocation().toString();
+  List<Connector> connectors=new LinkedList<Connector>();
+  HandlerCollection handlerCollection=new HandlerCollection();
+  boolean startingFromWARFile=false;
+  ServletContextHandler servletContext=null;
+  if (sourceJarName.endsWith(".war")) {
+    WebAppContext webAppContext=new WebAppContext(server,basePath + "/" + sourceJarName,contextPath);
+    webAppContext.setWar(basePath + sourceJarName);
+    servletContext=webAppContext;
+    startingFromWARFile=true;
+  }
+ else {
+    servletContext=new ServletContextHandler(server,contextPath,ServletContextHandler.SESSIONS);
+  }
+  servletContext.setBaseResource(new ResourceCollection(Resource.newResource(basePath),JarResource.newJarResource(Resource.newResource(sourceJarName))));
+  servletContext.setInitParameter("configfile.path",confFile.getAbsolutePath());
+  if (enableGzipCompression) {
+    FilterHolder gzipFilter=servletContext.addFilter(GzipFilter.class,"/*",EnumSet.of(DispatcherType.REQUEST,DispatcherType.FORWARD));
+    gzipFilter.setInitParameter("mimeTypes","text/html,text/plain,text/css,text/javascript");
+  }
+  if (enableRewriteFilter) {
+    FilterHolder rewriteFilter=servletContext.addFilter(UrlRewriteFilter.class,"/*",EnumSet.of(DispatcherType.REQUEST,DispatcherType.FORWARD));
+    if (startingFromWARFile) {
+      rewriteFilter.setInitParameter("confPath","/WEB-INF/urlrewrite.xml");
+    }
+ else {
+      rewriteFilter.setInitParameter("confPath","/urlrewrite.xml");
+    }
+  }
+  if ("true".equals(configuration.getProperty("log.requests","false"))) {
+    String logFile=configuration.getProperty("log.name","structr-yyyy_mm_dd.request.log");
+    RequestLogHandler requestLogHandler=new RequestLogHandler();
+    String logPath=basePath + "/logs";
+    File logDir=new File(logPath);
+    if (!logDir.exists()) {
+      logDir.mkdir();
+    }
+    logPath=logDir.getAbsolutePath();
+    NCSARequestLog requestLog=new NCSARequestLog(logPath + "/" + logFile);
+    requestLog.setRetainDays(90);
+    requestLog.setAppend(true);
+    requestLog.setExtended(false);
+    requestLog.setLogTimeZone("GMT");
+    requestLogHandler.setRequestLog(requestLog);
+    handlerCollection.addHandler(requestLogHandler);
+  }
+  JsonRestServlet structrRestServlet=new JsonRestServlet();
+  ServletHolder structrRestServletHolder=new ServletHolder(structrRestServlet);
+  Map<String,String> structrRestParams=new HashMap<String,String>();
+  structrRestParams.put("PropertyFormat","FlatNameValue");
+  structrRestParams.put("ResourceProvider",resourceProvider.getName());
+  structrRestParams.put("Authenticator",authenticator.getName());
+  structrRestParams.put("IdProperty","uuid");
+  structrRestServletHolder.setInitParameters(structrRestParams);
+  structrRestServletHolder.setInitOrder(0);
+  servlets.put(restUrl + "/*",structrRestServletHolder);
+  int position=1;
+  for (  Entry<String,ServletHolder> servlet : servlets.entrySet()) {
+    String path=servlet.getKey();
+    ServletHolder servletHolder=servlet.getValue();
+    servletHolder.setInitOrder(position++);
+    logger.log(Level.INFO,"Adding servlet {0} for {1}",new Object[]{servletHolder,path});
+    servletContext.addServlet(servletHolder,path);
+  }
+  servletContext.addEventListener(new ApplicationContextListener());
+  handlerCollection.addHandler(servletContext);
+  server.setHandler(handlerCollection);
+  if (enableHttps) {
+    if (httpsPort > -1 && keyStorePath != null && !keyStorePath.isEmpty() && keyStorePassword != null) {
+      SslSelectChannelConnector httpsConnector=null;
+      SslContextFactory factory=new SslContextFactory(keyStorePath);
+      factory.setKeyStorePassword(keyStorePassword);
+      httpsConnector=new SslSelectChannelConnector(factory);
+      httpsConnector.setHost(host);
+      httpsConnector.setPort(httpsPort);
+      httpsConnector.setMaxIdleTime(maxIdleTime);
+      httpsConnector.setRequestHeaderSize(requestHeaderSize);
+      connectors.add(httpsConnector);
+    }
+ else {
+      logger.log(Level.WARNING,"Unable to configure SSL, please make sure that application.https.port, application.keystore.path and application.keystore.password are set correctly in structr.conf.");
+    }
+  }
+  if (host != null && !host.isEmpty() && restPort > -1) {
+    SelectChannelConnector httpConnector=new SelectChannelConnector();
+    httpConnector.setHost(host);
+    httpConnector.setPort(restPort);
+    httpConnector.setMaxIdleTime(maxIdleTime);
+    httpConnector.setRequestHeaderSize(requestHeaderSize);
+    connectors.add(httpConnector);
+  }
+ else {
+    logger.log(Level.WARNING,"Unable to configure REST port, please make sure that application.host, application.rest.port and application.rest.path are set correctly in structr.conf.");
+  }
+  if (!connectors.isEmpty()) {
+    server.setConnectors(connectors.toArray(new Connector[0]));
+  }
+ else {
+    logger.log(Level.SEVERE,"No connectors configured, aborting.");
+    System.exit(0);
+  }
+  server.setGracefulShutdown(1000);
+  server.setStopAtShutdown(true);
+  if (!quiet) {
+    System.out.println();
+    System.out.println("Starting " + applicationName + " (host="+ host+ ":"+ restPort+ ", maxIdleTime="+ maxIdleTime+ ", requestHeaderSize="+ requestHeaderSize+ ")");
+    System.out.println("Base path " + basePath);
+    System.out.println();
+    System.out.println(applicationName + " started:        http://" + host+ ":"+ restPort+ restUrl);
+    System.out.println();
+  }
+  server.start();
+  removeDir(basePath,"jsp");
+  server.join();
+  if (!quiet) {
+    System.out.println();
+    System.out.println(applicationName + " stopped.");
+    System.out.println();
+  }
+}

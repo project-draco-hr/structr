@@ -1,11 +1,11 @@
 {
-  File baseDir=new File(System.getProperty("home",""));
+  String sourceJarName=app.getProtectionDomain().getCodeSource().getLocation().toString();
+  File baseDir=new File(System.getProperty("home",basePath));
   String basePath=baseDir.getAbsolutePath();
-  File confFile=checkStructrConf(basePath);
+  File confFile=checkStructrConf(basePath,sourceJarName);
   Properties configuration=getConfiguration(confFile);
   checkPrerequisites(configuration);
   Server server=new Server(restPort);
-  String sourceJarName=app.getProtectionDomain().getCodeSource().getLocation().toString();
   List<Connector> connectors=new LinkedList<Connector>();
   HandlerCollection handlerCollection=new HandlerCollection();
   boolean startingFromWARFile=false;
@@ -118,10 +118,13 @@
   }
   server.start();
   removeDir(basePath,"jsp");
-  server.join();
-  if (!quiet) {
-    System.out.println();
-    System.out.println(applicationName + " stopped.");
-    System.out.println();
+  if (waitForExit) {
+    server.join();
+    if (!quiet) {
+      System.out.println();
+      System.out.println(applicationName + " stopped.");
+      System.out.println();
+    }
   }
+  return server;
 }

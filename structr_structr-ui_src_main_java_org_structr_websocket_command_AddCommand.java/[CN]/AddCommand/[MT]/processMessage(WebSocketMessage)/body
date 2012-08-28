@@ -34,19 +34,23 @@
       RelationClass rel=EntityContext.getRelationClass(parentNode.getClass(),nodeToAdd.getClass());
       if (rel != null) {
         try {
-          boolean addedPageIdProperty=false;
+          AbstractRelationship existingRel=null;
+          long maxPos=0;
           for (          AbstractRelationship r : parentNode.getOutgoingRelationships(RelType.CONTAINS)) {
             if (r.getEndNode().equals(nodeToAdd) && r.getLongProperty(originalPageId) != null) {
-              r.setProperty(newPageId,Long.parseLong((String)relData.get(newPageId)));
-              logger.log(Level.INFO,"Tagging relationship with pageId {0} and position {1}",new Object[]{newPageId,relData.get(newPageId)});
-              addedPageIdProperty=true;
-              break;
+              existingRel=r;
             }
+            maxPos=Math.max(r.getLongProperty(newPageId),maxPos);
           }
-          if (!addedPageIdProperty) {
+          if (existingRel != null) {
+            existingRel.setProperty(newPageId,Long.parseLong((String)relData.get(newPageId)));
+            logger.log(Level.INFO,"Tagging relationship with pageId {0} and position {1}",new Object[]{newPageId,maxPos + 1});
+          }
+ else {
             if (parentNode instanceof Page && !(nodeToAdd instanceof Html)) {
               logger.log(Level.SEVERE,"Trying to add non Html node to Page!");
             }
+            relData.put(newPageId,maxPos + 1);
             rel.createRelationship(securityContext,parentNode,nodeToAdd,relData);
             logger.log(Level.INFO,"Created new relationship between parent node {0}, added node {1} ({2})",new Object[]{parentNode.getUuid(),nodeToAdd.getUuid(),relData});
           }

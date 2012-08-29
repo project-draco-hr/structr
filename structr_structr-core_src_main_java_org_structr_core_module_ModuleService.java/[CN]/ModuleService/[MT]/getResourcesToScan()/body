@@ -5,10 +5,15 @@
   Matcher matcher=pattern.matcher("");
   for (  String jarPath : classPath.split("[:]+")) {
     String lowerPath=jarPath.toLowerCase();
-    String moduleName=lowerPath.substring(lowerPath.lastIndexOf("/") + 1);
-    matcher.reset(moduleName);
-    if (matcher.matches()) {
+    if (lowerPath.endsWith("/classes")) {
       ret.add(jarPath);
+    }
+ else {
+      String moduleName=lowerPath.substring(lowerPath.lastIndexOf("/") + 1);
+      matcher.reset(moduleName);
+      if (matcher.matches()) {
+        ret.add(jarPath);
+      }
     }
   }
   String resources=Services.getResources();

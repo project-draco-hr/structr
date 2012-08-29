@@ -1,0 +1,19 @@
+{
+  int prefixLen=prefix.length();
+  for (  File file : dir.listFiles()) {
+    if (file.isDirectory()) {
+      addClassesRecursively(file,prefix,classes);
+    }
+ else {
+      try {
+        String fileEntry=file.getAbsolutePath();
+        fileEntry=fileEntry.substring(0,fileEntry.length() - 6);
+        fileEntry=fileEntry.substring(fileEntry.indexOf(prefix) + prefixLen);
+        fileEntry=fileEntry.replaceAll("[/]+",".");
+        classes.add(fileEntry);
+      }
+ catch (      Throwable t) {
+      }
+    }
+  }
+}

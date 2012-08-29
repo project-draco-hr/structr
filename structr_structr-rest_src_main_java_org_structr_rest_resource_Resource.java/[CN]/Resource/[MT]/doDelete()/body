@@ -17,6 +17,9 @@
             deleteRel.execute(obj);
           }
  else           if (obj instanceof AbstractNode) {
+            if (!securityContext.isAllowed((AbstractNode)obj,Permission.delete)) {
+              throw new NotAllowedException();
+            }
             deleteNode.execute(obj,true);
           }
         }

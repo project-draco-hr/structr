@@ -14,17 +14,15 @@
     if ((dbNode.hasProperty(Location.Key.latitude.name())) && (dbNode.hasProperty(Location.Key.longitude.name()))) {
       LayerNodeIndex layerIndex=(LayerNodeIndex)indices.get(NodeIndex.layer.name());
       try {
-        layerIndex.add(dbNode,"","");
+synchronized (layerIndex) {
+          layerIndex.add(dbNode,"","");
+        }
       }
- catch (      Exception e) {
-        final Map<String,String> config=new HashMap<String,String>();
-        config.put(LayerNodeIndex.LAT_PROPERTY_KEY,Location.Key.latitude.name());
-        config.put(LayerNodeIndex.LON_PROPERTY_KEY,Location.Key.longitude.name());
-        config.put(SpatialIndexProvider.GEOMETRY_TYPE,LayerNodeIndex.POINT_PARAMETER);
-        layerIndex=new LayerNodeIndex("layerIndex",graphDb,config);
-        logger.log(Level.WARNING,"Created layer node index due to exception",e);
-        indices.put(NodeIndex.layer.name(),layerIndex);
-        layerIndex.add(dbNode,"","");
+ catch (      NotFoundException nfe) {
+        logger.log(Level.SEVERE,"Could not add node to layer index because the db could not find the node",nfe);
+      }
+catch (      Exception e) {
+        logger.log(Level.SEVERE,"Could add node to layer index",e);
       }
     }
   }

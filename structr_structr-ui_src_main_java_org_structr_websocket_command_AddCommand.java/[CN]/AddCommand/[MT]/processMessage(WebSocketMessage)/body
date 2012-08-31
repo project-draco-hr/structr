@@ -40,7 +40,10 @@
             if (r.getEndNode().equals(nodeToAdd) && r.getLongProperty(originalPageId) != null) {
               existingRel=r;
             }
-            maxPos=Math.max(r.getLongProperty(newPageId),maxPos);
+            Long pos=r.getLongProperty(newPageId);
+            if (pos != null) {
+              maxPos=Math.max(pos,maxPos);
+            }
           }
           if (existingRel != null) {
             existingRel.setProperty(newPageId,Long.parseLong((String)relData.get(newPageId)));

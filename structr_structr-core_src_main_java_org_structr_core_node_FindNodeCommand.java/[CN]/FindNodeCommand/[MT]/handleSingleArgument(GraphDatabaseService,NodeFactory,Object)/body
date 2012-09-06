@@ -16,12 +16,23 @@
     }
   }
  else   if (argument instanceof String) {
+    Long id=null;
     try {
-      long id=Long.parseLong((String)argument);
-      Node node=graphDb.getNodeById(id);
-      result=nodeFactory.createNode(securityContext,node);
+      id=Long.parseLong((String)argument);
     }
  catch (    NumberFormatException nfex) {
+    }
+    if (id != null) {
+      try {
+        Node node=graphDb.getNodeById(id);
+        result=nodeFactory.createNode(securityContext,node);
+      }
+ catch (      NotFoundException nfe) {
+        result=(AbstractNode)Services.command(securityContext,GetNodeByIdCommand.class).execute((String)argument);
+        if (result == null) {
+          throw new FrameworkException("FindNodeCommand",new IdNotFoundToken(id));
+        }
+      }
     }
   }
  else   if (argument instanceof ReferenceNode) {

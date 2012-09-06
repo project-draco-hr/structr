@@ -5,7 +5,7 @@
   ExecutionEngine engine=new ExecutionEngine(graphDb);
   String query=null;
   Map<String,Object> params=null;
-  boolean includeHiddenAndDeleted=false;
+  boolean includeHiddenAndDeleted=true;
   boolean publicOnly=false;
 switch (parameters.length) {
 case 0:
@@ -18,6 +18,10 @@ case 2:
 params=(Map<String,Object>)parameters[1];
 case 1:
 query=(String)parameters[0];
+if (query == null) {
+logger.log(Level.WARNING,"Query parameter is null");
+return Collections.EMPTY_LIST;
+}
 }
 if (parameters[0] instanceof String) {
 List<GraphObject> resultList=new LinkedList<GraphObject>();
@@ -33,13 +37,13 @@ for (Object o : IteratorUtil.asIterable(result.columnAs(column))) {
 if (o instanceof Node) {
 AbstractNode node=nodeFactory.createNode(securityContext,(Node)o,includeHiddenAndDeleted,publicOnly);
 if (node != null) {
-  resultList.add(node);
+resultList.add(node);
 }
 }
  else if (o instanceof Relationship) {
 AbstractRelationship rel=relFactory.createRelationship(securityContext,(Relationship)o);
 if (rel != null) {
-  resultList.add(rel);
+resultList.add(rel);
 }
 }
 }

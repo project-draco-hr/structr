@@ -64,7 +64,7 @@
         }
       }
     }
-    for (    Node node : data.createdNodes()) {
+    for (    Node node : sortNodes(data.createdNodes())) {
       AbstractNode entity=nodeFactory.createNode(securityContext,node,true,false);
       if (entity != null) {
         hasError|=!entity.beforeCreation(securityContext,errorBuffer);
@@ -74,13 +74,25 @@
         }
       }
     }
-    for (    Relationship rel : data.createdRelationships()) {
+    for (    Relationship rel : sortRelationships(data.createdRelationships())) {
       AbstractRelationship entity=relFactory.createRelationship(securityContext,rel);
       if (entity != null) {
         hasError|=!entity.beforeCreation(securityContext,errorBuffer);
         createdRels.add(entity);
         for (        StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
           hasError|=!listener.graphObjectCreated(securityContext,transactionKey,errorBuffer,entity);
+        }
+        try {
+          AbstractNode startNode=nodeFactory.createNode(securityContext,rel.getStartNode());
+          if (startNode != null && !data.isDeleted(rel.getStartNode())) {
+            modifiedNodes.add(startNode);
+          }
+          AbstractNode endNode=nodeFactory.createNode(securityContext,rel.getEndNode());
+          if (endNode != null && !data.isDeleted(rel.getEndNode())) {
+            modifiedNodes.add(endNode);
+          }
+        }
+ catch (        Throwable ignore) {
         }
       }
     }
@@ -92,9 +104,22 @@
           hasError|=!listener.graphObjectDeleted(securityContext,transactionKey,errorBuffer,entity,removedRelProperties.get(rel));
         }
         deletedRels.add(entity);
+        try {
+          AbstractNode startNode=nodeFactory.createNode(securityContext,rel.getStartNode());
+          if (startNode != null && !data.isDeleted(rel.getStartNode())) {
+            modifiedNodes.add(startNode);
+          }
+          AbstractNode endNode=nodeFactory.createNode(securityContext,rel.getEndNode());
+          if (endNode != null && !data.isDeleted(rel.getEndNode())) {
+            modifiedNodes.add(endNode);
+          }
+        }
+ catch (        Throwable ignore) {
+        }
       }
     }
     for (    Node node : data.deletedNodes()) {
+      logger.log(Level.FINEST,"Node deleted: {0}",node.getId());
       String type=(String)removedNodeProperties.get(node).get(AbstractNode.Key.type.name());
       AbstractNode entity=nodeFactory.createDeletedNode(securityContext,node,type);
       if (entity != null) {

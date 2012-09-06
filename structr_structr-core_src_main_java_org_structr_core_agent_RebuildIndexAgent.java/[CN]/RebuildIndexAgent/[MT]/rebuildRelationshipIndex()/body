@@ -12,8 +12,9 @@
       logger.log(Level.INFO,"... done. Got {0} relationships.",allRelationships.size());
       for (      AbstractRelationship s : allRelationships) {
         indexer.execute(s);
+        s=null;
         rels++;
-        if (rels % 100 == 0) {
+        if (rels % 1000 == 0) {
           logger.log(Level.INFO,"Indexed {0} relationships, committing results to database.",rels);
           tx.success();
           tx.finish();

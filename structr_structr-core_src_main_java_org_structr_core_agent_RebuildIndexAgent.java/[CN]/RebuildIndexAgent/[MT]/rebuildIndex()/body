@@ -10,14 +10,18 @@
       logger.log(Level.INFO,"Get all nodes ...");
       Result allNodes=(Result)Services.command(securityContext,GetAllNodes.class).execute();
       logger.log(Level.INFO,"... done. Start indexing {0} nodes ...",allNodes.size());
-      for (      GraphObject obj : allNodes.getResults()) {
+      List<? extends GraphObject> list=allNodes.getResults();
+      for (      GraphObject obj : list) {
         indexer.execute(obj);
+        obj=null;
         nodes++;
-        if (nodes > 1000 && nodes % 1000 == 0) {
+        if (nodes % 1000 == 0) {
           logger.log(Level.INFO,"Indexed {0} nodes, committing results to database.",nodes);
           tx.success();
           tx.finish();
           tx=graphDb.beginTx();
+          indexer=null;
+          indexer=Services.command(securityContext,IndexNodeCommand.class);
           logger.log(Level.FINE,"######## committed ########",nodes);
         }
       }

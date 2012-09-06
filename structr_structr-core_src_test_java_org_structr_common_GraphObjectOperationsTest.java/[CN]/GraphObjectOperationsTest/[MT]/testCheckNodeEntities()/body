@@ -1,0 +1,47 @@
+{
+  final Map<String,Object> props=new HashMap<String,Object>();
+  try {
+    transactionCommand.execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        Class[] entities=null;
+        try {
+          entities=getClasses("org.structr.core.entity");
+        }
+ catch (        ClassNotFoundException ex) {
+          Logger.getLogger(GraphObjectOperationsTest.class.getName()).log(Level.SEVERE,null,ex);
+        }
+catch (        IOException ex) {
+          Logger.getLogger(GraphObjectOperationsTest.class.getName()).log(Level.SEVERE,null,ex);
+        }
+        List<Class> entityList=Arrays.asList(entities);
+        assertTrue(entityList.contains(AbstractNode.class));
+        assertTrue(entityList.contains(Cache.class));
+        assertTrue(entityList.contains(Category.class));
+        assertTrue(entityList.contains(File.class));
+        assertTrue(entityList.contains(GenericNode.class));
+        assertTrue(entityList.contains(Image.class));
+        assertTrue(entityList.contains(Location.class));
+        assertTrue(entityList.contains(NodeList.class));
+        assertTrue(entityList.contains(Folder.class));
+        assertTrue(entityList.contains(PlainText.class));
+        assertTrue(entityList.contains(PrincipalImpl.class));
+        assertTrue(entityList.contains(Person.class));
+        assertTrue(entityList.contains(ResourceAccess.class));
+        for (        Class entityClass : entities) {
+          if (AbstractNode.class.isAssignableFrom(entityClass)) {
+            String type=entityClass.getSimpleName();
+            logger.log(Level.INFO,"Creating node of type {0}",type);
+            props.put(AbstractNode.Key.type.name(),type);
+            AbstractNode node=(AbstractNode)createNodeCommand.execute(props);
+            assertTrue(type.equals(node.getStringProperty(AbstractNode.Key.type)));
+          }
+        }
+        return null;
+      }
+    }
+);
+  }
+ catch (  FrameworkException ex) {
+    logger.log(Level.SEVERE,null,ex);
+  }
+}

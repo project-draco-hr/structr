@@ -1,0 +1,24 @@
+{
+  try {
+    List<AbstractNode> nodes=createTestNodes("UnknownTestType",2);
+    final AbstractNode startNode=nodes.get(0);
+    final AbstractNode endNode=nodes.get(1);
+    final RelationshipType relType=RelType.UNDEFINED;
+    final Map<String,Object> props=new HashMap<String,Object>();
+    props.put("foo","bar");
+    props.put("bar",123);
+    transactionCommand.execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        AbstractRelationship rel1=(AbstractRelationship)createRelationshipCommand.execute(startNode,endNode,relType,props,true);
+        assertTrue(rel1 != null);
+        AbstractRelationship rel2=(AbstractRelationship)createRelationshipCommand.execute(startNode,endNode,relType,props,true);
+        assertTrue(rel2 == null);
+        return null;
+      }
+    }
+);
+  }
+ catch (  FrameworkException ex) {
+    Logger.getLogger(GraphObjectOperationsTest.class.getName()).log(Level.SEVERE,null,ex);
+  }
+}

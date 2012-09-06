@@ -1,0 +1,34 @@
+{
+  final Map<String,Object> props=new HashMap<String,Object>();
+  StructrTransaction tx=new StructrTransaction(){
+    @Override public Object execute() throws FrameworkException {
+      Class[] entities=null;
+      try {
+        entities=getClasses("org.structr.core.entity");
+      }
+ catch (      ClassNotFoundException ex) {
+        Logger.getLogger(GraphObjectOperationsTest.class.getName()).log(Level.SEVERE,null,ex);
+      }
+catch (      IOException ex) {
+        Logger.getLogger(GraphObjectOperationsTest.class.getName()).log(Level.SEVERE,null,ex);
+      }
+      for (      Class entityClass : entities) {
+        if (AbstractNode.class.isAssignableFrom(entityClass)) {
+          String type=entityClass.getSimpleName();
+          logger.log(Level.INFO,"Creating node of type {0}",type);
+          props.put(AbstractNode.Key.type.name(),type);
+          AbstractNode node=(AbstractNode)createNodeCommand.execute(props);
+          assertTrue(type.equals(node.getStringProperty(AbstractNode.Key.type)));
+        }
+      }
+      return null;
+    }
+  }
+;
+  try {
+    Services.command(securityContext,TransactionCommand.class).execute(tx);
+  }
+ catch (  FrameworkException ex) {
+    Logger.getLogger(GraphObjectOperationsTest.class.getName()).log(Level.SEVERE,null,ex);
+  }
+}

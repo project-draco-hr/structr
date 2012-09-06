@@ -1,0 +1,36 @@
+{
+  try {
+    transactionCommand.execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        Class[] entities=null;
+        try {
+          entities=getClasses("org.structr.core.entity");
+        }
+ catch (        ClassNotFoundException ex) {
+          Logger.getLogger(GraphObjectOperationsTest.class.getName()).log(Level.SEVERE,null,ex);
+        }
+catch (        IOException ex) {
+          Logger.getLogger(GraphObjectOperationsTest.class.getName()).log(Level.SEVERE,null,ex);
+        }
+        for (        Class entityClass : entities) {
+          if (AbstractRelationship.class.isAssignableFrom(entityClass)) {
+            String type=entityClass.getSimpleName();
+            logger.log(Level.INFO,"Creating relationship of type {0}",type);
+            List<AbstractNode> nodes=createTestNodes("UnknownTestType",2);
+            final AbstractNode startNode=nodes.get(0);
+            final AbstractNode endNode=nodes.get(1);
+            final RelationshipType relType=RelType.LINK;
+            AbstractRelationship rel=(AbstractRelationship)createRelationshipCommand.execute(startNode,endNode,relType);
+            assertTrue(rel != null);
+            assertTrue(rel.getType().equals(relType.name()));
+          }
+        }
+        return null;
+      }
+    }
+);
+  }
+ catch (  FrameworkException ex) {
+    logger.log(Level.SEVERE,null,ex);
+  }
+}

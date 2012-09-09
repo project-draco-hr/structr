@@ -2,9 +2,9 @@
   try {
     transactionCommand.execute(new StructrTransaction(){
       @Override public Object execute() throws FrameworkException {
-        Class[] entities=null;
+        List<Class> entityList=null;
         try {
-          entities=getClasses("org.structr.core.entity");
+          entityList=getClasses("org.structr.core.entity");
         }
  catch (        ClassNotFoundException ex) {
           Logger.getLogger(GraphObjectOperationsTest.class.getName()).log(Level.SEVERE,null,ex);
@@ -12,10 +12,9 @@
 catch (        IOException ex) {
           Logger.getLogger(GraphObjectOperationsTest.class.getName()).log(Level.SEVERE,null,ex);
         }
-        List<Class> entityList=Arrays.asList(entities);
         assertTrue(entityList.contains(AbstractRelationship.class));
         assertTrue(entityList.contains(GenericRelationship.class));
-        for (        Class entityClass : entities) {
+        for (        Class entityClass : entityList) {
           if (AbstractRelationship.class.isAssignableFrom(entityClass)) {
             String type=entityClass.getSimpleName();
             logger.log(Level.INFO,"Creating relationship of type {0}",type);
@@ -34,6 +33,7 @@ catch (        IOException ex) {
 );
   }
  catch (  FrameworkException ex) {
-    logger.log(Level.SEVERE,null,ex);
+    logger.log(Level.SEVERE,ex.toString());
+    fail("Unexpected exception");
   }
 }

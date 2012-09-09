@@ -3,17 +3,16 @@
   try {
     transactionCommand.execute(new StructrTransaction(){
       @Override public Object execute() throws FrameworkException {
-        Class[] entities=null;
+        List<Class> entityList=null;
         try {
-          entities=getClasses("org.structr.core.entity");
+          entityList=getClasses("org.structr.core.entity");
         }
  catch (        ClassNotFoundException ex) {
-          Logger.getLogger(GraphObjectOperationsTest.class.getName()).log(Level.SEVERE,null,ex);
+          logger.log(Level.SEVERE,null,ex);
         }
 catch (        IOException ex) {
-          Logger.getLogger(GraphObjectOperationsTest.class.getName()).log(Level.SEVERE,null,ex);
+          logger.log(Level.SEVERE,null,ex);
         }
-        List<Class> entityList=Arrays.asList(entities);
         assertTrue(entityList.contains(AbstractNode.class));
         assertTrue(entityList.contains(Cache.class));
         assertTrue(entityList.contains(Category.class));
@@ -27,13 +26,21 @@ catch (        IOException ex) {
         assertTrue(entityList.contains(PrincipalImpl.class));
         assertTrue(entityList.contains(Person.class));
         assertTrue(entityList.contains(ResourceAccess.class));
-        for (        Class entityClass : entities) {
+        for (        Class entityClass : entityList) {
           if (AbstractNode.class.isAssignableFrom(entityClass)) {
             String type=entityClass.getSimpleName();
+            if (type.equals(ResourceAccess.class.getSimpleName())) {
+              props.put(ResourceAccess.Key.signature.name(),"/");
+              props.put(ResourceAccess.Key.flags.name(),6);
+            }
             logger.log(Level.INFO,"Creating node of type {0}",type);
             props.put(AbstractNode.Key.type.name(),type);
             AbstractNode node=(AbstractNode)createNodeCommand.execute(props);
             assertTrue(type.equals(node.getStringProperty(AbstractNode.Key.type)));
+            if (type.equals(ResourceAccess.class.getSimpleName())) {
+              props.remove(ResourceAccess.Key.signature.name());
+              props.remove(ResourceAccess.Key.flags.name());
+            }
           }
         }
         return null;
@@ -42,6 +49,7 @@ catch (        IOException ex) {
 );
   }
  catch (  FrameworkException ex) {
-    logger.log(Level.SEVERE,null,ex);
+    logger.log(Level.SEVERE,ex.toString());
+    fail("Unexpected exception");
   }
 }

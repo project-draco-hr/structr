@@ -13,7 +13,7 @@
       config.add("");
     }
     config.add("# JSON output nesting depth");
-    config.add("json.depth = 1");
+    config.add("json.depth = " + jsonDepth);
     config.add("");
     config.add("# base directory");
     config.add("base.path = " + basePath);
@@ -28,27 +28,42 @@
     config.add("files.path = " + basePath + "/files");
     config.add("");
     config.add("# REST server settings");
-    config.add("application.host = 0.0.0.0");
-    config.add("application.rest.port = 8082");
-    config.add("application.rest.path = /structr/rest");
+    config.add("application.host = " + host);
+    config.add("application.rest.port = " + restPort);
+    config.add("application.rest.path = " + restUrl);
     config.add("");
-    config.add("application.https.enabled = false");
-    config.add("application.https.port = ");
-    config.add("application.keystore.path = ");
-    config.add("application.keystore.password = ");
+    config.add("application.https.enabled = " + enableHttps);
+    config.add("application.https.port = " + httpsPort);
+    config.add("application.keystore.path = " + keyStorePath);
+    config.add("application.keystore.password = " + keyStorePassword);
     config.add("");
     config.add("# SMPT settings");
-    config.add("smtp.host = localhost");
-    config.add("smtp.port = 25");
+    config.add("smtp.host = " + smtpHost);
+    config.add("smtp.port = " + smtpPort);
     config.add("");
     config.add("superuser.username = superadmin");
     config.add("superuser.password = " + RandomStringUtils.randomAlphanumeric(12));
     config.add("");
     config.add("# services");
-    config.add("configured.services = ModuleService NodeService AgentService");
+    StringBuilder configuredServicesLine=new StringBuilder("configured.services = ");
+    for (    Class<? extends Service> serviceClass : configuredServices) {
+      configuredServicesLine.append(" ").append(serviceClass.getSimpleName());
+    }
+    config.add(configuredServicesLine.toString());
     config.add("");
-    config.add("log.requests = false");
+    config.add("log.requests = " + logRequests);
     config.add("log.name = structr-yyyy_mm_dd.request.log");
+    config.add("CronService.tasks = \\");
+    StringBuilder cronServiceTasksLines=new StringBuilder();
+    StringBuilder cronExpressions=new StringBuilder();
+    for (    Entry<String,String> task : cronServiceTasks.entrySet()) {
+      String taskClassName=task.getKey();
+      String cronExpression=task.getValue();
+      cronServiceTasksLines.append(" ").append(taskClassName).append(" \\\n");
+      cronExpressions.append(taskClassName).append(".cronExpression = ").append(cronExpression).append("\n");
+    }
+    config.add(cronServiceTasksLines.toString());
+    config.add(cronExpressions.toString());
     confFile.createNewFile();
     FileUtils.writeLines(confFile,"UTF-8",config);
   }

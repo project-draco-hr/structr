@@ -2,6 +2,11 @@
   String sourceJarName=app.getProtectionDomain().getCodeSource().getLocation().toString();
   File baseDir=new File(System.getProperty("home",basePath));
   String basePath=baseDir.getAbsolutePath();
+  configuredServices.add(ModuleService.class);
+  configuredServices.add(NodeService.class);
+  configuredServices.add(AgentService.class);
+  configuredServices.add(CronService.class);
+  configuredServices.add(LogService.class);
   File confFile=checkStructrConf(basePath,sourceJarName);
   Properties configuration=getConfiguration(confFile);
   checkPrerequisites(configuration);
@@ -34,28 +39,50 @@
       rewriteFilter.setInitParameter("confPath","/urlrewrite.xml");
     }
   }
-  if ("true".equals(configuration.getProperty("log.requests","false"))) {
-    String logFile=configuration.getProperty("log.name","structr-yyyy_mm_dd.request.log");
+  if (logRequests) {
+    String etcPath=basePath + "/etc";
+    File etcDir=new File(etcPath);
+    if (!etcDir.exists()) {
+      etcDir.mkdir();
+    }
+    String logbackConfFilePath=basePath + "/etc/logback-access.xml";
+    File logbackConfFile=new File(logbackConfFilePath);
+    if (!logbackConfFile.exists()) {
+      List<String> config=new LinkedList<String>();
+      config.add("<configuration>");
+      config.add("  <appender name=\"FILE\" class=\"ch.qos.logback.core.rolling.RollingFileAppender\">");
+      config.add("    <rollingPolicy class=\"ch.qos.logback.core.rolling.TimeBasedRollingPolicy\">");
+      config.add("      <fileNamePattern>logs/" + logPrefix + "-%d{yyyy_MM_dd}.request.log.zip</fileNamePattern>");
+      config.add("    </rollingPolicy>");
+      config.add("    <encoder>");
+      config.add("      <pattern>%h %l %u %t \"%r\" %s %b %n%fullRequest%n%n%fullResponse</pattern>");
+      config.add("    </encoder>");
+      config.add("  </appender>");
+      config.add("<appender-ref ref=\"FILE\" />");
+      config.add("</configuration>");
+      logbackConfFile.createNewFile();
+      FileUtils.writeLines(logbackConfFile,"UTF-8",config);
+    }
+    FilterHolder loggingFilter=servletContext.addFilter(TeeFilter.class,"/*",EnumSet.of(DispatcherType.REQUEST,DispatcherType.FORWARD));
+    loggingFilter.setInitParameter("includes","");
     RequestLogHandler requestLogHandler=new RequestLogHandler();
     String logPath=basePath + "/logs";
     File logDir=new File(logPath);
     if (!logDir.exists()) {
       logDir.mkdir();
     }
-    logPath=logDir.getAbsolutePath();
-    NCSARequestLog requestLog=new NCSARequestLog(logPath + "/" + logFile);
-    requestLog.setRetainDays(90);
-    requestLog.setAppend(true);
-    requestLog.setExtended(false);
-    requestLog.setLogTimeZone("GMT");
+    RequestLogImpl requestLog=new RequestLogImpl();
     requestLogHandler.setRequestLog(requestLog);
-    handlerCollection.addHandler(requestLogHandler);
+    ContextHandlerCollection contexts=new ContextHandlerCollection();
+    contexts.setHandlers(new Handler[]{servletContext,requestLogHandler});
+    handlerCollection.setHandlers(new Handler[]{contexts,new DefaultHandler(),requestLogHandler});
   }
   JsonRestServlet structrRestServlet=new JsonRestServlet();
   ServletHolder structrRestServletHolder=new ServletHolder(structrRestServlet);
   servletParams.put("PropertyFormat","FlatNameValue");
   servletParams.put("ResourceProvider",resourceProvider.getName());
   servletParams.put("Authenticator",authenticator.getName());
+  servletParams.put("DefaultPropertyView",defaultPropertyView);
   servletParams.put("IdProperty","uuid");
   structrRestServletHolder.setInitParameters(servletParams);
   structrRestServletHolder.setInitOrder(0);

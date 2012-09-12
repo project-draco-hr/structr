@@ -1,0 +1,26 @@
+{
+  try {
+    AbstractRelationship rel=cascadeRel(TestOne.class,TestTwo.class,RelationClass.DELETE_IF_CONSTRAINT_WOULD_BE_VIOLATED);
+    final String startNodeId=rel.getStartNode().getUuid();
+    final String endNodeId=rel.getEndNode().getUuid();
+    deleteCascade(rel.getStartNode());
+    assertNodeNotFound(startNodeId);
+    assertNodeNotFound(endNodeId);
+    rel=cascadeRel(TestOne.class,TestThree.class,RelationClass.DELETE_IF_CONSTRAINT_WOULD_BE_VIOLATED);
+    final String startNodeId2=rel.getStartNode().getUuid();
+    final String endNodeId2=rel.getEndNode().getUuid();
+    deleteCascade(rel.getStartNode());
+    assertNodeNotFound(startNodeId2);
+    assertNodeExists(endNodeId2);
+    rel=cascadeRel(TestOne.class,TestFour.class,RelationClass.DELETE_IF_CONSTRAINT_WOULD_BE_VIOLATED);
+    final String startNodeId3=rel.getStartNode().getUuid();
+    final String endNodeId3=rel.getEndNode().getUuid();
+    deleteCascade(rel.getStartNode());
+    assertNodeNotFound(startNodeId3);
+    assertNodeExists(endNodeId3);
+  }
+ catch (  FrameworkException ex) {
+    logger.log(Level.SEVERE,ex.toString());
+    fail("Unexpected exception");
+  }
+}

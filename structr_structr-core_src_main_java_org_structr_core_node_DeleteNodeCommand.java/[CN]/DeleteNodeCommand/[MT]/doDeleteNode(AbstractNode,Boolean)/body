@@ -1,4 +1,5 @@
 {
+  deletedNodes.add(node);
   if (node.getStringProperty(AbstractNode.Key.uuid) == null) {
     logger.log(Level.WARNING,"Will not delete node which has no UUID");
     return null;
@@ -9,12 +10,16 @@
   transactionCommand.execute(new StructrTransaction(){
     @Override public Object execute() throws FrameworkException {
       try {
+        List<AbstractNode> nodesToCheckAfterDeletion=new LinkedList<AbstractNode>();
         if (cascade) {
           List<AbstractRelationship> outgoingRels=node.getOutgoingRelationships();
           for (          AbstractRelationship rel : outgoingRels) {
             int cascadeDelete=rel.cascadeDelete();
-            if ((cascadeDelete == RelationClass.DELETE_OUTGOING) || (cascadeDelete == RelationClass.DELETE_BOTH)) {
-              AbstractNode endNode=rel.getEndNode();
+            AbstractNode endNode=rel.getEndNode();
+            if ((cascadeDelete & RelationClass.DELETE_IF_CONSTRAINT_WOULD_BE_VIOLATED) == RelationClass.DELETE_IF_CONSTRAINT_WOULD_BE_VIOLATED) {
+              nodesToCheckAfterDeletion.add(endNode);
+            }
+            if (!deletedNodes.contains(endNode) && ((cascadeDelete & RelationClass.DELETE_OUTGOING) == RelationClass.DELETE_OUTGOING)) {
               removeNodeFromIndex.execute(endNode);
               doDeleteNode(endNode,cascade);
             }
@@ -22,11 +27,13 @@
           List<AbstractRelationship> incomingRels=node.getIncomingRelationships();
           for (          AbstractRelationship rel : incomingRels) {
             int cascadeDelete=rel.cascadeDelete();
-            if ((cascadeDelete == RelationClass.DELETE_INCOMING) || (cascadeDelete == RelationClass.DELETE_BOTH)) {
-              AbstractNode startNode=rel.getStartNode();
+            AbstractNode startNode=rel.getStartNode();
+            if ((cascadeDelete & RelationClass.DELETE_IF_CONSTRAINT_WOULD_BE_VIOLATED) == RelationClass.DELETE_IF_CONSTRAINT_WOULD_BE_VIOLATED) {
+              nodesToCheckAfterDeletion.add(startNode);
+            }
+            if (!deletedNodes.contains(startNode) && ((cascadeDelete & RelationClass.DELETE_INCOMING) == RelationClass.DELETE_INCOMING)) {
               removeNodeFromIndex.execute(startNode);
               doDeleteNode(startNode,cascade);
-              doDeleteNode(rel.getStartNode(),cascade);
             }
           }
         }
@@ -37,6 +44,15 @@
         }
         removeNodeFromIndex.execute(node);
         node.getNode().delete();
+        if (cascade) {
+          for (          AbstractNode nodeToCheck : nodesToCheckAfterDeletion) {
+            ErrorBuffer errorBuffer=new ErrorBuffer();
+            if (!nodeToCheck.isValid(errorBuffer)) {
+              removeNodeFromIndex.execute(nodeToCheck);
+              doDeleteNode(nodeToCheck,cascade);
+            }
+          }
+        }
       }
  catch (      Throwable t) {
         logger.log(Level.WARNING,"Exception while deleting node: {0}",t);

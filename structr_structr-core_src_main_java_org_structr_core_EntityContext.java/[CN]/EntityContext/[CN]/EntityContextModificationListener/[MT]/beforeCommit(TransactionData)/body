@@ -130,40 +130,54 @@
         deletedNodes.add(entity);
       }
     }
+    Node n=null;
+    AbstractNode nodeEntity=null;
     for (    PropertyEntry<Node> entry : data.assignedNodeProperties()) {
-      AbstractNode entity=nodeFactory.createNode(securityContext,entry.entity(),true,false);
-      if (entity != null) {
+      Node nodeFromPropertyEntry=entry.entity();
+      if (!(nodeFromPropertyEntry.equals(n))) {
+        nodeEntity=nodeFactory.createNode(securityContext,nodeFromPropertyEntry,true,false);
+        n=nodeFromPropertyEntry;
+      }
+      if (nodeEntity != null) {
         String key=entry.key();
         Object value=entry.value();
-        Set<PropertyValidator> validators=EntityContext.getPropertyValidators(securityContext,entity.getClass(),key);
+        Set<PropertyValidator> validators=EntityContext.getPropertyValidators(securityContext,nodeEntity.getClass(),key);
         if (validators != null) {
           for (          PropertyValidator validator : validators) {
-            hasError|=!(validator.isValid(entity,key,value,errorBuffer));
+            hasError|=!(validator.isValid(nodeEntity,key,value,errorBuffer));
           }
         }
         for (        StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
-          hasError|=!listener.propertyModified(securityContext,transactionKey,errorBuffer,entity,key,entry.previouslyCommitedValue(),value);
+          hasError|=!listener.propertyModified(securityContext,transactionKey,errorBuffer,nodeEntity,key,entry.previouslyCommitedValue(),value);
         }
-        indexNodeCommand.execute(entity,key);
-        modifiedNodes.add(entity);
+        if (!createdNodes.contains(nodeEntity) && !deletedNodes.contains(nodeEntity)) {
+          indexNodeCommand.execute(nodeEntity,key);
+        }
+        modifiedNodes.add(nodeEntity);
       }
     }
+    Relationship r=null;
+    AbstractRelationship relEntity=null;
     for (    PropertyEntry<Relationship> entry : data.assignedRelationshipProperties()) {
-      AbstractRelationship entity=relFactory.createRelationship(securityContext,entry.entity());
-      if (entity != null) {
+      Relationship relFromPropertyEntry=entry.entity();
+      if (!(relFromPropertyEntry.equals(r))) {
+        relEntity=relFactory.createRelationship(securityContext,relFromPropertyEntry);
+        r=relFromPropertyEntry;
+      }
+      if (relEntity != null) {
         String key=entry.key();
         Object value=entry.value();
-        Set<PropertyValidator> validators=EntityContext.getPropertyValidators(securityContext,entity.getClass(),key);
+        Set<PropertyValidator> validators=EntityContext.getPropertyValidators(securityContext,relEntity.getClass(),key);
         if (validators != null) {
           for (          PropertyValidator validator : validators) {
-            hasError|=!(validator.isValid(entity,key,value,errorBuffer));
+            hasError|=!(validator.isValid(relEntity,key,value,errorBuffer));
           }
         }
         for (        StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
-          hasError|=!listener.propertyModified(securityContext,transactionKey,errorBuffer,entity,key,entry.previouslyCommitedValue(),value);
+          hasError|=!listener.propertyModified(securityContext,transactionKey,errorBuffer,relEntity,key,entry.previouslyCommitedValue(),value);
         }
-        indexRelationshipCommand.execute(entity,key);
-        modifiedRels.add(entity);
+        indexRelationshipCommand.execute(relEntity,key);
+        modifiedRels.add(relEntity);
       }
     }
     for (    AbstractNode node : modifiedNodes) {
@@ -172,8 +186,8 @@
         for (        StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
           hasError|=!listener.graphObjectModified(securityContext,transactionKey,errorBuffer,node);
         }
+        indexNodeCommand.execute(node);
       }
-      indexNodeCommand.execute(node);
     }
     for (    AbstractRelationship rel : modifiedRels) {
       if (!createdRels.contains(rel) && !deletedRels.contains(rel)) {
@@ -181,8 +195,8 @@
         for (        StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
           hasError|=!listener.graphObjectModified(securityContext,transactionKey,errorBuffer,rel);
         }
+        indexRelationshipCommand.execute(rel);
       }
-      indexRelationshipCommand.execute(rel);
     }
     for (    AbstractNode node : createdNodes) {
       indexNodeCommand.execute(node);

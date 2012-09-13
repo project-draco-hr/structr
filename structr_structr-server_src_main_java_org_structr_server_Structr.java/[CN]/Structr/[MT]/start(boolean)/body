@@ -147,6 +147,11 @@
   }
   server.start();
   removeDir(basePath,"jsp");
+  if (!callbacks.isEmpty()) {
+    for (    Callback callback : callbacks) {
+      callback.execute();
+    }
+  }
   if (waitForExit) {
     server.join();
     if (!quiet) {

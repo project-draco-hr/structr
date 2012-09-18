@@ -3,7 +3,7 @@
     boolean includeDeletedAndHidden=true;
     boolean publicOnly=false;
     String type=TestOne.class.getSimpleName();
-    int number=100;
+    int number=43;
     List<AbstractNode> nodes=this.createTestNodes(type,number);
     List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
     searchAttributes.add(Search.andType(type));
@@ -14,10 +14,10 @@
     int pageSize=10;
     int page=1;
     result=(Result)searchNodeCommand.execute(null,includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDesc,pageSize,page);
-    logger.log(Level.INFO,"Raw result size: {0}",result.getRawResultCount());
+    logger.log(Level.INFO,"Raw result size: {0}, expected: {1}",new Object[]{result.getRawResultCount(),number});
     assertTrue(result.getRawResultCount() == number);
-    logger.log(Level.INFO,"Result size: {0} (pageSize: {1})",new Object[]{number / pageSize,pageSize});
-    assertTrue(result.size() == number / pageSize);
+    logger.log(Level.INFO,"Result size: {0}, expected: {1}",new Object[]{result.size(),pageSize});
+    assertTrue(result.size() == pageSize);
   }
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,ex.toString());

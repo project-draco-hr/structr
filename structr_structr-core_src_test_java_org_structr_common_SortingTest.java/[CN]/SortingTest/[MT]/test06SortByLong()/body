@@ -3,35 +3,41 @@
     boolean includeDeletedAndHidden=true;
     boolean publicOnly=false;
     String type=TestOne.class.getSimpleName();
-    int number=131;
+    int number=43;
     List<AbstractNode> nodes=this.createTestNodes(type,number);
-    String name;
-    int offset=10;
-    int i=offset;
+    String key=TestOne.Key.aLong.name();
+    long offset=10;
+    long i=offset;
     Collections.shuffle(nodes);
     for (    AbstractNode node : nodes) {
-      name=Integer.toString(i);
+      node.setName(Long.toString(i));
+      node.setProperty(key,i);
       i++;
-      node.setName(name);
+      System.out.println(node.getStringProperty(AbstractNode.Key.name) + ": " + node.getLongProperty(key));
     }
     List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
     searchAttributes.add(Search.andType(type));
     Result result=(Result)searchNodeCommand.execute(null,includeDeletedAndHidden,publicOnly,searchAttributes);
     assertTrue(result.size() == number);
-    String sortKey=AbstractNode.Key.lastModifiedDate.name();
-    boolean sortDesc=true;
-    int pageSize=10;
+    String sortKey=key;
+    boolean sortDesc=false;
+    int pageSize=20;
     int page=1;
     result=(Result)searchNodeCommand.execute(null,includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDesc,pageSize,page,SortField.LONG);
+    for (    GraphObject obj : result.getResults()) {
+      System.out.println(obj.getStringProperty(AbstractNode.Key.name) + ": " + obj.getLongProperty(key));
+    }
     logger.log(Level.INFO,"Raw result size: {0}, expected: {1}",new Object[]{result.getRawResultCount(),number});
     assertTrue(result.getRawResultCount() == number);
     logger.log(Level.INFO,"Result size: {0}, expected: {1}",new Object[]{result.size(),pageSize});
-    assertTrue(result.size() == Math.min(number,pageSize));
+    if (result.size() >= pageSize) {
+      assertTrue(result.size() == pageSize);
+    }
     for (int j=0; j < pageSize; j++) {
-      int expectedNumber=number + offset - 1 - j;
-      String gotName=result.get(j).getStringProperty(AbstractNode.Key.name);
-      System.out.println(expectedNumber + ", got: " + gotName);
-      assertTrue(gotName.equals(Integer.toString(expectedNumber)));
+      long expectedNumber=offset + j;
+      long gotNumber=result.get(j).getLongProperty(key);
+      System.out.println("expected: " + expectedNumber + ", got: "+ gotNumber);
+      assertTrue(gotNumber == expectedNumber);
     }
   }
  catch (  FrameworkException ex) {

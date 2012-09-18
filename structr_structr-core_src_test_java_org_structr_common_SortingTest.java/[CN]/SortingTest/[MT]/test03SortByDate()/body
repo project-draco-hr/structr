@@ -3,39 +3,38 @@
     boolean includeDeletedAndHidden=true;
     boolean publicOnly=false;
     String type=TestOne.class.getSimpleName();
-    int number=43;
+    int number=97;
     List<AbstractNode> nodes=this.createTestNodes(type,number);
+    int offset=10;
+    int i=offset;
     String name;
-    int i=10;
     Collections.shuffle(nodes);
     for (    AbstractNode node : nodes) {
       name=Integer.toString(i);
       i++;
       node.setName(name);
+      long timestamp=(new Date()).getTime();
+      node.setProperty(TestOne.Key.aDate,timestamp);
     }
     List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
     searchAttributes.add(Search.andType(type));
     Result result=(Result)searchNodeCommand.execute(null,includeDeletedAndHidden,publicOnly,searchAttributes);
     assertTrue(result.size() == number);
-    String sortKey=AbstractNode.Key.lastModifiedDate.name();
+    String sortKey=TestOne.Key.aDate.name();
     boolean sortDesc=false;
     int pageSize=10;
     int page=1;
-    result=(Result)searchNodeCommand.execute(null,includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDesc,pageSize,page);
+    result=(Result)searchNodeCommand.execute(null,includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDesc,pageSize,page,SortField.LONG);
     logger.log(Level.INFO,"Raw result size: {0}, expected: {1}",new Object[]{result.getRawResultCount(),number});
     assertTrue(result.getRawResultCount() == number);
     logger.log(Level.INFO,"Result size: {0}, expected: {1}",new Object[]{result.size(),pageSize});
-    assertTrue(result.size() == pageSize);
-    assertTrue(result.get(0).getStringProperty(AbstractNode.Key.name).equals("10"));
-    assertTrue(result.get(1).getStringProperty(AbstractNode.Key.name).equals("11"));
-    assertTrue(result.get(2).getStringProperty(AbstractNode.Key.name).equals("12"));
-    assertTrue(result.get(3).getStringProperty(AbstractNode.Key.name).equals("13"));
-    assertTrue(result.get(4).getStringProperty(AbstractNode.Key.name).equals("14"));
-    assertTrue(result.get(5).getStringProperty(AbstractNode.Key.name).equals("15"));
-    assertTrue(result.get(6).getStringProperty(AbstractNode.Key.name).equals("16"));
-    assertTrue(result.get(7).getStringProperty(AbstractNode.Key.name).equals("17"));
-    assertTrue(result.get(8).getStringProperty(AbstractNode.Key.name).equals("18"));
-    assertTrue(result.get(9).getStringProperty(AbstractNode.Key.name).equals("19"));
+    assertTrue(result.size() == Math.min(number,pageSize));
+    for (int j=0; j < Math.min(result.size(),pageSize); j++) {
+      int expectedNumber=offset + j;
+      String gotName=result.get(j).getStringProperty(AbstractNode.Key.name);
+      System.out.println(expectedNumber + ", got: " + gotName);
+      assertTrue(gotName.equals(Integer.toString(expectedNumber)));
+    }
   }
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,ex.toString());

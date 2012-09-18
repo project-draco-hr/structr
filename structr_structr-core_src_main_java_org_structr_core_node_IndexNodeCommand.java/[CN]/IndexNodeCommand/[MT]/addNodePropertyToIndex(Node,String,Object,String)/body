@@ -1,6 +1,11 @@
 {
   Index<Node> index=indices.get(indexName);
 synchronized (index) {
-    index.add(node,key,value);
+    if (value instanceof Number) {
+      index.add(node,key,new ValueContext(value).indexNumeric());
+    }
+ else {
+      index.add(node,key,value);
+    }
   }
 }

@@ -11,18 +11,23 @@
   boolean sortDescending=false;
   long pageSize=-1;
   long page=-1;
+  Integer sortType=null;
 switch (parameters.length) {
-case 8:
-    if (parameters[7] instanceof Number) {
-      page=((Number)parameters[7]).longValue();
+case 9:
+    if (parameters[8] instanceof Integer) {
+      sortType=((Integer)parameters[8]).intValue();
     }
-case 7:
-  if (parameters[6] instanceof Number) {
-    pageSize=((Number)parameters[6]).longValue();
+case 8:
+  if (parameters[7] instanceof Number) {
+    page=((Number)parameters[7]).longValue();
   }
+case 7:
+if (parameters[6] instanceof Number) {
+  pageSize=((Number)parameters[6]).longValue();
+}
 case 6:
 if (parameters[5] instanceof Boolean) {
-  sortDescending=(Boolean)parameters[5];
+sortDescending=(Boolean)parameters[5];
 }
 case 5:
 if (parameters[4] instanceof String) {
@@ -46,5 +51,5 @@ searchAttrs=(List<SearchAttribute>)parameters[3];
 }
 break;
 }
-return search(securityContext,topNode,includeDeletedAndHidden,publicOnly,searchAttrs,sortKey,sortDescending,pageSize,page);
+return search(securityContext,topNode,includeDeletedAndHidden,publicOnly,searchAttrs,sortKey,sortDescending,pageSize,page,sortType);
 }

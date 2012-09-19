@@ -1,6 +1,6 @@
 {
   try {
-    boolean includeDeletedAndHidden=true;
+    boolean includeDeletedAndHidden=false;
     boolean publicOnly=false;
     String type=TestOne.class.getSimpleName();
     int number=97;
@@ -8,11 +8,11 @@
     int offset=10;
     int i=offset;
     String name;
-    Collections.shuffle(nodes);
+    Collections.shuffle(nodes,new Random(System.nanoTime()));
     for (    AbstractNode node : nodes) {
       name=Integer.toString(i);
       i++;
-      node.setName(name);
+      node.setName("TestOne-" + name);
       long timestamp=(new Date()).getTime();
       node.setProperty(TestOne.Key.aDate,timestamp);
     }
@@ -30,10 +30,10 @@
     logger.log(Level.INFO,"Result size: {0}, expected: {1}",new Object[]{result.size(),pageSize});
     assertTrue(result.size() == Math.min(number,pageSize));
     for (int j=0; j < Math.min(result.size(),pageSize); j++) {
-      int expectedNumber=offset + j;
+      String expectedName="TestOne-" + (offset + j);
       String gotName=result.get(j).getStringProperty(AbstractNode.Key.name);
-      System.out.println(expectedNumber + ", got: " + gotName);
-      assertTrue(gotName.equals(Integer.toString(expectedNumber)));
+      System.out.println(expectedName + ", got: " + gotName);
+      assertTrue(gotName.equals(expectedName));
     }
   }
  catch (  FrameworkException ex) {

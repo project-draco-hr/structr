@@ -1,0 +1,38 @@
+{
+  List<SchemaInformation> resultList=new LinkedList<SchemaInformation>();
+  ModuleService moduleService=(ModuleService)Services.getService(ModuleService.class);
+  for (  String rawType : moduleService.getCachedNodeEntityTypes()) {
+    Class type=EntityContext.getEntityClassForRawType(rawType);
+    SchemaInformation schema=new SchemaInformation();
+    resultList.add(schema);
+    String url="/".concat(CaseHelper.toUnderscore(rawType,true));
+    schema.setProperty("url",url);
+    schema.setProperty("type",rawType);
+    schema.setProperty("flags",SecurityContext.getResourceFlags(rawType));
+    Map<String,Map<String,Object>> views=new TreeMap<String,Map<String,Object>>();
+    Set<String> propertyViews=EntityContext.getPropertyViews();
+    schema.setProperty("views",views);
+    for (    String view : propertyViews) {
+      Map<String,Object> propertyConverterMap=new TreeMap<String,Object>();
+      Set<String> properties=EntityContext.getPropertySet(type,view);
+      if (!"all".equals(view) && !properties.isEmpty()) {
+        for (        String property : properties) {
+          StringBuilder converterPlusValue=new StringBuilder();
+          PropertyConverter converter=EntityContext.getPropertyConverter(securityContext,type,property);
+          Value conversionValue=EntityContext.getPropertyConversionParameter(type,property);
+          if (converter != null) {
+            converterPlusValue.append(converter.getClass().getName());
+          }
+          if (conversionValue != null) {
+            converterPlusValue.append("(");
+            converterPlusValue.append(conversionValue.getClass().getName());
+            converterPlusValue.append(")");
+          }
+          propertyConverterMap.put(property,converterPlusValue.toString());
+        }
+        views.put(view,propertyConverterMap);
+      }
+    }
+  }
+  return new Result(resultList,resultList.size(),false,false);
+}

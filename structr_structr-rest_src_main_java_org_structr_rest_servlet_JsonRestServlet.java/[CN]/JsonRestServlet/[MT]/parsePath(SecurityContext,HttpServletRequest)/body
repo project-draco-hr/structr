@@ -9,6 +9,13 @@
     String part=pathParts[i].trim();
     if (part.length() > 0) {
       boolean found=false;
+      if ("_schema".equals(part)) {
+        SchemaResource resource=new SchemaResource();
+        resource.checkAndConfigure("_schema",securityContext,request);
+        constraintChain.add(resource);
+        found=true;
+        break;
+      }
       for (      Entry<Pattern,Class> entry : resourceMap.entrySet()) {
         Pattern pattern=entry.getKey();
         Matcher matcher=pattern.matcher(pathParts[i]);

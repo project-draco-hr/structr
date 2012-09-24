@@ -1,5 +1,12 @@
 {
   String sourceJarName=app.getProtectionDomain().getCodeSource().getLocation().toString();
+  if (StringUtils.stripEnd(sourceJarName,"/").endsWith("classes")) {
+    String jarFile=System.getProperty("jarFile");
+    if (StringUtils.isEmpty(jarFile)) {
+      throw new IllegalArgumentException(app.getName() + " was started in an environment where the classloader cannot determine the JAR file containing the main class.\n" + "Please specify the path to the JAR file in the parameter -DjarFile.\n"+ "Example: -DjarFile=${project.build.directory}/${project.artifactId}-${project.version}.jar");
+    }
+    sourceJarName=jarFile;
+  }
   File baseDir=new File(System.getProperty("home",basePath));
   String basePath=baseDir.getAbsolutePath();
   if (!baseDir.exists()) {
@@ -16,31 +23,16 @@
   Server server=new Server(restPort);
   List<Connector> connectors=new LinkedList<Connector>();
   HandlerCollection handlerCollection=new HandlerCollection();
-  boolean startingFromWARFile=false;
-  ServletContextHandler servletContext=null;
-  if (sourceJarName.endsWith(".war")) {
-    WebAppContext webAppContext=new WebAppContext(server,basePath + "/" + sourceJarName,contextPath);
-    webAppContext.setWar(basePath + sourceJarName);
-    servletContext=webAppContext;
-    startingFromWARFile=true;
-  }
- else {
-    servletContext=new ServletContextHandler(server,contextPath,ServletContextHandler.SESSIONS);
-  }
-  servletContext.setBaseResource(new ResourceCollection(Resource.newResource(basePath),JarResource.newJarResource(Resource.newResource(sourceJarName))));
-  servletContext.setInitParameter("configfile.path",confFile.getAbsolutePath());
+  ServletContextHandler context=new WebAppContext(server,basePath,contextPath);
+  context.setBaseResource(new ResourceCollection(Resource.newResource(basePath),JarResource.newJarResource(Resource.newResource(sourceJarName))));
+  context.setInitParameter("configfile.path",confFile.getAbsolutePath());
   if (enableGzipCompression) {
-    FilterHolder gzipFilter=servletContext.addFilter(GzipFilter.class,"/*",EnumSet.of(DispatcherType.REQUEST,DispatcherType.FORWARD));
+    FilterHolder gzipFilter=context.addFilter(GzipFilter.class,"/*",EnumSet.of(DispatcherType.REQUEST,DispatcherType.FORWARD));
     gzipFilter.setInitParameter("mimeTypes","text/html,text/plain,text/css,text/javascript");
   }
   if (enableRewriteFilter) {
-    FilterHolder rewriteFilter=servletContext.addFilter(UrlRewriteFilter.class,"/*",EnumSet.of(DispatcherType.REQUEST,DispatcherType.FORWARD));
-    if (startingFromWARFile) {
-      rewriteFilter.setInitParameter("confPath","/WEB-INF/urlrewrite.xml");
-    }
- else {
-      rewriteFilter.setInitParameter("confPath","/urlrewrite.xml");
-    }
+    FilterHolder rewriteFilter=context.addFilter(UrlRewriteFilter.class,"/*",EnumSet.of(DispatcherType.REQUEST,DispatcherType.FORWARD));
+    rewriteFilter.setInitParameter("confPath","/urlrewrite.xml");
   }
   if (logRequests) {
     String etcPath=basePath + "/etc";
@@ -66,7 +58,7 @@
       logbackConfFile.createNewFile();
       FileUtils.writeLines(logbackConfFile,"UTF-8",config);
     }
-    FilterHolder loggingFilter=servletContext.addFilter(TeeFilter.class,"/*",EnumSet.of(DispatcherType.REQUEST,DispatcherType.FORWARD));
+    FilterHolder loggingFilter=context.addFilter(TeeFilter.class,"/*",EnumSet.of(DispatcherType.REQUEST,DispatcherType.FORWARD));
     loggingFilter.setInitParameter("includes","");
     RequestLogHandler requestLogHandler=new RequestLogHandler();
     String logPath=basePath + "/logs";
@@ -77,8 +69,8 @@
     RequestLogImpl requestLog=new RequestLogImpl();
     requestLogHandler.setRequestLog(requestLog);
     ContextHandlerCollection contexts=new ContextHandlerCollection();
-    contexts.setHandlers(new Handler[]{servletContext,requestLogHandler});
-    handlerCollection.setHandlers(new Handler[]{contexts,new DefaultHandler(),requestLogHandler});
+    contexts.setHandlers(new Handler[]{contexts,new DefaultHandler(),requestLogHandler});
+    handlerCollection.addHandler(contexts);
   }
   JsonRestServlet structrRestServlet=new JsonRestServlet();
   ServletHolder structrRestServletHolder=new ServletHolder(structrRestServlet);
@@ -96,13 +88,10 @@
     ServletHolder servletHolder=servlet.getValue();
     servletHolder.setInitOrder(position++);
     logger.log(Level.INFO,"Adding servlet {0} for {1}",new Object[]{servletHolder,path});
-    servletContext.addServlet(servletHolder,path);
+    context.addServlet(servletHolder,path);
   }
-  servletContext.addEventListener(new ApplicationContextListener());
-  handlerCollection.addHandler(servletContext);
-  if (resourceHandler != null) {
-    handlerCollection.addHandler(resourceHandler);
-  }
+  context.addEventListener(new ApplicationContextListener());
+  handlerCollection.addHandler(context);
   server.setHandler(handlerCollection);
   if (enableHttps) {
     if (httpsPort > -1 && keyStorePath != null && !keyStorePath.isEmpty() && keyStorePassword != null) {

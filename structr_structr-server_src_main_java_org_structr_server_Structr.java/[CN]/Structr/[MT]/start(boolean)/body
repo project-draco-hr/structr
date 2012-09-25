@@ -23,6 +23,9 @@
   Server server=new Server(restPort);
   List<Connector> connectors=new LinkedList<Connector>();
   HandlerCollection handlerCollection=new HandlerCollection();
+  if (resourceHandler != null) {
+    handlerCollection.addHandler(resourceHandler);
+  }
   ServletContextHandler context=new WebAppContext(server,basePath,contextPath);
   context.setBaseResource(new ResourceCollection(Resource.newResource(basePath),JarResource.newJarResource(Resource.newResource(sourceJarName))));
   context.setInitParameter("configfile.path",confFile.getAbsolutePath());

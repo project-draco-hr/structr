@@ -22,14 +22,16 @@ catch (    DeadlockDetectedException ddex) {
       logger.log(Level.SEVERE,"Neo4j detected a deadlock!",ddex.getMessage());
     }
  finally {
-      long transactionKey=nextLong();
-      EntityContext.setSecurityContext(securityContext);
-      EntityContext.setTransactionKey(transactionKey);
-      try {
-        tx.finish();
-      }
- catch (      Throwable t) {
-        exception=EntityContext.getFrameworkException(transactionKey);
+synchronized (TransactionCommand.class) {
+        long transactionKey=nextLong();
+        EntityContext.setSecurityContext(securityContext);
+        EntityContext.setTransactionKey(transactionKey);
+        try {
+          tx.finish();
+        }
+ catch (        Throwable t) {
+          exception=EntityContext.getFrameworkException(transactionKey);
+        }
       }
     }
   }
@@ -52,14 +54,16 @@ catch (    DeadlockDetectedException ddex) {
       logger.log(Level.SEVERE,"Neo4j detected a deadlock!",ddex.getMessage());
     }
  finally {
-      long transactionKey=nextLong();
-      EntityContext.setSecurityContext(securityContext);
-      EntityContext.setTransactionKey(transactionKey);
-      try {
-        tx.finish();
-      }
- catch (      Throwable t) {
-        exception=EntityContext.getFrameworkException(transactionKey);
+synchronized (TransactionCommand.class) {
+        long transactionKey=nextLong();
+        EntityContext.setSecurityContext(securityContext);
+        EntityContext.setTransactionKey(transactionKey);
+        try {
+          tx.finish();
+        }
+ catch (        Throwable t) {
+          exception=EntityContext.getFrameworkException(transactionKey);
+        }
       }
     }
   }

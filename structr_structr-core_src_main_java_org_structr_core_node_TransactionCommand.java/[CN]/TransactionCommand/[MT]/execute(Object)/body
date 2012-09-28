@@ -73,12 +73,16 @@ synchronized (TransactionCommand.class) {
   if (topLevelTransaction) {
     Transaction postProcessingTransaction=graphDb.beginTx();
     try {
-      afterCreation(securityContext,EntityContext.getCreatedNodes());
-      afterCreation(securityContext,EntityContext.getCreatedRelationships());
-      afterModification(securityContext,EntityContext.getModifiedNodes());
-      afterModification(securityContext,EntityContext.getModifiedRelationships());
-      afterDeletion(securityContext,EntityContext.getDeletedNodes());
-      afterDeletion(securityContext,EntityContext.getDeletedRelationships());
+      TransactionChangeSet changeSet=EntityContext.getTransactionChangeSet();
+      afterCreation(securityContext,changeSet.getCreatedNodes());
+      afterCreation(securityContext,changeSet.getCreatedRelationships());
+      afterModification(securityContext,changeSet.getModifiedNodes());
+      afterModification(securityContext,changeSet.getModifiedRelationships());
+      afterDeletion(securityContext,changeSet.getDeletedNodes());
+      afterDeletion(securityContext,changeSet.getDeletedRelationships());
+      afterOwnerModification(securityContext,changeSet.getOwnerModifiedNodes());
+      afterSecurityModification(securityContext,changeSet.getSecurityModifiedNodes());
+      afterLocationModification(securityContext,changeSet.getLocationModifiedNodes());
       EntityContext.clearTransactionData();
       postProcessingTransaction.success();
     }

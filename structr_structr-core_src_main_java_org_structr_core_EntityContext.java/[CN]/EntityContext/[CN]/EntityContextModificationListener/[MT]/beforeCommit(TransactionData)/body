@@ -16,12 +16,7 @@
     Map<Relationship,Map<String,Object>> removedRelProperties=new LinkedHashMap<Relationship,Map<String,Object>>();
     Map<Node,Map<String,Object>> removedNodeProperties=new LinkedHashMap<Node,Map<String,Object>>();
     RelationshipFactory relFactory=new RelationshipFactory(securityContext);
-    Set<AbstractNode> modifiedNodes=new LinkedHashSet<AbstractNode>();
-    Set<AbstractNode> createdNodes=new LinkedHashSet<AbstractNode>();
-    Set<AbstractNode> deletedNodes=new LinkedHashSet<AbstractNode>();
-    Set<AbstractRelationship> modifiedRels=new LinkedHashSet<AbstractRelationship>();
-    Set<AbstractRelationship> createdRels=new LinkedHashSet<AbstractRelationship>();
-    Set<AbstractRelationship> deletedRels=new LinkedHashSet<AbstractRelationship>();
+    TransactionChangeSet changeSet=new TransactionChangeSet();
     ErrorBuffer errorBuffer=new ErrorBuffer();
     NodeFactory nodeFactory=new NodeFactory();
     boolean hasError=false;
@@ -39,7 +34,7 @@
       if (!data.isDeleted(node)) {
         AbstractNode modifiedNode=nodeFactory.createNode(securityContext,node,true,false);
         if (modifiedNode != null) {
-          modifiedNodes.add(modifiedNode);
+          changeSet.modify(modifiedNode);
           for (          StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
             hasError|=!listener.propertyRemoved(securityContext,transactionKey,errorBuffer,modifiedNode,entry.key(),entry.previouslyCommitedValue());
           }
@@ -57,7 +52,7 @@
       if (!data.isDeleted(rel)) {
         AbstractRelationship modifiedRel=relFactory.createRelationship(securityContext,rel);
         if (modifiedRel != null) {
-          modifiedRels.add(modifiedRel);
+          changeSet.modify(modifiedRel);
           for (          StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
             hasError|=!listener.propertyRemoved(securityContext,transactionKey,errorBuffer,modifiedRel,entry.key(),entry.previouslyCommitedValue());
           }
@@ -68,7 +63,7 @@
       AbstractNode entity=nodeFactory.createNode(securityContext,node,true,false);
       if (entity != null) {
         hasError|=!entity.beforeCreation(securityContext,errorBuffer);
-        createdNodes.add(entity);
+        changeSet.create(entity);
         for (        StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
           hasError|=!listener.graphObjectCreated(securityContext,transactionKey,errorBuffer,entity);
         }
@@ -78,18 +73,19 @@
       AbstractRelationship entity=relFactory.createRelationship(securityContext,rel);
       if (entity != null) {
         hasError|=!entity.beforeCreation(securityContext,errorBuffer);
-        createdRels.add(entity);
+        changeSet.create(entity);
         for (        StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
           hasError|=!listener.graphObjectCreated(securityContext,transactionKey,errorBuffer,entity);
         }
         try {
           AbstractNode startNode=nodeFactory.createNode(securityContext,rel.getStartNode());
+          RelType relationshipType=(RelType)entity.getRelType();
           if (startNode != null && !data.isDeleted(rel.getStartNode())) {
-            modifiedNodes.add(startNode);
+            changeSet.modifyRelationshipEndpoint(startNode,relationshipType);
           }
           AbstractNode endNode=nodeFactory.createNode(securityContext,rel.getEndNode());
           if (endNode != null && !data.isDeleted(rel.getEndNode())) {
-            modifiedNodes.add(endNode);
+            changeSet.modifyRelationshipEndpoint(endNode,relationshipType);
           }
         }
  catch (        Throwable ignore) {
@@ -103,15 +99,16 @@
         for (        StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
           hasError|=!listener.graphObjectDeleted(securityContext,transactionKey,errorBuffer,entity,removedRelProperties.get(rel));
         }
-        deletedRels.add(entity);
+        changeSet.delete(entity);
         try {
           AbstractNode startNode=nodeFactory.createNode(securityContext,rel.getStartNode());
+          RelType relationshipType=(RelType)entity.getRelType();
           if (startNode != null && !data.isDeleted(rel.getStartNode())) {
-            modifiedNodes.add(startNode);
+            changeSet.modifyRelationshipEndpoint(startNode,relationshipType);
           }
           AbstractNode endNode=nodeFactory.createNode(securityContext,rel.getEndNode());
           if (endNode != null && !data.isDeleted(rel.getEndNode())) {
-            modifiedNodes.add(endNode);
+            changeSet.modifyRelationshipEndpoint(endNode,relationshipType);
           }
         }
  catch (        Throwable ignore) {
@@ -127,7 +124,7 @@
         for (        StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
           hasError|=!listener.graphObjectDeleted(securityContext,transactionKey,errorBuffer,entity,removedNodeProperties.get(node));
         }
-        deletedNodes.add(entity);
+        changeSet.delete(entity);
       }
     }
     Node n=null;
@@ -150,10 +147,10 @@
         for (        StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
           hasError|=!listener.propertyModified(securityContext,transactionKey,errorBuffer,nodeEntity,key,entry.previouslyCommitedValue(),value);
         }
-        if (!createdNodes.contains(nodeEntity) && !deletedNodes.contains(nodeEntity)) {
+        if (!changeSet.isNewOrDeleted(nodeEntity)) {
           indexNodeCommand.execute(nodeEntity,key);
+          changeSet.modify(nodeEntity);
         }
-        modifiedNodes.add(nodeEntity);
       }
     }
     Relationship r=null;
@@ -177,11 +174,11 @@
           hasError|=!listener.propertyModified(securityContext,transactionKey,errorBuffer,relEntity,key,entry.previouslyCommitedValue(),value);
         }
         indexRelationshipCommand.execute(relEntity,key);
-        modifiedRels.add(relEntity);
+        changeSet.modify(relEntity);
       }
     }
-    for (    AbstractNode node : modifiedNodes) {
-      if (!createdNodes.contains(node) && !deletedNodes.contains(node)) {
+    for (    AbstractNode node : changeSet.getModifiedNodes()) {
+      if (!changeSet.isNewOrDeleted(node)) {
         hasError|=!node.beforeModification(securityContext,errorBuffer);
         for (        StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
           hasError|=!listener.graphObjectModified(securityContext,transactionKey,errorBuffer,node);
@@ -189,8 +186,8 @@
         indexNodeCommand.execute(node);
       }
     }
-    for (    AbstractRelationship rel : modifiedRels) {
-      if (!createdRels.contains(rel) && !deletedRels.contains(rel)) {
+    for (    AbstractRelationship rel : changeSet.getModifiedRelationships()) {
+      if (!changeSet.isNewOrDeleted(relEntity)) {
         hasError|=!rel.beforeModification(securityContext,errorBuffer);
         for (        StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
           hasError|=!listener.graphObjectModified(securityContext,transactionKey,errorBuffer,rel);
@@ -198,10 +195,10 @@
         indexRelationshipCommand.execute(rel);
       }
     }
-    for (    AbstractNode node : createdNodes) {
+    for (    AbstractNode node : changeSet.getCreatedNodes()) {
       indexNodeCommand.execute(node);
     }
-    for (    AbstractRelationship rel : createdRels) {
+    for (    AbstractRelationship rel : changeSet.getCreatedRelationships()) {
       indexRelationshipCommand.execute(rel);
     }
     if (hasError) {
@@ -213,12 +210,7 @@
     for (    StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
       listener.commit(securityContext,transactionKey);
     }
-    getModifiedRelationships().addAll(modifiedRels);
-    getCreatedRelationships().addAll(createdRels);
-    getDeletedRelationships().addAll(deletedRels);
-    getModifiedNodes().addAll(modifiedNodes);
-    getCreatedNodes().addAll(createdNodes);
-    getDeletedNodes().addAll(deletedNodes);
+    globalChangeSet.get().include(changeSet);
   }
  catch (  FrameworkException fex) {
     exceptionMap.put(transactionKey,fex);

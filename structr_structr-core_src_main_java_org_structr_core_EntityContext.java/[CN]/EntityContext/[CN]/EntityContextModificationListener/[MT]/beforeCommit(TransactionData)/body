@@ -79,7 +79,7 @@
         }
         try {
           AbstractNode startNode=nodeFactory.createNode(securityContext,rel.getStartNode());
-          RelType relationshipType=(RelType)entity.getRelType();
+          RelationshipType relationshipType=entity.getRelType();
           if (startNode != null && !data.isDeleted(rel.getStartNode())) {
             changeSet.modifyRelationshipEndpoint(startNode,relationshipType);
           }
@@ -102,7 +102,7 @@
         changeSet.delete(entity);
         try {
           AbstractNode startNode=nodeFactory.createNode(securityContext,rel.getStartNode());
-          RelType relationshipType=(RelType)entity.getRelType();
+          RelationshipType relationshipType=entity.getRelType();
           if (startNode != null && !data.isDeleted(rel.getStartNode())) {
             changeSet.modifyRelationshipEndpoint(startNode,relationshipType);
           }
@@ -111,7 +111,8 @@
             changeSet.modifyRelationshipEndpoint(endNode,relationshipType);
           }
         }
- catch (        Throwable ignore) {
+ catch (        Throwable t) {
+          logger.log(Level.SEVERE,"Error while determining start/end node of deleted relationship",t);
         }
       }
     }

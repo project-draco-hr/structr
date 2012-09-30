@@ -1,23 +1,30 @@
 {
   try {
-    boolean includeDeletedAndHidden=true;
+    boolean includeDeletedAndHidden=false;
     boolean publicOnly=false;
     String type=TestOne.class.getSimpleName();
-    int number=43;
+    int number=89;
     List<AbstractNode> nodes=this.createTestNodes(type,number);
+    int offset=10;
+    int i=offset;
+    String name;
+    Collections.shuffle(nodes,new Random(System.nanoTime()));
+    for (    AbstractNode node : nodes) {
+      name="TestOne-" + i;
+      i++;
+      node.setName(name);
+    }
     List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
-    searchAttributes.add(Search.andType(type));
+    searchAttributes.add(Search.andExactTypeAndSubtypes(type));
     Result result=(Result)searchNodeCommand.execute(null,includeDeletedAndHidden,publicOnly,searchAttributes);
     assertTrue(result.size() == number);
-    String sortKey="name";
+    String sortKey=AbstractNode.Key.name.name();
     boolean sortDesc=false;
-    int pageSize=10;
-    int page=1;
-    result=(Result)searchNodeCommand.execute(null,includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDesc,pageSize,page);
-    logger.log(Level.INFO,"Raw result size: {0}, expected: {1}",new Object[]{result.getRawResultCount(),number});
-    assertTrue(result.getRawResultCount() == number);
-    logger.log(Level.INFO,"Result size: {0}, expected: {1}",new Object[]{result.size(),pageSize});
-    assertTrue(result.size() == pageSize);
+    for (int ps=0; ps < 10; ps++) {
+      for (int p=0; p < (number / Math.max(1,ps)) + 1; p++) {
+        testPaging(ps,p,number,offset,includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDesc);
+      }
+    }
   }
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,ex.toString());

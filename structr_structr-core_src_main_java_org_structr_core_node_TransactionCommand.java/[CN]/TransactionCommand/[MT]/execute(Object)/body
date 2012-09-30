@@ -22,14 +22,16 @@ catch (    DeadlockDetectedException ddex) {
       logger.log(Level.SEVERE,"Neo4j detected a deadlock!",ddex.getMessage());
     }
  finally {
-      long transactionKey=nextLong();
-      EntityContext.setSecurityContext(securityContext);
-      EntityContext.setTransactionKey(transactionKey);
-      try {
-        tx.finish();
-      }
- catch (      Throwable t) {
-        exception=EntityContext.getFrameworkException(transactionKey);
+synchronized (TransactionCommand.class) {
+        long transactionKey=nextLong();
+        EntityContext.setSecurityContext(securityContext);
+        EntityContext.setTransactionKey(transactionKey);
+        try {
+          tx.finish();
+        }
+ catch (        Throwable t) {
+          exception=EntityContext.getFrameworkException(transactionKey);
+        }
       }
     }
   }
@@ -52,14 +54,16 @@ catch (    DeadlockDetectedException ddex) {
       logger.log(Level.SEVERE,"Neo4j detected a deadlock!",ddex.getMessage());
     }
  finally {
-      long transactionKey=nextLong();
-      EntityContext.setSecurityContext(securityContext);
-      EntityContext.setTransactionKey(transactionKey);
-      try {
-        tx.finish();
-      }
- catch (      Throwable t) {
-        exception=EntityContext.getFrameworkException(transactionKey);
+synchronized (TransactionCommand.class) {
+        long transactionKey=nextLong();
+        EntityContext.setSecurityContext(securityContext);
+        EntityContext.setTransactionKey(transactionKey);
+        try {
+          tx.finish();
+        }
+ catch (        Throwable t) {
+          exception=EntityContext.getFrameworkException(transactionKey);
+        }
       }
     }
   }
@@ -69,12 +73,16 @@ catch (    DeadlockDetectedException ddex) {
   if (topLevelTransaction) {
     Transaction postProcessingTransaction=graphDb.beginTx();
     try {
-      afterCreation(securityContext,EntityContext.getCreatedNodes());
-      afterCreation(securityContext,EntityContext.getCreatedRelationships());
-      afterModification(securityContext,EntityContext.getModifiedNodes());
-      afterModification(securityContext,EntityContext.getModifiedRelationships());
-      afterDeletion(securityContext,EntityContext.getDeletedNodes());
-      afterDeletion(securityContext,EntityContext.getDeletedRelationships());
+      TransactionChangeSet changeSet=EntityContext.getTransactionChangeSet();
+      afterCreation(securityContext,changeSet.getCreatedNodes());
+      afterCreation(securityContext,changeSet.getCreatedRelationships());
+      afterModification(securityContext,changeSet.getModifiedNodes());
+      afterModification(securityContext,changeSet.getModifiedRelationships());
+      afterDeletion(securityContext,changeSet.getDeletedNodes());
+      afterDeletion(securityContext,changeSet.getDeletedRelationships());
+      afterOwnerModification(securityContext,changeSet.getOwnerModifiedNodes());
+      afterSecurityModification(securityContext,changeSet.getSecurityModifiedNodes());
+      afterLocationModification(securityContext,changeSet.getLocationModifiedNodes());
       EntityContext.clearTransactionData();
       postProcessingTransaction.success();
     }

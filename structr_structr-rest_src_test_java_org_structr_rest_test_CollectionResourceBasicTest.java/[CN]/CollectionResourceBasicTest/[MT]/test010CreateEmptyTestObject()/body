@@ -5,6 +5,6 @@
   assertNotNull(uuid);
   assertFalse(uuid.isEmpty());
   assertTrue(uuid.matches("[a-f0-9]{32}"));
-  Object name=RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(200).body("result_count",equalTo(1)).body("query_time",lessThan("0.1")).body("serialization_time",lessThan("0.001")).body("result[0].id",equalTo(uuid)).when().get("/test_objects").jsonPath().get("result[0].name");
+  Object name=RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(200).body("result_count",equalTo(1)).body("result[0].id",equalTo(uuid)).when().get("/test_objects").jsonPath().get("result[0].name");
   assertTrue(name instanceof JSONNull);
 }

@@ -1,9 +1,13 @@
 {
+  String queryString="";
   String key=singleAttribute.getKey();
   String value=singleAttribute.getValue();
   SearchOperator op=singleAttribute.getSearchOperator();
   if (StringUtils.isBlank(value) || value.equals("\"\"")) {
-    return " AND " + key + ":\""+ IMPROBABLE_SEARCH_VALUE+ "\"";
+    queryString=((isFirst && !(op.equals(SearchOperator.NOT))) ? "" : " " + op + " ") + key + ":\""+ IMPROBABLE_SEARCH_VALUE+ "\"";
   }
-  return ((isFirst && !(op.equals(SearchOperator.NOT))) ? "" : " " + op + " ") + expand(key,value);
+ else {
+    queryString=((isFirst && !(op.equals(SearchOperator.NOT))) ? "" : " " + op + " ") + expand(key,value);
+  }
+  return queryString;
 }

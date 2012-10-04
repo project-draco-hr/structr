@@ -1,14 +1,17 @@
 {
   List<AbstractNode> nodes=new LinkedList<AbstractNode>();
-  long position=0L;
-  long count=0L;
+  int position=0;
+  int count=0;
+  int offset;
   if (input != null) {
     int size=input.size();
-    if (size == 0) {
-      return Result.EMPTY_RESULT;
+    if (offsetId == null && page < 0) {
+      size=realSize(input);
+      offset=size + (page * pageSize);
     }
-    long offset=page > 0 ? (page - 1) * pageSize : size + (page * pageSize);
-    logger.log(Level.FINE,"page: {0}, pageSize: {1}, result size: {2}, offset: {3}",new Object[]{page,pageSize,size,offset});
+ else {
+      offset=(page - 1) * pageSize;
+    }
     if (input instanceof SpatialRecordHits) {
       Command graphDbCommand=Services.command(securityContext,GraphDatabaseCommand.class);
       GraphDatabaseService graphDb=(GraphDatabaseService)graphDbCommand.execute();

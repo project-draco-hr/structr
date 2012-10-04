@@ -1,0 +1,110 @@
+{
+  List<AbstractNode> nodes=new LinkedList<AbstractNode>();
+  long position=0L;
+  long count=0L;
+  if (input != null) {
+    int size=input.size();
+    if (size == 0) {
+      return Result.EMPTY_RESULT;
+    }
+    long offset=page > 0 ? (page - 1) * pageSize : size + (page * pageSize);
+    logger.log(Level.FINE,"page: {0}, pageSize: {1}, result size: {2}, offset: {3}",new Object[]{page,pageSize,size,offset});
+    if (input instanceof SpatialRecordHits) {
+      Command graphDbCommand=Services.command(securityContext,GraphDatabaseCommand.class);
+      GraphDatabaseService graphDb=(GraphDatabaseService)graphDbCommand.execute();
+      for (      Node node : input) {
+        Long dbNodeId=null;
+        Node realNode=null;
+        if (node.hasProperty("id")) {
+          dbNodeId=(Long)node.getProperty("id");
+          try {
+            realNode=graphDb.getNodeById(dbNodeId);
+          }
+ catch (          NotFoundException nfe) {
+            logger.log(Level.SEVERE,"Node with id {0} not found.",dbNodeId);
+            for (            String key : node.getPropertyKeys()) {
+              logger.log(Level.FINE,"{0}={1}",new Object[]{key,node.getProperty(key)});
+            }
+          }
+        }
+        if (realNode != null) {
+          AbstractNode n=createNode(securityContext,realNode,includeDeletedAndHidden,publicOnly);
+          if (n != null) {
+            List<AbstractNode> nodesAt=getNodesAt(n);
+            size+=nodesAt.size();
+            for (            AbstractNode nodeAt : nodesAt) {
+              if (nodeAt != null && securityContext.isReadable(nodeAt,includeDeletedAndHidden,publicOnly)) {
+                if (++position > offset) {
+                  if (++count > pageSize) {
+                    return new Result(nodes,size,true,false);
+                  }
+                  nodes.add(nodeAt);
+                }
+              }
+            }
+          }
+        }
+      }
+      return new Result(nodes,size,true,false);
+    }
+ else {
+      if (offsetId != null) {
+        List<AbstractNode> allNodes=new LinkedList();
+        int i=0;
+        boolean gotOffset=false;
+        for (        Node node : input) {
+          AbstractNode n=createNode(securityContext,(Node)node,includeDeletedAndHidden,publicOnly);
+          allNodes.add(n);
+          if (!gotOffset) {
+            if (!offsetId.equals(n.getUuid())) {
+              i++;
+              continue;
+            }
+            gotOffset=true;
+            offset=page > 0 ? i : i + (page * pageSize);
+            break;
+          }
+        }
+        if (!gotOffset) {
+          throw new FrameworkException("offsetId",new IdNotFoundToken(offsetId));
+        }
+        for (        AbstractNode node : allNodes) {
+          if (node != null) {
+            if (++position > offset) {
+              if (++count > pageSize) {
+                return new Result(nodes,size,true,false);
+              }
+              nodes.add(node);
+            }
+          }
+        }
+        for (        Node node : input) {
+          AbstractNode n=createNode(securityContext,(Node)node,includeDeletedAndHidden,publicOnly);
+          if (n != null) {
+            if (++position > offset) {
+              if (++count > pageSize) {
+                return new Result(nodes,size,true,false);
+              }
+              nodes.add(n);
+            }
+          }
+        }
+      }
+ else {
+        for (        Node node : input) {
+          AbstractNode n=createNode(securityContext,(Node)node,includeDeletedAndHidden,publicOnly);
+          if (n != null) {
+            if (++position > offset) {
+              if (pageSize > 0 && ++count > pageSize) {
+                return new Result(nodes,size,true,false);
+              }
+              nodes.add(n);
+            }
+          }
+        }
+      }
+      return new Result(nodes,size,true,false);
+    }
+  }
+  return Result.EMPTY_RESULT;
+}

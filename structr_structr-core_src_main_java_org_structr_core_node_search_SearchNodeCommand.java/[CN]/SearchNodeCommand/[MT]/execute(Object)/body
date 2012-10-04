@@ -9,21 +9,26 @@
   boolean publicOnly=false;
   String sortKey=null;
   boolean sortDescending=false;
-  long pageSize=-1;
-  long page=-1;
+  int pageSize=NodeFactory.DEFAULT_PAGE_SIZE;
+  int page=NodeFactory.DEFAULT_PAGE;
+  String offsetId=null;
   Integer sortType=null;
 switch (parameters.length) {
-case 9:
-    if (parameters[8] instanceof Integer) {
-      sortType=((Integer)parameters[8]).intValue();
+case 10:
+    if (parameters[9] instanceof Integer) {
+      sortType=((Integer)parameters[9]).intValue();
     }
-case 8:
-  if (parameters[7] instanceof Number) {
-    page=((Number)parameters[7]).longValue();
+case 9:
+  if (parameters[8] instanceof String) {
+    offsetId=(String)parameters[8];
   }
+case 8:
+if (parameters[7] instanceof Integer) {
+  page=((Integer)parameters[7]).intValue();
+}
 case 7:
-if (parameters[6] instanceof Number) {
-  pageSize=((Number)parameters[6]).longValue();
+if (parameters[6] instanceof Integer) {
+pageSize=((Integer)parameters[6]).intValue();
 }
 case 6:
 if (parameters[5] instanceof Boolean) {
@@ -51,5 +56,5 @@ searchAttrs=(List<SearchAttribute>)parameters[3];
 }
 break;
 }
-return search(securityContext,topNode,includeDeletedAndHidden,publicOnly,searchAttrs,sortKey,sortDescending,pageSize,page,sortType);
+return search(securityContext,topNode,includeDeletedAndHidden,publicOnly,searchAttrs,sortKey,sortDescending,pageSize,page,offsetId,sortType);
 }

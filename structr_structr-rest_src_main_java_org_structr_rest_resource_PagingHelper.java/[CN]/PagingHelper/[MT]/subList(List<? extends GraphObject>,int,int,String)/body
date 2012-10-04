@@ -1,0 +1,28 @@
+{
+  if (pageSize <= 0 || page == 0) {
+    return Collections.EMPTY_LIST;
+  }
+  int size=list.size();
+  int fromIndex=0;
+  int toIndex=size - 1;
+  if (StringUtils.isNotBlank(offsetId)) {
+    int offsetIndex=0;
+    int i=0;
+    for (    GraphObject obj : list) {
+      if (obj.getUuid().equals(offsetId)) {
+        offsetIndex=i;
+        break;
+      }
+ else {
+        i++;
+        continue;
+      }
+    }
+    fromIndex=page > 0 ? offsetIndex : offsetIndex + (page * pageSize);
+  }
+ else {
+    fromIndex=page > 0 ? (page - 1) * pageSize : size + (page * pageSize);
+  }
+  toIndex=Math.min(size - 1,fromIndex + (page * pageSize));
+  return list.subList(fromIndex,toIndex);
+}

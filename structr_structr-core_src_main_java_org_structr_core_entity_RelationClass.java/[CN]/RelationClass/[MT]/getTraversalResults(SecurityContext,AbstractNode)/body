@@ -1,5 +1,5 @@
 {
-  final NodeFactory nodeFactory=new NodeFactory<AbstractNode>();
+  final NodeFactory nodeFactory=new NodeFactory<AbstractNode>(securityContext);
   final List<AbstractNode> nodeList=new LinkedList<AbstractNode>();
   Iterable<Node> nodes=Traversal.description().uniqueness(Uniqueness.NODE_PATH).breadthFirst().relationships(relType,direction).evaluator(new Evaluator(){
     @Override public Evaluation evaluate(    Path path){
@@ -10,7 +10,7 @@
         }
  else {
           try {
-            AbstractNode abstractNode=(AbstractNode)nodeFactory.createNode(securityContext,path.endNode());
+            AbstractNode abstractNode=(AbstractNode)nodeFactory.createNode(path.endNode());
             if (abstractNode != null) {
               if ((destType != null) && destType.isAssignableFrom(abstractNode.getClass())) {
                 nodeList.add(abstractNode);

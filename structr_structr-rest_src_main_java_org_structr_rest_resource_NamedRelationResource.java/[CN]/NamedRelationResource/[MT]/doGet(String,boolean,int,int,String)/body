@@ -1,0 +1,44 @@
+{
+  List<GraphObject> relationResults=new LinkedList<GraphObject>();
+  if (wrappedResource != null) {
+    List<? extends GraphObject> results=wrappedResource.doGet(sortKey,sortDescending,pageSize,page,offsetId).getResults();
+    for (    GraphObject obj : results) {
+      if (obj instanceof AbstractNode) {
+        relationResults.addAll(namedRelation.getRelationships((AbstractNode)obj));
+      }
+    }
+  }
+ else {
+    List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
+    searchAttributes.add(Search.andExactRelType(namedRelation));
+    hasSearchableAttributesForRelationships(namedRelation.getEntityClass().getSimpleName(),request,searchAttributes);
+    relationResults.addAll((List<AbstractRelationship>)Services.command(securityContext,SearchRelationshipCommand.class).execute(searchAttributes));
+  }
+  final List<SearchAttribute> filterAttributes=new LinkedList<SearchAttribute>();
+  hasSearchableAttributesForRelationships(namedRelation.getEntityClass().getSimpleName(),request,filterAttributes);
+  if (!filterAttributes.isEmpty()) {
+    Predicate<GraphObject> predicate=new Predicate<GraphObject>(){
+      @Override public boolean evaluate(      SecurityContext securityContext,      GraphObject... objs){
+        if (objs.length > 0) {
+          GraphObject obj=objs[0];
+          for (          SearchAttribute attr : filterAttributes) {
+            String value=((TextualSearchAttribute)attr).getValue();
+            String key=((TextualSearchAttribute)attr).getKey();
+            Object val="\"" + obj.getProperty(key) + "\"";
+            if (val != null && val.equals(value)) {
+              return true;
+            }
+          }
+        }
+        return false;
+      }
+    }
+;
+    for (Iterator<GraphObject> it=relationResults.iterator(); it.hasNext(); ) {
+      if (!predicate.evaluate(securityContext,it.next())) {
+        it.remove();
+      }
+    }
+  }
+  return new Result(relationResults,null,isCollectionResource(),isPrimitiveArray());
+}

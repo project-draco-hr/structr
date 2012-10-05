@@ -1,0 +1,64 @@
+{
+  try {
+    boolean includeDeletedAndHidden=false;
+    boolean publicOnly=false;
+    String type=TestOne.class.getSimpleName();
+    int number=8;
+    List<AbstractNode> nodes=this.createTestNodes(type,number);
+    int offset=0;
+    int i=offset;
+    String name;
+    Collections.shuffle(nodes,new Random(System.nanoTime()));
+    for (    AbstractNode node : nodes) {
+      name="TestOne-" + i;
+      i++;
+      node.setName(name);
+    }
+    List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
+    searchAttributes.add(Search.andExactTypeAndSubtypes(type));
+    Result result=(Result)searchNodeCommand.execute(null,includeDeletedAndHidden,publicOnly,searchAttributes);
+    assertTrue(result.size() == number);
+    String sortKey=AbstractNode.Key.name.name();
+    boolean sortDesc=false;
+    int pageSize=2;
+    int page=1;
+    result=(Result)searchNodeCommand.execute(null,includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDesc,pageSize,page);
+    assertTrue(result.size() == 2);
+    assertEquals("TestOne-0",result.get(0).getStringProperty(AbstractNode.Key.name));
+    assertEquals("TestOne-1",result.get(1).getStringProperty(AbstractNode.Key.name));
+    page=-1;
+    result=(Result)searchNodeCommand.execute(null,includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDesc,pageSize,page);
+    assertTrue(result.size() == 2);
+    assertEquals("TestOne-6",result.get(0).getStringProperty(AbstractNode.Key.name));
+    assertEquals("TestOne-7",result.get(1).getStringProperty(AbstractNode.Key.name));
+    page=-2;
+    result=(Result)searchNodeCommand.execute(null,includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDesc,pageSize,page);
+    assertTrue(result.size() == 2);
+    assertEquals("TestOne-4",result.get(0).getStringProperty(AbstractNode.Key.name));
+    assertEquals("TestOne-5",result.get(1).getStringProperty(AbstractNode.Key.name));
+    page=-3;
+    result=(Result)searchNodeCommand.execute(null,includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDesc,pageSize,page);
+    assertTrue(result.size() == 2);
+    assertEquals("TestOne-2",result.get(0).getStringProperty(AbstractNode.Key.name));
+    assertEquals("TestOne-3",result.get(1).getStringProperty(AbstractNode.Key.name));
+    page=-4;
+    result=(Result)searchNodeCommand.execute(null,includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDesc,pageSize,page);
+    assertTrue(result.size() == 2);
+    assertEquals("TestOne-0",result.get(0).getStringProperty(AbstractNode.Key.name));
+    assertEquals("TestOne-1",result.get(1).getStringProperty(AbstractNode.Key.name));
+    page=1;
+    result=(Result)searchNodeCommand.execute(null,includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDesc,pageSize,page,nodes.get(3).getUuid());
+    assertTrue(result.size() == 2);
+    assertEquals("TestOne-3",result.get(0).getStringProperty(AbstractNode.Key.name));
+    assertEquals("TestOne-4",result.get(1).getStringProperty(AbstractNode.Key.name));
+    page=-1;
+    result=(Result)searchNodeCommand.execute(null,includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDesc,pageSize,page,nodes.get(3).getUuid());
+    assertTrue(result.size() == 2);
+    assertEquals("TestOne-1",result.get(0).getStringProperty(AbstractNode.Key.name));
+    assertEquals("TestOne-2",result.get(1).getStringProperty(AbstractNode.Key.name));
+  }
+ catch (  FrameworkException ex) {
+    logger.log(Level.SEVERE,ex.toString());
+    fail("Unexpected exception");
+  }
+}

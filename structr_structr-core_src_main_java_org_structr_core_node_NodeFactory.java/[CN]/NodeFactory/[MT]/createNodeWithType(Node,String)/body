@@ -1,0 +1,27 @@
+{
+  Class nodeClass=(Class)getEntityClassCommand.get().execute(nodeType);
+  AbstractNode newNode=null;
+  if (nodeClass != null) {
+    try {
+      Constructor constructor=constructors.get(nodeClass);
+      if (constructor == null) {
+        constructor=nodeClass.getConstructor();
+        constructors.put(nodeClass,constructor);
+      }
+      newNode=(AbstractNode)constructor.newInstance();
+    }
+ catch (    Throwable t) {
+      newNode=null;
+    }
+  }
+  if (newNode == null) {
+    newNode=new GenericNode();
+  }
+  newNode.init(factoryProfile.getSecurityContext(),node);
+  newNode.onNodeInstantiation();
+  newNode.setType(nodeType);
+  if (factoryProfile.getSecurityContext().isReadable(newNode,factoryProfile.includeDeletedAndHidden(),factoryProfile.publicOnly())) {
+    return newNode;
+  }
+  return null;
+}

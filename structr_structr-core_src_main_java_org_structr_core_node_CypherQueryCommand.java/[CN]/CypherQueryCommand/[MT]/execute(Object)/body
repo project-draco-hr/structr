@@ -1,7 +1,7 @@
 {
   RelationshipFactory relFactory=(RelationshipFactory)arguments.get("relationshipFactory");
   GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
-  NodeFactory nodeFactory=(NodeFactory)arguments.get("nodeFactory");
+  NodeFactory nodeFactory=new NodeFactory(securityContext);
   ExecutionEngine engine=new ExecutionEngine(graphDb);
   String query=null;
   Map<String,Object> params=null;
@@ -35,7 +35,7 @@ result=engine.execute(query);
 for (String column : result.columns()) {
 for (Object o : IteratorUtil.asIterable(result.columnAs(column))) {
 if (o instanceof Node) {
-AbstractNode node=nodeFactory.createNode(securityContext,(Node)o,includeHiddenAndDeleted,publicOnly);
+AbstractNode node=nodeFactory.createNode((Node)o,includeHiddenAndDeleted,publicOnly);
 if (node != null) {
 resultList.add(node);
 }

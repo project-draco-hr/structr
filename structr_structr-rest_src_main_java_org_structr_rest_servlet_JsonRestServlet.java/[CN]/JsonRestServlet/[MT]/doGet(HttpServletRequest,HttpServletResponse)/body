@@ -1,6 +1,7 @@
 {
   try {
     request.setCharacterEncoding("UTF-8");
+    response.setCharacterEncoding("UTF-8");
     response.setContentType("application/json; charset=utf-8");
     SecurityContext securityContext=getSecurityContext(request,response);
     propertyView.set(securityContext,defaultPropertyView);
@@ -9,12 +10,13 @@
     securityContext.examineRequest(request,resource.getResourceSignature(),resource.getGrant(),propertyView.get(securityContext));
     String pageSizeParameter=request.getParameter(REQUEST_PARAMETER_PAGE_SIZE);
     String pageParameter=request.getParameter(REQUEST_PARAMETER_PAGE_NUMBER);
+    String offsetId=request.getParameter(REQUEST_PARAMETER_OFFSET_ID);
     String sortOrder=request.getParameter(REQUEST_PARAMETER_SORT_ORDER);
     String sortKey=request.getParameter(REQUEST_PARAMETER_SORT_KEY);
     boolean sortDescending=(sortOrder != null && "desc".equals(sortOrder.toLowerCase()));
-    int pageSize=parseInt(pageSizeParameter,-1);
-    int page=parseInt(pageParameter,-1);
-    Result result=resource.doGet(sortKey,sortDescending,pageSize,page);
+    int pageSize=parseInt(pageSizeParameter,NodeFactory.DEFAULT_PAGE_SIZE);
+    int page=parseInt(pageParameter,NodeFactory.DEFAULT_PAGE);
+    Result result=resource.doGet(sortKey,sortDescending,pageSize,page,offsetId);
     result.setIsCollection(resource.isCollectionResource());
     result.setIsPrimitiveArray(resource.isPrimitiveArray());
     PagingHelper.addPagingParameter(result,pageSize,page);

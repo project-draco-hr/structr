@@ -1,0 +1,36 @@
+{
+  try {
+    boolean includeDeletedAndHidden=false;
+    boolean publicOnly=false;
+    String type=TestOne.class.getSimpleName();
+    int number=20;
+    List<AbstractNode> nodes=this.createTestNodes(type,number);
+    int offset=10;
+    int i=offset;
+    String name;
+    Collections.shuffle(nodes,new Random(System.nanoTime()));
+    for (    AbstractNode node : nodes) {
+      name="TestOne-" + i;
+      i++;
+      node.setName(name);
+    }
+    List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
+    searchAttributes.add(Search.andExactTypeAndSubtypes(type));
+    Result result=(Result)searchNodeCommand.execute(null,includeDeletedAndHidden,publicOnly,searchAttributes);
+    assertTrue(result.size() == number);
+    String sortKey=AbstractNode.Key.name.name();
+    boolean sortDesc=false;
+    int pageSize=2;
+    int page=1;
+    testPaging(pageSize,page,number,offset,includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDesc);
+    Map<String,Object> props=new HashMap();
+    props.put(sortKey,"TestOne-09");
+    this.createTestNode(type,props);
+    testPaging(pageSize,page + 1,number + 1,offset - 1,includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDesc);
+    System.out.println("paging test finished");
+  }
+ catch (  FrameworkException ex) {
+    logger.log(Level.SEVERE,ex.toString());
+    fail("Unexpected exception");
+  }
+}

@@ -1,7 +1,8 @@
 {
   final GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
-  final NodeFactory nodeFactory=(NodeFactory)arguments.get("nodeFactory");
-  final Command searchNode=Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class);
+  final SecurityContext superUserContext=SecurityContext.getSuperUserInstance();
+  final NodeFactory nodeFactory=new NodeFactory(superUserContext);
+  final Command searchNode=Services.command(superUserContext,SearchNodeCommand.class);
   if (!((parameters != null) && (parameters.length == 1) && (parameters[0] instanceof Map)&& !((Map)parameters[0]).isEmpty())) {
     throw new IllegalArgumentException("This command requires one argument of type Map. Map must not be empty.");
   }
@@ -19,7 +20,7 @@
           properties.remove(AbstractNode.Key.type.name());
         }
  else {
-          result=(Result)nodeFactory.createNodes(securityContext,GlobalGraphOperations.at(graphDb).getAllNodes());
+          result=(Result)nodeFactory.createAllNodes(GlobalGraphOperations.at(graphDb).getAllNodes());
         }
         for (        GraphObject obj : result.getResults()) {
           AbstractNode node=(AbstractNode)obj;

@@ -1,6 +1,6 @@
 {
   GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
-  NodeFactory nodeFactory=(NodeFactory)arguments.get("nodeFactory");
+  NodeFactory nodeFactory=new NodeFactory(securityContext);
   Object ret=null;
   if (nodeFactory != null) {
     if (parameters.length > 0) {
@@ -18,7 +18,7 @@
             logger.log(Level.WARNING,"Unknown parameter of type {0}",o.getClass().getName());
             return null;
           }
-          AbstractNode abstractNode=nodeFactory.createNode(securityContext,node,true,false);
+          AbstractNode abstractNode=nodeFactory.createNode(node,true,false);
           if (abstractNode != null) {
             collection.add(abstractNode);
           }
@@ -26,7 +26,7 @@
         ret=collection;
       }
  else {
-        Node node=null;
+        Node node;
         if (parameters[0] instanceof AbstractNode) {
           node=graphDb.getNodeById(((AbstractNode)parameters[0]).getId());
         }
@@ -37,7 +37,7 @@
           logger.log(Level.WARNING,"Unknown parameter of type {0}",parameters[0].getClass().getName());
           return null;
         }
-        ret=nodeFactory.createNode(securityContext,node,true,false);
+        ret=nodeFactory.createNode(node,true,false);
       }
     }
  else {

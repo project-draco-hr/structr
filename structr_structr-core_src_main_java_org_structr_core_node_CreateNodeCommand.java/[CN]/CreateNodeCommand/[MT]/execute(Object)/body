@@ -1,6 +1,5 @@
 {
   GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
-  NodeFactory nodeFactory=(NodeFactory)arguments.get("nodeFactory");
   Principal user=securityContext.getUser();
   AbstractNode node=null;
   if (graphDb != null) {
@@ -25,7 +24,8 @@
     }
     Object typeObject=attrs.get(AbstractNode.Key.type.name());
     String nodeType=(typeObject != null) ? typeObject.toString() : "GenericNode";
-    node=nodeFactory.createNode(SecurityContext.getSuperUserInstance(),graphDb.createNode(),nodeType);
+    NodeFactory nodeFactory=new NodeFactory(SecurityContext.getSuperUserInstance());
+    node=nodeFactory.createNodeWithType(graphDb.createNode(),nodeType);
     if (node != null) {
       if ((user != null) && !(user instanceof SuperUser)) {
         node.setOwner(user);

@@ -1,12 +1,8 @@
 {
   Path path=getValidatedPath();
   if (path != null) {
-    NodeFactory nodeFactory=new NodeFactory<AbstractNode>();
-    List<GraphObject> nodeList=new LinkedList<GraphObject>();
-    for (    Node node : path.nodes()) {
-      AbstractNode traversedNode=nodeFactory.createNode(securityContext,node);
-      nodeList.add(traversedNode);
-    }
+    NodeFactory nodeFactory=new NodeFactory<AbstractNode>(securityContext,pageSize,page,offsetId);
+    nodeFactory.createAllNodes(path.nodes());
     return lastResource.doGet(sortKey,sortDescending,pageSize,page,offsetId);
   }
  else {

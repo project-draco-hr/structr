@@ -1,0 +1,19 @@
+{
+  final int pageSize=factoryProfile.getPageSize();
+  final int page=factoryProfile.getPage();
+  int offset;
+  int size=input.size();
+  if (page < 0) {
+    offset=Math.max(0,size + (page * pageSize));
+    List<Node> rawNodes=read(input);
+    final List<AbstractNode> nodes=new LinkedList<AbstractNode>();
+    for (    Node n : rawNodes.subList(offset,offset + pageSize)) {
+      nodes.add(createNode(n));
+    }
+    return new Result(nodes,rawNodes.size(),true,false);
+  }
+ else {
+    offset=(page - 1) * pageSize;
+    return page(input,size,offset,pageSize);
+  }
+}

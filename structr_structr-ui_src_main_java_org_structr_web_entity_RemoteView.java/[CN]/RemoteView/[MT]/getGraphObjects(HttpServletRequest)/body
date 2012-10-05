@@ -6,16 +6,14 @@
     String username=getStringProperty(Key.remoteUser);
     String password=getStringProperty(Key.remotePassword);
     RelationshipFactory relFactory=new RelationshipFactory(securityContext);
-    NodeFactory nodeFactory=new NodeFactory();
-    boolean includeHiddenAndDeleted=false;
-    boolean publicOnly=false;
+    NodeFactory nodeFactory=new NodeFactory(securityContext);
     GraphDatabaseService gds=new RestGraphDatabase(repositoryUrl,username,password);
     ExecutionEngine engine=new ExecutionEngine(gds);
     ExecutionResult result=engine.execute(query);
     for (    String column : result.columns()) {
       for (      Object o : IteratorUtil.asIterable(result.columnAs(column))) {
         if (o instanceof Node) {
-          AbstractNode node=nodeFactory.createNode(securityContext,(Node)o,includeHiddenAndDeleted,publicOnly);
+          AbstractNode node=nodeFactory.createNode((Node)o);
           if (node != null) {
             resultList.add(node);
           }

@@ -1,0 +1,49 @@
+{
+  final int pageSize=factoryProfile.getPageSize();
+  final int page=factoryProfile.getPage();
+  final String offsetId=factoryProfile.getOffsetId();
+  final SecurityContext securityContext=factoryProfile.getSecurityContext();
+  final boolean includeDeletedAndHidden=factoryProfile.includeDeletedAndHidden();
+  final boolean publicOnly=factoryProfile.publicOnly();
+  List<AbstractNode> nodes=new LinkedList<AbstractNode>();
+  int position=0;
+  int count=0;
+  int offset=0;
+  int size=spatialRecordHits.size();
+  Command graphDbCommand=Services.command(securityContext,GraphDatabaseCommand.class);
+  GraphDatabaseService graphDb=(GraphDatabaseService)graphDbCommand.execute();
+  for (  Node node : spatialRecordHits) {
+    Long dbNodeId=null;
+    Node realNode=null;
+    if (node.hasProperty("id")) {
+      dbNodeId=(Long)node.getProperty("id");
+      try {
+        realNode=graphDb.getNodeById(dbNodeId);
+      }
+ catch (      NotFoundException nfe) {
+        logger.log(Level.SEVERE,"Node with id {0} not found.",dbNodeId);
+        for (        String key : node.getPropertyKeys()) {
+          logger.log(Level.FINE,"{0}={1}",new Object[]{key,node.getProperty(key)});
+        }
+      }
+    }
+    if (realNode != null) {
+      AbstractNode n=createNode(realNode);
+      if (n != null) {
+        List<AbstractNode> nodesAt=getNodesAt(n);
+        size+=nodesAt.size();
+        for (        AbstractNode nodeAt : nodesAt) {
+          if (nodeAt != null && securityContext.isReadable(nodeAt,includeDeletedAndHidden,publicOnly)) {
+            if (++position > offset) {
+              if (++count > pageSize) {
+                return new Result(nodes,size,true,false);
+              }
+              nodes.add(nodeAt);
+            }
+          }
+        }
+      }
+    }
+  }
+  return new Result(nodes,size,true,false);
+}

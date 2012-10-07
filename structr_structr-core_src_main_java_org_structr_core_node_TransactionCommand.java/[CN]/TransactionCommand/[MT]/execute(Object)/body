@@ -71,9 +71,22 @@ synchronized (TransactionCommand.class) {
     throw exception;
   }
   if (topLevelTransaction) {
+    TransactionChangeSet changeSet=EntityContext.getTransactionChangeSet();
+    final Queue<AbstractNode> propagationQueue=changeSet.getPropagationQueue();
+    final Set<AbstractNode> propagationSet=new LinkedHashSet<AbstractNode>();
+    propagationSet.addAll(propagationQueue);
+    if (!propagationQueue.isEmpty()) {
+      do {
+        final AbstractNode node=propagationQueue.poll();
+        if (!propagationSet.contains(node)) {
+          propagationSet.addAll(node.getNodesForModificationPropagation());
+        }
+      }
+ while (!propagationQueue.isEmpty());
+    }
     Transaction postProcessingTransaction=graphDb.beginTx();
     try {
-      TransactionChangeSet changeSet=EntityContext.getTransactionChangeSet();
+      propagateModification(securityContext,propagationSet);
       afterCreation(securityContext,changeSet.getCreatedNodes());
       afterCreation(securityContext,changeSet.getCreatedRelationships());
       afterModification(securityContext,changeSet.getModifiedNodes());

@@ -6,4 +6,10 @@
     validatorMap.put(propertyKey,validators);
   }
   validators.add(validator);
+  if (AbstractNode.class.isAssignableFrom(type)) {
+    EntityContext.registerSearchableProperty(type,NodeIndex.keyword.name(),propertyKey);
+  }
+ else   if (AbstractRelationship.class.isAssignableFrom(type)) {
+    EntityContext.registerSearchableProperty(type,RelationshipIndex.rel_keyword.name(),propertyKey);
+  }
 }

@@ -3,21 +3,24 @@
     return false;
   }
   try {
+    Image img=null;
     if (source instanceof byte[]) {
       byte[] data=(byte[])source;
       MagicMatch match=Magic.getMagicMatch(data);
       String mimeType=match.getMimeType();
-      return ImageHelper.createImage(securityContext,data,mimeType).getUuid();
+      img=ImageHelper.createImage(securityContext,data,mimeType,Image.class);
     }
  else     if (source instanceof String) {
       if (StringUtils.isNotBlank((String)source)) {
-        return ImageHelper.createImageBase64(securityContext,(String)source).getUuid();
+        img=ImageHelper.createImageBase64(securityContext,(String)source,Image.class);
       }
     }
+    Services.command(securityContext,IndexNodeCommand.class).execute(img);
+    currentObject.setProperty((PropertyKey)value.get(securityContext),img.getUuid());
+    return null;
   }
  catch (  Throwable t) {
     logger.log(Level.WARNING,"Cannot create image node from given data",t);
     return null;
   }
-  return source;
 }

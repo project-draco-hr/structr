@@ -32,8 +32,8 @@ result=engine.execute(query,params);
  else {
 result=engine.execute(query);
 }
-for (String column : result.columns()) {
-for (Object o : IteratorUtil.asIterable(result.columnAs(column))) {
+for (Map<String,Object> row : result) {
+for (Object o : row.values()) {
 if (o instanceof Node) {
 AbstractNode node=nodeFactory.createNode((Node)o,includeHiddenAndDeleted,publicOnly);
 if (node != null) {

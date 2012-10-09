@@ -10,11 +10,11 @@
         if (typeResource.hasSearchableAttributes(dummyList)) {
           List<? extends GraphObject> typeNodes=typeResource.doGet(sortKey,sortDescending,NodeFactory.DEFAULT_PAGE_SIZE,NodeFactory.DEFAULT_PAGE,null).getResults();
           List intersection=ListUtils.intersection(relatedNodes,typeNodes);
-          applyDefaultSorting(intersection);
+          applyDefaultSorting(intersection,sortKey,sortDescending);
           return new Result(PagingHelper.subList(intersection,pageSize,page,offsetId),intersection.size(),isCollectionResource(),isPrimitiveArray());
         }
         if (!relatedNodes.isEmpty()) {
-          applyDefaultSorting(relatedNodes);
+          applyDefaultSorting(relatedNodes,sortKey,sortDescending);
           return new Result(PagingHelper.subList(relatedNodes,pageSize,page,offsetId),relatedNodes.size(),isCollectionResource(),isPrimitiveArray());
         }
       }
@@ -36,7 +36,7 @@
         if (value != null) {
           if ((value instanceof List) && !((List)value).isEmpty() && ((List)value).get(0) instanceof GraphObject) {
             List<GraphObject> list=(List<GraphObject>)value;
-            applyDefaultSorting(list);
+            applyDefaultSorting(list,sortKey,sortDescending);
             return new Result(PagingHelper.subList(list,pageSize,page,offsetId),list.size(),isCollectionResource(),isPrimitiveArray());
           }
  else           if (value instanceof Iterable) {
@@ -50,6 +50,7 @@
                 throw new SystemException(msg);
               }
             }
+            applyDefaultSorting(propertyListResult,sortKey,sortDescending);
             return new Result(PagingHelper.subList(propertyListResult,pageSize,page,offsetId),propertyListResult.size(),isCollectionResource(),isPrimitiveArray());
           }
         }

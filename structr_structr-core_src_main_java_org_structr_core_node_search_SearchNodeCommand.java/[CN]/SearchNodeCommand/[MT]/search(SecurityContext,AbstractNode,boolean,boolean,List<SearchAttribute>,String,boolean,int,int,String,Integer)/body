@@ -8,10 +8,9 @@
   boolean allExactMatch=true;
   final Index<Node> index;
   if (graphDb != null) {
-    BooleanQuery query=new BooleanQuery();
     List<FilterSearchAttribute> filters=new ArrayList<FilterSearchAttribute>();
     List<TextualSearchAttribute> textualAttributes=new ArrayList<TextualSearchAttribute>();
-    StringBuilder textualQueryString=new StringBuilder();
+    StringBuilder queryString=new StringBuilder();
     DistanceSearchAttribute distanceSearch=null;
     GeoCodingResult coords=null;
     Double dist=null;
@@ -23,30 +22,11 @@
       }
  else       if (attr instanceof SearchAttributeGroup) {
         SearchAttributeGroup attributeGroup=(SearchAttributeGroup)attr;
-        List<SearchAttribute> groupedAttributes=attributeGroup.getSearchAttributes();
-        StringBuilder subQueryString=new StringBuilder();
-        if (!(groupedAttributes.isEmpty())) {
-          BooleanQuery subQuery=new BooleanQuery();
-          String subQueryPrefix=(StringUtils.isBlank(textualQueryString.toString()) ? "" : attributeGroup.getSearchOperator()) + " ( ";
-          for (          SearchAttribute groupedAttr : groupedAttributes) {
-            if (groupedAttr instanceof TextualSearchAttribute) {
-              textualAttributes.add((TextualSearchAttribute)groupedAttr);
-              subQuery.add(toQuery((TextualSearchAttribute)groupedAttr),translateToBooleanClauseOccur(groupedAttr.getSearchOperator()));
-              subQueryString.append(toQueryString((TextualSearchAttribute)groupedAttr,StringUtils.isBlank(subQueryString.toString())));
-              allExactMatch&=isExactMatch(((TextualSearchAttribute)groupedAttr).getValue());
-            }
-          }
-          query.add(subQuery,translateToBooleanClauseOccur(attributeGroup.getSearchOperator()));
-          String subQuerySuffix=" ) ";
-          if (StringUtils.isNotBlank(subQueryString.toString())) {
-            textualQueryString.append(subQueryPrefix).append(subQueryString).append(subQuerySuffix);
-          }
-        }
+        handleAttributeGroup(attributeGroup,queryString,textualAttributes,allExactMatch);
       }
  else       if (attr instanceof TextualSearchAttribute) {
         textualAttributes.add((TextualSearchAttribute)attr);
-        query.add(toQuery((TextualSearchAttribute)attr),translateToBooleanClauseOccur(attr.getSearchOperator()));
-        textualQueryString.append(toQueryString((TextualSearchAttribute)attr,StringUtils.isBlank(textualQueryString.toString())));
+        queryString.append(toQueryString((TextualSearchAttribute)attr,StringUtils.isBlank(queryString.toString())));
         allExactMatch&=isExactMatch(((TextualSearchAttribute)attr).getValue());
       }
  else       if (attr instanceof FilterSearchAttribute) {
@@ -57,13 +37,13 @@
       throw new UnsupportedArgumentError("At least one texutal search attribute or distance search have to be present in search attributes!");
     }
     Result intermediateResult;
-    if (searchAttrs.isEmpty() && StringUtils.isBlank(textualQueryString.toString())) {
+    if (searchAttrs.isEmpty() && StringUtils.isBlank(queryString.toString())) {
       intermediateResult=new Result(new ArrayList<AbstractNode>(),null,false,false);
     }
  else {
       long t0=System.nanoTime();
-      logger.log(Level.FINE,"Textual Query String: {0}",textualQueryString);
-      QueryContext queryContext=new QueryContext(textualQueryString);
+      logger.log(Level.FINE,"Textual Query String: {0}",queryString);
+      QueryContext queryContext=new QueryContext(queryString);
       IndexHits hits=null;
       if (sortKey != null) {
         if (sortType != null) {

@@ -16,8 +16,10 @@
         img=ImageHelper.createImageBase64(securityContext,(String)source,kc.getCls());
       }
     }
-    Services.command(securityContext,IndexNodeCommand.class).execute(img);
-    currentObject.setProperty(kc.getPropertyKey(),img.getUuid());
+    if (img != null) {
+      Services.command(securityContext,IndexNodeCommand.class).execute(img);
+      currentObject.setProperty(kc.getPropertyKey(),img.getUuid());
+    }
     return null;
   }
  catch (  Throwable t) {

@@ -30,6 +30,7 @@
       }
     }
     Integer sortType=null;
+    boolean sortFinalResults=false;
     PropertyConverter converter=EntityContext.getPropertyConverter(securityContext,entityClass,sortKey);
     if (converter != null) {
       if (converter instanceof IntConverter) {
@@ -38,8 +39,14 @@
  else       if (converter instanceof DateConverter) {
         sortType=SortField.LONG;
       }
+ else       if (converter instanceof ResultCountConverter) {
+        sortFinalResults=true;
+      }
     }
     Result results=(Result)Services.command(securityContext,SearchNodeCommand.class).execute(topNode,includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDescending,pageSize,page,offsetId,sortType);
+    if (sortFinalResults) {
+      Collections.sort(results.getResults(),new GraphObjectComparator(sortKey,sortDescending ? GraphObjectComparator.DESCENDING : GraphObjectComparator.ASCENDING));
+    }
     return results;
   }
  else {

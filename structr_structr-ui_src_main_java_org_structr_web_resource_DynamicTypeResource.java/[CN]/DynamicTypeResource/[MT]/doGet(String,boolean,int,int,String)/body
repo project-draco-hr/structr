@@ -4,14 +4,14 @@
     uuidResource.setSecurityContext(this.securityContext);
     uuidResults=(List<GraphObject>)uuidResource.doGet(sortKey,sortDescending,pageSize,page,offsetId).getResults();
   }
-  List<SearchAttribute> searchAttributes=getSearchAttributes(rawType);
+  final List<SearchAttribute> searchAttributes=getSearchAttributes(rawType);
   hasSearchableAttributesForNodes(rawType,request,searchAttributes);
   List<GraphObject> results=getComponents(securityContext,searchAttributes);
   if (!results.isEmpty()) {
     if (uuidResults != null) {
       results=ListUtils.intersection(results,uuidResults);
     }
-    for (    DynamicTypeResource res : nestedResources) {
+    for (    final DynamicTypeResource res : nestedResources) {
       if (res.doGet(sortKey,sortDescending,pageSize,page,offsetId).getResults().isEmpty()) {
         throw new NotFoundException();
       }

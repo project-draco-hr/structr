@@ -1,15 +1,15 @@
 {
-  List<? extends GraphObject> results=typedIdResource.doGet(sortKey,sortDescending,NodeFactory.DEFAULT_PAGE_SIZE,NodeFactory.DEFAULT_PAGE,null).getResults();
+  final List<? extends GraphObject> results=typedIdResource.doGet(sortKey,sortDescending,NodeFactory.DEFAULT_PAGE_SIZE,NodeFactory.DEFAULT_PAGE,null).getResults();
   if (results != null) {
-    AbstractNode sourceNode=typedIdResource.getTypesafeNode();
+    final AbstractNode sourceNode=typedIdResource.getTypesafeNode();
     if (sourceNode != null) {
-      RelationClass staticRel=findRelationClass(typedIdResource,typeResource);
+      final RelationClass staticRel=findRelationClass(typedIdResource,typeResource);
       if (staticRel != null) {
-        List relatedNodes=staticRel.getRelatedNodes(securityContext,sourceNode);
-        List<SearchAttribute> dummyList=new LinkedList<SearchAttribute>();
+        final List relatedNodes=staticRel.getRelatedNodes(securityContext,sourceNode);
+        final List<SearchAttribute> dummyList=new LinkedList<SearchAttribute>();
         if (typeResource.hasSearchableAttributes(dummyList)) {
-          List<? extends GraphObject> typeNodes=typeResource.doGet(sortKey,sortDescending,NodeFactory.DEFAULT_PAGE_SIZE,NodeFactory.DEFAULT_PAGE,null).getResults();
-          List intersection=ListUtils.intersection(relatedNodes,typeNodes);
+          final List<? extends GraphObject> typeNodes=typeResource.doGet(sortKey,sortDescending,NodeFactory.DEFAULT_PAGE_SIZE,NodeFactory.DEFAULT_PAGE,null).getResults();
+          final List intersection=ListUtils.intersection(relatedNodes,typeNodes);
           applyDefaultSorting(intersection,sortKey,sortDescending);
           return new Result(PagingHelper.subList(intersection,pageSize,page,offsetId),intersection.size(),isCollectionResource(),isPrimitiveArray());
         }
@@ -18,31 +18,31 @@
           return new Result(PagingHelper.subList(relatedNodes,pageSize,page,offsetId),relatedNodes.size(),isCollectionResource(),isPrimitiveArray());
         }
       }
-      Class type=sourceNode.getClass();
-      String key=typeResource.getRawType();
-      PropertyConverter converter=EntityContext.getPropertyConverter(securityContext,type,key);
+      final Class type=sourceNode.getClass();
+      final String key=typeResource.getRawType();
+      final PropertyConverter converter=EntityContext.getPropertyConverter(securityContext,type,key);
       if (converter != null) {
-        Value conversionValue=EntityContext.getPropertyConversionParameter(type,key);
+        final Value conversionValue=EntityContext.getPropertyConversionParameter(type,key);
         converter.setCurrentObject(sourceNode);
         converter.setRawMode(true);
-        Object value=converter.convertForGetter(null,conversionValue);
-        StringBuilder msgBuilder=new StringBuilder();
+        final Object value=converter.convertForGetter(null,conversionValue);
+        final StringBuilder msgBuilder=new StringBuilder();
         msgBuilder.append("Property result on type ");
         msgBuilder.append(sourceNode.getClass().getSimpleName());
         msgBuilder.append(", key ");
         msgBuilder.append(key);
         msgBuilder.append(" is not an Iterable<GraphObject>!");
-        String msg=msgBuilder.toString();
+        final String msg=msgBuilder.toString();
         if (value != null) {
-          if ((value instanceof List) && !((List)value).isEmpty() && ((List)value).get(0) instanceof GraphObject) {
-            List<GraphObject> list=(List<GraphObject>)value;
+          if (value instanceof List && !((List)value).isEmpty() && ((List)value).get(0) instanceof GraphObject) {
+            final List<GraphObject> list=(List<GraphObject>)value;
             applyDefaultSorting(list,sortKey,sortDescending);
             return new Result(PagingHelper.subList(list,pageSize,page,offsetId),list.size(),isCollectionResource(),isPrimitiveArray());
           }
  else           if (value instanceof Iterable) {
-            List<GraphObject> propertyListResult=new LinkedList<GraphObject>();
-            Iterable sourceIterable=(Iterable)value;
-            for (            Object o : sourceIterable) {
+            final List<GraphObject> propertyListResult=new LinkedList<GraphObject>();
+            final Iterable sourceIterable=(Iterable)value;
+            for (            final Object o : sourceIterable) {
               if (o instanceof GraphObject) {
                 propertyListResult.add((GraphObject)o);
               }

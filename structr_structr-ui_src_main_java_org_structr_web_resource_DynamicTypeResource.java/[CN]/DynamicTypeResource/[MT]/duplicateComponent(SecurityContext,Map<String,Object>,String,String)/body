@@ -15,22 +15,22 @@
     parentComponentId=surroundingComponentId;
   }
   final String finalParentComponentId=parentComponentId;
-  Component newComponent=(Component)Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+  final Component newComponent=(Component)Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
     @Override public Object execute() throws FrameworkException {
-      Component comp=(Component)createNodeCommand.execute(templateProperties);
+      final Component comp=(Component)createNodeCommand.execute(templateProperties);
       RelationshipHelper.copyRelationships(SecurityContext.getSuperUserInstance(),template,comp,RelType.CONTAINS,finalParentComponentId,true);
-      Map<String,Object> contentTemplateProperties=new LinkedHashMap<String,Object>();
-      for (      AbstractNode node : template.getContentNodes().values()) {
+      final Map<String,Object> contentTemplateProperties=new LinkedHashMap<String,Object>();
+      for (      final AbstractNode node : template.getContentNodes().values()) {
         if (node instanceof Content) {
-          Content contentTemplate=(Content)node;
-          String dataKey=contentTemplate.getStringProperty("data-key");
+          final Content contentTemplate=(Content)node;
+          final String dataKey=contentTemplate.getStringProperty("data-key");
           contentTemplateProperties.clear();
           contentTemplateProperties.put(AbstractNode.Key.type.name(),Content.class.getSimpleName());
           contentTemplateProperties.put(Content.UiKey.typeDefinitionId.name(),contentTemplate.getStringProperty(Content.UiKey.typeDefinitionId));
           contentTemplateProperties.put("data-key",dataKey);
           contentTemplateProperties.put(AbstractNode.Key.visibleToPublicUsers.name(),contentTemplate.getStringProperty(AbstractNode.Key.visibleToPublicUsers.name()));
           contentTemplateProperties.put(AbstractNode.Key.visibleToAuthenticatedUsers.name(),contentTemplate.getStringProperty(AbstractNode.Key.visibleToAuthenticatedUsers.name()));
-          Content newContent=(Content)createNodeCommand.execute(contentTemplateProperties);
+          final Content newContent=(Content)createNodeCommand.execute(contentTemplateProperties);
           newContent.setProperty(Content.UiKey.content.name(),propertySet.get(dataKey));
           propertySet.remove(dataKey);
           RelationshipHelper.copyRelationships(SecurityContext.getSuperUserInstance(),contentTemplate,newContent,RelType.CONTAINS,componentId,false);
@@ -43,7 +43,7 @@
   if (newComponent != null) {
     propertySet.remove(AbstractNode.Key.createdDate.name());
     propertySet.remove(AbstractNode.Key.lastModifiedDate.name());
-    for (    String key : propertySet.keySet()) {
+    for (    final String key : propertySet.keySet()) {
       newComponent.setProperty(key,propertySet.get(key));
     }
   }

@@ -1,23 +1,23 @@
 {
-  StructrTransaction transaction=new StructrTransaction(){
+  final StructrTransaction transaction=new StructrTransaction(){
     @Override public Object execute() throws FrameworkException {
-      AbstractNode sourceNode=typedIdResource.getIdResource().getNode();
-      RelationClass rel=EntityContext.getRelationClass(sourceNode.getClass(),typeResource.getEntityClass());
-      if ((sourceNode != null) && (rel != null)) {
+      final AbstractNode sourceNode=typedIdResource.getIdResource().getNode();
+      final RelationClass rel=EntityContext.getRelationClass(sourceNode.getClass(),typeResource.getEntityClass());
+      if (sourceNode != null && rel != null) {
         if (EntityContext.isReadOnlyProperty(sourceNode.getClass(),typeResource.getRawType())) {
           logger.log(Level.INFO,"Read-only property on {0}: {1}",new Object[]{sourceNode.getClass(),typeResource.getRawType()});
           return null;
         }
-        Notion notion=rel.getNotion();
-        PropertyKey primaryPropertyKey=notion.getPrimaryPropertyKey();
-        if ((primaryPropertyKey != null) && (propertySet.containsKey(primaryPropertyKey.name()) && (propertySet.size() == 1))) {
-          Adapter<Object,GraphObject> deserializationStrategy=notion.getAdapterForSetter(securityContext);
-          Object keySource=propertySet.get(primaryPropertyKey.name());
+        final Notion notion=rel.getNotion();
+        final PropertyKey primaryPropertyKey=notion.getPrimaryPropertyKey();
+        if (primaryPropertyKey != null && propertySet.containsKey(primaryPropertyKey.name()) && propertySet.size() == 1) {
+          final Adapter<Object,GraphObject> deserializationStrategy=notion.getAdapterForSetter(securityContext);
+          final Object keySource=propertySet.get(primaryPropertyKey.name());
           if (keySource != null) {
             GraphObject otherNode=null;
             if (keySource instanceof Collection) {
-              Collection collection=(Collection)keySource;
-              for (              Object key : collection) {
+              final Collection collection=(Collection)keySource;
+              for (              final Object key : collection) {
                 otherNode=deserializationStrategy.adapt(key);
                 if (otherNode != null) {
                   rel.createRelationship(securityContext,sourceNode,otherNode);
@@ -38,7 +38,7 @@
           return null;
         }
  else {
-          AbstractNode otherNode=typeResource.createNode(propertySet);
+          final AbstractNode otherNode=typeResource.createNode(propertySet);
           if (otherNode != null) {
             rel.createRelationship(securityContext,sourceNode,otherNode);
             return otherNode;
@@ -49,7 +49,7 @@
     }
   }
 ;
-  AbstractNode newNode=(AbstractNode)Services.command(securityContext,TransactionCommand.class).execute(transaction);
+  final AbstractNode newNode=(AbstractNode)Services.command(securityContext,TransactionCommand.class).execute(transaction);
   RestMethodResult result;
   if (newNode != null) {
     result=new RestMethodResult(HttpServletResponse.SC_CREATED);

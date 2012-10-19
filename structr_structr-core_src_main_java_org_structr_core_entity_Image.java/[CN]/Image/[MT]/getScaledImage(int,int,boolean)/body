@@ -25,37 +25,30 @@
     Command transactionCommand=Services.command(securityContext,TransactionCommand.class);
     thumbnail=(Image)transactionCommand.execute(new StructrTransaction(){
       @Override public Object execute() throws FrameworkException {
-        Command createNode=Services.command(securityContext,CreateNodeCommand.class);
         Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
-        NodeAttribute typeAttr=new NodeAttribute(AbstractNode.Key.type.name(),Image.class.getSimpleName());
-        NodeAttribute contentTypeAttr=new NodeAttribute(File.Key.contentType.name(),"image/" + Thumbnail.FORMAT);
-        NodeAttribute isHiddenAttr=new NodeAttribute(AbstractNode.Key.hidden.name(),originalImage.getHidden());
-        NodeAttribute isPublicAttr=new NodeAttribute(AbstractNode.Key.visibleToPublicUsers.name(),originalImage.getVisibleToPublicUsers());
-        NodeAttribute isVisibleForAuthenticatedUsersAttr=new NodeAttribute(AbstractNode.Key.visibleToAuthenticatedUsers.name(),originalImage.getVisibleToAuthenticatedUsers());
         Thumbnail thumbnailData=ImageHelper.createThumbnail(originalImage,maxWidth,maxHeight,cropToFit);
         if (thumbnailData != null) {
-          Image thumbnail=(Image)createNode.execute(originalImage.getOwnerNode(),typeAttr,contentTypeAttr,isHiddenAttr,isPublicAttr,isVisibleForAuthenticatedUsersAttr,false);
+          Integer tnWidth=thumbnailData.getWidth();
+          Integer tnHeight=thumbnailData.getHeight();
+          Image thumbnail=null;
+          try {
+            byte[] data=thumbnailData.getBytes();
+            int size=data.length;
+            thumbnail=ImageHelper.createImage(securityContext,data,"image/" + Thumbnail.FORMAT,Image.class);
+            thumbnail.setSize(size);
+            thumbnail.setName(originalImage.getName() + "_thumb_" + tnWidth+ "x"+ tnHeight);
+            thumbnail.setHidden(originalImage.getHidden());
+            thumbnail.setVisibleToPublicUsers(originalImage.getVisibleToPublicUsers());
+            thumbnail.setVisibleToAuthenticatedUsers(originalImage.getVisibleToAuthenticatedUsers());
+          }
+ catch (          IOException ex) {
+            logger.log(Level.WARNING,"Could not create thumbnail image",ex);
+          }
           if (thumbnail != null) {
             AbstractRelationship thumbnailRelationship=(AbstractRelationship)createRel.execute(originalImage,thumbnail,RelType.THUMBNAIL);
             thumbnailRelationships.add(thumbnailRelationship);
-            String relativeFilePath=thumbnail.getId() + "_" + System.currentTimeMillis();
-            String path=Services.getFilesPath() + "/" + relativeFilePath;
-            java.io.File imageFile=new java.io.File(path);
-            try {
-              FileUtils.writeByteArrayToFile(imageFile,thumbnailData.getBytes());
-            }
- catch (            IOException ex) {
-              logger.log(Level.SEVERE,"Could not write thumbnail data to file",ex);
-              return null;
-            }
-            long size=imageFile.length();
-            thumbnail.setSize(size);
-            Integer tnWidth=thumbnailData.getWidth();
-            Integer tnHeight=thumbnailData.getHeight();
             thumbnailRelationship.setProperty(Key.width.name(),tnWidth);
             thumbnailRelationship.setProperty(Key.height.name(),tnHeight);
-            thumbnail.setRelativeFilePath(relativeFilePath);
-            thumbnail.setName(originalImage.getName() + "_thumb_" + tnWidth+ "x"+ tnHeight);
           }
           return thumbnail;
         }
@@ -66,6 +59,7 @@
       }
     }
 );
+    Services.command(securityContext,IndexNodeCommand.class).execute(thumbnail);
   }
  catch (  FrameworkException fex) {
     logger.log(Level.WARNING,"Unable to create thumbnail",fex);

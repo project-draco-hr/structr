@@ -6,8 +6,8 @@
       final RelationClass staticRel=findRelationClass(typedIdResource,typeResource);
       if (staticRel != null) {
         final List relatedNodes=staticRel.getRelatedNodes(securityContext,sourceNode);
-        final List<SearchAttribute> dummyList=new LinkedList<SearchAttribute>();
-        if (typeResource.hasSearchableAttributes(dummyList)) {
+        final List<SearchAttribute> dummyList=typeResource.extractSearchableAttributesFromRequest();
+        if (!dummyList.isEmpty()) {
           final List<? extends GraphObject> typeNodes=typeResource.doGet(sortKey,sortDescending,NodeFactory.DEFAULT_PAGE_SIZE,NodeFactory.DEFAULT_PAGE,null).getResults();
           final List intersection=ListUtils.intersection(relatedNodes,typeNodes);
           applyDefaultSorting(intersection,sortKey,sortDescending);

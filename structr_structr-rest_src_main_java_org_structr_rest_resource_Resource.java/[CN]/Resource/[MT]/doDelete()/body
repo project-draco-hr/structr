@@ -5,14 +5,14 @@
   try {
     results=doGet(null,false,NodeFactory.DEFAULT_PAGE_SIZE,NodeFactory.DEFAULT_PAGE,null).getResults();
   }
- catch (  NoResultsException nre) {
+ catch (  final NoResultsException nre) {
     results=null;
   }
   if (results != null) {
     final Iterable<? extends GraphObject> finalResults=results;
     Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
       @Override public Object execute() throws FrameworkException {
-        for (        GraphObject obj : finalResults) {
+        for (        final GraphObject obj : finalResults) {
           if (obj instanceof AbstractRelationship) {
             deleteRel.execute(obj);
           }

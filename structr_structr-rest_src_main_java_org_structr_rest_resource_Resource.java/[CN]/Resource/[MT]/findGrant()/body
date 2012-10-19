@@ -1,19 +1,19 @@
 {
-  Command search=Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class);
-  String uriPart=EntityContext.normalizeEntityName(this.getResourceSignature());
-  List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
-  AbstractNode topNode=null;
-  boolean includeDeletedAndHidden=false;
-  boolean publicOnly=false;
+  final Command search=Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class);
+  final String uriPart=EntityContext.normalizeEntityName(this.getResourceSignature());
+  final List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
+  final AbstractNode topNode=null;
+  final boolean includeDeletedAndHidden=false;
+  final boolean publicOnly=false;
   ResourceAccess grant=null;
   searchAttributes.add(Search.andExactType(ResourceAccess.class.getSimpleName()));
   searchAttributes.add(Search.andExactProperty(ResourceAccess.Key.signature,uriPart));
-  Result result=(Result)search.execute(topNode,includeDeletedAndHidden,publicOnly,searchAttributes);
+  final Result result=(Result)search.execute(topNode,includeDeletedAndHidden,publicOnly,searchAttributes);
   if (result.isEmpty()) {
     logger.log(Level.FINE,"No resource access object found for {0}",uriPart);
   }
  else {
-    AbstractNode node=(AbstractNode)result.get(0);
+    final AbstractNode node=(AbstractNode)result.get(0);
     if (node instanceof ResourceAccess) {
       grant=(ResourceAccess)node;
     }

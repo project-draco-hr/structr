@@ -1,7 +1,7 @@
 {
   boolean hasSearchableAttributes=false;
-  if ((rawType != null) && (request != null) && !request.getParameterMap().isEmpty()) {
-    boolean looseSearch=parseInteger(request.getParameter(JsonRestServlet.REQUEST_PARAMETER_LOOSE_SEARCH)) == 1;
+  if (rawType != null && request != null && !request.getParameterMap().isEmpty()) {
+    final boolean looseSearch=parseInteger(request.getParameter(JsonRestServlet.REQUEST_PARAMETER_LOOSE_SEARCH)) == 1;
     Set<String> searchableProperties=null;
     if (looseSearch) {
       searchableProperties=EntityContext.getSearchableProperties(rawType,NodeService.NodeIndex.fulltext.name());
@@ -11,7 +11,7 @@
     }
     if (searchableProperties != null) {
       checkForIllegalSearchKeys(request,searchableProperties);
-      for (      String key : searchableProperties) {
+      for (      final String key : searchableProperties) {
         String searchValue=request.getParameter(key);
         if (searchValue != null) {
           if (looseSearch) {
@@ -25,11 +25,11 @@
           }
  else {
             if (StringUtils.startsWith(searchValue,"[") && StringUtils.endsWith(searchValue,"]")) {
-              String strippedValue=StringUtils.stripEnd(StringUtils.stripStart(searchValue,"["),"]");
+              final String strippedValue=StringUtils.stripEnd(StringUtils.stripStart(searchValue,"["),"]");
               searchAttributes.add(Search.andMatchExactValues(key,strippedValue,SearchOperator.OR));
             }
  else             if (StringUtils.startsWith(searchValue,"(") && StringUtils.endsWith(searchValue,")")) {
-              String strippedValue=StringUtils.stripEnd(StringUtils.stripStart(searchValue,"("),")");
+              final String strippedValue=StringUtils.stripEnd(StringUtils.stripStart(searchValue,"("),")");
               searchAttributes.add(Search.andMatchExactValues(key,strippedValue,SearchOperator.AND));
             }
  else {

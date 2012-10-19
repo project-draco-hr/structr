@@ -1,30 +1,29 @@
 {
-  List<GraphObject> relationResults=new LinkedList<GraphObject>();
+  final List<GraphObject> relationResults=new LinkedList<GraphObject>();
   if (wrappedResource != null) {
-    List<? extends GraphObject> results=wrappedResource.doGet(sortKey,sortDescending,pageSize,page,offsetId).getResults();
-    for (    GraphObject obj : results) {
+    final List<? extends GraphObject> results=wrappedResource.doGet(sortKey,sortDescending,pageSize,page,offsetId).getResults();
+    for (    final GraphObject obj : results) {
       if (obj instanceof AbstractNode) {
-        relationResults.addAll(namedRelation.getRelationships((AbstractNode)obj));
+        relationResults.addAll(namedRelation.getRelationships(obj));
       }
     }
   }
  else {
-    List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
+    final List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
     searchAttributes.add(Search.andExactRelType(namedRelation));
-    hasSearchableAttributesForRelationships(namedRelation.getEntityClass().getSimpleName(),request,searchAttributes);
+    searchAttributes.addAll(extractSearchableAttributesForRelationships(namedRelation.getEntityClass().getSimpleName(),request));
     relationResults.addAll((List<AbstractRelationship>)Services.command(securityContext,SearchRelationshipCommand.class).execute(searchAttributes));
   }
-  final List<SearchAttribute> filterAttributes=new LinkedList<SearchAttribute>();
-  hasSearchableAttributesForRelationships(namedRelation.getEntityClass().getSimpleName(),request,filterAttributes);
+  final List<SearchAttribute> filterAttributes=extractSearchableAttributesForRelationships(namedRelation.getEntityClass().getSimpleName(),request);
   if (!filterAttributes.isEmpty()) {
-    Predicate<GraphObject> predicate=new Predicate<GraphObject>(){
-      @Override public boolean evaluate(      SecurityContext securityContext,      GraphObject... objs){
+    final Predicate<GraphObject> predicate=new Predicate<GraphObject>(){
+      @Override public boolean evaluate(      final SecurityContext securityContext,      final GraphObject... objs){
         if (objs.length > 0) {
-          GraphObject obj=objs[0];
-          for (          SearchAttribute attr : filterAttributes) {
-            String value=((TextualSearchAttribute)attr).getValue();
-            String key=((TextualSearchAttribute)attr).getKey();
-            Object val="\"" + obj.getProperty(key) + "\"";
+          final GraphObject obj=objs[0];
+          for (          final SearchAttribute attr : filterAttributes) {
+            final String value=((TextualSearchAttribute)attr).getValue();
+            final String key=((TextualSearchAttribute)attr).getKey();
+            final Object val="\"" + obj.getProperty(key) + "\"";
             if (val != null && val.equals(value)) {
               return true;
             }
@@ -34,7 +33,7 @@
       }
     }
 ;
-    for (Iterator<GraphObject> it=relationResults.iterator(); it.hasNext(); ) {
+    for (final Iterator<GraphObject> it=relationResults.iterator(); it.hasNext(); ) {
       if (!predicate.evaluate(securityContext,it.next())) {
         it.remove();
       }

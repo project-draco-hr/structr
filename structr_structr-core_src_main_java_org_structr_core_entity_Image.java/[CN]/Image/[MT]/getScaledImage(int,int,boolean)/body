@@ -7,8 +7,8 @@
   if ((origWidth != null) && (origHeight != null)) {
     if ((thumbnailRelationships != null) && !(thumbnailRelationships.isEmpty())) {
       for (      AbstractRelationship r : thumbnailRelationships) {
-        Integer w=(Integer)r.getProperty(Key.width.name());
-        Integer h=(Integer)r.getProperty(Key.height.name());
+        Integer w=(Integer)r.getProperty(Image.width);
+        Integer h=(Integer)r.getProperty(Image.height);
         if ((w != null) && (h != null)) {
           if (((w == maxWidth) && (h <= maxHeight)) || ((w <= maxWidth) && (h == maxHeight)) || ((origWidth <= w) && (origHeight <= h))) {
             thumbnail=(Image)r.getEndNode();
@@ -47,8 +47,8 @@
           if (thumbnail != null) {
             AbstractRelationship thumbnailRelationship=(AbstractRelationship)createRel.execute(originalImage,thumbnail,RelType.THUMBNAIL);
             thumbnailRelationships.add(thumbnailRelationship);
-            thumbnailRelationship.setProperty(Key.width.name(),tnWidth);
-            thumbnailRelationship.setProperty(Key.height.name(),tnHeight);
+            thumbnailRelationship.setProperty(Image.width,tnWidth);
+            thumbnailRelationship.setProperty(Image.height,tnHeight);
           }
           return thumbnail;
         }

@@ -1,11 +1,13 @@
 {
-  Set<String> augmentedPropertyKeys=new LinkedHashSet<String>();
-  for (  String key : super.getPropertyKeys(propertyView)) {
+  Set<PropertyKey> augmentedPropertyKeys=new LinkedHashSet<PropertyKey>();
+  for (  PropertyKey key : super.getPropertyKeys(propertyView)) {
     augmentedPropertyKeys.add(key);
   }
-  augmentedPropertyKeys.addAll(contentNodes.keySet());
+  for (  String key : contentNodes.keySet()) {
+    augmentedPropertyKeys.add(new Property(key));
+  }
   for (  String subType : subTypes) {
-    augmentedPropertyKeys.add(subType.toLowerCase().concat("s"));
+    augmentedPropertyKeys.add(new Property(subType.toLowerCase().concat("s")));
   }
   return augmentedPropertyKeys;
 }

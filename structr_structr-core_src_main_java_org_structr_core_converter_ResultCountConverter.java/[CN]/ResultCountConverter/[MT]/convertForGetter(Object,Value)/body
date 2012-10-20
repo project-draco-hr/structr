@@ -2,8 +2,8 @@
   int count=0;
   if (currentObject != null && value != null) {
     Object val=value.get(securityContext);
-    if (val != null) {
-      Object toCount=currentObject.getProperty(val.toString());
+    if (val != null && val instanceof PropertyKey) {
+      Object toCount=currentObject.getProperty((PropertyKey)val);
       if (toCount != null) {
         if (toCount instanceof Collection) {
           count=((Collection)toCount).size();
@@ -20,6 +20,9 @@
           count=1;
         }
       }
+    }
+ else {
+      logger.log(Level.WARNING,"PasswordConverter for type {0} called with invalid parameter {1}",new Object[]{currentObject.getType(),val != null ? val : "null"});
     }
   }
   return count;

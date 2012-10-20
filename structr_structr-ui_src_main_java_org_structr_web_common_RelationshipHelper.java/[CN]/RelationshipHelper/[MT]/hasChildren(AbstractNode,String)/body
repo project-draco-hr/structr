@@ -1,15 +1,16 @@
 {
   List<AbstractRelationship> childRels=node.getOutgoingRelationships(RelType.CONTAINS);
+  Property pageIdProperty=new Property(pageId);
   if ((node instanceof Group) || (node instanceof Folder)) {
     return !childRels.isEmpty();
   }
   for (  AbstractRelationship childRel : childRels) {
     Long childPos=null;
-    if (childRel.getLongProperty(pageId) != null) {
-      childPos=childRel.getLongProperty(pageId);
+    if (childRel.getLongProperty(pageIdProperty) != null) {
+      childPos=childRel.getLongProperty(pageIdProperty);
     }
  else {
-      childPos=childRel.getLongProperty("*");
+      childPos=childRel.getLongProperty(new Property("*"));
     }
     if (childPos != null) {
       return true;

@@ -1,3 +1,13 @@
 {
-  setProperty(propertyKey.name(),value,updateIndex);
+  Object oldValue=getProperty(key);
+  if ((oldValue == null) && (value == null)) {
+    return;
+  }
+  if ((oldValue == null) && (value != null)) {
+    setPropertyInternal(key,value);
+    return;
+  }
+  if ((oldValue != null) && !oldValue.equals(value)) {
+    setPropertyInternal(key,value);
+  }
 }

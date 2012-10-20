@@ -1,15 +1,15 @@
 {
   try {
     Map<String,Object> props=new HashMap<String,Object>();
-    String key="someDate";
+    PropertyKey key=new Property("someDate");
     Date date=new Date();
     String type="Something";
-    props.put(key,date);
+    props.put(key.name(),date);
     AbstractNode node=createTestNode(type,props);
     boolean includeDeletedAndHidden=true;
     boolean publicOnly=false;
     List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
-    searchAttributes.add(new TextualSearchAttribute(AbstractNode.Key.type.name(),type,SearchOperator.AND));
+    searchAttributes.add(new TextualSearchAttribute(AbstractNode.type,type,SearchOperator.AND));
     searchAttributes.add(new FilterSearchAttribute(key,date.getTime(),SearchOperator.AND));
     Result result=(Result)searchNodeCommand.execute(null,includeDeletedAndHidden,publicOnly,searchAttributes);
     assertTrue(result.size() == 1);

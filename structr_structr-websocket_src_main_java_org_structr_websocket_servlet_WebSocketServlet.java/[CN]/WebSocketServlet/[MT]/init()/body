@@ -1,16 +1,12 @@
 {
   config=this.getServletConfig();
-  final String idPropertyName=this.getInitParameter(SERVLET_PARAMETER_ID_PROPERTY);
-  if (idPropertyName != null) {
-    logger.log(Level.INFO,"Setting id property to {0}",idPropertyName);
-  }
-  final Gson gson=new GsonBuilder().setPrettyPrinting().registerTypeAdapter(WebSocketMessage.class,new WebSocketDataGSONAdapter(idPropertyName)).create();
+  final Gson gson=new GsonBuilder().setPrettyPrinting().registerTypeAdapter(WebSocketMessage.class,new WebSocketDataGSONAdapter(idProperty)).create();
   syncController=new SynchronizationController(gson);
   EntityContext.registerTransactionListener(syncController);
   factory=new WebSocketFactory(new Acceptor(){
     @Override public WebSocket doWebSocketConnect(    final HttpServletRequest request,    final String protocol){
       if (STRUCTR_PROTOCOL.equals(protocol)) {
-        return new StructrWebSocket(syncController,config,request,gson,idPropertyName);
+        return new StructrWebSocket(syncController,config,request,gson,idProperty);
       }
  else {
         logger.log(Level.INFO,"Protocol {0} not accepted",protocol);

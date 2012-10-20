@@ -1,7 +1,7 @@
 {
   if (source == null) {
     for (    PropertyKey key : propertyKeys) {
-      destination.setProperty(key.name(),null);
+      destination.setProperty(key,null);
     }
   }
  else   if (source instanceof Map) {
@@ -12,19 +12,21 @@
         setGroupedProperties(value,destination);
       }
  else {
-        destination.setProperty(key,value);
+        PropertyKey propertyKey=destination.getPropertyKeyForName(key);
+        destination.setProperty(propertyKey,value);
       }
     }
   }
  else   if (source instanceof PropertySet) {
-    for (    NodeAttribute attr : ((PropertySet)source).getAttributes()) {
-      String key=attr.getKey();
-      Object value=attr.getValue();
+    for (    Entry<String,Object> entry : ((PropertySet)source).getAttributes().entrySet()) {
+      String key=entry.getKey();
+      Object value=entry.getValue();
       if (value instanceof PropertySet) {
         setGroupedProperties(value,destination);
       }
  else {
-        destination.setProperty(key,value);
+        PropertyKey propertyKey=destination.getPropertyKeyForName(key);
+        destination.setProperty(propertyKey,value);
       }
     }
   }

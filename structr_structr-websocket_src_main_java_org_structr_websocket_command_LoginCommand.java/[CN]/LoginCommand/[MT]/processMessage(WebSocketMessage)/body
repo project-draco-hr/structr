@@ -10,10 +10,10 @@
       user=auth.doLogin(securityContext,socket.getRequest(),null,username,password);
       if (user != null) {
         String token=StructrWebSocket.secureRandomString();
-        user.setProperty(Principal.Key.sessionId,token);
+        user.setProperty(Principal.sessionId,token);
         webSocketData.getNodeData().clear();
         webSocketData.setToken(token);
-        webSocketData.getNodeData().put("username",user.getStringProperty(AbstractNode.Key.name));
+        webSocketData.getNodeData().put("username",user.getStringProperty(AbstractNode.name));
         this.getWebSocket().setAuthenticated(token,user);
         this.getWebSocket().send(webSocketData,false);
       }

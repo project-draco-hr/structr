@@ -32,21 +32,23 @@
       String originalPageId=(String)nodeData.get("sourcePageId");
       String newPageId=(String)nodeData.get("targetPageId");
       RelationClass rel=EntityContext.getRelationClass(parentNode.getClass(),nodeToAdd.getClass());
+      PropertyKey<Long> originalPageIdProperty=new Property<Long>(originalPageId);
+      PropertyKey<Long> newPageIdProperty=new Property<Long>(newPageId);
       if (rel != null) {
         try {
           AbstractRelationship existingRel=null;
           long maxPos=0;
           for (          AbstractRelationship r : parentNode.getOutgoingRelationships(RelType.CONTAINS)) {
-            if (r.getEndNode().equals(nodeToAdd) && r.getLongProperty(originalPageId) != null) {
+            if (r.getEndNode().equals(nodeToAdd) && r.getLongProperty(originalPageIdProperty) != null) {
               existingRel=r;
             }
-            Long pos=r.getLongProperty(newPageId);
+            Long pos=r.getLongProperty(newPageIdProperty);
             if (pos != null) {
               maxPos=Math.max(pos,maxPos);
             }
           }
           if (existingRel != null) {
-            existingRel.setProperty(newPageId,Long.parseLong((String)relData.get(newPageId)));
+            existingRel.setProperty(newPageIdProperty,Long.parseLong((String)relData.get(newPageId)));
             logger.log(Level.INFO,"Tagging relationship with pageId {0} and position {1}",new Object[]{newPageId,maxPos + 1});
           }
  else {
@@ -69,9 +71,9 @@
       if (childContent != null) {
         Content contentNode=null;
         final List<NodeAttribute> attrs=new LinkedList<NodeAttribute>();
-        attrs.add(new NodeAttribute(Content.UiKey.content,childContent));
-        attrs.add(new NodeAttribute(Content.UiKey.contentType,"text/plain"));
-        attrs.add(new NodeAttribute(AbstractNode.Key.type,Content.class.getSimpleName()));
+        attrs.add(new NodeAttribute(Content.content,childContent));
+        attrs.add(new NodeAttribute(Content.contentType,"text/plain"));
+        attrs.add(new NodeAttribute(AbstractNode.type,Content.class.getSimpleName()));
         StructrTransaction transaction=new StructrTransaction(){
           @Override public Object execute() throws FrameworkException {
             return Services.command(securityContext,CreateNodeCommand.class).execute(attrs);

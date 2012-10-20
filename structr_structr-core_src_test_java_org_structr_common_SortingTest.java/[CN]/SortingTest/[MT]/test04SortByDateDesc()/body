@@ -18,7 +18,7 @@
     searchAttributes.add(Search.andType(type));
     Result result=(Result)searchNodeCommand.execute(null,includeDeletedAndHidden,publicOnly,searchAttributes);
     assertTrue(result.size() == number);
-    String sortKey=AbstractNode.Key.lastModifiedDate.name();
+    String sortKey=AbstractNode.lastModifiedDate.name();
     boolean sortDesc=true;
     int pageSize=10;
     int page=1;
@@ -29,7 +29,7 @@
     assertTrue(result.size() == Math.min(number,pageSize));
     for (int j=0; j < pageSize; j++) {
       int expectedNumber=number + offset - 1 - j;
-      String gotName=result.get(j).getStringProperty(AbstractNode.Key.name);
+      String gotName=result.get(j).getStringProperty(AbstractNode.name);
       System.out.println(expectedNumber + ", got: " + gotName);
       assertTrue(gotName.equals(Integer.toString(expectedNumber)));
     }

@@ -17,7 +17,7 @@
     for (    SearchAttribute attr : searchAttrs) {
       if (attr instanceof DistanceSearchAttribute) {
         distanceSearch=(DistanceSearchAttribute)attr;
-        coords=GeoHelper.geocode(distanceSearch.getKey());
+        coords=GeoHelper.geocode(distanceSearch.getKey().name());
         dist=distanceSearch.getValue();
       }
  else       if (attr instanceof SearchAttributeGroup) {
@@ -64,10 +64,10 @@ synchronized (index) {
           }
         }
       }
- else       if ((textualAttributes.size() == 1) && textualAttributes.get(0).getKey().equals(AbstractNode.Key.uuid.name())) {
+ else       if ((textualAttributes.size() == 1) && textualAttributes.get(0).getKey().equals(AbstractNode.uuid.name())) {
         index=(Index<Node>)arguments.get(NodeIndex.uuid.name());
 synchronized (index) {
-          hits=index.get(AbstractNode.Key.uuid.name(),decodeExactMatch(textualAttributes.get(0).getValue()));
+          hits=index.get(AbstractNode.uuid.name(),decodeExactMatch(textualAttributes.get(0).getValue()));
         }
       }
  else       if (allExactMatch) {
@@ -95,7 +95,7 @@ synchronized (index) {
       for (      GraphObject obj : intermediateResultList) {
         AbstractNode node=(AbstractNode)obj;
         for (        FilterSearchAttribute attr : filters) {
-          String key=attr.getKey();
+          PropertyKey key=attr.getKey();
           Object searchValue=attr.getValue();
           SearchOperator op=attr.getSearchOperator();
           Object nodeValue=node.getProperty(key);

@@ -1,11 +1,18 @@
 {
-  final Class type1=typeResource1.getEntityClass();
-  final Class type2=typeResource2.getEntityClass();
+  final Class<? extends GraphObject> type1=typeResource1.getEntityClass();
+  final Class<? extends GraphObject> type2=typeResource2.getEntityClass();
   if (type1 != null && type2 != null) {
     return EntityContext.getRelationClass(type1,type2);
   }
   if (type1 != null) {
-    return EntityContext.getRelationClassForProperty(type1,typeResource2.getRawType());
+    GraphObject typeInstance=null;
+    try {
+      typeInstance=type1.newInstance();
+    }
+ catch (    Throwable t) {
+    }
+    PropertyKey key=typeInstance != null ? typeInstance.getPropertyKeyForName(typeResource2.getRawType()) : new Property(typeResource2.getRawType());
+    return EntityContext.getRelationClassForProperty(type1,key);
   }
   return null;
 }

@@ -12,8 +12,8 @@
     StructrTransaction transaction=new StructrTransaction(){
       @Override public Object execute() throws FrameworkException {
         Component newComponent=(Component)Services.command(securityContext,CreateNodeCommand.class).execute(nodeData);
-        String componentId=newComponent.getStringProperty(AbstractNode.Key.uuid);
-        RelationshipHelper.moveIncomingRelationships(securityContext,nodeToWrap,newComponent,RelType.CONTAINS,pageId,newComponent.getStringProperty(AbstractNode.Key.uuid),false);
+        String componentId=newComponent.getStringProperty(AbstractNode.uuid);
+        RelationshipHelper.moveIncomingRelationships(securityContext,nodeToWrap,newComponent,RelType.CONTAINS,pageId,newComponent.getStringProperty(AbstractNode.uuid),false);
         if ((parentNode != null) && (newComponent != null)) {
           RelationClass rel=EntityContext.getRelationClass(parentNode.getClass(),newComponent.getClass());
           if (rel != null) {

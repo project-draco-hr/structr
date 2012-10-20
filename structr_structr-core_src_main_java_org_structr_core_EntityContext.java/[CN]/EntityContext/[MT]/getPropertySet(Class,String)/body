@@ -1,8 +1,8 @@
 {
-  Map<String,Set<String>> propertyViewMap=getPropertyViewMapForType(type);
-  Set<String> propertySet=propertyViewMap.get(propertyView);
+  Map<String,Set<PropertyKey>> propertyViewMap=getPropertyViewMapForType(type);
+  Set<PropertyKey> propertySet=propertyViewMap.get(propertyView);
   if (propertySet == null) {
-    propertySet=new LinkedHashSet<String>();
+    propertySet=new LinkedHashSet<PropertyKey>();
     propertyViewMap.put(propertyView,propertySet);
   }
   for (  Class interfaceClass : getInterfacesForType(type)) {
@@ -10,7 +10,7 @@
   }
   Class superClass=type.getSuperclass();
   while ((superClass != null) && !superClass.equals(Object.class)) {
-    Set<String> superProperties=getPropertySet(superClass,propertyView);
+    Set<PropertyKey> superProperties=getPropertySet(superClass,propertyView);
     propertySet.addAll(superProperties);
     superClass=superClass.getSuperclass();
   }

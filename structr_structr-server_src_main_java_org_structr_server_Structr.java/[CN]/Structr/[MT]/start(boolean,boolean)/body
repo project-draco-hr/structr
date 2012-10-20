@@ -84,13 +84,11 @@
     staticResourceHandler.setHandler(resourceHandler);
     contexts.addHandler(staticResourceHandler);
   }
-  JsonRestServlet structrRestServlet=new JsonRestServlet();
+  ResourceProvider resourceProviderInstance=resourceProvider.newInstance();
+  JsonRestServlet structrRestServlet=new JsonRestServlet(resourceProviderInstance,defaultPropertyView,AbstractNode.uuid);
   ServletHolder structrRestServletHolder=new ServletHolder(structrRestServlet);
   servletParams.put("PropertyFormat","FlatNameValue");
-  servletParams.put("ResourceProvider",resourceProvider.getName());
   servletParams.put("Authenticator",authenticator.getName());
-  servletParams.put("DefaultPropertyView",defaultPropertyView);
-  servletParams.put("IdProperty","uuid");
   structrRestServletHolder.setInitParameters(servletParams);
   structrRestServletHolder.setInitOrder(0);
   servlets.put(restUrl + "/*",structrRestServletHolder);

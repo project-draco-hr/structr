@@ -1,13 +1,13 @@
 {
   Principal user=null;
   List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
-  attrs.add(Search.andExactProperty(Principal.Key.sessionId,messageToken));
+  attrs.add(Search.andExactProperty(Principal.sessionId,messageToken));
   attrs.add(Search.andExactType("User"));
   try {
     Result results=(Result)Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class).execute(null,false,false,attrs);
     if (!results.isEmpty()) {
       user=(Principal)results.get(0);
-      if ((user != null) && messageToken.equals(user.getProperty(Principal.Key.sessionId))) {
+      if ((user != null) && messageToken.equals(user.getProperty(Principal.sessionId))) {
         return user;
       }
     }

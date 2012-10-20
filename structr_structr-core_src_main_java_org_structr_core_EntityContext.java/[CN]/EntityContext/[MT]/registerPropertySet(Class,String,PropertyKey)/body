@@ -1,3 +1,13 @@
 {
-  registerPropertySet(type,propertyView,null,propertySet);
+  Set<PropertyKey> properties=getPropertySet(type,propertyView);
+  properties.addAll(Arrays.asList(propertySet));
+  Class superClass=type.getSuperclass();
+  while ((superClass != null) && !superClass.equals(Object.class)) {
+    Set<PropertyKey> superProperties=getPropertySet(superClass,propertyView);
+    properties.addAll(superProperties);
+    superClass=superClass.getSuperclass();
+  }
+  for (  Class interfaceClass : getInterfacesForType(type)) {
+    properties.addAll(getPropertySet(interfaceClass,propertyView));
+  }
 }

@@ -17,12 +17,12 @@
   }
   if (startNode != null) {
     String id=startNode.getUuid();
-    tag=startNode.getStringProperty(Element.UiKey.tag);
+    tag=startNode.getStringProperty(Element.tag);
     if (startNode instanceof Component && searchClass != null) {
-      String kind=startNode.getStringProperty(Component.UiKey.kind);
+      String kind=startNode.getStringProperty(Component.kind);
       if ((kind != null) && kind.equals(EntityContext.normalizeEntityName(searchClass)) && (attrs != null)) {
         for (        NodeAttribute attr : attrs) {
-          String key=attr.getKey();
+          PropertyKey key=attr.getKey();
           Object val=attr.getValue();
           if (!val.equals(startNode.getProperty(key))) {
             return;
@@ -32,8 +32,8 @@
     }
     if (startNode instanceof Content) {
       Content contentNode=(Content)startNode;
-      content=contentNode.getPropertyWithVariableReplacement(request,page,pageId,componentId,viewComponent,Content.UiKey.content.name());
-      String contentType=contentNode.getStringProperty(Content.UiKey.contentType);
+      content=contentNode.getPropertyWithVariableReplacement(request,page,pageId,componentId,viewComponent,Content.content);
+      String contentType=contentNode.getStringProperty(Content.contentType);
       if (contentType != null) {
         Adapter<String,String> converter=contentConverters.get(contentType);
         if (converter != null) {
@@ -50,7 +50,7 @@
       }
     }
     if (startNode instanceof Component) {
-      localComponentId=startNode.getStringProperty(AbstractNode.Key.uuid);
+      localComponentId=startNode.getStringProperty(AbstractNode.uuid);
     }
     if (edit && inBody && (startNode instanceof Content)) {
       tag="span";
@@ -75,11 +75,11 @@
           }
         }
         if (el != null) {
-          for (          String attribute : EntityContext.getPropertySet(startNode.getClass(),PropertyView.Html)) {
+          for (          PropertyKey attribute : EntityContext.getPropertySet(startNode.getClass(),PropertyView.Html)) {
             try {
               String value=el.getPropertyWithVariableReplacement(page,pageId,localComponentId,viewComponent,attribute);
               if ((value != null) && StringUtils.isNotBlank(value)) {
-                String key=attribute.substring(PropertyView.Html.length());
+                String key=attribute.name().substring(PropertyView.Html.length());
                 buffer.append(" ").append(key).append("=\"").append(value).append("\"");
               }
             }

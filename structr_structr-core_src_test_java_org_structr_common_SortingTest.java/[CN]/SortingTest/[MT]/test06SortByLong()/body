@@ -5,7 +5,7 @@
     String type=TestOne.class.getSimpleName();
     int number=43;
     List<AbstractNode> nodes=this.createTestNodes(type,number);
-    String key=TestOne.Key.aLong.name();
+    PropertyKey key=TestOne.aLong;
     long offset=10;
     long i=offset;
     Collections.shuffle(nodes,new Random(System.nanoTime()));
@@ -13,19 +13,19 @@
       node.setName(Long.toString(i));
       node.setProperty(key,i);
       i++;
-      System.out.println(node.getStringProperty(AbstractNode.Key.name) + ": " + node.getLongProperty(key));
+      System.out.println(node.getStringProperty(AbstractNode.name) + ": " + node.getLongProperty(key));
     }
     List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
     searchAttributes.add(Search.andType(type));
     Result result=(Result)searchNodeCommand.execute(null,includeDeletedAndHidden,publicOnly,searchAttributes);
     assertTrue(result.size() == number);
-    String sortKey=key;
+    String sortKey=key.name();
     boolean sortDesc=false;
     int pageSize=20;
     int page=1;
     result=(Result)searchNodeCommand.execute(null,includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDesc,pageSize,page,null,SortField.LONG);
     for (    GraphObject obj : result.getResults()) {
-      System.out.println(obj.getStringProperty(AbstractNode.Key.name) + ": " + obj.getLongProperty(key));
+      System.out.println(obj.getStringProperty(AbstractNode.name) + ": " + obj.getLongProperty(key));
     }
     logger.log(Level.INFO,"Raw result size: {0}, expected: {1}",new Object[]{result.getRawResultCount(),number});
     assertTrue(result.getRawResultCount() == number);

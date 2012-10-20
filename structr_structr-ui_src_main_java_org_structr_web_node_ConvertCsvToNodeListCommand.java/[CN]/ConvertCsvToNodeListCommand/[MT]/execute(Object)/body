@@ -56,7 +56,7 @@
     final Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
     final NodeList<AbstractNode> nodeListNode=(NodeList<AbstractNode>)transactionCommand.execute(new StructrTransaction(){
       @Override public Object execute() throws FrameworkException {
-        NodeList<AbstractNode> result=(NodeList)createNode.execute(userCopy,new NodeAttribute(AbstractNode.Key.type.name(),NodeList.class.getSimpleName()),new NodeAttribute(AbstractNode.Key.name.name(),sourceNodeCopy.getName() + " List"));
+        NodeList<AbstractNode> result=(NodeList)createNode.execute(userCopy,new NodeAttribute(AbstractNode.type,NodeList.class.getSimpleName()),new NodeAttribute(AbstractNode.name,sourceNodeCopy.getName() + " List"));
         createRel.execute(sourceNodeCopy,result,RelType.CONTAINS);
         return result;
       }
@@ -64,6 +64,7 @@
 );
     final List<List<NodeAttribute>> creationList=new LinkedList<List<NodeAttribute>>();
     String targetClassName=targetClass.getSimpleName();
+    GraphObject typeInstance=null;
     String[] line=null;
     do {
       try {
@@ -73,10 +74,11 @@
       }
       if (line != null) {
         List<NodeAttribute> nodeAttributes=new LinkedList<NodeAttribute>();
-        nodeAttributes.add(new NodeAttribute(AbstractNode.Key.type.name(),targetClassName));
+        nodeAttributes.add(new NodeAttribute(AbstractNode.type,targetClassName));
         for (int i=0; i < col; i++) {
           String csvValue=line[i];
-          String key=fieldIndex.get(i);
+          String keyName=fieldIndex.get(i);
+          PropertyKey key=typeInstance != null ? typeInstance.getPropertyKeyForName(keyName) : new Property(keyName);
           nodeAttributes.add(new NodeAttribute(key,csvValue));
         }
         creationList.add(nodeAttributes);

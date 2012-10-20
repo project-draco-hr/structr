@@ -16,14 +16,14 @@
         found=true;
         break;
       }
-      for (      Entry<Pattern,Class> entry : resourceMap.entrySet()) {
+      for (      Entry<Pattern,Class<? extends Resource>> entry : resourceMap.entrySet()) {
         Pattern pattern=entry.getKey();
         Matcher matcher=pattern.matcher(pathParts[i]);
         if (matcher.matches()) {
-          Class type=entry.getValue();
+          Class<? extends Resource> type=entry.getValue();
           Resource resource=null;
           try {
-            resource=(Resource)type.newInstance();
+            resource=type.newInstance();
           }
  catch (          Throwable t) {
             logger.log(Level.WARNING,"Error instantiating constraint class",t);

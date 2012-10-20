@@ -6,7 +6,7 @@
     if (staticRel != null) {
       final AbstractNode startNode=typedIdResource.getTypesafeNode();
       if (startNode != null) {
-        if (EntityContext.isReadOnlyProperty(startNode.getClass(),typeResource.getRawType())) {
+        if (EntityContext.isReadOnlyProperty(startNode.getClass(),startNode.getPropertyKeyForName(typeResource.getRawType()))) {
           logger.log(Level.INFO,"Read-only property on {1}: {0}",new Object[]{startNode.getClass(),typeResource.getRawType()});
           return new RestMethodResult(HttpServletResponse.SC_FORBIDDEN);
         }
@@ -17,7 +17,7 @@
             for (            final AbstractRelationship rel : rels) {
               final AbstractNode otherNode=rel.getOtherNode(startNode);
               final Class otherNodeType=otherNode.getClass();
-              final String id=otherNode.getStringProperty(AbstractNode.Key.uuid.name());
+              final String id=otherNode.getStringProperty(AbstractNode.uuid);
               if (staticRel.getDestType().equals(otherNodeType) && !propertySet.containsValue(id)) {
                 deleteRel.execute(rel);
               }
@@ -39,7 +39,7 @@
               final AbstractNode targetNode=(AbstractNode)results.get(0);
               final Class type=staticRel.getDestType();
               if (!type.equals(targetNode.getClass())) {
-                throw new FrameworkException(startNode.getClass().getSimpleName(),new TypeToken(uuid,type.getSimpleName()));
+                throw new FrameworkException(startNode.getClass().getSimpleName(),new TypeToken(AbstractNode.uuid,type.getSimpleName()));
               }
               staticRel.createRelationship(securityContext,startNode,targetNode);
             }

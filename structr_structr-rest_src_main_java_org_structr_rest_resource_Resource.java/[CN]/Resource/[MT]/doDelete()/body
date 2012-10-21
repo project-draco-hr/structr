@@ -1,7 +1,7 @@
 {
-  final Command deleteNode=Services.command(securityContext,DeleteNodeCommand.class);
-  final Command deleteRel=Services.command(securityContext,DeleteRelationshipCommand.class);
-  Iterable<? extends GraphObject> results;
+  final DeleteNodeCommand deleteNode=Services.command(securityContext,DeleteNodeCommand.class);
+  final DeleteRelationshipCommand deleteRel=Services.command(securityContext,DeleteRelationshipCommand.class);
+  Iterable<? extends GraphObject> results=null;
   try {
     results=doGet(null,false,NodeFactory.DEFAULT_PAGE_SIZE,NodeFactory.DEFAULT_PAGE,null).getResults();
   }
@@ -14,13 +14,13 @@
       @Override public Object execute() throws FrameworkException {
         for (        final GraphObject obj : finalResults) {
           if (obj instanceof AbstractRelationship) {
-            deleteRel.execute(obj);
+            deleteRel.execute((AbstractRelationship)obj);
           }
  else           if (obj instanceof AbstractNode) {
             if (!securityContext.isAllowed((AbstractNode)obj,Permission.delete)) {
               throw new NotAllowedException();
             }
-            deleteNode.execute(obj,true);
+            deleteNode.execute((AbstractNode)obj,true);
           }
         }
         return null;

@@ -4,7 +4,8 @@
     @Override public Object execute() throws FrameworkException {
       Map<String,Object> nodeData=webSocketData.getNodeData();
       nodeData.put(AbstractNode.visibleToAuthenticatedUsers.name(),true);
-      return Services.command(securityContext,CreateNodeCommand.class).execute(nodeData);
+      PropertySet properties=PropertySet.convert(nodeData);
+      return Services.command(securityContext,CreateNodeCommand.class).execute(properties);
     }
   }
 ;

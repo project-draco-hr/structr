@@ -1,11 +1,11 @@
 {
-  AbstractRelationship newRel=null;
-  Class relClass;
+  Class<T> relClass=null;
+  T newRel=null;
   try {
     relClass=findNamedRelation(relationship);
     if (relClass != null) {
       try {
-        newRel=(AbstractRelationship)relClass.newInstance();
+        newRel=relClass.newInstance();
       }
  catch (      Throwable t2) {
         newRel=null;
@@ -24,7 +24,7 @@
  catch (  Throwable t) {
   }
   if (newRel == null) {
-    newRel=new GenericRelationship();
+    newRel=(T)new GenericRelationship();
   }
   newRel.init(securityContext,relationship);
   newRel.onRelationshipInstantiation();

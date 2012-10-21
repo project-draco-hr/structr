@@ -4,11 +4,8 @@
   List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
   Set<String> nodesWithChildren=new HashSet<String>();
   searchAttributes.add(Search.andExactType(CaseHelper.toUpperCamelCase(type)));
-  AbstractNode topNode=null;
-  boolean includeDeletedAndHidden=false;
-  boolean publicOnly=false;
   try {
-    Result result=(Result)Services.command(securityContext,SearchNodeCommand.class).execute(topNode,includeDeletedAndHidden,publicOnly,searchAttributes);
+    Result result=(Result)Services.command(securityContext,SearchNodeCommand.class).execute(searchAttributes);
     List<? extends GraphObject> resultList=result.getResults();
     if (webSocketData.getSortKey() != null) {
       final String sortOrder=webSocketData.getSortOrder();

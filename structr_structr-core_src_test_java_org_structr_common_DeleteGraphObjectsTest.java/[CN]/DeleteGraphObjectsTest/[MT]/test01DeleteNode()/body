@@ -1,28 +1,30 @@
 {
   try {
-    AbstractNode node;
-    final Map<String,Object> props=new HashMap<String,Object>();
+    final PropertySet props=new PropertySet();
     String type="UnknownTestType";
     String name="GenericNode-name";
-    props.put(AbstractNode.type.name(),type);
-    props.put(AbstractNode.name.name(),name);
-    node=(AbstractNode)transactionCommand.execute(new StructrTransaction(){
-      @Override public Object execute() throws FrameworkException {
-        return (AbstractNode)createNodeCommand.execute(props);
+    props.put(AbstractNode.type,type);
+    props.put(AbstractNode.name,name);
+    final AbstractNode node=transactionCommand.execute(new StructrTransaction<AbstractNode>(){
+      @Override public AbstractNode execute() throws FrameworkException {
+        return createNodeCommand.execute(props);
       }
     }
 );
     assertTrue(node != null);
-    final String nodeId=node.getUuid();
+    String uuid=node.getUuid();
     transactionCommand.execute(new StructrTransaction(){
       @Override public Object execute() throws FrameworkException {
-        return deleteNodeCommand.execute(nodeId);
+        deleteNodeCommand.execute(node);
+        return null;
       }
     }
 );
     try {
-      findNodeCommand.execute(nodeId);
-      fail("Should have raised a not found exception");
+      List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
+      attrs.add(Search.andExactUuid(uuid));
+      Result result=searchNodeCommand.execute(attrs);
+      assertEquals("Node should have been deleted",0,result.size());
     }
  catch (    FrameworkException fe) {
     }

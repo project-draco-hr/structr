@@ -1,10 +1,14 @@
 {
   if (nodeId == null)   return null;
-  try {
-    return (AbstractNode)Services.command(securityContext,FindNodeCommand.class).execute(nodeId);
-  }
- catch (  FrameworkException fex) {
-    fex.printStackTrace();
+  NodeFactory factory=new NodeFactory(securityContext);
+  GraphDatabaseService graphDb=Services.command(securityContext,GraphDatabaseCommand.class).execute();
+  Node node=graphDb.getNodeById(nodeId);
+  if (node != null) {
+    try {
+      return factory.createNode(node);
+    }
+ catch (    FrameworkException fex) {
+    }
   }
   return null;
 }

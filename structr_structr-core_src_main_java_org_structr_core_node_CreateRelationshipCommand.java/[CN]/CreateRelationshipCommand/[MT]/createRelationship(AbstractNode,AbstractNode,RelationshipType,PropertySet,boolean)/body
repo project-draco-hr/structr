@@ -1,0 +1,46 @@
+{
+  return (T)Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+    @Override public Object execute() throws FrameworkException {
+      if (checkDuplicates) {
+        List<AbstractRelationship> incomingRels=toNode.getIncomingRelationships();
+        for (        AbstractRelationship rel : incomingRels) {
+          if (rel.getRelType().equals(relType) && rel.getStartNode().equals(fromNode)) {
+            PropertySet relProps=rel.getProperties();
+            boolean propsEqual=true;
+            for (            Entry<PropertyKey,Object> entry : properties.entrySet()) {
+              PropertyKey key=entry.getKey();
+              Object val=entry.getValue();
+              if (!relProps.containsKey(key) || !relProps.get(key).equals(val)) {
+                propsEqual=false;
+                break;
+              }
+            }
+            if (propsEqual) {
+              logger.log(Level.WARNING,"Creation of duplicate relationship was blocked");
+              return null;
+            }
+          }
+        }
+      }
+      RelationshipFactory<T> relationshipFactory=new RelationshipFactory<T>(securityContext);
+      Node startNode=fromNode.getNode();
+      Node endNode=toNode.getNode();
+      Relationship rel=startNode.createRelationshipTo(endNode,relType);
+      T newRel=relationshipFactory.createRelationship(securityContext,rel);
+      newRel.setProperty(AbstractRelationship.createdDate,new Date());
+      if (newRel != null) {
+        if ((properties != null) && !properties.isEmpty()) {
+          for (          Entry<PropertyKey,Object> entry : properties.entrySet()) {
+            newRel.setProperty(entry.getKey(),entry.getValue());
+          }
+        }
+        newRel.onRelationshipInstantiation();
+        for (        Transformation<GraphObject> transformation : EntityContext.getEntityCreationTransformations(newRel.getClass())) {
+          transformation.apply(securityContext,newRel);
+        }
+      }
+      return newRel;
+    }
+  }
+);
+}

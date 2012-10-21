@@ -1,0 +1,31 @@
+{
+  RelationshipFactory relFactory=(RelationshipFactory)arguments.get("relationshipFactory");
+  GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
+  NodeFactory nodeFactory=new NodeFactory(securityContext);
+  ExecutionEngine engine=new ExecutionEngine(graphDb);
+  List<GraphObject> resultList=new LinkedList<GraphObject>();
+  ExecutionResult result=null;
+  if (parameters != null) {
+    result=engine.execute(query,parameters);
+  }
+ else {
+    result=engine.execute(query);
+  }
+  for (  Map<String,Object> row : result) {
+    for (    Object o : row.values()) {
+      if (o instanceof Node) {
+        AbstractNode node=nodeFactory.createNode((Node)o,includeHiddenAndDeleted,publicOnly);
+        if (node != null) {
+          resultList.add(node);
+        }
+      }
+ else       if (o instanceof Relationship) {
+        AbstractRelationship rel=relFactory.createRelationship(securityContext,(Relationship)o);
+        if (rel != null) {
+          resultList.add(rel);
+        }
+      }
+    }
+  }
+  return resultList;
+}

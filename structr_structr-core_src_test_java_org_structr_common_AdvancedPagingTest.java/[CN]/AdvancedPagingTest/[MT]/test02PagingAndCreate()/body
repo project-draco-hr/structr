@@ -16,14 +16,14 @@
     }
     List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
     searchAttributes.add(Search.andExactTypeAndSubtypes(type));
-    Result result=(Result)searchNodeCommand.execute(null,includeDeletedAndHidden,publicOnly,searchAttributes);
+    Result result=searchNodeCommand.execute(searchAttributes);
     assertTrue(result.size() == number);
-    String sortKey=AbstractNode.name.name();
+    PropertyKey sortKey=AbstractNode.name;
     boolean sortDesc=false;
     int pageSize=2;
     int page=1;
     testPaging(pageSize,page,number,offset,includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDesc);
-    Map<String,Object> props=new HashMap();
+    PropertySet props=new PropertySet();
     props.put(sortKey,"TestOne-09");
     this.createTestNode(type,props);
     testPaging(pageSize,page + 1,number + 1,offset - 1,includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDesc);

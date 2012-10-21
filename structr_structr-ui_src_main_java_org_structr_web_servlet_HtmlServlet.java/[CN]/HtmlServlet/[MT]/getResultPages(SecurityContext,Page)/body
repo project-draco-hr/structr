@@ -14,15 +14,12 @@
     resultPages=new HashSet<Page>();
   }
   List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
-  AbstractNode topNode=null;
-  boolean includeDeletedAndHidden=false;
-  boolean publicOnly=false;
   searchAttributes.add(Search.andContent(search));
   searchAttributes.add(Search.andExactType(Content.class.getSimpleName()));
   try {
-    Result result=(Result)searchNodesAsSuperuser.execute(topNode,includeDeletedAndHidden,publicOnly,searchAttributes);
-    for (    GraphObject obj : result.getResults()) {
-      resultPages.addAll(PageHelper.getPages(securityContext,(Content)obj));
+    Result<Content> result=searchNodesAsSuperuser.execute(searchAttributes);
+    for (    Content content : result.getResults()) {
+      resultPages.addAll(PageHelper.getPages(securityContext,content));
     }
     resultPages.remove((Page)displayPage);
   }

@@ -1,0 +1,24 @@
+{
+  TxPageFile logDb=(TxPageFile)arguments.get("logDb");
+  if (logDb != null) {
+    if (key != null) {
+synchronized (logDb) {
+        Transaction tx=logDb.tx();
+        MultiIndexFactory multiIndexFactory=new MultiIndexFactory(tx);
+        IndexFactory<String,Object> indexFactory=new BTreeIndexFactory<String,Object>();
+        SortedIndex<String,Object> index=null;
+        try {
+          index=(SortedIndex<String,Object>)multiIndexFactory.openOrCreate(key,indexFactory);
+        }
+ catch (        org.fusesource.hawtdb.api.IndexException e) {
+          logger.log(Level.WARNING,"Could not open or create log db page for key {0}",key);
+          index=(SortedIndex<String,Object>)multiIndexFactory.create(key,indexFactory);
+        }
+        String uuid=UUID.randomUUID().toString().replaceAll("[\\-]+","");
+        index.put(uuid,obj);
+        tx.commit();
+        logDb.flush();
+      }
+    }
+  }
+}

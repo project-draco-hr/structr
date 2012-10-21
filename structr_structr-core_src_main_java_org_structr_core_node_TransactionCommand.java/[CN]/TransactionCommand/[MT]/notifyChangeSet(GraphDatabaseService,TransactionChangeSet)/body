@@ -1,0 +1,44 @@
+{
+  final Queue<AbstractNode> propagationQueue=changeSet.getPropagationQueue();
+  final Set<AbstractNode> propagationSet=new LinkedHashSet<AbstractNode>();
+  propagationSet.addAll(propagationQueue);
+  if (!propagationQueue.isEmpty()) {
+    do {
+      final AbstractNode node=propagationQueue.poll();
+      if (!propagationSet.contains(node)) {
+        propagationSet.addAll(node.getNodesForModificationPropagation());
+      }
+    }
+ while (!propagationQueue.isEmpty());
+  }
+  Transaction postProcessingTransaction=graphDb.beginTx();
+  try {
+    propagateModification(securityContext,propagationSet);
+    afterCreation(securityContext,changeSet.getCreatedNodes());
+    afterCreation(securityContext,changeSet.getCreatedRelationships());
+    afterModification(securityContext,changeSet.getModifiedNodes());
+    afterModification(securityContext,changeSet.getModifiedRelationships());
+    afterDeletion(securityContext,changeSet.getDeletedNodes());
+    afterDeletion(securityContext,changeSet.getDeletedRelationships());
+    afterOwnerModification(securityContext,changeSet.getOwnerModifiedNodes());
+    afterSecurityModification(securityContext,changeSet.getSecurityModifiedNodes());
+    afterLocationModification(securityContext,changeSet.getLocationModifiedNodes());
+    EntityContext.clearTransactionData();
+    postProcessingTransaction.success();
+  }
+ catch (  Throwable t) {
+    postProcessingTransaction.failure();
+  }
+ finally {
+    long transactionKey=nextLong();
+    EntityContext.setSecurityContext(securityContext);
+    EntityContext.setTransactionKey(transactionKey);
+    try {
+      postProcessingTransaction.finish();
+    }
+ catch (    Throwable t) {
+      logger.log(Level.FINE,"Transaction failure",t);
+    }
+    EntityContext.clearTransactionData();
+  }
+}

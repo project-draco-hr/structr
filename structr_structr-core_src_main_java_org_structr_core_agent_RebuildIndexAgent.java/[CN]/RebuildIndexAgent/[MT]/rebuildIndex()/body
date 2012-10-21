@@ -1,27 +1,21 @@
 {
   final SecurityContext securityContext=SecurityContext.getSuperUserInstance();
-  Command transactionCommand=Services.command(securityContext,TransactionCommand.class);
-  Command graphDbCommand=Services.command(securityContext,GraphDatabaseCommand.class);
-  final GraphDatabaseService graphDb=(GraphDatabaseService)graphDbCommand.execute();
-  Long noOfNodes=(Long)transactionCommand.execute(new BatchTransaction(){
-    @Override public Object execute(    Transaction tx) throws FrameworkException {
+  final GraphDatabaseService graphDb=Services.command(securityContext,GraphDatabaseCommand.class).execute();
+  Long noOfNodes=Services.command(securityContext,TransactionCommand.class).execute(new BatchTransaction<Long>(){
+    @Override public Long execute(    Transaction tx) throws FrameworkException {
+      IndexNodeCommand indexer=Services.command(securityContext,IndexNodeCommand.class);
       long nodes=0;
-      Command indexer=Services.command(securityContext,IndexNodeCommand.class);
       logger.log(Level.INFO,"Get all nodes ...");
-      Result allNodes=(Result)Services.command(securityContext,GetAllNodes.class).execute();
+      List<AbstractNode> allNodes=Services.command(securityContext,GetAllNodes.class).execute();
       logger.log(Level.INFO,"... done. Start indexing {0} nodes ...",allNodes.size());
-      List<? extends GraphObject> list=allNodes.getResults();
-      for (      GraphObject obj : list) {
-        indexer.execute(obj);
-        obj=null;
+      for (      AbstractNode node : allNodes) {
+        indexer.execute(node);
         nodes++;
         if (nodes % 1000 == 0) {
           logger.log(Level.INFO,"Indexed {0} nodes, committing results to database.",nodes);
           tx.success();
           tx.finish();
           tx=graphDb.beginTx();
-          indexer=null;
-          indexer=Services.command(securityContext,IndexNodeCommand.class);
           logger.log(Level.FINE,"######## committed ########",nodes);
         }
       }

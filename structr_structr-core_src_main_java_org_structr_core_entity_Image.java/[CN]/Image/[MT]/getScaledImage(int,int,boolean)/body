@@ -22,10 +22,9 @@
   }
   logger.log(Level.INFO,"Creating thumbnail for {0}",getName());
   try {
-    Command transactionCommand=Services.command(securityContext,TransactionCommand.class);
-    thumbnail=(Image)transactionCommand.execute(new StructrTransaction(){
-      @Override public Object execute() throws FrameworkException {
-        Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
+    thumbnail=Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction<Image>(){
+      @Override public Image execute() throws FrameworkException {
+        CreateRelationshipCommand createRel=Services.command(securityContext,CreateRelationshipCommand.class);
         Thumbnail thumbnailData=ImageHelper.createThumbnail(originalImage,maxWidth,maxHeight,cropToFit);
         if (thumbnailData != null) {
           Integer tnWidth=thumbnailData.getWidth();
@@ -45,7 +44,7 @@
             logger.log(Level.WARNING,"Could not create thumbnail image",ex);
           }
           if (thumbnail != null) {
-            AbstractRelationship thumbnailRelationship=(AbstractRelationship)createRel.execute(originalImage,thumbnail,RelType.THUMBNAIL);
+            AbstractRelationship thumbnailRelationship=createRel.execute(originalImage,thumbnail,RelType.THUMBNAIL);
             thumbnailRelationships.add(thumbnailRelationship);
             thumbnailRelationship.setProperty(Image.width,tnWidth);
             thumbnailRelationship.setProperty(Image.height,tnHeight);

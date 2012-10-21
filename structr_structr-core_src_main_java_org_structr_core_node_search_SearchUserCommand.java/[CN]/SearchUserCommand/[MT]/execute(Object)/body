@@ -1,5 +1,5 @@
 {
-  final Command findNode=Services.command(securityContext,FindNodeCommand.class);
+  final NodeFactory nodeFactory=new NodeFactory(securityContext);
 switch (parameters.length) {
 case 1:
 {
@@ -7,7 +7,7 @@ case 1:
       if (parameters[0] instanceof String) {
         final String userName=(String)parameters[0];
         for (        final Node n : index.get(AbstractNode.name.name(),userName)) {
-          final AbstractNode s=(AbstractNode)findNode.execute(n);
+          final AbstractNode s=nodeFactory.createNode(n);
           if (s.getType().equals(Principal.class.getSimpleName())) {
             return s;
           }
@@ -24,7 +24,7 @@ case 3:
   final IndexHits<Node> indexHits=index.query(key.name(),"\"" + userNickName + "\"");
   try {
     for (    final Node n : indexHits) {
-      final Object u=findNode.execute(n);
+      final Object u=nodeFactory.createNode(n);
       if (u != null) {
         return u;
       }

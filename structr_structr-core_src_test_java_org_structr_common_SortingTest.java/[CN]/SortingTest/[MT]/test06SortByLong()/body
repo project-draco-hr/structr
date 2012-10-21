@@ -17,13 +17,13 @@
     }
     List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
     searchAttributes.add(Search.andType(type));
-    Result result=(Result)searchNodeCommand.execute(null,includeDeletedAndHidden,publicOnly,searchAttributes);
-    assertTrue(result.size() == number);
-    String sortKey=key.name();
+    Result result=searchNodeCommand.execute(includeDeletedAndHidden,publicOnly,searchAttributes);
+    assertEquals(number,result.size());
+    PropertyKey sortKey=key;
     boolean sortDesc=false;
     int pageSize=20;
     int page=1;
-    result=(Result)searchNodeCommand.execute(null,includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDesc,pageSize,page,null,SortField.LONG);
+    result=searchNodeCommand.execute(includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDesc,pageSize,page,null,SortField.LONG);
     for (    GraphObject obj : result.getResults()) {
       System.out.println(obj.getStringProperty(AbstractNode.name) + ": " + obj.getLongProperty(key));
     }
@@ -37,7 +37,7 @@
       long expectedNumber=offset + j;
       long gotNumber=result.get(j).getLongProperty(key);
       System.out.println("expected: " + expectedNumber + ", got: "+ gotNumber);
-      assertTrue(gotNumber == expectedNumber);
+      assertEquals(expectedNumber,gotNumber);
     }
   }
  catch (  FrameworkException ex) {

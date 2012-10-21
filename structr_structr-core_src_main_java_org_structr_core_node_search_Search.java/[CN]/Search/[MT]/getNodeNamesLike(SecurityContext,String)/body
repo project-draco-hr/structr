@@ -3,10 +3,10 @@
   List<SearchAttribute> searchAttrs=new LinkedList<SearchAttribute>();
   searchAttrs.add(Search.andName(string + SearchAttribute.WILDCARD));
   try {
-    Result result=(Result)Services.command(securityContext,SearchNodeCommand.class).execute(null,false,false,searchAttrs);
+    Result<AbstractNode> result=Services.command(securityContext,SearchNodeCommand.class).execute(searchAttrs);
     if (result != null) {
-      for (      GraphObject obj : result.getResults()) {
-        names.add(((AbstractNode)obj).getName());
+      for (      AbstractNode node : result.getResults()) {
+        names.add(node.getName());
       }
     }
   }

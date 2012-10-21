@@ -1,5 +1,5 @@
 {
-  final Map<String,Object> props=new HashMap<String,Object>();
+  final PropertySet props=new PropertySet();
   try {
     transactionCommand.execute(new StructrTransaction(){
       @Override public Object execute() throws FrameworkException {
@@ -31,20 +31,20 @@ catch (        IOException ex) {
           if (AbstractNode.class.isAssignableFrom(entityClass)) {
             String type=entityClass.getSimpleName();
             if (type.equals(ResourceAccess.class.getSimpleName())) {
-              props.put(ResourceAccess.signature.name(),"/");
-              props.put(ResourceAccess.flags.name(),6);
+              props.put(ResourceAccess.signature,"/");
+              props.put(ResourceAccess.flags,6);
             }
             if (type.equals(Location.class.getSimpleName())) {
-              props.put(Location.latitude.name(),12.34);
-              props.put(Location.longitude.name(),56.78);
+              props.put(Location.latitude,12.34);
+              props.put(Location.longitude,56.78);
             }
             logger.log(Level.INFO,"Creating node of type {0}",type);
-            props.put(AbstractNode.type.name(),type);
+            props.put(AbstractNode.type,type);
             AbstractNode node=(AbstractNode)createNodeCommand.execute(props);
             assertTrue(type.equals(node.getStringProperty(AbstractNode.type)));
             if (type.equals(ResourceAccess.class.getSimpleName())) {
-              props.remove(ResourceAccess.signature.name());
-              props.remove(ResourceAccess.flags.name());
+              props.remove(ResourceAccess.signature);
+              props.remove(ResourceAccess.flags);
             }
           }
         }

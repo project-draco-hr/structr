@@ -4,16 +4,13 @@
     return false;
   }
   if ((key != null) && (value != null)) {
-    AbstractNode topNode=null;
-    Boolean includeDeletedAndHidden=false;
-    Boolean publicOnly=false;
     boolean nodeExists=false;
     List<SearchAttribute> attributes=new LinkedList<SearchAttribute>();
     String id=null;
     attributes.add(new TextualSearchAttribute(key,value,SearchOperator.AND));
     Result resultList=null;
     try {
-      resultList=(Result)Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class).execute(topNode,includeDeletedAndHidden,publicOnly,attributes);
+      resultList=Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class).execute(attributes);
       nodeExists=!resultList.isEmpty();
     }
  catch (    FrameworkException fex) {

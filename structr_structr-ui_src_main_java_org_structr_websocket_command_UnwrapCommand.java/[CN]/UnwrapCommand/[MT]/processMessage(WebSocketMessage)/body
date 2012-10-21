@@ -7,19 +7,19 @@
   final String pageId=(String)relData.get("pageId");
   final String parentId=(String)nodeData.get("parentId");
   final AbstractNode parentNode=getNode(parentId);
-  final Long position=Long.parseLong((String)relData.get(pageId));
   if (nodeToWrap != null) {
     StructrTransaction transaction=new StructrTransaction(){
       @Override public Object execute() throws FrameworkException {
-        Component newComponent=(Component)Services.command(securityContext,CreateNodeCommand.class).execute(nodeData);
+        PropertySet nodeProps=PropertySet.convert(nodeData);
+        Component newComponent=(Component)Services.command(securityContext,CreateNodeCommand.class).execute(nodeProps);
         String componentId=newComponent.getStringProperty(AbstractNode.uuid);
         RelationshipHelper.moveIncomingRelationships(securityContext,nodeToWrap,newComponent,RelType.CONTAINS,pageId,newComponent.getStringProperty(AbstractNode.uuid),false);
         if ((parentNode != null) && (newComponent != null)) {
           RelationClass rel=EntityContext.getRelationClass(parentNode.getClass(),newComponent.getClass());
           if (rel != null) {
-            Map<String,Object> relProps=new LinkedHashMap<String,Object>();
-            relProps.put(pageId,0);
-            relProps.put("componentId",componentId);
+            PropertySet relProps=new PropertySet();
+            relProps.put(new Property(pageId),0);
+            relProps.put(new Property("componentId"),componentId);
             try {
               rel.createRelationship(securityContext,newComponent,nodeToWrap,relProps);
             }

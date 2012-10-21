@@ -10,8 +10,8 @@
   }
   SecurityContext securityContext=securityContextMap.get(currentThread);
   SecurityContext superUserContext=SecurityContext.getSuperUserInstance();
-  Command indexNodeCommand=Services.command(superUserContext,IndexNodeCommand.class);
-  Command indexRelationshipCommand=Services.command(superUserContext,IndexRelationshipCommand.class);
+  IndexNodeCommand indexNodeCommand=Services.command(superUserContext,IndexNodeCommand.class);
+  IndexRelationshipCommand indexRelationshipCommand=Services.command(superUserContext,IndexRelationshipCommand.class);
   try {
     Map<Relationship,Map<String,Object>> removedRelProperties=new LinkedHashMap<Relationship,Map<String,Object>>();
     Map<Node,Map<String,Object>> removedNodeProperties=new LinkedHashMap<Node,Map<String,Object>>();
@@ -97,9 +97,10 @@
     for (    Relationship rel : data.deletedRelationships()) {
       AbstractRelationship entity=relFactory.createRelationship(securityContext,rel);
       if (entity != null) {
-        hasError|=!entity.beforeDeletion(securityContext,errorBuffer,removedRelProperties.get(rel));
+        PropertySet properties=PropertySet.convert(entity,removedRelProperties.get(rel));
+        hasError|=!entity.beforeDeletion(securityContext,errorBuffer,properties);
         for (        StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
-          hasError|=!listener.graphObjectDeleted(securityContext,transactionKey,errorBuffer,entity,removedRelProperties.get(rel));
+          hasError|=!listener.graphObjectDeleted(securityContext,transactionKey,errorBuffer,entity,properties);
         }
         changeSet.delete(entity);
         try {
@@ -122,9 +123,10 @@
       String type=(String)removedNodeProperties.get(node).get(AbstractNode.type.name());
       AbstractNode entity=nodeFactory.createDummyNode(type);
       if (entity != null) {
-        hasError|=!entity.beforeDeletion(securityContext,errorBuffer,removedNodeProperties.get(node));
+        PropertySet properties=PropertySet.convert(entity,removedNodeProperties.get(node));
+        hasError|=!entity.beforeDeletion(securityContext,errorBuffer,properties);
         for (        StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
-          hasError|=!listener.graphObjectDeleted(securityContext,transactionKey,errorBuffer,entity,removedNodeProperties.get(node));
+          hasError|=!listener.graphObjectDeleted(securityContext,transactionKey,errorBuffer,entity,properties);
         }
         changeSet.delete(entity);
       }

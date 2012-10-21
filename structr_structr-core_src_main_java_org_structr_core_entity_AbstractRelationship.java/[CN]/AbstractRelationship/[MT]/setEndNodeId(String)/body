@@ -7,13 +7,11 @@
   if (getEndNodeId().equals(endNodeId)) {
     return;
   }
-  Command transaction=Services.command(securityContext,TransactionCommand.class);
-  transaction.execute(new StructrTransaction(){
+  Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
     @Override public Object execute() throws FrameworkException {
-      Command deleteRel=Services.command(securityContext,DeleteRelationshipCommand.class);
-      Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
-      Command nodeFactory=Services.command(securityContext,NodeFactoryCommand.class);
-      AbstractNode startNode=(AbstractNode)nodeFactory.execute(getStartNode());
+      DeleteRelationshipCommand deleteRel=Services.command(securityContext,DeleteRelationshipCommand.class);
+      CreateRelationshipCommand createRel=Services.command(securityContext,CreateRelationshipCommand.class);
+      AbstractNode startNode=getStartNode();
       AbstractNode newEndNode=getNodeByUuid(endNodeId);
       if (newEndNode == null) {
         throw new FrameworkException(type,new IdNotFoundToken(endNodeId));

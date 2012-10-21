@@ -7,10 +7,11 @@
     AbstractRelationship relationship=(AbstractRelationship)graphObject;
     AbstractNode startNode=relationship.getStartNode();
     AbstractNode endNode=relationship.getEndNode();
-    Map<String,Object> relProperties=relationship.getProperties();
-    relProperties.put("startNodeId",startNode.getUuid());
-    relProperties.put("endNodeId",endNode.getUuid());
-    message.setRelData(relProperties);
+    PropertySet relProperties=relationship.getProperties();
+    relProperties.put(new Property("startNodeId"),startNode.getUuid());
+    relProperties.put(new Property("endNodeId"),endNode.getUuid());
+    Map<String,Object> properties=PropertySet.revert(relProperties);
+    message.setRelData(properties);
   }
   message.setId(uuid);
   message.setGraphObject(graphObject);

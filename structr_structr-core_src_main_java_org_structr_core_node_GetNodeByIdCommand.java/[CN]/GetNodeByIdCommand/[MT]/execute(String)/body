@@ -1,0 +1,20 @@
+{
+  List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
+  attrs.add(Search.andExactUuid(uuid));
+  Result results=Services.command(securityContext,SearchNodeCommand.class).execute(attrs);
+  int size=results.size();
+  if (size == 0) {
+    return null;
+  }
+  if (size > 1) {
+    logger.log(Level.WARNING,"Got more than one result for UUID {0}, this is very likely to be a UUID collision!",uuid);
+  }
+  GraphObject result=results.get(0);
+  if (result instanceof AbstractNode) {
+    return (AbstractNode)result;
+  }
+ else {
+    logger.log(Level.WARNING,"Node with UUID {0} is not of type AbstractNode!",uuid);
+  }
+  return null;
+}

@@ -16,13 +16,13 @@
     }
     List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
     searchAttributes.add(Search.andExactTypeAndSubtypes(type));
-    Result result=(Result)searchNodeCommand.execute(null,includeDeletedAndHidden,publicOnly,searchAttributes);
-    assertTrue(result.size() == number);
-    String sortKey=AbstractNode.name.name();
+    Result result=searchNodeCommand.execute(includeDeletedAndHidden,publicOnly,searchAttributes);
+    assertEquals(number,result.size());
+    PropertyKey sortKey=AbstractNode.name;
     boolean sortDesc=false;
     int pageSize=10;
     int page=1;
-    result=(Result)searchNodeCommand.execute(null,includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDesc,pageSize,page);
+    result=searchNodeCommand.execute(includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDesc,pageSize,page);
     logger.log(Level.INFO,"Raw result size: {0}, expected: {1}",new Object[]{result.getRawResultCount(),number});
     assertTrue(result.getRawResultCount() == number);
     logger.log(Level.INFO,"Result size: {0}, expected: {1}",new Object[]{result.size(),Math.min(number,pageSize)});
@@ -31,7 +31,7 @@
       String expectedName="TestOne-" + (offset + j);
       String gotName=result.get(j).getStringProperty(AbstractNode.name);
       System.out.println(expectedName + ", got: " + gotName);
-      assertTrue(gotName.equals(expectedName));
+      assertEquals(expectedName,gotName);
     }
   }
  catch (  FrameworkException ex) {

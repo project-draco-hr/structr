@@ -1,28 +1,23 @@
 {
   List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
-  try {
-    SecurityContext superUserContext=SecurityContext.getSuperUserInstance();
-    Map<String,Class> entities=(Map)Services.command(superUserContext,GetEntitiesCommand.class).execute();
-    Class parentClass=entities.get(searchString);
-    if (parentClass == null) {
-      ModuleService moduleService=(ModuleService)Services.command(superUserContext,GetModuleServiceCommand.class).execute();
-      Set<Class> classesForInterface=moduleService.getClassesForInterface(EntityContext.normalizeEntityName(searchString));
-      if (classesForInterface != null) {
-        for (        Class clazz : classesForInterface) {
-          attrs.addAll(getExactTypeAndSubtypesInternal(clazz.getSimpleName()));
-        }
-      }
-      return attrs;
-    }
-    for (    Map.Entry<String,Class> entity : entities.entrySet()) {
-      Class entityClass=entity.getValue();
-      if (parentClass.isAssignableFrom(entityClass)) {
-        attrs.add(Search.orExactType(entity.getKey()));
+  SecurityContext superUserContext=SecurityContext.getSuperUserInstance();
+  Map<String,Class> entities=Services.command(superUserContext,GetEntitiesCommand.class).execute();
+  Class parentClass=entities.get(searchString);
+  if (parentClass == null) {
+    ModuleService moduleService=(ModuleService)Services.command(superUserContext,GetModuleServiceCommand.class).execute();
+    Set<Class> classesForInterface=moduleService.getClassesForInterface(EntityContext.normalizeEntityName(searchString));
+    if (classesForInterface != null) {
+      for (      Class clazz : classesForInterface) {
+        attrs.addAll(getExactTypeAndSubtypesInternal(clazz.getSimpleName()));
       }
     }
+    return attrs;
   }
- catch (  FrameworkException fex) {
-    logger.log(Level.WARNING,"Unable to add subtypes to search attributes",fex);
+  for (  Map.Entry<String,Class> entity : entities.entrySet()) {
+    Class entityClass=entity.getValue();
+    if (parentClass.isAssignableFrom(entityClass)) {
+      attrs.add(Search.orExactType(entity.getKey()));
+    }
   }
   return attrs;
 }

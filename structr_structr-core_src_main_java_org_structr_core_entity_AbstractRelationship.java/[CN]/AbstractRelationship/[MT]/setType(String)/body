@@ -1,16 +1,14 @@
 {
   if (type != null) {
     try {
-      Command transacted=Services.command(securityContext,TransactionCommand.class);
-      transacted.execute(new StructrTransaction(){
+      Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
         @Override public Object execute() throws FrameworkException {
-          Command deleteRel=Services.command(securityContext,DeleteRelationshipCommand.class);
-          Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
-          Command nodeFactory=Services.command(securityContext,NodeFactoryCommand.class);
-          AbstractNode startNode=(AbstractNode)nodeFactory.execute(getStartNode());
-          AbstractNode endNode=(AbstractNode)nodeFactory.execute(getEndNode());
+          DeleteRelationshipCommand deleteRel=Services.command(securityContext,DeleteRelationshipCommand.class);
+          CreateRelationshipCommand createRel=Services.command(securityContext,CreateRelationshipCommand.class);
+          AbstractNode startNode=getStartNode();
+          AbstractNode endNode=getEndNode();
           deleteRel.execute(dbRelationship);
-          dbRelationship=((AbstractRelationship)createRel.execute(startNode,endNode,type)).getRelationship();
+          dbRelationship=createRel.execute(startNode,endNode,type).getRelationship();
           return (null);
         }
       }

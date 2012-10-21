@@ -1,6 +1,5 @@
 {
   List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
-  AbstractNode topNode=null;
   boolean includeDeletedAndHidden=false;
   boolean publicOnly=false;
   if (rawType != null) {
@@ -43,7 +42,7 @@
         sortFinalResults=true;
       }
     }
-    Result results=(Result)Services.command(securityContext,SearchNodeCommand.class).execute(topNode,includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDescending,pageSize,page,offsetId,sortType);
+    Result results=Services.command(securityContext,SearchNodeCommand.class).execute(includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDescending,pageSize,page,offsetId,sortType);
     if (sortFinalResults) {
       Collections.sort(results.getResults(),new GraphObjectComparator(sortKey,sortDescending ? GraphObjectComparator.DESCENDING : GraphObjectComparator.ASCENDING));
     }

@@ -16,13 +16,13 @@
     }
     List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
     searchAttributes.add(Search.andExactTypeAndSubtypes(type));
-    Result result=(Result)searchNodeCommand.execute(null,includeDeletedAndHidden,publicOnly,searchAttributes);
+    Result result=searchNodeCommand.execute(includeDeletedAndHidden,publicOnly,searchAttributes);
     assertTrue(result.size() == number);
-    String sortKey=AbstractNode.name.name();
+    PropertyKey sortKey=AbstractNode.name;
     boolean sortDesc=false;
     int pageSize=10;
     int page=1;
-    result=(Result)searchNodeCommand.execute(null,includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDesc,pageSize,page,nodes.get(3).getUuid());
+    result=searchNodeCommand.execute(includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDesc,pageSize,page,nodes.get(3).getUuid());
     assertTrue(result.size() == 7);
     assertEquals("TestOne-3",result.get(0).getStringProperty(AbstractNode.name));
     assertEquals("TestOne-4",result.get(1).getStringProperty(AbstractNode.name));

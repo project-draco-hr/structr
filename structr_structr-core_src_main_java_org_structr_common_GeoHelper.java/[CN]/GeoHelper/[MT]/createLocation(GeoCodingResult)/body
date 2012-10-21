@@ -1,13 +1,13 @@
 {
+  final PropertySet props=new PropertySet();
   double latitude=coords.getLatitude();
   double longitude=coords.getLongitude();
   String type=Location.class.getSimpleName();
-  final Map<String,Object> props=new HashMap<String,Object>();
-  props.put(AbstractNode.type.name(),type);
-  props.put(Location.latitude.name(),latitude);
-  props.put(Location.longitude.name(),longitude);
-  StructrTransaction transaction=new StructrTransaction(){
-    @Override public Object execute() throws FrameworkException {
+  props.put(AbstractNode.type,type);
+  props.put(Location.latitude,latitude);
+  props.put(Location.longitude,longitude);
+  StructrTransaction transaction=new StructrTransaction<AbstractNode>(){
+    @Override public AbstractNode execute() throws FrameworkException {
       return Services.command(SecurityContext.getSuperUserInstance(),CreateNodeCommand.class).execute(props);
     }
   }

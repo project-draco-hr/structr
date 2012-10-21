@@ -1,14 +1,14 @@
 {
-  final List<GraphObject> templates=getComponents(SecurityContext.getSuperUserInstance(),getSearchAttributes(rawType));
-  final Command createNodeCommand=Services.command(securityContext,CreateNodeCommand.class);
-  final Map<String,Object> templateProperties=new LinkedHashMap<String,Object>();
+  final List<Component> templates=getComponents(SecurityContext.getSuperUserInstance(),getSearchAttributes(rawType));
+  final CreateNodeCommand createNodeCommand=Services.command(securityContext,CreateNodeCommand.class);
   final String componentId=UUID.randomUUID().toString().replaceAll("[\\-]+","");
-  final Component template=(Component)templates.get(templates.size() - 1);
-  templateProperties.put(AbstractNode.type.name(),Component.class.getSimpleName());
-  templateProperties.put(Component.kind.name(),template.getStringProperty(Component.kind));
-  templateProperties.put(AbstractNode.uuid.name(),componentId);
-  templateProperties.put(AbstractNode.visibleToPublicUsers.name(),template.getBooleanProperty(AbstractNode.visibleToPublicUsers));
-  templateProperties.put(AbstractNode.visibleToAuthenticatedUsers.name(),template.getBooleanProperty(AbstractNode.visibleToAuthenticatedUsers));
+  final Component template=templates.get(templates.size() - 1);
+  final PropertySet templateProperties=new PropertySet();
+  templateProperties.put(AbstractNode.type,Component.class.getSimpleName());
+  templateProperties.put(Component.kind,template.getStringProperty(Component.kind));
+  templateProperties.put(AbstractNode.uuid,componentId);
+  templateProperties.put(AbstractNode.visibleToPublicUsers,template.getBooleanProperty(AbstractNode.visibleToPublicUsers));
+  templateProperties.put(AbstractNode.visibleToAuthenticatedUsers,template.getBooleanProperty(AbstractNode.visibleToAuthenticatedUsers));
   String parentComponentId=template.getComponentId();
   propertySet.remove("pageId");
   if (surroundingComponentId != null) {
@@ -19,17 +19,17 @@
     @Override public Object execute() throws FrameworkException {
       final Component comp=(Component)createNodeCommand.execute(templateProperties);
       RelationshipHelper.copyRelationships(SecurityContext.getSuperUserInstance(),template,comp,RelType.CONTAINS,finalParentComponentId,true);
-      final Map<String,Object> contentTemplateProperties=new LinkedHashMap<String,Object>();
+      final PropertySet contentTemplateProperties=new PropertySet();
       for (      final AbstractNode node : template.getContentNodes().values()) {
         if (node instanceof Content) {
           final Content contentTemplate=(Content)node;
           final String dataKey=contentTemplate.getStringProperty(Content.dataKey);
           contentTemplateProperties.clear();
-          contentTemplateProperties.put(AbstractNode.type.name(),Content.class.getSimpleName());
-          contentTemplateProperties.put(Content.typeDefinitionId.name(),contentTemplate.getStringProperty(Content.typeDefinitionId));
-          contentTemplateProperties.put("data-key",dataKey);
-          contentTemplateProperties.put(AbstractNode.visibleToPublicUsers.name(),contentTemplate.getBooleanProperty(AbstractNode.visibleToPublicUsers));
-          contentTemplateProperties.put(AbstractNode.visibleToAuthenticatedUsers.name(),contentTemplate.getBooleanProperty(AbstractNode.visibleToAuthenticatedUsers));
+          contentTemplateProperties.put(AbstractNode.type,Content.class.getSimpleName());
+          contentTemplateProperties.put(Content.typeDefinitionId,contentTemplate.getStringProperty(Content.typeDefinitionId));
+          contentTemplateProperties.put(Content.dataKey,dataKey);
+          contentTemplateProperties.put(AbstractNode.visibleToPublicUsers,contentTemplate.getBooleanProperty(AbstractNode.visibleToPublicUsers));
+          contentTemplateProperties.put(AbstractNode.visibleToAuthenticatedUsers,contentTemplate.getBooleanProperty(AbstractNode.visibleToAuthenticatedUsers));
           final Content newContent=(Content)createNodeCommand.execute(contentTemplateProperties);
           newContent.setProperty(Content.content,propertySet.get(dataKey));
           propertySet.remove(dataKey);

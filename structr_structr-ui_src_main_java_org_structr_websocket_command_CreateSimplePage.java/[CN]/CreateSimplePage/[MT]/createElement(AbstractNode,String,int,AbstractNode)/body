@@ -1,18 +1,18 @@
 {
-  Map<String,Object> nodeData=new HashMap<String,Object>();
-  nodeData.put(AbstractNode.visibleToAuthenticatedUsers.name(),true);
-  nodeData.put(AbstractNode.type.name(),Page.class.getSimpleName());
-  Map<String,Object> relData=new HashMap<String,Object>();
+  PropertySet nodeData=new PropertySet();
+  nodeData.put(AbstractNode.visibleToAuthenticatedUsers,true);
+  nodeData.put(AbstractNode.type,Page.class.getSimpleName());
+  PropertySet relData=new PropertySet();
   if (page != null) {
     String pageId=page.getUuid();
-    relData.put(pageId,position);
+    relData.put(new Property(pageId),position);
   }
-  nodeData.put(AbstractNode.type.name(),type);
-  nodeData.put(HtmlElement.name.name(),type.toLowerCase());
+  nodeData.put(AbstractNode.type,type);
+  nodeData.put(HtmlElement.name,type.toLowerCase());
   if (!Content.class.getSimpleName().equals(type)) {
-    nodeData.put(HtmlElement.tag.name(),type.toLowerCase());
+    nodeData.put(HtmlElement.tag,type.toLowerCase());
   }
-  AbstractNode element=(AbstractNode)createNode.execute(nodeData);
+  AbstractNode element=createNode.execute(nodeData);
   if (parentElement != null) {
     createRel.execute(parentElement,element,RelType.CONTAINS,relData,false);
   }

@@ -6,8 +6,9 @@
           Task task=(Task)taskOrCommand.newInstance();
           Services.command(securityContext,ProcessTaskCommand.class).execute(task);
         }
- else         if (Command.class.isAssignableFrom(taskOrCommand)) {
-          Services.command(securityContext,taskOrCommand).execute(propertySet);
+ else         if (MaintenanceCommand.class.isAssignableFrom(taskOrCommand)) {
+          MaintenanceCommand cmd=(MaintenanceCommand)Services.command(securityContext,taskOrCommand);
+          cmd.execute(propertySet);
         }
  else {
           return new RestMethodResult(HttpServletResponse.SC_NOT_FOUND);

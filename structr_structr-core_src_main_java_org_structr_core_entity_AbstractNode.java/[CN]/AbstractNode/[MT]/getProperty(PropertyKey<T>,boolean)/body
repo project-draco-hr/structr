@@ -1,0 +1,70 @@
+{
+  if (key == null || key.name() == null) {
+    return null;
+  }
+  Object value;
+  if (isDirty) {
+    return (T)properties.get(key);
+  }
+  if (dbNode == null) {
+    return null;
+  }
+  value=(T)(applyConverter ? cachedConvertedProperties.get(key) : cachedRawProperties.get(key));
+  Class type=this.getClass();
+  boolean dontCache=false;
+  if (value == null) {
+    PropertyGroup<T> propertyGroup=EntityContext.getPropertyGroup(type,key);
+    if (propertyGroup != null) {
+      return propertyGroup.getGroupedProperties(this);
+    }
+    if (dbNode.hasProperty(key.name())) {
+      if ((key != null) && (dbNode != null)) {
+        value=dbNode.getProperty(key.name());
+      }
+    }
+ else {
+      RelationClass rel=EntityContext.getRelationClass(type,key);
+      if (rel != null) {
+        Notion notion=rel.getNotion();
+switch (rel.getCardinality()) {
+case ManyToMany:
+case OneToMany:
+          value=new IterableAdapter(rel.getRelatedNodes(securityContext,this),notion.getAdapterForGetter(securityContext));
+        dontCache=true;
+      break;
+case OneToOne:
+case ManyToOne:
+    try {
+      value=notion.getAdapterForGetter(securityContext).adapt(rel.getRelatedNode(securityContext,this));
+      dontCache=true;
+    }
+ catch (    FrameworkException fex) {
+      logger.log(Level.WARNING,"Error while adapting related node",fex);
+    }
+  break;
+}
+}
+}
+if (value == null) {
+value=key.defaultValue();
+dontCache=true;
+}
+if (applyConverter) {
+PropertyConverter converter=EntityContext.getPropertyConverter(securityContext,type,key);
+if (converter != null) {
+Value conversionValue=EntityContext.getPropertyConversionParameter(type,key);
+converter.setCurrentObject(this);
+value=converter.convertForGetter(value,conversionValue);
+}
+}
+if (!dontCache) {
+if (applyConverter) {
+cachedConvertedProperties.put(key,value);
+}
+ else {
+cachedRawProperties.put(key,value);
+}
+}
+}
+return (T)value;
+}

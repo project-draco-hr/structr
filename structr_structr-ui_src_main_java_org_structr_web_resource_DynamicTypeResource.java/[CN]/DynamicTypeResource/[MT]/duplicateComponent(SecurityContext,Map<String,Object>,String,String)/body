@@ -31,7 +31,10 @@
           contentTemplateProperties.put(AbstractNode.visibleToPublicUsers,contentTemplate.getBooleanProperty(AbstractNode.visibleToPublicUsers));
           contentTemplateProperties.put(AbstractNode.visibleToAuthenticatedUsers,contentTemplate.getBooleanProperty(AbstractNode.visibleToAuthenticatedUsers));
           final Content newContent=(Content)createNodeCommand.execute(contentTemplateProperties);
-          newContent.setProperty(Content.content,propertySet.get(dataKey));
+          Object dataKeyValue=propertySet.get(dataKey);
+          if (dataKeyValue != null) {
+            newContent.setProperty(Content.content,dataKeyValue.toString());
+          }
           propertySet.remove(dataKey);
           RelationshipHelper.copyRelationships(SecurityContext.getSuperUserInstance(),contentTemplate,newContent,RelType.CONTAINS,componentId,false);
         }

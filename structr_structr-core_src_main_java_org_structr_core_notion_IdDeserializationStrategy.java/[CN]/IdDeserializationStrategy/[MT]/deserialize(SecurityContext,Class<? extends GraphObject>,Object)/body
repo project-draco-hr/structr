@@ -8,6 +8,16 @@
         attrs.add(Search.andExactProperty(entry.getKey(),entry.getValue().toString()));
       }
     }
+ else     if (source instanceof GraphObject) {
+      GraphObject obj=(GraphObject)source;
+      if (propertyKey != null) {
+        attrs.add(Search.andExactProperty(propertyKey,obj.getProperty(propertyKey)));
+      }
+ else {
+        PropertyKey<String> idProperty=obj.getPropertyKeyForName(AbstractNode.uuid.name());
+        attrs.add(Search.andExactUuid(obj.getProperty(idProperty)));
+      }
+    }
  else {
       attrs.add(Search.andExactUuid(source.toString()));
     }

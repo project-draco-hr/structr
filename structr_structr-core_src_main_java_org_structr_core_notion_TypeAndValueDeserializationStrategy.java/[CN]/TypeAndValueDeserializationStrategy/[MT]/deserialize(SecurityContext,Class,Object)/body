@@ -2,6 +2,26 @@
   List<SearchAttribute> attrs=new LinkedList();
   attrs.add(Search.andExactTypeAndSubtypes(type.getSimpleName()));
   if (source != null) {
+    if (source instanceof JsonInput) {
+      Object value=((JsonInput)source).getAttributes().get(propertyKey.name());
+      if (value != null) {
+        String stringValue=value.toString();
+        attrs.add(Search.andExactProperty(propertyKey,stringValue));
+      }
+    }
+ else     if (source instanceof GraphObject) {
+      GraphObject obj=(GraphObject)source;
+      if (propertyKey != null) {
+        attrs.add(Search.andExactProperty(propertyKey,obj.getProperty(propertyKey)));
+      }
+ else {
+        PropertyKey<String> idProperty=obj.getPropertyKeyForName(AbstractNode.uuid.name());
+        attrs.add(Search.andExactUuid(obj.getProperty(idProperty)));
+      }
+    }
+ else {
+      attrs.add(Search.andExactUuid(source.toString()));
+    }
     attrs.add(Search.andExactProperty(propertyKey,source.toString()));
   }
   Result result=Services.command(securityContext,SearchNodeCommand.class).execute(attrs);

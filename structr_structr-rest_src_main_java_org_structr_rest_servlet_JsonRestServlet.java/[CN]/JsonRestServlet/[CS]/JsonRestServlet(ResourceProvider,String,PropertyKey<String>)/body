@@ -1,15 +1,5 @@
 {
+  this.resourceProvider=resourceProvider;
   this.defaultPropertyView=defaultPropertyView;
   this.defaultIdProperty=idProperty;
-  for (  RelationshipMapping relMapping : EntityContext.getNamedRelations()) {
-    resourceMap.put(Pattern.compile(relMapping.getName()),NamedRelationResource.class);
-  }
-  resourceMap.putAll(resourceProvider.getResources());
-  this.propertyView=new ThreadLocalPropertyView();
-  for (  RelationshipMapping relMapping : EntityContext.getNamedRelations()) {
-    resourceMap.put(Pattern.compile(relMapping.getName()),NamedRelationResource.class);
-  }
-  this.resultGsonAdapter=new ResultGSONAdapter(propertyView,defaultIdProperty);
-  this.propertySetAdapter=new PropertySetGSONAdapter(propertyView,defaultIdProperty);
-  this.gson=new GsonBuilder().setPrettyPrinting().serializeNulls().registerTypeHierarchyAdapter(FrameworkException.class,new FrameworkExceptionGSONAdapter()).registerTypeAdapter(JsonInput.class,propertySetAdapter).registerTypeAdapter(Result.class,resultGsonAdapter).create();
 }

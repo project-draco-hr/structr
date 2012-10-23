@@ -12,8 +12,8 @@
       @Override public Object execute() throws FrameworkException {
         PropertySet nodeProps=PropertySet.convert(nodeData);
         Component newComponent=(Component)Services.command(securityContext,CreateNodeCommand.class).execute(nodeProps);
-        String componentId=newComponent.getStringProperty(AbstractNode.uuid);
-        RelationshipHelper.moveIncomingRelationships(securityContext,nodeToWrap,newComponent,RelType.CONTAINS,pageId,newComponent.getStringProperty(AbstractNode.uuid),false);
+        String componentId=newComponent.getProperty(AbstractNode.uuid);
+        RelationshipHelper.moveIncomingRelationships(securityContext,nodeToWrap,newComponent,RelType.CONTAINS,pageId,newComponent.getProperty(AbstractNode.uuid),false);
         if ((parentNode != null) && (newComponent != null)) {
           RelationClass rel=EntityContext.getRelationClass(parentNode.getClass(),newComponent.getClass());
           if (rel != null) {

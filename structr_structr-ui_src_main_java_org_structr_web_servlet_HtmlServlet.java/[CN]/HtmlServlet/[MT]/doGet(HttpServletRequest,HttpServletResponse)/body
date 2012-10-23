@@ -73,7 +73,7 @@
     if ((page != null) && securityContext.isVisible(page)) {
       request.getSession().setAttribute(LAST_GET_URL,request.getPathInfo());
       PrintWriter out=response.getWriter();
-      String uuid=page.getStringProperty(AbstractNode.uuid);
+      String uuid=page.getProperty(AbstractNode.uuid);
       final StringBuilder buffer=new StringBuilder(8192);
       List<NodeAttribute> attrs=new LinkedList<NodeAttribute>();
       Map<String,String[]> parameterMap=request.getParameterMap();
@@ -91,7 +91,7 @@
         String content=buffer.toString();
         double end=System.nanoTime();
         logger.log(Level.INFO,"Content for path {0} in {1} seconds",new Object[]{path,decimalFormat.format((end - setup) / 1000000000.0)});
-        String contentType=page.getStringProperty(Page.contentType);
+        String contentType=page.getProperty(Page.contentType);
         if (contentType != null) {
           if (contentType.equals("text/html")) {
             contentType=contentType.concat(";charset=UTF-8");

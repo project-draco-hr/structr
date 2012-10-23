@@ -12,7 +12,7 @@
         List<AbstractRelationship> rels=relFactory.createRelationships(securityContext,GlobalGraphOperations.at(graphDb).getAllRelationships());
         long n=0;
         for (        AbstractRelationship rel : rels) {
-          if (rel.getStringProperty(AbstractNode.uuid) != null) {
+          if (rel.getProperty(AbstractNode.uuid) != null) {
             rel.setProperty(new Property(destKey),rel.getProperty(new Property(sourceKey)));
             if (n > 1000 && n % 1000 == 0) {
               logger.log(Level.INFO,"Set properties on {0} rels, committing results to database.",n);

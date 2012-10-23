@@ -15,9 +15,9 @@
       @Override public Object execute() throws FrameworkException {
         Page newPage=(Page)Services.command(securityContext,CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.type,Page.class.getSimpleName()),new NodeAttribute(AbstractNode.name,newName),new NodeAttribute(AbstractNode.visibleToAuthenticatedUsers,true));
         if (newPage != null) {
-          String pageId=newPage.getStringProperty(AbstractNode.uuid);
+          String pageId=newPage.getProperty(AbstractNode.uuid);
           List<AbstractRelationship> relsOut=nodeToClone.getOutgoingRelationships(RelType.CONTAINS);
-          String originalPageId=nodeToClone.getStringProperty(AbstractNode.uuid);
+          String originalPageId=nodeToClone.getProperty(AbstractNode.uuid);
           Html htmlNode=null;
           for (          AbstractRelationship out : relsOut) {
             AbstractNode endNode=out.getEndNode();

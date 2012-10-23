@@ -17,9 +17,9 @@
   }
   if (startNode != null) {
     String id=startNode.getUuid();
-    tag=startNode.getStringProperty(Element.tag);
+    tag=startNode.getProperty(Element.tag);
     if (startNode instanceof Component && searchClass != null) {
-      String kind=startNode.getStringProperty(Component.kind);
+      String kind=startNode.getProperty(Component.kind);
       if ((kind != null) && kind.equals(EntityContext.normalizeEntityName(searchClass)) && (attrs != null)) {
         for (        NodeAttribute attr : attrs) {
           PropertyKey key=attr.getKey();
@@ -33,7 +33,7 @@
     if (startNode instanceof Content) {
       Content contentNode=(Content)startNode;
       content=contentNode.getPropertyWithVariableReplacement(request,page,pageId,componentId,viewComponent,Content.content);
-      String contentType=contentNode.getStringProperty(Content.contentType);
+      String contentType=contentNode.getProperty(Content.contentType);
       if (contentType != null) {
         Adapter<String,String> converter=contentConverters.get(contentType);
         if (converter != null) {
@@ -50,7 +50,7 @@
       }
     }
     if (startNode instanceof Component) {
-      localComponentId=startNode.getStringProperty(AbstractNode.uuid);
+      localComponentId=startNode.getProperty(AbstractNode.uuid);
     }
     if (edit && inBody && (startNode instanceof Content)) {
       tag="span";

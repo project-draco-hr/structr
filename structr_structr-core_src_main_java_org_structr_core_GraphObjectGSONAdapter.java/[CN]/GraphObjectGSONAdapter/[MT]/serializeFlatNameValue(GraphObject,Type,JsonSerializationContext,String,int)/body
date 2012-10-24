@@ -32,7 +32,19 @@
           jsonObject.add(key.name(),serializeMap((Map)value,typeOfSrc,context,localPropertyView,false,depth));
         }
  else {
-          jsonObject.add(key.name(),primitive(value));
+          try {
+            SecurityContext securityContext=SecurityContext.getSuperUserInstance();
+            PropertyConverter converter=key.inputConverter(securityContext);
+            if (converter != null) {
+              jsonObject.add(key.name(),toPrimitive(converter.convertForSetter(value)));
+            }
+ else {
+              jsonObject.add(key.name(),toPrimitive(value));
+            }
+          }
+ catch (          FrameworkException fex) {
+            logger.log(Level.WARNING,"Exception while serializing property {0} of entity {1}: {2}",new Object[]{key.name(),src.getType(),fex.getMessage()});
+          }
         }
       }
  else {

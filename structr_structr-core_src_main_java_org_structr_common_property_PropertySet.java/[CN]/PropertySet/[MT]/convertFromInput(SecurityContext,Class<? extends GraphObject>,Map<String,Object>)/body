@@ -1,0 +1,12 @@
+{
+  if (type == null) {
+    type=AbstractNode.class;
+  }
+  try {
+    return convertFromInput(securityContext,type.newInstance(),source);
+  }
+ catch (  Throwable t) {
+    logger.log(Level.WARNING,"Unable to convert property map: {0}",t.getMessage());
+  }
+  return fallbackPropertyMap(source);
+}

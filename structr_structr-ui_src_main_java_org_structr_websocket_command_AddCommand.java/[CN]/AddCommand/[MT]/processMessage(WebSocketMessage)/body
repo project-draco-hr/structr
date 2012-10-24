@@ -14,7 +14,7 @@
  else {
       StructrTransaction transaction=new StructrTransaction<AbstractNode>(){
         @Override public AbstractNode execute() throws FrameworkException {
-          PropertySet nodeProps=PropertySet.convert(nodeData);
+          PropertySet nodeProps=PropertySet.convertFromInput(securityContext,nodeData);
           return Services.command(securityContext,CreateNodeCommand.class).execute(nodeProps);
         }
       }
@@ -65,7 +65,7 @@
               logger.log(Level.SEVERE,"Trying to add non Html node to Page!");
             }
             relData.put(newPageId,maxPos + 1);
-            PropertySet relProperties=PropertySet.convert(relData);
+            PropertySet relProperties=PropertySet.convertFromInput(securityContext,relData);
             rel.createRelationship(securityContext,parentNode,nodeToAdd,relProperties);
             logger.log(Level.INFO,"Created new relationship between parent node {0}, added node {1} ({2})",new Object[]{parentNode.getUuid(),nodeToAdd.getUuid(),relData});
           }
@@ -102,7 +102,7 @@
         if (contentNode != null) {
           try {
             relData.put(newPageId,0L);
-            PropertySet relProperties=PropertySet.convert(relData);
+            PropertySet relProperties=PropertySet.convertFromInput(securityContext,relData);
             rel.createRelationship(securityContext,nodeToAdd,contentNode,relProperties);
             if ((originalPageId != null) && (newPageId != null) && !originalPageId.equals(newPageId)) {
               RelationshipHelper.tagOutgoingRelsWithPageId(contentNode,contentNode,originalPageId,newPageId);

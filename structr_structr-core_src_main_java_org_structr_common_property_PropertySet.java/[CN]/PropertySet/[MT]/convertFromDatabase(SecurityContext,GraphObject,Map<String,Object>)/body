@@ -1,0 +1,19 @@
+{
+  PropertySet resultMap=new PropertySet();
+  for (  Entry<String,Object> entry : source.entrySet()) {
+    String key=entry.getKey();
+    Object value=entry.getValue();
+    if (key != null && value != null) {
+      PropertyKey propertyKey=entity.getPropertyKeyForName(key);
+      PropertyConverter converter=propertyKey.databaseConverter(securityContext);
+      if (converter != null) {
+        Object propertyValue=converter.convertForGetter(value);
+        resultMap.put(propertyKey,propertyValue);
+      }
+ else {
+        logger.log(Level.WARNING,"No converter registered for key {0} of type {1}!",new Object[]{propertyKey.name(),entity.getClass().getSimpleName()});
+      }
+    }
+  }
+  return resultMap;
+}

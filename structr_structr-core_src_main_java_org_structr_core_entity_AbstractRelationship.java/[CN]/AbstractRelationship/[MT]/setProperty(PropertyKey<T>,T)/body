@@ -3,11 +3,11 @@
   PropertyKey endNodeIdKey=getEndNodeIdKey();
   cachedConvertedProperties.remove(key);
   cachedRawProperties.remove(key);
-  if ((startNodeIdKey != null) && key.equals(startNodeIdKey.name())) {
+  if ((startNodeIdKey != null) && key.equals(startNodeIdKey)) {
     setStartNodeId((String)value);
     return;
   }
-  if ((endNodeIdKey != null) && key.equals(endNodeIdKey.name())) {
+  if ((endNodeIdKey != null) && key.equals(endNodeIdKey)) {
     setEndNodeId((String)value);
     return;
   }
@@ -25,12 +25,11 @@
     propertyGroup.setGroupedProperties(value,this);
     return;
   }
-  PropertyConverter converter=EntityContext.getPropertyConverter(securityContext,type,key);
+  PropertyConverter converter=key.databaseConverter(securityContext);
   final Object convertedValue;
   if (converter != null) {
-    Value conversionValue=EntityContext.getPropertyConversionParameter(type,key);
     converter.setCurrentObject(this);
-    convertedValue=converter.convertForSetter(value,conversionValue);
+    convertedValue=converter.convertForSetter(value);
   }
  else {
     convertedValue=value;
@@ -46,12 +45,7 @@
           dbRelationship.removeProperty(key.name());
         }
  else {
-          if (convertedValue instanceof Date) {
-            dbRelationship.setProperty(key.name(),((Date)convertedValue).getTime());
-          }
- else {
-            dbRelationship.setProperty(key.name(),convertedValue);
-          }
+          dbRelationship.setProperty(key.name(),convertedValue);
         }
       }
   finally {

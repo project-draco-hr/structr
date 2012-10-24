@@ -97,7 +97,7 @@
     for (    Relationship rel : data.deletedRelationships()) {
       AbstractRelationship entity=relFactory.createRelationship(securityContext,rel);
       if (entity != null) {
-        PropertySet properties=PropertySet.convert(entity,removedRelProperties.get(rel));
+        PropertySet properties=PropertySet.convertFromDatabase(securityContext,entity,removedRelProperties.get(rel));
         hasError|=!entity.beforeDeletion(securityContext,errorBuffer,properties);
         for (        StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
           hasError|=!listener.graphObjectDeleted(securityContext,transactionKey,errorBuffer,entity,properties);
@@ -123,7 +123,7 @@
       String type=(String)removedNodeProperties.get(node).get(AbstractNode.type.name());
       AbstractNode entity=nodeFactory.createDummyNode(type);
       if (entity != null) {
-        PropertySet properties=PropertySet.convert(entity,removedNodeProperties.get(node));
+        PropertySet properties=PropertySet.convertFromDatabase(securityContext,entity,removedNodeProperties.get(node));
         hasError|=!entity.beforeDeletion(securityContext,errorBuffer,properties);
         for (        StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
           hasError|=!listener.graphObjectDeleted(securityContext,transactionKey,errorBuffer,entity,properties);

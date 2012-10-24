@@ -57,12 +57,11 @@
     }
   }
  else {
-    PropertyConverter converter=EntityContext.getPropertyConverter(securityContext,type,key);
+    PropertyConverter converter=key.databaseConverter(securityContext);
     final Object convertedValue;
     if (converter != null) {
-      Value conversionValue=EntityContext.getPropertyConversionParameter(type,key);
       converter.setCurrentObject(this);
-      convertedValue=converter.convertForSetter(value,conversionValue);
+      convertedValue=converter.convertForSetter(value);
     }
  else {
       convertedValue=value;
@@ -82,14 +81,9 @@
               dbNode.removeProperty(key.name());
             }
  else {
-              if (!key.equals(AbstractNode.lastModifiedDate.name())) {
-                if (convertedValue instanceof Date) {
-                  dbNode.setProperty(key.name(),((Date)convertedValue).getTime());
-                }
- else {
-                  dbNode.setProperty(key.name(),convertedValue);
-                  dbNode.setProperty(AbstractNode.lastModifiedDate.name(),(new Date()).getTime());
-                }
+              if (!key.equals(AbstractNode.lastModifiedDate)) {
+                dbNode.setProperty(key.name(),convertedValue);
+                dbNode.setProperty(AbstractNode.lastModifiedDate.name(),System.currentTimeMillis());
               }
  else {
                 logger.log(Level.FINE,"Tried to set lastModifiedDate explicitely (action was denied)");

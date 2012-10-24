@@ -11,6 +11,7 @@
     logger.log(Level.FINEST,"Transaction successfull");
   }
  catch (  FrameworkException frameworkException) {
+    frameworkException.printStackTrace();
     tx.failure();
     logger.log(Level.WARNING,"Transaction failure",frameworkException);
     exception=frameworkException;
@@ -28,6 +29,7 @@ synchronized (TransactionCommand.class) {
         tx.finish();
       }
  catch (      Throwable t) {
+        t.printStackTrace();
         exception=EntityContext.getFrameworkException(transactionKey);
       }
     }

@@ -8,7 +8,7 @@
     AbstractNode nodeToInsert=null;
     StructrTransaction transaction=new StructrTransaction(){
       @Override public Object execute() throws FrameworkException {
-        PropertySet nodeProperties=PropertySet.convertFromInput(securityContext,properties);
+        PropertyMap nodeProperties=PropertyMap.inputTypeToJavaType(securityContext,properties);
         return Services.command(securityContext,CreateNodeCommand.class).execute(nodeProperties);
       }
     }
@@ -24,7 +24,7 @@
       RelationClass rel=EntityContext.getRelationClass(parentNode.getClass(),nodeToInsert.getClass());
       if (rel != null) {
         try {
-          PropertySet relProperties=PropertySet.convertFromInput(securityContext,relData);
+          PropertyMap relProperties=PropertyMap.inputTypeToJavaType(securityContext,relData);
           rel.createRelationship(securityContext,parentNode,nodeToInsert,relProperties);
         }
  catch (        Throwable t) {

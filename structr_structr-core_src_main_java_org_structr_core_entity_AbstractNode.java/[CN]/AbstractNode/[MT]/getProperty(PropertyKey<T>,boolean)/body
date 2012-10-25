@@ -15,7 +15,12 @@
   if (value == null) {
     PropertyGroup<T> propertyGroup=EntityContext.getPropertyGroup(type,key);
     if (propertyGroup != null) {
-      return propertyGroup.getGroupedProperties(this);
+      try {
+        return propertyGroup.getGroupedProperties(securityContext,this);
+      }
+ catch (      FrameworkException fex) {
+        logger.log(Level.WARNING,"Unable to convert property {0} of type {1}: {2}",new Object[]{key.name(),entityType.getSimpleName(),fex.getMessage()});
+      }
     }
     if (dbNode.hasProperty(key.name())) {
       if ((key != null) && (dbNode != null)) {
@@ -45,19 +50,15 @@ case ManyToOne:
 }
 }
 }
-if (value == null) {
-value=key.defaultValue();
-dontCache=true;
-}
 if (applyConverter) {
-PropertyConverter converter=key.databaseConverter(securityContext);
+PropertyConverter converter=key.databaseConverter(securityContext,this);
 if (converter != null) {
-converter.setCurrentObject(this);
 try {
-value=converter.convertForGetter(value);
+value=converter.revert(value);
 }
- catch (FrameworkException fex) {
-logger.log(Level.WARNING,"Unable to convert property {0} of type {1}: {2}",new Object[]{key.name(),getClass().getSimpleName(),fex.getMessage()});
+ catch (Throwable t) {
+t.printStackTrace();
+logger.log(Level.WARNING,"Unable to convert property {0} of type {1}: {2}",new Object[]{key.name(),getClass().getSimpleName(),t.getMessage()});
 }
 }
 }
@@ -69,6 +70,10 @@ cachedConvertedProperties.put(key,value);
 cachedRawProperties.put(key,value);
 }
 }
+}
+if (value == null) {
+value=key.defaultValue();
+dontCache=true;
 }
 try {
 return (T)value;

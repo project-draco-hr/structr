@@ -1,0 +1,14 @@
+{
+  Map<Field,T> fields=new LinkedHashMap<Field,T>();
+  for (  Field field : entity.getClass().getFields()) {
+    if (type.isAssignableFrom(field.getType())) {
+      try {
+        fields.put(field,(T)field.get(entity));
+      }
+ catch (      Throwable t) {
+        t.printStackTrace();
+      }
+    }
+  }
+  return fields;
+}

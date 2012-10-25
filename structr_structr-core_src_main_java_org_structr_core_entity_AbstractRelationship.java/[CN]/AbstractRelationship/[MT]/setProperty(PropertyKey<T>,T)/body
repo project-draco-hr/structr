@@ -22,14 +22,13 @@
   }
   PropertyGroup propertyGroup=EntityContext.getPropertyGroup(type,key);
   if (propertyGroup != null) {
-    propertyGroup.setGroupedProperties(value,this);
+    propertyGroup.setGroupedProperties(securityContext,value,this);
     return;
   }
-  PropertyConverter converter=key.databaseConverter(securityContext);
+  PropertyConverter converter=key.databaseConverter(securityContext,this);
   final Object convertedValue;
   if (converter != null) {
-    converter.setCurrentObject(this);
-    convertedValue=converter.convertForSetter(value);
+    convertedValue=converter.convert(value);
   }
  else {
     convertedValue=value;

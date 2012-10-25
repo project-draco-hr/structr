@@ -10,14 +10,14 @@
   if (nodeToWrap != null) {
     StructrTransaction transaction=new StructrTransaction(){
       @Override public Object execute() throws FrameworkException {
-        PropertySet nodeProps=PropertySet.convertFromInput(securityContext,nodeData);
+        PropertyMap nodeProps=PropertyMap.inputTypeToJavaType(securityContext,nodeData);
         Component newComponent=(Component)Services.command(securityContext,CreateNodeCommand.class).execute(nodeProps);
         String componentId=newComponent.getUuid();
         RelationshipHelper.moveIncomingRelationships(SecurityContext.getSuperUserInstance(),nodeToWrap,newComponent,RelType.CONTAINS,pageId,componentId,false);
         if ((parentNode != null) && (newComponent != null)) {
           RelationClass rel=EntityContext.getRelationClass(parentNode.getClass(),newComponent.getClass());
           if (rel != null) {
-            PropertySet relProps=new PropertySet();
+            PropertyMap relProps=new PropertyMap();
             relProps.put(new Property(pageId),0);
             relProps.put(new Property("componentId"),componentId);
             try {

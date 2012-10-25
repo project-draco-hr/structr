@@ -1,13 +1,19 @@
 {
-  List<PropertyKey> properties=getFieldsOfType(PropertyKey.class,entity);
-  List<View> views=getFieldsOfType(View.class,entity);
-  Class type=entity.getClass();
-  Map<String,PropertyKey> classPropertyMap=getClassPropertyMapForType(type);
-  for (  PropertyKey key : properties) {
-    classPropertyMap.put(key.name(),key);
+  Map<Field,PropertyKey> allProperties=getFieldValuesOfType(PropertyKey.class,entity);
+  Map<Field,View> views=getFieldValuesOfType(View.class,entity);
+  Class entityType=entity.getClass();
+  for (  Entry<Field,PropertyKey> entry : allProperties.entrySet()) {
+    PropertyKey propertyKey=entry.getValue();
+    Field field=entry.getKey();
+    registerProperty(field.getDeclaringClass(),propertyKey);
+    registerProperty(entityType,propertyKey);
   }
-  registerPropertySet(type,PropertyView.All,properties.toArray(new PropertyKey[0]));
-  for (  View view : views) {
-    registerPropertySet(type,view.name(),view.properties());
+  for (  Entry<Field,View> entry : views.entrySet()) {
+    Field field=entry.getKey();
+    View view=entry.getValue();
+    for (    PropertyKey propertyKey : view.properties()) {
+      registerPropertySet(field.getDeclaringClass(),view.name(),propertyKey);
+      registerPropertySet(entityType,view.name(),propertyKey);
+    }
   }
 }

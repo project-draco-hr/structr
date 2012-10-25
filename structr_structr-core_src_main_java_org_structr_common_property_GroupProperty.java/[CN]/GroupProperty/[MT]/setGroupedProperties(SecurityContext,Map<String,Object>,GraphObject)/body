@@ -1,0 +1,24 @@
+{
+  if (source == null) {
+    for (    PropertyKey key : propertyKeys) {
+      destination.setProperty(key,null);
+    }
+    return;
+  }
+  for (  PropertyKey key : propertyKeys) {
+    Object value=source.get(key.name());
+    PropertyConverter converter=key.inputConverter(securityContext);
+    if (converter != null) {
+      try {
+        Object convertedValue=converter.convert(value);
+        destination.setProperty(key,convertedValue);
+      }
+ catch (      FrameworkException fex) {
+        logger.log(Level.WARNING,"Unable to convert grouped property {0} on type {1}: {2}",new Object[]{key.name(),source.getClass().getSimpleName(),fex.getMessage()});
+      }
+    }
+ else {
+      destination.setProperty(key,value);
+    }
+  }
+}

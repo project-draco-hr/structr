@@ -18,16 +18,8 @@
     int page=parseInt(pageParameter,NodeFactory.DEFAULT_PAGE);
     PropertyKey sortKey=null;
     if (sortKeyName != null) {
-      try {
-        Class<? extends GraphObject> type=resource.getEntityClass();
-        GraphObject typeInstance=type.newInstance();
-        if (typeInstance != null) {
-          sortKey=typeInstance.getPropertyKeyForName(sortKeyName);
-        }
-      }
- catch (      Throwable t) {
-        sortKey=new Property(sortKeyName);
-      }
+      Class<? extends GraphObject> type=resource.getEntityClass();
+      sortKey=EntityContext.getPropertyKeyForName(type,sortKeyName);
     }
     Result result=resource.doGet(sortKey,sortDescending,pageSize,page,offsetId);
     result.setIsCollection(resource.isCollectionResource());

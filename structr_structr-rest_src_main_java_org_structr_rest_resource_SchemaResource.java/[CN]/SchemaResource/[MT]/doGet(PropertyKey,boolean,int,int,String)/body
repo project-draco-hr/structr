@@ -18,10 +18,20 @@
       if (!"all".equals(view) && !properties.isEmpty()) {
         for (        PropertyKey property : properties) {
           StringBuilder converterPlusValue=new StringBuilder();
-          PropertyConverter converter=property.databaseConverter(securityContext);
-          if (converter != null) {
-            converterPlusValue.append(converter.getClass().getName());
+          PropertyConverter databaseConverter=property.databaseConverter(securityContext,null);
+          PropertyConverter inputConverter=property.inputConverter(securityContext);
+          converterPlusValue.append("(");
+          if (databaseConverter != null) {
+            converterPlusValue.append(" databaseConverter: ");
+            converterPlusValue.append(databaseConverter.getClass().getName());
+            converterPlusValue.append(" ");
           }
+          if (inputConverter != null) {
+            converterPlusValue.append(" inputConverter: ");
+            converterPlusValue.append(inputConverter.getClass().getName());
+            converterPlusValue.append(" ");
+          }
+          converterPlusValue.append(")");
           propertyConverterMap.put(property.name(),converterPlusValue.toString());
         }
         views.put(view,propertyConverterMap);

@@ -1,0 +1,21 @@
+{
+  Map<String,Object> inputTypedProperties=new LinkedHashMap<String,Object>();
+  for (  Entry<PropertyKey,Object> entry : properties.entrySet()) {
+    PropertyKey propertyKey=entry.getKey();
+    PropertyConverter converter=propertyKey.inputConverter(securityContext);
+    if (converter != null) {
+      try {
+        Object propertyValue=converter.revert(entry.getValue());
+        inputTypedProperties.put(propertyKey.name(),propertyValue);
+      }
+ catch (      ClassCastException cce) {
+        cce.printStackTrace();
+        throw new FrameworkException(entity.getSimpleName(),new TypeToken(propertyKey,"XXX"));
+      }
+    }
+ else {
+      inputTypedProperties.put(propertyKey.name(),entry.getValue());
+    }
+  }
+  return inputTypedProperties;
+}

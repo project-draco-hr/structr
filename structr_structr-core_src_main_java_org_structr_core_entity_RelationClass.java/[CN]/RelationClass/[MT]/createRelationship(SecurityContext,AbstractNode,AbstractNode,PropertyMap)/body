@@ -1,0 +1,62 @@
+{
+  final CreateRelationshipCommand<?> createRel=Services.command(securityContext,CreateRelationshipCommand.class);
+  final DeleteRelationshipCommand deleteRel=Services.command(securityContext,DeleteRelationshipCommand.class);
+  if ((sourceNode != null) && (targetNode != null)) {
+    final AbstractNode finalTargetNode=targetNode;
+    final AbstractNode finalSourceNode=(AbstractNode)sourceNode;
+    StructrTransaction transaction=new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        PropertyMap props=new PropertyMap(properties);
+        if (cascadeDelete > 0) {
+          props.put(AbstractRelationship.cascadeDelete,new Integer(cascadeDelete));
+        }
+        AbstractRelationship newRel;
+        if (direction.equals(Direction.OUTGOING)) {
+          newRel=createRel.execute(sourceNode,finalTargetNode,relType,props,true);
+        }
+ else {
+          newRel=createRel.execute(finalTargetNode,sourceNode,relType,props,true);
+        }
+        if (newRel != null) {
+switch (cardinality) {
+case ManyToOne:
+case OneToOne:
+{
+              Class destType=finalTargetNode.getClass();
+              List<AbstractRelationship> rels=finalSourceNode.getRelationships(relType,direction);
+              for (              AbstractRelationship rel : rels) {
+                if ((!rel.equals(newRel) && ((!(rel instanceof GenericRelationship) && newRel.getClass().isAssignableFrom(rel.getClass())) || destType.isAssignableFrom(rel.getOtherNode(finalSourceNode).getClass())))) {
+                  deleteRel.execute(rel);
+                }
+              }
+              break;
+            }
+case OneToMany:
+{
+            Class sourceType=finalSourceNode.getClass();
+            List<AbstractRelationship> rels=finalTargetNode.getRelationships(relType,Direction.INCOMING);
+            for (            AbstractRelationship rel : rels) {
+              if ((!rel.equals(newRel) && ((!(rel instanceof GenericRelationship) && newRel.getClass().isAssignableFrom(rel.getClass())) || sourceType.isAssignableFrom(rel.getOtherNode(finalTargetNode).getClass())))) {
+                deleteRel.execute(rel);
+              }
+            }
+          }
+      }
+    }
+    return newRel;
+  }
+}
+;
+Services.command(securityContext,TransactionCommand.class).execute(transaction);
+}
+ else {
+String type="unknown";
+if (sourceNode != null) {
+  type=sourceNode.getType();
+}
+ else if (targetNode != null) {
+  type=targetNode.getType();
+}
+throw new FrameworkException(type,new IdNotFoundToken(targetNode));
+}
+}

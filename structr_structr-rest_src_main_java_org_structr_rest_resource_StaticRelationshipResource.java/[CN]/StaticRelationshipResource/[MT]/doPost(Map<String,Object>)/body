@@ -4,8 +4,9 @@
       final AbstractNode sourceNode=typedIdResource.getIdResource().getNode();
       final RelationClass rel=EntityContext.getRelationClass(sourceNode.getClass(),typeResource.getEntityClass());
       if (sourceNode != null && rel != null) {
-        if (EntityContext.isReadOnlyProperty(sourceNode.getClass(),sourceNode.getPropertyKeyForName(typeResource.getRawType()))) {
-          logger.log(Level.INFO,"Read-only property on {0}: {1}",new Object[]{sourceNode.getClass(),typeResource.getRawType()});
+        Class sourceNodeType=sourceNode.getClass();
+        if (EntityContext.isReadOnlyProperty(sourceNodeType,EntityContext.getPropertyKeyForName(sourceNodeType,typeResource.getRawType()))) {
+          logger.log(Level.INFO,"Read-only property on {0}: {1}",new Object[]{sourceNodeType,typeResource.getRawType()});
           return null;
         }
         final Notion notion=rel.getNotion();

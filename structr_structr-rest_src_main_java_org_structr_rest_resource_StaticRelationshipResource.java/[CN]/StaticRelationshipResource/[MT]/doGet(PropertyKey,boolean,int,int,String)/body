@@ -19,12 +19,11 @@
         }
       }
       final Class type=sourceNode.getClass();
-      final PropertyKey key=sourceNode.getPropertyKeyForName(typeResource.getRawType());
-      final PropertyConverter converter=key.inputConverter(securityContext);
+      final PropertyKey key=EntityContext.getPropertyKeyForName(type,typeResource.getRawType());
+      final PropertyConverter converter=key.databaseConverter(securityContext,sourceNode);
       if (converter != null) {
-        converter.setCurrentObject(sourceNode);
         converter.setRawMode(true);
-        final Object value=converter.convertForGetter(null);
+        final Object value=converter.revert(null);
         final StringBuilder msgBuilder=new StringBuilder();
         msgBuilder.append("Property result on type ");
         msgBuilder.append(sourceNode.getClass().getSimpleName());

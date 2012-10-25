@@ -22,7 +22,7 @@
     final Class sourceType=namedRelation.getSourceType();
     final Class destType=namedRelation.getDestType();
     propertySet.put(AbstractRelationship.combinedType.name(),EntityContext.createCombinedRelationshipType(sourceType,relType,destType));
-    PropertySet properties=PropertySet.convertFromInput(securityContext,relationshipEntity,propertySet);
+    PropertyMap properties=PropertyMap.inputTypeToJavaType(securityContext,relationshipEntity.getClass(),propertySet);
     final AbstractRelationship newRel=createRel.execute(startNode,endNode,relType,properties,false);
     final RestMethodResult result=new RestMethodResult(201);
     result.addHeader("Location",buildLocationHeader(newRel));

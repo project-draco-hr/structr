@@ -1,0 +1,19 @@
+{
+  PropertyMap groupedProperties=new PropertyMap();
+  for (  PropertyKey key : propertyKeys) {
+    PropertyConverter converter=key.inputConverter(securityContext);
+    if (converter != null) {
+      try {
+        Object convertedValue=converter.revert(source.getProperty(key));
+        groupedProperties.put(key,convertedValue);
+      }
+ catch (      FrameworkException fex) {
+        logger.log(Level.WARNING,"Unable to convert grouped property {0} on type {1}: {2}",new Object[]{key.name(),source.getClass().getSimpleName(),fex.getMessage()});
+      }
+    }
+ else {
+      groupedProperties.put(key,source.getProperty(key));
+    }
+  }
+  return groupedProperties;
+}

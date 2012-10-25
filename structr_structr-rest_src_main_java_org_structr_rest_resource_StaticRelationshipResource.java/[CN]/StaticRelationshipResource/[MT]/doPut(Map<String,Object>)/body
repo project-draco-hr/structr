@@ -6,7 +6,8 @@
     if (staticRel != null) {
       final AbstractNode startNode=typedIdResource.getTypesafeNode();
       if (startNode != null) {
-        if (EntityContext.isReadOnlyProperty(startNode.getClass(),startNode.getPropertyKeyForName(typeResource.getRawType()))) {
+        Class startNodeType=startNode.getClass();
+        if (EntityContext.isReadOnlyProperty(startNodeType,EntityContext.getPropertyKeyForName(startNodeType,typeResource.getRawType()))) {
           logger.log(Level.INFO,"Read-only property on {1}: {0}",new Object[]{startNode.getClass(),typeResource.getRawType()});
           return new RestMethodResult(HttpServletResponse.SC_FORBIDDEN);
         }

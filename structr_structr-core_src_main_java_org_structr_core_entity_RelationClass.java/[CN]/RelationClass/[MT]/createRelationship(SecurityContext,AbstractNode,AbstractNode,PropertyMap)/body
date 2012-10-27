@@ -18,6 +18,7 @@
           newRel=createRel.execute(finalTargetNode,sourceNode,relType,props,true);
         }
         if (newRel != null) {
+          GenericFactory genericFactory=EntityContext.getGenericFactory();
 switch (cardinality) {
 case ManyToOne:
 case OneToOne:
@@ -25,7 +26,8 @@ case OneToOne:
               Class destType=finalTargetNode.getClass();
               List<AbstractRelationship> rels=finalSourceNode.getRelationships(relType,direction);
               for (              AbstractRelationship rel : rels) {
-                if ((!rel.equals(newRel) && ((!(rel instanceof GenericRelationship) && newRel.getClass().isAssignableFrom(rel.getClass())) || destType.isAssignableFrom(rel.getOtherNode(finalSourceNode).getClass())))) {
+                boolean isGeneric=genericFactory.isGeneric(rel.getClass());
+                if ((!rel.equals(newRel) && ((!isGeneric && newRel.getClass().isAssignableFrom(rel.getClass())) || destType.isAssignableFrom(rel.getOtherNode(finalSourceNode).getClass())))) {
                   deleteRel.execute(rel);
                 }
               }
@@ -36,7 +38,8 @@ case OneToMany:
             Class sourceType=finalSourceNode.getClass();
             List<AbstractRelationship> rels=finalTargetNode.getRelationships(relType,Direction.INCOMING);
             for (            AbstractRelationship rel : rels) {
-              if ((!rel.equals(newRel) && ((!(rel instanceof GenericRelationship) && newRel.getClass().isAssignableFrom(rel.getClass())) || sourceType.isAssignableFrom(rel.getOtherNode(finalTargetNode).getClass())))) {
+              boolean isGeneric=genericFactory.isGeneric(rel.getClass());
+              if ((!rel.equals(newRel) && ((!isGeneric && newRel.getClass().isAssignableFrom(rel.getClass())) || sourceType.isAssignableFrom(rel.getOtherNode(finalTargetNode).getClass())))) {
                 deleteRel.execute(rel);
               }
             }

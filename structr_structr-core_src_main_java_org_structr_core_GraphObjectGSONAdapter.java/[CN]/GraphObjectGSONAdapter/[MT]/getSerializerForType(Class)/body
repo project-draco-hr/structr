@@ -1,0 +1,26 @@
+{
+  Class localType=type;
+  Serializer serializer=serializerCache.get(type);
+  if (serializer == null && !nonSerializerClasses.contains(type)) {
+    System.out.println("cache miss for type " + type);
+    do {
+      serializer=serializers.get(localType);
+      localType=localType.getSuperclass();
+    }
+ while (serializer == null && !localType.equals(Object.class));
+    if (serializer == null) {
+      Set<Class> interfaces=new LinkedHashSet<Class>();
+      collectAllInterfaces(type,interfaces);
+      for (      Class interfaceType : interfaces) {
+        serializer=serializers.get(interfaceType);
+        if (serializer != null) {
+          break;
+        }
+      }
+    }
+    if (serializer != null) {
+      serializerCache.put(type,serializer);
+    }
+  }
+  return serializer;
+}

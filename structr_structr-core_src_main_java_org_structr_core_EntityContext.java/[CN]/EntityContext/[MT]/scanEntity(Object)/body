@@ -5,7 +5,10 @@
   for (  Entry<Field,PropertyKey> entry : allProperties.entrySet()) {
     PropertyKey propertyKey=entry.getValue();
     Field field=entry.getKey();
-    registerProperty(field.getDeclaringClass(),propertyKey);
+    Class declaringClass=field.getDeclaringClass();
+    if (declaringClass != null) {
+      registerProperty(declaringClass,propertyKey);
+    }
     registerProperty(entityType,propertyKey);
   }
   for (  Entry<Field,View> entry : views.entrySet()) {

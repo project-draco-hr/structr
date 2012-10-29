@@ -7,12 +7,12 @@
   int position=0;
   int count=0;
   int offset=0;
-  List<AbstractNode> allNodes=new LinkedList();
+  List<AbstractNode> nodesUpToOffset=new LinkedList();
   int i=0;
   boolean gotOffset=false;
   for (  Node node : input) {
     AbstractNode n=createNode(node);
-    allNodes.add(n);
+    nodesUpToOffset.add(n);
     if (!gotOffset) {
       if (!offsetId.equals(n.getUuid())) {
         i++;
@@ -26,7 +26,11 @@
   if (!gotOffset) {
     throw new FrameworkException("offsetId",new IdNotFoundToken(offsetId));
   }
-  for (  AbstractNode node : allNodes) {
+  if (offset < 0) {
+    nodesUpToOffset.remove(nodesUpToOffset.size() - 1);
+    return new Result(nodesUpToOffset,size,true,false);
+  }
+  for (  AbstractNode node : nodesUpToOffset) {
     if (node != null) {
       if (++position > offset) {
         if (++count > pageSize) {

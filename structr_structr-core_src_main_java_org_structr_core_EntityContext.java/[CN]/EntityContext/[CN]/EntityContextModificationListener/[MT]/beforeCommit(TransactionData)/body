@@ -1,14 +1,14 @@
 {
-  Thread currentThread=Thread.currentThread();
-  if (!transactionKeyMap.containsKey(currentThread)) {
+  Long transactionKeyValue=transactionKeyMap.get();
+  if (transactionKeyValue == null) {
     return -1L;
   }
-  long transactionKey=transactionKeyMap.get(Thread.currentThread());
+  long transactionKey=transactionKeyMap.get();
   if (!Services.isReady(NodeService.class)) {
     logger.log(Level.WARNING,"Node service is not ready yet.");
     return transactionKey;
   }
-  SecurityContext securityContext=securityContextMap.get(currentThread);
+  SecurityContext securityContext=securityContextMap.get();
   SecurityContext superUserContext=SecurityContext.getSuperUserInstance();
   IndexNodeCommand indexNodeCommand=Services.command(superUserContext,IndexNodeCommand.class);
   IndexRelationshipCommand indexRelationshipCommand=Services.command(superUserContext,IndexRelationshipCommand.class);
@@ -20,6 +20,7 @@
     ErrorBuffer errorBuffer=new ErrorBuffer();
     NodeFactory nodeFactory=new NodeFactory(securityContext);
     boolean hasError=false;
+    globalChangeSets.put(transactionKey,changeSet);
     for (    StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
       listener.begin(securityContext,transactionKey);
     }
@@ -35,6 +36,9 @@
         AbstractNode modifiedNode=nodeFactory.createNode(node,true,false);
         if (modifiedNode != null) {
           PropertyKey key=getPropertyKeyForName(modifiedNode.getClass(),entry.key());
+          if (!key.isSystemProperty()) {
+            changeSet.nonSystemProperty();
+          }
           changeSet.modify(modifiedNode);
           for (          StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
             hasError|=!listener.propertyRemoved(securityContext,transactionKey,errorBuffer,modifiedNode,key,entry.previouslyCommitedValue());
@@ -54,6 +58,9 @@
         AbstractRelationship modifiedRel=relFactory.createRelationship(securityContext,rel);
         if (modifiedRel != null) {
           PropertyKey key=getPropertyKeyForName(modifiedRel.getClass(),entry.key());
+          if (!key.isSystemProperty()) {
+            changeSet.nonSystemProperty();
+          }
           changeSet.modify(modifiedRel);
           for (          StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
             hasError|=!listener.propertyRemoved(securityContext,transactionKey,errorBuffer,modifiedRel,key,entry.previouslyCommitedValue());
@@ -142,6 +149,9 @@
       if (nodeEntity != null) {
         PropertyKey key=getPropertyKeyForName(nodeEntity.getClass(),entry.key());
         Object value=entry.value();
+        if (!key.isSystemProperty()) {
+          changeSet.nonSystemProperty();
+        }
         Set<PropertyValidator> validators=EntityContext.getPropertyValidators(securityContext,nodeEntity.getClass(),key);
         if (validators != null) {
           for (          PropertyValidator validator : validators) {
@@ -168,6 +178,9 @@
       if (relEntity != null) {
         PropertyKey key=getPropertyKeyForName(relEntity.getClass(),entry.key());
         Object value=entry.value();
+        if (!key.isSystemProperty()) {
+          changeSet.nonSystemProperty();
+        }
         Set<PropertyValidator> validators=EntityContext.getPropertyValidators(securityContext,relEntity.getClass(),key);
         if (validators != null) {
           for (          PropertyValidator validator : validators) {
@@ -214,7 +227,6 @@
     for (    StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
       listener.commit(securityContext,transactionKey);
     }
-    globalChangeSet.get().include(changeSet);
   }
  catch (  FrameworkException fex) {
     exceptionMap.put(transactionKey,fex);

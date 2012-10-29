@@ -85,7 +85,9 @@ synchronized (index) {
       long t1=System.nanoTime();
       logger.log(Level.FINE,"Querying index took {0} ns, size() says {1} results.",new Object[]{t1 - t0,(hits != null) ? hits.size() : 0});
       intermediateResult=nodeFactory.createNodes(hits);
-      hits.close();
+      if (hits != null) {
+        hits.close();
+      }
       long t2=System.nanoTime();
       logger.log(Level.FINE,"Creating structr nodes took {0} ns, {1} nodes made.",new Object[]{t2 - t1,intermediateResult.getResults().size()});
     }

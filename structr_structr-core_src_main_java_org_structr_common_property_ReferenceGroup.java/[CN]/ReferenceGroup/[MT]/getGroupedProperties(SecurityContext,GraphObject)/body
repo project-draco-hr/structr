@@ -1,0 +1,16 @@
+{
+  if (source instanceof AbstractRelationship) {
+    AbstractRelationship rel=(AbstractRelationship)source;
+    PropertyMap properties=new PropertyMap();
+    for (    Reference reference : (Reference[])propertyKeys) {
+      GraphObject referencedEntity=reference.getReferencedEntity(rel);
+      PropertyKey referenceKey=reference.getReferenceKey();
+      PropertyKey propertyKey=reference.getPropertyKey();
+      if (referencedEntity != null) {
+        properties.put(propertyKey,referencedEntity.getProperty(referenceKey));
+      }
+    }
+    return properties;
+  }
+  return null;
+}

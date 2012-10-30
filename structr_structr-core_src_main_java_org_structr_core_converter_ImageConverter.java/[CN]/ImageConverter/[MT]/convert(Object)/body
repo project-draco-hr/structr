@@ -4,6 +4,9 @@
   }
   try {
     Image img=null;
+    if (keyAndClass == null) {
+      return false;
+    }
     if (source instanceof byte[]) {
       byte[] data=(byte[])source;
       MagicMatch match=Magic.getMagicMatch(data);
@@ -16,7 +19,7 @@
       }
     }
     if (img != null) {
-      Services.command(securityContext,IndexNodeCommand.class).execute(img);
+      Services.command(securityContext,IndexNodeCommand.class).execute(img,AbstractNode.uuid);
       currentObject.setProperty(keyAndClass.getPropertyKey(),img.getUuid());
     }
     return null;

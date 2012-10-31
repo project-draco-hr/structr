@@ -1,18 +1,15 @@
 {
   final SecurityContext securityContext=SecurityContext.getSuperUserInstance();
-  Command transactionCommand=Services.command(securityContext,TransactionCommand.class);
-  Command graphDbCommand=Services.command(securityContext,GraphDatabaseCommand.class);
-  final GraphDatabaseService graphDb=(GraphDatabaseService)graphDbCommand.execute();
-  Long noOfRels=(Long)transactionCommand.execute(new BatchTransaction(){
-    @Override public Object execute(    Transaction tx) throws FrameworkException {
+  final GraphDatabaseService graphDb=Services.command(securityContext,GraphDatabaseCommand.class).execute();
+  Long noOfRels=Services.command(securityContext,TransactionCommand.class).execute(new BatchTransaction<Long>(){
+    @Override public Long execute(    Transaction tx) throws FrameworkException {
+      IndexRelationshipCommand indexer=Services.command(securityContext,IndexRelationshipCommand.class);
       long rels=0;
-      Command indexer=Services.command(securityContext,IndexRelationshipCommand.class);
       logger.log(Level.INFO,"Get all relationships ...");
-      List<AbstractRelationship> allRelationships=(List<AbstractRelationship>)Services.command(securityContext,GetAllRelationships.class).execute();
+      List<AbstractRelationship> allRelationships=Services.command(securityContext,GetAllRelationships.class).execute();
       logger.log(Level.INFO,"... done. Got {0} relationships.",allRelationships.size());
       for (      AbstractRelationship s : allRelationships) {
         indexer.execute(s);
-        s=null;
         rels++;
         if (rels % 1000 == 0) {
           logger.log(Level.INFO,"Indexed {0} relationships, committing results to database.",rels);

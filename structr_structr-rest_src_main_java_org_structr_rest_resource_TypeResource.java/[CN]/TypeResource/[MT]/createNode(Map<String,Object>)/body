@@ -1,4 +1,5 @@
 {
-  propertySet.put(AbstractNode.Key.type.name(),EntityContext.normalizeEntityName(rawType));
-  return (AbstractNode)Services.command(securityContext,CreateNodeCommand.class).execute(propertySet);
+  PropertyMap properties=PropertyMap.inputTypeToJavaType(securityContext,entityClass,propertySet);
+  properties.put(AbstractNode.type,entityClass.getSimpleName());
+  return (AbstractNode)Services.command(securityContext,CreateNodeCommand.class).execute(properties);
 }

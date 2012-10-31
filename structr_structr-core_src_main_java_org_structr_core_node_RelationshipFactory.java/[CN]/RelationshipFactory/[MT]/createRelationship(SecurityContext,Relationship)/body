@@ -1,19 +1,19 @@
 {
-  AbstractRelationship newRel=null;
-  Class relClass;
+  Class<T> relClass=null;
+  T newRel=null;
   try {
     relClass=findNamedRelation(relationship);
     if (relClass != null) {
       try {
-        newRel=(AbstractRelationship)relClass.newInstance();
+        newRel=relClass.newInstance();
       }
  catch (      Throwable t2) {
         newRel=null;
       }
     }
  else {
-      if (relationship.hasProperty(AbstractRelationship.HiddenKey.combinedType.name())) {
-        String combinedRelType=(String)relationship.getProperty(AbstractRelationship.HiddenKey.combinedType.name());
+      if (relationship.hasProperty(AbstractRelationship.combinedType.name())) {
+        String combinedRelType=(String)relationship.getProperty(AbstractRelationship.combinedType.name());
         relClass=EntityContext.getNamedRelationClass(combinedRelType);
         if (relClass != null) {
           newRel=createRelationship(securityContext,combinedRelType);
@@ -24,7 +24,7 @@
  catch (  Throwable t) {
   }
   if (newRel == null) {
-    newRel=new GenericRelationship();
+    newRel=(T)EntityContext.getGenericFactory().createGenericRelationship();
   }
   newRel.init(securityContext,relationship);
   newRel.onRelationshipInstantiation();

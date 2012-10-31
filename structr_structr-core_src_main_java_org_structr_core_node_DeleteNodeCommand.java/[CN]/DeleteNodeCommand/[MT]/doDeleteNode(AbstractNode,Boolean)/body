@@ -1,13 +1,12 @@
 {
   deletedNodes.add(node);
-  if (node.getStringProperty(AbstractNode.Key.uuid) == null) {
+  if (node.getProperty(AbstractNode.uuid) == null) {
     logger.log(Level.WARNING,"Will not delete node which has no UUID");
     return null;
   }
-  final Command transactionCommand=Services.command(securityContext,TransactionCommand.class);
-  final Command removeNodeFromIndex=Services.command(securityContext,RemoveNodeFromIndex.class);
-  final Command deleteRel=Services.command(securityContext,DeleteRelationshipCommand.class);
-  transactionCommand.execute(new StructrTransaction(){
+  final RemoveNodeFromIndex removeNodeFromIndex=Services.command(securityContext,RemoveNodeFromIndex.class);
+  final DeleteRelationshipCommand deleteRel=Services.command(securityContext,DeleteRelationshipCommand.class);
+  Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
     @Override public Object execute() throws FrameworkException {
       try {
         List<AbstractNode> nodesToCheckAfterDeletion=new LinkedList<AbstractNode>();

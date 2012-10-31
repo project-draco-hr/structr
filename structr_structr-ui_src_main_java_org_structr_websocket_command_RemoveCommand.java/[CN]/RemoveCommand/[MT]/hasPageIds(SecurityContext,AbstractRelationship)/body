@@ -1,13 +1,13 @@
 {
-  Command searchNode=Services.command(securityContext,SearchNodeCommand.class);
+  SearchNodeCommand searchNode=Services.command(securityContext,SearchNodeCommand.class);
   long count=0;
-  for (  Entry entry : rel.getProperties().entrySet()) {
-    String key=(String)entry.getKey();
-    if (key.matches("[a-zA-Z0-9]{32}")) {
+  for (  Entry<PropertyKey,Object> entry : rel.getProperties().entrySet()) {
+    PropertyKey key=entry.getKey();
+    if (key.name().matches("[a-zA-Z0-9]{32}")) {
       List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
       attrs.add(Search.andExactType(Page.class.getSimpleName()));
-      attrs.add(Search.andExactUuid(key));
-      Result results=(Result)searchNode.execute(null,false,false,attrs);
+      attrs.add(Search.andExactUuid(key.name()));
+      Result results=searchNode.execute(attrs);
       if (results != null && !results.isEmpty()) {
         count++;
       }

@@ -1,14 +1,14 @@
 {
-  final List<GraphObject> templates=getComponents(SecurityContext.getSuperUserInstance(),getSearchAttributes(rawType));
-  final Command createNodeCommand=Services.command(securityContext,CreateNodeCommand.class);
-  final Map<String,Object> templateProperties=new LinkedHashMap<String,Object>();
+  final List<Component> templates=getComponents(SecurityContext.getSuperUserInstance(),getSearchAttributes(rawType));
+  final CreateNodeCommand createNodeCommand=Services.command(securityContext,CreateNodeCommand.class);
   final String componentId=UUID.randomUUID().toString().replaceAll("[\\-]+","");
-  final Component template=(Component)templates.get(templates.size() - 1);
-  templateProperties.put(AbstractNode.Key.type.name(),Component.class.getSimpleName());
-  templateProperties.put(Component.UiKey.kind.name(),template.getStringProperty(Component.UiKey.kind.name()));
-  templateProperties.put(AbstractNode.Key.uuid.name(),componentId);
-  templateProperties.put(AbstractNode.Key.visibleToPublicUsers.name(),template.getBooleanProperty(AbstractNode.Key.visibleToPublicUsers));
-  templateProperties.put(AbstractNode.Key.visibleToAuthenticatedUsers.name(),template.getBooleanProperty(AbstractNode.Key.visibleToAuthenticatedUsers));
+  final Component template=templates.get(templates.size() - 1);
+  final PropertyMap templateProperties=new PropertyMap();
+  templateProperties.put(AbstractNode.type,Component.class.getSimpleName());
+  templateProperties.put(Component.kind,template.getProperty(Component.kind));
+  templateProperties.put(AbstractNode.uuid,componentId);
+  templateProperties.put(AbstractNode.visibleToPublicUsers,template.getBooleanProperty(AbstractNode.visibleToPublicUsers));
+  templateProperties.put(AbstractNode.visibleToAuthenticatedUsers,template.getBooleanProperty(AbstractNode.visibleToAuthenticatedUsers));
   String parentComponentId=template.getComponentId();
   propertySet.remove("pageId");
   if (surroundingComponentId != null) {
@@ -19,19 +19,22 @@
     @Override public Object execute() throws FrameworkException {
       final Component comp=(Component)createNodeCommand.execute(templateProperties);
       RelationshipHelper.copyRelationships(SecurityContext.getSuperUserInstance(),template,comp,RelType.CONTAINS,finalParentComponentId,true);
-      final Map<String,Object> contentTemplateProperties=new LinkedHashMap<String,Object>();
+      final PropertyMap contentTemplateProperties=new PropertyMap();
       for (      final AbstractNode node : template.getContentNodes().values()) {
         if (node instanceof Content) {
           final Content contentTemplate=(Content)node;
-          final String dataKey=contentTemplate.getStringProperty("data-key");
+          final String dataKey=contentTemplate.getProperty(Content.dataKey);
           contentTemplateProperties.clear();
-          contentTemplateProperties.put(AbstractNode.Key.type.name(),Content.class.getSimpleName());
-          contentTemplateProperties.put(Content.UiKey.typeDefinitionId.name(),contentTemplate.getStringProperty(Content.UiKey.typeDefinitionId));
-          contentTemplateProperties.put("data-key",dataKey);
-          contentTemplateProperties.put(AbstractNode.Key.visibleToPublicUsers.name(),contentTemplate.getStringProperty(AbstractNode.Key.visibleToPublicUsers.name()));
-          contentTemplateProperties.put(AbstractNode.Key.visibleToAuthenticatedUsers.name(),contentTemplate.getStringProperty(AbstractNode.Key.visibleToAuthenticatedUsers.name()));
+          contentTemplateProperties.put(AbstractNode.type,Content.class.getSimpleName());
+          contentTemplateProperties.put(Content.typeDefinitionId,contentTemplate.getProperty(Content.typeDefinitionId));
+          contentTemplateProperties.put(Content.dataKey,dataKey);
+          contentTemplateProperties.put(AbstractNode.visibleToPublicUsers,contentTemplate.getBooleanProperty(AbstractNode.visibleToPublicUsers));
+          contentTemplateProperties.put(AbstractNode.visibleToAuthenticatedUsers,contentTemplate.getBooleanProperty(AbstractNode.visibleToAuthenticatedUsers));
           final Content newContent=(Content)createNodeCommand.execute(contentTemplateProperties);
-          newContent.setProperty(Content.UiKey.content.name(),propertySet.get(dataKey));
+          Object dataKeyValue=propertySet.get(dataKey);
+          if (dataKeyValue != null) {
+            newContent.setProperty(Content.content,dataKeyValue.toString());
+          }
           propertySet.remove(dataKey);
           RelationshipHelper.copyRelationships(SecurityContext.getSuperUserInstance(),contentTemplate,newContent,RelType.CONTAINS,componentId,false);
         }
@@ -41,10 +44,11 @@
   }
 );
   if (newComponent != null) {
-    propertySet.remove(AbstractNode.Key.createdDate.name());
-    propertySet.remove(AbstractNode.Key.lastModifiedDate.name());
-    for (    final String key : propertySet.keySet()) {
-      newComponent.setProperty(key,propertySet.get(key));
+    propertySet.remove(AbstractNode.createdDate.name());
+    propertySet.remove(AbstractNode.lastModifiedDate.name());
+    for (    final String keyName : propertySet.keySet()) {
+      PropertyKey key=EntityContext.getPropertyKeyForName(Component.class,keyName);
+      newComponent.setProperty(key,propertySet.get(keyName));
     }
   }
   return newComponent;

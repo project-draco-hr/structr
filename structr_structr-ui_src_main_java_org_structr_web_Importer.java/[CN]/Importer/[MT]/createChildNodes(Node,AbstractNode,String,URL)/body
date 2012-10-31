@@ -41,20 +41,20 @@
     }
     List<NodeAttribute> attrs=new LinkedList<NodeAttribute>();
     if (content != null) {
-      attrs.add(new NodeAttribute("content",content));
+      attrs.add(new NodeAttribute(Content.content,content));
     }
-    attrs.add(new NodeAttribute(AbstractNode.Key.type.name(),type));
-    attrs.add(new NodeAttribute("tag",tag));
+    attrs.add(new NodeAttribute(AbstractNode.type,type));
+    attrs.add(new NodeAttribute(HtmlElement.tag,tag));
     if (StringUtils.isNotBlank(id)) {
-      attrs.add(new NodeAttribute(PropertyView.Html + "id",id));
+      attrs.add(new NodeAttribute(HtmlElement._id,id));
     }
     if (StringUtils.isNotBlank(classString.toString())) {
-      attrs.add(new NodeAttribute(PropertyView.Html + "class",StringUtils.trim(classString.toString())));
+      attrs.add(new NodeAttribute(HtmlElement._class,StringUtils.trim(classString.toString())));
     }
     for (    Attribute nodeAttr : node.attributes()) {
       String key=nodeAttr.getKey();
       if (!key.equals("text")) {
-        attrs.add(new NodeAttribute(PropertyView.Html + nodeAttr.getKey(),nodeAttr.getValue()));
+        attrs.add(new NodeAttribute(new Property(PropertyView.Html.concat(nodeAttr.getKey())),nodeAttr.getValue()));
       }
     }
     String nodePath=getNodePath(node);

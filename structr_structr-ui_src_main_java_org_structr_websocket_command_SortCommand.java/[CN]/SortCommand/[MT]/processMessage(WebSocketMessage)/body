@@ -7,11 +7,12 @@
       AbstractNode nodeToSort=getNode(id);
       Long pos=Long.parseLong((String)nodeData.get(id));
       List<AbstractRelationship> rels=nodeToSort.getRelationships(RelType.CONTAINS,Direction.INCOMING);
+      PropertyKey<Long> pageIdProperty=new Property<Long>(pageId);
       for (      AbstractRelationship rel : rels) {
         try {
-          Long oldPos=rel.getLongProperty(pageId);
+          Long oldPos=rel.getLongProperty(pageIdProperty);
           if ((oldPos != null) && !(oldPos.equals(pos))) {
-            rel.setProperty(pageId,pos);
+            rel.setProperty(pageIdProperty,pos);
           }
         }
  catch (        FrameworkException fex) {

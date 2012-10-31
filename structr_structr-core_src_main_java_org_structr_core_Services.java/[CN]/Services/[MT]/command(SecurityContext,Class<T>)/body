@@ -1,0 +1,32 @@
+{
+  logger.log(Level.FINER,"Creating command ",commandType.getName());
+  Class serviceClass=null;
+  T command=null;
+  try {
+    command=commandType.newInstance();
+    command.setSecurityContext(securityContext);
+    serviceClass=command.getServiceClass();
+    if ((serviceClass != null) && isConfigured(serviceClass)) {
+      Service service=serviceCache.get(serviceClass);
+      if (service == null) {
+        service=createService(serviceClass);
+      }
+ else {
+        if (service instanceof RunnableService) {
+          RunnableService runnableService=(RunnableService)service;
+          if (!runnableService.isRunning()) {
+            runnableService.stopService();
+            runnableService.shutdown();
+            service=createService(serviceClass);
+          }
+        }
+      }
+      logger.log(Level.FINEST,"Initializing command ",commandType.getName());
+      service.injectArguments(command);
+    }
+  }
+ catch (  Throwable t) {
+    logger.log(Level.SEVERE,"Exception while creating command " + commandType.getName(),t);
+  }
+  return (command);
+}

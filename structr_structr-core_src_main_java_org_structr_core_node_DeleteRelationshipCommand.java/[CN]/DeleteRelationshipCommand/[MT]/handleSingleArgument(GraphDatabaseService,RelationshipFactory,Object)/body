@@ -16,14 +16,13 @@
     rel=relationshipFactory.createRelationship(securityContext,(Relationship)argument);
   }
   if (rel != null) {
-    if (rel.getStringProperty(AbstractRelationship.Key.uuid) == null) {
+    if (rel.getProperty(AbstractRelationship.uuid) == null) {
       logger.log(Level.WARNING,"Will not delete relationship which has no UUID");
       return null;
     }
-    final Command transactionCommand=Services.command(securityContext,TransactionCommand.class);
     final Relationship relToDelete=rel.getRelationship();
     final AbstractRelationship finalRel=rel;
-    transactionCommand.execute(new StructrTransaction(){
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
       @Override public Object execute() throws FrameworkException {
         try {
           Services.command(securityContext,RemoveRelationshipFromIndex.class).execute(finalRel);

@@ -1,3 +1,9 @@
 {
-  registerSearchableProperty(type,index,key.name());
+  Map<String,Set<PropertyKey>> searchablePropertyMapForType=getSearchablePropertyMapForType(type.getSimpleName());
+  Set<PropertyKey> searchablePropertySet=searchablePropertyMapForType.get(index);
+  if (searchablePropertySet == null) {
+    searchablePropertySet=new LinkedHashSet<PropertyKey>();
+    searchablePropertyMapForType.put(index,searchablePropertySet);
+  }
+  searchablePropertySet.add(key);
 }

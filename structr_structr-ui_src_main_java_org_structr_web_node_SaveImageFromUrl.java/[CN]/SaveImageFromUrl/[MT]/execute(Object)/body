@@ -27,7 +27,7 @@ if (imageNode != null) {
 refreshImageFromUrl(imageNode);
 }
  else if (user != null && urlString != null && parentNode != null) {
-Image newImageNode=(Image)Services.command(securityContext,CreateNodeCommand.class).execute(user,new NodeAttribute(AbstractNode.Key.type.name(),Image.class.getSimpleName()),new NodeAttribute(org.structr.core.entity.File.Key.url.name(),urlString),new NodeAttribute(AbstractNode.Key.visibleToAuthenticatedUsers.name(),true),new NodeAttribute(AbstractNode.Key.visibleToPublicUsers.name(),true),true);
+Image newImageNode=(Image)Services.command(securityContext,CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.type,Image.class.getSimpleName()),new NodeAttribute(org.structr.core.entity.File.url,urlString),new NodeAttribute(AbstractNode.visibleToAuthenticatedUsers,true),new NodeAttribute(AbstractNode.visibleToPublicUsers,true));
 Services.command(securityContext,CreateRelationshipCommand.class).execute(parentNode,newImageNode,RelType.CONTAINS);
 refreshImageFromUrl(newImageNode);
 return newImageNode;

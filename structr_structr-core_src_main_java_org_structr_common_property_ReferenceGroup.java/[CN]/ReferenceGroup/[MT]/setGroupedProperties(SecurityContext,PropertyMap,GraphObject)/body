@@ -1,0 +1,14 @@
+{
+  if (destination instanceof AbstractRelationship) {
+    AbstractRelationship rel=(AbstractRelationship)destination;
+    for (    Reference reference : (Reference[])propertyKeys) {
+      GraphObject referencedEntity=reference.getReferencedEntity(rel);
+      PropertyKey referenceKey=reference.getReferenceKey();
+      PropertyKey propertyKey=reference.getPropertyKey();
+      if (referencedEntity != null && !reference.isReadOnlyProperty()) {
+        Object value=source.get(propertyKey);
+        referencedEntity.setProperty(referenceKey,value);
+      }
+    }
+  }
+}

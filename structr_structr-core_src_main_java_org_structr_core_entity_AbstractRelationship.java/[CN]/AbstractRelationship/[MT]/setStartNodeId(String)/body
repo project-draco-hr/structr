@@ -1,20 +1,18 @@
 {
   final String type=this.getClass().getSimpleName();
-  final String key=getStartNodeIdKey().name();
+  final PropertyKey key=getStartNodeIdKey();
   if (startNodeId == null) {
     throw new FrameworkException(type,new NullPropertyToken(key));
   }
   if (getStartNodeId().equals(startNodeId)) {
     return;
   }
-  Command transaction=Services.command(securityContext,TransactionCommand.class);
-  transaction.execute(new StructrTransaction(){
+  Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
     @Override public Object execute() throws FrameworkException {
-      Command deleteRel=Services.command(securityContext,DeleteRelationshipCommand.class);
-      Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
-      Command nodeFactory=Services.command(securityContext,NodeFactoryCommand.class);
+      DeleteRelationshipCommand deleteRel=Services.command(securityContext,DeleteRelationshipCommand.class);
+      CreateRelationshipCommand createRel=Services.command(securityContext,CreateRelationshipCommand.class);
       AbstractNode newStartNode=getNodeByUuid(startNodeId);
-      AbstractNode endNode=(AbstractNode)nodeFactory.execute(getEndNode());
+      AbstractNode endNode=getEndNode();
       if (newStartNode == null) {
         throw new FrameworkException(type,new IdNotFoundToken(startNodeId));
       }

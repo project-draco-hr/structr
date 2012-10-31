@@ -1,7 +1,7 @@
 {
   try {
-    Command nodeFactory=Services.command(SecurityContext.getSuperUserInstance(),NodeFactoryCommand.class);
-    return (AbstractNode)nodeFactory.execute(dbRelationship.getOtherNode(node.getNode()));
+    NodeFactory nodeFactory=new NodeFactory(SecurityContext.getSuperUserInstance());
+    return (AbstractNode)nodeFactory.createNode(dbRelationship.getOtherNode(node.getNode()));
   }
  catch (  FrameworkException fex) {
     logger.log(Level.WARNING,"Unable to instantiate node",fex);

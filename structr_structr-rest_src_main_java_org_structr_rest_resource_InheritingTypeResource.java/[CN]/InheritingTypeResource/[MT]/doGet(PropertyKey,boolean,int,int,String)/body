@@ -1,0 +1,37 @@
+{
+  final List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
+  final AbstractNode topNode=null;
+  final boolean includeDeletedAndHidden=false;
+  final boolean publicOnly=false;
+  if (rawType != null) {
+    searchAttributes.add(Search.andExactTypeAndSubtypes(EntityContext.normalizeEntityName(rawType)));
+    searchAttributes.addAll(extractSearchableAttributesFromRequest());
+    if (sortKey == null) {
+      try {
+        final GraphObject templateEntity=(GraphObject)entityClass.newInstance();
+        final PropertyKey sortKeyProperty=templateEntity.getDefaultSortKey();
+        sortDescending=GraphObjectComparator.DESCENDING.equals(templateEntity.getDefaultSortOrder());
+        if (sortKeyProperty != null) {
+          sortKey=sortKeyProperty;
+        }
+      }
+ catch (      final Throwable t) {
+        sortKey=AbstractNode.name;
+      }
+    }
+    Integer sortType=null;
+    if (sortKey != null) {
+      final PropertyConverter converter=sortKey.inputConverter(securityContext);
+      if (converter != null) {
+        sortType=converter.getSortType();
+      }
+    }
+    final Result results=Services.command(securityContext,SearchNodeCommand.class).execute(includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDescending,pageSize,page,offsetId,sortType);
+    return results;
+  }
+ else {
+    logger.log(Level.WARNING,"type was null");
+  }
+  final List emptyList=Collections.emptyList();
+  return new Result(emptyList,null,isCollectionResource(),isPrimitiveArray());
+}

@@ -55,22 +55,22 @@
   if ((src.getGraphObject() != null)) {
     GraphObject graphObject=src.getGraphObject();
     if (!src.getModifiedProperties().isEmpty()) {
-      for (      String modifiedKey : src.getModifiedProperties()) {
+      for (      PropertyKey modifiedKey : src.getModifiedProperties()) {
         modifiedProperties.add(toJsonPrimitive(modifiedKey));
         Object newValue=graphObject.getProperty(modifiedKey);
         if (newValue != null) {
           if (graphObject instanceof AbstractNode) {
-            src.getNodeData().put(modifiedKey,newValue);
+            src.getNodeData().put(modifiedKey.name(),newValue);
           }
  else {
-            src.getRelData().put(modifiedKey,newValue);
+            src.getRelData().put(modifiedKey.name(),newValue);
           }
         }
       }
       root.add("modifiedProperties",modifiedProperties);
     }
     if (!src.getRemovedProperties().isEmpty()) {
-      for (      String removedKey : src.getRemovedProperties()) {
+      for (      PropertyKey removedKey : src.getRemovedProperties()) {
         removedProperties.add(toJsonPrimitive(removedKey));
       }
       root.add("removedProperties",removedProperties);

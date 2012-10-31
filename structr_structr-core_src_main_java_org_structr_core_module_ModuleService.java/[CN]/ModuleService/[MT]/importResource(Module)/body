@@ -9,6 +9,11 @@
       if (!Modifier.isAbstract(clazz.getModifiers())) {
         if (AbstractNode.class.isAssignableFrom(clazz)) {
           EntityContext.init(clazz);
+          try {
+            EntityContext.scanEntity(clazz.newInstance());
+          }
+ catch (          Throwable t) {
+          }
           String simpleName=clazz.getSimpleName();
           String fullName=clazz.getName();
           nodeEntityClassCache.put(simpleName,clazz);
@@ -24,10 +29,25 @@
           }
         }
         if (AbstractRelationship.class.isAssignableFrom(clazz)) {
+          EntityContext.init(clazz);
+          try {
+            EntityContext.scanEntity(clazz.newInstance());
+          }
+ catch (          Throwable t) {
+          }
           String simpleName=clazz.getSimpleName();
           String fullName=clazz.getName();
           relationshipClassCache.put(simpleName,clazz);
           relationshipPackages.add(fullName.substring(0,fullName.lastIndexOf(".")));
+          for (          Class interfaceClass : clazz.getInterfaces()) {
+            String interfaceName=interfaceClass.getSimpleName();
+            Set<Class> classesForInterface=interfaceCache.get(interfaceName);
+            if (classesForInterface == null) {
+              classesForInterface=new LinkedHashSet<Class>();
+              interfaceCache.put(interfaceName,classesForInterface);
+            }
+            classesForInterface.add(clazz);
+          }
         }
         if (Service.class.isAssignableFrom(clazz)) {
           Services.registerServiceClass(clazz);

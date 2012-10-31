@@ -1,0 +1,16 @@
+{
+  Map<Field,T> fields=new LinkedHashMap<Field,T>();
+  Set<Class<?>> allTypes=getAllTypes(entity.getClass());
+  for (  Class<?> type : allTypes) {
+    for (    Field field : type.getDeclaredFields()) {
+      if (entityType.isAssignableFrom(field.getType())) {
+        try {
+          fields.put(field,(T)field.get(entity));
+        }
+ catch (        Throwable t) {
+        }
+      }
+    }
+  }
+  return fields;
+}

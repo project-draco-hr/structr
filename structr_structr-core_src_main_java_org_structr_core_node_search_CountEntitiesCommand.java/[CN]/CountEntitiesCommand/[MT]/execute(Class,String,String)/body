@@ -1,0 +1,28 @@
+{
+  Index<Node> index=(Index<Node>)arguments.get(NodeService.NodeIndex.keyword.name());
+  String type=entityType.getSimpleName();
+  int count=-1;
+  if (type != null) {
+    Query typeQuery=new TermQuery(new Term("type",type));
+    Query actualQuery=null;
+    if (lowerTerm != null && upperTerm != null) {
+      Query dateQuery=new TermRangeQuery("createdDate",lowerTerm,upperTerm,true,false);
+      BooleanQuery booleanQuery=new BooleanQuery();
+      booleanQuery.add(dateQuery,BooleanClause.Occur.MUST);
+      booleanQuery.add(typeQuery,BooleanClause.Occur.MUST);
+      actualQuery=booleanQuery;
+    }
+ else {
+      actualQuery=typeQuery;
+    }
+    long start=System.currentTimeMillis();
+    IndexHits hits=index.query(actualQuery);
+    for (    Object hit : hits) {
+      count++;
+    }
+    long end=System.currentTimeMillis();
+    logger.log(Level.FINE,"Counted {0} entities in {1} ms.",new Object[]{count,(end - start)});
+    hits.close();
+  }
+  return count;
+}

@@ -5,7 +5,7 @@
     String type=TestOne.class.getSimpleName();
     int number=61;
     List<AbstractNode> nodes=this.createTestNodes(type,number);
-    String key=TestOne.Key.anInt.name();
+    PropertyKey key=TestOne.anInt;
     int offset=10;
     int i=offset;
     Collections.shuffle(nodes,new Random(System.nanoTime()));
@@ -16,13 +16,13 @@
     }
     List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
     searchAttributes.add(Search.andType(type));
-    Result result=(Result)searchNodeCommand.execute(null,includeDeletedAndHidden,publicOnly,searchAttributes);
-    assertTrue(result.size() == number);
-    String sortKey=key;
+    Result result=searchNodeCommand.execute(includeDeletedAndHidden,publicOnly,searchAttributes);
+    assertEquals(number,result.size());
+    PropertyKey sortKey=key;
     boolean sortDesc=false;
     int pageSize=5;
     int page=1;
-    result=(Result)searchNodeCommand.execute(null,includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDesc,pageSize,page,null,SortField.INT);
+    result=searchNodeCommand.execute(includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDesc,pageSize,page,null,SortField.INT);
     logger.log(Level.INFO,"Raw result size: {0}, expected: {1}",new Object[]{result.getRawResultCount(),number});
     assertTrue(result.getRawResultCount() == number);
     logger.log(Level.INFO,"Result size: {0}, expected: {1}",new Object[]{result.size(),pageSize});
@@ -31,7 +31,7 @@
       int expectedNumber=offset + j;
       int gotNumber=result.get(j).getIntProperty(key);
       System.out.println("expected: " + expectedNumber + ", got: "+ gotNumber);
-      assertTrue(gotNumber == expectedNumber);
+      assertEquals(expectedNumber,gotNumber);
     }
   }
  catch (  FrameworkException ex) {

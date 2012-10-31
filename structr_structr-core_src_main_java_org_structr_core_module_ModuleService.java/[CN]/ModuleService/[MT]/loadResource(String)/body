@@ -7,17 +7,17 @@
       ZipEntry entry=entries.nextElement();
       String entryName=entry.getName();
       if (entryName.endsWith(".class")) {
-        String fileEntry=entry.getName().replaceAll("[/]+",".");
+        String fileEntry=entry.getName().replaceAll("[".concat(fileSepEscaped).concat("]+"),".");
         classes.add(fileEntry.substring(0,fileEntry.length() - 6));
       }
     }
     zipFile.close();
   }
- else   if (resource.endsWith("/classes")) {
-    addClassesRecursively(new File(resource),"/classes",classes);
+ else   if (resource.endsWith(classesDir)) {
+    addClassesRecursively(new File(resource),classesDir,classes);
   }
- else   if (resource.endsWith("/test-classes")) {
-    addClassesRecursively(new File(resource),"/test-classes",classes);
+ else   if (resource.endsWith(testClassesDir)) {
+    addClassesRecursively(new File(resource),testClassesDir,classes);
   }
   return ret;
 }

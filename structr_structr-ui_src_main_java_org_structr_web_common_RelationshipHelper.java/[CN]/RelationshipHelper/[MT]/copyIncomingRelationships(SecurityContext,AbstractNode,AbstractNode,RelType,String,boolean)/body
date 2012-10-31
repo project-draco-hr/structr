@@ -2,7 +2,7 @@
   if (cloneNode == null) {
     return;
   }
-  Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
+  CreateRelationshipCommand createRel=Services.command(securityContext,CreateRelationshipCommand.class);
   for (  AbstractRelationship in : origNode.getIncomingRelationships()) {
     AbstractNode startNode=in.getStartNode();
     if (startNode == null) {
@@ -12,13 +12,13 @@
     if (!(relType.name().equals(origRelType.name()))) {
       continue;
     }
-    Map<String,Object> props=in.getProperties();
-    props.remove(AbstractRelationship.Key.uuid.name());
-    props.remove(AbstractRelationship.HiddenKey.createdDate.name());
-    props.put(AbstractRelationship.HiddenKey.combinedType.name(),EntityContext.createCombinedRelationshipType(in.getStringProperty(AbstractRelationship.HiddenKey.combinedType),cloneNode.getClass()));
-    AbstractRelationship newInRel=(AbstractRelationship)createRel.execute(startNode,cloneNode,relType,props,false);
-    if ((componentId != null) && !(cloneNode.getStringProperty(AbstractNode.Key.uuid).equals(componentId))) {
-      newInRel.setProperty(Component.Key.componentId,componentId);
+    PropertyMap props=in.getProperties();
+    props.remove(AbstractRelationship.uuid);
+    props.remove(AbstractRelationship.createdDate);
+    props.put(AbstractRelationship.combinedType,EntityContext.createCombinedRelationshipType(in.getProperty(AbstractRelationship.combinedType),cloneNode.getClass()));
+    AbstractRelationship newInRel=createRel.execute(startNode,cloneNode,relType,props,false);
+    if ((componentId != null) && !(cloneNode.getProperty(AbstractNode.uuid).equals(componentId))) {
+      newInRel.setProperty(Component.componentId,componentId);
     }
     setPositions(cloneNode,newInRel,increasePosition);
   }

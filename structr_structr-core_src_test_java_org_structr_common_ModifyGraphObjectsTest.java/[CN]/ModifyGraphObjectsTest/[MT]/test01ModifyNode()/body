@@ -1,34 +1,34 @@
 {
   try {
     AbstractNode node;
-    final Map<String,Object> props=new HashMap<String,Object>();
+    final PropertyMap props=new PropertyMap();
     String type="UnknownTestType";
     String name="GenericNode-name";
-    props.put(AbstractNode.Key.type.name(),type);
-    props.put(AbstractNode.Key.name.name(),name);
+    props.put(AbstractNode.type,type);
+    props.put(AbstractNode.name,name);
     node=(AbstractNode)transactionCommand.execute(new StructrTransaction(){
       @Override public Object execute() throws FrameworkException {
         return (AbstractNode)createNodeCommand.execute(props);
       }
     }
 );
-    assertTrue(node.getStringProperty(AbstractNode.Key.type).equals(type));
-    assertTrue(node.getStringProperty(AbstractNode.Key.name).equals(name));
-    assertTrue(!node.getBooleanProperty(AbstractNode.Key.hidden));
-    assertTrue(!node.getBooleanProperty(AbstractNode.Key.deleted));
-    assertTrue(!node.getBooleanProperty(AbstractNode.Key.visibleToAuthenticatedUsers));
-    assertTrue(!node.getBooleanProperty(AbstractNode.Key.visibleToPublicUsers));
+    assertTrue(node.getProperty(AbstractNode.type).equals(type));
+    assertTrue(node.getProperty(AbstractNode.name).equals(name));
+    assertTrue(!node.getBooleanProperty(AbstractNode.hidden));
+    assertTrue(!node.getBooleanProperty(AbstractNode.deleted));
+    assertTrue(!node.getBooleanProperty(AbstractNode.visibleToAuthenticatedUsers));
+    assertTrue(!node.getBooleanProperty(AbstractNode.visibleToPublicUsers));
     name="GenericNode-name-????????";
-    node.setProperty(AbstractNode.Key.name,name);
-    assertTrue(node.getStringProperty(AbstractNode.Key.name).equals(name));
-    node.setProperty(AbstractNode.Key.hidden,true);
-    assertTrue(node.getBooleanProperty(AbstractNode.Key.hidden));
-    node.setProperty(AbstractNode.Key.deleted,true);
-    assertTrue(node.getBooleanProperty(AbstractNode.Key.deleted));
-    node.setProperty(AbstractNode.Key.visibleToAuthenticatedUsers,true);
-    assertTrue(node.getBooleanProperty(AbstractNode.Key.visibleToAuthenticatedUsers));
-    node.setProperty(AbstractNode.Key.visibleToPublicUsers,true);
-    assertTrue(node.getBooleanProperty(AbstractNode.Key.visibleToPublicUsers));
+    node.setProperty(AbstractNode.name,name);
+    assertTrue(node.getProperty(AbstractNode.name).equals(name));
+    node.setProperty(AbstractNode.hidden,true);
+    assertTrue(node.getBooleanProperty(AbstractNode.hidden));
+    node.setProperty(AbstractNode.deleted,true);
+    assertTrue(node.getBooleanProperty(AbstractNode.deleted));
+    node.setProperty(AbstractNode.visibleToAuthenticatedUsers,true);
+    assertTrue(node.getBooleanProperty(AbstractNode.visibleToAuthenticatedUsers));
+    node.setProperty(AbstractNode.visibleToPublicUsers,true);
+    assertTrue(node.getBooleanProperty(AbstractNode.visibleToPublicUsers));
   }
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,ex.toString());

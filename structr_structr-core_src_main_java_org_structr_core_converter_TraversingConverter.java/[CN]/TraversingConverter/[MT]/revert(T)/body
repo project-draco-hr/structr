@@ -1,0 +1,26 @@
+{
+  if (currentObject != null) {
+    TraversalDescription description=traverserInterface.getTraversalDescription(securityContext,source);
+    AbstractNode currentNode=(AbstractNode)currentObject;
+    Comparator<AbstractNode> comparator=traverserInterface.getComparator();
+    List<AbstractNode> nodes=getTraversalResults(comparator,description,currentNode);
+    if (traverserInterface.collapseSingleResult() && nodes.isEmpty()) {
+      return null;
+    }
+    List<GraphObject> transformedNodes=traverserInterface.transformResult(nodes);
+    Notion notion=traverserInterface.getNotion();
+    if (notion != null && !rawMode) {
+      Adapter<GraphObject,Object> adapter=notion.getAdapterForGetter(securityContext);
+      List<Object> results=new LinkedList<Object>();
+      for (      GraphObject obj : transformedNodes) {
+        results.add(adapter.adapt(obj));
+      }
+      traverserInterface.cleanup();
+      return (T)((traverserInterface.collapseSingleResult() && results.size() == 1) ? results.get(0) : results);
+    }
+ else {
+      return (T)transformedNodes;
+    }
+  }
+  return null;
+}

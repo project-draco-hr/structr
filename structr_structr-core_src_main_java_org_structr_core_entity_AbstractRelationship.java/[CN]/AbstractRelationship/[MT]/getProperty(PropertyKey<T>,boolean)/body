@@ -1,0 +1,69 @@
+{
+  if (key == null || key.name() == null) {
+    return null;
+  }
+  Object value=applyConverter ? cachedConvertedProperties.get(key) : cachedRawProperties.get(key);
+  boolean dontCache=false;
+  Class type=this.getClass();
+  if (value == null || !applyConverter) {
+    PropertyKey startNodeIdKey=getStartNodeIdKey();
+    PropertyKey endNodeIdKey=getEndNodeIdKey();
+    if (startNodeIdKey != null && key.equals(startNodeIdKey)) {
+      value=getStartNodeId();
+      if (applyConverter) {
+        cachedConvertedProperties.put(key,value);
+      }
+ else {
+        cachedRawProperties.put(key,value);
+      }
+      return (T)value;
+    }
+    if (endNodeIdKey != null && key.equals(endNodeIdKey)) {
+      value=getEndNodeId();
+      if (applyConverter) {
+        cachedConvertedProperties.put(key,value);
+      }
+ else {
+        cachedRawProperties.put(key,value);
+      }
+      return (T)value;
+    }
+    PropertyGroup<T> propertyGroup=EntityContext.getPropertyGroup(type,key);
+    if (propertyGroup != null) {
+      try {
+        return propertyGroup.getGroupedProperties(securityContext,this);
+      }
+ catch (      FrameworkException fex) {
+        logger.log(Level.WARNING,"Unable to convert property {0} of type {1}: {2}",new Object[]{key.name(),entityType.getSimpleName(),fex.getMessage()});
+      }
+    }
+    if (dbRelationship.hasProperty(key.name())) {
+      value=dbRelationship.getProperty(key.name());
+    }
+    if (applyConverter) {
+      PropertyConverter converter=key.databaseConverter(securityContext,this);
+      if (converter != null) {
+        try {
+          value=converter.revert(value);
+        }
+ catch (        Throwable t) {
+          t.printStackTrace();
+          logger.log(Level.WARNING,"Unable to convert property {0} of type {1}: {2}",new Object[]{key.name(),getClass().getSimpleName(),t.getMessage()});
+        }
+      }
+    }
+    if (!dontCache) {
+      if (applyConverter) {
+        cachedConvertedProperties.put(key,value);
+      }
+ else {
+        cachedRawProperties.put(key,value);
+      }
+    }
+  }
+  if (value == null) {
+    value=key.defaultValue();
+    dontCache=true;
+  }
+  return (T)value;
+}

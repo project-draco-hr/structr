@@ -1,0 +1,17 @@
+{
+  RelationClass relation=null;
+  Class localType=sourceType;
+  while ((relation == null) && localType != null && !localType.equals(Object.class)) {
+    relation=getPropertyRelationshipMapForType(localType).get(propertyKey);
+    if (relation == null) {
+      for (      Class interfaceClass : getInterfacesForType(localType)) {
+        relation=getPropertyRelationshipMapForType(interfaceClass).get(propertyKey);
+        if (relation != null) {
+          return relation;
+        }
+      }
+    }
+    localType=localType.getSuperclass();
+  }
+  return relation;
+}

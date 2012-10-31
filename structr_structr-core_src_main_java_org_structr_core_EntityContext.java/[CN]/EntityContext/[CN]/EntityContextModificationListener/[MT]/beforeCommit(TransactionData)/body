@@ -1,17 +1,17 @@
 {
-  Thread currentThread=Thread.currentThread();
-  if (!transactionKeyMap.containsKey(currentThread)) {
+  Long transactionKeyValue=transactionKeyMap.get();
+  if (transactionKeyValue == null) {
     return -1L;
   }
-  long transactionKey=transactionKeyMap.get(Thread.currentThread());
+  long transactionKey=transactionKeyMap.get();
   if (!Services.isReady(NodeService.class)) {
     logger.log(Level.WARNING,"Node service is not ready yet.");
     return transactionKey;
   }
-  SecurityContext securityContext=securityContextMap.get(currentThread);
+  SecurityContext securityContext=securityContextMap.get();
   SecurityContext superUserContext=SecurityContext.getSuperUserInstance();
-  Command indexNodeCommand=Services.command(superUserContext,IndexNodeCommand.class);
-  Command indexRelationshipCommand=Services.command(superUserContext,IndexRelationshipCommand.class);
+  IndexNodeCommand indexNodeCommand=Services.command(superUserContext,IndexNodeCommand.class);
+  IndexRelationshipCommand indexRelationshipCommand=Services.command(superUserContext,IndexRelationshipCommand.class);
   try {
     Map<Relationship,Map<String,Object>> removedRelProperties=new LinkedHashMap<Relationship,Map<String,Object>>();
     Map<Node,Map<String,Object>> removedNodeProperties=new LinkedHashMap<Node,Map<String,Object>>();
@@ -20,6 +20,7 @@
     ErrorBuffer errorBuffer=new ErrorBuffer();
     NodeFactory nodeFactory=new NodeFactory(securityContext);
     boolean hasError=false;
+    globalChangeSets.put(transactionKey,changeSet);
     for (    StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
       listener.begin(securityContext,transactionKey);
     }
@@ -34,9 +35,13 @@
       if (!data.isDeleted(node)) {
         AbstractNode modifiedNode=nodeFactory.createNode(node,true,false);
         if (modifiedNode != null) {
+          PropertyKey key=getPropertyKeyForName(modifiedNode.getClass(),entry.key());
+          if (!key.isSystemProperty()) {
+            changeSet.nonSystemProperty();
+          }
           changeSet.modify(modifiedNode);
           for (          StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
-            hasError|=!listener.propertyRemoved(securityContext,transactionKey,errorBuffer,modifiedNode,entry.key(),entry.previouslyCommitedValue());
+            hasError|=!listener.propertyRemoved(securityContext,transactionKey,errorBuffer,modifiedNode,key,entry.previouslyCommitedValue());
           }
         }
       }
@@ -52,9 +57,13 @@
       if (!data.isDeleted(rel)) {
         AbstractRelationship modifiedRel=relFactory.createRelationship(securityContext,rel);
         if (modifiedRel != null) {
+          PropertyKey key=getPropertyKeyForName(modifiedRel.getClass(),entry.key());
+          if (!key.isSystemProperty()) {
+            changeSet.nonSystemProperty();
+          }
           changeSet.modify(modifiedRel);
           for (          StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
-            hasError|=!listener.propertyRemoved(securityContext,transactionKey,errorBuffer,modifiedRel,entry.key(),entry.previouslyCommitedValue());
+            hasError|=!listener.propertyRemoved(securityContext,transactionKey,errorBuffer,modifiedRel,key,entry.previouslyCommitedValue());
           }
         }
       }
@@ -95,9 +104,10 @@
     for (    Relationship rel : data.deletedRelationships()) {
       AbstractRelationship entity=relFactory.createRelationship(securityContext,rel);
       if (entity != null) {
-        hasError|=!entity.beforeDeletion(securityContext,errorBuffer,removedRelProperties.get(rel));
+        PropertyMap properties=PropertyMap.databaseTypeToJavaType(securityContext,entity,removedRelProperties.get(rel));
+        hasError|=!entity.beforeDeletion(securityContext,errorBuffer,properties);
         for (        StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
-          hasError|=!listener.graphObjectDeleted(securityContext,transactionKey,errorBuffer,entity,removedRelProperties.get(rel));
+          hasError|=!listener.graphObjectDeleted(securityContext,transactionKey,errorBuffer,entity,properties);
         }
         changeSet.delete(entity);
         try {
@@ -117,12 +127,13 @@
     }
     for (    Node node : data.deletedNodes()) {
       logger.log(Level.FINEST,"Node deleted: {0}",node.getId());
-      String type=(String)removedNodeProperties.get(node).get(AbstractNode.Key.type.name());
+      String type=(String)removedNodeProperties.get(node).get(AbstractNode.type.name());
       AbstractNode entity=nodeFactory.createDummyNode(type);
       if (entity != null) {
-        hasError|=!entity.beforeDeletion(securityContext,errorBuffer,removedNodeProperties.get(node));
+        PropertyMap properties=PropertyMap.databaseTypeToJavaType(securityContext,entity,removedNodeProperties.get(node));
+        hasError|=!entity.beforeDeletion(securityContext,errorBuffer,properties);
         for (        StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
-          hasError|=!listener.graphObjectDeleted(securityContext,transactionKey,errorBuffer,entity,removedNodeProperties.get(node));
+          hasError|=!listener.graphObjectDeleted(securityContext,transactionKey,errorBuffer,entity,properties);
         }
         changeSet.delete(entity);
       }
@@ -136,8 +147,11 @@
         n=nodeFromPropertyEntry;
       }
       if (nodeEntity != null) {
-        String key=entry.key();
+        PropertyKey key=getPropertyKeyForName(nodeEntity.getClass(),entry.key());
         Object value=entry.value();
+        if (!key.isSystemProperty()) {
+          changeSet.nonSystemProperty();
+        }
         Set<PropertyValidator> validators=EntityContext.getPropertyValidators(securityContext,nodeEntity.getClass(),key);
         if (validators != null) {
           for (          PropertyValidator validator : validators) {
@@ -162,8 +176,11 @@
         r=relFromPropertyEntry;
       }
       if (relEntity != null) {
-        String key=entry.key();
+        PropertyKey key=getPropertyKeyForName(relEntity.getClass(),entry.key());
         Object value=entry.value();
+        if (!key.isSystemProperty()) {
+          changeSet.nonSystemProperty();
+        }
         Set<PropertyValidator> validators=EntityContext.getPropertyValidators(securityContext,relEntity.getClass(),key);
         if (validators != null) {
           for (          PropertyValidator validator : validators) {
@@ -210,7 +227,6 @@
     for (    StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
       listener.commit(securityContext,transactionKey);
     }
-    globalChangeSet.get().include(changeSet);
   }
  catch (  FrameworkException fex) {
     exceptionMap.put(transactionKey,fex);

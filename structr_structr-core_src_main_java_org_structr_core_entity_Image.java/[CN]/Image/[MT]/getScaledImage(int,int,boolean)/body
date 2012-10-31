@@ -1,5 +1,5 @@
 {
-  thumbnailRelationships=getThumbnailRelationships();
+  List<AbstractRelationship> thumbnailRelationships=getThumbnailRelationships();
   Image thumbnail=null;
   final Image originalImage=this;
   Integer origWidth=originalImage.getWidth();
@@ -7,13 +7,30 @@
   if ((origWidth != null) && (origHeight != null)) {
     if ((thumbnailRelationships != null) && !(thumbnailRelationships.isEmpty())) {
       for (      AbstractRelationship r : thumbnailRelationships) {
-        Integer w=(Integer)r.getProperty(Key.width.name());
-        Integer h=(Integer)r.getProperty(Key.height.name());
+        Integer w=(Integer)r.getProperty(Image.width);
+        Integer h=(Integer)r.getProperty(Image.height);
         if ((w != null) && (h != null)) {
           if (((w == maxWidth) && (h <= maxHeight)) || ((w <= maxWidth) && (h == maxHeight)) || ((origWidth <= w) && (origHeight <= h))) {
             thumbnail=(Image)r.getEndNode();
-            if (!(originalImage.getLastModifiedDate().after(thumbnail.getLastModifiedDate()))) {
+            Long storedChecksum=r.getProperty(Image.checksum);
+            Long currentChecksum=originalImage.getProperty(Image.checksum);
+            if (storedChecksum != null && storedChecksum.equals(currentChecksum)) {
               return thumbnail;
+            }
+ else {
+              final Image thumbnailToDelete=thumbnail;
+              try {
+                Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+                  @Override public Image execute() throws FrameworkException {
+                    Services.command(SecurityContext.getSuperUserInstance(),DeleteNodeCommand.class).execute(thumbnailToDelete);
+                    return null;
+                  }
+                }
+);
+              }
+ catch (              FrameworkException fex) {
+                logger.log(Level.WARNING,"Unable to delete thumbnail",fex);
+              }
             }
           }
         }
@@ -22,33 +39,35 @@
   }
   logger.log(Level.INFO,"Creating thumbnail for {0}",getName());
   try {
-    Command transactionCommand=Services.command(securityContext,TransactionCommand.class);
-    thumbnail=(Image)transactionCommand.execute(new StructrTransaction(){
-      @Override public Object execute() throws FrameworkException {
-        Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
+    thumbnail=Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction<Image>(){
+      @Override public Image execute() throws FrameworkException {
+        CreateRelationshipCommand createRel=Services.command(securityContext,CreateRelationshipCommand.class);
         Thumbnail thumbnailData=ImageHelper.createThumbnail(originalImage,maxWidth,maxHeight,cropToFit);
         if (thumbnailData != null) {
           Integer tnWidth=thumbnailData.getWidth();
           Integer tnHeight=thumbnailData.getHeight();
           Image thumbnail=null;
+          byte[] data=null;
           try {
-            byte[] data=thumbnailData.getBytes();
-            int size=data.length;
+            data=thumbnailData.getBytes();
             thumbnail=ImageHelper.createImage(securityContext,data,"image/" + Thumbnail.FORMAT,Image.class);
-            thumbnail.setSize(size);
-            thumbnail.setName(originalImage.getName() + "_thumb_" + tnWidth+ "x"+ tnHeight);
-            thumbnail.setHidden(originalImage.getHidden());
-            thumbnail.setVisibleToPublicUsers(originalImage.getVisibleToPublicUsers());
-            thumbnail.setVisibleToAuthenticatedUsers(originalImage.getVisibleToAuthenticatedUsers());
           }
  catch (          IOException ex) {
             logger.log(Level.WARNING,"Could not create thumbnail image",ex);
           }
           if (thumbnail != null) {
-            AbstractRelationship thumbnailRelationship=(AbstractRelationship)createRel.execute(originalImage,thumbnail,RelType.THUMBNAIL);
-            thumbnailRelationships.add(thumbnailRelationship);
-            thumbnailRelationship.setProperty(Key.width.name(),tnWidth);
-            thumbnailRelationship.setProperty(Key.height.name(),tnHeight);
+            AbstractRelationship thumbnailRelationship=createRel.execute(originalImage,thumbnail,RelType.THUMBNAIL);
+            int size=data.length;
+            thumbnail.setSize(size);
+            thumbnail.setName(originalImage.getName() + "_thumb_" + tnWidth+ "x"+ tnHeight);
+            thumbnail.setWidth(tnWidth);
+            thumbnail.setHeight(tnHeight);
+            thumbnail.setHidden(originalImage.getHidden());
+            thumbnail.setVisibleToPublicUsers(originalImage.getVisibleToPublicUsers());
+            thumbnail.setVisibleToAuthenticatedUsers(originalImage.getVisibleToAuthenticatedUsers());
+            thumbnailRelationship.setProperty(Image.width,tnWidth);
+            thumbnailRelationship.setProperty(Image.height,tnHeight);
+            thumbnailRelationship.setProperty(Image.checksum,originalImage.getProperty(checksum));
           }
           return thumbnail;
         }
@@ -59,7 +78,6 @@
       }
     }
 );
-    Services.command(securityContext,IndexNodeCommand.class).execute(thumbnail);
   }
  catch (  FrameworkException fex) {
     logger.log(Level.WARNING,"Unable to create thumbnail",fex);

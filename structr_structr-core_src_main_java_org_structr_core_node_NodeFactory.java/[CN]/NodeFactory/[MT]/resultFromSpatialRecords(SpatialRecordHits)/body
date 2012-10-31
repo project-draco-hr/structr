@@ -1,7 +1,6 @@
 {
   final int pageSize=factoryProfile.getPageSize();
   final int page=factoryProfile.getPage();
-  final String offsetId=factoryProfile.getOffsetId();
   final SecurityContext securityContext=factoryProfile.getSecurityContext();
   final boolean includeDeletedAndHidden=factoryProfile.includeDeletedAndHidden();
   final boolean publicOnly=factoryProfile.publicOnly();
@@ -10,8 +9,8 @@
   int count=0;
   int offset=0;
   int size=spatialRecordHits.size();
-  Command graphDbCommand=Services.command(securityContext,GraphDatabaseCommand.class);
-  GraphDatabaseService graphDb=(GraphDatabaseService)graphDbCommand.execute();
+  GraphDatabaseCommand graphDbCommand=Services.command(securityContext,GraphDatabaseCommand.class);
+  GraphDatabaseService graphDb=graphDbCommand.execute();
   for (  Node node : spatialRecordHits) {
     Long dbNodeId=null;
     Node realNode=null;

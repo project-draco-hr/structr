@@ -5,7 +5,6 @@
   String childContent=(String)nodeData.get("childContent");
   final Map<String,Object> relData=webSocketData.getRelData();
   String parentId=webSocketData.getId();
-  boolean newNodeCreated=false;
   if (parentId != null) {
     AbstractNode nodeToAdd=null;
     AbstractNode parentNode=getNode(parentId);
@@ -13,15 +12,15 @@
       nodeToAdd=getNode(nodeToAddId);
     }
  else {
-      StructrTransaction transaction=new StructrTransaction(){
-        @Override public Object execute() throws FrameworkException {
-          return Services.command(securityContext,CreateNodeCommand.class).execute(nodeData);
+      StructrTransaction transaction=new StructrTransaction<AbstractNode>(){
+        @Override public AbstractNode execute() throws FrameworkException {
+          PropertyMap nodeProps=PropertyMap.inputTypeToJavaType(securityContext,nodeData);
+          return Services.command(securityContext,CreateNodeCommand.class).execute(nodeProps);
         }
       }
 ;
       try {
         nodeToAdd=(AbstractNode)Services.command(securityContext,TransactionCommand.class).execute(transaction);
-        newNodeCreated=true;
       }
  catch (      FrameworkException fex) {
         logger.log(Level.WARNING,"Could not create node.",fex);
@@ -32,29 +31,42 @@
       String originalPageId=(String)nodeData.get("sourcePageId");
       String newPageId=(String)nodeData.get("targetPageId");
       RelationClass rel=EntityContext.getRelationClass(parentNode.getClass(),nodeToAdd.getClass());
+      PropertyKey<Long> originalPageIdProperty=null;
+      PropertyKey<Long> newPageIdProperty=null;
+      if (originalPageId != null) {
+        originalPageIdProperty=new Property<Long>(originalPageId);
+      }
+      if (newPageId != null) {
+        newPageIdProperty=new Property<Long>(newPageId);
+      }
       if (rel != null) {
         try {
           AbstractRelationship existingRel=null;
           long maxPos=0;
           for (          AbstractRelationship r : parentNode.getOutgoingRelationships(RelType.CONTAINS)) {
-            if (r.getEndNode().equals(nodeToAdd) && r.getLongProperty(originalPageId) != null) {
+            if (r.getEndNode().equals(nodeToAdd) && originalPageIdProperty != null && r.getLongProperty(originalPageIdProperty) != null) {
               existingRel=r;
             }
-            Long pos=r.getLongProperty(newPageId);
-            if (pos != null) {
-              maxPos=Math.max(pos,maxPos);
+            if (newPageIdProperty != null) {
+              Long pos=r.getLongProperty(newPageIdProperty);
+              if (pos != null) {
+                maxPos=Math.max(pos,maxPos);
+              }
             }
           }
           if (existingRel != null) {
-            existingRel.setProperty(newPageId,Long.parseLong((String)relData.get(newPageId)));
-            logger.log(Level.INFO,"Tagging relationship with pageId {0} and position {1}",new Object[]{newPageId,maxPos + 1});
+            if (newPageIdProperty != null) {
+              existingRel.setProperty(newPageIdProperty,Long.parseLong((String)relData.get(newPageId)));
+              logger.log(Level.INFO,"Tagging relationship with pageId {0} and position {1}",new Object[]{newPageId,maxPos + 1});
+            }
           }
  else {
             if (parentNode instanceof Page && !(nodeToAdd instanceof Html)) {
               logger.log(Level.SEVERE,"Trying to add non Html node to Page!");
             }
             relData.put(newPageId,maxPos + 1);
-            rel.createRelationship(securityContext,parentNode,nodeToAdd,relData);
+            PropertyMap relProperties=PropertyMap.inputTypeToJavaType(securityContext,relData);
+            rel.createRelationship(securityContext,parentNode,nodeToAdd,relProperties);
             logger.log(Level.INFO,"Created new relationship between parent node {0}, added node {1} ({2})",new Object[]{parentNode.getUuid(),nodeToAdd.getUuid(),relData});
           }
           if ((originalPageId != null) && (newPageId != null) && !originalPageId.equals(newPageId)) {
@@ -63,15 +75,17 @@
           }
         }
  catch (        Throwable t) {
+          t.printStackTrace();
+          ;
           getWebSocket().send(MessageBuilder.status().code(400).message(t.getMessage()).build(),true);
         }
       }
       if (childContent != null) {
         Content contentNode=null;
         final List<NodeAttribute> attrs=new LinkedList<NodeAttribute>();
-        attrs.add(new NodeAttribute(Content.UiKey.content,childContent));
-        attrs.add(new NodeAttribute(Content.UiKey.contentType,"text/plain"));
-        attrs.add(new NodeAttribute(AbstractNode.Key.type,Content.class.getSimpleName()));
+        attrs.add(new NodeAttribute(Content.content,childContent));
+        attrs.add(new NodeAttribute(Content.contentType,"text/plain"));
+        attrs.add(new NodeAttribute(AbstractNode.type,Content.class.getSimpleName()));
         StructrTransaction transaction=new StructrTransaction(){
           @Override public Object execute() throws FrameworkException {
             return Services.command(securityContext,CreateNodeCommand.class).execute(attrs);
@@ -88,7 +102,8 @@
         if (contentNode != null) {
           try {
             relData.put(newPageId,0L);
-            rel.createRelationship(securityContext,nodeToAdd,contentNode,relData);
+            PropertyMap relProperties=PropertyMap.inputTypeToJavaType(securityContext,relData);
+            rel.createRelationship(securityContext,nodeToAdd,contentNode,relProperties);
             if ((originalPageId != null) && (newPageId != null) && !originalPageId.equals(newPageId)) {
               RelationshipHelper.tagOutgoingRelsWithPageId(contentNode,contentNode,originalPageId,newPageId);
             }

@@ -13,27 +13,26 @@
       name=Integer.toString(i);
       i++;
       node.setName("TestOne-" + name);
-      long timestamp=(new Date()).getTime();
-      node.setProperty(TestOne.Key.aDate,timestamp);
+      node.setProperty(TestOne.aDate,new Date());
     }
     List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
     searchAttributes.add(Search.andType(type));
-    Result result=(Result)searchNodeCommand.execute(null,includeDeletedAndHidden,publicOnly,searchAttributes);
-    assertTrue(result.size() == number);
-    String sortKey=TestOne.Key.aDate.name();
+    Result result=searchNodeCommand.execute(includeDeletedAndHidden,publicOnly,searchAttributes);
+    assertEquals(number,result.size());
+    PropertyKey sortKey=TestOne.aDate;
     boolean sortDesc=false;
     int pageSize=10;
     int page=1;
-    result=(Result)searchNodeCommand.execute(null,includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDesc,pageSize,page,null,SortField.LONG);
+    result=searchNodeCommand.execute(includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDesc,pageSize,page,null,SortField.LONG);
     logger.log(Level.INFO,"Raw result size: {0}, expected: {1}",new Object[]{result.getRawResultCount(),number});
     assertTrue(result.getRawResultCount() == number);
     logger.log(Level.INFO,"Result size: {0}, expected: {1}",new Object[]{result.size(),pageSize});
     assertTrue(result.size() == Math.min(number,pageSize));
     for (int j=0; j < Math.min(result.size(),pageSize); j++) {
       String expectedName="TestOne-" + (offset + j);
-      String gotName=result.get(j).getStringProperty(AbstractNode.Key.name);
+      String gotName=result.get(j).getProperty(AbstractNode.name);
       System.out.println(expectedName + ", got: " + gotName);
-      assertTrue(gotName.equals(expectedName));
+      assertEquals(expectedName,gotName);
     }
   }
  catch (  FrameworkException ex) {

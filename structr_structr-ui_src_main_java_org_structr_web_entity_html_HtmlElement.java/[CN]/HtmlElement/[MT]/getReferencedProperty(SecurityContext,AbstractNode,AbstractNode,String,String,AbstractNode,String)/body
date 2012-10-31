@@ -2,6 +2,8 @@
   AbstractNode node=startNode;
   String[] parts=refKey.split("[\\.]+");
   String referenceKey=parts[parts.length - 1];
+  PropertyKey pageIdProperty=new Property(pageId);
+  PropertyKey referenceKeyProperty=new Property(referenceKey);
   for (int i=0; (i < parts.length) && (node != null); i++) {
     String part=parts[i];
     if ("request".equals(part.toLowerCase())) {
@@ -31,7 +33,7 @@
     }
     if ("parent".equals(part.toLowerCase())) {
       for (      AbstractRelationship rel : node.getRelationships(RelType.CONTAINS,Direction.INCOMING)) {
-        if (rel.getProperty(pageId) != null) {
+        if (rel.getProperty(pageIdProperty) != null) {
           node=rel.getStartNode();
           break;
         }
@@ -73,7 +75,7 @@
     }
   }
   if (node != null) {
-    return node.getProperty(referenceKey);
+    return node.getProperty(referenceKeyProperty);
   }
   return null;
 }

@@ -1,0 +1,16 @@
+{
+  try {
+    PropertyConverter converter=key.inputConverter(securityContext);
+    if (converter != null) {
+      return serializeRoot(converter.revert(value),localPropertyView,depth);
+    }
+ else {
+      return serializeRoot(value,localPropertyView,depth);
+    }
+  }
+ catch (  Throwable t) {
+    t.printStackTrace();
+    logger.log(Level.WARNING,"Exception while serializing property {0} ({1}, {2}) of entity {3}: {4}",new Object[]{key.name(),key.getClass(),key.getClass().getDeclaringClass(),value.getClass().getName(),t.getMessage()});
+  }
+  return null;
+}

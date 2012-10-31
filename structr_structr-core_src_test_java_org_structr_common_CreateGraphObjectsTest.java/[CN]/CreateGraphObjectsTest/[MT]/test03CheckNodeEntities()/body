@@ -1,5 +1,5 @@
 {
-  final Map<String,Object> props=new HashMap<String,Object>();
+  final PropertyMap props=new PropertyMap();
   try {
     transactionCommand.execute(new StructrTransaction(){
       @Override public Object execute() throws FrameworkException {
@@ -23,7 +23,6 @@ catch (        IOException ex) {
         assertTrue(entityList.contains(NodeList.class));
         assertTrue(entityList.contains(Folder.class));
         assertTrue(entityList.contains(PlainText.class));
-        assertTrue(entityList.contains(PrincipalImpl.class));
         assertTrue(entityList.contains(Person.class));
         assertTrue(entityList.contains(ResourceAccess.class));
         entityList.remove(TestTwo.class);
@@ -31,20 +30,20 @@ catch (        IOException ex) {
           if (AbstractNode.class.isAssignableFrom(entityClass)) {
             String type=entityClass.getSimpleName();
             if (type.equals(ResourceAccess.class.getSimpleName())) {
-              props.put(ResourceAccess.Key.signature.name(),"/");
-              props.put(ResourceAccess.Key.flags.name(),6);
+              props.put(ResourceAccess.signature,"/");
+              props.put(ResourceAccess.flags,6);
             }
             if (type.equals(Location.class.getSimpleName())) {
-              props.put(Location.Key.latitude.name(),12.34);
-              props.put(Location.Key.longitude.name(),56.78);
+              props.put(Location.latitude,12.34);
+              props.put(Location.longitude,56.78);
             }
             logger.log(Level.INFO,"Creating node of type {0}",type);
-            props.put(AbstractNode.Key.type.name(),type);
+            props.put(AbstractNode.type,type);
             AbstractNode node=(AbstractNode)createNodeCommand.execute(props);
-            assertTrue(type.equals(node.getStringProperty(AbstractNode.Key.type)));
+            assertTrue(type.equals(node.getProperty(AbstractNode.type)));
             if (type.equals(ResourceAccess.class.getSimpleName())) {
-              props.remove(ResourceAccess.Key.signature.name());
-              props.remove(ResourceAccess.Key.flags.name());
+              props.remove(ResourceAccess.signature);
+              props.remove(ResourceAccess.flags);
             }
           }
         }

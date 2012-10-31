@@ -1,3 +1,9 @@
 {
-  return converter.convertForGetter(source.get(securityContext),this);
+  try {
+    return converter.convert(source.get(securityContext));
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"Unable to obtain value for Converter {0}",getClass().getName());
+  }
+  return null;
 }

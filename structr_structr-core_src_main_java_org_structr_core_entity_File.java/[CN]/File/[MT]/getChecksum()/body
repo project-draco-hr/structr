@@ -1,22 +1,3 @@
 {
-  Long storedChecksum=getLongProperty(Key.checksum);
-  if (storedChecksum != null) {
-    return storedChecksum;
-  }
-  String relativeFilePath=getRelativeFilePath();
-  if (relativeFilePath != null) {
-    String filePath=Services.getFilePath(Path.Files,relativeFilePath);
-    java.io.File fileOnDisk=new java.io.File(filePath);
-    Long checksum;
-    try {
-      checksum=FileUtils.checksumCRC32(fileOnDisk);
-      logger.log(Level.FINE,"Checksum of file {0} ({1}): {2}",new Object[]{getId(),filePath,checksum});
-      setChecksum(checksum);
-      return checksum;
-    }
- catch (    Exception ex) {
-      logger.log(Level.WARNING,"Could not calculate checksum of file " + filePath,ex);
-    }
-  }
-  return null;
+  return getProperty(checksum);
 }

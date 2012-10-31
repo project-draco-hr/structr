@@ -1,13 +1,12 @@
 {
-  return (AbstractNode)Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-    @Override public Object execute() throws FrameworkException {
-      AbstractNode relatedNode=(AbstractNode)Services.command(securityContext,CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.Key.type.name(),getDestType().getSimpleName()));
-      Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
-      Map<String,Object> props=new LinkedHashMap<String,Object>();
+  return Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction<AbstractNode>(){
+    @Override public AbstractNode execute() throws FrameworkException {
+      AbstractNode relatedNode=Services.command(securityContext,CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.type,getDestType().getSimpleName()));
+      PropertyMap props=new PropertyMap();
       if (cascadeDelete > 0) {
-        props.put(AbstractRelationship.HiddenKey.cascadeDelete.name(),new Integer(cascadeDelete));
+        props.put(AbstractRelationship.cascadeDelete,new Integer(cascadeDelete));
       }
-      AbstractRelationship newRel=(AbstractRelationship)createRel.execute(node,relatedNode,getRelType(),props,false);
+      Services.command(securityContext,CreateRelationshipCommand.class).execute(node,relatedNode,getRelType(),props,false);
       return relatedNode;
     }
   }

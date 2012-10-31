@@ -51,12 +51,12 @@
     }
     final Principal userCopy=user;
     final AbstractNode sourceNodeCopy=csvFileNode;
-    final Command transactionCommand=Services.command(securityContext,TransactionCommand.class);
-    final Command createNode=Services.command(securityContext,CreateNodeCommand.class);
-    final Command createRel=Services.command(securityContext,CreateRelationshipCommand.class);
-    final NodeList<AbstractNode> nodeListNode=(NodeList<AbstractNode>)transactionCommand.execute(new StructrTransaction(){
-      @Override public Object execute() throws FrameworkException {
-        NodeList<AbstractNode> result=(NodeList)createNode.execute(userCopy,new NodeAttribute(AbstractNode.Key.type.name(),NodeList.class.getSimpleName()),new NodeAttribute(AbstractNode.Key.name.name(),sourceNodeCopy.getName() + " List"));
+    final TransactionCommand transactionCommand=Services.command(securityContext,TransactionCommand.class);
+    final CreateNodeCommand createNode=Services.command(securityContext,CreateNodeCommand.class);
+    final CreateRelationshipCommand createRel=Services.command(securityContext,CreateRelationshipCommand.class);
+    final NodeList<AbstractNode> nodeListNode=transactionCommand.execute(new StructrTransaction<NodeList<AbstractNode>>(){
+      @Override public NodeList<AbstractNode> execute() throws FrameworkException {
+        NodeList<AbstractNode> result=(NodeList)createNode.execute(new NodeAttribute(AbstractNode.type,NodeList.class.getSimpleName()),new NodeAttribute(AbstractNode.name,sourceNodeCopy.getName() + " List"));
         createRel.execute(sourceNodeCopy,result,RelType.CONTAINS);
         return result;
       }
@@ -73,10 +73,11 @@
       }
       if (line != null) {
         List<NodeAttribute> nodeAttributes=new LinkedList<NodeAttribute>();
-        nodeAttributes.add(new NodeAttribute(AbstractNode.Key.type.name(),targetClassName));
+        nodeAttributes.add(new NodeAttribute(AbstractNode.type,targetClassName));
         for (int i=0; i < col; i++) {
           String csvValue=line[i];
-          String key=fieldIndex.get(i);
+          String keyName=fieldIndex.get(i);
+          PropertyKey key=EntityContext.getPropertyKeyForName(targetClass,keyName);
           nodeAttributes.add(new NodeAttribute(key,csvValue));
         }
         creationList.add(nodeAttributes);
@@ -88,7 +89,7 @@
       @Override public Object execute() throws FrameworkException {
         List<AbstractNode> nodesToAdd=new LinkedList<AbstractNode>();
         for (        List<NodeAttribute> attrList : creationList) {
-          nodesToAdd.add((AbstractNode)createNode.execute(attrList,false));
+          nodesToAdd.add(createNode.execute(attrList));
         }
         nodeListNode.addAll(nodesToAdd);
         return (null);

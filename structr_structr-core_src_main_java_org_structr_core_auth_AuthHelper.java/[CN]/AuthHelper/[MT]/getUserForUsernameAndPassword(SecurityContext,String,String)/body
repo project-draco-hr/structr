@@ -7,11 +7,11 @@
   }
  else {
     try {
-      Command searchNode=Services.command(securityContext,SearchNodeCommand.class);
+      SearchNodeCommand searchNode=Services.command(securityContext,SearchNodeCommand.class);
       List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
       attrs.add(Search.andExactTypeAndSubtypes(Principal.class.getSimpleName()));
       attrs.add(Search.andExactName(userName));
-      Result userList=(Result)searchNode.execute(null,false,false,attrs);
+      Result userList=searchNode.execute(attrs);
       if (!userList.isEmpty()) {
         user=(Principal)userList.get(0);
       }

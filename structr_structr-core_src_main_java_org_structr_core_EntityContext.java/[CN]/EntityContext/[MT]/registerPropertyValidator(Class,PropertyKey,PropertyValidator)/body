@@ -1,3 +1,15 @@
 {
-  registerPropertyValidator(type,propertyKey.name(),validatorClass);
+  Map<PropertyKey,Set<PropertyValidator>> validatorMap=getPropertyValidatorMapForType(type);
+  Set<PropertyValidator> validators=validatorMap.get(propertyKey);
+  if (validators == null) {
+    validators=new LinkedHashSet<PropertyValidator>();
+    validatorMap.put(propertyKey,validators);
+  }
+  validators.add(validator);
+  if (AbstractNode.class.isAssignableFrom(type)) {
+    EntityContext.registerSearchableProperty(type,NodeIndex.keyword.name(),propertyKey);
+  }
+ else   if (AbstractRelationship.class.isAssignableFrom(type)) {
+    EntityContext.registerSearchableProperty(type,RelationshipIndex.rel_keyword.name(),propertyKey);
+  }
 }

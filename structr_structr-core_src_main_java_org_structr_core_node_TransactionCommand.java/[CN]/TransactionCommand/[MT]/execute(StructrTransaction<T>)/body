@@ -16,7 +16,9 @@
       tx.success();
     }
  catch (    Throwable t) {
-      t.printStackTrace();
+      if (debug) {
+        t.printStackTrace();
+      }
       tx.failure();
       exception=t;
     }
@@ -28,14 +30,19 @@ synchronized (TransactionCommand.class) {
           tx.finish();
         }
  catch (        Throwable t) {
-          t.printStackTrace();
+          if (debug) {
+            t.printStackTrace();
+          }
           exception=EntityContext.getFrameworkException(transactionKey);
         }
       }
     }
     if (exception != null) {
-      exception.printStackTrace();
+      if (debug) {
+        exception.printStackTrace();
+      }
       if (exception instanceof FrameworkException) {
+        logger.log(Level.WARNING,((FrameworkException)exception).toString());
         EntityContext.clearTransactionData(transactionKey);
         throw (FrameworkException)exception;
       }
@@ -71,7 +78,9 @@ synchronized (TransactionCommand.class) {
 );
         }
  catch (        Throwable t) {
-          t.printStackTrace();
+          if (debug) {
+            t.printStackTrace();
+          }
         }
         depths.set(depth);
       }

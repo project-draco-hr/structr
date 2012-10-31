@@ -1,5 +1,5 @@
 {
-  thumbnailRelationships=getThumbnailRelationships();
+  List<AbstractRelationship> thumbnailRelationships=getThumbnailRelationships();
   Image thumbnail=null;
   final Image originalImage=this;
   Integer origWidth=originalImage.getWidth();
@@ -16,6 +16,21 @@
             Long currentChecksum=originalImage.getProperty(Image.checksum);
             if (storedChecksum != null && storedChecksum.equals(currentChecksum)) {
               return thumbnail;
+            }
+ else {
+              final Image thumbnailToDelete=thumbnail;
+              try {
+                Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+                  @Override public Image execute() throws FrameworkException {
+                    Services.command(SecurityContext.getSuperUserInstance(),DeleteNodeCommand.class).execute(thumbnailToDelete);
+                    return null;
+                  }
+                }
+);
+              }
+ catch (              FrameworkException fex) {
+                logger.log(Level.WARNING,"Unable to delete thumbnail",fex);
+              }
             }
           }
         }
@@ -42,7 +57,6 @@
           }
           if (thumbnail != null) {
             AbstractRelationship thumbnailRelationship=createRel.execute(originalImage,thumbnail,RelType.THUMBNAIL);
-            thumbnailRelationships.add(thumbnailRelationship);
             int size=data.length;
             thumbnail.setSize(size);
             thumbnail.setName(originalImage.getName() + "_thumb_" + tnWidth+ "x"+ tnHeight);

@@ -18,7 +18,8 @@
     if (StringUtils.isNotBlank(ifModifiedSince)) {
       try {
         Date ifModSince=httpDateFormat.parse(ifModifiedSince);
-        if ((ifModSince != null) && (lastModified.equals(ifModSince) || lastModified.before(ifModSince))) {
+        Date rounded=DateUtils.round(lastModified,Calendar.SECOND);
+        if ((ifModSince != null) && (rounded.equals(ifModSince) || rounded.before(ifModSince))) {
           notModified=true;
           response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
         }

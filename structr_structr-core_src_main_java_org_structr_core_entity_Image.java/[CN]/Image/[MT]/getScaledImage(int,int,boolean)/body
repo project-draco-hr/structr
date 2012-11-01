@@ -1,36 +1,32 @@
 {
   List<AbstractRelationship> thumbnailRelationships=getThumbnailRelationships();
+  final List<Image> oldThumbnails=new LinkedList();
   Image thumbnail=null;
   final Image originalImage=this;
   Integer origWidth=originalImage.getWidth();
   Integer origHeight=originalImage.getHeight();
+  Long currentChecksum=originalImage.getProperty(Image.checksum);
+  final Long newChecksum;
+  if (currentChecksum == null || currentChecksum == 0) {
+    newChecksum=FileHelper.getChecksum(originalImage);
+  }
+ else {
+    newChecksum=currentChecksum;
+  }
   if ((origWidth != null) && (origHeight != null)) {
     if ((thumbnailRelationships != null) && !(thumbnailRelationships.isEmpty())) {
-      for (      AbstractRelationship r : thumbnailRelationships) {
+      for (      final AbstractRelationship r : thumbnailRelationships) {
         Integer w=(Integer)r.getProperty(Image.width);
         Integer h=(Integer)r.getProperty(Image.height);
         if ((w != null) && (h != null)) {
           if (((w == maxWidth) && (h <= maxHeight)) || ((w <= maxWidth) && (h == maxHeight)) || ((origWidth <= w) && (origHeight <= h))) {
             thumbnail=(Image)r.getEndNode();
             Long storedChecksum=r.getProperty(Image.checksum);
-            Long currentChecksum=originalImage.getProperty(Image.checksum);
-            if (storedChecksum != null && storedChecksum.equals(currentChecksum)) {
+            if (storedChecksum != null && storedChecksum.equals(newChecksum)) {
               return thumbnail;
             }
  else {
-              final Image thumbnailToDelete=thumbnail;
-              try {
-                Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-                  @Override public Image execute() throws FrameworkException {
-                    Services.command(SecurityContext.getSuperUserInstance(),DeleteNodeCommand.class).execute(thumbnailToDelete);
-                    return null;
-                  }
-                }
-);
-              }
- catch (              FrameworkException fex) {
-                logger.log(Level.WARNING,"Unable to delete thumbnail",fex);
-              }
+              oldThumbnails.add(thumbnail);
             }
           }
         }
@@ -41,6 +37,12 @@
   try {
     thumbnail=Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction<Image>(){
       @Override public Image execute() throws FrameworkException {
+        try {
+          originalImage.setChecksum(newChecksum);
+        }
+ catch (        FrameworkException ex) {
+          logger.log(Level.SEVERE,"Could not store checksum for original image",ex);
+        }
         CreateRelationshipCommand createRel=Services.command(securityContext,CreateRelationshipCommand.class);
         Thumbnail thumbnailData=ImageHelper.createThumbnail(originalImage,maxWidth,maxHeight,cropToFit);
         if (thumbnailData != null) {
@@ -67,7 +69,10 @@
             thumbnail.setVisibleToAuthenticatedUsers(originalImage.getVisibleToAuthenticatedUsers());
             thumbnailRelationship.setProperty(Image.width,tnWidth);
             thumbnailRelationship.setProperty(Image.height,tnHeight);
-            thumbnailRelationship.setProperty(Image.checksum,originalImage.getProperty(checksum));
+            thumbnailRelationship.setProperty(Image.checksum,newChecksum);
+            for (            Image tn : oldThumbnails) {
+              tn.setDeleted(true);
+            }
           }
           return thumbnail;
         }

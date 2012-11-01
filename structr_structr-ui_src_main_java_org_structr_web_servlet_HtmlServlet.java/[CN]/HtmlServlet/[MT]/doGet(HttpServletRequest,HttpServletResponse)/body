@@ -81,7 +81,7 @@
         attrs=convertToNodeAttributes(parameterMap);
       }
       double setup=System.nanoTime();
-      logger.log(Level.INFO,"Setup time: {0} seconds",decimalFormat.format((setup - start) / 1000000000.0));
+      logger.log(Level.FINE,"Setup time: {0} seconds",decimalFormat.format((setup - start) / 1000000000.0));
       if (!edit && !dontCache && setCachingHeader(request,response,node)) {
         out.flush();
         out.close();
@@ -90,7 +90,7 @@
         getContent(securityContext,uuid,null,buffer,page,page,0,false,searchFor,attrs,null,null);
         String content=buffer.toString();
         double end=System.nanoTime();
-        logger.log(Level.INFO,"Content for path {0} in {1} seconds",new Object[]{path,decimalFormat.format((end - setup) / 1000000000.0)});
+        logger.log(Level.FINE,"Content for path {0} in {1} seconds",new Object[]{path,decimalFormat.format((end - setup) / 1000000000.0)});
         String contentType=page.getProperty(Page.contentType);
         if (contentType != null) {
           if (contentType.equals("text/html")) {

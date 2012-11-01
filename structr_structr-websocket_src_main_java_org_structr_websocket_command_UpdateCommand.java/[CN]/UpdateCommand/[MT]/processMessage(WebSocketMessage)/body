@@ -7,8 +7,12 @@
     obj=getRelationship(webSocketData.getId());
   }
   if (obj != null) {
-    for (    Entry<String,Object> entry : webSocketData.getNodeData().entrySet()) {
-      setPropertyRecursively(obj,entry.getKey(),entry.getValue(),rec);
+    try {
+      setProperties(obj,PropertyMap.inputTypeToJavaType(this.getWebSocket().getSecurityContext(),obj.getClass(),webSocketData.getNodeData()),rec);
+    }
+ catch (    FrameworkException ex) {
+      logger.log(Level.SEVERE,"Unable to set properties: {0}",((FrameworkException)ex).toString());
+      getWebSocket().send(MessageBuilder.status().code(400).build(),true);
     }
   }
  else {

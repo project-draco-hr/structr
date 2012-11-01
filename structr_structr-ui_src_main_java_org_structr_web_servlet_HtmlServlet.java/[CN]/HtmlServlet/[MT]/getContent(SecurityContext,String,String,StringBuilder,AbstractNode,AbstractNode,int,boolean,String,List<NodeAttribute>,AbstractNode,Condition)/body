@@ -60,6 +60,7 @@
         inBody=true;
       }
       if ((startNode instanceof Content) || (startNode instanceof HtmlElement)) {
+        double start=System.nanoTime();
         buffer.append("<").append(tag);
         if (edit && (id != null)) {
           if (depth == 1) {
@@ -92,12 +93,15 @@
         if (!isVoid) {
           buffer.append(ind);
         }
+        double end=System.nanoTime();
+        logger.log(Level.FINE,"Render node {0} in {1} seconds",new Object[]{startNode.getUuid(),decimalFormat.format((end - start) / 1000000000.0)});
       }
     }
     if (content != null) {
       buffer.append(content);
     }
     if (startNode instanceof SearchResultView) {
+      double startSearchResultView=System.nanoTime();
       String searchString=(String)request.getParameter("search");
       if ((request != null) && StringUtils.isNotBlank(searchString)) {
         for (        Page resultPage : getResultPages(securityContext,(Page)page)) {
@@ -112,12 +116,14 @@
           }
         }
       }
+      double endSearchResultView=System.nanoTime();
+      logger.log(Level.FINE,"Get graph objects for search {0} in {1} seconds",new Object[]{searchString,decimalFormat.format((endSearchResultView - startSearchResultView) / 1000000000.0)});
     }
  else     if (startNode instanceof View) {
       double startView=System.nanoTime();
       List<GraphObject> results=((View)startNode).getGraphObjects(request);
       double endView=System.nanoTime();
-      logger.log(Level.INFO,"Get graph objects for {0} in {1} seconds",new Object[]{startNode.getUuid(),decimalFormat.format((endView - startView) / 1000000000.0)});
+      logger.log(Level.FINE,"Get graph objects for {0} in {1} seconds",new Object[]{startNode.getUuid(),decimalFormat.format((endView - startView) / 1000000000.0)});
       for (      GraphObject result : results) {
         List<AbstractRelationship> rels=Component.getChildRelationships(request,startNode,pageId,localComponentId);
         for (        AbstractRelationship rel : rels) {

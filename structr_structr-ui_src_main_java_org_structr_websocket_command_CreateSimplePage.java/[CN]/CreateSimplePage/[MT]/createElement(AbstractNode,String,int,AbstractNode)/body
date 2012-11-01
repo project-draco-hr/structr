@@ -1,20 +1,3 @@
 {
-  PropertyMap nodeData=new PropertyMap();
-  nodeData.put(AbstractNode.visibleToAuthenticatedUsers,true);
-  nodeData.put(AbstractNode.type,Page.class.getSimpleName());
-  PropertyMap relData=new PropertyMap();
-  if (page != null) {
-    String pageId=page.getUuid();
-    relData.put(new Property(pageId),position);
-  }
-  nodeData.put(AbstractNode.type,type);
-  nodeData.put(HtmlElement.name,type.toLowerCase());
-  if (!Content.class.getSimpleName().equals(type)) {
-    nodeData.put(HtmlElement.tag,type.toLowerCase());
-  }
-  AbstractNode element=createNode.execute(nodeData);
-  if (parentElement != null) {
-    createRel.execute(parentElement,element,RelType.CONTAINS,relData,false);
-  }
-  return element;
+  return createElement(page,type,position,parentElement,null);
 }

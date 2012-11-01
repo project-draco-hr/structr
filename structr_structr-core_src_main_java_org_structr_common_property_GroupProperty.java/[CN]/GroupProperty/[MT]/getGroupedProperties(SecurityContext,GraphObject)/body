@@ -1,5 +1,6 @@
 {
   PropertyMap groupedProperties=new PropertyMap();
+  boolean nullValuesOnly=true;
   for (  PropertyKey key : propertyKeys) {
     Object value=source.getProperty(key);
     PropertyConverter converter=key.inputConverter(securityContext);
@@ -7,6 +8,9 @@
       try {
         Object convertedValue=converter.revert(value);
         groupedProperties.put(key,convertedValue);
+        if (convertedValue != null) {
+          nullValuesOnly=false;
+        }
       }
  catch (      FrameworkException fex) {
         logger.log(Level.WARNING,"Unable to convert grouped property {0} on type {1}: {2}",new Object[]{key.name(),source.getClass().getSimpleName(),fex.getMessage()});
@@ -14,7 +18,13 @@
     }
  else {
       groupedProperties.put(key,value);
+      if (value != null) {
+        nullValuesOnly=false;
+      }
     }
+  }
+  if (nullValuesOnly) {
+    return null;
   }
   return groupedProperties;
 }

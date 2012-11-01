@@ -1,15 +1,13 @@
 {
   RelationshipFactory relFactory=(RelationshipFactory)arguments.get("relationshipFactory");
-  GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
   NodeFactory nodeFactory=new NodeFactory(securityContext);
-  ExecutionEngine engine=new ExecutionEngine(graphDb);
   List<GraphObject> resultList=new LinkedList<GraphObject>();
   ExecutionResult result=null;
   if (parameters != null) {
-    result=engine.execute(query,parameters);
+    result=engine.get().execute(query,parameters);
   }
  else {
-    result=engine.execute(query);
+    result=engine.get().execute(query);
   }
   for (  Map<String,Object> row : result) {
     for (    Object o : row.values()) {

@@ -1,0 +1,35 @@
+{
+  final SecurityContext securityContext=SecurityContext.getSuperUserInstance();
+  final GraphDatabaseService graphDb=Services.command(securityContext,GraphDatabaseCommand.class).execute();
+  final NodeFactory nodeFactory=new NodeFactory(securityContext);
+  final Iterable<Node> allNodes=GlobalGraphOperations.at(graphDb).getAllNodes();
+  final IndexNodeCommand indexer=Services.command(securityContext,IndexNodeCommand.class);
+  long nodeCount=0L;
+  logger.log(Level.INFO,"Start indexing of nodes.");
+  final Iterator<Node> nodeIterator=allNodes.iterator();
+  while (nodeIterator.hasNext()) {
+    nodeCount+=Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction<Integer>(){
+      @Override public Integer execute() throws FrameworkException {
+        int count=0;
+        while (nodeIterator.hasNext()) {
+          try {
+            Node dbNode=nodeIterator.next();
+            if (dbNode.hasProperty(GraphObject.uuid.name())) {
+              indexer.execute(nodeFactory.createNode(dbNode));
+              if (count++ == 100) {
+                break;
+              }
+            }
+          }
+ catch (          Throwable t) {
+          }
+        }
+        return count;
+      }
+    }
+);
+    logger.log(Level.INFO,"Indexed {0} nodes ...",nodeCount);
+  }
+  logger.log(Level.INFO,"Done");
+  return nodeCount;
+}

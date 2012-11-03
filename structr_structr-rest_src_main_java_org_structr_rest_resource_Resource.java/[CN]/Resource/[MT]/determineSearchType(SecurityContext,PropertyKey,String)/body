@@ -1,0 +1,41 @@
+{
+  if (StringUtils.startsWith(searchValue,"[") && StringUtils.endsWith(searchValue,"]")) {
+    Matcher matcher=rangeQueryPattern.matcher(searchValue);
+    if (matcher.matches()) {
+      if (matcher.groupCount() == 2) {
+        String rangeStart=matcher.group(1);
+        String rangeEnd=matcher.group(2);
+        try {
+          PropertyConverter inputConverter=key.inputConverter(securityContext);
+          PropertyConverter databaseConverter=key.databaseConverter(securityContext,null);
+          Object rangeStartConverted=rangeStart;
+          Object rangeEndConverted=rangeEnd;
+          if (inputConverter != null) {
+            rangeStartConverted=inputConverter.convert(rangeStartConverted);
+            rangeEndConverted=inputConverter.convert(rangeEndConverted);
+          }
+          if (databaseConverter != null) {
+            rangeStartConverted=databaseConverter.convert(rangeStartConverted);
+            rangeEndConverted=databaseConverter.convert(rangeEndConverted);
+          }
+          return new RangeSearchAttribute(key,rangeStartConverted,rangeEndConverted,SearchOperator.AND);
+        }
+ catch (        Throwable t) {
+          t.printStackTrace();
+        }
+      }
+      return null;
+    }
+ else {
+      final String strippedValue=StringUtils.stripEnd(StringUtils.stripStart(searchValue,"["),"]");
+      return Search.andMatchExactValues(key,strippedValue,SearchOperator.OR);
+    }
+  }
+ else   if (StringUtils.startsWith(searchValue,"(") && StringUtils.endsWith(searchValue,")")) {
+    final String strippedValue=StringUtils.stripEnd(StringUtils.stripStart(searchValue,"("),")");
+    return Search.andMatchExactValues(key,strippedValue,SearchOperator.AND);
+  }
+ else {
+    return Search.andExactProperty(key,searchValue);
+  }
+}

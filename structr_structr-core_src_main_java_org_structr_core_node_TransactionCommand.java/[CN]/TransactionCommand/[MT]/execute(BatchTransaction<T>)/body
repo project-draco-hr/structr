@@ -1,14 +1,14 @@
 {
   GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
   Long transactionKey=transactionKeys.get();
-  Transaction tx=tramsactions.get();
+  Transaction tx=transactions.get();
   Throwable exception=null;
   T ret=null;
   if (tx == null || transactionKey == null) {
     tx=graphDb.beginTx();
     transactionKey=nextLong();
     transactionKeys.set(transactionKey);
-    tramsactions.set(tx);
+    transactions.set(tx);
     EntityContext.setSecurityContext(securityContext);
     EntityContext.setTransactionKey(transactionKey);
     if (debug) {
@@ -27,7 +27,7 @@
       exception=t;
     }
  finally {
-      tramsactions.remove();
+      transactions.remove();
       transactionKeys.remove();
 synchronized (TransactionCommand.class) {
         try {

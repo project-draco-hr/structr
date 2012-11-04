@@ -14,7 +14,7 @@
         attrs.add(Search.andExactProperty(propertyKey,obj.getProperty(propertyKey)));
       }
  else {
-        PropertyKey<String> idProperty=EntityContext.getPropertyKeyForName(obj.getClass(),AbstractNode.uuid.name());
+        PropertyKey<String> idProperty=EntityContext.getPropertyKeyForName(obj.getClass(),AbstractNode.uuid.dbName());
         attrs.add(Search.andExactUuid(obj.getProperty(idProperty)));
       }
     }
@@ -37,7 +37,7 @@ return (T)Services.command(securityContext,TransactionCommand.class).execute(new
 @Override public AbstractNode execute() throws FrameworkException {
   AbstractNode newNode=Services.command(securityContext,CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.type,type.getSimpleName()));
   if (newNode == null) {
-    logger.log(Level.WARNING,"Unable to create node of type {0} for property {1}",new Object[]{type.getSimpleName(),propertyKey.name()});
+    logger.log(Level.WARNING,"Unable to create node of type {0} for property {1}",new Object[]{type.getSimpleName(),propertyKey.dbName()});
   }
   return newNode;
 }

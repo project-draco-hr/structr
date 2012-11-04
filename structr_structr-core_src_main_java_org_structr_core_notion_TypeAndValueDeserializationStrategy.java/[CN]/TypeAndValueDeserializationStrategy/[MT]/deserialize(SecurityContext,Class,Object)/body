@@ -3,7 +3,7 @@
   attrs.add(Search.andExactTypeAndSubtypes(type.getSimpleName()));
   if (source != null) {
     if (source instanceof JsonInput) {
-      Object value=((JsonInput)source).getAttributes().get(propertyKey.name());
+      Object value=((JsonInput)source).getAttributes().get(propertyKey.jsonName());
       if (value != null) {
         String stringValue=value.toString();
         attrs.add(Search.andExactProperty(propertyKey,stringValue));
@@ -15,7 +15,7 @@
         attrs.add(Search.andExactProperty(propertyKey,obj.getProperty(propertyKey)));
       }
  else {
-        PropertyKey<String> idProperty=EntityContext.getPropertyKeyForName(obj.getClass(),AbstractNode.uuid.name());
+        PropertyKey<String> idProperty=EntityContext.getPropertyKeyForName(obj.getClass(),AbstractNode.uuid.dbName());
         attrs.add(Search.andExactUuid(obj.getProperty(idProperty)));
       }
     }
@@ -33,7 +33,7 @@ case 0:
         return newNode;
       }
  else {
-        logger.log(Level.WARNING,"Unable to create node of type {0} for property {1}",new Object[]{type.getSimpleName(),propertyKey.name()});
+        logger.log(Level.WARNING,"Unable to create node of type {0} for property {1}",new Object[]{type.getSimpleName(),propertyKey.jsonName()});
       }
     }
   break;

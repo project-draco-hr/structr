@@ -11,9 +11,9 @@
         }
         final Notion notion=rel.getNotion();
         final PropertyKey primaryPropertyKey=notion.getPrimaryPropertyKey();
-        if (primaryPropertyKey != null && propertySet.containsKey(primaryPropertyKey.name()) && propertySet.size() == 1) {
+        if (primaryPropertyKey != null && propertySet.containsKey(primaryPropertyKey.jsonName()) && propertySet.size() == 1) {
           final Adapter<Object,GraphObject> deserializationStrategy=notion.getAdapterForSetter(securityContext);
-          final Object keySource=propertySet.get(primaryPropertyKey.name());
+          final Object keySource=propertySet.get(primaryPropertyKey.jsonName());
           if (keySource != null) {
             GraphObject otherNode=null;
             if (keySource instanceof Collection) {
@@ -40,7 +40,7 @@
             return otherNode;
           }
  else {
-            logger.log(Level.INFO,"Key {0} not found in {1}",new Object[]{primaryPropertyKey.name(),propertySet.toString()});
+            logger.log(Level.INFO,"Key {0} not found in {1}",new Object[]{primaryPropertyKey.jsonName(),propertySet.toString()});
           }
           return null;
         }

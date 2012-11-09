@@ -18,8 +18,9 @@
       try {
         return propertyGroup.getGroupedProperties(securityContext,this);
       }
- catch (      FrameworkException fex) {
-        logger.log(Level.WARNING,"Unable to convert property {0} of type {1}: {2}",new Object[]{key.name(),entityType.getSimpleName(),fex.getMessage()});
+ catch (      Throwable t) {
+        t.printStackTrace();
+        logger.log(Level.WARNING,"Unable to convert property {0} of type {1}: {2}",new Object[]{key.name(),entityType.getSimpleName(),t.getMessage()});
       }
     }
     if (dbNode.hasProperty(key.name())) {

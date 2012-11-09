@@ -1,24 +1,25 @@
 {
   if (source == null) {
-    for (    PropertyKey key : propertyKeys) {
+    for (    PropertyKey key : propertyKeys.values()) {
       destination.setProperty(key,null);
     }
     return;
   }
-  for (  PropertyKey key : propertyKeys) {
+  for (  PropertyKey key : propertyKeys.values()) {
+    PropertyKey groupPropertyKey=new GroupPropertyWrapper(key);
     Object value=source.get(key);
-    PropertyConverter converter=key.inputConverter(securityContext);
+    PropertyConverter converter=groupPropertyKey.inputConverter(securityContext);
     if (converter != null) {
       try {
         Object convertedValue=converter.convert(value);
-        destination.setProperty(key,convertedValue);
+        destination.setProperty(groupPropertyKey,convertedValue);
       }
  catch (      FrameworkException fex) {
-        logger.log(Level.WARNING,"Unable to convert grouped property {0} on type {1}: {2}",new Object[]{key.dbName(),source.getClass().getSimpleName(),fex.getMessage()});
+        logger.log(Level.WARNING,"Unable to convert grouped property {0} on type {1}: {2}",new Object[]{groupPropertyKey.dbName(),source.getClass().getSimpleName(),fex.getMessage()});
       }
     }
  else {
-      destination.setProperty(key,value);
+      destination.setProperty(groupPropertyKey,value);
     }
   }
 }

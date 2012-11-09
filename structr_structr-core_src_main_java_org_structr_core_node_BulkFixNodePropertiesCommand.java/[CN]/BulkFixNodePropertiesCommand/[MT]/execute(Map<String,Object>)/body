@@ -1,0 +1,62 @@
+{
+  final String propertyName=(String)attributes.get("name");
+  final String entityTypeName=(String)attributes.get("type");
+  long nodeCount=0L;
+  if (propertyName != null && entityTypeName != null) {
+    final Class type=EntityContext.getEntityClassForRawType(entityTypeName);
+    if (type != null) {
+      final PropertyKey propertyToFix=EntityContext.getPropertyKeyForName(type,propertyName);
+      final Result<AbstractNode> result=Services.command(securityContext,SearchNodeCommand.class).execute(Search.andExactType(type.getSimpleName()));
+      final List<AbstractNode> nodes=result.getResults();
+      if (propertyToFix != null && type != null) {
+        logger.log(Level.INFO,"Start fixing {0} properties of type {1}",new Object[]{propertyToFix.name(),type.getSimpleName()});
+        final Iterator<AbstractNode> nodeIterator=nodes.iterator();
+        while (nodeIterator.hasNext()) {
+          nodeCount+=Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction<Integer>(){
+            @Override public Integer execute() throws FrameworkException {
+              int count=0;
+              while (nodeIterator.hasNext()) {
+                AbstractNode abstractNode=nodeIterator.next();
+                Node databaseNode=abstractNode.getNode();
+                if (databaseNode.hasProperty(propertyToFix.name())) {
+                  PropertyConverter dbConverter=propertyToFix.databaseConverter(securityContext,abstractNode);
+                  PropertyConverter inConverter=propertyToFix.inputConverter(securityContext);
+                  Object rawValue=databaseNode.getProperty(propertyToFix.name());
+                  Object correctedValue=null;
+                  try {
+                    correctedValue=dbConverter.convert(rawValue);
+                  }
+ catch (                  Throwable t0) {
+                    try {
+                      correctedValue=inConverter.convert(rawValue);
+                    }
+ catch (                    Throwable t1) {
+                      logger.log(Level.WARNING,"Unable to fix property type for {0} on {1}, please specify conversionType!",new Object[]{propertyToFix.name(),type.getSimpleName()});
+                    }
+                  }
+                  if (correctedValue != null) {
+                    try {
+                      abstractNode.setProperty(propertyToFix,correctedValue);
+                    }
+ catch (                    Throwable t) {
+                      logger.log(Level.WARNING,"Unable to set property {0} on {1}: {2}",new Object[]{propertyToFix.name(),type.getSimpleName(),t.getMessage()});
+                    }
+                  }
+                }
+                if (++count == 100) {
+                  break;
+                }
+              }
+              return count;
+            }
+          }
+);
+          logger.log(Level.INFO,"Fixed {0} nodes ...",nodeCount);
+        }
+        logger.log(Level.INFO,"Done");
+        return;
+      }
+    }
+  }
+  logger.log(Level.INFO,"Unable to determine property and/or entity type to fix.");
+}

@@ -92,6 +92,11 @@
   structrRestServletHolder.setInitParameters(servletParams);
   structrRestServletHolder.setInitOrder(0);
   servlets.put(restUrl + "/*",structrRestServletHolder);
+  if (enableCrudServlet) {
+    StructrCrudServlet crudServlet=new StructrCrudServlet();
+    ServletHolder crudServletHolder=new ServletHolder(crudServlet);
+    servlets.put(crudUrl + "/*",crudServletHolder);
+  }
   int position=1;
   for (  Entry<String,ServletHolder> servlet : servlets.entrySet()) {
     String path=servlet.getKey();

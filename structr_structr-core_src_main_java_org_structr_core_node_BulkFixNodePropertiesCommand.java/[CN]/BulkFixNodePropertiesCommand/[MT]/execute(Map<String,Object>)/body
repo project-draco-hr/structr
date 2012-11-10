@@ -6,7 +6,7 @@
     final Class type=EntityContext.getEntityClassForRawType(entityTypeName);
     if (type != null) {
       final PropertyKey propertyToFix=EntityContext.getPropertyKeyForName(type,propertyName);
-      final Result<AbstractNode> result=Services.command(securityContext,SearchNodeCommand.class).execute(Search.andExactType(type.getSimpleName()));
+      final Result<AbstractNode> result=Services.command(securityContext,SearchNodeCommand.class).execute(true,false,Search.andExactType(type.getSimpleName()));
       final List<AbstractNode> nodes=result.getResults();
       if (propertyToFix != null && type != null) {
         logger.log(Level.INFO,"Start fixing {0} properties of type {1}",new Object[]{propertyToFix.name(),type.getSimpleName()});

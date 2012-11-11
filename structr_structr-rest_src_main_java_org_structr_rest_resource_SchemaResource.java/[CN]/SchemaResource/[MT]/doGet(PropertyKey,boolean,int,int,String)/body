@@ -6,12 +6,12 @@
     GraphObjectMap schema=new GraphObjectMap();
     resultList.add(schema);
     String url="/".concat(CaseHelper.toUnderscore(rawType,true));
-    schema.setProperty(new Property("url"),url);
-    schema.setProperty(new Property("type"),rawType);
-    schema.setProperty(new Property("flags"),SecurityContext.getResourceFlags(rawType));
+    schema.setProperty(new StringProperty("url"),url);
+    schema.setProperty(new StringProperty("type"),rawType);
+    schema.setProperty(new LongProperty("flags"),SecurityContext.getResourceFlags(rawType));
     Map<String,Map<String,Object>> views=new TreeMap<String,Map<String,Object>>();
     Set<String> propertyViews=EntityContext.getPropertyViews();
-    schema.setProperty(new Property("views"),views);
+    schema.setProperty(new StringProperty("views"),views);
     for (    String view : propertyViews) {
       Map<String,Object> propertyConverterMap=new TreeMap<String,Object>();
       Set<PropertyKey> properties=EntityContext.getPropertySet(type,view);

@@ -1,14 +1,14 @@
 {
   String sourceJarName=app.getProtectionDomain().getCodeSource().getLocation().toString();
-  if (!isTest && StringUtils.stripEnd(sourceJarName,"/").endsWith("classes")) {
+  if (!isTest && StringUtils.stripEnd(sourceJarName,System.getProperty("file.separator")).endsWith("classes")) {
     String jarFile=System.getProperty("jarFile");
     if (StringUtils.isEmpty(jarFile)) {
       throw new IllegalArgumentException(app.getName() + " was started in an environment where the classloader cannot determine the JAR file containing the main class.\n" + "Please specify the path to the JAR file in the parameter -DjarFile.\n"+ "Example: -DjarFile=${project.build.directory}/${project.artifactId}-${project.version}.jar");
     }
     sourceJarName=jarFile;
   }
-  File baseDir=new File(System.getProperty("home",basePath));
-  String basePath=baseDir.getAbsolutePath();
+  basePath=System.getProperty("home",basePath);
+  File baseDir=new File(basePath);
   if (!baseDir.exists()) {
     baseDir.mkdirs();
   }

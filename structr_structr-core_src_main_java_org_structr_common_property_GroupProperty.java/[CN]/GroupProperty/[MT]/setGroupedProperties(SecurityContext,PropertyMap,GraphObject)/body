@@ -1,10 +1,12 @@
 {
-  if (source == null) {
-    for (    PropertyKey key : propertyKeys.values()) {
-      destination.setProperty(key,null);
-    }
+  if (source.containsKey(nullValuesOnlyProperty)) {
+    throw new FrameworkException("base",new ReadOnlyPropertyToken(nullValuesOnlyProperty));
+  }
+  if (source.isEmpty()) {
+    destination.setProperty(nullValuesOnlyProperty,true);
     return;
   }
+  destination.setProperty(nullValuesOnlyProperty,false);
   for (  PropertyKey key : propertyKeys.values()) {
     PropertyKey groupPropertyKey=new GroupPropertyWrapper(key);
     Object value=source.get(key);

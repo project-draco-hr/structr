@@ -1,6 +1,9 @@
 {
   PropertyMap groupedProperties=new PropertyMap();
-  boolean nullValuesOnly=true;
+  Boolean nullValuesOnly=source.getProperty(nullValuesOnlyProperty);
+  if (nullValuesOnly != null && nullValuesOnly.booleanValue()) {
+    return null;
+  }
   for (  PropertyKey key : propertyKeys.values()) {
     Object value=source.getProperty(new GroupPropertyWrapper(key));
     PropertyConverter converter=key.inputConverter(securityContext);

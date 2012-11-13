@@ -20,7 +20,7 @@
       }
  else       if (attr instanceof DistanceSearchAttribute) {
         distanceSearch=(DistanceSearchAttribute)attr;
-        coords=GeoHelper.geocode(distanceSearch.getKey().name());
+        coords=GeoHelper.geocode(distanceSearch.getKey().dbName());
         dist=distanceSearch.getValue();
       }
  else       if (attr instanceof SearchAttributeGroup) {
@@ -51,10 +51,10 @@
       IndexHits hits=null;
       if (sortKey != null) {
         if (sortType != null) {
-          queryContext.sort(new Sort(new SortField(sortKey.name(),sortType,sortDescending)));
+          queryContext.sort(new Sort(new SortField(sortKey.dbName(),sortType,sortDescending)));
         }
  else {
-          queryContext.sort(new Sort(new SortField(sortKey.name(),Locale.getDefault(),sortDescending)));
+          queryContext.sort(new Sort(new SortField(sortKey.dbName(),Locale.getDefault(),sortDescending)));
         }
       }
       if (distanceSearch != null) {
@@ -68,10 +68,10 @@ synchronized (index) {
           }
         }
       }
- else       if ((textualAttributes.size() == 1) && textualAttributes.get(0).getKey().equals(AbstractNode.uuid.name())) {
+ else       if ((textualAttributes.size() == 1) && textualAttributes.get(0).getKey().equals(AbstractNode.uuid.dbName())) {
         index=(Index<Node>)arguments.get(NodeIndex.uuid.name());
 synchronized (index) {
-          hits=index.get(AbstractNode.uuid.name(),decodeExactMatch(textualAttributes.get(0).getValue()));
+          hits=index.get(AbstractNode.uuid.dbName(),decodeExactMatch(textualAttributes.get(0).getValue()));
         }
       }
  else       if (allExactMatch) {

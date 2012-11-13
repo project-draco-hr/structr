@@ -4,8 +4,8 @@
   final AbstractNode nodeToClone=getNode(nodeId);
   final Map<String,Object> nodeData=webSocketData.getNodeData();
   final String newName;
-  if (nodeData.containsKey(AbstractNode.name.name())) {
-    newName=(String)nodeData.get(AbstractNode.name.name());
+  if (nodeData.containsKey(AbstractNode.name.dbName())) {
+    newName=(String)nodeData.get(AbstractNode.name.dbName());
   }
  else {
     newName="unknown";
@@ -30,7 +30,7 @@
             RelationClass rel=EntityContext.getRelationClass(newPage.getClass(),htmlNode.getClass());
             if (rel != null) {
               PropertyMap relProps=new PropertyMap();
-              relProps.put(new Property(pageId),0);
+              relProps.put(new LongProperty(pageId),0);
               try {
                 rel.createRelationship(securityContext,newPage,htmlNode,relProps);
               }

@@ -7,11 +7,11 @@
       @Override public Object execute(      Transaction tx) throws FrameworkException {
         long n=0L;
         List<AbstractRelationship> rels=null;
-        if (properties.containsKey(AbstractRelationship.combinedType.name())) {
+        if (properties.containsKey(AbstractRelationship.combinedType.dbName())) {
           List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
-          attrs.add(Search.andExactType((String)properties.get(AbstractRelationship.combinedType.name())));
+          attrs.add(Search.andExactType((String)properties.get(AbstractRelationship.combinedType.dbName())));
           rels=(List<AbstractRelationship>)searchRel.execute(attrs);
-          properties.remove(AbstractRelationship.combinedType.name());
+          properties.remove(AbstractRelationship.combinedType.dbName());
         }
  else {
           rels=(List<AbstractRelationship>)relationshipFactory.createRelationships(securityContext,GlobalGraphOperations.at(graphDb).getAllRelationships());
@@ -21,7 +21,7 @@
             for (            Entry entry : properties.entrySet()) {
               String key=(String)entry.getKey();
               Object val=entry.getValue();
-              rel.setProperty(new Property(key),val);
+              rel.setProperty(new GenericProperty(key),val);
             }
             if (n > 1000 && n % 1000 == 0) {
               logger.log(Level.INFO,"Set properties on {0} relationships, committing results to database.",n);

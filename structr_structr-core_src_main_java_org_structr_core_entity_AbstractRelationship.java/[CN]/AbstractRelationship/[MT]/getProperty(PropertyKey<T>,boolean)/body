@@ -1,5 +1,5 @@
 {
-  if (key == null || key.name() == null) {
+  if (key == null || key.dbName() == null) {
     return null;
   }
   Object value=applyConverter ? cachedConvertedProperties.get(key) : cachedRawProperties.get(key);
@@ -34,11 +34,11 @@
         return propertyGroup.getGroupedProperties(securityContext,this);
       }
  catch (      FrameworkException fex) {
-        logger.log(Level.WARNING,"Unable to convert property {0} of type {1}: {2}",new Object[]{key.name(),entityType.getSimpleName(),fex.getMessage()});
+        logger.log(Level.WARNING,"Unable to convert property {0} of type {1}: {2}",new Object[]{key.dbName(),entityType.getSimpleName(),fex.getMessage()});
       }
     }
-    if (dbRelationship.hasProperty(key.name())) {
-      value=dbRelationship.getProperty(key.name());
+    if (dbRelationship.hasProperty(key.dbName())) {
+      value=dbRelationship.getProperty(key.dbName());
     }
     if (applyConverter) {
       PropertyConverter converter=key.databaseConverter(securityContext,this);
@@ -48,7 +48,7 @@
         }
  catch (        Throwable t) {
           t.printStackTrace();
-          logger.log(Level.WARNING,"Unable to convert property {0} of type {1}: {2}",new Object[]{key.name(),getClass().getSimpleName(),t.getMessage()});
+          logger.log(Level.WARNING,"Unable to convert property {0} of type {1}: {2}",new Object[]{key.dbName(),getClass().getSimpleName(),t.getMessage()});
         }
       }
     }

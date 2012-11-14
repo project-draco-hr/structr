@@ -102,17 +102,9 @@
       }
     }
     for (    Relationship rel : data.deletedRelationships()) {
-      Map<String,Object> removedProperties=removedRelProperties.get(rel);
-      AbstractRelationship entity=null;
-      if (removedProperties.containsKey(AbstractRelationship.combinedType.dbName())) {
-        String combinedType=(String)removedProperties.get(AbstractRelationship.combinedType.dbName());
-        entity=relFactory.instantiateDeletedRelationship(securityContext,rel,combinedType);
-      }
-      if (entity == null) {
-        entity=relFactory.instantiateRelationship(securityContext,rel);
-      }
+      AbstractRelationship entity=relFactory.instantiateRelationship(securityContext,rel);
       if (entity != null) {
-        PropertyMap properties=PropertyMap.databaseTypeToJavaType(securityContext,entity,removedProperties);
+        PropertyMap properties=PropertyMap.databaseTypeToJavaType(securityContext,entity,removedRelProperties.get(rel));
         hasError|=!entity.beforeDeletion(securityContext,errorBuffer,properties);
         for (        StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
           hasError|=!listener.graphObjectDeleted(securityContext,transactionKey,errorBuffer,entity,properties);

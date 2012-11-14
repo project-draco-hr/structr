@@ -14,7 +14,10 @@
  else {
       if (relationship.hasProperty(AbstractRelationship.combinedType.dbName())) {
         String combinedRelType=(String)relationship.getProperty(AbstractRelationship.combinedType.dbName());
-        newRel=createRelationship(securityContext,relationship,combinedRelType);
+        relClass=EntityContext.getNamedRelationClass(combinedRelType);
+        if (relClass != null) {
+          newRel=instantiateRelationship(securityContext,combinedRelType);
+        }
       }
     }
   }

@@ -3,7 +3,7 @@
   if (argument instanceof Long) {
     long id=((Long)argument).longValue();
     try {
-      rel=relationshipFactory.createRelationship(securityContext,(Relationship)graphDb.getRelationshipById(id));
+      rel=relationshipFactory.instantiateRelationship(securityContext,(Relationship)graphDb.getRelationshipById(id));
     }
  catch (    NotFoundException nfe) {
       logger.log(Level.SEVERE,"Relationship {0} not found, cannot delete.",id);
@@ -13,7 +13,7 @@
     rel=(AbstractRelationship)argument;
   }
  else   if (argument instanceof Relationship) {
-    rel=relationshipFactory.createRelationship(securityContext,(Relationship)argument);
+    rel=relationshipFactory.instantiateRelationship(securityContext,(Relationship)argument);
   }
   if (rel != null) {
     if (rel.getProperty(AbstractRelationship.uuid) == null) {

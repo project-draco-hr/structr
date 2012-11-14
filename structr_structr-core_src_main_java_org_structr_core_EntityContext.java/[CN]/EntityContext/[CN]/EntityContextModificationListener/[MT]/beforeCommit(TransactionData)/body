@@ -55,7 +55,7 @@
       }
       propertyMap.put(entry.key(),entry.previouslyCommitedValue());
       if (!data.isDeleted(rel)) {
-        AbstractRelationship modifiedRel=relFactory.createRelationship(securityContext,rel);
+        AbstractRelationship modifiedRel=relFactory.instantiateRelationship(securityContext,rel);
         if (modifiedRel != null) {
           PropertyKey key=getPropertyKeyForDatabaseName(modifiedRel.getClass(),entry.key());
           if (!key.isSystemProperty()) {
@@ -79,7 +79,7 @@
       }
     }
     for (    Relationship rel : sortRelationships(data.createdRelationships())) {
-      AbstractRelationship entity=relFactory.createRelationship(securityContext,rel);
+      AbstractRelationship entity=relFactory.instantiateRelationship(securityContext,rel);
       if (entity != null) {
         hasError|=!entity.beforeCreation(securityContext,errorBuffer);
         changeSet.create(entity);
@@ -106,10 +106,10 @@
       AbstractRelationship entity=null;
       if (removedProperties.containsKey(AbstractRelationship.combinedType.dbName())) {
         String combinedType=(String)removedProperties.get(AbstractRelationship.combinedType.dbName());
-        entity=relFactory.createRelationship(securityContext,rel,combinedType);
+        entity=relFactory.instantiateDeletedRelationship(securityContext,rel,combinedType);
       }
- else {
-        entity=relFactory.createRelationship(securityContext,rel);
+      if (entity == null) {
+        entity=relFactory.instantiateRelationship(securityContext,rel);
       }
       if (entity != null) {
         PropertyMap properties=PropertyMap.databaseTypeToJavaType(securityContext,entity,removedProperties);
@@ -180,7 +180,7 @@
     for (    PropertyEntry<Relationship> entry : data.assignedRelationshipProperties()) {
       Relationship relFromPropertyEntry=entry.entity();
       if (!(relFromPropertyEntry.equals(r))) {
-        relEntity=relFactory.createRelationship(securityContext,relFromPropertyEntry);
+        relEntity=relFactory.instantiateRelationship(securityContext,relFromPropertyEntry);
         r=relFromPropertyEntry;
       }
       if (relEntity != null) {

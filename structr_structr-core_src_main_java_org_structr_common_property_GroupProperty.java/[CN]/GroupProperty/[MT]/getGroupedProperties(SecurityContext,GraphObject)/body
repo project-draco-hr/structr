@@ -1,8 +1,11 @@
 {
   PropertyMap groupedProperties=new PropertyMap();
-  boolean nullValuesOnly=true;
-  for (  PropertyKey key : propertyKeys) {
-    Object value=source.getProperty(key);
+  Boolean nullValuesOnly=source.getProperty(nullValuesOnlyProperty);
+  if (nullValuesOnly != null && nullValuesOnly.booleanValue()) {
+    return null;
+  }
+  for (  PropertyKey key : propertyKeys.values()) {
+    Object value=source.getProperty(new GroupPropertyWrapper(key));
     PropertyConverter converter=key.inputConverter(securityContext);
     if (converter != null) {
       try {
@@ -14,7 +17,7 @@
       }
  catch (      Throwable t) {
         t.printStackTrace();
-        logger.log(Level.WARNING,"Unable to convert grouped property {0} on type {1}: {2}",new Object[]{key.name(),source.getClass().getSimpleName(),t.getMessage()});
+        logger.log(Level.WARNING,"Unable to convert grouped property {0} on type {1}: {2}",new Object[]{key.dbName(),source.getClass().getSimpleName(),t.getMessage()});
       }
     }
  else {

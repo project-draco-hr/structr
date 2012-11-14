@@ -1,5 +1,5 @@
 {
-  if (key == null || key.name() == null) {
+  if (key == null || key.dbName() == null) {
     return null;
   }
   Object value;
@@ -20,12 +20,12 @@
       }
  catch (      Throwable t) {
         t.printStackTrace();
-        logger.log(Level.WARNING,"Unable to convert property {0} of {1} {2}: {3}",new Object[]{key.name(),entityType.getSimpleName(),getUuid(),t.getMessage()});
+        logger.log(Level.WARNING,"Unable to convert property {0} of type {1}: {2}",new Object[]{key.dbName(),entityType.getSimpleName(),getUuid(),t.getMessage()});
       }
     }
-    if (dbNode.hasProperty(key.name())) {
+    if (dbNode.hasProperty(key.dbName())) {
       if ((key != null) && (dbNode != null)) {
-        value=dbNode.getProperty(key.name());
+        value=dbNode.getProperty(key.dbName());
       }
     }
  else {
@@ -59,7 +59,7 @@ value=converter.revert(value);
 }
  catch (Throwable t) {
 t.printStackTrace();
-logger.log(Level.WARNING,"Unable to convert property {0} of {1} {2}: {3}",new Object[]{key.name(),entityType.getSimpleName(),getUuid(),t.getMessage()});
+logger.log(Level.WARNING,"Unable to convert property {0} of type {1}: {2}",new Object[]{key.dbName(),getClass().getSimpleName(),t.getMessage()});
 }
 }
 }
@@ -80,6 +80,6 @@ try {
 return (T)value;
 }
  catch (Throwable t) {
-throw new IllegalStateException("Value for key " + key.name() + " has incorrect type, maybe you forgot to register a PropertyConverter?");
+throw new IllegalStateException("Value for key " + key.dbName() + " has incorrect type, maybe you forgot to register a PropertyConverter?");
 }
 }

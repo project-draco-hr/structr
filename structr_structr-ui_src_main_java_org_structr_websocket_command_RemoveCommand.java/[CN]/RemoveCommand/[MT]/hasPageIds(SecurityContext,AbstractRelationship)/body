@@ -3,10 +3,10 @@
   long count=0;
   for (  Entry<PropertyKey,Object> entry : rel.getProperties().entrySet()) {
     PropertyKey key=entry.getKey();
-    if (key.name().matches("[a-zA-Z0-9]{32}")) {
+    if (key.dbName().matches("[a-zA-Z0-9]{32}")) {
       List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
       attrs.add(Search.andExactType(Page.class.getSimpleName()));
-      attrs.add(Search.andExactUuid(key.name()));
+      attrs.add(Search.andExactUuid(key.dbName()));
       Result results=searchNode.execute(attrs);
       if (results != null && !results.isEmpty()) {
         count++;

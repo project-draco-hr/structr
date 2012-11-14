@@ -1,10 +1,10 @@
 {
-  final Class type=this.getClass();
+  Class type=this.getClass();
   if (key == null) {
     logger.log(Level.SEVERE,"Tried to set property with null key (action was denied)");
     throw new FrameworkException(type.getSimpleName(),new NullArgumentToken(base));
   }
-  if (key.isReadOnlyProperty() || (key.isWriteOnceProperty() && (dbNode != null) && dbNode.hasProperty(key.name()))) {
+  if (key.isReadOnlyProperty() || (key.isWriteOnceProperty() && (dbNode != null) && dbNode.hasProperty(key.dbName()))) {
     if (readOnlyPropertiesUnlocked) {
       readOnlyPropertiesUnlocked=false;
     }
@@ -77,12 +77,12 @@
         @Override public Object execute() throws FrameworkException {
           try {
             if (convertedValue == null) {
-              dbNode.removeProperty(key.name());
+              dbNode.removeProperty(key.dbName());
             }
  else {
               if (!key.equals(AbstractNode.lastModifiedDate)) {
-                dbNode.setProperty(key.name(),convertedValue);
-                dbNode.setProperty(AbstractNode.lastModifiedDate.name(),System.currentTimeMillis());
+                dbNode.setProperty(key.dbName(),convertedValue);
+                dbNode.setProperty(AbstractNode.lastModifiedDate.dbName(),System.currentTimeMillis());
               }
  else {
                 logger.log(Level.FINE,"Tried to set lastModifiedDate explicitely (action was denied)");

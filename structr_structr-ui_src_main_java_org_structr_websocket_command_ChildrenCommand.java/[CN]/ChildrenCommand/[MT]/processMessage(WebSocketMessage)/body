@@ -9,7 +9,7 @@
   Map<Long,GraphObject> sortMap=new TreeMap<Long,GraphObject>();
   Set<String> nodesWithChildren=new HashSet<String>();
   List<GraphObject> result=new LinkedList<GraphObject>();
-  PropertyKey<Long> pageIdProperty=new Property<Long>(pageId);
+  PropertyKey<Long> pageIdProperty=new LongProperty(pageId);
   for (  AbstractRelationship rel : rels) {
     AbstractNode endNode=rel.getEndNode();
     if (endNode == null) {
@@ -28,7 +28,7 @@
       pos=rel.getLongProperty(pageIdProperty);
     }
  else {
-      pos=rel.getLongProperty(new Property("*"));
+      pos=rel.getLongProperty(new LongProperty("*"));
     }
     String relCompId=rel.getProperty(Component.componentId);
     boolean isComponentOrContent=((endNode instanceof Component) || (endNode instanceof Content));

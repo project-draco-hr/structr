@@ -6,15 +6,15 @@
     if (converter != null) {
       try {
         Object propertyValue=converter.revert(entry.getValue());
-        inputTypedProperties.put(propertyKey.name(),propertyValue);
+        inputTypedProperties.put(propertyKey.jsonName(),propertyValue);
       }
  catch (      ClassCastException cce) {
         cce.printStackTrace();
-        throw new FrameworkException(entity.getSimpleName(),new TypeToken(propertyKey,"XXX"));
+        throw new FrameworkException(entity.getSimpleName(),new TypeToken(propertyKey,propertyKey.typeName()));
       }
     }
  else {
-      inputTypedProperties.put(propertyKey.name(),entry.getValue());
+      inputTypedProperties.put(propertyKey.jsonName(),entry.getValue());
     }
   }
   return inputTypedProperties;

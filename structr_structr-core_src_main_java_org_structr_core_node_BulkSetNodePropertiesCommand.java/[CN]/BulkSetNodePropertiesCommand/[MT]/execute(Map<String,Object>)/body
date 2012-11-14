@@ -8,11 +8,11 @@
       @Override public Object execute(      Transaction tx) throws FrameworkException {
         Result<AbstractNode> result=null;
         long n=0L;
-        if (properties.containsKey(AbstractNode.type.name())) {
+        if (properties.containsKey(AbstractNode.type.dbName())) {
           List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
-          attrs.add(Search.andExactType((String)properties.get(AbstractNode.type.name())));
+          attrs.add(Search.andExactType((String)properties.get(AbstractNode.type.dbName())));
           result=searchNode.execute(attrs);
-          properties.remove(AbstractNode.type.name());
+          properties.remove(AbstractNode.type.dbName());
         }
  else {
           result=nodeFactory.createAllNodes(GlobalGraphOperations.at(graphDb).getAllNodes());
@@ -23,7 +23,7 @@
               String key=(String)entry.getKey();
               Object val=entry.getValue();
               node.unlockReadOnlyPropertiesOnce();
-              node.setProperty(new Property(key),val);
+              node.setProperty(new GenericProperty(key),val);
             }
             if (n > 1000 && n % 1000 == 0) {
               logger.log(Level.INFO,"Set properties on {0} nodes, committing results to database.",n);

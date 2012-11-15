@@ -1,11 +1,13 @@
 {
   try {
-    StructrCrudServlet crudServlet=new StructrCrudServlet();
-    ServletHolder crudServletHolder=new ServletHolder(crudServlet);
-    Map<String,String> htmlInitParams=new HashMap<String,String>();
-    htmlInitParams.put("Authenticator","org.structr.web.auth.HttpAuthenticator");
-    crudServletHolder.setInitParameters(htmlInitParams);
-    Structr.createServer(CrudServer.class,"structr CRUD",8182).addServlet("/structr/crud/*",crudServletHolder).addResourceHandler("/structr","src/main/resources/",false,new String[]{"index.html"}).enableRewriteFilter().start(true);
+    CsvServlet structrRestServlet=new CsvServlet(DefaultResourceProvider.class.newInstance(),PropertyView.All,AbstractNode.uuid);
+    ServletHolder csvServletHolder=new ServletHolder(structrRestServlet);
+    Map<String,String> servletParams=new HashMap<String,String>();
+    servletParams.put("PropertyFormat","FlatNameValue");
+    servletParams.put("Authenticator",DefaultAuthenticator.class.getName());
+    csvServletHolder.setInitParameters(servletParams);
+    csvServletHolder.setInitOrder(0);
+    Structr.createServer(CrudServer.class,"structr CRUD",8182).addServlet("/structr/csv/*",csvServletHolder).addResourceHandler("/structr","src/main/resources/",false,new String[]{"index.html"}).enableRewriteFilter().start(true);
   }
  catch (  Throwable t) {
     t.printStackTrace();

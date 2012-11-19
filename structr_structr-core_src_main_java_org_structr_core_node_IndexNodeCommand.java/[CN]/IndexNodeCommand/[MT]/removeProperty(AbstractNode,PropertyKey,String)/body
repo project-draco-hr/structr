@@ -1,0 +1,21 @@
+{
+  Node dbNode=node.getNode();
+  long id=node.getId();
+  if (key == null) {
+    logger.log(Level.SEVERE,"Node {0} has null key",new Object[]{id});
+    return;
+  }
+  boolean emptyKey=StringUtils.isEmpty(key.dbName());
+  if (emptyKey) {
+    logger.log(Level.SEVERE,"Node {0} has empty, not-null key, removing property",new Object[]{id});
+    dbNode.removeProperty(key.dbName());
+    return;
+  }
+  removeNodePropertyFromIndex(dbNode,key,indexName);
+  if ((node instanceof Principal) && (key.equals(AbstractNode.name) || key.equals(Person.email))) {
+    removeNodePropertyFromIndex(dbNode,key,NodeIndex.user.name());
+  }
+  if (key.equals(AbstractNode.uuid)) {
+    removeNodePropertyFromIndex(dbNode,key,NodeIndex.uuid.name());
+  }
+}

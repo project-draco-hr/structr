@@ -1,0 +1,33 @@
+{
+  try {
+    String uuid=node.getProperty(AbstractNode.uuid);
+    if (uuid == null) {
+      return;
+    }
+    for (    Enum index : (NodeIndex[])arguments.get("indices")) {
+      Set<PropertyKey> properties=EntityContext.getSearchableProperties(node.getClass(),index.name());
+      for (      PropertyKey key : properties) {
+        removeProperty(node,key,index.name());
+      }
+    }
+    Node dbNode=node.getNode();
+    if ((dbNode.hasProperty(Location.latitude.dbName())) && (dbNode.hasProperty(Location.longitude.dbName()))) {
+      LayerNodeIndex layerIndex=(LayerNodeIndex)indices.get(NodeIndex.layer.name());
+      try {
+synchronized (layerIndex) {
+          layerIndex.remove(dbNode,"","");
+        }
+      }
+ catch (      NotFoundException nfe) {
+        logger.log(Level.SEVERE,"Could not remove node from layer index because the db could not find the node",nfe);
+      }
+catch (      Exception e) {
+        logger.log(Level.SEVERE,"Could not remove node from layer index",e);
+      }
+    }
+  }
+ catch (  Throwable t) {
+    t.printStackTrace();
+    logger.log(Level.WARNING,"Unable to remove node {0}: {1}",new Object[]{node.getNode().getId(),t.getMessage()});
+  }
+}

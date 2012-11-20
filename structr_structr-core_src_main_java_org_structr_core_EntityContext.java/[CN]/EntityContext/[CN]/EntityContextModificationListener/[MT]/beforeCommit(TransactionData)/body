@@ -10,7 +10,7 @@
   }
   SecurityContext securityContext=securityContextMap.get();
   SecurityContext superUserContext=SecurityContext.getSuperUserInstance();
-  IndexNodeCommand indexNodeCommand=Services.command(superUserContext,IndexNodeCommand.class);
+  NewIndexNodeCommand indexNodeCommand=Services.command(superUserContext,NewIndexNodeCommand.class);
   IndexRelationshipCommand indexRelationshipCommand=Services.command(superUserContext,IndexRelationshipCommand.class);
   try {
     Map<Relationship,Map<String,Object>> removedRelProperties=new LinkedHashMap<Relationship,Map<String,Object>>();
@@ -89,11 +89,11 @@
         try {
           AbstractNode startNode=nodeFactory.createNode(rel.getStartNode());
           RelationshipType relationshipType=entity.getRelType();
-          if (startNode != null && !data.isDeleted(rel.getStartNode())) {
+          if (startNode != null) {
             changeSet.modifyRelationshipEndpoint(startNode,relationshipType);
           }
           AbstractNode endNode=nodeFactory.createNode(rel.getEndNode());
-          if (endNode != null && !data.isDeleted(rel.getEndNode())) {
+          if (endNode != null) {
             changeSet.modifyRelationshipEndpoint(endNode,relationshipType);
           }
         }
@@ -113,11 +113,11 @@
         try {
           AbstractNode startNode=nodeFactory.createNode(rel.getStartNode());
           RelationshipType relationshipType=entity.getRelType();
-          if (startNode != null && !data.isDeleted(rel.getStartNode())) {
+          if (startNode != null) {
             changeSet.modifyRelationshipEndpoint(startNode,relationshipType);
           }
           AbstractNode endNode=nodeFactory.createNode(rel.getEndNode());
-          if (endNode != null && !data.isDeleted(rel.getEndNode())) {
+          if (endNode != null) {
             changeSet.modifyRelationshipEndpoint(endNode,relationshipType);
           }
         }
@@ -162,7 +162,6 @@
           hasError|=!listener.propertyModified(securityContext,transactionKey,errorBuffer,nodeEntity,key,entry.previouslyCommitedValue(),value);
         }
         if (!changeSet.isNewOrDeleted(nodeEntity)) {
-          indexNodeCommand.execute(nodeEntity,key);
           changeSet.modify(nodeEntity);
         }
       }
@@ -190,7 +189,6 @@
         for (        StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
           hasError|=!listener.propertyModified(securityContext,transactionKey,errorBuffer,relEntity,key,entry.previouslyCommitedValue(),value);
         }
-        indexRelationshipCommand.execute(relEntity,key);
         changeSet.modify(relEntity);
       }
     }
@@ -200,7 +198,7 @@
         for (        StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
           hasError|=!listener.graphObjectModified(securityContext,transactionKey,errorBuffer,node);
         }
-        indexNodeCommand.execute(node);
+        indexNodeCommand.updateNode(node);
       }
     }
     for (    AbstractRelationship rel : changeSet.getModifiedRelationships()) {
@@ -209,11 +207,11 @@
         for (        StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
           hasError|=!listener.graphObjectModified(securityContext,transactionKey,errorBuffer,rel);
         }
-        indexRelationshipCommand.execute(rel);
+        indexRelationshipCommand.execute(relEntity);
       }
     }
     for (    AbstractNode node : changeSet.getCreatedNodes()) {
-      indexNodeCommand.execute(node);
+      indexNodeCommand.addNode(node);
     }
     for (    AbstractRelationship rel : changeSet.getCreatedRelationships()) {
       indexRelationshipCommand.execute(rel);

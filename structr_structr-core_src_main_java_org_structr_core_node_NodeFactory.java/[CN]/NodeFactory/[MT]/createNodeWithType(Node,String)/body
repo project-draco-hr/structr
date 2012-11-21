@@ -1,6 +1,7 @@
 {
-  Class<T> nodeClass=(Class)getEntityClassCommand.get().execute(nodeType);
+  SecurityContext securityContext=factoryProfile.getSecurityContext();
   T newNode=null;
+  Class<T> nodeClass=Services.getService(ModuleService.class).getNodeEntityClass(nodeType);
   if (nodeClass != null) {
     try {
       Constructor<T> constructor=constructors.get(nodeClass);
@@ -20,7 +21,6 @@
   newNode.init(factoryProfile.getSecurityContext(),node);
   newNode.onNodeInstantiation();
   newNode.setType(nodeType);
-  SecurityContext securityContext=factoryProfile.getSecurityContext();
   if (securityContext.isReadable(newNode,factoryProfile.includeDeletedAndHidden(),factoryProfile.publicOnly())) {
     return newNode;
   }

@@ -1,9 +1,10 @@
 {
+  SecurityContext securityContext=getSecurityContext(request,response);
   try {
     request.setCharacterEncoding("UTF-8");
     response.setCharacterEncoding("UTF-8");
     response.setContentType("application/json; charset=UTF-8");
-    SecurityContext securityContext=getSecurityContext(request,response);
+    securityContext.initializeAndExamineRequest(request,response);
     List<Resource> chain=parsePath(securityContext,request);
     Resource resourceConstraint=optimizeConstraintChain(chain);
     securityContext.examineRequest(request,resourceConstraint.getResourceSignature(),resourceConstraint.getGrant(),propertyView.get(securityContext));
@@ -14,8 +15,6 @@
     response.setStatus(frameworkException.getStatus());
     gson.toJson(frameworkException,response.getWriter());
     response.getWriter().println();
-    response.getWriter().flush();
-    response.getWriter().close();
   }
 catch (  JsonSyntaxException jsex) {
     logger.log(Level.WARNING,"JsonSyntaxException in OPTIONS",jsex);
@@ -34,5 +33,15 @@ catch (  Throwable t) {
     int code=HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
     response.setStatus(code);
     response.getWriter().append(jsonError(code,"JsonSyntaxException in OPTIONS: " + t.getMessage()));
+  }
+ finally {
+    try {
+      response.getWriter().flush();
+      response.getWriter().close();
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"Unable to flush and close response: {0}",t.getMessage());
+    }
+    securityContext.cleanUp();
   }
 }

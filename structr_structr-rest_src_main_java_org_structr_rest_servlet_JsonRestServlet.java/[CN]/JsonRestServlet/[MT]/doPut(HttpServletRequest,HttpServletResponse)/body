@@ -1,10 +1,11 @@
 {
+  SecurityContext securityContext=getSecurityContext(request,response);
   try {
     request.setCharacterEncoding("UTF-8");
     response.setCharacterEncoding("UTF-8");
     response.setContentType("application/json; charset=UTF-8");
     final JsonInput propertySet=gson.fromJson(request.getReader(),JsonInput.class);
-    SecurityContext securityContext=getSecurityContext(request,response);
+    securityContext.initializeAndExamineRequest(request,response);
     if (securityContext != null) {
       List<Resource> chain=ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,defaultIdProperty);
       Resource resourceConstraint=ResourceHelper.optimizeConstraintChain(chain,defaultIdProperty);
@@ -21,8 +22,6 @@
     response.setStatus(frameworkException.getStatus());
     gson.toJson(frameworkException,response.getWriter());
     response.getWriter().println();
-    response.getWriter().flush();
-    response.getWriter().close();
   }
 catch (  JsonSyntaxException jsex) {
     logger.log(Level.WARNING,"JsonSyntaxException in PUT",jsex);
@@ -41,5 +40,15 @@ catch (  Throwable t) {
     int code=HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
     response.setStatus(code);
     response.getWriter().append(jsonError(code,"JsonSyntaxException in PUT: " + t.getMessage()));
+  }
+ finally {
+    try {
+      response.getWriter().flush();
+      response.getWriter().close();
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"Unable to flush and close response: {0}",t.getMessage());
+    }
+    securityContext.cleanUp();
   }
 }

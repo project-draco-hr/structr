@@ -1,0 +1,11 @@
+{
+  boolean hasError=false;
+  for (  AbstractNode node : changeSet.getModifiedNodes()) {
+    hasError|=!node.beforeModification(securityContext,errorBuffer);
+    for (    StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
+      hasError|=!listener.graphObjectModified(securityContext,transactionKey,errorBuffer,node);
+    }
+    indexNodeCommand.updateNode(node);
+  }
+  return hasError;
+}

@@ -1,0 +1,28 @@
+{
+  boolean hasError=false;
+  for (  Relationship rel : data.deletedRelationships()) {
+    AbstractRelationship entity=relFactory.instantiateRelationship(securityContext,rel);
+    if (entity != null) {
+      PropertyMap properties=PropertyMap.databaseTypeToJavaType(securityContext,entity,removedRelProperties.get(rel));
+      hasError|=!entity.beforeDeletion(securityContext,errorBuffer,properties);
+      for (      StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
+        hasError|=!listener.graphObjectDeleted(securityContext,transactionKey,errorBuffer,entity,properties);
+      }
+      changeSet.delete(entity);
+      try {
+        AbstractNode startNode=nodeFactory.createNode(rel.getStartNode());
+        RelationshipType relationshipType=entity.getRelType();
+        if (startNode != null) {
+          changeSet.modifyRelationshipEndpoint(startNode,relationshipType);
+        }
+        AbstractNode endNode=nodeFactory.createNode(rel.getEndNode());
+        if (endNode != null) {
+          changeSet.modifyRelationshipEndpoint(endNode,relationshipType);
+        }
+      }
+ catch (      Throwable ignore) {
+      }
+    }
+  }
+  return hasError;
+}

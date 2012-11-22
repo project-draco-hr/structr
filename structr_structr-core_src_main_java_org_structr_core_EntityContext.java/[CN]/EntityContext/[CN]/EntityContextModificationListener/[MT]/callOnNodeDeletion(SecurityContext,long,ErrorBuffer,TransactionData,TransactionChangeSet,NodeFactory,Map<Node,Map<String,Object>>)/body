@@ -1,0 +1,16 @@
+{
+  boolean hasError=false;
+  for (  Node node : data.deletedNodes()) {
+    String type=(String)removedNodeProperties.get(node).get(AbstractNode.type.dbName());
+    AbstractNode entity=nodeFactory.createDummyNode(type);
+    if (entity != null) {
+      PropertyMap properties=PropertyMap.databaseTypeToJavaType(securityContext,entity,removedNodeProperties.get(node));
+      hasError|=!entity.beforeDeletion(securityContext,errorBuffer,properties);
+      for (      StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
+        hasError|=!listener.graphObjectDeleted(securityContext,transactionKey,errorBuffer,entity,properties);
+      }
+      changeSet.delete(entity);
+    }
+  }
+  return hasError;
+}

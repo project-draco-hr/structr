@@ -1,0 +1,14 @@
+{
+  boolean hasError=false;
+  for (  Node node : sortNodes(data.createdNodes())) {
+    AbstractNode entity=nodeFactory.createNode(node,true,false);
+    if (entity != null) {
+      hasError|=!entity.beforeCreation(securityContext,errorBuffer);
+      changeSet.create(entity);
+      for (      StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
+        hasError|=!listener.graphObjectCreated(securityContext,transactionKey,errorBuffer,entity);
+      }
+    }
+  }
+  return hasError;
+}

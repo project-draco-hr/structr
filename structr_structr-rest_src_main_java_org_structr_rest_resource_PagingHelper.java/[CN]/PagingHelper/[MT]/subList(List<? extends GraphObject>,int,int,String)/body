@@ -24,5 +24,16 @@
     fromIndex=page > 0 ? (page - 1) * pageSize : size + (page * pageSize);
   }
   toIndex=fromIndex + pageSize;
-  return list.subList(Math.max(0,fromIndex),Math.min(size,toIndex));
+  int finalFromIndex=Math.max(0,fromIndex);
+  int finalToIndex=Math.min(size,Math.max(0,toIndex));
+  if (finalFromIndex > finalToIndex) {
+    finalFromIndex=finalToIndex;
+  }
+  try {
+    return list.subList(finalFromIndex,finalToIndex);
+  }
+ catch (  Throwable t) {
+    logger.log(Level.WARNING,"Invalid range for sublist in paging, pageSize {0}, page {1}, offsetId {2}: {3}",new Object[]{pageSize,page,offsetId,t.getMessage()});
+  }
+  return Collections.EMPTY_LIST;
 }

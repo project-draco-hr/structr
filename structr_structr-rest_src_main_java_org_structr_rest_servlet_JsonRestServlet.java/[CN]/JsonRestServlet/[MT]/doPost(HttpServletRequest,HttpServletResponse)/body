@@ -1,10 +1,11 @@
 {
+  SecurityContext securityContext=getSecurityContext(request,response);
   try {
     request.setCharacterEncoding("UTF-8");
     response.setCharacterEncoding("UTF-8");
     response.setContentType("application/json; charset=UTF-8");
     final JsonInput propertySet=gson.fromJson(request.getReader(),JsonInput.class);
-    SecurityContext securityContext=getSecurityContext(request,response);
+    securityContext.initializeAndExamineRequest(request,response);
     if (securityContext != null) {
       List<Resource> chain=ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,defaultIdProperty);
       Resource resourceConstraint=ResourceHelper.optimizeConstraintChain(chain,defaultIdProperty);
@@ -52,9 +53,10 @@ catch (  Throwable t) {
     try {
       response.getWriter().flush();
       response.getWriter().close();
-      response.flushBuffer();
     }
  catch (    Throwable t) {
+      logger.log(Level.WARNING,"Unable to flush and close response: {0}",t.getMessage());
     }
+    securityContext.cleanUp();
   }
 }

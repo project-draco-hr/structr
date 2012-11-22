@@ -1,0 +1,31 @@
+{
+  SecurityContext securityContext=factoryProfile.getSecurityContext();
+  T newNode=(T)securityContext.lookup(node);
+  if (newNode == null) {
+    Class<T> nodeClass=Services.getService(ModuleService.class).getNodeEntityClass(nodeType);
+    if (nodeClass != null) {
+      try {
+        Constructor<T> constructor=constructors.get(nodeClass);
+        if (constructor == null) {
+          constructor=nodeClass.getConstructor();
+          constructors.put(nodeClass,constructor);
+        }
+        newNode=constructor.newInstance();
+      }
+ catch (      Throwable t) {
+        newNode=null;
+      }
+    }
+    if (newNode == null) {
+      newNode=(T)EntityContext.getGenericFactory().createGenericNode();
+    }
+    newNode.init(factoryProfile.getSecurityContext(),node);
+    newNode.onNodeInstantiation();
+    newNode.setType(nodeType);
+    securityContext.store(newNode);
+  }
+  if (securityContext.isReadable(newNode,factoryProfile.includeDeletedAndHidden(),factoryProfile.publicOnly())) {
+    return newNode;
+  }
+  return null;
+}

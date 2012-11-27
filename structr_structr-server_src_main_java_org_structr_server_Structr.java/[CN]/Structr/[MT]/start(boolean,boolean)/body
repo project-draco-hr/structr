@@ -27,16 +27,19 @@
   ContextHandlerCollection contexts=new ContextHandlerCollection();
   contexts.addHandler(new DefaultHandler());
   List<Connector> connectors=new LinkedList<Connector>();
-  ServletContextHandler servletContext=new WebAppContext(server,basePath,contextPath);
+  ServletContextHandler servletContext=new ServletContextHandler(server,contextPath,true,true);
   servletContext.setBaseResource(new ResourceCollection(Resource.newResource(basePath),JarResource.newJarResource(Resource.newResource(sourceJarName))));
   servletContext.setInitParameter("configfile.path",confFile.getAbsolutePath());
+  servletContext.addServlet("org.eclipse.jetty.servlet.DefaultServlet","/");
   if (enableGzipCompression) {
-    FilterHolder gzipFilter=servletContext.addFilter(GzipFilter.class,"/*",EnumSet.of(DispatcherType.REQUEST,DispatcherType.FORWARD));
+    FilterHolder gzipFilter=new FilterHolder(GzipFilter.class);
     gzipFilter.setInitParameter("mimeTypes","text/html,text/plain,text/css,text/javascript");
+    servletContext.addFilter(gzipFilter,"/*",EnumSet.of(DispatcherType.REQUEST,DispatcherType.FORWARD));
   }
   if (enableRewriteFilter) {
-    FilterHolder rewriteFilter=servletContext.addFilter(UrlRewriteFilter.class,"/*",EnumSet.of(DispatcherType.REQUEST,DispatcherType.FORWARD));
+    FilterHolder rewriteFilter=new FilterHolder(UrlRewriteFilter.class);
     rewriteFilter.setInitParameter("confPath","/urlrewrite.xml");
+    servletContext.addFilter(rewriteFilter,"/*",EnumSet.of(DispatcherType.REQUEST,DispatcherType.FORWARD));
   }
   contexts.addHandler(servletContext);
   if (logRequests) {
@@ -64,7 +67,8 @@
       logbackConfFile.createNewFile();
       FileUtils.writeLines(logbackConfFile,"UTF-8",config);
     }
-    FilterHolder loggingFilter=servletContext.addFilter(TeeFilter.class,"/*",EnumSet.of(DispatcherType.REQUEST,DispatcherType.FORWARD));
+    FilterHolder loggingFilter=new FilterHolder(TeeFilter.class);
+    servletContext.addFilter(loggingFilter,"/*",EnumSet.of(DispatcherType.REQUEST,DispatcherType.FORWARD));
     loggingFilter.setInitParameter("includes","");
     RequestLogHandler requestLogHandler=new RequestLogHandler();
     String logPath=basePath + "/logs";

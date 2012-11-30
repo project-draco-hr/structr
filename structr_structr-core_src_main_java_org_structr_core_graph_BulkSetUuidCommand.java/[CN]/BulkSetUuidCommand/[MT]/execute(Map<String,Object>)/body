@@ -1,11 +1,14 @@
 {
-  final String entityTypeName=(String)attributes.get("type");
+  final String entityType=(String)attributes.get("type");
+  final String relType=(String)attributes.get("relType");
   final GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
   final SecurityContext superUserContext=SecurityContext.getSuperUserInstance();
   final NodeFactory nodeFactory=new NodeFactory(superUserContext);
+  final RelationshipFactory relFactory=new RelationshipFactory(superUserContext);
   long nodeCount=0L;
-  if (entityTypeName != null) {
-    final Class type=EntityContext.getEntityClassForRawType(entityTypeName);
+  long relCount=0L;
+  if (entityType != null) {
+    final Class type=EntityContext.getEntityClassForRawType(entityType);
     if (type != null) {
       final Result<AbstractNode> result=nodeFactory.createAllNodes(GlobalGraphOperations.at(graphDb).getAllNodes());
       final List<AbstractNode> nodes=result.getResults();
@@ -39,6 +42,38 @@
       logger.log(Level.INFO,"Done");
       return;
     }
+  }
+ else   if (relType != null) {
+    final List<AbstractRelationship> rels=relFactory.instantiateRelationships(superUserContext,GlobalGraphOperations.at(graphDb).getAllRelationships());
+    logger.log(Level.INFO,"Start setting UUID on all rels of type {1}",new Object[]{AbstractRelationship.uuid,relType});
+    final Iterator<AbstractRelationship> nodeIterator=rels.iterator();
+    while (nodeIterator.hasNext()) {
+      relCount+=Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction<Integer>(){
+        @Override public Integer execute() throws FrameworkException {
+          int count=0;
+          while (nodeIterator.hasNext()) {
+            AbstractRelationship abstractRel=nodeIterator.next();
+            if (!abstractRel.getType().equals(relType)) {
+              continue;
+            }
+            try {
+              abstractRel.setProperty(AbstractRelationship.uuid,UUID.randomUUID().toString().replaceAll("[\\-]+",""));
+            }
+ catch (            Throwable t) {
+              logger.log(Level.WARNING,"Unable to set UUID on {0}: {1}",new Object[]{relType,t.getMessage()});
+            }
+            if (++count == 1000) {
+              break;
+            }
+          }
+          return count;
+        }
+      }
+);
+      logger.log(Level.INFO,"Set UUID on {0} rels ...",relCount);
+    }
+    logger.log(Level.INFO,"Done");
+    return;
   }
   logger.log(Level.INFO,"Unable to determine entity type to set UUID.");
 }

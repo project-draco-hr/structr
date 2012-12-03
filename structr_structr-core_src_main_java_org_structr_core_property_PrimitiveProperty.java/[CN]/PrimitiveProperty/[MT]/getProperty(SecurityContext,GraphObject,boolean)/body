@@ -1,0 +1,24 @@
+{
+  Object value=null;
+  final PropertyContainer propertyContainer=obj.getPropertyContainer();
+  if (propertyContainer != null) {
+    if (propertyContainer.hasProperty(dbName())) {
+      if (propertyContainer != null) {
+        value=propertyContainer.getProperty(dbName());
+      }
+    }
+  }
+  if (applyConverter) {
+    PropertyConverter converter=databaseConverter(securityContext,obj);
+    if (converter != null) {
+      try {
+        value=converter.revert(value);
+      }
+ catch (      Throwable t) {
+        t.printStackTrace();
+        logger.log(Level.WARNING,"Unable to convert property {0} of type {1}: {2}",new Object[]{dbName(),getClass().getSimpleName(),t.getMessage()});
+      }
+    }
+  }
+  return (T)value;
+}

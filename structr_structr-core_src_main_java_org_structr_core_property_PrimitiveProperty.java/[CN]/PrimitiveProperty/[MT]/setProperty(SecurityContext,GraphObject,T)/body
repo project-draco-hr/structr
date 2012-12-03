@@ -1,0 +1,39 @@
+{
+  PropertyConverter converter=databaseConverter(securityContext,obj);
+  final Object convertedValue;
+  if (converter != null) {
+    convertedValue=converter.convert(value);
+  }
+ else {
+    convertedValue=value;
+  }
+  final Object oldValue=getProperty(securityContext,obj,true);
+  if (((convertedValue == null) && (oldValue == null)) || ((convertedValue != null) && (oldValue != null) && convertedValue.equals(oldValue))) {
+    return;
+  }
+  final PropertyContainer propertyContainer=obj.getPropertyContainer();
+  if (propertyContainer != null) {
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        try {
+          if (convertedValue == null) {
+            propertyContainer.removeProperty(dbName());
+          }
+ else {
+            if (!PrimitiveProperty.this.equals(AbstractNode.lastModifiedDate)) {
+              propertyContainer.setProperty(dbName(),convertedValue);
+              propertyContainer.setProperty(AbstractNode.lastModifiedDate.dbName(),System.currentTimeMillis());
+            }
+ else {
+              logger.log(Level.FINE,"Tried to set lastModifiedDate explicitely (action was denied)");
+            }
+          }
+        }
+  finally {
+        }
+        return null;
+      }
+    }
+);
+  }
+}

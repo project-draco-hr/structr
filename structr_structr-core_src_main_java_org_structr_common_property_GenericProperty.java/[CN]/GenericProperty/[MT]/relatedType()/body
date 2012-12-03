@@ -1,0 +1,11 @@
+{
+  if (relatedType != null) {
+    return relatedType;
+  }
+  RelationClass relType=EntityContext.getRelationClass(getDeclaringClass(),this);
+  if (relType != null) {
+    relatedType=relType.getDestType();
+    isCollection=(Cardinality.ManyToMany.equals(relType.getCardinality()) || Cardinality.OneToMany.equals(relType.getCardinality()));
+  }
+  return relatedType;
+}

@@ -19,7 +19,6 @@
         propProperties.put("dbName",property.dbName());
         propProperties.put("jsonName",property.jsonName());
         propProperties.put("className",property.getClass().getName());
-        propProperties.put("type",property.typeName());
         propProperties.put("declaringClass",property.getDeclaringClass());
         propProperties.put("defaultValue",property.defaultValue());
         propProperties.put("readOnly",property.isReadOnlyProperty());
@@ -27,6 +26,10 @@
         Class<? extends GraphObject> relatedType=property.relatedType();
         if (relatedType != null) {
           propProperties.put("relatedType",relatedType.getName());
+          propProperties.put("type",relatedType.getSimpleName());
+        }
+ else {
+          propProperties.put("type",property.typeName());
         }
         propProperties.put("isCollection",property.isCollection());
         PropertyConverter databaseConverter=property.databaseConverter(securityContext,null);

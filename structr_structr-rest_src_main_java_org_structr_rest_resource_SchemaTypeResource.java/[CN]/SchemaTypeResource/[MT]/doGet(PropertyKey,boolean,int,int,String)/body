@@ -24,6 +24,12 @@
         propProperties.put("defaultValue",property.defaultValue());
         propProperties.put("readOnly",property.isReadOnlyProperty());
         propProperties.put("system",property.isSystemProperty());
+        if (property instanceof RelationProperty) {
+          RelationProperty relProp=(RelationProperty)property;
+          propProperties.put("remoteClassName",relProp.getRemoteClass().getName());
+          propProperties.put("isCollection",relProp.isCollection());
+          propProperties.put("notion",relProp.getNotion());
+        }
         PropertyConverter databaseConverter=property.databaseConverter(securityContext,null);
         PropertyConverter inputConverter=property.inputConverter(securityContext);
         if (databaseConverter != null) {

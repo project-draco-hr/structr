@@ -1,0 +1,16 @@
+{
+  Object value=Notion.convertList(getRelatedNodes(securityContext,(AbstractNode)obj),notion.getAdapterForGetter(securityContext));
+  if (applyConverter) {
+    PropertyConverter converter=databaseConverter(securityContext,obj);
+    if (converter != null) {
+      try {
+        value=converter.revert(value);
+      }
+ catch (      Throwable t) {
+        t.printStackTrace();
+        logger.log(Level.WARNING,"Unable to convert property {0} of type {1}: {2}",new Object[]{dbName(),getClass().getSimpleName(),t.getMessage()});
+      }
+    }
+  }
+  return (List<T>)value;
+}

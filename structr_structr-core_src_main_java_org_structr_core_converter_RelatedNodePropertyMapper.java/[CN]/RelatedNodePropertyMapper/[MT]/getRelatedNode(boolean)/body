@@ -1,0 +1,16 @@
+{
+  AbstractNode relatedNode=null;
+  if ((currentObject != null) && (currentObject instanceof AbstractNode)) {
+    AbstractNode localNode=(AbstractNode)currentObject;
+    relatedNode=localNode.getProperty(sourceKey);
+    if (relatedNode == null && add) {
+      try {
+        relatedNode=sourceKey.createRelatedNode(securityContext,localNode);
+      }
+ catch (      FrameworkException fex) {
+        logger.log(Level.WARNING,"Unable to create related node from property {0}",sourceKey);
+      }
+    }
+  }
+  return relatedNode;
+}

@@ -2,8 +2,8 @@
   if (currentObject != null && currentObject instanceof AbstractNode) {
     AbstractNode sourceNode=(AbstractNode)currentObject;
     List<AbstractNode> nodes=new LinkedList<AbstractNode>();
-    for (    Class type : aggregation.getAggregationTypes()) {
-      nodes.addAll(sourceNode.getRelatedNodes(type));
+    for (    CollectionProperty<? extends AbstractNode> property : aggregation.getAggregationProperties()) {
+      nodes.addAll(sourceNode.getProperty(property));
     }
     Comparator<AbstractNode> comparator=aggregation.getComparator();
     if (nodes.isEmpty() && comparator != null) {

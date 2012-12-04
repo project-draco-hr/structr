@@ -27,18 +27,15 @@
             }
           }
           if (htmlNode != null) {
-            RelationClass rel=EntityContext.getRelationClass(newPage.getClass(),htmlNode.getClass());
-            if (rel != null) {
-              PropertyMap relProps=new PropertyMap();
-              relProps.put(new LongProperty(pageId),0);
-              try {
-                rel.createRelationship(securityContext,newPage,htmlNode,relProps);
-              }
- catch (              Throwable t) {
-                getWebSocket().send(MessageBuilder.status().code(400).message(t.getMessage()).build(),true);
-              }
-              RelationshipHelper.tagOutgoingRelsWithPageId(newPage,newPage,originalPageId,pageId);
+            PropertyMap relProps=new PropertyMap();
+            relProps.put(new LongProperty(pageId),0);
+            try {
+              Page.elements.createRelationship(securityContext,newPage,htmlNode,relProps);
             }
+ catch (            Throwable t) {
+              getWebSocket().send(MessageBuilder.status().code(400).message(t.getMessage()).build(),true);
+            }
+            RelationshipHelper.tagOutgoingRelsWithPageId(newPage,newPage,originalPageId,pageId);
           }
         }
  else {

@@ -12,8 +12,9 @@
     }
   }
   uriParts.add(typedIdResource.getUriPart());
-  RelationClass rel=findRelationClass(lastResource,typedIdResource);
-  if (rel != null) {
+  PropertyKey key=findPropertyKey(lastResource,typedIdResource.getTypeResource());
+  if (key != null && key instanceof AbstractRelationProperty) {
+    AbstractRelationProperty rel=(AbstractRelationProperty)key;
     if (!visitedRelationships.contains(rel)) {
       traversalDescription=traversalDescription.relationships(rel.getRelType(),rel.getDirection());
       visitedRelationships.add(rel);

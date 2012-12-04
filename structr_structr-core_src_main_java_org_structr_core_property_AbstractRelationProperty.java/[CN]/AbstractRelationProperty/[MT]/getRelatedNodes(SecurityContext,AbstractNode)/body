@@ -1,0 +1,24 @@
+{
+  if (getCardinality().equals(Relation.Cardinality.OneToMany) || getCardinality().equals(Relation.Cardinality.ManyToMany)) {
+    NodeFactory nodeFactory=new NodeFactory(securityContext);
+    List<T> nodes=new LinkedList<T>();
+    Node dbNode=node.getNode();
+    AbstractNode value=null;
+    try {
+      for (      Relationship rel : dbNode.getRelationships(getRelType(),getDirection())) {
+        value=nodeFactory.createNode(rel.getOtherNode(dbNode));
+        if (value != null && getDestType().isInstance(value)) {
+          nodes.add((T)value);
+        }
+      }
+      return nodes;
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"Unable to fetch related node: {0}",t.getMessage());
+    }
+  }
+ else {
+    logger.log(Level.WARNING,"Requested related nodes with wrong cardinality {0} between {1} and {2}",new Object[]{getCardinality().name(),node.getClass().getSimpleName(),getDestType()});
+  }
+  return Collections.emptyList();
+}

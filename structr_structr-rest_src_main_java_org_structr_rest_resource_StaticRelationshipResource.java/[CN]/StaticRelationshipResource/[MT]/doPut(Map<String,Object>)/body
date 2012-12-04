@@ -2,8 +2,9 @@
   final List<? extends GraphObject> results=typedIdResource.doGet(null,false,NodeFactory.DEFAULT_PAGE_SIZE,NodeFactory.DEFAULT_PAGE,null).getResults();
   final SearchNodeCommand searchNode=Services.command(securityContext,SearchNodeCommand.class);
   if (results != null) {
-    final RelationClass staticRel=findRelationClass(typedIdResource,typeResource);
-    if (staticRel != null) {
+    final PropertyKey key=findPropertyKey(typedIdResource,typeResource);
+    if (key != null && key instanceof AbstractRelationProperty) {
+      final AbstractRelationProperty staticRel=(AbstractRelationProperty)key;
       final AbstractNode startNode=typedIdResource.getTypesafeNode();
       if (startNode != null) {
         Class startNodeType=startNode.getClass();

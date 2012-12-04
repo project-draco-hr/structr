@@ -1,0 +1,22 @@
+{
+  if (value != null) {
+    Collection<GraphObject> collection=(Collection)notion.getCollectionAdapterForSetter(securityContext).adapt(value);
+    for (    GraphObject graphObject : collection) {
+      if (graphObject instanceof AbstractNode) {
+        createRelationship(securityContext,(AbstractNode)obj,(AbstractNode)graphObject);
+      }
+    }
+  }
+ else {
+    Object existingValue=getProperty(securityContext,obj,true);
+    if (existingValue == null) {
+      return;
+    }
+    for (    Object val : ((Iterable)existingValue)) {
+      GraphObject graphObject=(GraphObject)notion.getAdapterForSetter(securityContext).adapt(val);
+      if (graphObject instanceof AbstractNode) {
+        removeRelationship(securityContext,(AbstractNode)obj,(AbstractNode)graphObject);
+      }
+    }
+  }
+}

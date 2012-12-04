@@ -2,8 +2,9 @@
   final StructrTransaction transaction=new StructrTransaction(){
     @Override public Object execute() throws FrameworkException {
       final AbstractNode sourceNode=typedIdResource.getIdResource().getNode();
-      final RelationClass rel=EntityContext.getRelationClass(sourceNode.getClass(),typeResource.getEntityClass());
-      if (sourceNode != null && rel != null) {
+      final PropertyKey propertyKey=findPropertyKey(typedIdResource,typeResource);
+      if (sourceNode != null && propertyKey != null) {
+        final AbstractRelationProperty rel=(AbstractRelationProperty)propertyKey;
         Class sourceNodeType=sourceNode.getClass();
         if (EntityContext.getPropertyKeyForJSONName(sourceNodeType,typeResource.getRawType()).isReadOnlyProperty()) {
           logger.log(Level.INFO,"Read-only property on {0}: {1}",new Object[]{sourceNodeType,typeResource.getRawType()});

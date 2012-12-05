@@ -1,16 +1,30 @@
 {
-  Object value=Notion.convertList(getRelatedNodes(securityContext,(AbstractNode)obj),notion.getAdapterForGetter(securityContext));
-  if (applyConverter) {
-    PropertyConverter converter=databaseConverter(securityContext,obj);
-    if (converter != null) {
+  if (obj instanceof AbstractNode) {
+    AbstractNode node=(AbstractNode)obj;
+    if (cardinality.equals(Relation.Cardinality.OneToMany) || cardinality.equals(Relation.Cardinality.ManyToMany)) {
+      NodeFactory nodeFactory=new NodeFactory(securityContext);
+      List<T> nodes=new LinkedList<T>();
+      Node dbNode=node.getNode();
+      AbstractNode value=null;
       try {
-        value=converter.revert(value);
+        for (        Relationship rel : dbNode.getRelationships(getRelType(),getDirection())) {
+          value=nodeFactory.createNode(rel.getOtherNode(dbNode));
+          if (value != null && getDestType().isInstance(value)) {
+            nodes.add((T)value);
+          }
+        }
+        return nodes;
       }
  catch (      Throwable t) {
-        t.printStackTrace();
-        logger.log(Level.WARNING,"Unable to convert property {0} of type {1}: {2}",new Object[]{dbName(),getClass().getSimpleName(),t.getMessage()});
+        logger.log(Level.WARNING,"Unable to fetch related node: {0}",t.getMessage());
       }
     }
+ else {
+      logger.log(Level.WARNING,"Requested related nodes with wrong cardinality {0} between {1} and {2}",new Object[]{getCardinality().name(),node.getClass().getSimpleName(),getDestType()});
+    }
   }
-  return (List<T>)value;
+ else {
+    logger.log(Level.WARNING,"Property {0} is registered on illegal type {1}",new Object[]{this,obj.getClass()});
+  }
+  return Collections.emptyList();
 }

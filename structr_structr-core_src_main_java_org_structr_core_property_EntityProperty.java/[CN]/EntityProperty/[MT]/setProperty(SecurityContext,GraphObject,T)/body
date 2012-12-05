@@ -1,18 +1,12 @@
 {
   if (value != null) {
-    GraphObject graphObject=(GraphObject)notion.getAdapterForSetter(securityContext).adapt(value);
-    if (graphObject instanceof AbstractNode) {
-      createRelationship(securityContext,(AbstractNode)obj,(AbstractNode)graphObject);
-    }
+    createRelationship(securityContext,(AbstractNode)obj,(AbstractNode)value);
   }
  else {
-    Object existingValue=getProperty(securityContext,obj,true);
+    T existingValue=getProperty(securityContext,obj,true);
     if (existingValue == null) {
       return;
     }
-    GraphObject graphObject=(GraphObject)notion.getAdapterForSetter(securityContext).adapt(existingValue);
-    if (graphObject instanceof AbstractNode) {
-      removeRelationship(securityContext,(AbstractNode)obj,(AbstractNode)graphObject);
-    }
+    removeRelationship(securityContext,(AbstractNode)obj,(AbstractNode)existingValue);
   }
 }

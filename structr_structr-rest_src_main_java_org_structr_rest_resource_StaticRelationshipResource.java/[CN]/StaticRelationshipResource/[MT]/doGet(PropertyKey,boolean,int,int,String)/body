@@ -1,28 +1,25 @@
 {
-  final List<? extends GraphObject> results=typedIdResource.doGet(sortKey,sortDescending,NodeFactory.DEFAULT_PAGE_SIZE,NodeFactory.DEFAULT_PAGE,null).getResults();
-  if (results != null) {
-    final AbstractNode sourceNode=typedIdResource.getTypesafeNode();
-    if (sourceNode != null) {
-      final PropertyKey key=findPropertyKey(typedIdResource,typeResource);
-      if (key != null) {
-        final Object value=sourceNode.getProperty(key);
-        if (value != null) {
-          if (value instanceof List) {
-            final List<GraphObject> list=(List<GraphObject>)value;
-            applyDefaultSorting(list,sortKey,sortDescending);
-            return new Result(PagingHelper.subList(list,pageSize,page,offsetId),list.size(),isCollectionResource(),isPrimitiveArray());
-          }
- else           if (value instanceof Iterable) {
-            final List<GraphObject> propertyListResult=new LinkedList<GraphObject>();
-            final Iterable sourceIterable=(Iterable)value;
-            for (            final Object o : sourceIterable) {
-              if (o instanceof GraphObject) {
-                propertyListResult.add((GraphObject)o);
-              }
+  final AbstractNode sourceNode=typedIdResource.getTypesafeNode();
+  if (sourceNode != null) {
+    final PropertyKey key=findPropertyKey(typedIdResource,typeResource);
+    if (key != null) {
+      final Object value=sourceNode.getProperty(key);
+      if (value != null) {
+        if (value instanceof List) {
+          final List<GraphObject> list=(List<GraphObject>)value;
+          applyDefaultSorting(list,sortKey,sortDescending);
+          return new Result(PagingHelper.subList(list,pageSize,page,offsetId),list.size(),isCollectionResource(),isPrimitiveArray());
+        }
+ else         if (value instanceof Iterable) {
+          final List<GraphObject> propertyListResult=new LinkedList<GraphObject>();
+          final Iterable sourceIterable=(Iterable)value;
+          for (          final Object o : sourceIterable) {
+            if (o instanceof GraphObject) {
+              propertyListResult.add((GraphObject)o);
             }
-            applyDefaultSorting(propertyListResult,sortKey,sortDescending);
-            return new Result(PagingHelper.subList(propertyListResult,pageSize,page,offsetId),propertyListResult.size(),isCollectionResource(),isPrimitiveArray());
           }
+          applyDefaultSorting(propertyListResult,sortKey,sortDescending);
+          return new Result(PagingHelper.subList(propertyListResult,pageSize,page,offsetId),propertyListResult.size(),isCollectionResource(),isPrimitiveArray());
         }
       }
     }

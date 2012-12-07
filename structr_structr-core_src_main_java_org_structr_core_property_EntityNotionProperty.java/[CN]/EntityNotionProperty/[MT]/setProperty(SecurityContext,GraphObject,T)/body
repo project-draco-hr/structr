@@ -1,9 +1,8 @@
 {
-  GraphObject graphObject=notion.getAdapterForSetter(securityContext).adapt(value);
-  if (graphObject instanceof AbstractNode) {
-    base.setProperty(securityContext,obj,(AbstractNode)graphObject);
+  if (value != null) {
+    base.setProperty(securityContext,obj,notion.getAdapterForSetter(securityContext).adapt(value));
   }
  else {
-    logger.log(Level.WARNING,"Unable to apply notion of type {0} to property {1}",new Object[]{notion.getClass(),this});
+    base.setProperty(securityContext,obj,null);
   }
 }

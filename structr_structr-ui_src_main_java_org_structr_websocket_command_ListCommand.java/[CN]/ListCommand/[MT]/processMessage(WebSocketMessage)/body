@@ -13,6 +13,15 @@
   try {
     Result result=(Result)Services.command(securityContext,SearchNodeCommand.class).execute(true,false,searchAttributes,sortProperty,"desc".equals(sortOrder),pageSize,page);
     List<? extends GraphObject> resultList=result.getResults();
+    for (    GraphObject obj : resultList) {
+      if (obj instanceof AbstractNode) {
+        AbstractNode node=(AbstractNode)obj;
+        if (RelationshipHelper.hasChildren(node,node.getUuid())) {
+          nodesWithChildren.add(node.getUuid());
+        }
+      }
+    }
+    webSocketData.setNodesWithChildren(nodesWithChildren);
     webSocketData.setResult(resultList);
     webSocketData.setRawResultCount(result.getRawResultCount());
     getWebSocket().send(webSocketData,true);

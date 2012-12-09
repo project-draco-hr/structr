@@ -3,12 +3,13 @@
     AbstractNode node=(AbstractNode)obj;
     if (cardinality.equals(Relation.Cardinality.OneToOne) || cardinality.equals(Relation.Cardinality.ManyToOne)) {
       NodeFactory nodeFactory=new NodeFactory(securityContext);
+      Class destinationType=getDestType();
       Node dbNode=node.getNode();
       AbstractNode value=null;
       try {
         for (        Relationship rel : dbNode.getRelationships(getRelType(),getDirection())) {
           value=nodeFactory.createNode(rel.getOtherNode(dbNode));
-          if (value != null && getDestType().isInstance(value)) {
+          if (value != null && destinationType.isInstance(value)) {
             return (T)value;
           }
         }

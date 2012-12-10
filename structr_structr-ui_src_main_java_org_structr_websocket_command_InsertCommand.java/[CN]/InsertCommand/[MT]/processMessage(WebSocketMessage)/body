@@ -21,15 +21,12 @@
       getWebSocket().send(MessageBuilder.status().code(fex.getStatus()).message(fex.getMessage()).build(),true);
     }
     if ((nodeToInsert != null) && (parentNode != null)) {
-      RelationClass rel=EntityContext.getRelationClass(parentNode.getClass(),nodeToInsert.getClass());
-      if (rel != null) {
-        try {
-          PropertyMap relProperties=PropertyMap.inputTypeToJavaType(securityContext,relData);
-          rel.createRelationship(securityContext,parentNode,nodeToInsert,relProperties);
-        }
- catch (        Throwable t) {
-          getWebSocket().send(MessageBuilder.status().code(400).message(t.getMessage()).build(),true);
-        }
+      try {
+        PropertyMap relProperties=PropertyMap.inputTypeToJavaType(securityContext,relData);
+        Element.elements.createRelationship(securityContext,parentNode,nodeToInsert,relProperties);
+      }
+ catch (      Throwable t) {
+        getWebSocket().send(MessageBuilder.status().code(400).message(t.getMessage()).build(),true);
       }
     }
  else {

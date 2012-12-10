@@ -1,0 +1,74 @@
+{
+  final CreateRelationshipCommand<?> createRel=Services.command(securityContext,CreateRelationshipCommand.class);
+  final DeleteRelationshipCommand deleteRel=Services.command(securityContext,DeleteRelationshipCommand.class);
+  if ((sourceNode != null) && (targetNode != null)) {
+    final AbstractNode finalTargetNode=targetNode;
+    final AbstractNode finalSourceNode=(AbstractNode)sourceNode;
+    StructrTransaction transaction=new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        PropertyMap props=new PropertyMap(properties);
+        AbstractRelationship newRel=null;
+        if (getCascadeDelete() > 0) {
+          props.put(AbstractRelationship.cascadeDelete,new Integer(getCascadeDelete()));
+        }
+        if (getDirection().equals(Direction.OUTGOING)) {
+          newRel=createRel.execute(sourceNode,finalTargetNode,getRelType(),props,true);
+        }
+ else {
+          newRel=createRel.execute(finalTargetNode,sourceNode,getRelType(),props,true);
+        }
+        if (newRel != null) {
+          GenericFactory genericFactory=EntityContext.getGenericFactory();
+          Class newRelationshipClass=newRel.getClass();
+switch (getCardinality()) {
+case ManyToOne:
+case OneToOne:
+{
+              Class destType=finalTargetNode.getClass();
+              List<AbstractRelationship> rels=finalSourceNode.getRelationships(getRelType(),getDirection());
+              for (              AbstractRelationship rel : rels) {
+                if (rel.equals(newRel)) {
+                  continue;
+                }
+                Class relationshipClass=rel.getClass();
+                boolean isGeneric=genericFactory.isGeneric(relationshipClass);
+                if ((!isGeneric && newRelationshipClass.isAssignableFrom(relationshipClass) || destType.isAssignableFrom(rel.getOtherNode(finalSourceNode).getClass()))) {
+                  deleteRel.execute(rel);
+                }
+              }
+              break;
+            }
+case OneToMany:
+{
+            Class sourceType=finalSourceNode.getClass();
+            List<AbstractRelationship> rels=finalTargetNode.getRelationships(getRelType(),Direction.INCOMING);
+            for (            AbstractRelationship rel : rels) {
+              if (rel.equals(newRel)) {
+                continue;
+              }
+              Class relationshipClass=rel.getClass();
+              boolean isGeneric=genericFactory.isGeneric(relationshipClass);
+              if ((!isGeneric && newRelationshipClass.isAssignableFrom(relationshipClass)) || sourceType.isAssignableFrom(rel.getOtherNode(finalTargetNode).getClass())) {
+                deleteRel.execute(rel);
+              }
+            }
+          }
+      }
+    }
+    return newRel;
+  }
+}
+;
+Services.command(securityContext,TransactionCommand.class).execute(transaction);
+}
+ else {
+String type="unknown";
+if (sourceNode != null) {
+  type=sourceNode.getType();
+}
+ else if (targetNode != null) {
+  type=targetNode.getType();
+}
+throw new FrameworkException(type,new IdNotFoundToken(targetNode));
+}
+}

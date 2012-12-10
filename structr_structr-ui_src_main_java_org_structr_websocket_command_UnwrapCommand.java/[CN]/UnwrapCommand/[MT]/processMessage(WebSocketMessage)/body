@@ -15,19 +15,16 @@
         String componentId=newComponent.getProperty(AbstractNode.uuid);
         RelationshipHelper.moveIncomingRelationships(securityContext,nodeToWrap,newComponent,RelType.CONTAINS,pageId,newComponent.getProperty(AbstractNode.uuid),false);
         if ((parentNode != null) && (newComponent != null)) {
-          RelationClass rel=EntityContext.getRelationClass(parentNode.getClass(),newComponent.getClass());
-          if (rel != null) {
-            PropertyMap relProps=new PropertyMap();
-            relProps.put(new GenericProperty(pageId),0);
-            relProps.put(new StringProperty("componentId"),componentId);
-            try {
-              rel.createRelationship(securityContext,newComponent,nodeToWrap,relProps);
-            }
- catch (            Throwable t) {
-              getWebSocket().send(MessageBuilder.status().code(400).message(t.getMessage()).build(),true);
-            }
-            tagOutgoingRelsWithComponentId(newComponent,newComponent,componentId);
+          PropertyMap relProps=new PropertyMap();
+          relProps.put(new GenericProperty(pageId),0);
+          relProps.put(new StringProperty("componentId"),componentId);
+          try {
+            Element.elements.createRelationship(securityContext,newComponent,nodeToWrap,relProps);
           }
+ catch (          Throwable t) {
+            getWebSocket().send(MessageBuilder.status().code(400).message(t.getMessage()).build(),true);
+          }
+          tagOutgoingRelsWithComponentId(newComponent,newComponent,componentId);
         }
  else {
           getWebSocket().send(MessageBuilder.status().code(404).build(),true);

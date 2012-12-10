@@ -1,60 +1,25 @@
 {
-  final List<? extends GraphObject> results=typedIdResource.doGet(sortKey,sortDescending,NodeFactory.DEFAULT_PAGE_SIZE,NodeFactory.DEFAULT_PAGE,null).getResults();
-  if (results != null) {
-    final AbstractNode sourceNode=typedIdResource.getTypesafeNode();
-    if (sourceNode != null) {
-      final RelationClass staticRel=findRelationClass(typedIdResource,typeResource);
-      if (staticRel != null) {
-        final List relatedNodes=staticRel.getRelatedNodes(securityContext,sourceNode);
-        final List<SearchAttribute> dummyList=typeResource.extractSearchableAttributesFromRequest(securityContext);
-        if (!dummyList.isEmpty()) {
-          final List<? extends GraphObject> typeNodes=typeResource.doGet(sortKey,sortDescending,NodeFactory.DEFAULT_PAGE_SIZE,NodeFactory.DEFAULT_PAGE,null).getResults();
-          final List intersection=ListUtils.intersection(relatedNodes,typeNodes);
-          applyDefaultSorting(intersection,sortKey,sortDescending);
-          return new Result(PagingHelper.subList(intersection,pageSize,page,offsetId),intersection.size(),isCollectionResource(),isPrimitiveArray());
+  final AbstractNode sourceNode=typedIdResource.getTypesafeNode();
+  if (sourceNode != null) {
+    final PropertyKey key=findPropertyKey(typedIdResource,typeResource);
+    if (key != null) {
+      final Object value=sourceNode.getProperty(key);
+      if (value != null) {
+        if (value instanceof List) {
+          final List<GraphObject> list=(List<GraphObject>)value;
+          applyDefaultSorting(list,sortKey,sortDescending);
+          return new Result(PagingHelper.subList(list,pageSize,page,offsetId),list.size(),isCollectionResource(),isPrimitiveArray());
         }
-        if (!relatedNodes.isEmpty()) {
-          applyDefaultSorting(relatedNodes,sortKey,sortDescending);
-          return new Result(PagingHelper.subList(relatedNodes,pageSize,page,offsetId),relatedNodes.size(),isCollectionResource(),isPrimitiveArray());
-        }
-      }
-      final Class type=sourceNode.getClass();
-      final PropertyKey key=EntityContext.getPropertyKeyForDatabaseName(type,typeResource.getRawType());
-      final PropertyConverter converter=key.databaseConverter(securityContext,sourceNode);
-      if (converter != null) {
-        converter.setRawMode(true);
-        final Object value=converter.revert(null);
-        final StringBuilder msgBuilder=new StringBuilder();
-        msgBuilder.append("Property result on type ");
-        msgBuilder.append(sourceNode.getClass().getSimpleName());
-        msgBuilder.append(", key ");
-        msgBuilder.append(key);
-        msgBuilder.append(" is not an Iterable<GraphObject>!");
-        final String msg=msgBuilder.toString();
-        if (value != null) {
-          if (value instanceof List && !((List)value).isEmpty() && ((List)value).get(0) instanceof GraphObject) {
-            final List<GraphObject> list=(List<GraphObject>)value;
-            applyDefaultSorting(list,sortKey,sortDescending);
-            return new Result(PagingHelper.subList(list,pageSize,page,offsetId),list.size(),isCollectionResource(),isPrimitiveArray());
-          }
- else           if (value instanceof Iterable) {
-            final List<GraphObject> propertyListResult=new LinkedList<GraphObject>();
-            final Iterable sourceIterable=(Iterable)value;
-            for (            final Object o : sourceIterable) {
-              if (o instanceof GraphObject) {
-                propertyListResult.add((GraphObject)o);
-              }
- else {
-                throw new SystemException(msg);
-              }
+ else         if (value instanceof Iterable) {
+          final List<GraphObject> propertyListResult=new LinkedList<GraphObject>();
+          final Iterable sourceIterable=(Iterable)value;
+          for (          final Object o : sourceIterable) {
+            if (o instanceof GraphObject) {
+              propertyListResult.add((GraphObject)o);
             }
-            applyDefaultSorting(propertyListResult,sortKey,sortDescending);
-            return new Result(PagingHelper.subList(propertyListResult,pageSize,page,offsetId),propertyListResult.size(),isCollectionResource(),isPrimitiveArray());
           }
-        }
- else {
-          logger.log(Level.SEVERE,msg);
-          throw new SystemException(msg);
+          applyDefaultSorting(propertyListResult,sortKey,sortDescending);
+          return new Result(PagingHelper.subList(propertyListResult,pageSize,page,offsetId),propertyListResult.size(),isCollectionResource(),isPrimitiveArray());
         }
       }
     }

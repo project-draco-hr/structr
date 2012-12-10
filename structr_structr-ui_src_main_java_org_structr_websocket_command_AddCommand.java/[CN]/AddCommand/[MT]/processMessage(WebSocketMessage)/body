@@ -30,7 +30,6 @@
     if ((nodeToAdd != null) && (parentNode != null)) {
       String originalPageId=(String)nodeData.get("sourcePageId");
       String newPageId=(String)nodeData.get("targetPageId");
-      RelationClass rel=EntityContext.getRelationClass(parentNode.getClass(),nodeToAdd.getClass());
       PropertyKey<Long> originalPageIdProperty=null;
       PropertyKey<Long> newPageIdProperty=null;
       if (originalPageId != null) {
@@ -39,7 +38,7 @@
       if (newPageId != null) {
         newPageIdProperty=new LongProperty(newPageId);
       }
-      if (rel != null) {
+{
         try {
           AbstractRelationship existingRel=null;
           long maxPos=0;
@@ -66,7 +65,7 @@
             }
             relData.put(newPageId,maxPos + 1);
             PropertyMap relProperties=PropertyMap.inputTypeToJavaType(securityContext,relData);
-            rel.createRelationship(securityContext,parentNode,nodeToAdd,relProperties);
+            Element.elements.createRelationship(securityContext,parentNode,nodeToAdd,relProperties);
             logger.log(Level.INFO,"Created new relationship between parent node {0}, added node {1} ({2})",new Object[]{parentNode.getUuid(),nodeToAdd.getUuid(),relData});
           }
           if ((originalPageId != null) && (newPageId != null) && !originalPageId.equals(newPageId)) {
@@ -76,7 +75,6 @@
         }
  catch (        Throwable t) {
           t.printStackTrace();
-          ;
           getWebSocket().send(MessageBuilder.status().code(400).message(t.getMessage()).build(),true);
         }
       }
@@ -103,7 +101,7 @@
           try {
             relData.put(newPageId,0L);
             PropertyMap relProperties=PropertyMap.inputTypeToJavaType(securityContext,relData);
-            rel.createRelationship(securityContext,nodeToAdd,contentNode,relProperties);
+            Element.elements.createRelationship(securityContext,nodeToAdd,contentNode,relProperties);
             if ((originalPageId != null) && (newPageId != null) && !originalPageId.equals(newPageId)) {
               RelationshipHelper.tagOutgoingRelsWithPageId(contentNode,contentNode,originalPageId,newPageId);
             }

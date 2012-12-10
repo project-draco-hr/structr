@@ -30,7 +30,7 @@ synchronized (TransactionCommand.class) {
           tx.finish();
         }
  catch (        Throwable t) {
-          if (debug) {
+          if (debug || logExceptions) {
             t.printStackTrace();
           }
           exception=EntityContext.getFrameworkException(transactionKey);
@@ -38,13 +38,17 @@ synchronized (TransactionCommand.class) {
       }
     }
     if (exception != null) {
-      if (debug) {
+      if (debug || logExceptions) {
         exception.printStackTrace();
       }
       if (exception instanceof FrameworkException) {
         logger.log(Level.WARNING,((FrameworkException)exception).toString());
         EntityContext.clearTransactionData(transactionKey);
         throw (FrameworkException)exception;
+      }
+ else {
+        exception.printStackTrace();
+        throw new RuntimeException(exception);
       }
     }
     final TransactionChangeSet changeSet=EntityContext.getTransactionChangeSet(transactionKey);
@@ -78,7 +82,7 @@ synchronized (TransactionCommand.class) {
 );
         }
  catch (        Throwable t) {
-          if (debug) {
+          if (debug || logExceptions) {
             t.printStackTrace();
           }
           if (t instanceof FrameworkException) {

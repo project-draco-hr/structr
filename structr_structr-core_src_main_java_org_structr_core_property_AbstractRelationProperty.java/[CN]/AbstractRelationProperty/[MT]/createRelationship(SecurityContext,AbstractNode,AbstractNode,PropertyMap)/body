@@ -19,44 +19,21 @@
         }
         if (newRel != null) {
           GenericFactory genericFactory=EntityContext.getGenericFactory();
-          Class newRelationshipClass=newRel.getClass();
 switch (getCardinality()) {
-case ManyToOne:
 case OneToOne:
-{
-              Class destType=finalTargetNode.getClass();
-              List<AbstractRelationship> rels=finalSourceNode.getRelationships(getRelType(),getDirection());
-              for (              AbstractRelationship rel : rels) {
-                if (rel.equals(newRel)) {
-                  continue;
-                }
-                Class relationshipClass=rel.getClass();
-                boolean isGeneric=genericFactory.isGeneric(relationshipClass);
-                if ((!isGeneric && newRelationshipClass.isAssignableFrom(relationshipClass) || destType.isAssignableFrom(rel.getOtherNode(finalSourceNode).getClass()))) {
-                  deleteRel.execute(rel);
-                }
-              }
-              break;
-            }
+            ensureManyToOne(finalSourceNode,finalTargetNode,newRel,genericFactory,deleteRel);
+          ensureOneToMany(finalSourceNode,finalTargetNode,newRel,genericFactory,deleteRel);
+        break;
+case ManyToOne:
+      ensureManyToOne(finalSourceNode,finalTargetNode,newRel,genericFactory,deleteRel);
+    break;
 case OneToMany:
-{
-            Class sourceType=finalSourceNode.getClass();
-            List<AbstractRelationship> rels=finalTargetNode.getRelationships(getRelType(),Direction.INCOMING);
-            for (            AbstractRelationship rel : rels) {
-              if (rel.equals(newRel)) {
-                continue;
-              }
-              Class relationshipClass=rel.getClass();
-              boolean isGeneric=genericFactory.isGeneric(relationshipClass);
-              if ((!isGeneric && newRelationshipClass.isAssignableFrom(relationshipClass)) || sourceType.isAssignableFrom(rel.getOtherNode(finalTargetNode).getClass())) {
-                deleteRel.execute(rel);
-              }
-            }
-          }
-      }
-    }
-    return newRel;
-  }
+  ensureOneToMany(finalSourceNode,finalTargetNode,newRel,genericFactory,deleteRel);
+break;
+}
+}
+return newRel;
+}
 }
 ;
 Services.command(securityContext,TransactionCommand.class).execute(transaction);
@@ -64,10 +41,10 @@ Services.command(securityContext,TransactionCommand.class).execute(transaction);
  else {
 String type="unknown";
 if (sourceNode != null) {
-  type=sourceNode.getType();
+type=sourceNode.getType();
 }
  else if (targetNode != null) {
-  type=targetNode.getType();
+type=targetNode.getType();
 }
 throw new FrameworkException(type,new IdNotFoundToken(targetNode));
 }

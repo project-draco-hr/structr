@@ -1,0 +1,5 @@
+{
+  RestAssured.given().contentType("application/json; charset=UTF-8").body(" { 'doubleProperty' : 3.141592653589793238 } ").expect().statusCode(201).when().post("/test_threes").getHeader("Location");
+  Response response=RestAssured.given().contentType("application/json; charset=UTF-8").filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(200)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(500)).expect().statusCode(200).when().get("/test_threes");
+  assertEquals(3.1415927,response.getBody().jsonPath().getDouble("result[0].doubleProperty"));
+}

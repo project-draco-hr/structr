@@ -18,6 +18,20 @@
       logger.log(Level.WARNING,"Unable to convert properties from type {0} to input type",relationship.getClass());
     }
   }
+ else   if (graphObject instanceof AbstractNode) {
+    AbstractNode node=(AbstractNode)graphObject;
+    try {
+      Map<String,Object> nodeProperties=new HashMap<String,Object>();
+      nodeProperties.put(key.dbName(),newValue);
+      nodeProperties.put(AbstractNode.type.dbName(),node.getType());
+      Map<String,Object> properties=PropertyMap.javaTypeToInputType(securityContext,node.getClass(),PropertyMap.databaseTypeToJavaType(securityContext,graphObject,nodeProperties));
+      properties.remove(AbstractNode.type.jsonName());
+      message.setNodeData(properties);
+    }
+ catch (    FrameworkException fex) {
+      logger.log(Level.WARNING,"Unable to convert properties from type {0} to input type",node.getClass());
+    }
+  }
   message.setId(uuid);
   message.setGraphObject(graphObject);
   message.getModifiedProperties().add(key);

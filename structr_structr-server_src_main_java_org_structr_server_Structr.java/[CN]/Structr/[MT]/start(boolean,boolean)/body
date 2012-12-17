@@ -86,11 +86,10 @@
  else {
     server.setHandler(contexts);
   }
-  if (resourceHandler != null) {
-    ContextHandler staticResourceHandler=new ContextHandler();
-    staticResourceHandler.setContextPath(staticResourceContextPath);
-    staticResourceHandler.setHandler(resourceHandler);
-    contexts.addHandler(staticResourceHandler);
+  if (!resourceHandler.isEmpty()) {
+    for (    ContextHandler contextHandler : resourceHandler) {
+      contexts.addHandler(contextHandler);
+    }
   }
   ResourceProvider resourceProviderInstance=resourceProvider.newInstance();
   JsonRestServlet structrRestServlet=new JsonRestServlet(resourceProviderInstance,defaultPropertyView,AbstractNode.uuid);

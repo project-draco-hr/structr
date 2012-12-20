@@ -1,0 +1,30 @@
+{
+  HttpServletRequest request=securityContext.getRequest();
+  String search=request.getParameter("search");
+  if ((request == null) || StringUtils.isEmpty(search)) {
+    return Collections.EMPTY_SET;
+  }
+  if (request != null) {
+    resultPages=(Set<Page>)request.getAttribute("searchResults");
+    if ((resultPages != null) && !resultPages.isEmpty()) {
+      return resultPages;
+    }
+  }
+  if (resultPages == null) {
+    resultPages=new HashSet<Page>();
+  }
+  List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
+  searchAttributes.add(Search.andContent(search));
+  searchAttributes.add(Search.andExactType(Content.class.getSimpleName()));
+  try {
+    Result<Content> result=searchNodesAsSuperuser.execute(searchAttributes);
+    for (    Content content : result.getResults()) {
+      resultPages.addAll(PageHelper.getPages(securityContext,content));
+    }
+    resultPages.remove((Page)displayPage);
+  }
+ catch (  FrameworkException fe) {
+    logger.log(Level.WARNING,"Error while searching in content",fe);
+  }
+  return resultPages;
+}

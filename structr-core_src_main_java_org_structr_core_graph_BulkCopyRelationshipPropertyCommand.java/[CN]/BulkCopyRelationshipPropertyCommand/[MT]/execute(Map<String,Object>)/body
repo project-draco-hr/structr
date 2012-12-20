@@ -1,0 +1,35 @@
+{
+  final GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
+  final RelationshipFactory relFactory=(RelationshipFactory)arguments.get("relationshipFactory");
+  final String sourceKey=(String)map.get("sourceKey");
+  final String destKey=(String)map.get("destKey");
+  if (sourceKey == null || destKey == null) {
+    throw new IllegalArgumentException("This command requires one argument of type Map. Map must contain values for 'sourceKey' and 'destKey'.");
+  }
+  if (graphDb != null) {
+    List<AbstractRelationship> rels=relFactory.instantiateRelationships(securityContext,GlobalGraphOperations.at(graphDb).getAllRelationships());
+    long count=bulkGraphOperation(securityContext,rels,1000,"CopyRelationshipProperties",new BulkGraphOperation<AbstractRelationship>(){
+      @Override public void handleGraphObject(      SecurityContext securityContext,      AbstractRelationship rel){
+        if (rel.getProperty(AbstractNode.uuid) != null) {
+          Class type=rel.getClass();
+          PropertyKey destPropertyKey=EntityContext.getPropertyKeyForDatabaseName(type,destKey);
+          PropertyKey sourcePropertyKey=EntityContext.getPropertyKeyForDatabaseName(type,sourceKey);
+          try {
+            rel.setProperty(destPropertyKey,rel.getProperty(sourcePropertyKey));
+          }
+ catch (          FrameworkException fex) {
+            logger.log(Level.WARNING,"Unable to copy relationship property {0} of relationship {1} to {2}: {3}",new Object[]{sourcePropertyKey,rel.getUuid(),destPropertyKey,fex.getMessage()});
+          }
+        }
+      }
+      @Override public void handleThrowable(      SecurityContext securityContext,      Throwable t,      AbstractRelationship rel){
+        logger.log(Level.WARNING,"Unable to copy relationship properties of relationship {0}: {1}",new Object[]{rel.getUuid(),t.getMessage()});
+      }
+      @Override public void handleTransactionFailure(      SecurityContext securityContext,      Throwable t){
+        logger.log(Level.WARNING,"Unable to copy relationship properties: {0}",t.getMessage());
+      }
+    }
+);
+    logger.log(Level.INFO,"Finished setting properties on {0} nodes",count);
+  }
+}

@@ -1,0 +1,16 @@
+{
+  if (next instanceof TypedIdResource) {
+    addTypedIdResource((TypedIdResource)next);
+    return this;
+  }
+ else   if (next instanceof TypeResource) {
+    if (getValidatedPath() != null) {
+      return new StaticRelationshipResource(securityContext,lastResource,(TypeResource)next);
+    }
+ else {
+      logger.log(Level.INFO,"No path found!");
+      throw new NotFoundException();
+    }
+  }
+  return super.tryCombineWith(next);
+}

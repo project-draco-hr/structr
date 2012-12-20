@@ -1,0 +1,14 @@
+{
+  Iterable<Relationship> rels=startNode.getRelationships(relationshipType,direction);
+  boolean ret=false;
+  for (  Relationship rel : rels) {
+    if (rel.hasProperty(NodeList.parent.dbName())) {
+      Object parent=rel.getProperty(NodeList.parent.dbName());
+      if ((parent instanceof Long) && ((Long)parent).equals(getNodeId())) {
+        rel.delete();
+        ret=true;
+      }
+    }
+  }
+  return (ret);
+}

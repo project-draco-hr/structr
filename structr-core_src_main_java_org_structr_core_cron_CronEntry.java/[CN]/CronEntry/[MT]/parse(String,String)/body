@@ -1,0 +1,59 @@
+{
+  String[] fields=expression.split("[ \\t]+");
+  if (fields.length == CronService.NUM_FIELDS) {
+    CronEntry cronEntry=new CronEntry(task);
+    String secondsField=fields[0];
+    String minutesField=fields[1];
+    String hoursField=fields[2];
+    String daysField=fields[3];
+    String monthsField=fields[4];
+    String weeksField=fields[5];
+    try {
+      CronField seconds=parseField(secondsField,0,59);
+      cronEntry.setSeconds(seconds);
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"Invalid cron expression for task {0}, field 'seconds': {1}",new Object[]{task,t.getMessage()});
+    }
+    try {
+      CronField minutes=parseField(minutesField,0,59);
+      cronEntry.setMinutes(minutes);
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"Invalid cron expression for task {0}, field 'minutes': {1}",new Object[]{task,t.getMessage()});
+    }
+    try {
+      CronField hours=parseField(hoursField,0,23);
+      cronEntry.setHours(hours);
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"Invalid cron expression for task {0}, field 'hours': {1}",new Object[]{task,t.getMessage()});
+    }
+    try {
+      CronField days=parseField(daysField,1,31);
+      cronEntry.setDays(days);
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"Invalid cron expression for task {0}, field 'days': {1}",new Object[]{task,t.getMessage()});
+    }
+    try {
+      CronField weeks=parseField(weeksField,0,6);
+      cronEntry.setWeeks(weeks);
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"Invalid cron expression for task {0}, field 'weeks': {1}",new Object[]{task,t.getMessage()});
+    }
+    try {
+      CronField months=parseField(monthsField,1,12);
+      cronEntry.setMonths(months);
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"Invalid cron expression for task {0}, field 'months': {1}",new Object[]{task,t.getMessage()});
+    }
+    return cronEntry;
+  }
+ else {
+    logger.log(Level.WARNING,"Invalid cron expression for task {0}: invalid number of fields (must be {1}).",new Object[]{task,CronService.NUM_FIELDS});
+  }
+  return null;
+}

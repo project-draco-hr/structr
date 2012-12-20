@@ -1,0 +1,38 @@
+{
+  long position=0;
+  try {
+    PropertyKey<Long> pageIdProperty=new LongProperty(pageId);
+    PropertyKey wildcardProperty=new LongProperty("*");
+    Object prop=null;
+    final String key;
+    if (relationship.getProperty(wildcardProperty) != null) {
+      prop=relationship.getProperty(wildcardProperty);
+      key="*";
+    }
+ else     if (relationship.getProperty(pageIdProperty) != null) {
+      prop=relationship.getLongProperty(pageIdProperty);
+      key=pageId;
+    }
+ else {
+      key=null;
+    }
+    if ((key != null) && (prop != null)) {
+      if (prop instanceof Long) {
+        position=(Long)prop;
+      }
+ else       if (prop instanceof Integer) {
+        position=((Integer)prop).longValue();
+      }
+ else       if (prop instanceof String) {
+        position=Long.parseLong((String)prop);
+      }
+ else {
+        throw new java.lang.IllegalArgumentException("Expected Long, Integer or String");
+      }
+    }
+  }
+ catch (  Throwable t) {
+    logger.log(Level.SEVERE,"While reading property " + pageId,t);
+  }
+  return position;
+}

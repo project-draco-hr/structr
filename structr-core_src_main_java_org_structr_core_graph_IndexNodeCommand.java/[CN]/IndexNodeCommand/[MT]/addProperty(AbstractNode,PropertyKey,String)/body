@@ -1,0 +1,28 @@
+{
+  Node dbNode=node.getNode();
+  long id=node.getId();
+  if (key == null) {
+    logger.log(Level.SEVERE,"Node {0} has null key",new Object[]{id});
+    return;
+  }
+  boolean emptyKey=StringUtils.isEmpty(key.dbName());
+  if (emptyKey) {
+    logger.log(Level.SEVERE,"Node {0} has empty, not-null key, not adding property",new Object[]{id});
+    return;
+  }
+  Object value=node.getProperty(key);
+  Object valueForIndexing=node.getPropertyForIndexing(key);
+  if ((value == null && key.databaseConverter(securityContext,null) == null) || (value != null && value instanceof String && StringUtils.isEmpty((String)value))) {
+    valueForIndexing=SearchNodeCommand.IMPROBABLE_SEARCH_VALUE;
+    value=SearchNodeCommand.IMPROBABLE_SEARCH_VALUE;
+  }
+  logger.log(Level.FINE,"Adding value {0} for key {1} on node {2} in {3} index",new Object[]{valueForIndexing,key,id,indexName});
+  addNodePropertyToIndex(dbNode,key,valueForIndexing,indexName);
+  if ((node instanceof Principal) && (key.equals(AbstractNode.name) || key.equals(Person.email))) {
+    addNodePropertyToIndex(dbNode,key,valueForIndexing,NodeIndex.user.name());
+  }
+  if (key.equals(AbstractNode.uuid)) {
+    addNodePropertyToIndex(dbNode,key,valueForIndexing,NodeIndex.uuid.name());
+  }
+  logger.log(Level.FINE,"Node {0}: New value {2} added for key {1}",new Object[]{id,key,value});
+}

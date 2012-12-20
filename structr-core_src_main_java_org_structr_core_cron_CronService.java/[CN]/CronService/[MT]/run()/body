@@ -1,0 +1,35 @@
+{
+  while (!Services.isInitialized()) {
+    try {
+      Thread.sleep(1000);
+    }
+ catch (    InterruptedException iex) {
+    }
+  }
+  try {
+    Thread.sleep(5000);
+  }
+ catch (  InterruptedException iex) {
+  }
+  while (doRun) {
+    try {
+      Thread.sleep(GRANULARITY_UNIT.toMillis(GRANULARITY));
+    }
+ catch (    InterruptedException iex) {
+    }
+    for (    CronEntry entry : cronEntries) {
+      if (entry.getDelayToNextExecutionInMillis() < GRANULARITY_UNIT.toMillis(GRANULARITY)) {
+        String taskClassName=entry.getName();
+        try {
+          Class taskClass=Class.forName(taskClassName);
+          Task task=(Task)taskClass.newInstance();
+          logger.log(Level.FINE,"Starting task {0}",taskClassName);
+          Services.command(securityContext,ProcessTaskCommand.class).execute(task);
+        }
+ catch (        Throwable t) {
+          logger.log(Level.WARNING,"Could not start task {0}: {1}",new Object[]{taskClassName,t.getMessage()});
+        }
+      }
+    }
+  }
+}

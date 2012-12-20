@@ -1,0 +1,25 @@
+{
+  try {
+    List<AbstractNode> nodes=createTestNodes("UnknownTestType",2);
+    final AbstractNode startNode=nodes.get(0);
+    final AbstractNode endNode=nodes.get(1);
+    final RelationshipType relType=RelType.UNDEFINED;
+    final PropertyMap props=new PropertyMap();
+    props.put(new StringProperty("foo"),"bar");
+    props.put(new IntProperty("bar"),123);
+    transactionCommand.execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        AbstractRelationship rel1=createRelationshipCommand.execute(startNode,endNode,relType,props,true);
+        assertTrue(rel1 != null);
+        AbstractRelationship rel2=createRelationshipCommand.execute(startNode,endNode,relType,props,true);
+        assertTrue(rel2 == null);
+        return null;
+      }
+    }
+);
+  }
+ catch (  FrameworkException ex) {
+    logger.log(Level.SEVERE,ex.toString());
+    fail("Unexpected exception");
+  }
+}

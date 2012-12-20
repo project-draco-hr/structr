@@ -1,0 +1,21 @@
+{
+  int size=0;
+synchronized (taskQueue) {
+    size=taskQueue.size();
+  }
+  if (size == 0) {
+    return (true);
+  }
+  long actualExecutionTime=System.nanoTime() - lastStartTime;
+  long upperThreshold=averageExecutionTime + (averageExecutionTime / 2);
+  long lowerThreshold=averageExecutionTime - (averageExecutionTime / 2);
+  if ((actualExecutionTime > upperThreshold) && (maxQueueSize > 2)) {
+    maxQueueSize-=2;
+    return (false);
+  }
+ else   if ((actualExecutionTime < lowerThreshold) && (maxQueueSize < 200)) {
+    maxQueueSize+=2;
+    return (true);
+  }
+  return (size < maxQueueSize);
+}

@@ -1,0 +1,21 @@
+{
+  Class namedRelationClass=null;
+  Class sourceSuperClass=sourceType;
+  Class destSuperClass=destType;
+  while ((namedRelationClass == null) && !sourceSuperClass.equals(Object.class) && !destSuperClass.equals(Object.class)) {
+    namedRelationClass=globalRelationshipClassMap.get(createCombinedRelationshipType(sourceSuperClass,relType,destSuperClass));
+    if (namedRelationClass == null) {
+      for (      Class interfaceClass : getInterfacesForType(destSuperClass)) {
+        namedRelationClass=globalRelationshipClassMap.get(createCombinedRelationshipType(sourceSuperClass,relType,interfaceClass));
+        if (namedRelationClass != null) {
+          break;
+        }
+      }
+    }
+    destSuperClass=destSuperClass.getSuperclass();
+  }
+  if (namedRelationClass != null) {
+    return namedRelationClass;
+  }
+  return globalRelationshipClassMap.get(createCombinedRelationshipType(sourceType,relType,destType));
+}

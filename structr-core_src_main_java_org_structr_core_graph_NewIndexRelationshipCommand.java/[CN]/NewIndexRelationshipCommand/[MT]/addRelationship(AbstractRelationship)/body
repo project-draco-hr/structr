@@ -1,0 +1,53 @@
+{
+  init();
+  try {
+    String uuid=relationship.getProperty(AbstractRelationship.uuid);
+    Relationship dbRelationship=relationship.getRelationship();
+    long id=relationship.getId();
+    if (uuid == null) {
+      return;
+    }
+    String combinedKey=relationship.getProperty(AbstractRelationship.combinedType);
+    if (combinedKey == null) {
+      AbstractNode startNode=relationship.getStartNode();
+      AbstractNode endNode=relationship.getEndNode();
+      if (startNode != null && endNode != null) {
+        String tripleKey=EntityContext.createCombinedRelationshipType(startNode.getType(),relationship.getType(),endNode.getType());
+        relationship.setProperty(AbstractRelationship.combinedType,Search.clean(tripleKey));
+        addRelationshipPropertyToIndex(dbRelationship,AbstractRelationship.combinedType,tripleKey,NodeService.RelationshipIndex.rel_fulltext.name());
+        addRelationshipPropertyToIndex(dbRelationship,AbstractRelationship.combinedType,tripleKey,NodeService.RelationshipIndex.rel_keyword.name());
+      }
+ else {
+        logger.log(Level.WARNING,"Unable to create combined type key, startNode or endNode was null!");
+      }
+    }
+    Map<String,Set<PropertyKey>> searchablePropertyIndexMap=EntityContext.getSearchablePropertyMapForType(relationship.getClass());
+    for (    Entry<String,Set<PropertyKey>> entry : searchablePropertyIndexMap.entrySet()) {
+      Set<PropertyKey> searchableProperties=entry.getValue();
+      String indexName=entry.getKey();
+      for (      PropertyKey key : searchableProperties) {
+        boolean emptyKey=StringUtils.isEmpty(key.dbName());
+        if (emptyKey) {
+          logger.log(Level.SEVERE,"Relationship {0} has empty, not-null key, removing property",new Object[]{id});
+          dbRelationship.removeProperty(key.dbName());
+          return;
+        }
+        Object valueForIndexing=relationship.getPropertyForIndexing(key);
+        Object value=relationship.getProperty(key);
+        if ((value == null && key.databaseConverter(securityContext,null) == null) || (value != null && value instanceof String && StringUtils.isEmpty((String)value))) {
+          valueForIndexing=SearchNodeCommand.IMPROBABLE_SEARCH_VALUE;
+        }
+        if (valueForIndexing != null) {
+          addRelationshipPropertyToIndex(dbRelationship,key,valueForIndexing,indexName);
+          if (key.equals(AbstractRelationship.uuid)) {
+            addRelationshipPropertyToIndex(dbRelationship,key,valueForIndexing,NodeService.RelationshipIndex.rel_uuid.name());
+          }
+        }
+      }
+    }
+  }
+ catch (  Throwable t) {
+    t.printStackTrace();
+    logger.log(Level.WARNING,"Unable to index relationship {0}: {1}",new Object[]{relationship.getRelationship().getId(),t.getMessage()});
+  }
+}

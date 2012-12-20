@@ -1,0 +1,40 @@
+{
+  agentService.notifyAgentStart(this);
+  do {
+    while (suspended.get()) {
+      Thread.yield();
+    }
+synchronized (taskQueue) {
+      currentTask=taskQueue.poll();
+    }
+    if (currentTask != null) {
+      lastStartTime=System.nanoTime();
+      ReturnValue ret=null;
+      try {
+        ret=processTask(currentTask);
+      }
+ catch (      Throwable t) {
+        logger.log(Level.SEVERE,"Processing task {0} failed. Maybe someone killed us?",currentTask.getType());
+        t.printStackTrace();
+      }
+      if (ret != null) {
+switch (ret) {
+case Success:
+case Abort:
+          break;
+case Retry:
+        break;
+    }
+  }
+  long endTime=System.nanoTime();
+  averageExecutionTime+=endTime;
+  averageExecutionTime/=2;
+}
+ else {
+  acceptingTasks.set(false);
+}
+}
+ while (acceptingTasks.get());
+beforeShutdown();
+agentService.notifyAgentStop(this);
+}

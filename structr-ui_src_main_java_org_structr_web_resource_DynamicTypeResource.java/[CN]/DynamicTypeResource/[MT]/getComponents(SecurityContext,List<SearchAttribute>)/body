@@ -1,0 +1,10 @@
+{
+  final Result<Component> searchResults=(Result)Services.command(securityContext,SearchNodeCommand.class).execute(searchAttributes);
+  final List<Component> filteredResults=new LinkedList<Component>();
+  for (  final Component res : searchResults.getResults()) {
+    if (res.hasRelationship(RelType.CONTAINS,Direction.INCOMING)) {
+      filteredResults.add(res);
+    }
+  }
+  return filteredResults;
+}

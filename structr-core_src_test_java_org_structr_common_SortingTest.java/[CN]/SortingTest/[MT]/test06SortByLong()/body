@@ -1,0 +1,47 @@
+{
+  try {
+    boolean includeDeletedAndHidden=false;
+    boolean publicOnly=false;
+    String type=TestOne.class.getSimpleName();
+    int number=43;
+    List<AbstractNode> nodes=this.createTestNodes(type,number);
+    PropertyKey key=TestOne.aLong;
+    long offset=10;
+    long i=offset;
+    Collections.shuffle(nodes,new Random(System.nanoTime()));
+    for (    AbstractNode node : nodes) {
+      node.setName(Long.toString(i));
+      node.setProperty(key,i);
+      i++;
+      System.out.println(node.getProperty(AbstractNode.name) + ": " + node.getLongProperty(key));
+    }
+    List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
+    searchAttributes.add(Search.andType(type));
+    Result<AbstractNode> result=searchNodeCommand.execute(includeDeletedAndHidden,publicOnly,searchAttributes);
+    assertEquals(number,result.size());
+    PropertyKey sortKey=key;
+    boolean sortDesc=false;
+    int pageSize=20;
+    int page=1;
+    result=searchNodeCommand.execute(includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDesc,pageSize,page,null,SortField.LONG);
+    for (    AbstractNode obj : result.getResults()) {
+      System.out.println(obj.getProperty(AbstractNode.name) + ": " + obj.getLongProperty(key));
+    }
+    logger.log(Level.INFO,"Raw result size: {0}, expected: {1}",new Object[]{result.getRawResultCount(),number});
+    assertTrue(result.getRawResultCount() == number);
+    logger.log(Level.INFO,"Result size: {0}, expected: {1}",new Object[]{result.size(),pageSize});
+    if (result.size() >= pageSize) {
+      assertTrue(result.size() == pageSize);
+    }
+    for (int j=0; j < pageSize; j++) {
+      long expectedNumber=offset + j;
+      long gotNumber=result.get(j).getLongProperty(key);
+      System.out.println("expected: " + expectedNumber + ", got: "+ gotNumber);
+      assertEquals(expectedNumber,gotNumber);
+    }
+  }
+ catch (  FrameworkException ex) {
+    logger.log(Level.SEVERE,ex.toString());
+    fail("Unexpected exception");
+  }
+}

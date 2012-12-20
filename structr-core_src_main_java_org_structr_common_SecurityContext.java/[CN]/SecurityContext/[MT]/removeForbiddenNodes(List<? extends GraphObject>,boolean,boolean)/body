@@ -1,0 +1,13 @@
+{
+  boolean readableByUser=false;
+  for (Iterator<? extends GraphObject> it=nodes.iterator(); it.hasNext(); ) {
+    GraphObject obj=it.next();
+    if (obj instanceof AbstractNode) {
+      AbstractNode n=(AbstractNode)obj;
+      readableByUser=isAllowed(n,Permission.read);
+      if (!(readableByUser && (includeDeletedAndHidden || !n.isDeleted()) && (n.isVisibleToPublicUsers() || !publicOnly))) {
+        it.remove();
+      }
+    }
+  }
+}

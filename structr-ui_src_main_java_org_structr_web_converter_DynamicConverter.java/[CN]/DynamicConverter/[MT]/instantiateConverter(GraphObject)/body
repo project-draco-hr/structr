@@ -1,0 +1,54 @@
+{
+  if (currentObject != null && currentObject instanceof Content) {
+    Content content=(Content)currentObject;
+    TypeDefinition typeDefinition=content.getTypeDefinition();
+    if (typeDefinition != null) {
+      String converterProp=typeDefinition.getProperty(TypeDefinition.converter);
+      if (StringUtils.isNotBlank(converterProp)) {
+        Class converterClass=null;
+        try {
+          converterClass=Class.forName(converterProp);
+        }
+ catch (        ClassNotFoundException ex) {
+          Logger.getLogger(DynamicConverter.class.getName()).log(Level.SEVERE,null,ex);
+        }
+        if (converterClass != null) {
+          try {
+            Constructor constructor=converterClass.getConstructor(SecurityContext.class,GraphObject.class);
+            converter=(PropertyConverter)constructor.newInstance(securityContext,currentObject);
+          }
+ catch (          InstantiationException ex) {
+            logger.log(Level.SEVERE,null,ex);
+          }
+catch (          IllegalAccessException ex) {
+            logger.log(Level.SEVERE,null,ex);
+          }
+catch (          NoSuchMethodException ex) {
+            logger.log(Level.SEVERE,null,ex);
+          }
+catch (          InvocationTargetException ex) {
+            logger.log(Level.SEVERE,null,ex);
+          }
+          if (converter == null) {
+            try {
+              Constructor constructor=converterClass.getConstructor(SecurityContext.class);
+              converter=(PropertyConverter)constructor.newInstance(securityContext);
+            }
+ catch (            InstantiationException ex) {
+              logger.log(Level.SEVERE,null,ex);
+            }
+catch (            IllegalAccessException ex) {
+              logger.log(Level.SEVERE,null,ex);
+            }
+catch (            NoSuchMethodException ex) {
+              logger.log(Level.SEVERE,null,ex);
+            }
+catch (            InvocationTargetException ex) {
+              logger.log(Level.SEVERE,null,ex);
+            }
+          }
+        }
+      }
+    }
+  }
+}

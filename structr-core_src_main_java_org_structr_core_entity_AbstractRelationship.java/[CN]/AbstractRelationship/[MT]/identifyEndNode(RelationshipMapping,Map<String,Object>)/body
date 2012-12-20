@@ -1,0 +1,11 @@
+{
+  Notion endNodeNotion=getEndNodeNotion();
+  endNodeNotion.setType(namedRelation.getDestType());
+  PropertyKey endNodeIdentifier=endNodeNotion.getPrimaryPropertyKey();
+  if (endNodeIdentifier != null) {
+    Object identifierValue=propertySet.get(endNodeIdentifier.jsonName());
+    propertySet.remove(endNodeIdentifier.jsonName());
+    return (AbstractNode)endNodeNotion.getAdapterForSetter(securityContext).adapt(identifierValue);
+  }
+  return null;
+}

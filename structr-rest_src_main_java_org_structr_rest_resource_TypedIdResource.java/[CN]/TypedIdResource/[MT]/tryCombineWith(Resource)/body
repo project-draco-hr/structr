@@ -1,0 +1,14 @@
+{
+  if (next instanceof TypeResource) {
+    StaticRelationshipResource resource=new StaticRelationshipResource(securityContext,this,(TypeResource)next);
+    resource.configureIdProperty(idProperty);
+    return resource;
+  }
+ else   if (next instanceof TypedIdResource) {
+    RelationshipFollowingResource resource=new RelationshipFollowingResource(securityContext,this);
+    resource.configureIdProperty(idProperty);
+    resource.addTypedIdResource((TypedIdResource)next);
+    return resource;
+  }
+  return super.tryCombineWith(next);
+}

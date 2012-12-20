@@ -1,0 +1,23 @@
+{
+  List<GraphObject> uuidResults=null;
+  if (uuidResource != null) {
+    uuidResource.setSecurityContext(this.securityContext);
+    uuidResults=(List<GraphObject>)uuidResource.doGet(sortKey,sortDescending,pageSize,page,offsetId).getResults();
+  }
+  final List<SearchAttribute> searchAttributes=getSearchAttributes(rawType);
+  searchAttributes.addAll(extractSearchableAttributesFromRequest(securityContext));
+  List<Component> results=getComponents(securityContext,searchAttributes);
+  if (!results.isEmpty()) {
+    if (uuidResults != null) {
+      results=ListUtils.intersection(results,uuidResults);
+    }
+    for (    final DynamicTypeResource res : nestedResources) {
+      if (res.doGet(sortKey,sortDescending,pageSize,page,offsetId).getResults().isEmpty()) {
+        throw new NotFoundException();
+      }
+    }
+    return new Result(results,null,isCollectionResource(),isPrimitiveArray());
+  }
+  parentResults=true;
+  return super.doGet(sortKey,sortDescending,pageSize,page,offsetId);
+}

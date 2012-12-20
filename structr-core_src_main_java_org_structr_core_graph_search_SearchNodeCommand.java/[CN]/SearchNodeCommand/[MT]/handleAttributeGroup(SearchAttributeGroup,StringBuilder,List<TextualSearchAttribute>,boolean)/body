@@ -1,0 +1,24 @@
+{
+  List<SearchAttribute> groupedAttributes=attributeGroup.getSearchAttributes();
+  StringBuilder subQueryString=new StringBuilder();
+  if (!(groupedAttributes.isEmpty())) {
+    String subQueryPrefix=(StringUtils.isBlank(queryString.toString()) ? "" : attributeGroup.getSearchOperator()) + " ( ";
+    for (    SearchAttribute groupedAttr : groupedAttributes) {
+      if (groupedAttr instanceof TextualSearchAttribute) {
+        textualAttributes.add((TextualSearchAttribute)groupedAttr);
+        subQueryString.append(toQueryString((TextualSearchAttribute)groupedAttr,StringUtils.isBlank(subQueryString.toString())));
+        allExactMatch&=isExactMatch(((TextualSearchAttribute)groupedAttr).getValue());
+      }
+ else       if (groupedAttr instanceof RangeSearchAttribute) {
+        handleRangeAttribute((RangeSearchAttribute)groupedAttr,queryString);
+      }
+ else       if (groupedAttr instanceof SearchAttributeGroup) {
+        handleAttributeGroup((SearchAttributeGroup)groupedAttr,subQueryString,textualAttributes,allExactMatch);
+      }
+    }
+    String subQuerySuffix=" ) ";
+    if (StringUtils.isNotBlank(subQueryString.toString())) {
+      queryString.append(subQueryPrefix).append(subQueryString).append(subQuerySuffix);
+    }
+  }
+}

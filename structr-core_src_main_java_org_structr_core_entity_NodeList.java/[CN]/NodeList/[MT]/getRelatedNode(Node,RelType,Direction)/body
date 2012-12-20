@@ -1,0 +1,19 @@
+{
+  if (startNode != null) {
+    Iterable<Relationship> rels=startNode.getRelationships(relationshipType,direction);
+    for (    Relationship rel : rels) {
+      if (rel.hasProperty(NodeList.parent.dbName())) {
+        Object parent=rel.getProperty(NodeList.parent.dbName());
+        if ((parent instanceof Long) && ((Long)parent).equals(getNodeId())) {
+          if (direction.equals(Direction.INCOMING)) {
+            return (rel.getStartNode());
+          }
+ else {
+            return (rel.getEndNode());
+          }
+        }
+      }
+    }
+  }
+  return (null);
+}

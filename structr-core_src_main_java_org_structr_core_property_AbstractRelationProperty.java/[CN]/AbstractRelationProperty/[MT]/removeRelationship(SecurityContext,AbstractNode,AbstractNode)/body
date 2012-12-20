@@ -1,0 +1,56 @@
+{
+  final DeleteRelationshipCommand deleteRel=Services.command(securityContext,DeleteRelationshipCommand.class);
+  if ((sourceNode != null) && (targetNode != null)) {
+    final AbstractNode finalTargetNode=targetNode;
+    StructrTransaction transaction=new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+switch (getCardinality()) {
+case ManyToOne:
+case OneToOne:
+{
+            String destType=finalTargetNode.getType();
+            List<AbstractRelationship> rels=sourceNode.getRelationships(getRelType(),getDirection());
+            for (            AbstractRelationship rel : rels) {
+              if (rel.getOtherNode(sourceNode).getType().equals(destType)) {
+                deleteRel.execute(rel);
+              }
+            }
+            break;
+          }
+case OneToMany:
+{
+          String sourceType=sourceNode.getType();
+          List<AbstractRelationship> rels=finalTargetNode.getRelationships(getRelType(),Direction.INCOMING);
+          for (          AbstractRelationship rel : rels) {
+            if (rel.getOtherNode(finalTargetNode).getType().equals(sourceType)) {
+              deleteRel.execute(rel);
+            }
+          }
+        }
+case ManyToMany:
+{
+        List<AbstractRelationship> rels=finalTargetNode.getRelationships(getRelType(),Direction.BOTH);
+        for (        AbstractRelationship rel : rels) {
+          if (rel.getOtherNode(finalTargetNode).equals(sourceNode)) {
+            deleteRel.execute(rel);
+          }
+        }
+      }
+  }
+  return null;
+}
+}
+;
+Services.command(securityContext,TransactionCommand.class).execute(transaction);
+}
+ else {
+String type="unknown";
+if (sourceNode != null) {
+type=sourceNode.getType();
+}
+ else if (targetNode != null) {
+type=targetNode.getType();
+}
+throw new FrameworkException(type,new IdNotFoundToken(targetNode));
+}
+}

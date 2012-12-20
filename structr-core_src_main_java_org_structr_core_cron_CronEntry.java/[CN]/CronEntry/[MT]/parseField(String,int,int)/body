@@ -1,0 +1,37 @@
+{
+  if ("*".equals(field)) {
+    return new CronField(minValue,maxValue,1,true);
+  }
+  if (field.startsWith("*/")) {
+    throw new UnsupportedOperationException("Steps are not supported yet.");
+  }
+  if (field.matches("[0-9]{1,2}")) {
+    int value=Integer.parseInt(field);
+    if ((value >= minValue) && (value <= maxValue)) {
+      return new CronField(value,value,1);
+    }
+ else {
+      throw new IllegalArgumentException("Parameter not within range: '" + field + "'");
+    }
+  }
+  if (field.matches("[0-9]{1,2}-[0-9]{1,2}")) {
+    String[] rangeValues=field.split("[-]+");
+    if (rangeValues.length == 2) {
+      int start=Integer.parseInt(rangeValues[0]);
+      int end=Integer.parseInt(rangeValues[1]);
+      if ((start >= minValue) && (start <= maxValue) && (end >= minValue)&& (end <= maxValue)) {
+        return new CronField(start,end,1);
+      }
+ else {
+        throw new IllegalArgumentException("Parameters not within range: '" + field + "'");
+      }
+    }
+ else {
+      throw new IllegalArgumentException("Invalid range: '" + field + "'");
+    }
+  }
+  if (field.matches("[0-9]{1,2}-[0-9]{1,2}/[0-9]{1,2}")) {
+    throw new UnsupportedOperationException("Steps are not supported yet.");
+  }
+  throw new IllegalArgumentException("Invalid field: '" + field + "'");
+}

@@ -1,0 +1,52 @@
+{
+  ArrayList<String> tokens=new ArrayList<String>(20);
+  boolean inDoubleQuotes=false;
+  boolean inSingleQuotes=false;
+  int len=source.length();
+  int level=0;
+  StringBuilder currentToken=new StringBuilder(len);
+  for (int i=0; i < len; i++) {
+    char c=source.charAt(i);
+    if ((level != 0) || (c != ',')) {
+      currentToken.append(c);
+    }
+switch (c) {
+case '(':
+      level++;
+    break;
+case ')':
+  level--;
+break;
+case '"':
+if (inDoubleQuotes) {
+inDoubleQuotes=false;
+level--;
+}
+ else {
+inDoubleQuotes=true;
+level++;
+}
+break;
+case '\'':
+if (inSingleQuotes) {
+inSingleQuotes=false;
+level--;
+}
+ else {
+inSingleQuotes=true;
+level++;
+}
+break;
+case ',':
+if (level == 0) {
+tokens.add(currentToken.toString().trim());
+currentToken.setLength(0);
+}
+break;
+}
+}
+if (currentToken.length() > 0) {
+tokens.add(currentToken.toString().trim());
+}
+return tokens.toArray(new String[0]);
+}

@@ -1,0 +1,58 @@
+{
+  final PropertyMap props=new PropertyMap();
+  try {
+    transactionCommand.execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        List<Class> entityList=null;
+        try {
+          entityList=getClasses("org.structr.core.entity");
+        }
+ catch (        ClassNotFoundException ex) {
+          logger.log(Level.SEVERE,null,ex);
+        }
+catch (        IOException ex) {
+          logger.log(Level.SEVERE,null,ex);
+        }
+        assertTrue(entityList.contains(AbstractNode.class));
+        assertTrue(entityList.contains(Cache.class));
+        assertTrue(entityList.contains(File.class));
+        assertTrue(entityList.contains(GenericNode.class));
+        assertTrue(entityList.contains(Image.class));
+        assertTrue(entityList.contains(Location.class));
+        assertTrue(entityList.contains(NodeList.class));
+        assertTrue(entityList.contains(Folder.class));
+        assertTrue(entityList.contains(PlainText.class));
+        assertTrue(entityList.contains(Person.class));
+        assertTrue(entityList.contains(ResourceAccess.class));
+        entityList.remove(TestTwo.class);
+        for (        Class entityClass : entityList) {
+          if (AbstractNode.class.isAssignableFrom(entityClass)) {
+            String type=entityClass.getSimpleName();
+            if (type.equals(ResourceAccess.class.getSimpleName())) {
+              props.put(ResourceAccess.signature,"/");
+              props.put(ResourceAccess.flags,6);
+            }
+            if (type.equals(Location.class.getSimpleName())) {
+              props.put(Location.latitude,12.34);
+              props.put(Location.longitude,56.78);
+            }
+            logger.log(Level.INFO,"Creating node of type {0}",type);
+            props.put(AbstractNode.type,type);
+            AbstractNode node=(AbstractNode)createNodeCommand.execute(props);
+            assertTrue(type.equals(node.getProperty(AbstractNode.type)));
+            if (type.equals(ResourceAccess.class.getSimpleName())) {
+              props.remove(ResourceAccess.signature);
+              props.remove(ResourceAccess.flags);
+            }
+          }
+        }
+        return null;
+      }
+    }
+);
+  }
+ catch (  FrameworkException ex) {
+    logger.log(Level.SEVERE,ex.toString());
+    fail("Unexpected exception");
+  }
+}

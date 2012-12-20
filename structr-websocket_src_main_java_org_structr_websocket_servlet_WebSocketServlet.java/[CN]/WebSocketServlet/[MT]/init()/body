@@ -1,0 +1,21 @@
+{
+  config=this.getServletConfig();
+  final Gson gson=new GsonBuilder().setPrettyPrinting().registerTypeAdapter(WebSocketMessage.class,new WebSocketDataGSONAdapter(idProperty)).create();
+  syncController=new SynchronizationController(gson);
+  EntityContext.registerTransactionListener(syncController);
+  factory=new WebSocketFactory(new Acceptor(){
+    @Override public WebSocket doWebSocketConnect(    final HttpServletRequest request,    final String protocol){
+      if (STRUCTR_PROTOCOL.equals(protocol)) {
+        return new StructrWebSocket(syncController,config,request,gson,idProperty);
+      }
+ else {
+        logger.log(Level.INFO,"Protocol {0} not accepted",protocol);
+      }
+      return null;
+    }
+    @Override public boolean checkOrigin(    final HttpServletRequest request,    final String origin){
+      return true;
+    }
+  }
+);
+}

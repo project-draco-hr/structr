@@ -1,0 +1,46 @@
+{
+  SecurityContext securityContext=getSecurityContext(request,response);
+  try {
+    request.setCharacterEncoding("UTF-8");
+    response.setCharacterEncoding("UTF-8");
+    response.setContentType("application/json; charset=UTF-8");
+    List<Resource> chain=ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,defaultIdProperty);
+    Resource resourceConstraint=ResourceHelper.optimizeConstraintChain(chain,defaultIdProperty);
+    securityContext.examineRequest(request,resourceConstraint.getResourceSignature(),resourceConstraint.getGrant(),propertyView.get(securityContext));
+    RestMethodResult result=resourceConstraint.doHead();
+    result.commitResponse(gson,response);
+  }
+ catch (  FrameworkException frameworkException) {
+    response.setStatus(frameworkException.getStatus());
+    gson.toJson(frameworkException,response.getWriter());
+    response.getWriter().println();
+  }
+catch (  JsonSyntaxException jsex) {
+    logger.log(Level.WARNING,"JsonSyntaxException in HEAD",jsex);
+    int code=HttpServletResponse.SC_BAD_REQUEST;
+    response.setStatus(code);
+    response.getWriter().append(jsonError(code,"JsonSyntaxException in HEAD: " + jsex.getMessage()));
+  }
+catch (  JsonParseException jpex) {
+    logger.log(Level.WARNING,"JsonParseException in HEAD",jpex);
+    int code=HttpServletResponse.SC_BAD_REQUEST;
+    response.setStatus(code);
+    response.getWriter().append(jsonError(code,"JsonSyntaxException in HEAD: " + jpex.getMessage()));
+  }
+catch (  Throwable t) {
+    logger.log(Level.WARNING,"Exception in HEAD",t);
+    int code=HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+    response.setStatus(code);
+    response.getWriter().append(jsonError(code,"JsonSyntaxException in HEAD: " + t.getMessage()));
+  }
+ finally {
+    try {
+      response.getWriter().flush();
+      response.getWriter().close();
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"Unable to flush and close response: {0}",t.getMessage());
+    }
+    securityContext.cleanUp();
+  }
+}

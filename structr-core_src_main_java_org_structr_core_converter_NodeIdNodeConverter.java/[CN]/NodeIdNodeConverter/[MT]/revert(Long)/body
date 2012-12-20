@@ -1,0 +1,10 @@
+{
+  if (nodeId == null)   return null;
+  NodeFactory factory=new NodeFactory(securityContext);
+  GraphDatabaseService graphDb=Services.command(securityContext,GraphDatabaseCommand.class).execute();
+  Node node=graphDb.getNodeById(nodeId);
+  if (node != null) {
+    return factory.createNode(node);
+  }
+  return null;
+}

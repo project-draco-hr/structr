@@ -1,0 +1,22 @@
+{
+  Class ret=AbstractNode.class;
+  if ((name != null) && (name.length() > 0)) {
+    ret=relationshipClassCache.get(name);
+    if (ret == null) {
+      for (      String possiblePath : relationshipPackages) {
+        if (possiblePath != null) {
+          try {
+            Class nodeClass=Class.forName(possiblePath + "." + name);
+            if (!Modifier.isAbstract(nodeClass.getModifiers())) {
+              relationshipClassCache.put(name,nodeClass);
+              break;
+            }
+          }
+ catch (          ClassNotFoundException ex) {
+          }
+        }
+      }
+    }
+  }
+  return (ret);
+}

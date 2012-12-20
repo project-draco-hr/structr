@@ -1,0 +1,25 @@
+{
+  final SearchNodeCommand search=Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class);
+  final String uriPart=EntityContext.normalizeEntityName(this.getResourceSignature());
+  final List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
+  ResourceAccess grant=null;
+  searchAttributes.add(Search.andExactType(ResourceAccess.class.getSimpleName()));
+  searchAttributes.add(Search.andExactProperty(ResourceAccess.signature,uriPart));
+  final Result result=search.execute(searchAttributes);
+  if (result.isEmpty()) {
+    logger.log(Level.FINE,"No resource access object found for {0}",uriPart);
+  }
+ else {
+    final AbstractNode node=(AbstractNode)result.get(0);
+    if (node instanceof ResourceAccess) {
+      grant=(ResourceAccess)node;
+    }
+ else {
+      logger.log(Level.SEVERE,"Grant for URI {0} has wrong type!",new Object[]{uriPart,node.getClass().getName()});
+    }
+    if (result.size() > 1) {
+      logger.log(Level.SEVERE,"Found {0} grants for URI {1}!",new Object[]{result.size(),uriPart});
+    }
+  }
+  return grant;
+}

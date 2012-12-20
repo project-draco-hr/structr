@@ -1,0 +1,22 @@
+{
+  try {
+    AbstractRelationship rel=cascadeRel(TestOne.class,TestTwo.class,Relation.DELETE_NONE);
+    AbstractNode startNode=rel.getStartNode();
+    AbstractNode endNode=rel.getEndNode();
+    final String startNodeId=startNode.getUuid();
+    final String endNodeId=endNode.getUuid();
+    deleteCascade(startNode);
+    assertNodeNotFound(startNodeId);
+    assertNodeExists(endNodeId);
+    rel=cascadeRel(TestOne.class,TestTwo.class,Relation.DELETE_NONE);
+    final String startNodeId2=rel.getStartNode().getUuid();
+    final String endNodeId2=rel.getEndNode().getUuid();
+    deleteCascade(rel.getEndNode());
+    assertNodeNotFound(endNodeId2);
+    assertNodeExists(startNodeId2);
+  }
+ catch (  FrameworkException ex) {
+    logger.log(Level.SEVERE,ex.toString());
+    fail("Unexpected exception");
+  }
+}

@@ -1,0 +1,26 @@
+{
+  messageStack=messageStackMap.get(transactionKey);
+  WebSocketMessage message=new WebSocketMessage();
+  message.setCommand("UPDATE");
+  String uuid=graphObject.getProperty(AbstractNode.uuid);
+  if (graphObject instanceof AbstractRelationship) {
+    AbstractRelationship relationship=(AbstractRelationship)graphObject;
+    AbstractNode startNode=relationship.getStartNode();
+    AbstractNode endNode=relationship.getEndNode();
+    try {
+      PropertyMap relProperties=relationship.getProperties();
+      relProperties.put(new StringProperty("startNodeId"),startNode.getUuid());
+      relProperties.put(new StringProperty("endNodeId"),endNode.getUuid());
+      Map<String,Object> properties=PropertyMap.javaTypeToInputType(securityContext,relationship.getClass(),relProperties);
+      message.setRelData(properties);
+    }
+ catch (    FrameworkException fex) {
+      logger.log(Level.WARNING,"Unable to convert properties from type {0} to input type",relationship.getClass());
+    }
+  }
+  message.setId(uuid);
+  message.setGraphObject(graphObject);
+  message.getRemovedProperties().add(key);
+  messageStack.add(message);
+  return true;
+}

@@ -1,0 +1,33 @@
+{
+  if (images != null) {
+    for (    Image imageNode : images) {
+      String relativeFilePath=imageNode.getRelativeFilePath();
+      if (relativeFilePath != null) {
+        String filePath=Services.getFilePath(Path.Files,relativeFilePath);
+        int width=0;
+        int height=0;
+        String format=null;
+        try {
+          BufferedImage img=ImageIO.read(imageNode.getInputStream());
+          try {
+            width=img.getWidth();
+            height=img.getHeight();
+            format=FileHelper.getContentMimeType(new File(filePath));
+            imageNode.setWidth(width);
+            imageNode.setHeight(height);
+            if (format != null) {
+              imageNode.setContentType(format);
+            }
+          }
+ catch (          Throwable t) {
+            logger.log(Level.SEVERE,"Error while extracting image dimensions or type from {0} {1}",new Object[]{filePath,t.getMessage()});
+          }
+        }
+ catch (        Throwable e) {
+          logger.log(Level.SEVERE,"Could not read image {0} {1}",new Object[]{filePath,e.getMessage()});
+        }
+        logger.log(Level.FINE,"Extracted dimensions and format from image node {0} (x,y, format): {1}, {2}, {3}",new Object[]{imageNode.getId(),width,height,format});
+      }
+    }
+  }
+}

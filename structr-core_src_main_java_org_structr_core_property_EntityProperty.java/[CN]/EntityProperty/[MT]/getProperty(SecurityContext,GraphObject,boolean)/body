@@ -1,0 +1,29 @@
+{
+  if (obj instanceof AbstractNode) {
+    AbstractNode node=(AbstractNode)obj;
+    if (cardinality.equals(Relation.Cardinality.OneToOne) || cardinality.equals(Relation.Cardinality.ManyToOne)) {
+      NodeFactory nodeFactory=new NodeFactory(securityContext);
+      Class destinationType=getDestType();
+      Node dbNode=node.getNode();
+      AbstractNode value=null;
+      try {
+        for (        Relationship rel : dbNode.getRelationships(getRelType(),getDirection())) {
+          value=nodeFactory.createNode(rel.getOtherNode(dbNode));
+          if (value != null && destinationType.isInstance(value)) {
+            return (T)value;
+          }
+        }
+      }
+ catch (      Throwable t) {
+        logger.log(Level.WARNING,"Unable to fetch related node: {0}",t.getMessage());
+      }
+    }
+ else {
+      logger.log(Level.WARNING,"Requested related node with wrong cardinality {0} between {1} and {2}",new Object[]{getCardinality().name(),node.getClass().getSimpleName(),getDestType()});
+    }
+  }
+ else {
+    logger.log(Level.WARNING,"Property {0} is registered on illegal type {1}",new Object[]{this,obj.getClass()});
+  }
+  return null;
+}

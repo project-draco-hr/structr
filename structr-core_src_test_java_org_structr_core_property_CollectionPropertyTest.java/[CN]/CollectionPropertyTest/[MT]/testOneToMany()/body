@@ -1,0 +1,31 @@
+{
+  CollectionProperty instance=TestSix.oneToManyTestOnes;
+  TestSix testSix1=null;
+  TestSix testSix2=null;
+  TestOne testOne1=null;
+  TestOne testOne2=null;
+  try {
+    testSix1=createTestNode(TestSix.class);
+    testSix2=createTestNode(TestSix.class);
+    testOne1=createTestNode(TestOne.class);
+    testOne2=createTestNode(TestOne.class);
+  }
+ catch (  FrameworkException fex) {
+    fail("Unable to create test nodes");
+  }
+  assertNotNull(testSix1);
+  assertNotNull(testSix2);
+  assertNotNull(testOne1);
+  assertNotNull(testOne2);
+  List<TestOne> testOnesToSet=new LinkedList<TestOne>();
+  testOnesToSet.add(testOne1);
+  testOnesToSet.add(testOne2);
+  instance.setProperty(securityContext,testSix1,testOnesToSet);
+  List vrfy1=instance.getProperty(securityContext,testSix1,true);
+  assertTrue(vrfy1 != null && vrfy1.size() == 2);
+  instance.setProperty(securityContext,testSix2,testOnesToSet);
+  List vrfy2=instance.getProperty(securityContext,testSix2,true);
+  assertTrue(vrfy2 != null && vrfy2.size() == 2);
+  List vrfy3=instance.getProperty(securityContext,testSix1,true);
+  assertTrue(vrfy3 != null && vrfy3.size() == 0);
+}

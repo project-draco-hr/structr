@@ -1,0 +1,20 @@
+{
+  for (  Enum index : NodeService.NodeIndex.values()) {
+    String indexName=index.name();
+    Map<String,Set<PropertyKey>> searchablePropertyMapForType=getSearchablePropertyMapForType(type);
+    Set<PropertyKey> searchablePropertySet=searchablePropertyMapForType.get(indexName);
+    if (searchablePropertySet == null) {
+      searchablePropertySet=new LinkedHashSet<PropertyKey>();
+      searchablePropertyMapForType.put(indexName,searchablePropertySet);
+    }
+    Class localType=type.getSuperclass();
+    while ((localType != null) && !localType.equals(Object.class)) {
+      Set<PropertyKey> superProperties=getSearchableProperties(localType,indexName);
+      searchablePropertySet.addAll(superProperties);
+      for (      Class interfaceClass : getInterfacesForType(localType)) {
+        searchablePropertySet.addAll(getSearchableProperties(interfaceClass,indexName));
+      }
+      localType=localType.getSuperclass();
+    }
+  }
+}

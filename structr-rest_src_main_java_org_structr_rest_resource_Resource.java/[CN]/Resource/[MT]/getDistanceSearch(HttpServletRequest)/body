@@ -1,0 +1,16 @@
+{
+  final String distance=request.getParameter(Search.DISTANCE_SEARCH_KEYWORD);
+  if (request != null && !request.getParameterMap().isEmpty() && StringUtils.isNotBlank(distance)) {
+    final Double dist=Double.parseDouble(distance);
+    final StringBuilder searchKey=new StringBuilder();
+    final Enumeration names=request.getParameterNames();
+    while (names.hasMoreElements()) {
+      final String name=(String)names.nextElement();
+      if (!name.equals(Search.DISTANCE_SEARCH_KEYWORD) && !name.equals(JsonRestServlet.REQUEST_PARAMETER_LOOSE_SEARCH) && !name.equals(JsonRestServlet.REQUEST_PARAMETER_PAGE_SIZE)&& !name.equals(JsonRestServlet.REQUEST_PARAMETER_PAGE_NUMBER)&& !name.equals(JsonRestServlet.REQUEST_PARAMETER_SORT_KEY)&& !name.equals(JsonRestServlet.REQUEST_PARAMETER_SORT_ORDER)&& !name.equals(JsonRestServlet.REQUEST_PARAMETER_OFFSET_ID)) {
+        searchKey.append(request.getParameter(name)).append(" ");
+      }
+    }
+    return new DistanceSearchAttribute(searchKey.toString(),dist,SearchOperator.AND);
+  }
+  return null;
+}

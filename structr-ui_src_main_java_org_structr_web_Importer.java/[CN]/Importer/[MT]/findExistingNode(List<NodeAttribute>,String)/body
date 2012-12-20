@@ -1,0 +1,27 @@
+{
+  List<SearchAttribute> searchAttrs=new LinkedList<SearchAttribute>();
+  for (  NodeAttribute attr : attrs) {
+    PropertyKey key=attr.getKey();
+    String value=attr.getValue().toString();
+    if (!key.equals(HtmlElement._data)) {
+      searchAttrs.add(Search.andExactProperty(key,value));
+    }
+  }
+  Result<AbstractNode> result=searchNode.execute(searchAttrs);
+  if (result.size() > 1) {
+    logger.log(Level.WARNING,"More than one node found.");
+  }
+  if (result.isEmpty()) {
+    return null;
+  }
+  for (  AbstractNode foundNode : result.getResults()) {
+    String foundNodePath=foundNode.getProperty(HtmlElement.path);
+    logger.log(Level.INFO,"Found a node with path {0}",foundNodePath);
+    if (foundNodePath != null && foundNodePath.equals(nodePath)) {
+      logger.log(Level.INFO,"MATCH!");
+      return foundNode;
+    }
+  }
+  logger.log(Level.INFO,"Does not match expected path {0}",nodePath);
+  return null;
+}

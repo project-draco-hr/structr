@@ -1,0 +1,51 @@
+{
+  List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
+  boolean includeDeletedAndHidden=false;
+  boolean publicOnly=false;
+  if (rawType != null) {
+    if (entityClass == null) {
+      throw new NotFoundException();
+    }
+    DistanceSearchAttribute distanceSearch=getDistanceSearch(request);
+    if (distanceSearch != null) {
+      searchAttributes.add(distanceSearch);
+      searchAttributes.add(new FilterSearchAttribute(AbstractNode.type,EntityContext.normalizeEntityName(rawType),SearchOperator.AND));
+    }
+ else {
+      searchAttributes.add(Search.andExactTypeAndSubtypes(EntityContext.normalizeEntityName(rawType)));
+      searchAttributes.addAll(extractSearchableAttributesFromRequest(securityContext));
+    }
+    if (sortKey == null) {
+      try {
+        GraphObject templateEntity=((GraphObject)entityClass.newInstance());
+        PropertyKey sortKeyProperty=templateEntity.getDefaultSortKey();
+        sortDescending=GraphObjectComparator.DESCENDING.equals(templateEntity.getDefaultSortOrder());
+        if (sortKeyProperty != null) {
+          sortKey=sortKeyProperty;
+        }
+      }
+ catch (      Throwable t) {
+        sortKey=AbstractNode.name;
+      }
+    }
+    Integer sortType=null;
+    boolean sortFinalResults=false;
+    if (sortKey != null) {
+      PropertyConverter converter=sortKey.inputConverter(securityContext);
+      if (converter != null) {
+        sortType=converter.getSortType();
+        sortFinalResults=converter.sortFinalResults();
+      }
+    }
+    Result results=Services.command(securityContext,SearchNodeCommand.class).execute(includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDescending,pageSize,page,offsetId,sortType);
+    if (sortFinalResults) {
+      Collections.sort(results.getResults(),new GraphObjectComparator(sortKey,sortDescending ? GraphObjectComparator.DESCENDING : GraphObjectComparator.ASCENDING));
+    }
+    return results;
+  }
+ else {
+    logger.log(Level.WARNING,"type was null");
+  }
+  List emptyList=Collections.emptyList();
+  return new Result(emptyList,null,isCollectionResource(),isPrimitiveArray());
+}

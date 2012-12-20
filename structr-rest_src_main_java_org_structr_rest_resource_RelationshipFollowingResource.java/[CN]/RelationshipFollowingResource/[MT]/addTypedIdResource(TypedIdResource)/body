@@ -1,0 +1,30 @@
+{
+  logger.log(Level.FINE,"Adding id {0} to id set",typedIdResource.getIdResource().getUriPart());
+  UuidResource idResource=typedIdResource.getIdResource();
+  if (idResource instanceof UuidResource) {
+    if (!idSet.add(((UuidResource)idResource).getUriPart())) {
+      throw new IllegalPathException();
+    }
+  }
+ else {
+    if (!idSet.add(idResource.getUuid())) {
+      throw new IllegalPathException();
+    }
+  }
+  uriParts.add(typedIdResource.getUriPart());
+  PropertyKey key=findPropertyKey(lastResource,typedIdResource.getTypeResource());
+  if (key != null && key instanceof AbstractRelationProperty) {
+    AbstractRelationProperty rel=(AbstractRelationProperty)key;
+    if (!visitedRelationships.contains(rel)) {
+      traversalDescription=traversalDescription.relationships(rel.getRelType(),rel.getDirection());
+      visitedRelationships.add(rel);
+    }
+  }
+ else {
+    String rawType1=lastResource.getTypeResource().getRawType();
+    String rawType2=typedIdResource.getTypeResource().getRawType();
+    logger.log(Level.INFO,"No relationship defined between {0} and {1}, illegal path",new Object[]{rawType1,rawType2});
+    throw new IllegalPathException();
+  }
+  lastResource=typedIdResource;
+}

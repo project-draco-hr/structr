@@ -1,0 +1,19 @@
+{
+  final SecurityContext securityContext=SecurityContext.getSuperUserInstance();
+  final ExtractAndSetImageDimensionsAndFormat extract=Services.command(securityContext,ExtractAndSetImageDimensionsAndFormat.class);
+  Integer numberOfImages=Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction<Integer>(){
+    @Override public Integer execute() throws FrameworkException {
+      List<Image> images=new LinkedList<Image>();
+      List<AbstractNode> allNodes=Services.command(securityContext,GetAllNodes.class).execute();
+      for (      AbstractNode s : allNodes) {
+        if (s instanceof Image) {
+          images.add((Image)s);
+        }
+      }
+      extract.execute(images);
+      return images.size();
+    }
+  }
+);
+  return numberOfImages;
+}

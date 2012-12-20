@@ -1,0 +1,59 @@
+{
+  Calendar now=GregorianCalendar.getInstance();
+  int nowSeconds=now.get(Calendar.SECOND);
+  int nowMinutes=now.get(Calendar.MINUTE);
+  int nowHours=now.get(Calendar.HOUR_OF_DAY);
+  int nowDays=now.get(Calendar.DAY_OF_MONTH);
+  int nowDow=now.get(Calendar.DAY_OF_WEEK) - 1;
+  int nowMonths=now.get(Calendar.MONTH) + 1;
+  boolean modified=true;
+  int maxTries=10000;
+  int numTries=0;
+  while (modified && numTries++ < maxTries) {
+    modified=false;
+    if (!modified && !seconds.isInside(nowSeconds)) {
+      now.add(Calendar.SECOND,1);
+      modified=true;
+    }
+    if (!modified && !minutes.isInside(nowMinutes)) {
+      now.add(Calendar.MINUTE,1);
+      modified=true;
+    }
+    if (!modified && !hours.isInside(nowHours)) {
+      now.add(Calendar.HOUR_OF_DAY,1);
+      modified=true;
+    }
+    if (!dow.isIsWildcard() && !days.isIsWildcard()) {
+      if (!modified && !(dow.isInside(nowDow) || days.isInside(nowDays))) {
+        now.add(Calendar.DAY_OF_MONTH,1);
+        modified=true;
+      }
+    }
+ else     if (!dow.isIsWildcard()) {
+      if (!modified && !dow.isInside(nowDow)) {
+        now.add(Calendar.DAY_OF_MONTH,1);
+        modified=true;
+      }
+    }
+ else     if (!days.isIsWildcard()) {
+      if (!modified && !days.isInside(nowDays)) {
+        now.add(Calendar.DAY_OF_MONTH,1);
+        modified=true;
+      }
+    }
+    if (!modified && !months.isInside(nowMonths)) {
+      now.add(Calendar.MONTH,1);
+      modified=true;
+    }
+    nowSeconds=now.get(Calendar.SECOND);
+    nowMinutes=now.get(Calendar.MINUTE);
+    nowHours=now.get(Calendar.HOUR_OF_DAY);
+    nowDays=now.get(Calendar.DAY_OF_MONTH);
+    nowDow=now.get(Calendar.DAY_OF_WEEK) - 1;
+    nowMonths=now.get(Calendar.MONTH) + 1;
+  }
+  if (numTries == maxTries) {
+    throw new IllegalArgumentException("Unable to determine next cron date for task " + name + ", aborting.");
+  }
+  return now.getTimeInMillis() - System.currentTimeMillis();
+}

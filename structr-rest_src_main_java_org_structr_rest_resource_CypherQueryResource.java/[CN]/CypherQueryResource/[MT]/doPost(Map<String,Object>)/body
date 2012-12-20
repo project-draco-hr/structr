@@ -1,0 +1,17 @@
+{
+  try {
+    RestMethodResult result=new RestMethodResult(200);
+    Object queryObject=propertySet.get("query");
+    if (queryObject != null) {
+      String query=queryObject.toString();
+      List<GraphObject> resultList=(List<GraphObject>)Services.command(securityContext,CypherQueryCommand.class).execute(query);
+      for (      GraphObject obj : resultList) {
+        result.addContent(obj);
+      }
+    }
+    return result;
+  }
+ catch (  org.neo4j.graphdb.NotFoundException nfe) {
+    throw new NotFoundException();
+  }
+}

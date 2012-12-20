@@ -1,0 +1,17 @@
+{
+  if (pageId == null) {
+    return;
+  }
+  Property pageIdProperty=new StringProperty(pageId);
+  long i=0;
+  Collections.sort(rels,new GraphObjectComparator(pageIdProperty,GraphObjectComparator.ASCENDING));
+  for (  AbstractRelationship rel : rels) {
+    try {
+      rel.setProperty(pageIdProperty,i);
+      i++;
+    }
+ catch (    IllegalStateException ise) {
+      continue;
+    }
+  }
+}

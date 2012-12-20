@@ -1,0 +1,10 @@
+{
+  boolean ret=false;
+  if ((node != null) && (toInsert != null) && !isMember(toInsert)) {
+    Node previousNode=getRelatedNode(node,RelType.NEXT_LIST_ENTRY,Direction.INCOMING);
+    ret|=deleteRelationship(previousNode,RelType.NEXT_LIST_ENTRY,Direction.OUTGOING);
+    ret|=createRelationship(previousNode,toInsert,RelType.NEXT_LIST_ENTRY);
+    ret|=createRelationship(toInsert,node,RelType.NEXT_LIST_ENTRY);
+  }
+  return (ret);
+}

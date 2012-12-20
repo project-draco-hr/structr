@@ -1,0 +1,56 @@
+{
+  String confPath=basePath + "/structr.conf";
+  File confFile=new File(confPath);
+  if (!confFile.exists()) {
+    List<String> config=new LinkedList<String>();
+    config.add("##################################");
+    config.add("# structr global config file     #");
+    config.add("##################################");
+    config.add("");
+    if (sourceJarName.endsWith(".jar") || sourceJarName.endsWith(".war")) {
+      config.add("# resources");
+      config.add("resources = " + sourceJarName);
+      config.add("");
+    }
+    config.add("# JSON output nesting depth");
+    config.add("json.depth = 1");
+    config.add("");
+    config.add("# base directory");
+    config.add("base.path = " + basePath);
+    config.add("");
+    config.add("# temp files directory");
+    config.add("tmp.path = /tmp");
+    config.add("");
+    config.add("# database files directory");
+    config.add("database.path = " + basePath + "/db");
+    config.add("");
+    config.add("# binary files directory");
+    config.add("files.path = " + basePath + "/files");
+    config.add("");
+    config.add("# REST server settings");
+    config.add("application.host = " + host);
+    config.add("application.rest.port = " + restPort);
+    config.add("application.rest.path = " + restUrl);
+    config.add("");
+    config.add("application.https.enabled = false");
+    config.add("application.https.port = ");
+    config.add("application.keystore.path = ");
+    config.add("application.keystore.password = ");
+    config.add("");
+    config.add("# SMPT settings");
+    config.add("smtp.host = localhost");
+    config.add("smtp.port = 25");
+    config.add("");
+    config.add("superuser.username = superadmin");
+    config.add("superuser.password = sehrgeheim");
+    config.add("");
+    config.add("# services");
+    config.add("configured.services = ModuleService NodeService");
+    config.add("");
+    config.add("log.requests = false");
+    config.add("log.name = structr-yyyy_mm_dd.request.log");
+    confFile.createNewFile();
+    FileUtils.writeLines(confFile,"UTF-8",config);
+  }
+  return confFile;
+}

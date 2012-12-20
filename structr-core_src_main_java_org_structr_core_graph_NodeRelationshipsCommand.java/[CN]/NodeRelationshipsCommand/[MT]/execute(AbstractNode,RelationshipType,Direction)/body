@@ -1,0 +1,21 @@
+{
+  RelationshipFactory factory=new RelationshipFactory(securityContext);
+  List<AbstractRelationship> result=new LinkedList<AbstractRelationship>();
+  Node node=sourceNode.getNode();
+  Iterable<Relationship> rels=null;
+  if (relType != null) {
+    rels=node.getRelationships(relType,dir);
+  }
+ else {
+    rels=node.getRelationships(dir);
+  }
+  try {
+    for (    Relationship r : rels) {
+      result.add(factory.instantiateRelationship(securityContext,r));
+    }
+  }
+ catch (  RuntimeException e) {
+    logger.log(Level.WARNING,"Exception occured: ",e.getMessage());
+  }
+  return result;
+}

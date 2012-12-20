@@ -1,9 +1,0 @@
-{
-  String location=RestAssured.given().contentType("application/json; charset=UTF-8").body(" { \"name\" : \"test\" } ").expect().statusCode(201).when().post("/test_objects").getHeader("Location");
-  assertNotNull(location);
-  String uuid=getUuidFromLocation(location);
-  assertNotNull(uuid);
-  assertFalse(uuid.isEmpty());
-  assertTrue(uuid.matches("[a-f0-9]{32}"));
-  RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(200).body("result_count",equalTo(1)).body("result[0]",isEntity(TestObject.class)).when().get("/test_objects");
-}

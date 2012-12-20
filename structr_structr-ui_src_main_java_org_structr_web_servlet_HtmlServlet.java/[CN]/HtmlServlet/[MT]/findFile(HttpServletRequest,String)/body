@@ -1,5 +1,11 @@
 {
   List<AbstractNode> entryPoints=findPossibleEntryPoints(request,PathHelper.getName(path));
+  if (entryPoints.isEmpty()) {
+    entryPoints=findPossibleEntryPoints(request,PathHelper.getName(PathHelper.replaceWhitespaceByPlus(path)));
+  }
+  if (entryPoints.isEmpty()) {
+    entryPoints=findPossibleEntryPoints(request,PathHelper.getName(PathHelper.replaceWhitespaceByPercentTwenty(path)));
+  }
   for (  AbstractNode node : entryPoints) {
     if (node instanceof org.structr.core.entity.File) {
       return (org.structr.core.entity.File)node;

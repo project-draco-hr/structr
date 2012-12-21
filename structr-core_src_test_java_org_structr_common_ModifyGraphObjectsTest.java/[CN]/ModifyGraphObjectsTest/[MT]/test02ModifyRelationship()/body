@@ -4,10 +4,14 @@
     PropertyKey key1=new StringProperty("jghsdkhgshdhgsdjkfgh");
     String val1="54354354546806849870";
     rel.setProperty(key1,val1);
-    assertTrue(rel.getProperty(key1).equals(val1));
+    assertTrue("Expected relationship to have a value for key '" + key1.dbName() + "'",rel.getRelationship().hasProperty(key1.dbName()));
+    assertEquals(val1,rel.getRelationship().getProperty(key1.dbName()));
+    Object vrfy1=rel.getProperty(key1);
+    assertEquals(val1,vrfy1);
     val1="??ljkh??oh??8osdfho??dhi";
     rel.setProperty(key1,val1);
-    assertTrue(rel.getProperty(key1).equals(val1));
+    Object vrfy2=rel.getProperty(key1);
+    assertEquals(val1,vrfy2);
   }
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,ex.toString());

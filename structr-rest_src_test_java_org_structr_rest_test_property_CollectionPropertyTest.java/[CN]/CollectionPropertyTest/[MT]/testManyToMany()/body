@@ -1,0 +1,11 @@
+{
+  String[] testOneIds=new String[3];
+  for (int i=0; i < 3; i++) {
+    String location=RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(201).when().post("/test_ones").getHeader("Location");
+    testOneIds[i]=getUuidFromLocation(location);
+  }
+  String location=RestAssured.given().contentType("application/json; charset=UTF-8").body(" { 'manyToManyTestOnes' : ['" + testOneIds[0] + "', '"+ testOneIds[1]+ "', '"+ testOneIds[2]+ "'] } ").expect().statusCode(201).when().post("/test_fives").getHeader("Location");
+  String testFiveId=getUuidFromLocation(location);
+  System.out.println("ID of TestFive node: " + testFiveId);
+  RestAssured.given().contentType("application/json; charset=UTF-8").filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(200)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(500)).expect().statusCode(200).body("result.manyToManyTestOnes",hasItems(testOneIds[0],testOneIds[1],testOneIds[2])).when().get("/test_fives/" + testFiveId);
+}

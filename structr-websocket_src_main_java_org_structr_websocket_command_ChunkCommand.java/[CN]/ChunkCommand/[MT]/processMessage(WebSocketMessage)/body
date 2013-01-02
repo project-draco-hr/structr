@@ -13,10 +13,12 @@
       }
     }
     File file=(File)getNode(uuid);
-    file.setProperty(File.size,(long)(sequenceNumber * chunkSize) + data.length);
+    long size=(long)(sequenceNumber * chunkSize) + data.length;
+    file.setProperty(File.size,size);
+    long partSize=(long)(sequenceNumber * chunkSize) + chunkSize;
     getWebSocket().handleFileChunk(uuid,sequenceNumber,chunkSize,data);
     file.setChecksum(0L);
-    getWebSocket().send(MessageBuilder.status().code(200).message("File saved successfully!").build(),true);
+    getWebSocket().send(MessageBuilder.status().code(200).message(size + " of " + file.getName()+ " successfully saved.").build(),true);
   }
  catch (  Throwable t) {
     String msg=t.toString();

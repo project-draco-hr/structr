@@ -1,11 +1,3 @@
 {
-  CreateNodeCommand<Image> createNodeCommand=Services.command(securityContext,CreateNodeCommand.class);
-  PropertyMap props=new PropertyMap();
-  props.put(AbstractNode.type,imageType.getSimpleName());
-  props.put(File.contentType,contentType);
-  Image newImage=createNodeCommand.execute(props);
-  FileHelper.writeToFile(newImage,imageData);
-  newImage.setChecksum(FileHelper.getChecksum(newImage));
-  newImage.setSize(FileHelper.getSize(newImage));
-  return newImage;
+  return createImage(securityContext,imageData,contentType,imageType,false);
 }

@@ -18,6 +18,7 @@
           }
  else           if (obj instanceof AbstractNode) {
             if (!securityContext.isAllowed((AbstractNode)obj,Permission.delete)) {
+              logger.log(Level.WARNING,"Could not delete {0} because {1} has no delete permission",new Object[]{obj,securityContext.getUser()});
               throw new NotAllowedException();
             }
             deleteNode.execute((AbstractNode)obj,true);

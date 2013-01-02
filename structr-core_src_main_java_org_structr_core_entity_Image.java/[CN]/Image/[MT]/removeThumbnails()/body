@@ -1,5 +1,4 @@
 {
-  DeleteRelationshipCommand deleteRelationship=Services.command(securityContext,DeleteRelationshipCommand.class);
   DeleteNodeCommand deleteNode=Services.command(securityContext,DeleteNodeCommand.class);
   for (  AbstractRelationship s : getThumbnailRelationships()) {
     AbstractNode thumbnail=s.getEndNode();
@@ -8,8 +7,7 @@
       continue;
     }
     try {
-      deleteRelationship.execute(s);
-      deleteNode.execute(thumbnail);
+      deleteNode.execute(thumbnail,true);
     }
  catch (    FrameworkException fex) {
       logger.log(Level.WARNING,"Unable to remove thumbnail",fex);

@@ -1,0 +1,15 @@
+{
+  try {
+    boolean includeDeletedAndHidden=true;
+    boolean publicOnly=false;
+    List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
+    searchAttributes.add(new DistanceSearchAttribute("Hanauer Landstr. 200, 60314 Frankfurt, Germany",10.0,SearchOperator.AND));
+    Result result=searchNodeCommand.execute(includeDeletedAndHidden,publicOnly,searchAttributes);
+    assertEquals(0,result.size());
+  }
+ catch (  FrameworkException ex) {
+    logger.log(Level.SEVERE,ex.toString());
+    System.out.println(ex.toString());
+    fail("Unexpected exception");
+  }
+}

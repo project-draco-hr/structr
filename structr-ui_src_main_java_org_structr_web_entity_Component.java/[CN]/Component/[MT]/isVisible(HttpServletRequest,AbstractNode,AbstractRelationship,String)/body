@@ -1,0 +1,23 @@
+{
+  if (request == null) {
+    return true;
+  }
+  if (node instanceof Component) {
+    Boolean requestContainsUuidsValue=(Boolean)request.getAttribute(REQUEST_CONTAINS_UUID_IDENTIFIER);
+    boolean requestContainsUuids=false;
+    if (requestContainsUuidsValue != null) {
+      requestContainsUuids=requestContainsUuidsValue.booleanValue();
+    }
+    String componentId=node.getProperty(AbstractNode.uuid);
+    if (requestContainsUuids) {
+      if (hasAttribute(request,componentId) || (parentComponentId != null)) {
+        return true;
+      }
+      return false;
+    }
+ else {
+      return true;
+    }
+  }
+  return false;
+}

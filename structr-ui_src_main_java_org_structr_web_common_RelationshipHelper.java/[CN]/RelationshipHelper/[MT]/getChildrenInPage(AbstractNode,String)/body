@@ -1,0 +1,23 @@
+{
+  Set<String> nodesWithChildren=new HashSet<String>();
+  List<AbstractRelationship> childRels=parentNode.getOutgoingRelationships(RelType.CONTAINS);
+  for (  AbstractRelationship childRel : childRels) {
+    String parentId=parentNode.getUuid();
+    if ((pageId == null) || (parentNode instanceof Group) || (parentNode instanceof Folder)) {
+      nodesWithChildren.add(parentId);
+      continue;
+    }
+    Property pageIdProperty=new LongProperty(pageId);
+    Long childPos=null;
+    if (childRel.getLongProperty(pageIdProperty) != null) {
+      childPos=childRel.getLongProperty(pageIdProperty);
+    }
+ else {
+      childPos=childRel.getLongProperty(new LongProperty("*"));
+    }
+    if (childPos != null) {
+      nodesWithChildren.add(parentId);
+    }
+  }
+  return nodesWithChildren;
+}

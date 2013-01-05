@@ -1,0 +1,13 @@
+{
+  String queryString="";
+  PropertyKey key=singleAttribute.getKey();
+  String value=singleAttribute.getValue();
+  SearchOperator op=singleAttribute.getSearchOperator();
+  if (StringUtils.isBlank(value) || value.equals("\"\"")) {
+    queryString=((isFirst && !(op.equals(SearchOperator.NOT))) ? "" : " " + op + " ") + key.dbName() + ":\""+ IMPROBABLE_SEARCH_VALUE+ "\"";
+  }
+ else {
+    queryString=((isFirst && !(op.equals(SearchOperator.NOT))) ? "" : " " + op + " ") + expand(key.dbName(),value);
+  }
+  return queryString;
+}

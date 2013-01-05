@@ -1,0 +1,29 @@
+{
+  final String type=TestSeven.class.getSimpleName();
+  AbstractNode node=null;
+  try {
+    node=transactionCommand.execute(new StructrTransaction<AbstractNode>(){
+      @Override public AbstractNode execute() throws FrameworkException {
+        final PropertyMap props=new PropertyMap();
+        final PropertyKey lat=TestSeven.latitude;
+        final PropertyKey lon=TestSeven.longitude;
+        props.put(AbstractNode.type,type);
+        props.put(lat,50.12284d);
+        props.put(lon,8.73923d);
+        props.put(AbstractNode.name,"TestSeven-0");
+        ;
+        AbstractNode node=createNodeCommand.execute(props);
+        props.remove(AbstractNode.name);
+        props.put(lat,50.12285d);
+        props.put(lon,8.73924d);
+        AbstractNode node2=createNodeCommand.execute(props);
+        AbstractNode node3=createNodeCommand.execute(props);
+        return node2;
+      }
+    }
+);
+    fail("Expected a FrameworkException (name must_not_be_empty)");
+  }
+ catch (  FrameworkException nfe) {
+  }
+}

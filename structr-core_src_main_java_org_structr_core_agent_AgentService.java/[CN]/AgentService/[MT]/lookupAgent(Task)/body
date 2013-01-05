@@ -1,0 +1,34 @@
+{
+  final SecurityContext securityContext=SecurityContext.getSuperUserInstance();
+  Class taskClass=task.getClass();
+  Agent agent=null;
+  Class agentClass=agentClassCache.get(taskClass);
+  if (agentClass == null) {
+    Map<String,Class<? extends Agent>> agentClassesMap=Services.command(securityContext,GetAgentsCommand.class).execute();
+    for (    Entry<String,Class<? extends Agent>> classEntry : agentClassesMap.entrySet()) {
+      Class<? extends Agent> supportedAgentClass=agentClassesMap.get(classEntry.getKey());
+      try {
+        Agent supportedAgent=supportedAgentClass.newInstance();
+        Class supportedTaskClass=supportedAgent.getSupportedTaskType();
+        if (supportedTaskClass.equals(taskClass)) {
+          agentClass=supportedAgentClass;
+        }
+        agentClassCache.put(supportedTaskClass,supportedAgentClass);
+      }
+ catch (      IllegalAccessException iaex) {
+      }
+catch (      InstantiationException itex) {
+      }
+    }
+  }
+  if (agentClass != null) {
+    try {
+      agent=(Agent)agentClass.newInstance();
+    }
+ catch (    IllegalAccessException iaex) {
+    }
+catch (    InstantiationException itex) {
+    }
+  }
+  return (agent);
+}

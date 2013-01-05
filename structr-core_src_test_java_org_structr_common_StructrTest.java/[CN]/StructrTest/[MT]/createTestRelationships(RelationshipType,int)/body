@@ -1,0 +1,15 @@
+{
+  List<AbstractNode> nodes=createTestNodes("UnknownTestType",2);
+  final AbstractNode startNode=nodes.get(0);
+  final AbstractNode endNode=nodes.get(1);
+  return transactionCommand.execute(new StructrTransaction<List<AbstractRelationship>>(){
+    @Override public List<AbstractRelationship> execute() throws FrameworkException {
+      List<AbstractRelationship> rels=new LinkedList<AbstractRelationship>();
+      for (int i=0; i < number; i++) {
+        rels.add(createRelationshipCommand.execute(startNode,endNode,relType));
+      }
+      return rels;
+    }
+  }
+);
+}

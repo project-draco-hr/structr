@@ -1,0 +1,19 @@
+{
+  final List<AbstractNode> nodes=new LinkedList<AbstractNode>();
+  int position=0;
+  int count=0;
+  int overallCount=0;
+  for (  Node node : input) {
+    AbstractNode n=createNode(node);
+    overallCount++;
+    if (n != null) {
+      if (++position > offset) {
+        if (++count > pageSize) {
+          return new Result(nodes,overallResultCount,true,false);
+        }
+        nodes.add(n);
+      }
+    }
+  }
+  return new Result(nodes,overallCount,true,false);
+}

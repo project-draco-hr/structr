@@ -1,0 +1,23 @@
+{
+  Object value1=o1.getProperty(propertyKey);
+  Object value2=o2.getProperty(propertyKey);
+  if (value1 != null && value2 != null) {
+    if (value1 instanceof Comparable && value2 instanceof Comparable) {
+      Comparable comp1=(Comparable)value1;
+      Comparable comp2=(Comparable)value2;
+      if (order.equals(Order.Ascending)) {
+        return comp1.compareTo(comp2);
+      }
+ else       if (order.equals(Order.Descending)) {
+        return comp2.compareTo(comp1);
+      }
+    }
+ else {
+      logger.log(Level.WARNING,"Cannot compare {0} to {1}!",new Object[]{value1.getClass().getName(),value2.getClass().getName()});
+    }
+  }
+ else {
+    logger.log(Level.WARNING,"Cannot compare null values!");
+  }
+  return 0;
+}

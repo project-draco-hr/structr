@@ -1,0 +1,23 @@
+{
+  if (wrappedResource != null && transformation != null) {
+    if (transformation.evaluateWrappedResource()) {
+      Result result=wrappedResource.doGet(sortKey,sortDescending,NodeFactory.DEFAULT_PAGE_SIZE,NodeFactory.DEFAULT_PAGE,null);
+      try {
+        transformation.apply(securityContext,result.getResults());
+        result.setRawResultCount(result.size());
+      }
+ catch (      Throwable t) {
+        t.printStackTrace();
+      }
+      return PagingHelper.subResult(result,pageSize,page,offsetId);
+    }
+ else {
+      List<? extends GraphObject> listToTransform=new LinkedList<GraphObject>();
+      transformation.apply(securityContext,listToTransform);
+      Result result=new Result(listToTransform,listToTransform.size(),wrappedResource.isCollectionResource(),wrappedResource.isPrimitiveArray());
+      return PagingHelper.subResult(result,pageSize,page,offsetId);
+    }
+  }
+  List emptyList=Collections.emptyList();
+  return new Result(emptyList,null,isCollectionResource(),isPrimitiveArray());
+}

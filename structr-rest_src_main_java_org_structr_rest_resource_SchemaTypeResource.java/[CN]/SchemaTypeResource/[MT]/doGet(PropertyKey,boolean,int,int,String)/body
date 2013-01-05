@@ -1,0 +1,49 @@
+{
+  List<GraphObjectMap> resultList=new LinkedList<GraphObjectMap>();
+  Class type=typeResource.getEntityClass();
+  GraphObjectMap schema=new GraphObjectMap();
+  resultList.add(schema);
+  String url="/".concat(CaseHelper.toUnderscore(rawType,true));
+  schema.setProperty(new StringProperty("url"),url);
+  schema.setProperty(new StringProperty("type"),type.getSimpleName());
+  schema.setProperty(new LongProperty("flags"),SecurityContext.getResourceFlags(rawType));
+  Map<String,Map<String,Object>> views=new TreeMap();
+  Set<String> propertyViews=EntityContext.getPropertyViews();
+  schema.setProperty(new StringProperty("views"),views);
+  for (  String view : propertyViews) {
+    Map<String,Object> propertyConverterMap=new TreeMap<String,Object>();
+    Set<PropertyKey> properties=EntityContext.getPropertySet(type,view);
+    if (!properties.isEmpty()) {
+      for (      PropertyKey property : properties) {
+        Map<String,Object> propProperties=new TreeMap();
+        propProperties.put("dbName",property.dbName());
+        propProperties.put("jsonName",property.jsonName());
+        propProperties.put("className",property.getClass().getName());
+        propProperties.put("declaringClass",property.getDeclaringClass());
+        propProperties.put("defaultValue",property.defaultValue());
+        propProperties.put("readOnly",property.isReadOnlyProperty());
+        propProperties.put("system",property.isSystemProperty());
+        Class<? extends GraphObject> relatedType=property.relatedType();
+        if (relatedType != null) {
+          propProperties.put("relatedType",relatedType.getName());
+          propProperties.put("type",relatedType.getSimpleName());
+        }
+ else {
+          propProperties.put("type",property.typeName());
+        }
+        propProperties.put("isCollection",property.isCollection());
+        PropertyConverter databaseConverter=property.databaseConverter(securityContext,null);
+        PropertyConverter inputConverter=property.inputConverter(securityContext);
+        if (databaseConverter != null) {
+          propProperties.put("databaseConverter",databaseConverter.getClass().getName());
+        }
+        if (inputConverter != null) {
+          propProperties.put("inputConverter",inputConverter.getClass().getName());
+        }
+        propertyConverterMap.put(property.jsonName(),propProperties);
+      }
+      views.put(view,propertyConverterMap);
+    }
+  }
+  return new Result(resultList,resultList.size(),false,false);
+}

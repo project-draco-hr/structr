@@ -1,0 +1,30 @@
+{
+  if (uuidResource != null) {
+    throw new IllegalPathException();
+  }
+  final List<? extends GraphObject> templates=doGet(null,false,NodeFactory.DEFAULT_PAGE_SIZE,NodeFactory.DEFAULT_PAGE,null).getResults();
+  if (parentResults) {
+    return super.doPost(propertySet);
+  }
+ else   if (!templates.isEmpty()) {
+    String surroundingComponentId=null;
+    if (wrappedResource != null && wrappedResource instanceof UuidResource) {
+      surroundingComponentId=((UuidResource)wrappedResource).getUuid();
+    }
+ else     if (!nestedResources.isEmpty()) {
+      final DynamicTypeResource nested=nestedResources.get(nestedResources.size() - 1);
+      if (nested.uuidResource != null) {
+        surroundingComponentId=nested.uuidResource.getUuid();
+      }
+    }
+    final Component newComponent=duplicateComponent(securityContext,propertySet,rawType,surroundingComponentId);
+    final RestMethodResult result=new RestMethodResult(201);
+    if (newComponent != null) {
+      result.addHeader("Location",buildLocationHeader(newComponent));
+    }
+    return result;
+  }
+ else {
+    return super.doPost(propertySet);
+  }
+}

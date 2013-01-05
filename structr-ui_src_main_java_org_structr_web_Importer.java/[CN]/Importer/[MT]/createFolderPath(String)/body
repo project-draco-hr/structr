@@ -1,0 +1,16 @@
+{
+  if (path == null) {
+    return null;
+  }
+  String[] parts=StringUtils.split(path,"/");
+  Folder folder=null;
+  for (  String part : parts) {
+    Folder parent=folder;
+    folder=findOrCreateFolder(part);
+    if (parent != null) {
+      createRel.execute(parent,folder,RelType.CONTAINS);
+    }
+    indexNode.update(folder);
+  }
+  return folder;
+}

@@ -1,0 +1,15 @@
+{
+  final int x=0;
+  if (next instanceof UuidResource) {
+    this.uuidResource=(UuidResource)next;
+    return this;
+  }
+ else   if (next instanceof DynamicTypeResource) {
+    ((DynamicTypeResource)next).nestedResources.add(this);
+    return next;
+  }
+ else   if (next instanceof TypeResource) {
+    throw new IllegalPathException();
+  }
+  return super.tryCombineWith(next);
+}

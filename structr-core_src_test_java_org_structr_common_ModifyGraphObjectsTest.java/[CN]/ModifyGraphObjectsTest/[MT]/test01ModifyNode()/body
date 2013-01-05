@@ -1,0 +1,41 @@
+{
+  try {
+    AbstractNode node;
+    final PropertyMap props=new PropertyMap();
+    String type="UnknownTestType";
+    String name="GenericNode-name";
+    props.put(AbstractNode.type,type);
+    props.put(AbstractNode.name,name);
+    node=(AbstractNode)transactionCommand.execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        return (AbstractNode)createNodeCommand.execute(props);
+      }
+    }
+);
+    assertTrue(node.getProperty(AbstractNode.type).equals(type));
+    assertTrue(node.getProperty(AbstractNode.name).equals(name));
+    assertTrue(!node.getBooleanProperty(AbstractNode.hidden));
+    assertTrue(!node.getBooleanProperty(AbstractNode.deleted));
+    assertTrue(!node.getBooleanProperty(AbstractNode.visibleToAuthenticatedUsers));
+    assertTrue(!node.getBooleanProperty(AbstractNode.visibleToPublicUsers));
+    name="GenericNode-name-????????";
+    node.setProperty(AbstractNode.name,name);
+    assertTrue(node.getProperty(AbstractNode.name).equals(name));
+    node.setProperty(AbstractNode.hidden,true);
+    assertTrue(node.getBooleanProperty(AbstractNode.hidden));
+    node.setProperty(AbstractNode.hidden,false);
+    assertFalse(node.getBooleanProperty(AbstractNode.hidden));
+    node.setProperty(AbstractNode.deleted,true);
+    assertTrue(node.getBooleanProperty(AbstractNode.deleted));
+    node.setProperty(AbstractNode.deleted,false);
+    assertFalse(node.getBooleanProperty(AbstractNode.deleted));
+    node.setProperty(AbstractNode.visibleToAuthenticatedUsers,true);
+    assertTrue(node.getBooleanProperty(AbstractNode.visibleToAuthenticatedUsers));
+    node.setProperty(AbstractNode.visibleToPublicUsers,true);
+    assertTrue(node.getBooleanProperty(AbstractNode.visibleToPublicUsers));
+  }
+ catch (  FrameworkException ex) {
+    logger.log(Level.SEVERE,ex.toString());
+    fail("Unexpected exception");
+  }
+}

@@ -1,0 +1,13 @@
+{
+  GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
+  RelationshipFactory<T> relationshipFactory=new RelationshipFactory<T>(securityContext);
+  if (graphDb != null) {
+    try {
+      return relationshipFactory.instantiateRelationship(securityContext,graphDb.getRelationshipById(Long.parseLong(idString)));
+    }
+ catch (    NumberFormatException ex) {
+      logger.log(Level.FINE,"Could not parse {0} to number",idString);
+    }
+  }
+  return null;
+}

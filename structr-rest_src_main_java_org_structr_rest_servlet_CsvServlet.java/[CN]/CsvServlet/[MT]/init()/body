@@ -1,0 +1,10 @@
+{
+  for (  RelationshipMapping relMapping : EntityContext.getNamedRelations()) {
+    resourceMap.put(Pattern.compile(relMapping.getName()),NamedRelationResource.class);
+  }
+  resourceMap.putAll(resourceProvider.getResources());
+  this.propertyView=new ThreadLocalPropertyView();
+  this.resultGsonAdapter=new ResultGSONAdapter(propertyView,defaultIdProperty);
+  this.jsonInputAdapter=new JsonInputGSONAdapter(propertyView,defaultIdProperty);
+  this.gson=new GsonBuilder().setPrettyPrinting().serializeNulls().registerTypeHierarchyAdapter(FrameworkException.class,new FrameworkExceptionGSONAdapter()).registerTypeAdapter(JsonInput.class,jsonInputAdapter).registerTypeAdapter(Result.class,resultGsonAdapter).create();
+}

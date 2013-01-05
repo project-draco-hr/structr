@@ -1,0 +1,60 @@
+{
+  init();
+  try {
+    String uuid=node.getProperty(AbstractNode.uuid);
+    Node dbNode=node.getNode();
+    long id=node.getId();
+    if (uuid == null) {
+      return;
+    }
+    Map<String,Set<PropertyKey>> searchablePropertyIndexMap=EntityContext.getSearchablePropertyMapForType(node.getClass());
+    for (    Entry<String,Set<PropertyKey>> entry : searchablePropertyIndexMap.entrySet()) {
+      Set<PropertyKey> searchableProperties=entry.getValue();
+      String indexName=entry.getKey();
+      for (      PropertyKey key : searchableProperties) {
+        boolean emptyKey=StringUtils.isEmpty(key.dbName());
+        if (emptyKey) {
+          logger.log(Level.SEVERE,"Node {0} has empty, not-null key, removing property",new Object[]{id});
+          dbNode.removeProperty(key.dbName());
+          return;
+        }
+        Object valueForIndexing=node.getPropertyForIndexing(key);
+        Object value=node.getProperty(key);
+        if ((value == null && key.databaseConverter(securityContext,null) == null) || (value != null && value instanceof String && StringUtils.isEmpty((String)value))) {
+          valueForIndexing=SearchNodeCommand.IMPROBABLE_SEARCH_VALUE;
+        }
+        if (valueForIndexing != null) {
+          addNodePropertyToIndex(dbNode,key,valueForIndexing,indexName);
+          if ((node instanceof Principal) && (key.equals(AbstractNode.name) || key.equals(Person.email))) {
+            addNodePropertyToIndex(dbNode,key,valueForIndexing,NodeService.NodeIndex.user.name());
+          }
+          if (key.equals(AbstractNode.uuid)) {
+            addNodePropertyToIndex(dbNode,key,valueForIndexing,NodeService.NodeIndex.uuid.name());
+          }
+        }
+      }
+    }
+    if ((dbNode.hasProperty(Location.latitude.dbName())) && (dbNode.hasProperty(Location.longitude.dbName()))) {
+      Object lat=dbNode.getProperty(Location.latitude.dbName());
+      Object lon=dbNode.getProperty(Location.longitude.dbName());
+      if (lat instanceof Double && lon instanceof Double && !((Double)lat).isNaN()&& !((Double)lon).isNaN()) {
+        LayerNodeIndex layerIndex=(LayerNodeIndex)indices.get(NodeService.NodeIndex.layer.name());
+        try {
+synchronized (layerIndex) {
+            layerIndex.add(dbNode,"","");
+          }
+        }
+ catch (        NotFoundException nfe) {
+          logger.log(Level.SEVERE,"Could not add node to layer index because the db could not find the node",nfe);
+        }
+catch (        Throwable t) {
+          logger.log(Level.SEVERE,"Could not add node to layer index",t);
+        }
+      }
+    }
+  }
+ catch (  Throwable t) {
+    t.printStackTrace();
+    logger.log(Level.WARNING,"Unable to index node {0}: {1}",new Object[]{node.getNode().getId(),t.getMessage()});
+  }
+}

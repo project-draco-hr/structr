@@ -1,0 +1,17 @@
+{
+  if (!list.isEmpty()) {
+    PropertyKey finalSortKey=sortKey;
+    String finalSortOrder=sortDescending ? "desc" : "asc";
+    if (finalSortKey == null) {
+      final GraphObject obj=list.get(0);
+      final PropertyKey defaultSort=obj.getDefaultSortKey();
+      if (defaultSort != null) {
+        finalSortKey=defaultSort;
+        finalSortOrder=obj.getDefaultSortOrder();
+      }
+    }
+    if (finalSortKey != null) {
+      Collections.sort(list,new GraphObjectComparator(finalSortKey,finalSortOrder));
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  final Iterator<T> iterator=nodes.iterator();
+  long objectCount=0L;
+  while (iterator.hasNext()) {
+    try {
+      objectCount+=Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction<Integer>(){
+        @Override public Integer execute() throws FrameworkException {
+          int count=0;
+          while (iterator.hasNext()) {
+            T node=iterator.next();
+            try {
+              operation.handleGraphObject(securityContext,node);
+            }
+ catch (            Throwable t) {
+              operation.handleThrowable(securityContext,t,node);
+            }
+            if (++count >= commitCount) {
+              break;
+            }
+          }
+          return count;
+        }
+      }
+);
+    }
+ catch (    Throwable t) {
+      operation.handleTransactionFailure(securityContext,t);
+    }
+    logger.log(Level.INFO,"{0}: {1} objects processed",new Object[]{description,objectCount});
+  }
+  return objectCount;
+}

@@ -1,0 +1,15 @@
+{
+  if (contentNodes.containsKey(key.dbName())) {
+    AbstractNode node=contentNodes.get(key.dbName());
+    if ((node != null) && (node != this)) {
+      return (T)node.getProperty(Content.content);
+    }
+  }
+ else   if (subTypes.contains(EntityContext.normalizeEntityName(key.dbName()))) {
+    String componentId=getProperty(AbstractNode.uuid);
+    List<Component> results=new LinkedList<Component>();
+    collectChildren(results,this,componentId,0,null);
+    return (T)results;
+  }
+  return super.getProperty(key);
+}

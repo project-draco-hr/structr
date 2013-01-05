@@ -1,0 +1,36 @@
+{
+  try {
+    final PropertyMap props=new PropertyMap();
+    String type="UnknownTestType";
+    String name="GenericNode-name";
+    props.put(AbstractNode.type,type);
+    props.put(AbstractNode.name,name);
+    final AbstractNode node=transactionCommand.execute(new StructrTransaction<AbstractNode>(){
+      @Override public AbstractNode execute() throws FrameworkException {
+        return createNodeCommand.execute(props);
+      }
+    }
+);
+    assertTrue(node != null);
+    String uuid=node.getUuid();
+    transactionCommand.execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        deleteNodeCommand.execute(node);
+        return null;
+      }
+    }
+);
+    try {
+      List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
+      attrs.add(Search.andExactUuid(uuid));
+      Result result=searchNodeCommand.execute(attrs);
+      assertEquals("Node should have been deleted",0,result.size());
+    }
+ catch (    FrameworkException fe) {
+    }
+  }
+ catch (  FrameworkException ex) {
+    logger.log(Level.SEVERE,ex.toString());
+    fail("Unexpected exception");
+  }
+}

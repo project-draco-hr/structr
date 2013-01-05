@@ -1,0 +1,43 @@
+{
+  String path=request.getPathInfo();
+  if (!StringUtils.isNotBlank(path)) {
+    throw new NoResultsException();
+  }
+  String[] pathParts=path.split("[/]+");
+  List<Resource> constraintChain=new ArrayList<Resource>(pathParts.length);
+  for (int i=0; i < pathParts.length; i++) {
+    String part=pathParts[i].trim();
+    if (part.length() > 0) {
+      boolean found=false;
+      for (      Map.Entry<Pattern,Class<? extends Resource>> entry : resourceMap.entrySet()) {
+        Pattern pattern=entry.getKey();
+        Matcher matcher=pattern.matcher(pathParts[i]);
+        if (matcher.matches()) {
+          Class<? extends Resource> type=entry.getValue();
+          Resource resource=null;
+          try {
+            resource=type.newInstance();
+          }
+ catch (          Throwable t) {
+            logger.log(Level.WARNING,"Error instantiating constraint class",t);
+          }
+          if (resource != null) {
+            resource.setSecurityContext(securityContext);
+            if (resource.checkAndConfigure(part,securityContext,request)) {
+              logger.log(Level.FINE,"{0} matched, adding constraint of type {1} for part {2}",new Object[]{matcher.pattern(),type.getName(),part});
+              resource.configurePropertyView(propertyView);
+              resource.configureIdProperty(defaultIdProperty);
+              constraintChain.add(resource);
+              found=true;
+              break;
+            }
+          }
+        }
+      }
+      if (!found) {
+        throw new NotFoundException();
+      }
+    }
+  }
+  return constraintChain;
+}

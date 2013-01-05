@@ -1,0 +1,92 @@
+{
+  List<AbstractRelationship> thumbnailRelationships=getThumbnailRelationships();
+  final List<Image> oldThumbnails=new LinkedList();
+  Image thumbnail=null;
+  final Image originalImage=this;
+  Integer origWidth=originalImage.getWidth();
+  Integer origHeight=originalImage.getHeight();
+  Long currentChecksum=originalImage.getProperty(Image.checksum);
+  final Long newChecksum;
+  if (currentChecksum == null || currentChecksum == 0) {
+    newChecksum=FileHelper.getChecksum(originalImage);
+  }
+ else {
+    newChecksum=currentChecksum;
+  }
+  if ((origWidth != null) && (origHeight != null)) {
+    if ((thumbnailRelationships != null) && !(thumbnailRelationships.isEmpty())) {
+      for (      final AbstractRelationship r : thumbnailRelationships) {
+        Integer w=(Integer)r.getProperty(Image.width);
+        Integer h=(Integer)r.getProperty(Image.height);
+        if ((w != null) && (h != null)) {
+          if (((w == maxWidth) && (h <= maxHeight)) || ((w <= maxWidth) && (h == maxHeight)) || ((origWidth <= w) && (origHeight <= h))) {
+            thumbnail=(Image)r.getEndNode();
+            Long storedChecksum=r.getProperty(Image.checksum);
+            if (storedChecksum != null && storedChecksum.equals(newChecksum)) {
+              return thumbnail;
+            }
+ else {
+              oldThumbnails.add(thumbnail);
+            }
+          }
+        }
+      }
+    }
+  }
+  logger.log(Level.FINE,"Creating thumbnail for {0}",getName());
+  try {
+    thumbnail=Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction<Image>(){
+      @Override public Image execute() throws FrameworkException {
+        try {
+          originalImage.setChecksum(newChecksum);
+        }
+ catch (        Exception ex) {
+          logger.log(Level.SEVERE,"Could not store checksum for original image",ex);
+        }
+        CreateRelationshipCommand createRel=Services.command(securityContext,CreateRelationshipCommand.class);
+        Thumbnail thumbnailData=ImageHelper.createThumbnail(originalImage,maxWidth,maxHeight,cropToFit);
+        if (thumbnailData != null) {
+          Integer tnWidth=thumbnailData.getWidth();
+          Integer tnHeight=thumbnailData.getHeight();
+          Image thumbnail=null;
+          byte[] data=null;
+          try {
+            data=thumbnailData.getBytes();
+            thumbnail=ImageHelper.createImage(securityContext,data,"image/" + Thumbnail.FORMAT,Image.class,true);
+          }
+ catch (          IOException ex) {
+            logger.log(Level.WARNING,"Could not create thumbnail image",ex);
+          }
+          if (thumbnail != null) {
+            AbstractRelationship thumbnailRelationship=createRel.execute(originalImage,thumbnail,RelType.THUMBNAIL,true);
+            thumbnailRelationship.setProperty(AbstractRelationship.cascadeDelete,Relation.DELETE_OUTGOING);
+            long size=data.length;
+            thumbnail.setSize(size);
+            thumbnail.setName(originalImage.getName() + "_thumb_" + tnWidth+ "x"+ tnHeight);
+            thumbnail.setWidth(tnWidth);
+            thumbnail.setHeight(tnHeight);
+            thumbnail.setProperty(Image.hidden,originalImage.getProperty(Image.hidden));
+            thumbnail.setProperty(Image.visibleToAuthenticatedUsers,originalImage.getProperty(Image.visibleToAuthenticatedUsers));
+            thumbnail.setProperty(Image.visibleToPublicUsers,originalImage.getProperty(Image.visibleToPublicUsers));
+            thumbnailRelationship.setProperty(Image.width,tnWidth);
+            thumbnailRelationship.setProperty(Image.height,tnHeight);
+            thumbnailRelationship.setProperty(Image.checksum,newChecksum);
+            for (            Image tn : oldThumbnails) {
+              tn.setDeleted(true);
+            }
+          }
+          return thumbnail;
+        }
+ else {
+          logger.log(Level.WARNING,"Could not create thumbnail for image {0} ({1})",new Object[]{getName(),getId()});
+          return null;
+        }
+      }
+    }
+);
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"Unable to create thumbnail",fex);
+  }
+  return thumbnail;
+}

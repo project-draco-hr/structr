@@ -1,0 +1,16 @@
+{
+  DeleteNodeCommand deleteNode=Services.command(securityContext,DeleteNodeCommand.class);
+  for (  AbstractRelationship s : getThumbnailRelationships()) {
+    AbstractNode thumbnail=s.getEndNode();
+    if (((Image)thumbnail).equals(this)) {
+      logger.log(Level.SEVERE,"Attempted to remove me as thumbnail!!");
+      continue;
+    }
+    try {
+      deleteNode.execute(thumbnail,true);
+    }
+ catch (    FrameworkException fex) {
+      logger.log(Level.WARNING,"Unable to remove thumbnail",fex);
+    }
+  }
+}

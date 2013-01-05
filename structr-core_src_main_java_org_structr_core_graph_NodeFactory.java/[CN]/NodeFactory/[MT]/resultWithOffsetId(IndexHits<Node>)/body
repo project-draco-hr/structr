@@ -1,0 +1,55 @@
+{
+  int size=input.size();
+  final int pageSize=Math.min(size,factoryProfile.getPageSize());
+  final int page=factoryProfile.getPage();
+  final String offsetId=factoryProfile.getOffsetId();
+  List<AbstractNode> nodes=new LinkedList<AbstractNode>();
+  int position=0;
+  int count=0;
+  int offset=0;
+  List<AbstractNode> nodesUpToOffset=new LinkedList();
+  int i=0;
+  boolean gotOffset=false;
+  for (  Node node : input) {
+    AbstractNode n=createNode(node);
+    nodesUpToOffset.add(n);
+    if (!gotOffset) {
+      if (!offsetId.equals(n.getUuid())) {
+        i++;
+        continue;
+      }
+      gotOffset=true;
+      offset=page > 0 ? i : i + (page * pageSize);
+      break;
+    }
+  }
+  if (!gotOffset) {
+    throw new FrameworkException("offsetId",new IdNotFoundToken(offsetId));
+  }
+  if (offset < 0) {
+    nodesUpToOffset.remove(nodesUpToOffset.size() - 1);
+    return new Result(nodesUpToOffset,size,true,false);
+  }
+  for (  AbstractNode node : nodesUpToOffset) {
+    if (node != null) {
+      if (++position > offset) {
+        if (++count > pageSize) {
+          return new Result(nodes,size,true,false);
+        }
+        nodes.add(node);
+      }
+    }
+  }
+  for (  Node node : input) {
+    AbstractNode n=createNode(node);
+    if (n != null) {
+      if (++position > offset) {
+        if (++count > pageSize) {
+          return new Result(nodes,size,true,false);
+        }
+        nodes.add(n);
+      }
+    }
+  }
+  return new Result(nodes,size,true,false);
+}

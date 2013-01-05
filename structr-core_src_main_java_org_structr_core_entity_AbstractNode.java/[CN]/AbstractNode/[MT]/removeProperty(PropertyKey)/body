@@ -1,0 +1,23 @@
+{
+  if (this.dbNode != null) {
+    if (key == null) {
+      logger.log(Level.SEVERE,"Tried to set property with null key (action was denied)");
+      return;
+    }
+    if (key.isReadOnlyProperty()) {
+      if (readOnlyPropertiesUnlocked) {
+        readOnlyPropertiesUnlocked=false;
+      }
+ else {
+        throw new FrameworkException(this.getType(),new ReadOnlyPropertyToken(key));
+      }
+    }
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        dbNode.removeProperty(key.dbName());
+        return null;
+      }
+    }
+);
+  }
+}

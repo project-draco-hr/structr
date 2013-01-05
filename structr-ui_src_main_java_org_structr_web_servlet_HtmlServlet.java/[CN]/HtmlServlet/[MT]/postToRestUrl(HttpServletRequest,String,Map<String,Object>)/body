@@ -1,0 +1,30 @@
+{
+  HttpClient httpClient=new HttpClient();
+  ContentExchange contentExchange;
+  String restUrl=null;
+  gson=new GsonBuilder().create();
+  try {
+    httpClient.start();
+    contentExchange=new ContentExchange();
+    httpClient.setConnectorType(HttpClient.CONNECTOR_SELECT_CHANNEL);
+    request.setCharacterEncoding("UTF-8");
+    restUrl=request.getScheme() + "://" + request.getServerName()+ ":"+ request.getLocalPort()+ Services.getRestPath()+ "/"+ pagePath;
+    contentExchange.setURL(restUrl);
+    Buffer buf=new ByteArrayBuffer(gson.toJson(parameters),"UTF-8");
+    contentExchange.setRequestContent(buf);
+    contentExchange.setRequestContentType("application/json;charset=UTF-8");
+    contentExchange.setMethod("POST");
+    String[] userAndPass=HttpAuthenticator.getUsernameAndPassword(request);
+    if ((userAndPass != null) && (userAndPass.length == 2) && (userAndPass[0] != null)&& (userAndPass[1] != null)) {
+      contentExchange.addRequestHeader("X-User",userAndPass[0]);
+      contentExchange.addRequestHeader("X-Password",userAndPass[1]);
+    }
+    httpClient.send(contentExchange);
+    contentExchange.waitForDone();
+    return contentExchange.getResponseContent();
+  }
+ catch (  Exception ex) {
+    logger.log(Level.WARNING,"Error while POSTing to REST url " + restUrl,ex);
+    return null;
+  }
+}

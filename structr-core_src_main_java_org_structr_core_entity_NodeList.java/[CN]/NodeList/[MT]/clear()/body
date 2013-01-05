@@ -1,0 +1,16 @@
+{
+  try {
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        for (        Node node : getRawNodes()) {
+          removeNodeFromList(node);
+        }
+        return (null);
+      }
+    }
+);
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"Unable to clear this list",fex);
+  }
+}

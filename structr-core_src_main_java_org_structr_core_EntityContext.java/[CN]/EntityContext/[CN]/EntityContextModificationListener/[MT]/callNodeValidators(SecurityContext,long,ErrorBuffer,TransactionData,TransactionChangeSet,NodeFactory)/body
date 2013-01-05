@@ -1,0 +1,24 @@
+{
+  boolean hasError=false;
+  for (  PropertyEntry<Node> entry : data.assignedNodeProperties()) {
+    AbstractNode nodeEntity=nodeFactory.createNode(entry.entity(),true,false);
+    if (nodeEntity != null) {
+      PropertyKey key=getPropertyKeyForDatabaseName(nodeEntity.getClass(),entry.key());
+      Object value=entry.value();
+      if (!key.isSystemProperty()) {
+        changeSet.nonSystemProperty();
+        changeSet.modify(nodeEntity);
+      }
+      Set<PropertyValidator> validators=EntityContext.getPropertyValidators(securityContext,nodeEntity.getClass(),key);
+      if (validators != null) {
+        for (        PropertyValidator validator : validators) {
+          hasError|=!(validator.isValid(nodeEntity,key,value,errorBuffer));
+        }
+      }
+      for (      StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
+        hasError|=!listener.propertyModified(securityContext,transactionKey,errorBuffer,nodeEntity,key,entry.previouslyCommitedValue(),value);
+      }
+    }
+  }
+  return hasError;
+}

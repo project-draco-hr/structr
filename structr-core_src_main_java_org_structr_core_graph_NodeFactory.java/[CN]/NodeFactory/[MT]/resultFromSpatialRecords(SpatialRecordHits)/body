@@ -1,0 +1,37 @@
+{
+  final int pageSize=factoryProfile.getPageSize();
+  final int page=factoryProfile.getPage();
+  final SecurityContext securityContext=factoryProfile.getSecurityContext();
+  final boolean includeDeletedAndHidden=factoryProfile.includeDeletedAndHidden();
+  final boolean publicOnly=factoryProfile.publicOnly();
+  List<AbstractNode> nodes=new LinkedList<AbstractNode>();
+  int position=0;
+  int count=0;
+  int offset=0;
+  int size=spatialRecordHits.size();
+  GraphDatabaseCommand graphDbCommand=Services.command(securityContext,GraphDatabaseCommand.class);
+  GraphDatabaseService graphDb=graphDbCommand.execute();
+  for (  Node node : spatialRecordHits) {
+    Long dbNodeId=null;
+    Node realNode=node;
+    if (realNode != null) {
+      AbstractNode n=createNode(realNode);
+      nodes.add(n);
+      if (n != null) {
+        List<AbstractNode> nodesAt=getNodesAt(n);
+        size+=nodesAt.size();
+        for (        AbstractNode nodeAt : nodesAt) {
+          if (nodeAt != null && securityContext.isReadable(nodeAt,includeDeletedAndHidden,publicOnly)) {
+            if (++position > offset) {
+              if (++count > pageSize) {
+                return new Result(nodes,size,true,false);
+              }
+              nodes.add(nodeAt);
+            }
+          }
+        }
+      }
+    }
+  }
+  return new Result(nodes,size,true,false);
+}

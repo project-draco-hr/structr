@@ -1,0 +1,15 @@
+{
+  Object obj=row.get(columnName);
+  try {
+    if (obj instanceof Node) {
+      return nodeFactory.createNode((Node)obj);
+    }
+    if (obj instanceof Relationship) {
+      return relFactory.instantiateRelationship(securityContext,(Relationship)obj);
+    }
+  }
+ catch (  Throwable ignore) {
+    logger.log(Level.WARNING,"Unable to instantiate node {0}",obj);
+  }
+  return null;
+}

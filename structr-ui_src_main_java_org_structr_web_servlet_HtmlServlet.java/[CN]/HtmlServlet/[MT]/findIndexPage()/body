@@ -1,0 +1,12 @@
+{
+  logger.log(Level.FINE,"Looking for an index page ...");
+  List<SearchAttribute> searchAttrs=new LinkedList<SearchAttribute>();
+  searchAttrs.add(Search.orExactType(Page.class.getSimpleName()));
+  Result results=(Result)searchNodesAsSuperuser.execute(searchAttrs);
+  logger.log(Level.FINE,"{0} results",results.size());
+  if (!results.isEmpty()) {
+    Collections.sort(results.getResults(),new GraphObjectComparator(Page.position,AbstractNodeComparator.ASCENDING));
+    return (Page)results.get(0);
+  }
+  return null;
+}

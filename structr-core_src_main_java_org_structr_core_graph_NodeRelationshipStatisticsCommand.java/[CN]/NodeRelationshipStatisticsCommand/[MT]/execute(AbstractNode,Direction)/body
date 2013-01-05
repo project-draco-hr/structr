@@ -1,0 +1,32 @@
+{
+  Map<RelationshipType,Long> statistics=new LinkedHashMap<RelationshipType,Long>();
+  Iterable<Relationship> rels=null;
+  Node node=sNode.getNode();
+  if (dir != null) {
+    rels=node.getRelationships(dir);
+  }
+ else {
+    rels=node.getRelationships();
+  }
+  try {
+    Map<RelationshipType,LongValueHolder> values=new LinkedHashMap<RelationshipType,LongValueHolder>();
+    for (    Relationship r : rels) {
+      RelationshipType relType=r.getType();
+      LongValueHolder count=values.get(relType);
+      if (count == null) {
+        count=new LongValueHolder();
+        values.put(relType,count);
+      }
+      count.inc();
+    }
+    for (    Entry<RelationshipType,LongValueHolder> entry : values.entrySet()) {
+      RelationshipType key=entry.getKey();
+      LongValueHolder value=entry.getValue();
+      statistics.put(key,value.getValue());
+    }
+  }
+ catch (  RuntimeException e) {
+    logger.log(Level.WARNING,"Exception occured.",e);
+  }
+  return statistics;
+}

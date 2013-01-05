@@ -1,0 +1,28 @@
+{
+  final String type=this.getClass().getSimpleName();
+  final PropertyKey key=getStartNodeIdKey();
+  if (endNodeId == null) {
+    throw new FrameworkException(type,new NullPropertyToken(key));
+  }
+  if (getEndNodeId().equals(endNodeId)) {
+    return;
+  }
+  Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+    @Override public Object execute() throws FrameworkException {
+      DeleteRelationshipCommand deleteRel=Services.command(securityContext,DeleteRelationshipCommand.class);
+      CreateRelationshipCommand createRel=Services.command(securityContext,CreateRelationshipCommand.class);
+      AbstractNode startNode=getStartNode();
+      AbstractNode newEndNode=getNodeByUuid(endNodeId);
+      if (newEndNode == null) {
+        throw new FrameworkException(type,new IdNotFoundToken(endNodeId));
+      }
+      RelationshipType type=dbRelationship.getType();
+      properties=getProperties();
+      deleteRel.execute(dbRelationship);
+      AbstractRelationship newRel=(AbstractRelationship)createRel.execute(startNode,newEndNode,type,properties,false);
+      dbRelationship=newRel.getRelationship();
+      return (null);
+    }
+  }
+);
+}

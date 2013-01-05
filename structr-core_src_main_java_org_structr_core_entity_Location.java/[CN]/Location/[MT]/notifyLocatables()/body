@@ -1,0 +1,10 @@
+{
+  boolean allLocatablesAreValid=false;
+  for (  AbstractRelationship rel : this.getRelationships()) {
+    AbstractNode otherNode=rel.getOtherNode(this);
+    if (otherNode != null && otherNode instanceof Locatable) {
+      allLocatablesAreValid|=!((Locatable)otherNode).locationChanged();
+    }
+  }
+  return allLocatablesAreValid;
+}

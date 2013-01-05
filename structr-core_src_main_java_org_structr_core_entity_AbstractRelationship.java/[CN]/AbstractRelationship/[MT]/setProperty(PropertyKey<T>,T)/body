@@ -1,0 +1,21 @@
+{
+  PropertyKey startNodeIdKey=getStartNodeIdKey();
+  PropertyKey endNodeIdKey=getEndNodeIdKey();
+  if ((startNodeIdKey != null) && key.equals(startNodeIdKey)) {
+    setStartNodeId((String)value);
+    return;
+  }
+  if ((endNodeIdKey != null) && key.equals(endNodeIdKey)) {
+    setEndNodeId((String)value);
+    return;
+  }
+  if (key.isReadOnlyProperty() || (key.isWriteOnceProperty() && (dbRelationship != null) && dbRelationship.hasProperty(key.dbName()))) {
+    if (readOnlyPropertiesUnlocked) {
+      readOnlyPropertiesUnlocked=false;
+    }
+ else {
+      throw new FrameworkException(getClass().getSimpleName(),new ReadOnlyPropertyToken(key));
+    }
+  }
+  key.setProperty(securityContext,this,value);
+}

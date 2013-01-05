@@ -1,0 +1,12 @@
+{
+  try {
+    DeleteNodeCommand deleteCommand=Services.command(securityContext,DeleteNodeCommand.class);
+    boolean cascade=true;
+    for (    AbstractNode contentNode : contentNodes.values()) {
+      deleteCommand.execute(contentNode,cascade);
+    }
+  }
+ catch (  Throwable t) {
+    logger.log(Level.SEVERE,"Exception while deleting nested Components: {0}",t.getMessage());
+  }
+}

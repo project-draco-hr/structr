@@ -1,3 +1,17 @@
 {
-  throw new UnsupportedOperationException("Not supported yet.");
+  final String elementType=EntityContext.normalizeEntityName(tag);
+  try {
+    return Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction<HtmlElement>(){
+      @Override public HtmlElement execute() throws FrameworkException {
+        HtmlElement element=(HtmlElement)Services.command(securityContext,CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.type,elementType));
+        Page.elements.createRelationship(securityContext,Page.this,element);
+        return element;
+      }
+    }
+);
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+  }
+  return null;
 }

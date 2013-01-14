@@ -6,24 +6,24 @@
   if (edit && inBody) {
     buffer.append("<span structr_content_id=\"").append(id).append("\">");
   }
-  String content=getPropertyWithVariableReplacement(renderContext,Content.content);
-  String contentType=getProperty(Content.contentType);
-  if (contentType != null) {
-    Adapter<String,String> converter=contentConverters.get(contentType);
+  String _content=getPropertyWithVariableReplacement(renderContext,Content.content);
+  String _contentType=getProperty(Content.contentType);
+  if (_contentType != null) {
+    Adapter<String,String> converter=contentConverters.get(_contentType);
     if (converter != null) {
       try {
-        content=converter.adapt(content);
+        _content=converter.adapt(_content);
       }
  catch (      FrameworkException fex) {
         logger.log(Level.WARNING,"Unable to convert content: {0}",fex.getMessage());
       }
     }
   }
-  if (((contentType == null) || contentType.equals("text/plain")) && (content != null) && !content.isEmpty()) {
-    content=content.replaceAll("[\\n]{1}","<br>");
+  if (((_contentType == null) || _contentType.equals("text/plain")) && (_content != null) && !_content.isEmpty()) {
+    _content=_content.replaceAll("[\\n]{1}","<br>");
   }
-  if (content != null) {
-    buffer.append(indent(depth,true)).append(content);
+  if (_content != null) {
+    buffer.append(indent(depth,true)).append(_content);
   }
   if (edit && inBody) {
     buffer.append("</span>");

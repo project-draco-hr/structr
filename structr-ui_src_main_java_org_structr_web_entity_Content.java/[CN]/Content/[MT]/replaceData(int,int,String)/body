@@ -1,4 +1,16 @@
 {
   checkWriteAccess();
-  throw new UnsupportedOperationException("Not supported yet.");
+  String text=getProperty(content);
+  String leftPart=text.substring(0,offset);
+  String rightPart=text.substring(offset + count);
+  StringBuilder buf=new StringBuilder(leftPart.length() + data.length() + rightPart.length());
+  buf.append(leftPart);
+  buf.append(data);
+  buf.append(rightPart);
+  try {
+    setProperty(content,buf.toString());
+  }
+ catch (  FrameworkException fex) {
+    throw new DOMException(DOMException.INVALID_STATE_ERR,fex.toString());
+  }
 }

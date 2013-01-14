@@ -1,0 +1,18 @@
+{
+  if (depth > MAX_DEPTH) {
+    return;
+  }
+  if (ref != null) {
+    if (startNode instanceof Component) {
+      children.add((Component)startNode);
+      return;
+    }
+  }
+  for (  AbstractRelationship rel : getChildRelationships(null,startNode)) {
+    AbstractNode endNode=rel.getEndNode();
+    if (endNode == null) {
+      continue;
+    }
+    collectChildren(children,endNode,depth + 1,rel);
+  }
+}

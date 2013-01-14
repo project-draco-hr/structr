@@ -1,0 +1,19 @@
+{
+  PropertyMap nodeData=new PropertyMap();
+  nodeData.put(AbstractNode.name,name != null ? name : type.toLowerCase());
+  nodeData.put(AbstractNode.visibleToPublicUsers,true);
+  PropertyMap relData=new PropertyMap();
+  if (page != null) {
+    String pageId=page.getUuid();
+    relData.put(new LongProperty(pageId),position);
+  }
+  nodeData.put(AbstractNode.type,type);
+  if (!Content.class.getSimpleName().equals(type)) {
+    nodeData.put(HtmlElement.tag,type.toLowerCase());
+  }
+  AbstractNode element=createNodeCommand.execute(nodeData);
+  if (parentElement != null) {
+    createRelationshipCommand.execute(parentElement,element,RelType.CONTAINS,relData,false);
+  }
+  return element;
+}

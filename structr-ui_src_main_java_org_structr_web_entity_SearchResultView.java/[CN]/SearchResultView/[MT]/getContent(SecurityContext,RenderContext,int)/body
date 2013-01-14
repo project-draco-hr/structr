@@ -1,0 +1,22 @@
+{
+  HttpServletRequest request=renderContext.getRequest();
+  Condition condition=renderContext.getCondition();
+  Page page=renderContext.getPage();
+  double startSearchResultView=System.nanoTime();
+  String searchString=(String)request.getParameter("search");
+  if ((request != null) && StringUtils.isNotBlank(searchString)) {
+    for (    Page resultPage : getResultPages(securityContext,page)) {
+      List<AbstractRelationship> rels=Component.getChildRelationships(request,resultPage);
+      for (      AbstractRelationship rel : rels) {
+        if ((condition == null) || ((condition != null) && condition.isSatisfied(request,rel))) {
+          HtmlElement subNode=(HtmlElement)rel.getEndNode();
+          if (subNode.isNotDeleted() && subNode.isNotDeleted()) {
+            subNode.getContent(securityContext,renderContext,depth + 1);
+          }
+        }
+      }
+    }
+  }
+  double endSearchResultView=System.nanoTime();
+  logger.log(Level.FINE,"Get graph objects for search {0} in {1} seconds",new java.lang.Object[]{searchString,decimalFormat.format((endSearchResultView - startSearchResultView) / 1000000000.0)});
+}

@@ -13,6 +13,7 @@
     String path=PathHelper.clean(request.getPathInfo());
     logger.log(Level.FINE,"Path info {0}",path);
     SecurityContext securityContext=SecurityContext.getInstance(this.getServletConfig(),request,response,AccessMode.Frontend);
+    RenderContext renderContext=RenderContext.getInstance(request,response,Locale.getDefault());
     org.structr.core.entity.File file=findFile(request,path);
     HtmlElement rootElement=null;
     String searchFor=null;
@@ -29,10 +30,6 @@
         rootElement=findPage(request,path);
       }
     }
-    edit=false;
-    if (request.getParameter("edit") != null) {
-      edit=true;
-    }
     AbstractNode node=file != null ? file : rootElement != null ? rootElement : null;
     if (edit || dontCache) {
       response.setHeader("Pragma","no-cache");
@@ -46,7 +43,6 @@
       request.getSession().setAttribute(LAST_GET_URL,request.getPathInfo());
       PrintWriter out=response.getWriter();
       String uuid=rootElement.getProperty(AbstractNode.uuid);
-      final StringBuilder buffer=new StringBuilder(8192);
       List<NodeAttribute> attrs=new LinkedList<NodeAttribute>();
       Map<String,String[]> parameterMap=request.getParameterMap();
       if ((parameterMap != null) && (parameterMap.size() > 0)) {
@@ -59,8 +55,8 @@
         out.close();
       }
  else {
-        rootElement.getContent(securityContext,buffer);
-        String content=buffer.toString();
+        rootElement.getContent(securityContext,renderContext,0);
+        String content=renderContext.getBuffer().toString();
         double end=System.nanoTime();
         logger.log(Level.FINE,"Content for path {0} in {1} seconds",new Object[]{path,decimalFormat.format((end - setup) / 1000000000.0)});
         String contentType=rootElement.getProperty(Page.contentType);
@@ -73,7 +69,6 @@
  else {
           response.setContentType("text/html;charset=UTF-8");
         }
-        out.append("<!DOCTYPE html>\n");
         HttpAuthenticator.writeContent(content,response);
       }
     }

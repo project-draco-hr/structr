@@ -1,0 +1,31 @@
+{
+  String id=getUuid();
+  boolean edit=renderContext.getEdit();
+  boolean inBody=renderContext.inBody();
+  StringBuilder buffer=renderContext.getBuffer();
+  if (edit && inBody) {
+    buffer.append("<span structr_content_id=\"").append(id).append("\">");
+  }
+  String content=getPropertyWithVariableReplacement(renderContext,Content.content);
+  String contentType=getProperty(Content.contentType);
+  if (contentType != null) {
+    Adapter<String,String> converter=contentConverters.get(contentType);
+    if (converter != null) {
+      try {
+        content=converter.adapt(content);
+      }
+ catch (      FrameworkException fex) {
+        logger.log(Level.WARNING,"Unable to convert content: {0}",fex.getMessage());
+      }
+    }
+  }
+  if (((contentType == null) || contentType.equals("text/plain")) && (content != null) && !content.isEmpty()) {
+    content=content.replaceAll("[\\n]{1}","<br>");
+  }
+  if (content != null) {
+    buffer.append(content);
+  }
+  if (edit && inBody) {
+    buffer.append("</span>");
+  }
+}

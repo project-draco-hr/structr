@@ -7,10 +7,7 @@
   String pageId=renderContext.getPageId();
   String id=getUuid();
   String tag=getProperty(HtmlElement.tag);
-  String ind="";
-  if (!avoidWhitespace()) {
-    ind=indent(depth,true);
-  }
+  buffer.append(indent(depth,true));
   if (StringUtils.isNotBlank(tag)) {
     renderContext.setInBody(tag.equals("body"));
     buffer.append("<").append(tag);
@@ -36,17 +33,6 @@
       }
     }
     buffer.append(">");
-    boolean whitespaceOnly=false;
-    int lastNewline=buffer.lastIndexOf("\n");
-    whitespaceOnly=StringUtils.isBlank((lastNewline > -1) ? buffer.substring(lastNewline) : buffer.toString());
-    if (!avoidWhitespace()) {
-      if (whitespaceOnly) {
-        buffer.replace(buffer.length() - 2,buffer.length(),"");
-      }
- else {
-        buffer.append(indent(depth - 1,true));
-      }
-    }
     List<AbstractRelationship> rels=Component.getChildRelationships(request,this);
     for (    AbstractRelationship rel : rels) {
       HtmlElement subNode=(HtmlElement)rel.getEndNode();
@@ -55,14 +41,9 @@
       }
     }
     if (StringUtils.isNotBlank(tag) && (!isVoid)) {
+      buffer.append(indent(depth,true));
       buffer.append("</").append(tag).append(">");
-      if (!avoidWhitespace()) {
-        buffer.append(indent(depth - 1,true));
-      }
     }
-  }
-  if (!isVoid) {
-    buffer.append(ind);
   }
   double end=System.nanoTime();
   logger.log(Level.FINE,"Render node {0} in {1} seconds",new java.lang.Object[]{getUuid(),decimalFormat.format((end - start) / 1000000000.0)});

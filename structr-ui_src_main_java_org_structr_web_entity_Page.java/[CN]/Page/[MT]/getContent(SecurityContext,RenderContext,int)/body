@@ -2,13 +2,13 @@
   HttpServletRequest request=securityContext.getRequest();
   Condition condition=renderContext.getCondition();
   renderContext.setPage(this);
-  renderContext.getBuffer().append("<!DOCTYPE html>\n");
+  renderContext.getBuffer().append("<!DOCTYPE html>");
   List<AbstractRelationship> rels=Component.getChildRelationships(request,this);
   for (  AbstractRelationship rel : rels) {
     if ((condition == null) || ((condition != null) && condition.isSatisfied(request,rel))) {
       HtmlElement subNode=(HtmlElement)rel.getEndNode();
       if (subNode.isNotDeleted() && subNode.isNotDeleted()) {
-        subNode.getContent(securityContext,renderContext,depth + 1);
+        subNode.getContent(securityContext,renderContext,depth);
       }
     }
   }

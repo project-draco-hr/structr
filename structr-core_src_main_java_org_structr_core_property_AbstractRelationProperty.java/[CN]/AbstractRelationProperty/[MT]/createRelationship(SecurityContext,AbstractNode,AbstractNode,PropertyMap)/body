@@ -11,6 +11,8 @@
         if (getCascadeDelete() > 0) {
           props.put(AbstractRelationship.cascadeDelete,new Integer(getCascadeDelete()));
         }
+        String tripleKey=EntityContext.createCombinedRelationshipType(declaringClass.getSimpleName(),relType.name(),destType.getSimpleName());
+        props.put(AbstractRelationship.combinedType,Search.clean(tripleKey));
         if (getDirection().equals(Direction.OUTGOING)) {
           newRel=createRel.execute(sourceNode,finalTargetNode,getRelType(),props,true);
         }

@@ -6,10 +6,10 @@
   String searchString=(String)request.getParameter("search");
   if ((request != null) && StringUtils.isNotBlank(searchString)) {
     for (    Page resultPage : getResultPages(securityContext,page)) {
-      List<AbstractRelationship> rels=Component.getChildRelationships(request,resultPage);
+      List<AbstractRelationship> rels=resultPage.getChildRelationships();
       for (      AbstractRelationship rel : rels) {
         if ((condition == null) || ((condition != null) && condition.isSatisfied(request,rel))) {
-          HtmlElement subNode=(HtmlElement)rel.getEndNode();
+          DOMElement subNode=(DOMElement)rel.getEndNode();
           if (subNode.isNotDeleted() && subNode.isNotDeleted()) {
             subNode.render(securityContext,renderContext,depth + 1);
           }

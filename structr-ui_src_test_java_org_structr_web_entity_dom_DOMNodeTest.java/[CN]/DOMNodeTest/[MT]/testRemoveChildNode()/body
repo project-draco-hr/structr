@@ -1,0 +1,46 @@
+{
+  Document document=getDocument();
+  Text test1=document.createTextNode("test1");
+  Text test2=document.createTextNode("test2");
+  Text test3=document.createTextNode("test3");
+  Text test4=document.createTextNode("test4");
+  Text test5=document.createTextNode("test5");
+  Text test6=document.createTextNode("test6");
+  assertNotNull(test1);
+  assertNotNull(test2);
+  assertNotNull(test3);
+  assertNotNull(test4);
+  assertNotNull(test5);
+  assertNotNull(test6);
+  Element div=document.createElement("div");
+  assertNotNull(div);
+  div.appendChild(test1);
+  div.appendChild(test2);
+  div.appendChild(test3);
+  div.appendChild(test4);
+  div.appendChild(test5);
+  NodeList children1=div.getChildNodes();
+  assertEquals(test1,children1.item(0));
+  assertEquals(test2,children1.item(1));
+  assertEquals(test3,children1.item(2));
+  assertEquals(test4,children1.item(3));
+  assertEquals(test5,children1.item(4));
+  div.removeChild(test3);
+  NodeList children2=div.getChildNodes();
+  assertEquals(test1,children2.item(0));
+  assertEquals(test2,children2.item(1));
+  assertEquals(test4,children2.item(2));
+  assertEquals(test5,children2.item(3));
+  div.removeChild(test1);
+  NodeList children3=div.getChildNodes();
+  assertEquals(test2,children3.item(0));
+  assertEquals(test4,children3.item(1));
+  assertEquals(test5,children3.item(2));
+  try {
+    div.removeChild(test6);
+    fail("Removing a node that is not a child of the given node should raise a DOMException");
+  }
+ catch (  DOMException dex) {
+    assertEquals(DOMException.NOT_FOUND_ERR,dex.code);
+  }
+}

@@ -1,5 +1,13 @@
 {
   StructrNodeList results=new StructrNodeList();
-  collectElementsByTagName(this,results,tagName,0);
+  collectElementsByPredicate(this,results,new Predicate<DOMElement>(){
+    @Override public boolean evaluate(    SecurityContext securityContext,    DOMElement... obj){
+      if (tagName.equals(obj[0].getProperty(DOMElement.tag))) {
+        return true;
+      }
+      return false;
+    }
+  }
+,0,false);
   return results;
 }

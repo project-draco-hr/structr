@@ -1,0 +1,18 @@
+{
+  if (startNode instanceof DOMNode) {
+    if (startNode instanceof DOMElement) {
+      if (predicate.evaluate(securityContext,(DOMElement)startNode)) {
+        results.add(startNode);
+        if (stopOnFirstHit) {
+          return;
+        }
+      }
+    }
+    NodeList _children=startNode.getChildNodes();
+    int len=_children.getLength();
+    for (int i=0; i < len; i++) {
+      DOMNode child=(DOMNode)_children.item(i);
+      collectElementsByPredicate(child,results,predicate,depth + 1,stopOnFirstHit);
+    }
+  }
+}

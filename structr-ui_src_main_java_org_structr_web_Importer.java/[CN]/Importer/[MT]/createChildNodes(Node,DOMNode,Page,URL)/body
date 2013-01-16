@@ -32,35 +32,33 @@
       }
     }
     if (type.equals("#text")) {
-      type="Content";
       tag="";
       content=((TextNode)node).toString();
       if (StringUtils.isBlank(content)) {
         continue;
       }
     }
-    List<NodeAttribute> attrs=new LinkedList<NodeAttribute>();
-    if (content != null) {
-      attrs.add(new NodeAttribute(Content.content,content));
+    org.structr.web.entity.dom.DOMNode newNode;
+    if (StringUtils.isBlank(tag)) {
+      newNode=(Content)page.createTextNode(content);
     }
-    attrs.add(new NodeAttribute(AbstractNode.type,type));
-    attrs.add(new NodeAttribute(DOMElement.tag,tag));
+ else {
+      newNode=(org.structr.web.entity.dom.DOMElement)page.createElement(tag);
+    }
     if (StringUtils.isNotBlank(id)) {
-      attrs.add(new NodeAttribute(DOMElement._id,id));
+      newNode.setProperty(DOMElement._id,id);
     }
     if (StringUtils.isNotBlank(classString.toString())) {
-      attrs.add(new NodeAttribute(DOMElement._class,StringUtils.trim(classString.toString())));
+      newNode.setProperty(DOMElement._class,StringUtils.trim(classString.toString()));
     }
     for (    Attribute nodeAttr : node.attributes()) {
       String key=nodeAttr.getKey();
       if (!key.equals("text")) {
-        attrs.add(new NodeAttribute(new StringProperty(PropertyView.Html.concat(nodeAttr.getKey())),nodeAttr.getValue()));
+        newNode.setProperty(new StringProperty(PropertyView.Html.concat(nodeAttr.getKey())),nodeAttr.getValue());
       }
     }
-    String nodePath=getNodePath(node);
-    AbstractNode newNode=findOrCreateNode(attrs,nodePath);
-    linkNodes(parent,newNode,pageId,localIndex);
-    createChildNodes(node,newNode,pageId,baseUrl);
+    parent.appendChild(newNode);
+    createChildNodes(node,newNode,page,baseUrl);
     localIndex++;
   }
 }

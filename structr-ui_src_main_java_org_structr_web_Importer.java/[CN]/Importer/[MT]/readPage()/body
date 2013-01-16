@@ -1,23 +1,13 @@
 {
-  final URL baseUrl;
   try {
-    baseUrl=new URL(address);
-    AbstractNode res=(AbstractNode)Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-      @Override public Object execute() throws FrameworkException {
-        List<NodeAttribute> attrs=new LinkedList<NodeAttribute>();
-        attrs.add(new NodeAttribute(AbstractNode.type,Page.class.getSimpleName()));
-        attrs.add(new NodeAttribute(AbstractNode.name,name));
-        attrs.add(new NodeAttribute(AbstractNode.visibleToPublicUsers,publicVisible));
-        attrs.add(new NodeAttribute(AbstractNode.visibleToAuthenticatedUsers,authVisible));
-        AbstractNode page=findOrCreateNode(attrs,"/");
-        createChildNodes(parsedDocument,page,page.getProperty(AbstractNode.uuid),baseUrl);
-        return page;
-      }
-    }
-);
-    if (res != null) {
+    URL baseUrl=new URL(address);
+    Page page=Page.createNewPage(securityContext,name);
+    if (page != null) {
+      page.setVisibleToAuthenticatedUsers(authVisible);
+      page.setVisibleToPublicUsers(publicVisible);
+      createChildNodes(parsedDocument,page,page,baseUrl);
       logger.log(Level.INFO,"##### Finished fetching {0} for page {1} #####",new Object[]{address,name});
-      return res.getProperty(AbstractNode.uuid);
+      return page.getProperty(AbstractNode.uuid);
     }
   }
  catch (  MalformedURLException ex) {

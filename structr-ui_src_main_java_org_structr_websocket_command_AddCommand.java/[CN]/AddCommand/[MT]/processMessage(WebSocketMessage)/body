@@ -32,13 +32,12 @@
       String newPageId=(String)nodeData.get("targetPageId");
 {
         try {
-          int maxPos=0;
           if (parentNode instanceof Page && !(nodeToAdd instanceof Html)) {
             logger.log(Level.SEVERE,"Trying to add non Html node to Page!");
           }
-          relData.put(ChildrenRelationship.position.jsonName(),parentNode.getProperty(HtmlElement.children).size() + 1);
+          relData.put(ChildrenRelationship.position.jsonName(),parentNode.getProperty(DOMElement.children).size());
           PropertyMap relProperties=PropertyMap.inputTypeToJavaType(securityContext,relData);
-          HtmlElement.children.createRelationship(securityContext,parentNode,nodeToAdd,relProperties);
+          DOMElement.children.createRelationship(securityContext,parentNode,nodeToAdd,relProperties);
           logger.log(Level.INFO,"Created new relationship between parent node {0}, added node {1} ({2})",new Object[]{parentNode.getUuid(),nodeToAdd.getUuid(),relData});
         }
  catch (        Throwable t) {
@@ -69,7 +68,7 @@
           try {
             relData.put(ChildrenRelationship.position.jsonName(),0);
             PropertyMap relProperties=PropertyMap.inputTypeToJavaType(securityContext,relData);
-            HtmlElement.children.createRelationship(securityContext,nodeToAdd,contentNode,relProperties);
+            DOMElement.children.createRelationship(securityContext,nodeToAdd,contentNode,relProperties);
             if ((originalPageId != null) && (newPageId != null) && !originalPageId.equals(newPageId)) {
               RelationshipHelper.tagOutgoingRelsWithPageId(contentNode,contentNode,originalPageId,newPageId);
             }

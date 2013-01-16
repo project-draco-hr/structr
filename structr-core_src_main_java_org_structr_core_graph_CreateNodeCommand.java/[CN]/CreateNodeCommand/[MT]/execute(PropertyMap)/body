@@ -8,8 +8,9 @@
     PropertyMap properties=new PropertyMap(attributes);
     Object typeObject=properties.get(AbstractNode.type);
     String nodeType=(typeObject != null) ? typeObject.toString() : EntityContext.getGenericFactory().createGenericNode().getClass().getSimpleName();
-    NodeFactory<T> nodeFactory=new NodeFactory<T>(SecurityContext.getSuperUserInstance());
-    node=nodeFactory.createNodeWithType(graphDb.createNode(),nodeType);
+    boolean isCreation=true;
+    NodeFactory<T> nodeFactory=new NodeFactory<T>(securityContext);
+    node=nodeFactory.createNodeWithType(graphDb.createNode(),nodeType,isCreation);
     if (node != null) {
       if ((user != null) && user instanceof AbstractNode) {
         AbstractNode owner=(AbstractNode)user;

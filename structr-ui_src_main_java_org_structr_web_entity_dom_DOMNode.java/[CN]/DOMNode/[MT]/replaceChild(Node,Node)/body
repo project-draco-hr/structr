@@ -1,0 +1,57 @@
+{
+  checkWriteAccess();
+  checkSameDocument(newChild);
+  checkSameDocument(oldChild);
+  checkHierarchy(newChild);
+  checkHierarchy(oldChild);
+  final DOMNode newNode=(DOMNode)newChild;
+  final DOMNode oldNode=(DOMNode)oldChild;
+  try {
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        if (newChild instanceof DocumentFragment) {
+          List<AbstractRelationship> rels=getChildRelationships();
+          int position=0;
+          for (          AbstractRelationship rel : rels) {
+            AbstractNode node=rel.getEndNode();
+            if (node instanceof DOMNode) {
+              DOMNode domNode=(DOMNode)node;
+              if (domNode.isSameNode(oldNode)) {
+                DOMNode.children.removeRelationship(securityContext,DOMNode.this,oldNode);
+                NodeList fragmentChildren=newChild.getChildNodes();
+                int len=fragmentChildren.getLength();
+                PropertyMap properties=new PropertyMap();
+                for (int i=0; i < len; i++) {
+                  Node fragmentChild=fragmentChildren.item(i);
+                  if (fragmentChild instanceof DOMNode) {
+                    properties.clear();
+                    properties.put(ChildrenRelationship.position,position);
+                    DOMNode.children.createRelationship(securityContext,DOMNode.this,(DOMNode)fragmentChild,properties);
+                    position++;
+                  }
+                }
+              }
+ else {
+                rel.setProperty(ChildrenRelationship.position,position);
+              }
+              position++;
+            }
+          }
+        }
+ else {
+          int oldPosition=oldNode.getPositionInParent();
+          DOMNode.children.removeRelationship(securityContext,DOMNode.this,oldNode);
+          PropertyMap properties=new PropertyMap();
+          properties.put(ChildrenRelationship.position,oldPosition);
+          DOMNode.children.createRelationship(securityContext,DOMNode.this,newNode,properties);
+        }
+        return null;
+      }
+    }
+);
+  }
+ catch (  FrameworkException fex) {
+    throw new DOMException(DOMException.INVALID_STATE_ERR,fex.toString());
+  }
+  return oldChild;
+}

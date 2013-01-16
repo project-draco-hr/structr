@@ -2,18 +2,18 @@
   double startView=System.nanoTime();
   HttpServletRequest request=renderContext.getRequest();
   Condition condition=renderContext.getCondition();
-  String pageId=renderContext.getPageId();
-  String localComponentId=renderContext.getComponentId();
   List<GraphObject> results=getGraphObjects(request);
   double endView=System.nanoTime();
   logger.log(Level.FINE,"Get graph objects for {0} in {1} seconds",new java.lang.Object[]{getUuid(),decimalFormat.format((endView - startView) / 1000000000.0)});
   for (  GraphObject result : results) {
-    List<AbstractRelationship> rels=Component.getChildRelationships(request,this);
-    for (    AbstractRelationship rel : rels) {
-      if ((condition == null) || ((condition != null) && condition.isSatisfied(request,rel))) {
-        HtmlElement subNode=(HtmlElement)rel.getEndNode();
-        if (subNode.isNotDeleted() && subNode.isNotDeleted()) {
-          subNode.render(securityContext,renderContext,depth + 1);
+    if (result instanceof DOMNode) {
+      List<AbstractRelationship> rels=((DOMNode)result).getChildRelationships();
+      for (      AbstractRelationship rel : rels) {
+        if ((condition == null) || ((condition != null) && condition.isSatisfied(request,rel))) {
+          DOMElement subNode=(DOMElement)rel.getEndNode();
+          if (subNode.isNotDeleted() && subNode.isNotDeleted()) {
+            subNode.render(securityContext,renderContext,depth + 1);
+          }
         }
       }
     }

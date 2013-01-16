@@ -32,10 +32,11 @@
       String newPageId=(String)nodeData.get("targetPageId");
 {
         try {
+          int maxPos=0;
           if (parentNode instanceof Page && !(nodeToAdd instanceof Html)) {
             logger.log(Level.SEVERE,"Trying to add non Html node to Page!");
           }
-          relData.put(ChildrenRelationship.position.jsonName(),parentNode.getProperty(HtmlElement.children).size());
+          relData.put(ChildrenRelationship.position.jsonName(),parentNode.getProperty(HtmlElement.children).size() + 1);
           PropertyMap relProperties=PropertyMap.inputTypeToJavaType(securityContext,relData);
           HtmlElement.children.createRelationship(securityContext,parentNode,nodeToAdd,relProperties);
           logger.log(Level.INFO,"Created new relationship between parent node {0}, added node {1} ({2})",new Object[]{parentNode.getUuid(),nodeToAdd.getUuid(),relData});

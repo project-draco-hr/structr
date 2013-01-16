@@ -1,0 +1,17 @@
+{
+  Document document=getDocument();
+  Text content=document.createTextNode("Dies ist ein Test");
+  assertNotNull(content);
+  Element div=document.createElement("div");
+  assertNotNull(div);
+  div.appendChild(content);
+  content.setData("Dies ist ein Test");
+  assertEquals("Dies ist ein Test",content.getData());
+  Content secondPart=(Content)content.splitText(8);
+  assertNotNull(secondPart);
+  assertEquals("Dies ist",content.getData());
+  assertEquals(" ein Test",secondPart.getData());
+  NodeList children=div.getChildNodes();
+  assertNotNull(children);
+  assertEquals(2,children.getLength());
+}

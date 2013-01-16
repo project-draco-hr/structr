@@ -1,0 +1,15 @@
+{
+  if (otherNode instanceof DOMNode) {
+    if (isSameNode(otherNode)) {
+      throw new DOMException(DOMException.HIERARCHY_REQUEST_ERR,HIERARCHY_REQUEST_ERR_MESSAGE_SAME_NODE);
+    }
+    Node _parent=getParentNode();
+    while (_parent != null) {
+      if (_parent.isSameNode(otherNode)) {
+        throw new DOMException(DOMException.HIERARCHY_REQUEST_ERR,HIERARCHY_REQUEST_ERR_MESSAGE_ANCESTOR);
+      }
+    }
+    return;
+  }
+  throw new DOMException(DOMException.NOT_SUPPORTED_ERR,NOT_SUPPORTED_ERR_MESSAGE);
+}

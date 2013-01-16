@@ -11,12 +11,14 @@
         if (getCascadeDelete() > 0) {
           props.put(AbstractRelationship.cascadeDelete,new Integer(getCascadeDelete()));
         }
-        String tripleKey=EntityContext.createCombinedRelationshipType(declaringClass.getSimpleName(),relType.name(),destType.getSimpleName());
-        props.put(AbstractRelationship.combinedType,Search.clean(tripleKey));
         if (getDirection().equals(Direction.OUTGOING)) {
+          String tripleKey=EntityContext.createCombinedRelationshipType(declaringClass.getSimpleName(),relType.name(),destType.getSimpleName());
+          props.put(AbstractRelationship.combinedType,Search.clean(tripleKey));
           newRel=createRel.execute(sourceNode,finalTargetNode,getRelType(),props,true);
         }
  else {
+          String tripleKey=EntityContext.createCombinedRelationshipType(destType.getSimpleName(),relType.name(),declaringClass.getSimpleName());
+          props.put(AbstractRelationship.combinedType,Search.clean(tripleKey));
           newRel=createRel.execute(finalTargetNode,sourceNode,getRelType(),props,true);
         }
         if (newRel != null) {

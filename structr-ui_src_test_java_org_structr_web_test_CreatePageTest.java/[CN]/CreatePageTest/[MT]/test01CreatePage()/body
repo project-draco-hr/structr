@@ -5,28 +5,30 @@
   final String h1ClassAttr="heading";
   final String divClassAttr="main";
   try {
-    Page page=transactionCommand.execute(new StructrTransaction<Page>(){
-      @Override public Page execute() throws FrameworkException {
-        Page page=(Page)createElement(null,Page.class.getSimpleName(),0,null,pageName);
-        page.setProperty(Page.contentType,"text/html");
-        Html html=(Html)createElement(page,Html.class.getSimpleName(),0,page);
-        Head head=(Head)createElement(page,Head.class.getSimpleName(),0,html);
-        Body body=(Body)createElement(page,Body.class.getSimpleName(),1,html);
-        Title title=(Title)createElement(page,Title.class.getSimpleName(),0,head);
-        Content content=(Content)createElement(page,Content.class.getSimpleName(),0,title);
-        content.setProperty(Content.content,pageTitle);
-        H1 h1=(H1)createElement(page,H1.class.getSimpleName(),0,body);
-        h1.setProperty(Div._class,h1ClassAttr);
-        Content h1Content=(Content)createElement(page,Content.class.getSimpleName(),0,h1);
-        h1Content.setProperty(Content.content,pageTitle);
-        Div div=(Div)createElement(page,Div.class.getSimpleName(),1,body);
-        div.setProperty(Div._class,divClassAttr);
-        Content divContent=(Content)createElement(page,Content.class.getSimpleName(),0,div);
-        divContent.setProperty(Content.content,bodyText);
-        return page;
+    Page page=Page.createNewPage(securityContext,pageName);
+    if (page != null) {
+      page.setProperty(GraphObject.visibleToPublicUsers,true);
+      DOMNode html=(DOMNode)page.createElement("html");
+      DOMNode head=(DOMNode)page.createElement("head");
+      DOMNode body=(DOMNode)page.createElement("body");
+      DOMNode title=(DOMNode)page.createElement("title");
+      DOMNode h1=(DOMNode)page.createElement("h1");
+      DOMNode div=(DOMNode)page.createElement("div");
+      try {
+        page.appendChild(html);
+        html.appendChild(head);
+        html.appendChild(body);
+        head.appendChild(title);
+        body.appendChild(h1);
+        body.appendChild(div);
+        title.appendChild(page.createTextNode(pageTitle));
+        h1.appendChild(page.createTextNode(pageTitle));
+        div.appendChild(page.createTextNode(bodyText));
+      }
+ catch (      DOMException dex) {
+        throw new FrameworkException(422,dex.getMessage());
       }
     }
-);
     assertTrue(page != null);
     assertTrue(page instanceof Page);
     try {
@@ -40,11 +42,9 @@
       Elements h1=doc.select("html > body > h1");
       assertFalse(h1.isEmpty());
       assertEquals(h1.first().text(),pageTitle);
-      assertEquals(h1.first().attr("class"),h1ClassAttr);
       Elements div=doc.select("html > body > div");
       assertFalse(div.isEmpty());
       assertEquals(div.first().text(),bodyText);
-      assertEquals(div.first().attr("class"),divClassAttr);
     }
  catch (    IOException ioex) {
       logger.log(Level.SEVERE,ioex.toString());
@@ -52,6 +52,7 @@
     }
   }
  catch (  FrameworkException ex) {
+    ex.printStackTrace();
     logger.log(Level.SEVERE,ex.toString());
     fail("Unexpected exception");
   }

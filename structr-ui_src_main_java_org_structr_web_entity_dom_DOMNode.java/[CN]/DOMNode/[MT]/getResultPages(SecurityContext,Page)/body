@@ -17,7 +17,7 @@
   searchAttributes.add(Search.andContent(search));
   searchAttributes.add(Search.andExactType(Content.class.getSimpleName()));
   try {
-    Result<Content> result=searchNodesAsSuperuser.get().execute(searchAttributes);
+    Result<Content> result=Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class).execute(searchAttributes);
     for (    Content content : result.getResults()) {
       resultPages.addAll(PageHelper.getPages(securityContext,content));
     }

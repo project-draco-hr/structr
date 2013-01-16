@@ -1,32 +1,34 @@
 {
-  pageName=(String)webSocketData.getNodeData().get(Page.name.dbName());
+  final String pageName=(String)webSocketData.getNodeData().get(Page.name.dbName());
   final SecurityContext securityContext=getWebSocket().getSecurityContext();
-  createNode=Services.command(securityContext,CreateNodeCommand.class);
-  createRel=Services.command(securityContext,CreateRelationshipCommand.class);
-  StructrTransaction transaction=new StructrTransaction(){
-    @Override public Object execute() throws FrameworkException {
-      Page page=(Page)createElement(null,Page.class.getSimpleName(),0,null,pageName);
-      page.setProperty(Page.contentType,"text/html");
-      Html html=(Html)createElement(page,Html.class.getSimpleName(),0,page);
-      Head head=(Head)createElement(page,Head.class.getSimpleName(),0,html);
-      Body body=(Body)createElement(page,Body.class.getSimpleName(),1,html);
-      Title title=(Title)createElement(page,Title.class.getSimpleName(),0,head);
-      Content content=(Content)createElement(page,Content.class.getSimpleName(),0,title);
-      content.setProperty(Content.content,"Page Title");
-      H1 h1=(H1)createElement(page,H1.class.getSimpleName(),0,body);
-      Content h1Content=(Content)createElement(page,Content.class.getSimpleName(),0,h1);
-      h1Content.setProperty(Content.content,"Page Title");
-      Div div=(Div)createElement(page,Div.class.getSimpleName(),1,body);
-      Content divContent=(Content)createElement(page,Content.class.getSimpleName(),0,div);
-      divContent.setProperty(Content.content,"Body Text");
-      return page;
+  try {
+    Page newPage=Page.createNewPage(securityContext,pageName);
+    if (newPage != null) {
+      Element html=newPage.createElement("html");
+      Element head=newPage.createElement("head");
+      Element body=newPage.createElement("body");
+      Element title=newPage.createElement("title");
+      Element h1=newPage.createElement("h1");
+      Element div=newPage.createElement("div");
+      try {
+        newPage.appendChild(html);
+        html.appendChild(head);
+        html.appendChild(body);
+        head.appendChild(title);
+        body.appendChild(h1);
+        body.appendChild(div);
+        title.appendChild(newPage.createTextNode("Page Title"));
+        h1.appendChild(newPage.createTextNode("Page Title"));
+        div.appendChild(newPage.createTextNode("Body Text"));
+      }
+ catch (      DOMException dex) {
+        dex.printStackTrace();
+        throw new FrameworkException(422,dex.getMessage());
+      }
     }
   }
-;
-  try {
-    Services.command(securityContext,TransactionCommand.class).execute(transaction);
-  }
  catch (  FrameworkException fex) {
+    fex.printStackTrace();
     logger.log(Level.WARNING,"Could not create node.",fex);
     getWebSocket().send(MessageBuilder.status().code(fex.getStatus()).message(fex.toString()).build(),true);
   }

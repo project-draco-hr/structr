@@ -1,0 +1,54 @@
+{
+  final String pageName="page-01";
+  try {
+    Page page=Page.createNewPage(securityContext,pageName);
+    assertTrue(page != null);
+    assertTrue(page instanceof Page);
+    DOMNode html=(DOMNode)page.createElement("html");
+    DOMNode head=(DOMNode)page.createElement("head");
+    DOMNode body=(DOMNode)page.createElement("body");
+    DOMNode title=(DOMNode)page.createElement("title");
+    DOMNode h1=(DOMNode)page.createElement("h1");
+    try {
+      page.appendChild(html);
+      html.appendChild(head);
+      html.appendChild(body);
+      head.appendChild(title);
+      title.appendChild(page.createTextNode("Test Page"));
+      body.appendChild(h1);
+      h1.appendChild(page.createTextNode("Page Title"));
+    }
+ catch (    DOMException dex) {
+      throw new FrameworkException(422,dex.getMessage());
+    }
+    assertEquals(html,page.getChildNodes().item(1));
+    assertEquals(head,html.getChildNodes().item(0));
+    assertEquals(body,html.getChildNodes().item(1));
+    XPathFactory factory=XPathFactory.newInstance();
+    XPath xpath=factory.newXPath();
+    XPathExpression xpathExpression=xpath.compile("/html/body/h1/text()");
+    System.out.println("#################################################################################################################################");
+    System.out.println("#############################: " + xpathExpression.evaluate(page));
+    printDocument(page);
+    System.out.println("#################################################################################################################################");
+    page.setDebugging(true);
+    try {
+      Document doc=DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File("/home/chrisi/test.html"));
+      System.out.println("#################################################################################################################################");
+      System.out.println("#############################: " + xpathExpression.evaluate(doc));
+      printDocument(doc);
+      System.out.println("#################################################################################################################################");
+    }
+ catch (    Throwable t) {
+      t.printStackTrace();
+    }
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+    fail("Unexpected exception");
+  }
+catch (  XPathExpressionException xpeex) {
+    xpeex.printStackTrace();
+    fail("Unexpected exception");
+  }
+}

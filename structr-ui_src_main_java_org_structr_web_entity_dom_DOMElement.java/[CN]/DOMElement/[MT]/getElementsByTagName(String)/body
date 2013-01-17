@@ -1,3 +1,16 @@
 {
-  throw new UnsupportedOperationException("Not supported yet.");
+  StructrNodeList results=new StructrNodeList();
+  collectNodesByPredicate(this,results,new Predicate<Node>(){
+    @Override public boolean evaluate(    SecurityContext securityContext,    Node... obj){
+      if (obj[0] instanceof DOMElement) {
+        DOMElement elem=(DOMElement)obj[0];
+        if (tagName.equals(elem.getProperty(DOMElement.tag))) {
+          return true;
+        }
+      }
+      return false;
+    }
+  }
+,0,false);
+  return results;
 }

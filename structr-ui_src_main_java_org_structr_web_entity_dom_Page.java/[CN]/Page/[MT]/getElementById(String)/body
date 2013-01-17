@@ -1,9 +1,13 @@
 {
+  logLine("getElementById(" + id + ")");
   StructrNodeList results=new StructrNodeList();
-  collectElementsByPredicate(this,results,new Predicate<DOMElement>(){
-    @Override public boolean evaluate(    SecurityContext securityContext,    DOMElement... obj){
-      if (id.equals(obj[0].getProperty(DOMElement._id))) {
-        return true;
+  collectNodesByPredicate(this,results,new Predicate<Node>(){
+    @Override public boolean evaluate(    SecurityContext securityContext,    Node... obj){
+      if (obj[0] instanceof DOMElement) {
+        DOMElement elem=(DOMElement)obj[0];
+        if (id.equals(elem.getProperty(DOMElement._id))) {
+          return true;
+        }
       }
       return false;
     }

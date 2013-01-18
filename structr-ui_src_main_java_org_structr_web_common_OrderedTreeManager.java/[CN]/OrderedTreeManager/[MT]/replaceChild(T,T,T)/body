@@ -1,0 +1,16 @@
+{
+  final SecurityContext securityContext=treeElement.getSecurityContext();
+  Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+    @Override public Object execute() throws FrameworkException {
+      int oldPosition=getChildPosition(oldChild);
+      collectionKey.removeRelationship(securityContext,treeElement,oldChild);
+      PropertyMap properties=new PropertyMap();
+      properties.put(positionKey,oldPosition);
+      collectionKey.createRelationship(securityContext,treeElement,newChild,properties);
+      linkedListManager.insertBefore(oldChild,newChild);
+      linkedListManager.remove(oldChild);
+      return null;
+    }
+  }
+);
+}

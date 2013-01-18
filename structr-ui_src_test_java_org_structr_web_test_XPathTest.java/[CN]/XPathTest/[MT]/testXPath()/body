@@ -26,22 +26,8 @@
     assertEquals(body,html.getChildNodes().item(1));
     XPathFactory factory=XPathFactory.newInstance();
     XPath xpath=factory.newXPath();
-    XPathExpression xpathExpression=xpath.compile("/html/body/h1/text()");
-    System.out.println("#################################################################################################################################");
-    System.out.println("#############################: " + xpathExpression.evaluate(page));
-    printDocument(page);
-    System.out.println("#################################################################################################################################");
-    page.setDebugging(true);
-    try {
-      Document doc=DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File("/home/chrisi/test.html"));
-      System.out.println("#################################################################################################################################");
-      System.out.println("#############################: " + xpathExpression.evaluate(doc));
-      printDocument(doc);
-      System.out.println("#################################################################################################################################");
-    }
- catch (    Throwable t) {
-      t.printStackTrace();
-    }
+    assertEquals("Page Title",xpath.evaluate("/html/body/h1/text()",page,XPathConstants.STRING));
+    assertEquals(h1,xpath.evaluate("/html/body/h1",page,XPathConstants.NODE));
   }
  catch (  FrameworkException fex) {
     fex.printStackTrace();

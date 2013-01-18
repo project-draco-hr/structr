@@ -1,0 +1,36 @@
+{
+  if (currentElement.getId() == newElement.getId()) {
+    throw new IllegalStateException("Cannot link a node to itself!");
+  }
+  final SecurityContext securityContext=currentElement.getSecurityContext();
+  final T next=getNext(currentElement);
+  if (next == null) {
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        Node startNode=currentElement.getNode();
+        Node endNode=newElement.getNode();
+        if (startNode != null && endNode != null) {
+          startNode.createRelationshipTo(endNode,relType);
+        }
+        return null;
+      }
+    }
+);
+  }
+ else {
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        Node nextNode=next.getNode();
+        Node currentNode=currentElement.getNode();
+        Node newNode=newElement.getNode();
+        if (nextNode != null && newNode != null && currentNode != null) {
+          removeRelationshipBetween(currentNode,nextNode);
+          currentNode.createRelationshipTo(newNode,relType);
+          newNode.createRelationshipTo(nextNode,relType);
+        }
+        return null;
+      }
+    }
+);
+  }
+}

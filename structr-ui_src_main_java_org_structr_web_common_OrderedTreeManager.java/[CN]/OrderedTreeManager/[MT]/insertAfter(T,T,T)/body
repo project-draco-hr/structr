@@ -1,0 +1,23 @@
+{
+  final SecurityContext securityContext=treeElement.getSecurityContext();
+  Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+    @Override public Object execute() throws FrameworkException {
+      List<AbstractRelationship> rels=getChildRelationships(treeElement);
+      int position=0;
+      for (      AbstractRelationship rel : rels) {
+        AbstractNode node=rel.getEndNode();
+        rel.setProperty(positionKey,position);
+        position++;
+        if (node.equals(refChild)) {
+          PropertyMap properties=new PropertyMap();
+          properties.put(positionKey,position);
+          collectionKey.createRelationship(securityContext,treeElement,newChild,properties);
+          position++;
+        }
+      }
+      linkedListManager.insertAfter(refChild,newChild);
+      return null;
+    }
+  }
+);
+}

@@ -1,0 +1,19 @@
+{
+  Page document=(Page)getDocument();
+  assertNotNull(document);
+  DOMElement div=(DOMElement)document.createElement("div");
+  assertNotNull(div);
+  Content content1=(Content)document.createTextNode("content1");
+  Content content2=(Content)document.createTextNode("content2");
+  assertNotNull(content1);
+  assertNotNull(content2);
+  div.appendChild(content1);
+  List<AbstractRelationship> divRels=div.getOutgoingRelationships(RelType.CONTAINS);
+  assertEquals(1,divRels.size());
+  assertEquals(Integer.valueOf(0),divRels.get(0).getProperty(ChildrenRelationship.position));
+  div.appendChild(content2);
+  divRels=div.getOutgoingRelationships(RelType.CONTAINS);
+  assertEquals(2,divRels.size());
+  assertEquals(Integer.valueOf(0),divRels.get(0).getProperty(ChildrenRelationship.position));
+  assertEquals(Integer.valueOf(1),divRels.get(1).getProperty(ChildrenRelationship.position));
+}

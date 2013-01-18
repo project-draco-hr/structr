@@ -1,0 +1,12 @@
+{
+  final SecurityContext securityContext=treeElement.getSecurityContext();
+  Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+    @Override public Object execute() throws FrameworkException {
+      linkedListManager.remove(childToRemove);
+      collectionKey.removeRelationship(securityContext,treeElement,childToRemove);
+      ensureCorrectChildPositions(treeElement);
+      return null;
+    }
+  }
+);
+}

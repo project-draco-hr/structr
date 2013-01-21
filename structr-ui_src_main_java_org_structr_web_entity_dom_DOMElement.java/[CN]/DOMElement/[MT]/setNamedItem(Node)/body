@@ -1,15 +1,6 @@
 {
-  String nodeName=node.getNodeName();
-  String nodeValue=node.getNodeValue();
-  String prefixedName=PropertyView.Html.concat(nodeName);
-  PropertyKey<String> key=EntityContext.getPropertyKeyForJSONName(getClass(),prefixedName);
-  if (key != null) {
-    try {
-      setProperty(key,nodeValue);
-    }
- catch (    FrameworkException fex) {
-      throw new DOMException(DOMException.INVALID_STATE_ERR,fex.toString());
-    }
+  if (node instanceof Attr) {
+    return setAttributeNode((Attr)node);
   }
   return null;
 }

@@ -1,0 +1,29 @@
+{
+  String id=webSocketData.getId();
+  Map<String,Object> nodeData=webSocketData.getNodeData();
+  String refId=(String)nodeData.get("refId");
+  String parentId=(String)nodeData.get("parentId");
+  if (id == null) {
+    getWebSocket().send(MessageBuilder.status().code(422).message("Cannot no node to append").build(),true);
+    return;
+  }
+  if (parentId == null) {
+    getWebSocket().send(MessageBuilder.status().code(422).message("Cannot add node without parentId").build(),true);
+    return;
+  }
+  DOMNode refNode=getDOMNode(refId);
+  DOMNode parentNode=getDOMNode(parentId);
+  if (parentNode == null) {
+    getWebSocket().send(MessageBuilder.status().code(404).message("Parent node not found").build(),true);
+    return;
+  }
+  DOMNode node=getDOMNode(id);
+  try {
+    if (node != null) {
+      parentNode.insertBefore(node,refNode);
+    }
+  }
+ catch (  DOMException dex) {
+    getWebSocket().send(MessageBuilder.status().code(422).message(dex.getMessage()).build(),true);
+  }
+}

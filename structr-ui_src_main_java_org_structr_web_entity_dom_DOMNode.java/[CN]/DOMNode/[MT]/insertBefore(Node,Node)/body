@@ -6,7 +6,14 @@
   checkHierarchy(refChild);
   try {
     if (newChild instanceof DocumentFragment) {
-      throw new UnsupportedOperationException("DocumentFragments not supported yet.");
+      DocumentFragment fragment=(DocumentFragment)newChild;
+      DOMNode currentChild=(DOMNode)fragment.getFirstChild();
+      while (currentChild != null) {
+        DOMNode savedNextChild=treeManager.getListManager().getNext(currentChild);
+        treeManager.removeChild((DOMNode)fragment,currentChild);
+        treeManager.insertBefore(this,currentChild,(DOMNode)refChild);
+        currentChild=savedNextChild;
+      }
     }
  else {
       treeManager.insertBefore(this,(DOMNode)newChild,(DOMNode)refChild);

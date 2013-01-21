@@ -1,12 +1,24 @@
 {
   checkWriteAccess();
-  checkSameDocument(node);
-  checkHierarchy(node);
+  checkSameDocument(newChild);
+  checkHierarchy(newChild);
   try {
-    treeManager.appendChild(this,(DOMNode)node);
+    if (newChild instanceof DocumentFragment) {
+      DocumentFragment fragment=(DocumentFragment)newChild;
+      DOMNode currentChild=(DOMNode)fragment.getFirstChild();
+      while (currentChild != null) {
+        DOMNode savedNextChild=treeManager.getListManager().getNext(currentChild);
+        treeManager.removeChild((DOMNode)fragment,currentChild);
+        treeManager.appendChild(this,(DOMNode)currentChild);
+        currentChild=savedNextChild;
+      }
+    }
+ else {
+      treeManager.appendChild(this,(DOMNode)newChild);
+    }
   }
  catch (  FrameworkException fex) {
     throw new DOMException(DOMException.INVALID_STATE_ERR,fex.toString());
   }
-  return node;
+  return newChild;
 }

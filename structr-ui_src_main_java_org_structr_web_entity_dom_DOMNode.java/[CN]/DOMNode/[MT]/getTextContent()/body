@@ -1,14 +1,6 @@
 {
   final StructrNodeList results=new StructrNodeList();
-  final StringBuilder buf=new StringBuilder();
-  collectNodesByPredicate(this,results,new Predicate<Node>(){
-    @Override public boolean evaluate(    SecurityContext securityContext,    Node... obj){
-      if (obj[0] instanceof Text) {
-        buf.append(((Text)obj[0]).getTextContent());
-      }
-      return false;
-    }
-  }
-,0,false);
-  return buf.toString();
+  final TextCollector textCollector=new TextCollector();
+  collectNodesByPredicate(this,results,textCollector,0,false);
+  return textCollector.getText();
 }

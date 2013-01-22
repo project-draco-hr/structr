@@ -2,7 +2,12 @@
   HtmlProperty htmlProperty=findOrCreateAttributeKey(name);
   String value=htmlProperty.getProperty(securityContext,this,true);
   if (value != null) {
-    return new DOMAttribute((Page)getOwnerDocument(),this,name,value);
+    boolean explicitlySpecified=true;
+    boolean isId=false;
+    if (value.equals(htmlProperty.defaultValue())) {
+      explicitlySpecified=false;
+    }
+    return new DOMAttribute((Page)getOwnerDocument(),this,name,value,explicitlySpecified,isId);
   }
   return null;
 }

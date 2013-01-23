@@ -3,25 +3,47 @@
   Map<String,Object> nodeData=webSocketData.getNodeData();
   String parentId=(String)nodeData.get("parentId");
   if (id == null) {
-    getWebSocket().send(MessageBuilder.status().code(422).message("Cannot no node to append").build(),true);
+    getWebSocket().send(MessageBuilder.status().code(422).message("Cannot append node, no id is given").build(),true);
     return;
   }
   if (parentId == null) {
     getWebSocket().send(MessageBuilder.status().code(422).message("Cannot add node without parentId").build(),true);
     return;
   }
-  DOMNode parentNode=getDOMNode(parentId);
+  AbstractNode parentNode=getNode(parentId);
   if (parentNode == null) {
     getWebSocket().send(MessageBuilder.status().code(404).message("Parent node not found").build(),true);
     return;
   }
-  DOMNode node=getDOMNode(id);
-  try {
-    if (node != null) {
-      parentNode.appendChild(node);
+  if (parentNode instanceof Folder) {
+    Folder folder=(Folder)parentNode;
+    AbstractNode node=getNode(id);
+    try {
+      if (node instanceof Folder) {
+        folder.addFolder((Folder)node);
+      }
+ else       if (node instanceof File) {
+        folder.addFile((File)node);
+      }
+    }
+ catch (    FrameworkException fex) {
+      getWebSocket().send(MessageBuilder.status().code(422).message(fex.getMessage()).build(),true);
     }
   }
- catch (  DOMException dex) {
-    getWebSocket().send(MessageBuilder.status().code(422).message(dex.getMessage()).build(),true);
+ else {
+    DOMNode parentDomNode=getDOMNode(parentId);
+    if (parentDomNode == null) {
+      getWebSocket().send(MessageBuilder.status().code(422).message("Parent node is no DOM node").build(),true);
+      return;
+    }
+    DOMNode node=getDOMNode(id);
+    try {
+      if (node != null) {
+        parentDomNode.appendChild(node);
+      }
+    }
+ catch (    DOMException dex) {
+      getWebSocket().send(MessageBuilder.status().code(422).message(dex.getMessage()).build(),true);
+    }
   }
 }

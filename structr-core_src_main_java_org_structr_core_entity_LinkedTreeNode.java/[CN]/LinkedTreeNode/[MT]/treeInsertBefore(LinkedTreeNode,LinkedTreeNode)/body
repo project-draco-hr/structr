@@ -1,0 +1,24 @@
+{
+  final CollectionProperty<? extends LinkedTreeNode> treeProperty=getTreeProperty();
+  final PropertyKey<Integer> positionProperty=getPositionProperty();
+  Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+    @Override public Object execute() throws FrameworkException {
+      List<AbstractRelationship> rels=treeGetChildRelationships();
+      int position=0;
+      for (      AbstractRelationship rel : rels) {
+        AbstractNode node=rel.getEndNode();
+        if (node.equals(refChild)) {
+          PropertyMap properties=new PropertyMap();
+          properties.put(positionProperty,position);
+          treeProperty.createRelationship(securityContext,LinkedTreeNode.this,newChild,properties);
+          position++;
+        }
+        rel.setProperty(positionProperty,position);
+        position++;
+      }
+      LinkedTreeNode.super.listInsertBefore(refChild,newChild);
+      return null;
+    }
+  }
+);
+}

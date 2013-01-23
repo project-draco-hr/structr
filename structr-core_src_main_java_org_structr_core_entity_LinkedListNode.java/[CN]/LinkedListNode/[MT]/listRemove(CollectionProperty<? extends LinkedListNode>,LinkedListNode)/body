@@ -1,0 +1,25 @@
+{
+  final RelationshipType relType=listProperty.getRelType();
+  final LinkedListNode previousElement=listGetPrevious(listProperty,currentElement);
+  final LinkedListNode nextElement=listGetNext(listProperty,currentElement);
+  final Node currentNode=currentElement.getNode();
+  if (previousElement != null) {
+    Node previousNode=previousElement.getNode();
+    if (previousNode != null && currentNode != null) {
+      removeRelationshipBetween(listProperty,previousNode,currentNode);
+    }
+  }
+  if (nextElement != null) {
+    Node nextNode=nextElement.getNode();
+    if (nextNode != null && currentNode != null) {
+      removeRelationshipBetween(listProperty,currentNode,nextNode);
+    }
+  }
+  if (previousElement != null && nextElement != null) {
+    Node previousNode=previousElement.getNode();
+    Node nextNode=nextElement.getNode();
+    if (previousNode != null && nextNode != null) {
+      previousNode.createRelationshipTo(nextNode,relType);
+    }
+  }
+}

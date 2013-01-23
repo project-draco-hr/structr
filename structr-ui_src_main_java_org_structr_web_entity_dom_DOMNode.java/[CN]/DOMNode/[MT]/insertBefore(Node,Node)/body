@@ -10,20 +10,20 @@
   try {
     if (newChild instanceof DocumentFragment) {
       DocumentFragment fragment=(DocumentFragment)newChild;
-      DOMNode currentChild=(DOMNode)fragment.getFirstChild();
+      Node currentChild=fragment.getFirstChild();
       while (currentChild != null) {
-        DOMNode savedNextChild=treeManager.getListManager().getNext(currentChild);
-        treeManager.removeChild((DOMNode)fragment,currentChild);
-        treeManager.insertBefore(this,currentChild,(DOMNode)refChild);
+        Node savedNextChild=currentChild.getNextSibling();
+        fragment.removeChild(currentChild);
+        insertBefore(currentChild,refChild);
         currentChild=savedNextChild;
       }
     }
  else {
       Node _parent=newChild.getParentNode();
-      if (_parent != null && _parent instanceof DOMNode) {
-        treeManager.removeChild((DOMNode)_parent,(DOMNode)newChild);
+      if (_parent != null) {
+        _parent.removeChild(newChild);
       }
-      treeManager.insertBefore(this,(DOMNode)newChild,(DOMNode)refChild);
+      treeInsertBefore((DOMNode)newChild,(DOMNode)refChild);
     }
   }
  catch (  FrameworkException fex) {

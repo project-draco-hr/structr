@@ -7,21 +7,21 @@
   try {
     if (newChild instanceof DocumentFragment) {
       DocumentFragment fragment=(DocumentFragment)newChild;
-      DOMNode currentChild=(DOMNode)fragment.getFirstChild();
+      Node currentChild=fragment.getFirstChild();
       while (currentChild != null) {
-        DOMNode savedNextChild=treeManager.getListManager().getNext(currentChild);
-        treeManager.removeChild((DOMNode)fragment,currentChild);
-        treeManager.insertBefore(this,currentChild,(DOMNode)oldChild);
+        Node savedNextChild=currentChild.getNextSibling();
+        fragment.removeChild(currentChild);
+        insertBefore(currentChild,oldChild);
         currentChild=savedNextChild;
       }
-      treeManager.removeChild(this,(DOMNode)oldChild);
+      removeChild(oldChild);
     }
  else {
       Node _parent=newChild.getParentNode();
       if (_parent != null && _parent instanceof DOMNode) {
-        treeManager.removeChild((DOMNode)_parent,(DOMNode)newChild);
+        _parent.removeChild(newChild);
       }
-      treeManager.replaceChild(this,(DOMNode)newChild,(DOMNode)oldChild);
+      treeReplaceChild((DOMNode)newChild,(DOMNode)oldChild);
     }
   }
  catch (  FrameworkException fex) {

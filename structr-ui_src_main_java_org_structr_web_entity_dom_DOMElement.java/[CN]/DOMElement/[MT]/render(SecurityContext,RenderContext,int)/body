@@ -30,9 +30,24 @@
       }
     }
     buffer.append(">");
-    List<GraphObject> data=getExternalDataOrCurrentNode();
-    for (    GraphObject dataObject : data) {
-      renderContext.setCurrentDataNode(dataObject);
+    List<GraphObject> _data=getExternalData();
+    if (_data != null) {
+      String _dataKey=getProperty(dataKey);
+      if (_dataKey == null) {
+        _dataKey="data";
+      }
+      for (      GraphObject dataObject : _data) {
+        renderContext.setDataNode(_dataKey,dataObject);
+        List<AbstractRelationship> rels=getChildRelationships();
+        for (        AbstractRelationship rel : rels) {
+          DOMNode subNode=(DOMNode)rel.getEndNode();
+          if (subNode.isNotDeleted()) {
+            subNode.render(securityContext,renderContext,depth + 1);
+          }
+        }
+      }
+    }
+ else {
       List<AbstractRelationship> rels=getChildRelationships();
       for (      AbstractRelationship rel : rels) {
         DOMNode subNode=(DOMNode)rel.getEndNode();

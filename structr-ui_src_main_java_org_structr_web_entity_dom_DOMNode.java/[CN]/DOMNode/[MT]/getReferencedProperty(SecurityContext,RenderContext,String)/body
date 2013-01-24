@@ -14,10 +14,6 @@
         return StringUtils.defaultString(request.getParameter(referenceKey));
       }
     }
-    if ("resource".equals(part.toLowerCase())) {
-      _data=PageHelper.getNodeById(securityContext,pageId);
-      continue;
-    }
     if ("page".equals(part.toLowerCase())) {
       _data=_page;
       continue;
@@ -45,9 +41,8 @@
       }
       continue;
     }
-    if ("data".equals(part.toLowerCase())) {
-      _data=renderContext.getCurrentDataNode();
-      continue;
+    if (renderContext.hasDataForKey(part.toLowerCase())) {
+      _data=renderContext.getDataNode(part.toLowerCase());
     }
     if ("result_size".equals(part.toLowerCase())) {
       Set<Page> pages=getResultPages(securityContext,(Page)_page);

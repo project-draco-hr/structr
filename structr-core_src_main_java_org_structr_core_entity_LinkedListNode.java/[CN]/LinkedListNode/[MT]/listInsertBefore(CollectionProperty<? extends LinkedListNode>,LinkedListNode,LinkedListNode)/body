@@ -2,16 +2,11 @@
   if (currentElement.getId() == newElement.getId()) {
     throw new IllegalStateException("Cannot link a node to itself!");
   }
-  final RelationshipType relType=listProperty.getRelType();
   final LinkedListNode previousElement=listGetPrevious(listProperty,currentElement);
   if (previousElement == null) {
     Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
       @Override public Object execute() throws FrameworkException {
-        Node startNode=newElement.getNode();
-        Node endNode=currentElement.getNode();
-        if (startNode != null && endNode != null) {
-          startNode.createRelationshipTo(endNode,relType);
-        }
+        listProperty.createRelationship(securityContext,newElement,currentElement);
         return null;
       }
     }
@@ -20,14 +15,9 @@
  else {
     Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
       @Override public Object execute() throws FrameworkException {
-        Node previousNode=previousElement.getNode();
-        Node currentNode=currentElement.getNode();
-        Node newNode=newElement.getNode();
-        if (previousNode != null && newNode != null && currentNode != null) {
-          removeRelationshipBetween(listProperty,previousNode,currentNode);
-          previousNode.createRelationshipTo(newNode,relType);
-          newNode.createRelationshipTo(currentNode,relType);
-        }
+        listProperty.removeRelationship(securityContext,previousElement,currentElement);
+        listProperty.createRelationship(securityContext,previousElement,newElement);
+        listProperty.createRelationship(securityContext,newElement,currentElement);
         return null;
       }
     }

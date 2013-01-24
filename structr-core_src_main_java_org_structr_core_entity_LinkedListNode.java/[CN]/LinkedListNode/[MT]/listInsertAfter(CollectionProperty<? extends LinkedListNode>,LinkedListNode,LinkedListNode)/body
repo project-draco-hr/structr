@@ -7,11 +7,7 @@
   if (next == null) {
     Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
       @Override public Object execute() throws FrameworkException {
-        Node startNode=currentElement.getNode();
-        Node endNode=newElement.getNode();
-        if (startNode != null && endNode != null) {
-          startNode.createRelationshipTo(endNode,relType);
-        }
+        listProperty.createRelationship(securityContext,currentElement,newElement);
         return null;
       }
     }
@@ -20,14 +16,9 @@
  else {
     Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
       @Override public Object execute() throws FrameworkException {
-        Node nextNode=next.getNode();
-        Node currentNode=currentElement.getNode();
-        Node newNode=newElement.getNode();
-        if (nextNode != null && newNode != null && currentNode != null) {
-          removeRelationshipBetween(listProperty,currentNode,nextNode);
-          currentNode.createRelationshipTo(newNode,relType);
-          newNode.createRelationshipTo(nextNode,relType);
-        }
+        listProperty.removeRelationship(securityContext,currentElement,next);
+        listProperty.createRelationship(securityContext,currentElement,newElement);
+        listProperty.createRelationship(securityContext,newElement,next);
         return null;
       }
     }

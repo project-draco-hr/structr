@@ -1,0 +1,11 @@
+{
+  Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+    @Override public Object execute() throws FrameworkException {
+      LinkedTreeNode.super.listRemove(getListKey(relType),childToRemove);
+      unlinkNodes(relType,LinkedTreeNode.this,childToRemove);
+      ensureCorrectChildPositions(relType);
+      return null;
+    }
+  }
+);
+}

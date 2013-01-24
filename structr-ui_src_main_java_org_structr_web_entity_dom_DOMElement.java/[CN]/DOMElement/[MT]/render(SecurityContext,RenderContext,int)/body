@@ -30,14 +30,18 @@
       }
     }
     buffer.append(">");
-    List<AbstractRelationship> rels=getChildRelationships();
-    for (    AbstractRelationship rel : rels) {
-      DOMNode subNode=(DOMNode)rel.getEndNode();
-      if (subNode.isNotDeleted()) {
-        if (Body.class.getSimpleName().toLowerCase().equals(this.getTagName())) {
-          renderContext.setInBody(true);
+    List<GraphObject> data=getExternalDataOrCurrentNode();
+    for (    GraphObject dataObject : data) {
+      renderContext.setCurrentDataNode(dataObject);
+      List<AbstractRelationship> rels=getChildRelationships();
+      for (      AbstractRelationship rel : rels) {
+        DOMNode subNode=(DOMNode)rel.getEndNode();
+        if (subNode.isNotDeleted()) {
+          if (Body.class.getSimpleName().toLowerCase().equals(this.getTagName())) {
+            renderContext.setInBody(true);
+          }
+          subNode.render(securityContext,renderContext,depth + 1);
         }
-        subNode.render(securityContext,renderContext,depth + 1);
       }
     }
     if (StringUtils.isNotBlank(tag) && (!isVoid)) {

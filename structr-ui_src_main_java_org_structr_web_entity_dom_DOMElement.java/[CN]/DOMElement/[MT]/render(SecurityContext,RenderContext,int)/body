@@ -32,11 +32,15 @@
       }
     }
     buffer.append(">");
-    List<AbstractRelationship> rels=getChildRelationships();
-    for (    AbstractRelationship rel : rels) {
-      DOMNode subNode=(DOMNode)rel.getEndNode();
-      if (subNode.isNotDeleted()) {
-        subNode.render(securityContext,renderContext,depth + 1);
+    List<GraphObject> data=getExternalDataOrCurrentNode();
+    for (    GraphObject dataObject : data) {
+      renderContext.setCurrentDataNode(dataObject);
+      List<AbstractRelationship> rels=getChildRelationships();
+      for (      AbstractRelationship rel : rels) {
+        DOMNode subNode=(DOMNode)rel.getEndNode();
+        if (subNode.isNotDeleted()) {
+          subNode.render(securityContext,renderContext,depth + 1);
+        }
       }
     }
     if (StringUtils.isNotBlank(tag) && (!isVoid)) {

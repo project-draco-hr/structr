@@ -37,22 +37,44 @@
     if (_dataKey == null) {
       _dataKey="data";
     }
-    LinkedTreeNode treeNode=checkTreeSources();
     List<GraphObject> listData=checkListSources();
+    DataNode treeNode=null;
+    String treeKey=null;
+    for (    AbstractRelationship rel : getOutgoingRelationships(RelType.RENDER_TREE)) {
+      AbstractNode endNode=rel.getEndNode();
+      if (endNode instanceof DataNode) {
+        treeNode=(DataNode)endNode;
+        treeKey=rel.getProperty(LinkedListNode.keyProperty);
+        break;
+      }
+    }
     if (treeNode != null) {
-      renderTreeNode(securityContext,renderContext,depth,_dataKey,treeNode);
+      renderContext.setTreeSource(treeNode);
+      renderContext.setTreeKey(treeKey);
+      renderContext.setRenderMode(RenderMode.TREE);
     }
  else     if (listData != null && !listData.isEmpty()) {
-      renderNodeList(securityContext,renderContext,depth,_dataKey,listData);
+      renderContext.setListSource(listData);
+      renderContext.setRenderMode(RenderMode.LIST);
     }
- else {
+switch (renderContext.getRenderMode()) {
+case NODE:
+case DEFAULT:
       renderSingleNode(securityContext,renderContext,depth);
-    }
-    if (StringUtils.isNotBlank(tag) && (!isVoid)) {
-      buffer.append(indent(depth,true));
-      buffer.append("</").append(tag).append(">");
-    }
-  }
-  double end=System.nanoTime();
-  logger.log(Level.FINE,"Render node {0} in {1} seconds",new java.lang.Object[]{getUuid(),decimalFormat.format((end - start) / 1000000000.0)});
+    break;
+case LIST:
+case CYPHER:
+case XPATH:
+  renderNodeList(securityContext,renderContext,depth,_dataKey);
+break;
+case TREE:
+renderTreeNode(securityContext,renderContext,depth,_dataKey);
+}
+if (StringUtils.isNotBlank(tag) && (!isVoid)) {
+buffer.append(indent(depth,true));
+buffer.append("</").append(tag).append(">");
+}
+}
+double end=System.nanoTime();
+logger.log(Level.FINE,"Render node {0} in {1} seconds",new java.lang.Object[]{getUuid(),decimalFormat.format((end - start) / 1000000000.0)});
 }

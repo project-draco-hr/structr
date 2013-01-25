@@ -30,34 +30,23 @@
       }
     }
     buffer.append(">");
-    List<GraphObject> _data=getExternalData();
-    if (_data != null) {
-      String _dataKey=getProperty(dataKey);
-      if (_dataKey == null) {
-        _dataKey="data";
-      }
-      for (      GraphObject dataObject : _data) {
-        renderContext.setDataNode(_dataKey,dataObject);
-        List<AbstractRelationship> rels=getChildRelationships();
-        for (        AbstractRelationship rel : rels) {
-          DOMNode subNode=(DOMNode)rel.getEndNode();
-          if (subNode.isNotDeleted()) {
-            subNode.render(securityContext,renderContext,depth + 1);
-          }
-        }
-      }
+    if (Body.class.getSimpleName().toLowerCase().equals(this.getTagName())) {
+      renderContext.setInBody(true);
+    }
+    String _dataKey=getProperty(dataKey);
+    if (_dataKey == null) {
+      _dataKey="data";
+    }
+    LinkedTreeNode treeNode=checkTreeSources();
+    List<GraphObject> listData=checkListSources();
+    if (treeNode != null) {
+      renderTreeNode(securityContext,renderContext,depth,_dataKey,treeNode);
+    }
+ else     if (listData != null && !listData.isEmpty()) {
+      renderNodeList(securityContext,renderContext,depth,_dataKey,listData);
     }
  else {
-      List<AbstractRelationship> rels=getChildRelationships();
-      for (      AbstractRelationship rel : rels) {
-        DOMNode subNode=(DOMNode)rel.getEndNode();
-        if (subNode.isNotDeleted()) {
-          if (Body.class.getSimpleName().toLowerCase().equals(this.getTagName())) {
-            renderContext.setInBody(true);
-          }
-          subNode.render(securityContext,renderContext,depth + 1);
-        }
-      }
+      renderSingleNode(securityContext,renderContext,depth);
     }
     if (StringUtils.isNotBlank(tag) && (!isVoid)) {
       buffer.append(indent(depth,true));

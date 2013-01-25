@@ -1,0 +1,14 @@
+{
+  for (  GraphDataSource<LinkedTreeNode> source : treeSources) {
+    try {
+      LinkedTreeNode graphData=source.getData(securityContext,this);
+      if (graphData != null) {
+        return graphData;
+      }
+    }
+ catch (    FrameworkException fex) {
+      logger.log(Level.WARNING,"Could not retrieve data from graph data source {0}: {1}",new Object[]{source,fex.getMessage()});
+    }
+  }
+  return null;
+}

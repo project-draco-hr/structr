@@ -1,3 +1,15 @@
 {
-  return null;
+  List<GraphObject> data=new LinkedList<GraphObject>();
+  for (  AbstractRelationship rel : referenceNode.getOutgoingRelationships(RelType.RENDER_LIST)) {
+    String key=rel.getProperty(LinkedListNode.keyProperty);
+    AbstractNode endNode=rel.getEndNode();
+    if (endNode instanceof DataNode) {
+      DataNode currentNode=(DataNode)endNode;
+      while (currentNode != null) {
+        data.add(currentNode);
+        currentNode=(DataNode)currentNode.next(key);
+      }
+    }
+  }
+  return data;
 }

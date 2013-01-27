@@ -40,7 +40,7 @@
       if (endNode instanceof DataNode) {
         DataNode dataRoot=(DataNode)endNode;
         renderContext.setTreeSource(dataRoot);
-        String treeKey=rel.getProperty(LinkedListNode.keyProperty);
+        String treeKey=dataRoot.getProperty(LinkedListNode.keyProperty);
         renderContext.setTreeKey(treeKey);
         renderContext.setDataNode(treeKey,dataRoot);
         break;
@@ -66,6 +66,7 @@
       buffer.append(indent(depth,true));
       buffer.append("</").append(tag).append(">");
     }
+    renderContext.setTreeSource(null);
   }
   double end=System.nanoTime();
   logger.log(Level.FINE,"Render node {0} in {1} seconds",new java.lang.Object[]{getUuid(),decimalFormat.format((end - start) / 1000000000.0)});

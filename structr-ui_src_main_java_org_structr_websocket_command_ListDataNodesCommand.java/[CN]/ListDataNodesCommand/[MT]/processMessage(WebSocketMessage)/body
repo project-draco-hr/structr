@@ -4,6 +4,7 @@
   String key=(String)webSocketData.getNodeData().get("key");
   Class type=EntityContext.getEntityClassForRawType(rawType);
   List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
+  Set<String> nodesWithChildren=new HashSet();
   searchAttributes.add(Search.andExactType(type.getSimpleName()));
   final String sortOrder=webSocketData.getSortOrder();
   final String sortKey=webSocketData.getSortKey();
@@ -15,13 +16,17 @@
     List<AbstractNode> filteredResults=new LinkedList<AbstractNode>();
     List<? extends DataNode> resultList=result.getResults();
     for (    DataNode dataNode : resultList) {
-      if (!dataNode.getChildren(key).isEmpty()) {
+      if (dataNode.getParent(key) == null) {
         filteredResults.add(dataNode);
+        if (dataNode.hasChildren(key)) {
+          nodesWithChildren.add(dataNode.getUuid());
+        }
       }
     }
     int resultCountBeforePaging=filteredResults.size();
     webSocketData.setResult(PagingHelper.subList(filteredResults,pageSize,page,null));
     webSocketData.setRawResultCount(resultCountBeforePaging);
+    webSocketData.setNodesWithChildren(nodesWithChildren);
     getWebSocket().send(webSocketData,true);
   }
  catch (  FrameworkException fex) {

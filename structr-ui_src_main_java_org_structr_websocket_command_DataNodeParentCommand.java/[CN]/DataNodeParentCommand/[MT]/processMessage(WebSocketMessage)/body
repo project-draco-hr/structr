@@ -1,0 +1,15 @@
+{
+  DataNode node=(DataNode)getNode(webSocketData.getId());
+  List<DataNode> result=new LinkedList();
+  String key=(String)webSocketData.getNodeData().get("key");
+  if (node == null || key == null) {
+    return;
+  }
+  DataNode currentNode=(DataNode)node.getParent(key);
+  if (currentNode != null) {
+    result.add(currentNode);
+  }
+  webSocketData.setView(PropertyView.Ui);
+  webSocketData.setResult(result);
+  getWebSocket().send(webSocketData,true);
+}

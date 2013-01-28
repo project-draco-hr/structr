@@ -4,32 +4,15 @@
     return;
   }
   List<AbstractRelationship> rels=node.getOutgoingRelationships(RelType.CONTAINS);
-  Map<Integer,GraphObject> sortMap=new TreeMap<Integer,GraphObject>();
-  Set<String> nodesWithChildren=new HashSet<String>();
   List<GraphObject> result=new LinkedList<GraphObject>();
   for (  AbstractRelationship rel : rels) {
     AbstractNode endNode=rel.getEndNode();
     if (endNode == null) {
       continue;
     }
-    if (endNode.hasRelationship(RelType.CONTAINS,Direction.OUTGOING)) {
-      nodesWithChildren.add(endNode.getProperty(GraphObject.uuid));
-    }
-    if ((node instanceof Group) || (node instanceof Folder)) {
-      result.add(endNode);
-      continue;
-    }
-    Integer pos=rel.getProperty(Component.position);
-    if (pos == null) {
-      continue;
-    }
-    sortMap.put(pos,endNode);
-  }
-  if (!sortMap.isEmpty()) {
-    result=new ArrayList<GraphObject>(sortMap.values());
+    result.add(endNode);
   }
   webSocketData.setView(PropertyView.Ui);
   webSocketData.setResult(result);
-  webSocketData.setNodesWithChildren(nodesWithChildren);
   getWebSocket().send(webSocketData,true);
 }

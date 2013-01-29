@@ -1,12 +1,22 @@
 {
   final SecurityContext securityContext=getWebSocket().getSecurityContext();
   String id=webSocketData.getId();
+  String key=(String)webSocketData.getNodeData().get("key");
   if (id != null) {
     final AbstractNode node=getNode(id);
     if (node != null) {
       if (node instanceof DOMNode) {
         DOMNode domNode=(DOMNode)node;
         domNode.getParentNode().removeChild(domNode);
+      }
+ else       if (node instanceof DataNode) {
+        DataNode dataNode=(DataNode)node;
+        try {
+          dataNode.getParent(key).removeChild(key,dataNode);
+        }
+ catch (        FrameworkException ex) {
+          logger.log(Level.SEVERE,"Could not remove data node from parent " + dataNode,ex);
+        }
       }
  else {
         DeleteRelationshipCommand deleteRel=Services.command(securityContext,DeleteRelationshipCommand.class);

@@ -1,0 +1,17 @@
+{
+  if (delegate == null) {
+    String _dataType=super.getProperty(PropertyDefinition.dataType);
+    String _name=super.getName();
+    if (_dataType != null && _name != null) {
+      Class<? extends PropertyKey> keyClass=delegateMap.get(_dataType);
+      if (keyClass != null) {
+        try {
+          delegate=keyClass.getConstructor(String.class).newInstance(_name);
+        }
+ catch (        Throwable t) {
+          t.printStackTrace();
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  if (cachedTypeDefinition == null) {
+    cachedTypeDefinition=getTypeDefinition();
+  }
+  if (cachedTypeDefinition != null) {
+    PropertyDefinition def=cachedTypeDefinition.getPropertyDefinition(key.dbName());
+    if (def != null) {
+      def.setDeclaringClass(getClass());
+      return def.getProperty(key);
+    }
+  }
+  return super.getProperty(key);
+}

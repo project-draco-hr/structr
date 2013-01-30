@@ -7,9 +7,9 @@
     Date now=new Date();
     PropertyMap properties=new PropertyMap(attributes);
     Object typeObject=properties.get(AbstractNode.type);
-    String nodeType=(typeObject != null) ? typeObject.toString() : EntityContext.getGenericFactory().createGenericNode().getClass().getSimpleName();
-    boolean isCreation=true;
+    String nodeType=(typeObject != null) ? typeObject.toString() : EntityContext.getFactoryDefinition().getGenericNodeType();
     NodeFactory<T> nodeFactory=new NodeFactory<T>(securityContext);
+    boolean isCreation=true;
     node=nodeFactory.createNodeWithType(graphDb.createNode(),nodeType,isCreation);
     if (node != null) {
       if ((user != null) && user instanceof AbstractNode) {

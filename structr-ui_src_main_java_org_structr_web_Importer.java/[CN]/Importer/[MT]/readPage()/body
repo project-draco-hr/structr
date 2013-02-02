@@ -1,14 +1,20 @@
 {
   try {
-    URL baseUrl=new URL(address);
-    Page page=Page.createNewPage(securityContext,name);
-    if (page != null) {
-      page.setVisibleToAuthenticatedUsers(authVisible);
-      page.setVisibleToPublicUsers(publicVisible);
-      createChildNodes(parsedDocument,page,page,baseUrl);
-      logger.log(Level.INFO,"##### Finished fetching {0} for page {1} #####",new Object[]{address,name});
-      return page.getProperty(AbstractNode.uuid);
+    final URL baseUrl=new URL(address);
+    return Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction<String>(){
+      @Override public String execute() throws FrameworkException {
+        Page page=Page.createNewPage(securityContext,name);
+        if (page != null) {
+          page.setVisibleToAuthenticatedUsers(authVisible);
+          page.setVisibleToPublicUsers(publicVisible);
+          createChildNodes(parsedDocument,page,page,baseUrl);
+          logger.log(Level.INFO,"##### Finished fetching {0} for page {1} #####",new Object[]{address,name});
+          return page.getProperty(AbstractNode.uuid);
+        }
+        return null;
+      }
     }
+);
   }
  catch (  MalformedURLException ex) {
     logger.log(Level.SEVERE,"Could not resolve address " + address,ex);

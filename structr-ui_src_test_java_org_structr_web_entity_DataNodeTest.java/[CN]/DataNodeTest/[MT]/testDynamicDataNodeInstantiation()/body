@@ -1,16 +1,17 @@
 {
   EntityContext.registerFactoryDefinition(new UiFactoryDefinition());
   try {
-    AbstractNode node=createTestNodes("unknown",1).get(0);
+    AbstractNode node=createTestNodes(DataNode.class.getSimpleName(),1).get(0);
     String uuid=node.getUuid();
     assertNotNull(uuid);
-    assertEquals(GenericNode.class,node.getClass());
-    Type def=createTestNodes(Type.class,1).get(0);
-    Services.command(securityContext,CreateRelationshipCommand.class).execute(def,node,RelType.DEFINES_TYPE);
+    assertEquals(DataNode.class,node.getClass());
+    node.setProperty(DataNode.kind,"Unknown");
+    PropertyDefinition def=createTestNodes(PropertyDefinition.class,1).get(0);
+    def.setProperty(PropertyDefinition.kind,"Unknown");
     Result<AbstractNode> result=Services.command(securityContext,SearchNodeCommand.class).execute(Search.andExactUuid(uuid));
     assertEquals(new Integer(1),result.getRawResultCount());
     AbstractNode foundNode=result.get(0);
-    assertEquals(DataNode.class,foundNode.getClass());
+    assertEquals("org.structr.web.entity.dynamic.Unknown",foundNode.getClass().getName());
   }
  catch (  FrameworkException fex) {
     fail("Unexpected exception: " + fex.toString());

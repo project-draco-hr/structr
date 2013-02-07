@@ -1,17 +1,10 @@
 {
-  if (cachedTypeDefinition == null) {
-    cachedTypeDefinition=getTypeDefinition();
+  List<PropertyKey> augmentedProperties=new LinkedList<PropertyKey>();
+  for (  PropertyKey key : super.getPropertyKeys(propertyView)) {
+    augmentedProperties.add(key);
   }
-  if (cachedTypeDefinition != null) {
-    List<PropertyKey> augmentedProperties=new LinkedList<PropertyKey>();
-    for (    PropertyKey key : super.getPropertyKeys(propertyView)) {
-      augmentedProperties.add(key);
-    }
-    for (    PropertyDefinition propertyDefinition : cachedTypeDefinition.getPropertyDefinitions()) {
-      propertyDefinition.setDeclaringClass(getClass());
-      augmentedProperties.add(propertyDefinition);
-    }
-    return augmentedProperties;
+  for (  PropertyDefinition propertyDefinition : PropertyDefinition.getPropertiesForKind(getType())) {
+    augmentedProperties.add(propertyDefinition);
   }
-  return super.getPropertyKeys(propertyView);
+  return augmentedProperties;
 }

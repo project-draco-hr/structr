@@ -1,6 +1,9 @@
 {
-  if (node.hasRelationship(Direction.INCOMING,RelType.DEFINES_TYPE)) {
-    return DataNode.class.getSimpleName();
+  String nodeType=super.determineNodeType(node);
+  if (DATA_NODE_TYPE.equals(nodeType) && node.hasProperty(KIND)) {
+    String kind=(String)node.getProperty(KIND);
+    extender.getType(kind);
+    nodeType=kind;
   }
-  return super.determineNodeType(node);
+  return nodeType;
 }

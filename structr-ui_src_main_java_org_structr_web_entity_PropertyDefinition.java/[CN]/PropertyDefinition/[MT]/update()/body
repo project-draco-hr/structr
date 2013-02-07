@@ -1,0 +1,14 @@
+{
+  if (dynamicTypes.isEmpty()) {
+    try {
+      SecurityContext securityContext=SecurityContext.getSuperUserInstance();
+      Result<PropertyDefinition> propertyDefinitions=Services.command(securityContext,SearchNodeCommand.class).execute(Search.andExactType(PropertyDefinition.class.getSimpleName()));
+      for (      PropertyDefinition def : propertyDefinitions.getResults()) {
+        getPropertyDefinitionsForKind(def.getProperty(PropertyDefinition.kind)).put(def.dbName(),def);
+      }
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"Unable to update dynamic property types: {0}",t.getMessage());
+    }
+  }
+}

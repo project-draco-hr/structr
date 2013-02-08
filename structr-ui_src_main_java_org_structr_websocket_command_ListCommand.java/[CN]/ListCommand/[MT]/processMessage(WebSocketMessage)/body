@@ -3,6 +3,10 @@
   String rawType=(String)webSocketData.getNodeData().get("type");
   Class type=EntityContext.getEntityClassForRawType(rawType);
   List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
+  if (type == null) {
+    getWebSocket().send(MessageBuilder.status().code(404).message("Type " + rawType + " not found").build(),true);
+    return;
+  }
   searchAttributes.add(Search.andExactType(type.getSimpleName()));
   if (type.equals(Image.class)) {
     searchAttributes.add(Search.andExactProperty(Image.isThumbnail,false));
@@ -30,6 +34,7 @@
     getWebSocket().send(webSocketData,true);
   }
  catch (  FrameworkException fex) {
-    fex.printStackTrace();
+    logger.log(Level.WARNING,"Exception occured",fex);
+    getWebSocket().send(MessageBuilder.status().code(fex.getStatus()).message(fex.getMessage()).build(),true);
   }
 }

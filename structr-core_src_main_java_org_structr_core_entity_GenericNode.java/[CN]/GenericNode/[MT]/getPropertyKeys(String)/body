@@ -1,0 +1,16 @@
+{
+  List<PropertyKey> augmentedProperties=new LinkedList<PropertyKey>();
+  String _type=getType();
+  for (  PropertyKey key : super.getPropertyKeys(propertyView)) {
+    augmentedProperties.add(key);
+  }
+  if (_type != null) {
+    Iterable<PropertyDefinition> defs=PropertyDefinition.getPropertiesForKind(_type);
+    if (defs != null) {
+      for (      PropertyDefinition propertyDefinition : defs) {
+        augmentedProperties.add(propertyDefinition);
+      }
+    }
+  }
+  return augmentedProperties;
+}

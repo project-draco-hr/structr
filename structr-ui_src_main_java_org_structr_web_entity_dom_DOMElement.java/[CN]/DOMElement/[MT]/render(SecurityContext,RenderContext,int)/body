@@ -36,27 +36,21 @@
     String _dataKey=getProperty(dataKey);
     List<GraphObject> listData=checkListSources();
     for (    AbstractRelationship rel : getOutgoingRelationships(RelType.RENDER_TREE)) {
-      AbstractNode endNode=rel.getEndNode();
-      if (endNode instanceof DataNode) {
-        DataNode dataRoot=(DataNode)endNode;
-        renderContext.setTreeSource(dataRoot);
-        String treeKey=dataRoot.getProperty(LinkedListNode.keyProperty);
-        if (treeKey == null) {
-          treeKey=rel.getProperty(LinkedListNode.keyProperty);
-          dataRoot.setProperty(LinkedListNode.keyProperty,treeKey);
-        }
-        renderContext.setTreeKey(treeKey);
-        renderContext.setDataNode(treeKey,dataRoot);
-        break;
-      }
+      AbstractNode dataRoot=rel.getEndNode();
+      renderContext.setTreeSource(dataRoot);
+      renderContext.setDataNode(_dataKey,dataRoot);
+      break;
     }
-    DataNode currentDataNode=renderContext.getTreeSource();
+    AbstractNode currentDataNode=renderContext.getTreeSource();
     if (currentDataNode != null && _dataKey != null) {
-      String treeKey=renderContext.getTreeKey();
-      for (      LinkedTreeNode node : currentDataNode.getChildren(treeKey)) {
-        renderContext.setTreeSource((DataNode)node);
-        renderContext.setDataNode(_dataKey,node);
-        renderSingleNode(securityContext,renderContext,depth);
+      PropertyKey propertyKey=EntityContext.getPropertyKeyForJSONName(currentDataNode.getClass(),_dataKey);
+      if (propertyKey instanceof CollectionProperty) {
+        CollectionProperty<AbstractNode> collectionProperty=(CollectionProperty)propertyKey;
+        for (        AbstractNode node : currentDataNode.getProperty(collectionProperty)) {
+          renderContext.setTreeSource(node);
+          renderContext.setDataNode(_dataKey,node);
+          renderSingleNode(securityContext,renderContext,depth);
+        }
       }
     }
  else     if (listData != null && !listData.isEmpty()) {

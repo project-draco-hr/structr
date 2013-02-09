@@ -9,4 +9,13 @@
  catch (  Throwable t) {
     logger.log(Level.SEVERE,"Could not instantiate security context!");
   }
+  if (request != null && request.getServletContext() != null) {
+    cache=(Map<Long,AbstractNode>)request.getServletContext().getAttribute("NODE_CACHE");
+  }
+  if (cache == null) {
+    cache=new ConcurrentHashMap<Long,AbstractNode>();
+    if (request != null && request.getServletContext() != null) {
+      request.getServletContext().setAttribute("NODE_CACHE",cache);
+    }
+  }
 }

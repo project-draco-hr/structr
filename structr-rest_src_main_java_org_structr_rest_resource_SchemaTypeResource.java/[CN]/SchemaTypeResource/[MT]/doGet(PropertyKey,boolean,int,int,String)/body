@@ -11,8 +11,16 @@
   Set<String> propertyViews=EntityContext.getPropertyViews();
   schema.setProperty(new StringProperty("views"),views);
   for (  String view : propertyViews) {
+    Set<PropertyKey> properties=new LinkedHashSet<PropertyKey>(EntityContext.getPropertySet(type,view));
     Map<String,Object> propertyConverterMap=new TreeMap<String,Object>();
-    Set<PropertyKey> properties=EntityContext.getPropertySet(type,view);
+    if (PropertyDefinition.exists(type.getSimpleName())) {
+      Iterable<PropertyDefinition> dynamicProperties=PropertyDefinition.getPropertiesForKind(type.getSimpleName());
+      if (dynamicProperties != null) {
+        for (        PropertyDefinition property : dynamicProperties) {
+          properties.add(property);
+        }
+      }
+    }
     if (!properties.isEmpty()) {
       for (      PropertyKey property : properties) {
         Map<String,Object> propProperties=new TreeMap();

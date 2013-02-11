@@ -16,24 +16,15 @@
     getWebSocket().send(MessageBuilder.status().code(404).message("Parent node not found").build(),true);
     return;
   }
-  if (parentNode instanceof LinkedTreeNode) {
-    LinkedTreeNode parentLinkedTreeNode=(LinkedTreeNode)parentNode;
-    if (parentLinkedTreeNode == null) {
-      getWebSocket().send(MessageBuilder.status().code(422).message("Parent node is no data node").build(),true);
+  if (parentNode instanceof DOMNode) {
+    DOMNode parentDOMNode=getDOMNode(parentId);
+    if (parentDOMNode == null) {
+      getWebSocket().send(MessageBuilder.status().code(422).message("Parent node is no DOM node").build(),true);
       return;
     }
-    if (key == null) {
-      key="CONTAINS";
-    }
-    LinkedTreeNode node=(LinkedTreeNode)getNode(id);
-    RelationshipType relType=DynamicRelationshipType.withName(key);
-    try {
-      if (node != null) {
-        parentLinkedTreeNode.treeAppendChild(relType,node);
-      }
-    }
- catch (    FrameworkException fex) {
-      getWebSocket().send(MessageBuilder.status().code(422).message(fex.getMessage()).build(),true);
+    DOMNode node=(DOMNode)getDOMNode(id);
+    if (node != null) {
+      parentDOMNode.appendChild(node);
     }
   }
  else {

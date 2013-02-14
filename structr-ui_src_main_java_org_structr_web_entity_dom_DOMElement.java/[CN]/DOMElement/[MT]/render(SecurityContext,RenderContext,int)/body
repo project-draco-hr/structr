@@ -35,9 +35,9 @@
     }
     String _dataKey=getProperty(dataKey);
     List<GraphObject> listData=checkListSources();
-    for (    AbstractRelationship rel : getOutgoingRelationships(RelType.RENDER_TREE)) {
+    for (    AbstractRelationship rel : getOutgoingRelationships(RelType.RENDER_NODE)) {
       AbstractNode dataRoot=rel.getEndNode();
-      renderContext.setTreeSource(dataRoot);
+      renderContext.setStartNode(dataRoot);
       renderContext.setDataNode(_dataKey,dataRoot);
       break;
     }
@@ -47,7 +47,7 @@
       if (propertyKey instanceof CollectionProperty) {
         CollectionProperty<AbstractNode> collectionProperty=(CollectionProperty)propertyKey;
         for (        AbstractNode node : currentDataNode.getProperty(collectionProperty)) {
-          renderContext.setTreeSource(node);
+          renderContext.setStartNode(node);
           renderContext.setDataNode(_dataKey,node);
           renderSingleNode(securityContext,renderContext,depth);
         }
@@ -64,7 +64,7 @@
       buffer.append(indent(depth,true));
       buffer.append("</").append(tag).append(">");
     }
-    renderContext.setTreeSource(null);
+    renderContext.setStartNode(null);
   }
   double end=System.nanoTime();
   logger.log(Level.FINE,"Render node {0} in {1} seconds",new java.lang.Object[]{getUuid(),decimalFormat.format((end - start) / 1000000000.0)});

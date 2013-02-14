@@ -1,10 +1,10 @@
 {
   if (source != null) {
-    Map<String,Object> propertySet=new LinkedHashMap<String,Object>();
+    PropertyMap propertyMap=new PropertyMap();
     for (    PropertyKey key : propertyKeys) {
-      propertySet.put(key.jsonName(),source.getProperty(key));
+      propertyMap.put(key,source.getProperty(key));
     }
-    return propertySet;
+    return PropertyMap.javaTypeToInputType(securityContext,type,propertyMap);
   }
   return null;
 }

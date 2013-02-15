@@ -1,0 +1,26 @@
+{
+  try {
+    Folder testFolder=createTestNodes(Folder.class,1).get(0);
+    assertNotNull(testFolder);
+    RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(401).when().delete("/folder/" + testFolder.getUuid());
+    ResourceAccess folderGrant=createResourceAccess("Folder",UiAuthenticator.FORBIDDEN);
+    RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(401).when().delete("/folder/" + testFolder.getUuid());
+    folderGrant.setFlag(UiAuthenticator.AUTH_USER_DELETE);
+    RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(401).when().delete("/folder/" + testFolder.getUuid());
+    folderGrant.setFlag(UiAuthenticator.NON_AUTH_USER_DELETE);
+    RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(403).when().delete("/folder/" + testFolder.getUuid());
+    String name="testuser-01";
+    String password="testpassword-01";
+    User testUser=createTestNodes(User.class,1).get(0);
+    testUser.setName(name);
+    testUser.setPassword(password);
+    RestAssured.given().headers("X-User",name,"X-Password",password).contentType("application/json; charset=UTF-8").expect().statusCode(403).when().delete("/folder/" + testFolder.getUuid());
+    testFolder.setOwner(testUser);
+    RestAssured.given().headers("X-User",name,"X-Password",password).contentType("application/json; charset=UTF-8").expect().statusCode(200).when().delete("/folder/" + testFolder.getUuid());
+  }
+ catch (  FrameworkException ex) {
+    ex.printStackTrace();
+    logger.log(Level.SEVERE,ex.toString());
+    fail("Unexpected exception");
+  }
+}

@@ -12,13 +12,20 @@
     ServletContextHandler servletContext=new ServletContextHandler(server,contextPath,ServletContextHandler.SESSIONS);
     servletContext.setBaseResource(new ResourceCollection(Resource.newResource(basePath),JarResource.newJarResource(Resource.newResource(sourceJarName))));
     servletContext.setInitParameter("configfile.path",basePath + "/structr.conf");
+    JsonRestServlet structrRestServlet=new JsonRestServlet(new UiResourceProvider(),PropertyView.Public,AbstractNode.uuid);
+    ServletHolder structrRestServletHolder=new ServletHolder(structrRestServlet);
+    Map<String,String> servletParams=new LinkedHashMap<String,String>();
+    servletParams.put("Authenticator",UiAuthenticator.class.getName());
+    structrRestServletHolder.setInitParameters(servletParams);
+    structrRestServletHolder.setInitOrder(0);
+    Map<String,ServletHolder> servlets=new LinkedHashMap<String,ServletHolder>();
+    servlets.put(restUrl + "/*",structrRestServletHolder);
     HtmlServlet htmlServlet=new HtmlServlet();
     ServletHolder htmlServletHolder=new ServletHolder(htmlServlet);
     Map<String,String> htmlInitParams=new HashMap<String,String>();
-    htmlInitParams.put("Authenticator","org.structr.web.auth.HttpAuthenticator");
+    htmlInitParams.put("Authenticator",UiAuthenticator.class.getName());
     htmlServletHolder.setInitParameters(htmlInitParams);
     htmlServletHolder.setInitOrder(1);
-    Map<String,ServletHolder> servlets=new LinkedHashMap<String,ServletHolder>();
     servlets.put(htmlUrl + "/*",htmlServletHolder);
     int position=1;
     for (    Map.Entry<String,ServletHolder> servlet : servlets.entrySet()) {

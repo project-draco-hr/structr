@@ -1,13 +1,14 @@
 {
   RelationshipFactory relFactory=(RelationshipFactory)arguments.get("relationshipFactory");
+  ExecutionEngine engine=(ExecutionEngine)arguments.get("cypherExecutionEngine");
   NodeFactory nodeFactory=new NodeFactory(securityContext);
   List<GraphObject> resultList=new LinkedList<GraphObject>();
   ExecutionResult result=null;
   if (parameters != null) {
-    result=engine.get().execute(query,parameters);
+    result=engine.execute(query,parameters);
   }
  else {
-    result=engine.get().execute(query);
+    result=engine.execute(query);
   }
   for (  Map<String,Object> row : result) {
     for (    Object o : row.values()) {

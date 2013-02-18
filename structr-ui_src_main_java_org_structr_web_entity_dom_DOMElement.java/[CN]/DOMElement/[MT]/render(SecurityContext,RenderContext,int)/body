@@ -1,0 +1,71 @@
+{
+  double start=System.nanoTime();
+  boolean edit=renderContext.getEdit();
+  boolean isVoid=isVoidElement();
+  StringBuilder buffer=renderContext.getBuffer();
+  String pageId=renderContext.getPageId();
+  String id=getUuid();
+  String tag=getProperty(DOMElement.tag);
+  buffer.append(indent(depth,true));
+  if (StringUtils.isNotBlank(tag)) {
+    buffer.append("<").append(tag);
+    if (edit) {
+      if (depth == 1) {
+        buffer.append(" data-structr_page_id='").append(pageId).append("'");
+      }
+      buffer.append(" data-structr_element_id=\"").append(id).append("\"");
+      buffer.append(" data-structr_type=\"").append(getType()).append("\"");
+      buffer.append(" data-structr_name=\"").append(getName()).append("\"");
+    }
+    for (    PropertyKey attribute : EntityContext.getPropertySet(getClass(),PropertyView.Html)) {
+      try {
+        String value=getPropertyWithVariableReplacement(securityContext,renderContext,attribute);
+        if ((value != null) && StringUtils.isNotBlank(value)) {
+          String key=attribute.jsonName().substring(PropertyView.Html.length());
+          buffer.append(" ").append(key).append("=\"").append(value).append("\"");
+        }
+      }
+ catch (      Throwable t) {
+        t.printStackTrace();
+      }
+    }
+    buffer.append(">");
+    if (Body.class.getSimpleName().toLowerCase().equals(this.getTagName())) {
+      renderContext.setInBody(true);
+    }
+    String _dataKey=getProperty(dataKey);
+    List<GraphObject> listData=checkListSources();
+    for (    AbstractRelationship rel : getOutgoingRelationships(RelType.RENDER_NODE)) {
+      AbstractNode dataRoot=rel.getEndNode();
+      renderContext.setStartNode(dataRoot);
+      renderContext.setDataNode(_dataKey,dataRoot);
+      break;
+    }
+    AbstractNode currentDataNode=renderContext.getTreeSource();
+    if (currentDataNode != null && _dataKey != null) {
+      PropertyKey propertyKey=EntityContext.getPropertyKeyForJSONName(currentDataNode.getClass(),_dataKey);
+      if (propertyKey instanceof CollectionProperty) {
+        CollectionProperty<AbstractNode> collectionProperty=(CollectionProperty)propertyKey;
+        for (        AbstractNode node : currentDataNode.getProperty(collectionProperty)) {
+          renderContext.setStartNode(node);
+          renderContext.setDataNode(_dataKey,node);
+          renderSingleNode(securityContext,renderContext,depth);
+        }
+      }
+    }
+ else     if (listData != null && !listData.isEmpty()) {
+      renderContext.setListSource(listData);
+      renderNodeList(securityContext,renderContext,depth,_dataKey);
+    }
+ else {
+      renderSingleNode(securityContext,renderContext,depth);
+    }
+    if (StringUtils.isNotBlank(tag) && (!isVoid)) {
+      buffer.append(indent(depth,true));
+      buffer.append("</").append(tag).append(">");
+    }
+    renderContext.setStartNode(null);
+  }
+  double end=System.nanoTime();
+  logger.log(Level.FINE,"Render node {0} in {1} seconds",new java.lang.Object[]{getUuid(),decimalFormat.format((end - start) / 1000000000.0)});
+}

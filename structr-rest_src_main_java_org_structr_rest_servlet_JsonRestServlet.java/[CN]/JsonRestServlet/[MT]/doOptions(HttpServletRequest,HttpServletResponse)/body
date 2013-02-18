@@ -6,7 +6,7 @@
     response.setContentType("application/json; charset=UTF-8");
     List<Resource> chain=ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,defaultIdProperty);
     Resource resourceConstraint=ResourceHelper.optimizeConstraintChain(chain,defaultIdProperty);
-    securityContext.examineRequest(request,resourceConstraint.getResourceSignature(),resourceConstraint.getGrant(),propertyView.get(securityContext));
+    securityContext.examineRequest(request,resourceConstraint.getResourceSignature(),resourceConstraint.getGrant(request,response),propertyView.get(securityContext));
     RestMethodResult result=resourceConstraint.doOptions();
     result.commitResponse(gson,response);
   }

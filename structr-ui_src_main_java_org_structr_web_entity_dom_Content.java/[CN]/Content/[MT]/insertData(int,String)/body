@@ -1,0 +1,16 @@
+{
+  checkWriteAccess();
+  String text=getProperty(content);
+  String leftPart=text.substring(0,offset);
+  String rightPart=text.substring(offset);
+  StringBuilder buf=new StringBuilder(text.length() + data.length() + 1);
+  buf.append(leftPart);
+  buf.append(data);
+  buf.append(rightPart);
+  try {
+    setProperty(content,buf.toString());
+  }
+ catch (  FrameworkException fex) {
+    throw new DOMException(DOMException.INVALID_STATE_ERR,fex.toString());
+  }
+}

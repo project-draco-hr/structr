@@ -1,0 +1,55 @@
+{
+  WebSocketMessage webSocketData=new WebSocketMessage();
+  if (json instanceof JsonObject) {
+    JsonObject root=json.getAsJsonObject();
+    JsonObject nodeData=root.getAsJsonObject("data");
+    JsonObject relData=root.getAsJsonObject("relData");
+    if (root.has("command")) {
+      webSocketData.setCommand(root.getAsJsonPrimitive("command").getAsString());
+    }
+    if (root.has("id")) {
+      webSocketData.setId(root.getAsJsonPrimitive("id").getAsString());
+    }
+    if (root.has("pageId")) {
+      webSocketData.setPageId(root.getAsJsonPrimitive("pageId").getAsString());
+    }
+    if (root.has("token")) {
+      webSocketData.setToken(root.getAsJsonPrimitive("token").getAsString());
+    }
+    if (root.has("callback")) {
+      webSocketData.setCallback(root.getAsJsonPrimitive("callback").getAsString());
+    }
+    if (root.has("button")) {
+      webSocketData.setButton(root.getAsJsonPrimitive("button").getAsString());
+    }
+    if (root.has("parent")) {
+      webSocketData.setParent(root.getAsJsonPrimitive("parent").getAsString());
+    }
+    if (root.has("view")) {
+      webSocketData.setView(root.getAsJsonPrimitive("view").getAsString());
+    }
+    if (root.has("sort")) {
+      webSocketData.setSortKey(root.getAsJsonPrimitive("sort").getAsString());
+    }
+    if (root.has("order")) {
+      webSocketData.setSortOrder(root.getAsJsonPrimitive("order").getAsString());
+    }
+    if (root.has("pageSize")) {
+      webSocketData.setPageSize(root.getAsJsonPrimitive("pageSize").getAsInt());
+    }
+    if (root.has("page")) {
+      webSocketData.setPage(root.getAsJsonPrimitive("page").getAsInt());
+    }
+    if (nodeData != null) {
+      for (      Entry<String,JsonElement> entry : nodeData.entrySet()) {
+        webSocketData.setNodeData(entry.getKey(),entry.getValue().getAsString());
+      }
+    }
+    if (relData != null) {
+      for (      Entry<String,JsonElement> entry : relData.entrySet()) {
+        webSocketData.setRelData(entry.getKey(),entry.getValue().getAsString());
+      }
+    }
+  }
+  return webSocketData;
+}

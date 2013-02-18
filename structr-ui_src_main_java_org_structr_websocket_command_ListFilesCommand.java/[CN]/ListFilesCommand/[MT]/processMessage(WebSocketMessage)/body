@@ -1,0 +1,35 @@
+{
+  final SecurityContext securityContext=getWebSocket().getSecurityContext();
+  String rawType=(String)webSocketData.getNodeData().get("type");
+  Class type=EntityContext.getEntityClassForRawType(rawType);
+  List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
+  searchAttributes.add(Search.andExactType(type.getSimpleName()));
+  if (type.equals(Image.class)) {
+    searchAttributes.add(Search.andExactProperty(Image.isThumbnail,false));
+  }
+  final String sortOrder=webSocketData.getSortOrder();
+  final String sortKey=webSocketData.getSortKey();
+  final int pageSize=webSocketData.getPageSize();
+  final int page=webSocketData.getPage();
+  PropertyKey sortProperty=EntityContext.getPropertyKeyForJSONName(type,sortKey);
+  try {
+    Result result=(Result)Services.command(securityContext,SearchNodeCommand.class).execute(true,false,searchAttributes,sortProperty,"desc".equals(sortOrder));
+    List<AbstractNode> filteredResults=new LinkedList<AbstractNode>();
+    List<? extends GraphObject> resultList=result.getResults();
+    for (    GraphObject obj : resultList) {
+      if (obj instanceof AbstractNode) {
+        AbstractNode node=(AbstractNode)obj;
+        if (!node.hasRelationship(RelType.CONTAINS,Direction.INCOMING)) {
+          filteredResults.add(node);
+        }
+      }
+    }
+    int resultCountBeforePaging=filteredResults.size();
+    webSocketData.setResult(PagingHelper.subList(filteredResults,pageSize,page,null));
+    webSocketData.setRawResultCount(resultCountBeforePaging);
+    getWebSocket().send(webSocketData,true);
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+  }
+}

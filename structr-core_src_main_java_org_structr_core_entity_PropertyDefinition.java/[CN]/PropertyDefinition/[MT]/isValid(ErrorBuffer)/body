@@ -1,0 +1,14 @@
+{
+  boolean error=false;
+  error|=ValidationHelper.checkStringNotBlank(this,kind,errorBuffer);
+  error|=ValidationHelper.checkStringNotBlank(this,dataType,errorBuffer);
+  String _dataType=getProperty(PropertyDefinition.dataType);
+  if (_dataType != null) {
+    if ("Entity".equals(_dataType) || "Collection".equals(_dataType)) {
+      error|=ValidationHelper.checkStringNotBlank(this,relKind,errorBuffer);
+      error|=ValidationHelper.checkStringNotBlank(this,relType,errorBuffer);
+    }
+  }
+  error|=!super.isValid(errorBuffer);
+  return !error;
+}

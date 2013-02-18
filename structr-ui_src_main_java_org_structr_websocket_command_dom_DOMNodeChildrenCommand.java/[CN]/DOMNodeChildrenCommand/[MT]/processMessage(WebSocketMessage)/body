@@ -1,0 +1,15 @@
+{
+  DOMNode node=getDOMNode(webSocketData.getId());
+  if (node == null) {
+    return;
+  }
+  List<GraphObject> result=new LinkedList<GraphObject>();
+  DOMNode currentNode=(DOMNode)node.getFirstChild();
+  while (currentNode != null) {
+    result.add(currentNode);
+    currentNode=(DOMNode)currentNode.getNextSibling();
+  }
+  webSocketData.setView(PropertyView.Ui);
+  webSocketData.setResult(result);
+  getWebSocket().send(webSocketData,true);
+}

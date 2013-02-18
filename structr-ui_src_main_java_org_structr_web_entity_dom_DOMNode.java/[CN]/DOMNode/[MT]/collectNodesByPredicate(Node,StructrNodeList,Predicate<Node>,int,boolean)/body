@@ -1,0 +1,16 @@
+{
+  if (predicate.evaluate(securityContext,startNode)) {
+    results.add(startNode);
+    if (stopOnFirstHit) {
+      return;
+    }
+  }
+  NodeList _children=startNode.getChildNodes();
+  if (_children != null) {
+    int len=_children.getLength();
+    for (int i=0; i < len; i++) {
+      Node child=_children.item(i);
+      collectNodesByPredicate(child,results,predicate,depth + 1,stopOnFirstHit);
+    }
+  }
+}

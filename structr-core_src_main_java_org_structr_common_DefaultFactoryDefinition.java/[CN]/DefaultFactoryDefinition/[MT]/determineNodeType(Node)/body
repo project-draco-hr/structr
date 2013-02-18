@@ -1,0 +1,23 @@
+{
+  String type=GraphObject.type.dbName();
+  if (node.hasProperty(type)) {
+    Object obj=node.getProperty(type);
+    if (obj != null) {
+      return obj.toString();
+    }
+  }
+ else {
+    if (externalNodeTypeName == null) {
+      externalNodeTypeName=(String)Services.getConfigurationValue(Services.FOREIGN_TYPE);
+    }
+    if (externalNodeTypeName != null && node.hasProperty(externalNodeTypeName)) {
+      Object typeObj=node.getProperty(externalNodeTypeName);
+      if (typeObj != null) {
+        String externalNodeType=typeObj.toString();
+        genericNodeExtender.getType(externalNodeType);
+        return typeObj.toString();
+      }
+    }
+  }
+  return getGenericNodeType();
+}

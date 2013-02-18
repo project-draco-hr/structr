@@ -33,29 +33,31 @@
     if (Body.class.getSimpleName().toLowerCase().equals(this.getTagName())) {
       renderContext.setInBody(true);
     }
-    String _dataKey=getProperty(dataKey);
+    String _refKey=getProperty(refKey);
     List<GraphObject> listData=checkListSources();
     for (    AbstractRelationship rel : getOutgoingRelationships(RelType.RENDER_NODE)) {
       AbstractNode dataRoot=rel.getEndNode();
       renderContext.setStartNode(dataRoot);
-      renderContext.setDataNode(_dataKey,dataRoot);
+      renderContext.setDataNode(_refKey,dataRoot);
       break;
     }
-    AbstractNode currentDataNode=renderContext.getTreeSource();
-    if (currentDataNode != null && _dataKey != null) {
-      PropertyKey propertyKey=EntityContext.getPropertyKeyForJSONName(currentDataNode.getClass(),_dataKey);
-      if (propertyKey instanceof CollectionProperty) {
-        CollectionProperty<AbstractNode> collectionProperty=(CollectionProperty)propertyKey;
-        for (        AbstractNode node : currentDataNode.getProperty(collectionProperty)) {
-          renderContext.setStartNode(node);
-          renderContext.setDataNode(_dataKey,node);
-          renderSingleNode(securityContext,renderContext,depth);
+    GraphObject currentDataNode=renderContext.getDataNode(_refKey);
+    if (currentDataNode != null && _refKey != null) {
+      String _dataKey=getProperty(dataKey);
+      if (_dataKey != null) {
+        PropertyKey propertyKey=EntityContext.getPropertyKeyForJSONName(currentDataNode.getClass(),_dataKey);
+        if (propertyKey instanceof CollectionProperty) {
+          CollectionProperty<AbstractNode> collectionProperty=(CollectionProperty)propertyKey;
+          for (          AbstractNode node : currentDataNode.getProperty(collectionProperty)) {
+            renderContext.setDataNode(_refKey,node);
+            renderSingleNode(securityContext,renderContext,depth);
+          }
         }
       }
     }
  else     if (listData != null && !listData.isEmpty()) {
       renderContext.setListSource(listData);
-      renderNodeList(securityContext,renderContext,depth,_dataKey);
+      renderNodeList(securityContext,renderContext,depth,_refKey);
     }
  else {
       renderSingleNode(securityContext,renderContext,depth);

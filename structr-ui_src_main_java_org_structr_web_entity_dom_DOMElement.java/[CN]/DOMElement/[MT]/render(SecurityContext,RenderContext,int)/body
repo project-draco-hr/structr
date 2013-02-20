@@ -33,40 +33,39 @@
     if (Body.class.getSimpleName().toLowerCase().equals(this.getTagName())) {
       renderContext.setInBody(true);
     }
-    String _refKey=getProperty(refKey);
+    String _dataKey=getProperty(dataKey);
     List<GraphObject> listData=checkListSources();
-    for (    AbstractRelationship rel : getOutgoingRelationships(RelType.RENDER_NODE)) {
-      AbstractNode dataRoot=rel.getEndNode();
-      renderContext.setStartNode(dataRoot);
-      renderContext.setDataNode(_refKey,dataRoot);
-      break;
-    }
-    GraphObject currentDataNode=renderContext.getDataNode(_refKey);
-    if (currentDataNode != null && _refKey != null) {
-      String _dataKey=getProperty(dataKey);
-      if (_dataKey != null) {
-        PropertyKey propertyKey=EntityContext.getPropertyKeyForJSONName(currentDataNode.getClass(),_dataKey);
-        if (propertyKey instanceof CollectionProperty) {
-          CollectionProperty<AbstractNode> collectionProperty=(CollectionProperty)propertyKey;
-          for (          AbstractNode node : currentDataNode.getProperty(collectionProperty)) {
-            renderContext.setDataNode(_refKey,node);
-            renderSingleNode(securityContext,renderContext,depth);
+    List<AbstractRelationship> rels=getChildRelationships();
+    for (    AbstractRelationship rel : rels) {
+      DOMNode subNode=(DOMNode)rel.getEndNode();
+      String subKey=subNode.getProperty(dataKey);
+      if (subKey != null) {
+        setDataRoot(renderContext,subNode,subKey);
+        GraphObject currentDataNode=renderContext.getDataObject();
+        PropertyKey propertyKey=null;
+        if (currentDataNode != null) {
+          propertyKey=EntityContext.getPropertyKeyForJSONName(currentDataNode.getClass(),subKey,false);
+          if (propertyKey != null && propertyKey instanceof CollectionProperty) {
+            CollectionProperty<AbstractNode> collectionProperty=(CollectionProperty)propertyKey;
+            for (            AbstractNode node : currentDataNode.getProperty(collectionProperty)) {
+              renderContext.putDataObject(subKey,node);
+              subNode.render(securityContext,renderContext,depth + 1);
+            }
           }
+ else {
+            subNode.render(securityContext,renderContext,depth + 1);
+          }
+          renderContext.setDataObject(currentDataNode);
         }
       }
-    }
- else     if (listData != null && !listData.isEmpty()) {
-      renderContext.setListSource(listData);
-      renderNodeList(securityContext,renderContext,depth,_refKey);
-    }
  else {
-      renderSingleNode(securityContext,renderContext,depth);
+        subNode.render(securityContext,renderContext,depth + 1);
+      }
     }
     if (StringUtils.isNotBlank(tag) && (!isVoid)) {
       buffer.append(indent(depth,true));
       buffer.append("</").append(tag).append(">");
     }
-    renderContext.setStartNode(null);
   }
   double end=System.nanoTime();
   logger.log(Level.FINE,"Render node {0} in {1} seconds",new java.lang.Object[]{getUuid(),decimalFormat.format((end - start) / 1000000000.0)});

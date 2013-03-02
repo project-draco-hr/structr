@@ -1,6 +1,7 @@
 {
   Map<String,Object> nodeData=webSocketData.getNodeData();
   String parentId=(String)nodeData.get("parentId");
+  nodeData.remove("parentId");
   String pageId=webSocketData.getPageId();
   if (pageId != null) {
     if (parentId == null) {
@@ -15,6 +16,7 @@
     Document document=getPage(pageId);
     if (document != null) {
       String tagName=(String)nodeData.get("tagName");
+      nodeData.remove("tagName");
       DOMNode newNode=null;
       try {
         if (tagName != null && !tagName.isEmpty()) {
@@ -25,6 +27,24 @@
         }
         if (newNode != null) {
           parentNode.appendChild(newNode);
+          for (          Entry entry : nodeData.entrySet()) {
+            String key=(String)entry.getKey();
+            Object val=entry.getValue();
+            PropertyKey propertyKey=EntityContext.getPropertyKeyForDatabaseName(newNode.getClass(),key);
+            if (propertyKey != null) {
+              try {
+                Object convertedValue=val;
+                PropertyConverter inputConverter=propertyKey.inputConverter(SecurityContext.getSuperUserInstance());
+                if (inputConverter != null) {
+                  convertedValue=inputConverter.convert(val);
+                }
+                newNode.setProperty(propertyKey,convertedValue);
+              }
+ catch (              FrameworkException fex) {
+                logger.log(Level.WARNING,"Unable to set node property {0} of node {1} to {2}: {3}",new Object[]{propertyKey,newNode.getUuid(),val,fex.getMessage()});
+              }
+            }
+          }
         }
       }
  catch (      DOMException dex) {

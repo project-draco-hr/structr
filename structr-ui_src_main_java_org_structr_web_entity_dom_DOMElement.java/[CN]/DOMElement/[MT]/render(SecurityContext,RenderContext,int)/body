@@ -34,7 +34,6 @@
       renderContext.setInBody(true);
     }
     String _dataKey=getProperty(dataKey);
-    List<GraphObject> listData=checkListSources();
     List<AbstractRelationship> rels=getChildRelationships();
     for (    AbstractRelationship rel : rels) {
       DOMNode subNode=(DOMNode)rel.getEndNode();
@@ -42,6 +41,7 @@
       if (subKey != null) {
         setDataRoot(renderContext,subNode,subKey);
         GraphObject currentDataNode=renderContext.getDataObject();
+        List<GraphObject> listData=((DOMElement)subNode).checkListSources(renderContext);
         PropertyKey propertyKey=null;
         if (currentDataNode != null) {
           propertyKey=EntityContext.getPropertyKeyForJSONName(currentDataNode.getClass(),subKey,false);
@@ -56,6 +56,10 @@
             subNode.render(securityContext,renderContext,depth + 1);
           }
           renderContext.setDataObject(currentDataNode);
+        }
+ else {
+          renderContext.setListSource(listData);
+          renderNodeList(securityContext,renderContext,depth,subKey);
         }
       }
  else {

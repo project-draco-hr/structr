@@ -1,4 +1,7 @@
 {
+  if (isDeleted() || isHidden()) {
+    return;
+  }
   double start=System.nanoTime();
   boolean edit=renderContext.getEdit();
   boolean isVoid=isVoidElement();
@@ -33,7 +36,6 @@
     if (Body.class.getSimpleName().toLowerCase().equals(this.getTagName())) {
       renderContext.setInBody(true);
     }
-    String _dataKey=getProperty(dataKey);
     List<AbstractRelationship> rels=getChildRelationships();
     for (    AbstractRelationship rel : rels) {
       DOMNode subNode=(DOMNode)rel.getEndNode();
@@ -59,7 +61,7 @@
         }
  else {
           renderContext.setListSource(listData);
-          renderNodeList(securityContext,renderContext,depth,subKey);
+          ((DOMElement)subNode).renderNodeList(securityContext,renderContext,depth,subKey);
         }
       }
  else {

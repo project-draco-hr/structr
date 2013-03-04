@@ -9,15 +9,13 @@
     if (resourceProvider == null) {
       try {
         resourceProvider=UiResourceProvider.class.newInstance();
-        resourceMap.putAll(resourceProvider.getResources());
       }
- catch (      InstantiationException ex) {
-        Logger.getLogger(DOMElement.class.getName()).log(Level.SEVERE,null,ex);
-      }
-catch (      IllegalAccessException ex) {
-        Logger.getLogger(DOMElement.class.getName()).log(Level.SEVERE,null,ex);
+ catch (      Throwable t) {
+        logger.log(Level.SEVERE,"Couldn't establish a resource provider",t);
+        return Collections.EMPTY_LIST;
       }
     }
+    resourceMap.putAll(resourceProvider.getResources());
     Value<String> propertyView=new ThreadLocalPropertyView();
     propertyView.set(securityContext,PropertyView.Ui);
     HttpServletRequest request=new HttpServletRequestWrapper(renderContext.getRequest()){

@@ -6,7 +6,18 @@
       resourceMap.put(Pattern.compile(relMapping.getName()),NamedRelationResource.class);
     }
     ResourceProvider resourceProvider=renderContext.getResourceProvider();
-    resourceMap.putAll(resourceProvider.getResources());
+    if (resourceProvider == null) {
+      try {
+        resourceProvider=UiResourceProvider.class.newInstance();
+        resourceMap.putAll(resourceProvider.getResources());
+      }
+ catch (      InstantiationException ex) {
+        Logger.getLogger(DOMElement.class.getName()).log(Level.SEVERE,null,ex);
+      }
+catch (      IllegalAccessException ex) {
+        Logger.getLogger(DOMElement.class.getName()).log(Level.SEVERE,null,ex);
+      }
+    }
     Value<String> propertyView=new ThreadLocalPropertyView();
     propertyView.set(securityContext,PropertyView.Ui);
     HttpServletRequest request=new HttpServletRequestWrapper(renderContext.getRequest()){
@@ -42,7 +53,6 @@
     securityContext.setRequest(request);
     HttpServletResponse response=renderContext.getResponse();
     Resource resource=ResourceHelper.applyViewTransformation(request,securityContext,ResourceHelper.optimizeConstraintChain(ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,AbstractNode.uuid),AbstractNode.uuid),propertyView);
-    securityContext.examineRequest(request,resource.getResourceSignature(),resource.getGrant(request,response),PropertyView.Ui);
     String pageSizeParameter=request.getParameter(REQUEST_PARAMETER_PAGE_SIZE);
     String pageParameter=request.getParameter(REQUEST_PARAMETER_PAGE_NUMBER);
     String offsetId=request.getParameter(REQUEST_PARAMETER_OFFSET_ID);

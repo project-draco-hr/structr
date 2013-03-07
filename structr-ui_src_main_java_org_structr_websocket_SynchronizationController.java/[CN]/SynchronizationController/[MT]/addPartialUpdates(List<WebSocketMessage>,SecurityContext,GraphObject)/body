@@ -1,0 +1,37 @@
+{
+  List<DOMElement> dynamicElements=null;
+  List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
+  attrs.add(Search.andExactTypeAndSubtypes(DOMElement.class.getSimpleName()));
+  attrs.add(Search.andExactProperty(DOMElement.dataKey,EntityContext.denormalizeEntityName(obj.getType())));
+  try {
+    Result results=Services.command(securityContext,SearchNodeCommand.class).execute(attrs);
+    dynamicElements=results.getResults();
+  }
+ catch (  FrameworkException ex) {
+    logger.log(Level.SEVERE,"Something went wrong while searching for dynamic elements of type " + obj.getType(),ex);
+  }
+  for (  DOMElement el : dynamicElements) {
+    logger.log(Level.INFO,"Found dynamic element for type {0}: {1}",new Object[]{obj.getType(),el});
+    try {
+      HttpServletRequest request=mock(HttpServletRequest.class);
+      RenderContext ctx=new RenderContext(request,null,false,Locale.GERMAN);
+      String pageId=(String)el.getProperty(DOMNode.pageId);
+      if (pageId != null) {
+        DOMElement parent=(DOMElement)el.getParentNode();
+        if (parent != null) {
+          parent.render(securityContext,ctx,0);
+        }
+        String partialContent=ctx.getBuffer().toString();
+        logger.log(Level.INFO,"Partial output:\n{0}",partialContent);
+        WebSocketMessage message=new WebSocketMessage();
+        message.setCommand("PARTIAL");
+        message.setNodeData("pageId",pageId);
+        message.setMessage(StringUtils.remove(partialContent,"\n"));
+        messageStack.add(message);
+      }
+    }
+ catch (    FrameworkException ex) {
+      Logger.getLogger(SynchronizationController.class.getName()).log(Level.SEVERE,null,ex);
+    }
+  }
+}

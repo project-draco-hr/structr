@@ -1,8 +1,8 @@
 {
   messageStack=messageStackMap.get(transactionKey);
   AbstractRelationship relationship;
-  if ((obj != null) && (obj instanceof AbstractRelationship)) {
-    relationship=(AbstractRelationship)obj;
+  if ((graphObject != null) && (graphObject instanceof AbstractRelationship)) {
+    relationship=(AbstractRelationship)graphObject;
     if (ignoreRelationship(relationship)) {
       return true;
     }
@@ -22,6 +22,7 @@
     String uuid=properties.get(AbstractNode.uuid).toString();
     message.setId(uuid);
     message.setCommand("DELETE");
+    partialController.sendPartial(securityContext,properties.get(AbstractNode.type));
     messageStack.add(message);
   }
   return true;

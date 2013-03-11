@@ -2,7 +2,12 @@
   logger.log(Level.FINE,"Broadcasting message to {0} clients..",clients.size());
   webSocketData.setSessionValid(true);
   String message;
+  String pagePath=(String)webSocketData.getNodeData().get("pagePath");
   for (  StructrWebSocket socket : clients) {
+    String clientPagePath=socket.getPathPath();
+    if (clientPagePath != null && !clientPagePath.equals(URIUtil.encodePath(pagePath))) {
+      continue;
+    }
     Connection socketConnection=socket.getConnection();
     webSocketData.setCallback(socket.getCallback());
     if ((socketConnection != null)) {

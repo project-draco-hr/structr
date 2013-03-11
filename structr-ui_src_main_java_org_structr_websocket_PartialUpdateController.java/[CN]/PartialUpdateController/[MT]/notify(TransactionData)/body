@@ -1,5 +1,15 @@
 {
+  Set<Node> nodes=new HashSet();
   for (  Node node : data.createdNodes()) {
+    nodes.add(node);
+  }
+  for (  PropertyEntry<Node> prop : data.assignedNodeProperties()) {
+    nodes.add(prop.entity());
+  }
+  for (  PropertyEntry<Node> prop : data.removedNodeProperties()) {
+    nodes.add(prop.entity());
+  }
+  for (  Node node : nodes) {
     String type=(String)node.getProperty("type");
     sendPartial(securityContext,type);
   }

@@ -2,7 +2,10 @@
   List<DOMElement> dynamicElements=null;
   List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
   attrs.add(Search.andExactTypeAndSubtypes(DOMElement.class.getSimpleName()));
-  attrs.add(Search.andExactProperty(DOMElement.dataKey,EntityContext.denormalizeEntityName(type)));
+  SearchAttributeGroup g=new SearchAttributeGroup(SearchOperator.AND);
+  g.add(Search.orExactProperty(DOMElement.dataKey,EntityContext.denormalizeEntityName(type)));
+  g.add(Search.orExactProperty(DOMElement.partialUpdateKey,EntityContext.denormalizeEntityName(type)));
+  attrs.add(g);
   try {
     Result results=Services.command(securityContext,SearchNodeCommand.class).execute(attrs);
     dynamicElements=results.getResults();
@@ -10,11 +13,12 @@
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,"Something went wrong while searching for dynamic elements of type " + type,ex);
   }
+  HttpServletRequest request=mock(HttpServletRequest.class);
+  RenderContext ctx=new RenderContext(request,null,false,Locale.GERMAN);
+  ctx.setResourceProvider(resourceProvider);
   for (  DOMElement el : dynamicElements) {
     logger.log(Level.FINE,"Found dynamic element for type {0}: {1}",new Object[]{type,el});
     try {
-      HttpServletRequest request=mock(HttpServletRequest.class);
-      RenderContext ctx=new RenderContext(request,null,false,Locale.GERMAN);
       Page page=el.getProperty(DOMNode.page);
       if (page != null) {
         DOMElement parent=(DOMElement)el.getParentNode();

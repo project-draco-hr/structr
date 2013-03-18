@@ -113,7 +113,7 @@ synchronized (index) {
           SearchOperator op=attr.getSearchOperator();
           Object nodeValue=node.getProperty(key);
           if (op.equals(SearchOperator.NOT)) {
-            if ((nodeValue != null) && !(nodeValue.equals(searchValue))) {
+            if ((nodeValue != null) && !(nodeValue.equals(decodeExactMatch(searchValue)))) {
               attr.addToResult(node);
             }
           }
@@ -121,7 +121,7 @@ synchronized (index) {
             if ((nodeValue == null) && (searchValue == null)) {
               attr.addToResult(node);
             }
-            if ((nodeValue != null) && nodeValue.equals(searchValue)) {
+            if ((nodeValue != null) && nodeValue.equals(decodeExactMatch(searchValue))) {
               attr.addToResult(node);
             }
           }

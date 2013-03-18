@@ -23,6 +23,17 @@
   GraphObject _data=null;
   for (int i=0; (i < parts.length); i++) {
     String part=parts[i];
+    if (_data != null) {
+      Object value=_data.getProperty(EntityContext.getPropertyKeyForJSONName(_data.getClass(),part));
+      if (value instanceof GraphObject) {
+        _data=(GraphObject)value;
+        continue;
+      }
+    }
+    if (renderContext.hasDataForKey(part.toLowerCase())) {
+      _data=renderContext.getDataNode(part.toLowerCase());
+      continue;
+    }
     if ("request".equals(part.toLowerCase())) {
       HttpServletRequest request=renderContext.getRequest();
       if (request != null) {
@@ -35,49 +46,48 @@
         }
       }
     }
-    if ("page".equals(part.toLowerCase())) {
-      _data=_page;
-      continue;
-    }
-    if ("link".equals(part.toLowerCase())) {
-      for (      AbstractRelationship rel : getRelationships(RelType.LINK,Direction.OUTGOING)) {
-        _data=rel.getEndNode();
-        break;
+    if (_data == null) {
+      if ("page".equals(part.toLowerCase())) {
+        _data=_page;
+        continue;
       }
-      continue;
-    }
-    if ("parent".equals(part.toLowerCase())) {
-      for (      AbstractRelationship rel : getRelationships(RelType.CONTAINS,Direction.INCOMING)) {
-        if (rel.getProperty(pageIdProperty) != null) {
+      if (_data == null && "link".equals(part.toLowerCase())) {
+        for (        AbstractRelationship rel : getRelationships(RelType.LINK,Direction.OUTGOING)) {
+          _data=rel.getEndNode();
+          break;
+        }
+        continue;
+      }
+      if ("parent".equals(part.toLowerCase())) {
+        for (        AbstractRelationship rel : getRelationships(RelType.CONTAINS,Direction.INCOMING)) {
+          if (rel.getProperty(pageIdProperty) != null) {
+            _data=rel.getStartNode();
+            break;
+          }
+        }
+        continue;
+      }
+      if ("owner".equals(part.toLowerCase())) {
+        for (        AbstractRelationship rel : getRelationships(RelType.OWNS,Direction.INCOMING)) {
           _data=rel.getStartNode();
           break;
         }
+        continue;
       }
-      continue;
-    }
-    if ("owner".equals(part.toLowerCase())) {
-      for (      AbstractRelationship rel : getRelationships(RelType.OWNS,Direction.INCOMING)) {
-        _data=rel.getStartNode();
-        break;
+      if ("result_size".equals(part.toLowerCase())) {
+        Set<Page> pages=getResultPages(securityContext,(Page)_page);
+        if (!pages.isEmpty()) {
+          return pages.size();
+        }
+        return 0;
       }
-      continue;
-    }
-    if (renderContext.hasDataForKey(part.toLowerCase())) {
-      _data=renderContext.getDataNode(part.toLowerCase());
-    }
-    if ("result_size".equals(part.toLowerCase())) {
-      Set<Page> pages=getResultPages(securityContext,(Page)_page);
-      if (!pages.isEmpty()) {
-        return pages.size();
+      if ("rest_result".equals(part.toLowerCase())) {
+        HttpServletRequest request=securityContext.getRequest();
+        if (request != null) {
+          return StringEscapeUtils.escapeJavaScript(StringUtils.replace(StringUtils.defaultString((String)request.getAttribute(HtmlServlet.REST_RESPONSE)),"\n",""));
+        }
+        return 0;
       }
-      return 0;
-    }
-    if ("rest_result".equals(part.toLowerCase())) {
-      HttpServletRequest request=securityContext.getRequest();
-      if (request != null) {
-        return StringEscapeUtils.escapeJavaScript(StringUtils.replace(StringUtils.defaultString((String)request.getAttribute(HtmlServlet.REST_RESPONSE)),"\n",""));
-      }
-      return 0;
     }
   }
   if (_data != null) {

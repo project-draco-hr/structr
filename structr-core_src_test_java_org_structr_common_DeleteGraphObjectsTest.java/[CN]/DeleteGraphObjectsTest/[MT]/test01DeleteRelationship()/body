@@ -1,0 +1,27 @@
+{
+  try {
+    List<AbstractNode> nodes=this.createTestNodes("UnknownTestType",2);
+    assertNotNull(nodes);
+    assertTrue(nodes.size() == 2);
+    AbstractRelationship rel=createRelationshipCommand.execute(nodes.get(0),nodes.get(1),TestRelType.ONE_TO_ONE);
+    assertNotNull(rel);
+    try {
+      rel.getRelationship().delete();
+      fail("Should have raised an org.neo4j.graphdb.NotInTransactionException");
+    }
+ catch (    org.neo4j.graphdb.NotInTransactionException e) {
+    }
+    assertNotNull(rel);
+    deleteRelationshipCommand.execute(rel);
+    try {
+      rel.getUuid();
+      fail("Should have raised an org.neo4j.graphdb.NotFoundException");
+    }
+ catch (    org.neo4j.graphdb.NotFoundException e) {
+    }
+  }
+ catch (  FrameworkException ex) {
+    logger.log(Level.SEVERE,ex.toString());
+    fail("Unexpected exception");
+  }
+}

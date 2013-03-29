@@ -11,15 +11,19 @@
       message.setId(endNode.getUuid());
       message.setNodeData("parentId",startNode.getUuid());
       Node refNode=null;
+      message.setCommand("APPEND_CHILD");
       if (endNode instanceof DOMNode) {
         refNode=((DOMNode)endNode).getNextSibling();
-      }
-      if (refNode != null) {
-        message.setCommand("INSERT_BEFORE");
-        message.setNodeData("refId",((AbstractNode)refNode).getUuid());
-      }
+        if (refNode != null) {
+          message.setCommand("INSERT_BEFORE");
+          message.setNodeData("refId",((AbstractNode)refNode).getUuid());
+        }
  else {
-        message.setCommand("APPEND_CHILD");
+        }
+      }
+ else       if (endNode instanceof User) {
+        message.setCommand("APPEND_USER");
+        message.setNodeData("refId",startNode.getUuid());
       }
       messageStack.add(message);
       logger.log(Level.FINE,"Relationship created: {0}({1} -> {2}{3}",new Object[]{startNode.getId(),startNode.getProperty(AbstractNode.uuid),endNode.getProperty(AbstractNode.uuid)});

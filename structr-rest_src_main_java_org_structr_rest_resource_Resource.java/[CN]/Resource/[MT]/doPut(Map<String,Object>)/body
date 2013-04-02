@@ -3,9 +3,9 @@
   final List<GraphObject> results=result.getResults();
   if (results != null && !results.isEmpty()) {
     final Class type=results.get(0).getClass();
-    final PropertyMap properties=PropertyMap.inputTypeToJavaType(securityContext,type,propertySet);
     final StructrTransaction transaction=new StructrTransaction(){
       @Override public Object execute() throws FrameworkException {
+        PropertyMap properties=PropertyMap.inputTypeToJavaType(securityContext,type,propertySet);
         for (        final GraphObject obj : results) {
           for (          final Entry<PropertyKey,Object> attr : properties.entrySet()) {
             obj.setProperty(attr.getKey(),attr.getValue());

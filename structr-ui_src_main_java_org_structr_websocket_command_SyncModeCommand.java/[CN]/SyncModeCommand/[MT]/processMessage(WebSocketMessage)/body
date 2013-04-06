@@ -3,13 +3,18 @@
   String sourceId=webSocketData.getId();
   Map<String,Object> properties=webSocketData.getNodeData();
   String targetId=(String)properties.get("targetId");
+  final String syncMode=(String)properties.get("syncMode");
   final AbstractNode sourceNode=getNode(sourceId);
   final AbstractNode targetNode=getNode(targetId);
   if ((sourceNode != null) && (targetNode != null)) {
     try {
+      final CreateRelationshipCommand<?> createRel=Services.command(securityContext,CreateRelationshipCommand.class);
       StructrTransaction transaction=new StructrTransaction(){
         @Override public Object execute() throws FrameworkException {
-          Link.linkable.createRelationship(securityContext,sourceNode,targetNode);
+          createRel.execute(sourceNode,targetNode,RelType.SYNC,true);
+          if (syncMode.equals("bidir")) {
+            createRel.execute(targetNode,sourceNode,RelType.SYNC,true);
+          }
           return null;
         }
       }
@@ -21,6 +26,6 @@
     }
   }
  else {
-    getWebSocket().send(MessageBuilder.status().code(400).message("The LINK command needs id and targetId!").build(),true);
+    getWebSocket().send(MessageBuilder.status().code(400).message("The SYNC_MODE command needs id and targetId!").build(),true);
   }
 }

@@ -1,0 +1,13 @@
+{
+  try {
+    if (providerClass == null) {
+      String geocodingProvider=Services.getConfigurationValue(Services.GEOCODING_PROVIDER,GoogleGeoCodingProvider.class.getName());
+      providerClass=(Class<GeoCodingProvider>)Class.forName(geocodingProvider);
+    }
+    return providerClass.newInstance();
+  }
+ catch (  Throwable t) {
+    logger.log(Level.WARNING,"Unable to instantiate geocoding provider: {0}",t.getMessage());
+  }
+  return null;
+}

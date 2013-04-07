@@ -37,6 +37,13 @@
       renderContext.setInBody(true);
     }
     List<AbstractRelationship> rels=getChildRelationships();
+    if (rels.isEmpty()) {
+      List<AbstractRelationship> syncRels=getRelationships(RelType.SYNC,Direction.INCOMING);
+      if (!syncRels.isEmpty()) {
+        DOMElement syncedNode=(DOMElement)syncRels.get(0).getStartNode();
+        rels=syncedNode.getChildRelationships();
+      }
+    }
     for (    AbstractRelationship rel : rels) {
       DOMNode subNode=(DOMNode)rel.getEndNode();
       String subKey=subNode.getProperty(dataKey);

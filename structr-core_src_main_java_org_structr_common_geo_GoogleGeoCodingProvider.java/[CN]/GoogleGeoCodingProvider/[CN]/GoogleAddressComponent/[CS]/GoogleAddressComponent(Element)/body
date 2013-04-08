@@ -1,0 +1,15 @@
+{
+  this.shortValue=addressComponent.element("short_name").getTextTrim();
+  this.longValue=addressComponent.element("long_name").getTextTrim();
+  Iterator<Element> typesElement=addressComponent.elementIterator("type");
+  for (; typesElement.hasNext(); ) {
+    Element typeElement=typesElement.next();
+    String typeName=typeElement.getTextTrim();
+    try {
+      this.types.add(Type.valueOf(typeName));
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"Encountered unknown address component type {0} while parsing.",typeName);
+    }
+  }
+}

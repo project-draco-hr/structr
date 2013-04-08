@@ -1,0 +1,87 @@
+{
+  if (apiKey != null && !apiKey.isEmpty()) {
+    StringBuilder urlBuffer=new StringBuilder("http://dev.virtualearth.net/REST/v1/Locations");
+    urlBuffer.append("?key=").append(apiKey);
+    urlBuffer.append("&c=").append(language);
+    urlBuffer.append("&o=xml");
+    urlBuffer.append("&query=");
+    if (house != null && !house.isEmpty()) {
+      urlBuffer.append(encodeURL(house)).append("+");
+    }
+    if (street != null && !street.isEmpty()) {
+      urlBuffer.append(encodeURL(street)).append("+");
+    }
+    if (city != null && !city.isEmpty()) {
+      urlBuffer.append(encodeURL(city)).append("+");
+    }
+    if (postalCode != null && !postalCode.isEmpty()) {
+      urlBuffer.append("&postalCode=").append(encodeURL(postalCode));
+    }
+    urlBuffer.append("&maxResults=1");
+    String url=urlBuffer.toString();
+    try {
+      logger.log(Level.INFO,"Using url {0}",url);
+      URL mapsUrl=new URL(urlBuffer.toString());
+      HttpURLConnection connection=(HttpURLConnection)mapsUrl.openConnection();
+      connection.connect();
+      Reader reader=new InputStreamReader(connection.getInputStream());
+      SAXReader saxReader=new SAXReader();
+      if (reader.read() != 65279) {
+        reader.reset();
+      }
+      Document xmlDoc=saxReader.read(reader);
+      connection.disconnect();
+      reader.close();
+      if (xmlDoc != null) {
+        Map<String,String> data=new LinkedHashMap<String,String>();
+        Element root=xmlDoc.getRootElement();
+        try {
+          data.put("lat",root.element("ResourceSets").element("ResourceSet").element("Resources").element("Location").element("Point").element("Latitude").getTextTrim());
+        }
+ catch (        Throwable t) {
+        }
+        try {
+          data.put("lon",root.element("ResourceSets").element("ResourceSet").element("Resources").element("Location").element("Point").element("Longitude").getTextTrim());
+        }
+ catch (        Throwable t) {
+        }
+        try {
+          data.put("postalCode",root.element("ResourceSets").element("ResourceSet").element("Resources").element("Location").element("Address").element("PostalCode").getTextTrim());
+        }
+ catch (        Throwable t) {
+        }
+        try {
+          data.put("adminDistrict",root.element("ResourceSets").element("ResourceSet").element("Resources").element("Location").element("Address").element("AdminDistrict").getTextTrim());
+        }
+ catch (        Throwable t) {
+        }
+        try {
+          data.put("adminDistrict2",root.element("ResourceSets").element("ResourceSet").element("Resources").element("Location").element("Address").element("AdminDistrict2").getTextTrim());
+        }
+ catch (        Throwable t) {
+        }
+        try {
+          data.put("locality",root.element("ResourceSets").element("ResourceSet").element("Resources").element("Location").element("Address").element("Locality").getTextTrim());
+        }
+ catch (        Throwable t) {
+        }
+        try {
+          data.put("countryRegion",root.element("ResourceSets").element("ResourceSet").element("Resources").element("Location").element("Address").element("CountryRegion").getTextTrim());
+        }
+ catch (        Throwable t) {
+        }
+        if (data.containsKey("lat") && data.containsKey("lon")) {
+          String address=(StringUtils.isNotBlank(street) ? street : "") + " " + (StringUtils.isNotBlank(house) ? house : "")+ " "+ (StringUtils.isNotBlank(postalCode) ? postalCode : "" + (StringUtils.isNotBlank(city) ? city : "") + " "+ (StringUtils.isNotBlank(state) ? state : "")+ " "+ (StringUtils.isNotBlank(country) ? country : "")+ " ");
+          return new BingGeoCodingResult(address,data);
+        }
+      }
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"Unable to use Bing geocoding provider: {0}",t.getMessage());
+    }
+  }
+ else {
+    logger.log(Level.WARNING,"Unable to use Bing geocoding provider, missing API key. Please supply API key in structr.conf using the key geocoding.apikey.");
+  }
+  return null;
+}

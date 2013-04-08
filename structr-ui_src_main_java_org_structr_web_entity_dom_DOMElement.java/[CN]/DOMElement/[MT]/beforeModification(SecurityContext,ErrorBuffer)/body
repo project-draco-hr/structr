@@ -1,10 +1,9 @@
 {
   for (  AbstractRelationship rel : getRelationships(RelType.SYNC,Direction.OUTGOING)) {
-    DOMNode syncedNode=(DOMNode)rel.getEndNode();
-    for (Iterator<PropertyKey> it=syncedNode.getPropertyKeys(uiView.name()).iterator(); it.hasNext(); ) {
-      PropertyKey key=it.next();
+    DOMElement syncedNode=(DOMElement)rel.getEndNode();
+    for (    Property htmlProp : syncedNode.getHtmlAttributes()) {
       try {
-        syncedNode.setProperty(key,getProperty(key));
+        syncedNode.setProperty(htmlProp,getProperty(htmlProp));
       }
  catch (      FrameworkException ex) {
         logger.log(Level.SEVERE,"Could not sync property",ex);

@@ -18,10 +18,11 @@
     edit=renderContext.getEdit();
     org.structr.core.entity.File file=findFile(request,path);
     DOMNode rootElement=null;
+    AbstractNode dataNode=null;
     String searchFor=null;
     if (file == null) {
       String[] urlParts=PathHelper.getParts(path);
-      if (urlParts.length > 1) {
+      if ((urlParts == null) || urlParts.length > 1) {
         searchFor=StringUtils.substringBefore(urlParts[1],"?");
       }
       if ((urlParts == null) || (urlParts.length == 0)) {
@@ -30,6 +31,34 @@
       }
  else {
         rootElement=findPage(request,path);
+      }
+      Matcher matcher=threadLocalUUIDMatcher.get();
+      boolean requestUriContainsUuids=false;
+      for (int i=0; i < urlParts.length; i++) {
+        request.setAttribute(urlParts[i],i);
+        matcher.reset(urlParts[i]);
+        requestUriContainsUuids|=matcher.matches();
+      }
+      if (!requestUriContainsUuids) {
+        dataNode=findFirstNodeByPath(request,path);
+        if (dataNode != null) {
+          request.setAttribute(dataNode.getUuid(),0);
+          requestUriContainsUuids=true;
+        }
+      }
+ else {
+        AbstractNode n=(AbstractNode)Services.command(securityContext,GetNodeByIdCommand.class).execute(PathHelper.getName(path));
+        if (n != null) {
+          dataNode=n;
+        }
+      }
+      request.setAttribute(REQUEST_CONTAINS_UUID_IDENTIFIER,requestUriContainsUuids);
+    }
+    if (rootElement == null && file == null) {
+      if (dataNode != null) {
+        request.removeAttribute(POSSIBLE_ENTRY_POINTS);
+        rootElement=findPage(request,PathHelper.clean(StringUtils.substringBeforeLast(path,PathHelper.PATH_SEP)));
+        renderContext.setDetailsDataObject(dataNode);
       }
     }
     AbstractNode node=file != null ? file : rootElement != null ? rootElement : null;

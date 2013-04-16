@@ -46,28 +46,40 @@
     }
     for (    AbstractRelationship rel : rels) {
       DOMNode subNode=(DOMNode)rel.getEndNode();
+      GraphObject details=renderContext.getDetailsDataObject();
+      boolean detailMode=details != null;
+      if (!detailMode && subNode.getProperty(renderOnIndex)) {
+        continue;
+      }
       String subKey=subNode.getProperty(dataKey);
       if (StringUtils.isNotBlank(subKey)) {
         setDataRoot(renderContext,subNode,subKey);
         GraphObject currentDataNode=renderContext.getDataObject();
         List<GraphObject> listData=((DOMElement)subNode).checkListSources(securityContext,renderContext);
         PropertyKey propertyKey=null;
-        if (listData.isEmpty() && currentDataNode != null) {
-          propertyKey=EntityContext.getPropertyKeyForJSONName(currentDataNode.getClass(),subKey,false);
-          if (propertyKey != null && propertyKey instanceof CollectionProperty) {
-            CollectionProperty<AbstractNode> collectionProperty=(CollectionProperty)propertyKey;
-            for (            AbstractNode node : currentDataNode.getProperty(collectionProperty)) {
-              renderContext.putDataObject(subKey,node);
-              subNode.render(securityContext,renderContext,depth + 1);
-            }
-          }
- else {
-          }
-          renderContext.setDataObject(currentDataNode);
+        if (subNode.getProperty(renderDetails) && detailMode) {
+          renderContext.setDataObject(details);
+          renderContext.putDataObject(subKey,details);
+          subNode.render(securityContext,renderContext,depth + 1);
         }
  else {
-          renderContext.setListSource(listData);
-          ((DOMElement)subNode).renderNodeList(securityContext,renderContext,depth,subKey);
+          if (listData.isEmpty() && currentDataNode != null) {
+            propertyKey=EntityContext.getPropertyKeyForJSONName(currentDataNode.getClass(),subKey,false);
+            if (propertyKey != null && propertyKey instanceof CollectionProperty) {
+              CollectionProperty<AbstractNode> collectionProperty=(CollectionProperty)propertyKey;
+              for (              AbstractNode node : currentDataNode.getProperty(collectionProperty)) {
+                renderContext.putDataObject(subKey,node);
+                subNode.render(securityContext,renderContext,depth + 1);
+              }
+            }
+ else {
+            }
+            renderContext.setDataObject(currentDataNode);
+          }
+ else {
+            renderContext.setListSource(listData);
+            ((DOMElement)subNode).renderNodeList(securityContext,renderContext,depth,subKey);
+          }
         }
       }
  else {

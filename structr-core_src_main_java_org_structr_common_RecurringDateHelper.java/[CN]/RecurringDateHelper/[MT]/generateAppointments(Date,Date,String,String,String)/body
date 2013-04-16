@@ -1,0 +1,22 @@
+{
+  List<Appointment> appointments=new LinkedList();
+  String[] wd=StringUtils.split(weekdays,",");
+  Date start=dateFromDateAndTimeString(startDate,wd[0],startTimeString);
+  Calendar cal=GregorianCalendar.getInstance();
+  while (start.before(startDate) && start.before(endDate)) {
+    cal.setTime(start);
+    cal.add(Calendar.DAY_OF_WEEK,1);
+    start=cal.getTime();
+  }
+  while (start.before(endDate)) {
+    String shortWeekday=getShortWeekday(cal.get(Calendar.DAY_OF_WEEK));
+    if (ArrayUtils.contains(wd,shortWeekday)) {
+      Date end=dateFromDateAndTimeString(start,shortWeekday,endTimeString);
+      appointments.add(new Appointment(start,end));
+    }
+    cal.setTime(start);
+    cal.add(Calendar.DAY_OF_WEEK,1);
+    start=cal.getTime();
+  }
+  return appointments;
+}

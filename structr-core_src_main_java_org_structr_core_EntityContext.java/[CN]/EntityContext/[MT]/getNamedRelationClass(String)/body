@@ -1,6 +1,10 @@
 {
-  Class sourceType=getSourceType(combinedRelationshipType);
-  Class destType=getDestType(combinedRelationshipType);
-  RelationshipType relType=getRelType(combinedRelationshipType);
-  return getNamedRelationClass(sourceType,destType,relType);
+  Class relEntity=globalRelationshipClassMap.get(combinedRelationshipType);
+  if (relEntity == null) {
+    Class sourceType=getSourceType(combinedRelationshipType);
+    Class destType=getDestType(combinedRelationshipType);
+    RelationshipType relType=getRelType(combinedRelationshipType);
+    relEntity=getNamedRelationClass(sourceType,destType,relType);
+  }
+  return relEntity;
 }

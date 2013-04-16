@@ -1,0 +1,20 @@
+{
+  String value=null;
+  if ((rawValue != null) && (rawValue instanceof String)) {
+    value=(String)rawValue;
+    Matcher matcher=threadLocalTemplateMatcher.get();
+    matcher.reset(value);
+    while (matcher.find()) {
+      String group=matcher.group();
+      String source=group.substring(2,group.length() - 1);
+      String partValue=extractFunctions(securityContext,renderContext,source);
+      if (partValue != null) {
+        value=value.replace(group,partValue);
+      }
+ else {
+        value=value.replace(group,"");
+      }
+    }
+  }
+  return value;
+}

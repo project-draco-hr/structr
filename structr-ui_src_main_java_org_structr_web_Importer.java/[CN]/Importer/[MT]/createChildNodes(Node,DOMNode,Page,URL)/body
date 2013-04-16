@@ -1,0 +1,64 @@
+{
+  List<Node> children=startNode.childNodes();
+  int localIndex=0;
+  for (  Node node : children) {
+    String tag=node.nodeName();
+    String type=CaseHelper.toUpperCamelCase(tag);
+    String content=null;
+    String id=null;
+    StringBuilder classString=new StringBuilder();
+    if (ArrayUtils.contains(ignoreElementNames,type)) {
+      continue;
+    }
+    if (node instanceof Element) {
+      Element el=((Element)node);
+      Set<String> classes=el.classNames();
+      for (      String cls : classes) {
+        classString.append(cls).append(" ");
+      }
+      id=el.id();
+      String downloadAddressAttr=(ArrayUtils.contains(srcElements,tag) ? "src" : ArrayUtils.contains(hrefElements,tag) ? "href" : null);
+      if (baseUrl != null && downloadAddressAttr != null && StringUtils.isNotBlank(node.attr(downloadAddressAttr))) {
+        String downloadAddress=node.attr(downloadAddressAttr);
+        downloadFiles(downloadAddress,baseUrl);
+      }
+    }
+    if (type.equals("#data") || type.equals("#comment")) {
+      type="Content";
+      tag="";
+      content=((DataNode)node).getWholeData().trim();
+      if (StringUtils.isBlank(content)) {
+        continue;
+      }
+    }
+    if (type.equals("#text")) {
+      tag="";
+      content=((TextNode)node).toString().trim();
+      if (StringUtils.isBlank(content)) {
+        continue;
+      }
+    }
+    org.structr.web.entity.dom.DOMNode newNode;
+    if (StringUtils.isBlank(tag)) {
+      newNode=(Content)page.createTextNode(content);
+    }
+ else {
+      newNode=(org.structr.web.entity.dom.DOMElement)page.createElement(tag);
+    }
+    if (StringUtils.isNotBlank(id)) {
+      newNode.setProperty(DOMElement._id,id);
+    }
+    if (StringUtils.isNotBlank(classString.toString())) {
+      newNode.setProperty(DOMElement._class,StringUtils.trim(classString.toString()));
+    }
+    for (    Attribute nodeAttr : node.attributes()) {
+      String key=nodeAttr.getKey();
+      if (!key.equals("text")) {
+        newNode.setProperty(new StringProperty(PropertyView.Html.concat(nodeAttr.getKey())),nodeAttr.getValue());
+      }
+    }
+    parent.appendChild(newNode);
+    createChildNodes(node,newNode,page,baseUrl);
+    localIndex++;
+  }
+}

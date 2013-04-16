@@ -1,0 +1,26 @@
+{
+  if (currentElement.getId() == newElement.getId()) {
+    throw new IllegalStateException("Cannot link a node to itself!");
+  }
+  final LinkedListNode next=listGetNext(relType,currentElement);
+  if (next == null) {
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        linkNodes(relType,currentElement,newElement);
+        return null;
+      }
+    }
+);
+  }
+ else {
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        unlinkNodes(relType,currentElement,next);
+        linkNodes(relType,currentElement,newElement);
+        linkNodes(relType,newElement,next);
+        return null;
+      }
+    }
+);
+  }
+}

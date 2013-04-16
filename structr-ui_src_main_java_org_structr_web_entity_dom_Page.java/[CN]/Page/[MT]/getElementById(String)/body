@@ -1,0 +1,19 @@
+{
+  DOMNodeList results=new DOMNodeList();
+  collectNodesByPredicate(this,results,new Predicate<Node>(){
+    @Override public boolean evaluate(    SecurityContext securityContext,    Node... obj){
+      if (obj[0] instanceof DOMElement) {
+        DOMElement elem=(DOMElement)obj[0];
+        if (id.equals(elem.getProperty(DOMElement._id))) {
+          return true;
+        }
+      }
+      return false;
+    }
+  }
+,0,true);
+  if (results.getLength() == 1) {
+    return (DOMElement)results.item(0);
+  }
+  return null;
+}

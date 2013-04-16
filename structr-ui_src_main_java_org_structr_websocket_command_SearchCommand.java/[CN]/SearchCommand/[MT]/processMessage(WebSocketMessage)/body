@@ -1,0 +1,22 @@
+{
+  final SecurityContext securityContext=getWebSocket().getSecurityContext();
+  String searchString=(String)webSocketData.getNodeData().get("searchString");
+  List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
+  if (searchString == null) {
+    getWebSocket().send(MessageBuilder.status().code(204).message("Empty search string").build(),true);
+    return;
+  }
+  searchAttributes.add(Search.andName(searchString));
+  final String sortOrder=webSocketData.getSortOrder();
+  final String sortKey=webSocketData.getSortKey();
+  PropertyKey sortProperty=EntityContext.getPropertyKeyForJSONName(AbstractNode.class,sortKey);
+  try {
+    Result result=(Result)Services.command(securityContext,SearchNodeCommand.class).execute(true,false,searchAttributes,sortProperty,"desc".equals(sortOrder));
+    webSocketData.setResult(result.getResults());
+    getWebSocket().send(webSocketData,true);
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"Exception occured",fex);
+    getWebSocket().send(MessageBuilder.status().code(fex.getStatus()).message(fex.getMessage()).build(),true);
+  }
+}

@@ -1,0 +1,45 @@
+{
+  Map<String,Object> nodeData=webSocketData.getNodeData();
+  String parentId=(String)nodeData.get("parentId");
+  String newId=(String)nodeData.get("newId");
+  String oldId=(String)nodeData.get("oldId");
+  String pageId=webSocketData.getPageId();
+  if (pageId != null) {
+    if (parentId == null) {
+      getWebSocket().send(MessageBuilder.status().code(422).message("Cannot replace node without parentId").build(),true);
+      return;
+    }
+    DOMNode parentNode=getDOMNode(parentId);
+    if (parentNode == null) {
+      getWebSocket().send(MessageBuilder.status().code(404).message("Parent node not found").build(),true);
+      return;
+    }
+    if (oldId == null) {
+      getWebSocket().send(MessageBuilder.status().code(422).message("Cannot replace node without oldId").build(),true);
+      return;
+    }
+    DOMNode oldNode=getDOMNode(oldId);
+    if (oldNode == null) {
+      getWebSocket().send(MessageBuilder.status().code(404).message("Old node not found").build(),true);
+      return;
+    }
+    if (newId == null) {
+      getWebSocket().send(MessageBuilder.status().code(422).message("Cannot replace node without newId").build(),true);
+      return;
+    }
+    DOMNode newNode=getDOMNode(newId);
+    if (newNode == null) {
+      getWebSocket().send(MessageBuilder.status().code(404).message("New node not found").build(),true);
+      return;
+    }
+    try {
+      parentNode.replaceChild(newNode,oldNode);
+    }
+ catch (    DOMException dex) {
+      getWebSocket().send(MessageBuilder.status().code(422).message(dex.getMessage()).build(),true);
+    }
+  }
+ else {
+    getWebSocket().send(MessageBuilder.status().code(422).message("Cannot replace node without pageId").build(),true);
+  }
+}

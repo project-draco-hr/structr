@@ -1,0 +1,31 @@
+{
+  if (node instanceof DOMNode) {
+    final DOMNode domNode=(DOMNode)node;
+    try {
+      return Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction<Node>(){
+        @Override public Node execute() throws FrameworkException {
+          Node importedNode=domNode.doImport(Page.this);
+          if (deep && domNode.hasChildNodes()) {
+            Node child=domNode.getFirstChild();
+            while (child != null) {
+              importNode(child,deep,false);
+              child=child.getNextSibling();
+            }
+          }
+          if (removeParentFromSourceNode) {
+            Node _parent=domNode.getParentNode();
+            if (_parent != null) {
+              _parent.removeChild(domNode);
+            }
+          }
+          return importedNode;
+        }
+      }
+);
+    }
+ catch (    FrameworkException fex) {
+      throw new DOMException(DOMException.INVALID_STATE_ERR,fex.getMessage());
+    }
+  }
+  return null;
+}

@@ -1,0 +1,16 @@
+{
+  final CreateNodeCommand cmd=Services.command(securityContext,CreateNodeCommand.class);
+  final PropertyMap properties=new PropertyMap();
+  properties.put(AbstractNode.name,name != null ? name : "page");
+  properties.put(AbstractNode.type,Page.class.getSimpleName());
+  properties.put(AbstractNode.visibleToAuthenticatedUsers,true);
+  properties.put(AbstractNode.visibleToPublicUsers,true);
+  properties.put(Page.contentType,"text/html");
+  Page newPage=Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction<Page>(){
+    @Override public Page execute() throws FrameworkException {
+      return (Page)cmd.execute(properties);
+    }
+  }
+);
+  return newPage;
+}

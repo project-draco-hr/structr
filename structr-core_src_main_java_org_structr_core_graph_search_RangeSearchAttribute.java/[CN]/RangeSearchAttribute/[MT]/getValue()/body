@@ -1,10 +1,26 @@
 {
-  StringBuilder buf=new StringBuilder();
-  buf.append(searchKey.dbName());
-  buf.append(":[");
-  buf.append(rangeStart.toString());
-  buf.append(" TO ");
-  buf.append(rangeEnd.toString());
-  buf.append("]");
-  return buf.toString();
+  Query q;
+  if (rangeStart == null && rangeEnd == null) {
+    return null;
+  }
+  if ((rangeStart != null && rangeStart instanceof Date) || (rangeEnd != null && rangeEnd instanceof Date)) {
+    q=NumericRangeQuery.newLongRange(searchKey.dbName(),rangeStart == null ? null : ((Date)rangeStart).getTime(),rangeEnd == null ? null : ((Date)rangeEnd).getTime(),true,true);
+  }
+ else   if ((rangeStart != null && rangeStart instanceof Long) || (rangeEnd != null && rangeEnd instanceof Long)) {
+    q=NumericRangeQuery.newLongRange(searchKey.dbName(),rangeStart == null ? null : (Long)rangeStart,rangeEnd == null ? null : (Long)rangeEnd,true,true);
+  }
+ else   if ((rangeStart != null && rangeStart instanceof Float) || (rangeEnd != null && rangeEnd instanceof Float)) {
+    q=NumericRangeQuery.newFloatRange(searchKey.dbName(),rangeStart == null ? null : (Float)rangeStart,rangeEnd == null ? null : (Float)rangeEnd,true,true);
+  }
+ else   if ((rangeStart != null && rangeStart instanceof Double) || (rangeEnd != null && rangeEnd instanceof Double)) {
+    q=NumericRangeQuery.newDoubleRange(searchKey.dbName(),rangeStart == null ? null : (Double)rangeStart,rangeEnd == null ? null : (Double)rangeEnd,true,true);
+  }
+ else   if ((rangeStart != null && rangeStart instanceof Integer) || (rangeEnd != null && rangeEnd instanceof Integer)) {
+    q=NumericRangeQuery.newIntRange(searchKey.dbName(),rangeStart == null ? null : (Integer)rangeStart,rangeEnd == null ? null : (Integer)rangeEnd,true,true);
+  }
+ else {
+    q=new TermRangeQuery(searchKey.dbName(),rangeStart == null ? null : rangeStart.toString(),rangeEnd == null ? null : rangeEnd.toString(),true,true);
+  }
+  logger.log(Level.INFO,"Range query: {0}",q);
+  return q.toString();
 }

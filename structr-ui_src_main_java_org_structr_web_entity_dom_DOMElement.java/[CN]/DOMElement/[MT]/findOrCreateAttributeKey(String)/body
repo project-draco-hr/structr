@@ -1,0 +1,20 @@
+{
+  HtmlProperty htmlProperty=null;
+synchronized (htmlProperties) {
+    htmlProperty=htmlProperties.get(name);
+  }
+  if (htmlProperty == null) {
+    PropertyKey key=EntityContext.getPropertyKeyForJSONName(getClass(),name,false);
+    if (key != null && key instanceof HtmlProperty) {
+      htmlProperty=(HtmlProperty)key;
+    }
+ else {
+      htmlProperty=new HtmlProperty(name);
+      htmlProperty.setDeclaringClass(DOMElement.class);
+    }
+synchronized (htmlProperties) {
+      htmlProperties.put(name,htmlProperty);
+    }
+  }
+  return htmlProperty;
+}

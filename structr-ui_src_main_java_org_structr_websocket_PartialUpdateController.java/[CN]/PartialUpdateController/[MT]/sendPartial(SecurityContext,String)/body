@@ -1,0 +1,44 @@
+{
+  List<DOMElement> dynamicElements=null;
+  List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
+  attrs.add(Search.andExactTypeAndSubtypes(DOMElement.class.getSimpleName()));
+  SearchAttributeGroup g=new SearchAttributeGroup(SearchOperator.AND);
+  g.add(Search.orExactProperty(DOMElement.dataKey,EntityContext.denormalizeEntityName(type)));
+  g.add(Search.orExactProperty(DOMElement.partialUpdateKey,EntityContext.denormalizeEntityName(type)));
+  attrs.add(g);
+  try {
+    Result results=Services.command(securityContext,SearchNodeCommand.class).execute(attrs);
+    dynamicElements=results.getResults();
+  }
+ catch (  FrameworkException ex) {
+    logger.log(Level.SEVERE,"Something went wrong while searching for dynamic elements of type " + type,ex);
+  }
+  HttpServletRequest request=mock(HttpServletRequest.class);
+  RenderContext ctx=new RenderContext(request,null,false,Locale.GERMAN);
+  ctx.setResourceProvider(resourceProvider);
+  for (  DOMElement el : dynamicElements) {
+    logger.log(Level.FINE,"Found dynamic element for type {0}: {1}",new Object[]{type,el});
+    try {
+      Page page=el.getProperty(DOMNode.ownerDocument);
+      if (page != null) {
+        DOMElement parent=(DOMElement)el.getParentNode();
+        if (parent != null) {
+          parent.render(securityContext,ctx,0);
+          String partialContent=ctx.getBuffer().toString();
+          logger.log(Level.FINE,"Partial output:\n{0}",partialContent);
+          WebSocketMessage message=new WebSocketMessage();
+          message.setCommand("PARTIAL");
+          message.setNodeData("pageId",page.getUuid());
+          String pageName=page.getName();
+          message.setNodeData("pagePath","/" + pageName);
+          message.setMessage(StringUtils.remove(partialContent,"\n"));
+          message.setNodeData("parentPositionPath",parent.getPositionPath());
+          syncController.broadcast(message);
+        }
+      }
+    }
+ catch (    FrameworkException ex) {
+      logger.log(Level.SEVERE,null,ex);
+    }
+  }
+}

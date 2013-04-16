@@ -1,0 +1,46 @@
+{
+  final String pageName="page-02";
+  try {
+    Page page=Page.createNewPage(securityContext,pageName);
+    assertTrue(page != null);
+    assertTrue(page instanceof Page);
+    DOMElement html=(DOMElement)page.createElement("html");
+    DOMElement head=(DOMElement)page.createElement("head");
+    DOMElement body=(DOMElement)page.createElement("body");
+    DOMElement title=(DOMElement)page.createElement("title");
+    DOMElement div=(DOMElement)page.createElement("div");
+    DOMElement p1=(DOMElement)page.createElement("p");
+    DOMElement p2=(DOMElement)page.createElement("p");
+    DOMElement p3=(DOMElement)page.createElement("p");
+    try {
+      page.appendChild(html);
+      html.appendChild(head);
+      html.appendChild(body);
+      head.appendChild(title);
+      title.appendChild(page.createTextNode("Test Page"));
+      body.appendChild(div);
+      div.appendChild(p1);
+      div.appendChild(p2);
+      div.appendChild(p3);
+      p2.setAttribute("blah","wurst");
+      p3.setAttribute("index","42");
+    }
+ catch (    DOMException dex) {
+      throw new FrameworkException(422,dex.getMessage());
+    }
+    XPathFactory factory=XPathFactory.newInstance();
+    XPath xpath=factory.newXPath();
+    assertEquals(div,xpath.evaluate("/html/body/div",page,XPathConstants.NODE));
+    assertEquals(p2,xpath.evaluate("/html/body/div/p[@blah='wurst']",page,XPathConstants.NODE));
+    assertEquals(p3,xpath.evaluate("/html/body/div/p[@index=42]",page,XPathConstants.NODE));
+    assertEquals(p3,xpath.evaluate("/html/body/div/p[@index>40]",page,XPathConstants.NODE));
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+    fail("Unexpected exception");
+  }
+catch (  XPathExpressionException xpeex) {
+    xpeex.printStackTrace();
+    fail("Unexpected exception");
+  }
+}

@@ -1,0 +1,16 @@
+{
+  try {
+    return Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction<Content>(){
+      @Override public Content execute() throws FrameworkException {
+        Content content=(Content)Services.command(securityContext,CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.type,Content.class.getSimpleName()),new NodeAttribute(Content.content,text));
+        Page.elements.createRelationship(securityContext,Page.this,content);
+        return content;
+      }
+    }
+);
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+  }
+  return null;
+}

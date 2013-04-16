@@ -1,5 +1,8 @@
 {
-  PropertyMap properties=PropertyMap.inputTypeToJavaType(securityContext,entityClass,propertySet);
-  properties.put(AbstractNode.type,entityClass.getSimpleName());
-  return (AbstractNode)Services.command(securityContext,CreateNodeCommand.class).execute(properties);
+  if (entityClass != null) {
+    PropertyMap properties=PropertyMap.inputTypeToJavaType(securityContext,entityClass,propertySet);
+    properties.put(AbstractNode.type,entityClass.getSimpleName());
+    return (AbstractNode)Services.command(securityContext,CreateNodeCommand.class).execute(properties);
+  }
+  throw new NotFoundException();
 }

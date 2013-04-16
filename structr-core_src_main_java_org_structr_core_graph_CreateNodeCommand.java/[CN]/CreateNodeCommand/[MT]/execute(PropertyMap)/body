@@ -7,9 +7,10 @@
     Date now=new Date();
     PropertyMap properties=new PropertyMap(attributes);
     Object typeObject=properties.get(AbstractNode.type);
-    String nodeType=(typeObject != null) ? typeObject.toString() : EntityContext.getGenericFactory().createGenericNode().getClass().getSimpleName();
-    NodeFactory<T> nodeFactory=new NodeFactory<T>(SecurityContext.getSuperUserInstance());
-    node=nodeFactory.createNodeWithType(graphDb.createNode(),nodeType);
+    String nodeType=(typeObject != null) ? typeObject.toString() : EntityContext.getFactoryDefinition().getGenericNodeType();
+    NodeFactory<T> nodeFactory=new NodeFactory<T>(securityContext);
+    boolean isCreation=true;
+    node=nodeFactory.createNodeWithType(graphDb.createNode(),nodeType,isCreation);
     if (node != null) {
       if ((user != null) && user instanceof AbstractNode) {
         AbstractNode owner=(AbstractNode)user;
@@ -23,11 +24,14 @@
       node.setProperty(AbstractNode.createdDate,now);
       node.unlockReadOnlyPropertiesOnce();
       node.setProperty(AbstractNode.lastModifiedDate,now);
-      logger.log(Level.FINE,"Node {0} created",node.getId());
       properties.remove(AbstractNode.type);
       for (      Entry<PropertyKey,Object> attr : properties.entrySet()) {
         Object value=attr.getValue();
-        node.setProperty(attr.getKey(),value);
+        PropertyKey key=attr.getKey();
+        if (key.isReadOnlyProperty()) {
+          node.unlockReadOnlyPropertiesOnce();
+        }
+        node.setProperty(key,value);
       }
       properties.clear();
     }

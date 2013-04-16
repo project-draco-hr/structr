@@ -1,0 +1,63 @@
+{
+  final String pageName="page-01";
+  final String pageTitle="Page Title";
+  final String bodyText="Body Text";
+  final String h1ClassAttr="heading";
+  final String divClassAttr="main";
+  try {
+    Page page=Page.createNewPage(securityContext,pageName);
+    if (page != null) {
+      page.setProperty(GraphObject.visibleToPublicUsers,true);
+      Element html=page.createElement("html");
+      Element head=page.createElement("head");
+      Element body=page.createElement("body");
+      Element title=page.createElement("title");
+      Element h1=page.createElement("h1");
+      Element div=page.createElement("div");
+      try {
+        page.appendChild(html);
+        html.appendChild(head);
+        html.appendChild(body);
+        head.appendChild(title);
+        body.appendChild(h1);
+        h1.setAttribute("class",h1ClassAttr);
+        body.appendChild(div);
+        div.setAttribute("class",divClassAttr);
+        title.appendChild(page.createTextNode(pageTitle));
+        h1.appendChild(page.createTextNode(pageTitle));
+        div.appendChild(page.createTextNode(bodyText));
+      }
+ catch (      DOMException dex) {
+        throw new FrameworkException(422,dex.getMessage());
+      }
+    }
+    assertTrue(page != null);
+    assertTrue(page instanceof Page);
+    try {
+      Document doc=Jsoup.connect(baseUri + pageName).get();
+      System.out.println(doc.html());
+      assertFalse(doc.select("html").isEmpty());
+      assertFalse(doc.select("html > head").isEmpty());
+      assertFalse(doc.select("html > head > title").isEmpty());
+      assertFalse(doc.select("html > body").isEmpty());
+      assertEquals(doc.select("html > head > title").first().text(),pageTitle);
+      Elements h1=doc.select("html > body > h1");
+      assertFalse(h1.isEmpty());
+      assertEquals(h1.first().text(),pageTitle);
+      assertEquals(h1.first().attr("class"),h1ClassAttr);
+      Elements div=doc.select("html > body > div");
+      assertFalse(div.isEmpty());
+      assertEquals(div.first().text(),bodyText);
+      assertEquals(div.first().attr("class"),divClassAttr);
+    }
+ catch (    IOException ioex) {
+      logger.log(Level.SEVERE,ioex.toString());
+      fail("Unexpected IOException");
+    }
+  }
+ catch (  FrameworkException ex) {
+    ex.printStackTrace();
+    logger.log(Level.SEVERE,ex.toString());
+    fail("Unexpected exception");
+  }
+}

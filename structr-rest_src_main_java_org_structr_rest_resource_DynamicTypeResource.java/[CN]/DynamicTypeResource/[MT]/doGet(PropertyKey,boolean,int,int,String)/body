@@ -1,0 +1,19 @@
+{
+  List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
+  boolean includeDeletedAndHidden=true;
+  boolean publicOnly=false;
+  if (rawType != null) {
+    if (entityClass == null) {
+      throw new NotFoundException();
+    }
+    searchAttributes.add(Search.andExactType(normalizedTypeName));
+    searchAttributes.addAll(extractSearchableAttributesFromRequest(securityContext));
+    Result results=Services.command(securityContext,SearchNodeCommand.class).execute(includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDescending,pageSize,page,offsetId);
+    return results;
+  }
+ else {
+    logger.log(Level.WARNING,"type was null");
+  }
+  List emptyList=Collections.emptyList();
+  return new Result(emptyList,null,isCollectionResource(),isPrimitiveArray());
+}

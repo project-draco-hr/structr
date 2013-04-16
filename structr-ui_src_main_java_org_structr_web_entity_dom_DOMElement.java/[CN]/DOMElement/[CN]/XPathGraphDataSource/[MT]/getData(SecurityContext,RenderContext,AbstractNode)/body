@@ -1,0 +1,29 @@
+{
+  String xpathQuery=referenceNode.getProperty(DOMElement.xpathQuery);
+  if (xpathQuery != null) {
+    XPathFactory factory=XPathFactory.newInstance();
+    XPath xpath=factory.newXPath();
+    try {
+      Object result=xpath.evaluate(xpathQuery,referenceNode);
+      List<GraphObject> results=new LinkedList<GraphObject>();
+      if (result instanceof NodeList) {
+        NodeList nodes=(NodeList)result;
+        int len=nodes.getLength();
+        for (int i=0; i < len; i++) {
+          Node node=nodes.item(i);
+          if (node instanceof GraphObject) {
+            results.add((GraphObject)node);
+          }
+        }
+      }
+ else       if (result instanceof GraphObject) {
+        results.add((GraphObject)result);
+      }
+      return results;
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"Unable to execute xpath query: {0}",t.getMessage());
+    }
+  }
+  return null;
+}

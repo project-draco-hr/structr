@@ -1,19 +1,22 @@
 {
-  List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
+  List<SearchAttribute> searchAttributes=new LinkedList();
+  List<SearchAttribute> validAttributes;
   boolean includeDeletedAndHidden=false;
   boolean publicOnly=false;
   if (rawType != null) {
     if (entityClass == null) {
       throw new NotFoundException();
     }
-    DistanceSearchAttribute distanceSearch=getDistanceSearch(request);
+    validAttributes=extractSearchableAttributesFromRequest(securityContext);
+    DistanceSearchAttribute distanceSearch=getDistanceSearch(request,keys(validAttributes));
     if (distanceSearch != null) {
       searchAttributes.add(distanceSearch);
       searchAttributes.add(new FilterSearchAttribute(AbstractNode.type,EntityContext.normalizeEntityName(rawType),SearchOperator.AND));
+      searchAttributes.addAll(toFilters(validAttributes));
     }
  else {
       searchAttributes.add(Search.andExactTypeAndSubtypes(EntityContext.normalizeEntityName(rawType)));
-      searchAttributes.addAll(extractSearchableAttributesFromRequest(securityContext));
+      searchAttributes.addAll(validAttributes);
     }
     if (sortKey == null) {
       try {

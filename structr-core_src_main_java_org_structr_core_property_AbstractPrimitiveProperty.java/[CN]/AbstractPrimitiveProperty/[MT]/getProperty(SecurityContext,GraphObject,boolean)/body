@@ -1,8 +1,17 @@
 {
   Object value=null;
   final PropertyContainer propertyContainer=obj.getPropertyContainer();
-  if (propertyContainer != null && propertyContainer.hasProperty(dbName())) {
-    value=propertyContainer.getProperty(dbName());
+  boolean hasProperty=false;
+  if (propertyContainer != null) {
+    try {
+      hasProperty=propertyContainer.hasProperty(dbName());
+    }
+ catch (    IllegalStateException ise) {
+      logger.log(Level.WARNING,"Could not determine property " + dbName + " of the requested graph object",ise);
+    }
+    if (hasProperty) {
+      value=propertyContainer.getProperty(dbName());
+    }
   }
   if (applyConverter) {
     PropertyConverter converter=databaseConverter(securityContext,obj);

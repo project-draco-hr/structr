@@ -1,0 +1,96 @@
+{
+  if (isDeleted() || isHidden()) {
+    return;
+  }
+  double start=System.nanoTime();
+  boolean edit=renderContext.getEdit();
+  boolean isVoid=isVoidElement();
+  StringBuilder buffer=renderContext.getBuffer();
+  String pageId=renderContext.getPageId();
+  String id=getUuid();
+  String tag=getProperty(DOMElement.tag);
+  buffer.append(indent(depth,true));
+  if (StringUtils.isNotBlank(tag)) {
+    buffer.append("<").append(tag);
+    if (edit) {
+      if (depth == 1) {
+        buffer.append(" data-structr_page_id='").append(pageId).append("'");
+      }
+      buffer.append(" data-structr_element_id=\"").append(id).append("\"");
+      buffer.append(" data-structr_type=\"").append(getType()).append("\"");
+      buffer.append(" data-structr_name=\"").append(getName()).append("\"");
+    }
+    for (    PropertyKey attribute : EntityContext.getPropertySet(getClass(),PropertyView.Html)) {
+      try {
+        String value=getPropertyWithVariableReplacement(securityContext,renderContext,attribute);
+        if ((value != null) && StringUtils.isNotBlank(value)) {
+          String key=attribute.jsonName().substring(PropertyView.Html.length());
+          buffer.append(" ").append(key).append("=\"").append(value).append("\"");
+        }
+      }
+ catch (      Throwable t) {
+        t.printStackTrace();
+      }
+    }
+    buffer.append(">");
+    if (Body.class.getSimpleName().toLowerCase().equals(this.getTagName())) {
+      renderContext.setInBody(true);
+    }
+    List<AbstractRelationship> rels=getChildRelationships();
+    if (rels.isEmpty()) {
+      List<AbstractRelationship> syncRels=getRelationships(RelType.SYNC,Direction.INCOMING);
+      if (!syncRels.isEmpty()) {
+        DOMElement syncedNode=(DOMElement)syncRels.get(0).getStartNode();
+        rels=syncedNode.getChildRelationships();
+      }
+    }
+    for (    AbstractRelationship rel : rels) {
+      DOMNode subNode=(DOMNode)rel.getEndNode();
+      GraphObject details=renderContext.getDetailsDataObject();
+      boolean detailMode=details != null;
+      if (!detailMode && subNode.getProperty(hideOnIndex)) {
+        continue;
+      }
+      String subKey=subNode.getProperty(dataKey);
+      if (StringUtils.isNotBlank(subKey)) {
+        setDataRoot(renderContext,subNode,subKey);
+        GraphObject currentDataNode=renderContext.getDataObject();
+        List<GraphObject> listData=((DOMElement)subNode).checkListSources(securityContext,renderContext);
+        PropertyKey propertyKey=null;
+        if (subNode.getProperty(renderDetails) && detailMode) {
+          renderContext.setDataObject(details);
+          renderContext.putDataObject(subKey,details);
+          subNode.render(securityContext,renderContext,depth + 1);
+        }
+ else {
+          if (listData.isEmpty() && currentDataNode != null) {
+            propertyKey=EntityContext.getPropertyKeyForJSONName(currentDataNode.getClass(),subKey,false);
+            if (propertyKey != null && propertyKey instanceof CollectionProperty) {
+              CollectionProperty<AbstractNode> collectionProperty=(CollectionProperty)propertyKey;
+              for (              AbstractNode node : currentDataNode.getProperty(collectionProperty)) {
+                renderContext.putDataObject(subKey,node);
+                subNode.render(securityContext,renderContext,depth + 1);
+              }
+            }
+ else {
+            }
+            renderContext.setDataObject(currentDataNode);
+          }
+ else {
+            renderContext.setListSource(listData);
+            ((DOMElement)subNode).renderNodeList(securityContext,renderContext,depth,subKey);
+          }
+        }
+      }
+ else {
+        subNode.render(securityContext,renderContext,depth + 1);
+      }
+    }
+    if (StringUtils.isNotBlank(tag) && (!isVoid)) {
+      buffer.append(indent(depth,!avoidWhitespace()));
+      buffer.append("</").append(tag).append(">");
+    }
+  }
+  double end=System.nanoTime();
+  logger.log(Level.FINE,"Render node {0} in {1} seconds",new java.lang.Object[]{getUuid(),decimalFormat.format((end - start) / 1000000000.0)});
+}

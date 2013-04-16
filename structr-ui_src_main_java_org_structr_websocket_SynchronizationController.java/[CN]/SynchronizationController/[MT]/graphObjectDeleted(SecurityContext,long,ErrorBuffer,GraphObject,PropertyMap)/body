@@ -1,0 +1,29 @@
+{
+  messageStack=messageStackMap.get(transactionKey);
+  AbstractRelationship relationship;
+  if ((graphObject != null) && (graphObject instanceof AbstractRelationship)) {
+    relationship=(AbstractRelationship)graphObject;
+    if (ignoreRelationship(relationship)) {
+      return true;
+    }
+    WebSocketMessage message=new WebSocketMessage();
+    String startNodeId=relationship.getCachedStartNodeId();
+    String endNodeId=relationship.getCachedEndNodeId();
+    String pageId=properties.get(new StringProperty("pageId"));
+    if ((startNodeId != null) && (endNodeId != null)) {
+      message.setCommand("REMOVE_CHILD");
+      message.setId(endNodeId);
+      message.setNodeData("parentId",startNodeId);
+      messageStack.add(message);
+    }
+  }
+ else {
+    WebSocketMessage message=new WebSocketMessage();
+    String uuid=properties.get(AbstractNode.uuid).toString();
+    message.setId(uuid);
+    message.setCommand("DELETE");
+    partialController.sendPartial(securityContext,properties.get(AbstractNode.type));
+    messageStack.add(message);
+  }
+  return true;
+}

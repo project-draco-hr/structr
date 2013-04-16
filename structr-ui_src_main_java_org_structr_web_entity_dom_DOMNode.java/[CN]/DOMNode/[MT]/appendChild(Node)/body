@@ -1,0 +1,28 @@
+{
+  checkWriteAccess();
+  checkSameDocument(newChild);
+  checkHierarchy(newChild);
+  try {
+    if (newChild instanceof DocumentFragment) {
+      DocumentFragment fragment=(DocumentFragment)newChild;
+      Node currentChild=fragment.getFirstChild();
+      while (currentChild != null) {
+        Node savedNextChild=currentChild.getNextSibling();
+        fragment.removeChild(currentChild);
+        appendChild(currentChild);
+        currentChild=savedNextChild;
+      }
+    }
+ else {
+      Node _parent=newChild.getParentNode();
+      if (_parent != null && _parent instanceof DOMNode) {
+        _parent.removeChild(newChild);
+      }
+      treeAppendChild(RelType.CONTAINS,(DOMNode)newChild);
+    }
+  }
+ catch (  FrameworkException fex) {
+    throw new DOMException(DOMException.INVALID_STATE_ERR,fex.toString());
+  }
+  return newChild;
+}

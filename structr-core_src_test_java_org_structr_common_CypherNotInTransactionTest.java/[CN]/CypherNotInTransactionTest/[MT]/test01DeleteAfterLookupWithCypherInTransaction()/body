@@ -1,0 +1,32 @@
+{
+  try {
+    List<AbstractNode> testNodes=this.createTestNodes("UnknownTestType",2);
+    assertNotNull(testNodes);
+    assertTrue(testNodes.size() == 2);
+    AbstractRelationship rel=createRelationshipCommand.execute(testNodes.get(0),testNodes.get(1),TestRelType.ONE_TO_ONE);
+    assertNotNull(rel);
+    GraphDatabaseService graphDb=graphDbCommand.execute();
+    ExecutionEngine engine=(ExecutionEngine)new ExecutionEngine(graphDb);
+    Transaction tx=graphDb.beginTx();
+    try {
+      ExecutionResult result=engine.execute("start n = node(*) match (n)<-[r:ONE_TO_ONE]-() return r");
+      final Iterator<Relationship> rels=result.columnAs("r");
+      assertTrue(rels.hasNext());
+      rels.next().delete();
+      tx.success();
+    }
+  finally {
+      tx.finish();
+    }
+    try {
+      rel.getUuid();
+      fail("Should have raised an org.neo4j.graphdb.NotFoundException");
+    }
+ catch (    org.neo4j.graphdb.NotFoundException e) {
+    }
+  }
+ catch (  FrameworkException ex) {
+    logger.log(Level.SEVERE,ex.toString());
+    fail("Unexpected exception");
+  }
+}

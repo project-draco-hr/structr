@@ -1,6 +1,6 @@
 {
   String resource="/test_one";
-  RestAssured.given().contentType("application/json; charset=UTF-8").body(" { 'name' : 'TestOne-0', 'anInt' : 0, 'aLong' : 0, 'aDate' : '2012-09-18T00:33:12+0200' } ").expect().statusCode(201).when().post(resource).getHeader("Location");
+  RestAssured.given().contentType("application/json; charset=UTF-8").filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(422)).body(" { 'name' : 'TestOne-0', 'anInt' : 0, 'aLong' : 0, 'aDate' : '2012-09-18T00:33:12+0200' } ").expect().statusCode(201).when().post(resource).getHeader("Location");
   RestAssured.given().contentType("application/json; charset=UTF-8").body(" { 'name' : 'TestOne-1', 'anInt' : 1, 'aLong' : 10, 'aDate' : '2012-09-18T01:33:12+0200' } ").expect().statusCode(201).when().post(resource).getHeader("Location");
   RestAssured.given().contentType("application/json; charset=UTF-8").body(" { 'name' : 'TestOne-2', 'anInt' : 2, 'aLong' : 20, 'aDate' : '2012-09-18T02:33:12+0200' } ").expect().statusCode(201).when().post(resource).getHeader("Location");
   String location=RestAssured.given().contentType("application/json; charset=UTF-8").body(" { 'name' : 'TestOne-3', 'anInt' : 3, 'aLong' : 30, 'aDate' : '2012-09-18T03:33:12+0200' } ").expect().statusCode(201).when().post(resource).getHeader("Location");

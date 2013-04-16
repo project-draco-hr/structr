@@ -13,21 +13,24 @@
     String path=PathHelper.clean(request.getPathInfo());
     logger.log(Level.FINE,"Path info {0}",path);
     SecurityContext securityContext=SecurityContext.getInstance(this.getServletConfig(),request,response,AccessMode.Frontend);
-    org.structr.core.entity.File file=findFile(request,path);
-    Page page=null;
-    Component comp=null;
+    RenderContext renderContext=RenderContext.getInstance(request,response,Locale.getDefault());
+    renderContext.setResourceProvider(resourceProvider);
+    edit=renderContext.getEdit();
+    org.structr.web.entity.File file=findFile(request,path);
+    DOMNode rootElement=null;
+    AbstractNode dataNode=null;
     String searchFor=null;
     if (file == null) {
       String[] urlParts=PathHelper.getParts(path);
-      if (urlParts.length > 1) {
+      if ((urlParts == null) || urlParts.length > 1) {
         searchFor=StringUtils.substringBefore(urlParts[1],"?");
       }
       if ((urlParts == null) || (urlParts.length == 0)) {
-        page=findIndexPage();
+        rootElement=findIndexPage();
         logger.log(Level.INFO,"No path supplied, trying to find index page");
       }
  else {
-        page=findPage(request,path);
+        rootElement=findPage(request,path);
       }
       Matcher matcher=threadLocalUUIDMatcher.get();
       boolean requestUriContainsUuids=false;
@@ -37,31 +40,28 @@
         requestUriContainsUuids|=matcher.matches();
       }
       if (!requestUriContainsUuids) {
-        comp=findComponent(request,path);
-        if (comp != null) {
-          request.setAttribute(comp.getUuid(),0);
+        dataNode=findFirstNodeByPath(request,path);
+        if (dataNode != null) {
+          request.setAttribute(dataNode.getUuid(),0);
           requestUriContainsUuids=true;
         }
       }
  else {
         AbstractNode n=(AbstractNode)Services.command(securityContext,GetNodeByIdCommand.class).execute(PathHelper.getName(path));
-        if (n != null && n instanceof Component) {
-          comp=(Component)n;
+        if (n != null) {
+          dataNode=n;
         }
       }
-      request.setAttribute(Component.REQUEST_CONTAINS_UUID_IDENTIFIER,requestUriContainsUuids);
+      request.setAttribute(REQUEST_CONTAINS_UUID_IDENTIFIER,requestUriContainsUuids);
     }
-    edit=false;
-    if (request.getParameter("edit") != null) {
-      edit=true;
-    }
-    if (page == null && file == null) {
-      if (comp != null) {
+    if (rootElement == null && file == null) {
+      if (dataNode != null) {
         request.removeAttribute(POSSIBLE_ENTRY_POINTS);
-        page=findPage(request,PathHelper.clean(StringUtils.substringBeforeLast(path,PathHelper.PATH_SEP)));
+        rootElement=findPage(request,PathHelper.clean(StringUtils.substringBeforeLast(path,PathHelper.PATH_SEP)));
+        renderContext.setDetailsDataObject(dataNode);
       }
     }
-    AbstractNode node=file != null ? file : page != null ? page : null;
+    AbstractNode node=file != null ? file : rootElement != null ? rootElement : null;
     if (edit || dontCache) {
       response.setHeader("Pragma","no-cache");
     }
@@ -70,11 +70,10 @@
         lastModified=node.getLastModifiedDate();
       }
     }
-    if ((page != null) && securityContext.isVisible(page)) {
+    if ((rootElement != null) && securityContext.isVisible(rootElement)) {
       request.getSession().setAttribute(LAST_GET_URL,request.getPathInfo());
       PrintWriter out=response.getWriter();
-      String uuid=page.getProperty(AbstractNode.uuid);
-      final StringBuilder buffer=new StringBuilder(8192);
+      String uuid=rootElement.getProperty(AbstractNode.uuid);
       List<NodeAttribute> attrs=new LinkedList<NodeAttribute>();
       Map<String,String[]> parameterMap=request.getParameterMap();
       if ((parameterMap != null) && (parameterMap.size() > 0)) {
@@ -87,11 +86,11 @@
         out.close();
       }
  else {
-        getContent(securityContext,uuid,null,buffer,page,page,0,false,searchFor,attrs,null,null);
-        String content=buffer.toString();
+        rootElement.render(securityContext,renderContext,0);
+        String content=renderContext.getBuffer().toString();
         double end=System.nanoTime();
         logger.log(Level.FINE,"Content for path {0} in {1} seconds",new Object[]{path,decimalFormat.format((end - setup) / 1000000000.0)});
-        String contentType=page.getProperty(Page.contentType);
+        String contentType=rootElement.getProperty(Page.contentType);
         if (contentType != null) {
           if (contentType.equals("text/html")) {
             contentType=contentType.concat(";charset=UTF-8");
@@ -101,7 +100,6 @@
  else {
           response.setContentType("text/html;charset=UTF-8");
         }
-        out.append("<!DOCTYPE html>\n");
         HttpAuthenticator.writeContent(content,response);
       }
     }
@@ -147,7 +145,6 @@
           HttpAuthenticator.writeUnauthorized(response);
         }
  catch (        IllegalStateException ise) {
-          ;
         }
       }
  else {

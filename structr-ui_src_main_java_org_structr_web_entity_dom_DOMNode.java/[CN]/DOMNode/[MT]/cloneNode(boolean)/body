@@ -1,0 +1,25 @@
+{
+  if (deep) {
+    throw new UnsupportedOperationException("cloneNode with deep=true is not supported yet.");
+  }
+ else {
+    final PropertyMap properties=new PropertyMap();
+    for (Iterator<PropertyKey> it=getPropertyKeys(uiView.name()).iterator(); it.hasNext(); ) {
+      PropertyKey key=it.next();
+      if (!key.isSystemProperty() && !key.equals(DOMNode.ownerDocument) && !key.equals(DOMNode.pageId)&& !key.equals(DOMNode.parent)&& !key.equals(DOMNode.parentId)&& !key.equals(DOMNode.children)&& !key.equals(DOMNode.childrenIds)) {
+        properties.put(key,getProperty(key));
+      }
+    }
+    try {
+      return (DOMNode)Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction<DOMNode>(){
+        @Override public DOMNode execute() throws FrameworkException {
+          return (DOMNode)Services.command(securityContext,CreateNodeCommand.class).execute(properties);
+        }
+      }
+);
+    }
+ catch (    FrameworkException ex) {
+      throw new DOMException(DOMException.INVALID_STATE_ERR,ex.toString());
+    }
+  }
+}

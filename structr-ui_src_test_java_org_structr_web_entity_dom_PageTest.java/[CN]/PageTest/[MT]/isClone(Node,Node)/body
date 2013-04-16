@@ -1,0 +1,13 @@
+{
+  boolean isClone=true;
+  isClone&=StringUtils.equals(n1.getNodeName(),n2.getNodeName());
+  isClone&=n1.getNodeType() == n2.getNodeType();
+  isClone&=StringUtils.equals(n1.getNodeValue(),n2.getNodeValue());
+  NamedNodeMap attrs1=n1.getAttributes();
+  NamedNodeMap attrs2=n2.getAttributes();
+  for (int i=0; i < attrs1.getLength(); i++) {
+    Node a1=attrs1.item(i);
+    isClone&=isClone(a1,attrs2.item(i));
+  }
+  return isClone;
+}

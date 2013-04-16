@@ -7,17 +7,14 @@
         String rangeEnd=matcher.group(2);
         try {
           PropertyConverter inputConverter=key.inputConverter(securityContext);
-          PropertyConverter databaseConverter=key.databaseConverter(securityContext,null);
           Object rangeStartConverted=rangeStart;
           Object rangeEndConverted=rangeEnd;
           if (inputConverter != null) {
             rangeStartConverted=inputConverter.convert(rangeStartConverted);
             rangeEndConverted=inputConverter.convert(rangeEndConverted);
           }
-          if (databaseConverter != null) {
-            rangeStartConverted=databaseConverter.convert(rangeStartConverted);
-            rangeEndConverted=databaseConverter.convert(rangeEndConverted);
-          }
+          rangeStartConverted=key.getSearchValue(rangeStartConverted);
+          rangeEndConverted=key.getSearchValue(rangeEndConverted);
           return new RangeSearchAttribute(key,rangeStartConverted,rangeEndConverted,SearchOperator.AND);
         }
  catch (        Throwable t) {
@@ -36,6 +33,16 @@
     return Search.andMatchExactValues(key,strippedValue,SearchOperator.AND);
   }
  else {
-    return Search.andExactProperty(key,searchValue);
+    PropertyConverter inputConverter=key.inputConverter(securityContext);
+    Object convertedSearchValue=searchValue;
+    if (inputConverter != null) {
+      try {
+        convertedSearchValue=inputConverter.convert(searchValue);
+      }
+ catch (      Throwable t) {
+        logger.log(Level.WARNING,"Unable to convert search value for key {0}",key);
+      }
+    }
+    return Search.andExactProperty(key,convertedSearchValue);
   }
 }

@@ -16,21 +16,22 @@
     RenderContext renderContext=RenderContext.getInstance(request,response,Locale.getDefault());
     renderContext.setResourceProvider(resourceProvider);
     edit=renderContext.getEdit();
-    org.structr.web.entity.File file=findFile(request,path);
     DOMNode rootElement=null;
     AbstractNode dataNode=null;
-    String searchFor=null;
-    if (file == null) {
-      String[] urlParts=PathHelper.getParts(path);
-      if ((urlParts == null) || urlParts.length > 1) {
-        searchFor=StringUtils.substringBefore(urlParts[1],"?");
-      }
-      if ((urlParts == null) || (urlParts.length == 0)) {
-        rootElement=findIndexPage();
-        logger.log(Level.INFO,"No path supplied, trying to find index page");
-      }
+    String[] urlParts=PathHelper.getParts(path);
+    if ((urlParts == null) || (urlParts.length == 0)) {
+      rootElement=findIndexPage();
+      logger.log(Level.FINE,"No path supplied, trying to find index page");
+    }
  else {
-        rootElement=findPage(request,path);
+      rootElement=findPage(request,path);
+    }
+    if (rootElement == null) {
+      org.structr.web.entity.File file=findFile(request,path);
+      if (file != null) {
+        logger.log(Level.FINE,"File found in {0} seconds",decimalFormat.format((System.nanoTime() - start) / 1000000000.0));
+        streamFile(securityContext,file,request,response);
+        return;
       }
       Matcher matcher=threadLocalUUIDMatcher.get();
       boolean requestUriContainsUuids=false;
@@ -41,10 +42,6 @@
       }
       if (!requestUriContainsUuids) {
         dataNode=findFirstNodeByPath(request,path);
-        if (dataNode != null) {
-          request.setAttribute(dataNode.getUuid(),0);
-          requestUriContainsUuids=true;
-        }
       }
  else {
         AbstractNode n=(AbstractNode)Services.command(securityContext,GetNodeByIdCommand.class).execute(PathHelper.getName(path));
@@ -52,36 +49,38 @@
           dataNode=n;
         }
       }
-      request.setAttribute(REQUEST_CONTAINS_UUID_IDENTIFIER,requestUriContainsUuids);
-    }
-    if (rootElement == null && file == null) {
       if (dataNode != null) {
         request.removeAttribute(POSSIBLE_ENTRY_POINTS);
         rootElement=findPage(request,PathHelper.clean(StringUtils.substringBeforeLast(path,PathHelper.PATH_SEP)));
         renderContext.setDetailsDataObject(dataNode);
       }
     }
-    AbstractNode node=file != null ? file : rootElement != null ? rootElement : null;
+    if (rootElement == null) {
+      if (response.getStatus() == HttpServletResponse.SC_UNAUTHORIZED) {
+        try {
+          HttpAuthenticator.writeUnauthorized(response);
+        }
+ catch (        IllegalStateException ise) {
+        }
+      }
+ else {
+        HttpAuthenticator.writeNotFound(response);
+      }
+      return;
+    }
+    logger.log(Level.FINE,"Page found in {0} seconds",decimalFormat.format((System.nanoTime() - start) / 1000000000.0));
     if (edit || dontCache) {
       response.setHeader("Pragma","no-cache");
     }
  else {
-      if (node != null) {
-        lastModified=node.getLastModifiedDate();
-      }
+      lastModified=rootElement.getLastModifiedDate();
     }
-    if ((rootElement != null) && securityContext.isVisible(rootElement)) {
+    if (securityContext.isVisible(rootElement)) {
       request.getSession().setAttribute(LAST_GET_URL,request.getPathInfo());
       PrintWriter out=response.getWriter();
-      String uuid=rootElement.getProperty(AbstractNode.uuid);
-      List<NodeAttribute> attrs=new LinkedList<NodeAttribute>();
-      Map<String,String[]> parameterMap=request.getParameterMap();
-      if ((parameterMap != null) && (parameterMap.size() > 0)) {
-        attrs=convertToNodeAttributes(parameterMap);
-      }
       double setup=System.nanoTime();
       logger.log(Level.FINE,"Setup time: {0} seconds",decimalFormat.format((setup - start) / 1000000000.0));
-      if (!edit && !dontCache && setCachingHeader(request,response,node)) {
+      if (!edit && !dontCache && notModifiedSince(request,response,rootElement)) {
         out.flush();
         out.close();
       }
@@ -103,53 +102,7 @@
         HttpAuthenticator.writeContent(content,response);
       }
     }
- else     if ((file != null) && securityContext.isVisible(file)) {
-      OutputStream out=response.getOutputStream();
-      if (!edit && setCachingHeader(request,response,node)) {
-        out.flush();
-        out.close();
-      }
  else {
-        InputStream in=file.getInputStream();
-        String contentType=file.getContentType();
-        if (contentType != null) {
-          response.setContentType(contentType);
-        }
- else {
-          response.setContentType("application/octet-stream");
-        }
-        try {
-          IOUtils.copy(in,out);
-        }
- catch (        Throwable t) {
-        }
- finally {
-          if (out != null) {
-            try {
-              out.flush();
-              out.close();
-            }
- catch (            Throwable t) {
-            }
-          }
-          if (in != null) {
-            in.close();
-          }
-          response.setStatus(HttpServletResponse.SC_OK);
-        }
-      }
-    }
- else {
-      if (response.getStatus() == HttpServletResponse.SC_UNAUTHORIZED) {
-        try {
-          HttpAuthenticator.writeUnauthorized(response);
-        }
- catch (        IllegalStateException ise) {
-        }
-      }
- else {
-        HttpAuthenticator.writeNotFound(response);
-      }
     }
   }
  catch (  Throwable t) {

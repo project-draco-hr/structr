@@ -1,20 +1,18 @@
 {
   HttpServletRequest request=securityContext.getRequest();
   String search=request.getParameter("search");
-  if ((request == null) || StringUtils.isEmpty(search)) {
+  if (StringUtils.isEmpty(search)) {
     return Collections.EMPTY_SET;
   }
-  if (request != null) {
-    resultPages=(Set<Page>)request.getAttribute("searchResults");
-    if ((resultPages != null) && !resultPages.isEmpty()) {
-      return resultPages;
-    }
+  resultPages=(Set<Page>)request.getAttribute("searchResults");
+  if ((resultPages != null) && !resultPages.isEmpty()) {
+    return resultPages;
   }
   if (resultPages == null) {
     resultPages=new HashSet<Page>();
   }
   List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
-  searchAttributes.add(Search.andContent(search));
+  searchAttributes.add(new TextualSearchAttribute(Content.content,search,SearchOperator.AND));
   searchAttributes.add(Search.andExactType(Content.class.getSimpleName()));
   try {
     Result<Content> result=Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class).execute(searchAttributes);

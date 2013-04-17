@@ -1,9 +1,9 @@
 {
   String uuid=obj.getProperty(AbstractNode.uuid);
-  if (uuid == null || (uuid != null && uuid.isEmpty())) {
+  if (uuid == null || uuid.isEmpty()) {
 synchronized (obj) {
-      String nextUuid=UUID.randomUUID().toString();
-      nextUuid=pattern.get().matcher(nextUuid).replaceAll("");
+      String nextUuid=StringUtils.replace(UUID.randomUUID().toString(),"-","");
+      obj.unlockReadOnlyPropertiesOnce();
       obj.setProperty(AbstractNode.uuid,nextUuid);
     }
   }

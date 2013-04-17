@@ -1,0 +1,22 @@
+{
+  try {
+    AbstractNode node;
+    final PropertyMap props=new PropertyMap();
+    String uuid=StringUtils.replace(UUID.randomUUID().toString(),"-","");
+    props.put(AbstractNode.type,"UnknownTestType????L??");
+    props.put(AbstractNode.uuid,uuid);
+    node=transactionCommand.execute(new StructrTransaction<AbstractNode>(){
+      @Override public AbstractNode execute() throws FrameworkException {
+        return (AbstractNode)createNodeCommand.execute(props);
+      }
+    }
+);
+    assertTrue(node != null);
+    assertTrue(node instanceof GenericNode);
+    assertEquals(node.getUuid(),uuid);
+  }
+ catch (  FrameworkException ex) {
+    logger.log(Level.SEVERE,ex.toString());
+    fail("Unexpected exception");
+  }
+}

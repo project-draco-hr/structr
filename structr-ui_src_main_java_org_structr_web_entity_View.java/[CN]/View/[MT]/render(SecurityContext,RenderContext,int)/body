@@ -1,7 +1,6 @@
 {
   double startView=System.nanoTime();
   HttpServletRequest request=renderContext.getRequest();
-  Condition condition=renderContext.getCondition();
   List<GraphObject> results=getGraphObjects(request);
   double endView=System.nanoTime();
   logger.log(Level.FINE,"Get graph objects for {0} in {1} seconds",new java.lang.Object[]{getUuid(),decimalFormat.format((endView - startView) / 1000000000.0)});
@@ -9,11 +8,9 @@
     if (result instanceof DOMNode) {
       List<AbstractRelationship> rels=((DOMNode)result).getChildRelationships();
       for (      AbstractRelationship rel : rels) {
-        if ((condition == null) || ((condition != null) && condition.isSatisfied(request,rel))) {
-          DOMElement subNode=(DOMElement)rel.getEndNode();
-          if (subNode.isNotDeleted() && subNode.isNotDeleted()) {
-            subNode.render(securityContext,renderContext,depth + 1);
-          }
+        DOMElement subNode=(DOMElement)rel.getEndNode();
+        if (subNode.isNotDeleted() && subNode.isNotDeleted()) {
+          subNode.render(securityContext,renderContext,depth + 1);
         }
       }
     }

@@ -1,0 +1,38 @@
+{
+  if (securityContext.isVisible(file)) {
+    OutputStream out=response.getOutputStream();
+    if (!edit && notModifiedSince(request,response,file)) {
+      out.flush();
+      out.close();
+    }
+ else {
+      InputStream in=file.getInputStream();
+      String contentType=file.getContentType();
+      if (contentType != null) {
+        response.setContentType(contentType);
+      }
+ else {
+        response.setContentType("application/octet-stream");
+      }
+      try {
+        IOUtils.copy(in,out);
+      }
+ catch (      Throwable t) {
+      }
+ finally {
+        if (out != null) {
+          try {
+            out.flush();
+            out.close();
+          }
+ catch (          Throwable t) {
+          }
+        }
+        if (in != null) {
+          in.close();
+        }
+        response.setStatus(HttpServletResponse.SC_OK);
+      }
+    }
+  }
+}

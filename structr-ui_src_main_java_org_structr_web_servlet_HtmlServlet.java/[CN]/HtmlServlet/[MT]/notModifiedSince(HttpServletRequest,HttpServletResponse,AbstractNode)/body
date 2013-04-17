@@ -13,13 +13,13 @@
     response.addHeader("Cache-Control","public, must-revalidate, proxy-revalidate");
   }
   if (lastModified != null) {
-    response.addHeader("Last-Modified",httpDateFormat.format(lastModified));
+    Date roundedLastModified=DateUtils.round(lastModified,Calendar.SECOND);
+    response.addHeader("Last-Modified",httpDateFormat.format(roundedLastModified));
     String ifModifiedSince=request.getHeader("If-Modified-Since");
     if (StringUtils.isNotBlank(ifModifiedSince)) {
       try {
         Date ifModSince=httpDateFormat.parse(ifModifiedSince);
-        Date rounded=DateUtils.round(lastModified,Calendar.SECOND);
-        if ((ifModSince != null) && (rounded.equals(ifModSince) || rounded.before(ifModSince))) {
+        if ((ifModSince != null) && (roundedLastModified.equals(ifModSince) || roundedLastModified.before(ifModSince))) {
           notModified=true;
           response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
         }

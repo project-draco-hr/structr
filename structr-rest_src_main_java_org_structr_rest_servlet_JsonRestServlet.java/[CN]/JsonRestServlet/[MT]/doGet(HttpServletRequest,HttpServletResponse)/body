@@ -33,7 +33,7 @@
       DecimalFormat decimalFormat=new DecimalFormat("0.000000000",DecimalFormatSymbols.getInstance(Locale.ENGLISH));
       result.setQueryTime(decimalFormat.format((queryTimeEnd - queryTimeStart) / 1000000000.0));
       Writer writer=response.getWriter();
-      gson.toJson(result,writer);
+      gson.get().toJson(result,writer);
       response.setStatus(HttpServletResponse.SC_OK);
       writer.append("\n");
     }
@@ -47,7 +47,7 @@
   }
  catch (  FrameworkException frameworkException) {
     response.setStatus(frameworkException.getStatus());
-    gson.toJson(frameworkException,response.getWriter());
+    gson.get().toJson(frameworkException,response.getWriter());
     response.getWriter().println();
   }
 catch (  JsonSyntaxException jsex) {

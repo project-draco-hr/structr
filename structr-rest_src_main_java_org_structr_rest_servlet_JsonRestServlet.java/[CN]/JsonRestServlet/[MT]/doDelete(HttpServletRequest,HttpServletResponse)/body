@@ -8,11 +8,11 @@
     Resource resourceConstraint=ResourceHelper.optimizeConstraintChain(chain,defaultIdProperty);
     securityContext.examineRequest(request,resourceConstraint.getResourceSignature(),resourceConstraint.getGrant(request,response),propertyView.get(securityContext));
     RestMethodResult result=resourceConstraint.doDelete();
-    result.commitResponse(gson,response);
+    result.commitResponse(gson.get(),response);
   }
  catch (  FrameworkException frameworkException) {
     response.setStatus(frameworkException.getStatus());
-    gson.toJson(frameworkException,response.getWriter());
+    gson.get().toJson(frameworkException,response.getWriter());
     response.getWriter().println();
   }
 catch (  JsonSyntaxException jsex) {

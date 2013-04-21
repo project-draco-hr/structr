@@ -64,15 +64,15 @@
         }
  else {
           if (listData.isEmpty() && currentDataNode != null) {
-            propertyKey=EntityContext.getPropertyKeyForJSONName(currentDataNode.getClass(),subKey,false);
-            if (propertyKey != null && propertyKey instanceof CollectionProperty) {
-              CollectionProperty<AbstractNode> collectionProperty=(CollectionProperty)propertyKey;
-              for (              AbstractNode node : currentDataNode.getProperty(collectionProperty)) {
-                renderContext.putDataObject(subKey,node);
-                subNode.render(securityContext,renderContext,depth + 1);
+            Object elements=currentDataNode.getProperty(new GenericProperty(subKey));
+            if (elements instanceof Iterable) {
+              for (              Object o : (Iterable)elements) {
+                if (o instanceof GraphObject) {
+                  GraphObject graphObject=(GraphObject)o;
+                  renderContext.putDataObject(subKey,graphObject);
+                  subNode.render(securityContext,renderContext,depth + 1);
+                }
               }
-            }
- else {
             }
             renderContext.setDataObject(currentDataNode);
           }

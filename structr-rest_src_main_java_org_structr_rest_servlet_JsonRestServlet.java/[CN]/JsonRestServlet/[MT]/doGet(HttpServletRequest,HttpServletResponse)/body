@@ -34,7 +34,12 @@
       result.setQueryTime(decimalFormat.format((queryTimeEnd - queryTimeStart) / 1000000000.0));
       Writer writer=response.getWriter();
       gson.get().toJson(result,writer);
-      response.setStatus(HttpServletResponse.SC_OK);
+      if (result.hasPartialContent()) {
+        response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
+      }
+ else {
+        response.setStatus(HttpServletResponse.SC_OK);
+      }
       writer.append("\n");
     }
  else {
@@ -54,19 +59,19 @@ catch (  JsonSyntaxException jsex) {
     logger.log(Level.WARNING,"JsonSyntaxException in GET",jsex);
     int code=HttpServletResponse.SC_BAD_REQUEST;
     response.setStatus(code);
-    response.getWriter().append(jsonError(code,"JsonSyntaxException in GET: " + jsex.getMessage()));
+    response.getWriter().append(jsonError(code,"Json syntax exception in GET: " + jsex.getMessage()));
   }
 catch (  JsonParseException jpex) {
     logger.log(Level.WARNING,"JsonParseException in GET",jpex);
     int code=HttpServletResponse.SC_BAD_REQUEST;
     response.setStatus(code);
-    response.getWriter().append(jsonError(code,"JsonSyntaxException in GET: " + jpex.getMessage()));
+    response.getWriter().append(jsonError(code,"Parser exception in GET: " + jpex.getMessage()));
   }
 catch (  Throwable t) {
     logger.log(Level.WARNING,"Exception in GET",t);
     int code=HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
     response.setStatus(code);
-    response.getWriter().append(jsonError(code,"JsonSyntaxException in GET: " + t.getMessage()));
+    response.getWriter().append(jsonError(code,"Exception in GET: " + t.getMessage()));
   }
  finally {
     try {

@@ -1,0 +1,32 @@
+{
+  writer.beginObject();
+  if (depth <= outputNestingDepth) {
+    if (idProperty == null) {
+      writer.name("id").value(source.getId());
+    }
+ else {
+      Object idPropertyValue=source.getProperty(idProperty);
+      if (idPropertyValue != null) {
+        writer.name("id").value(idPropertyValue.toString());
+      }
+    }
+    Iterable<PropertyKey> keys=source.getPropertyKeys(localPropertyView);
+    if (keys != null) {
+      for (      PropertyKey key : keys) {
+        Object value=source.getProperty(key);
+        PropertyKey localKey=key;
+        if (localKey.equals(idProperty)) {
+          localKey=id;
+        }
+        if (value != null) {
+          writer.name(localKey.jsonName());
+          serializeProperty(writer,key,value,localPropertyView,depth + 1);
+        }
+ else {
+          writer.name(localKey.jsonName()).nullValue();
+        }
+      }
+    }
+  }
+  writer.endObject();
+}

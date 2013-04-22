@@ -1,12 +1,13 @@
 {
-  ShortWeekday wd=ShortWeekday.valueOf(shortWeekday);
+  try {
+    ShortWeekday wd=ShortWeekday.valueOf(shortWeekday);
 switch (wd) {
 case Mo:
-    return Calendar.MONDAY;
+      return Calendar.MONDAY;
 case Di:
-  return Calendar.TUESDAY;
+    return Calendar.TUESDAY;
 case Mi:
-return Calendar.WEDNESDAY;
+  return Calendar.WEDNESDAY;
 case Do:
 return Calendar.THURSDAY;
 case Fr:
@@ -15,6 +16,10 @@ case Sa:
 return Calendar.SATURDAY;
 case So:
 return Calendar.SUNDAY;
+}
+}
+ catch (Throwable t) {
+logger.log(Level.WARNING,"Unable to parse day of week for string {0}",shortWeekday);
 }
 return 0;
 }

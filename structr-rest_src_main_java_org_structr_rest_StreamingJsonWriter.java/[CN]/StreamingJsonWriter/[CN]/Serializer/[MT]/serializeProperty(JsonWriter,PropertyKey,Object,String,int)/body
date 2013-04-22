@@ -2,7 +2,13 @@
   try {
     PropertyConverter converter=key.inputConverter(securityContext);
     if (converter != null) {
-      serializeRoot(writer,converter.revert(value),localPropertyView,depth);
+      Object convertedValue=null;
+      try {
+        convertedValue=converter.revert(value);
+      }
+ catch (      Throwable t) {
+      }
+      serializeRoot(writer,convertedValue,localPropertyView,depth);
     }
  else {
       serializeRoot(writer,value,localPropertyView,depth);

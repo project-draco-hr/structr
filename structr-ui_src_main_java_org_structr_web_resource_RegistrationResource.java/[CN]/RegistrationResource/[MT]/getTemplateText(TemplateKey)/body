@@ -1,0 +1,12 @@
+{
+  try {
+    List<MailTemplate> templates=(List<MailTemplate>)Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class).execute(Search.andExactType(MailTemplate.class.getSimpleName()),Search.andExactName(key.name()),Search.andMatchExactValues(MailTemplate.locale,localeString,SearchOperator.AND)).getResults();
+    if (!templates.isEmpty()) {
+      return templates.get(0).getProperty(MailTemplate.text).getProperty(Content.content);
+    }
+  }
+ catch (  FrameworkException ex) {
+    Logger.getLogger(RegistrationResource.class.getName()).log(Level.WARNING,"Could not get mail template for key " + key,ex);
+  }
+  return null;
+}

@@ -1,0 +1,16 @@
+{
+  Map<String,String> replacementMap=new HashMap();
+  String userEmail=user.getProperty(User.email);
+  replacementMap.put(toPlaceholder(User.email.jsonName()),userEmail);
+  replacementMap.put(toPlaceholder("link"),getTemplateText(TemplateKey.BASE_URL) + "/register?id=" + user.getUuid());
+  String textMailTemplate=getTemplateText(TemplateKey.TEXT_BODY);
+  String htmlMailTemplate=getTemplateText(TemplateKey.HTML_BODY);
+  String textMailContent=MailHelper.replacePlaceHoldersInTemplate(textMailTemplate,replacementMap);
+  String htmlMailContent=MailHelper.replacePlaceHoldersInTemplate(htmlMailTemplate,replacementMap);
+  try {
+    MailHelper.sendHtmlMail(getTemplateText(TemplateKey.SENDER_ADDRESS),getTemplateText(TemplateKey.SENDER_NAME),userEmail,"",null,null,null,getTemplateText(TemplateKey.SUBJECT),htmlMailContent,textMailContent);
+  }
+ catch (  Exception e) {
+    logger.log(Level.SEVERE,"Unable to send e-mail",e);
+  }
+}

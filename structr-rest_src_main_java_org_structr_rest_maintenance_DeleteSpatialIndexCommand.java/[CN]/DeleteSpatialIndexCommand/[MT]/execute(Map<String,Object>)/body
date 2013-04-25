@@ -1,18 +1,31 @@
 {
-  GraphDatabaseService graphDb=Services.getService(NodeService.class).getGraphDb();
-  TraversalDescription description=Traversal.description().depthFirst().uniqueness(Uniqueness.NODE_RECENT).relationships(org.neo4j.collections.rtree.RTreeRelationshipTypes.RTREE_REFERENCE,Direction.OUTGOING);
-  Node referenceNode=graphDb.getNodeById(0);
-  Traverser traverser=description.traverse(referenceNode);
-  for (  Node node : traverser.nodes()) {
-    logger.log(Level.INFO,"Deleting node {0}",node);
+  final GraphDatabaseService graphDb=Services.getService(NodeService.class).getGraphDb();
+  final List<Node> toDelete=new LinkedList<Node>();
+  for (  final Node node : GlobalGraphOperations.at(graphDb).getAllNodes()) {
     try {
-      for (      Relationship rel : node.getRelationships()) {
-        rel.delete();
+      if (node.hasProperty("bbox") && node.hasProperty("gtype") && node.hasProperty("id")&& node.hasProperty("latitude")&& node.hasProperty("longitude")) {
+        toDelete.add(node);
       }
-      node.delete();
     }
  catch (    Throwable t) {
-      t.printStackTrace();
     }
   }
+  Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+    @Override public Object execute() throws FrameworkException {
+      for (      Node node : toDelete) {
+        logger.log(Level.INFO,"Deleting node {0}",node);
+        try {
+          for (          Relationship rel : node.getRelationships()) {
+            rel.delete();
+          }
+          node.delete();
+        }
+ catch (        Throwable t) {
+          t.printStackTrace();
+        }
+      }
+      return null;
+    }
+  }
+);
 }

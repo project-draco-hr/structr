@@ -46,6 +46,13 @@
         }
       }
     }
+    if ("me".equals(part.toLowerCase())) {
+      User me=(User)securityContext.getUser(false);
+      if (me != null) {
+        _data=me;
+        continue;
+      }
+    }
     if (_data == null) {
       if ("page".equals(part.toLowerCase())) {
         _data=_page;
@@ -78,13 +85,6 @@
         Set<Page> pages=getResultPages(securityContext,(Page)_page);
         if (!pages.isEmpty()) {
           return pages.size();
-        }
-        return 0;
-      }
-      if ("rest_result".equals(part.toLowerCase())) {
-        HttpServletRequest request=securityContext.getRequest();
-        if (request != null) {
-          return StringEscapeUtils.escapeJavaScript(StringUtils.replace(StringUtils.defaultString((String)request.getAttribute(HtmlServlet.REST_RESPONSE)),"\n",""));
         }
         return 0;
       }

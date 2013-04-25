@@ -1,0 +1,22 @@
+{
+  logger.log(Level.FINE,"Checking registration ...");
+  String key=request.getParameter(CONFIRM_KEY_KEY);
+  String targetPage=request.getParameter(TARGET_PAGE_KEY);
+  if (path.equals(CONFIRM_REGISTRATION_PAGE)) {
+    List<SearchAttribute> searchAttrs=new LinkedList<SearchAttribute>();
+    searchAttrs.add(Search.andExactType(User.class.getSimpleName()));
+    searchAttrs.add(Search.andMatchValues(User.confirmationKey,key,SearchOperator.AND));
+    Result results=(Result)searchNodesAsSuperuser.execute(searchAttrs);
+    if (!results.isEmpty()) {
+      User user=(User)results.get(0);
+      user.setConfirmationKey(null);
+      request.getSession().setAttribute(HttpAuthenticator.SESSION_USER,user);
+      securityContext.setUser(user);
+      if (StringUtils.isNotBlank(targetPage)) {
+        response.sendRedirect("/" + targetPage);
+        return true;
+      }
+    }
+  }
+  return false;
+}

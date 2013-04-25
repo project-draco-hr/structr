@@ -24,7 +24,15 @@
       logger.log(Level.FINE,"No path supplied, trying to find index page");
     }
  else {
-      rootElement=findPage(request,path);
+      if (checkRegistration(securityContext,request,response,path)) {
+        return;
+      }
+      if (rootElement == null) {
+        rootElement=findPage(request,path);
+      }
+ else {
+        dontCache=true;
+      }
     }
     if (rootElement == null) {
       org.structr.web.entity.File file=findFile(request,path);

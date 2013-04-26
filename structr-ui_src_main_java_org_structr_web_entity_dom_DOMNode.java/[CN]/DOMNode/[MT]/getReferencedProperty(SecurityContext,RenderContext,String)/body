@@ -29,6 +29,13 @@
         _data=(GraphObject)value;
         continue;
       }
+      if ("link".equals(part.toLowerCase()) && _data instanceof AbstractNode) {
+        for (        AbstractRelationship rel : ((AbstractNode)_data).getRelationships(org.structr.web.common.RelType.LINK,Direction.OUTGOING)) {
+          _data=rel.getEndNode();
+          break;
+        }
+        continue;
+      }
     }
     if (renderContext.hasDataForKey(part.toLowerCase())) {
       _data=renderContext.getDataNode(part.toLowerCase());
@@ -66,12 +73,7 @@
         continue;
       }
       if ("parent".equals(part.toLowerCase())) {
-        for (        AbstractRelationship rel : getRelationships(RelType.CONTAINS,Direction.INCOMING)) {
-          if (rel.getProperty(pageIdProperty) != null) {
-            _data=rel.getStartNode();
-            break;
-          }
-        }
+        _data=(DOMNode)getParentNode();
         continue;
       }
       if ("owner".equals(part.toLowerCase())) {

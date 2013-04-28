@@ -1,0 +1,47 @@
+{
+  Object serializedObject=null;
+  String type=read(reader,2);
+  String lenLenSrc=read(reader,1);
+  int lenLen=Integer.parseInt(lenLenSrc);
+  Class clazz=classMap.get(type);
+  if (clazz != null) {
+    String lenSrc=read(reader,lenLen);
+    int len=Integer.parseInt(lenSrc);
+    if (clazz.isArray()) {
+      Object[] array=(Object[])Array.newInstance(clazz.getComponentType(),len);
+      for (int i=0; i < len; i++) {
+        array[i]=deserialize(reader);
+      }
+      serializedObject=array;
+    }
+ else {
+      String value=read(reader,len);
+      if (clazz.equals(String.class)) {
+        serializedObject=value;
+      }
+ else {
+        try {
+          Method valueOf=methodMap.get(clazz);
+          if (valueOf == null) {
+            valueOf=clazz.getMethod("valueOf",String.class);
+            methodMap.put(clazz,valueOf);
+          }
+          if (valueOf != null) {
+            serializedObject=valueOf.invoke(null,value);
+          }
+ else {
+            logger.log(Level.WARNING,"Unable to find static valueOf method for type {0}",clazz);
+          }
+        }
+ catch (        Throwable t) {
+          logger.log(Level.WARNING,"Unable to deserialize value {0} of type {1}, Class has no static valueOf method.",new Object[]{value,clazz});
+        }
+      }
+    }
+  }
+ else {
+    logger.log(Level.WARNING,"Unsupported type {0} in input",type);
+  }
+  reader.skip(1);
+  return serializedObject;
+}

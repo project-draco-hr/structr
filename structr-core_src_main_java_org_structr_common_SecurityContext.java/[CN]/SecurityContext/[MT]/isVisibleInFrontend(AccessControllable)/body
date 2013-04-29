@@ -5,11 +5,11 @@
   if (node.isHidden()) {
     return false;
   }
-  if (node.isVisibleToPublicUsers()) {
+  Principal user=getUser(false);
+  if (node.isVisibleToPublicUsers() && user == null) {
     return true;
   }
   if (node.isVisibleToAuthenticatedUsers()) {
-    Principal user=getUser(true);
     if (user != null) {
       return true;
     }

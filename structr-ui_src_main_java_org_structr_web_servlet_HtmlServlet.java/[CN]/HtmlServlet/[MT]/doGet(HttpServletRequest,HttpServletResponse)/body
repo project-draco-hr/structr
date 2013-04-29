@@ -4,15 +4,13 @@
     request.setCharacterEncoding("UTF-8");
     response.setCharacterEncoding("UTF-8");
     boolean dontCache=false;
-    String resp=(String)request.getSession().getAttribute(REST_RESPONSE);
-    if (resp != null) {
-      request.setAttribute(REST_RESPONSE,resp);
-      request.getSession().removeAttribute(REST_RESPONSE);
-      dontCache=true;
-    }
     String path=PathHelper.clean(request.getPathInfo());
     logger.log(Level.FINE,"Path info {0}",path);
     SecurityContext securityContext=SecurityContext.getInstance(this.getServletConfig(),request,response,AccessMode.Frontend);
+    securityContext.initializeAndExamineRequest(request,response);
+    if (securityContext.getUser(false) != null) {
+      dontCache=true;
+    }
     RenderContext renderContext=RenderContext.getInstance(request,response,Locale.getDefault());
     renderContext.setResourceProvider(resourceProvider);
     edit=renderContext.getEdit();

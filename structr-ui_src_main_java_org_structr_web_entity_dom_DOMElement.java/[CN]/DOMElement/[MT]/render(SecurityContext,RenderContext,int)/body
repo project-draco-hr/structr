@@ -46,6 +46,9 @@
     }
     for (    AbstractRelationship rel : rels) {
       DOMNode subNode=(DOMNode)rel.getEndNode();
+      if (!securityContext.isVisible(subNode)) {
+        continue;
+      }
       GraphObject details=renderContext.getDetailsDataObject();
       boolean detailMode=details != null;
       if (!detailMode && subNode.getProperty(hideOnIndex)) {

@@ -1,0 +1,16 @@
+{
+  PropertyMap properties=PropertyMap.inputTypeToJavaType(securityContext,User.class,propertySet);
+  String name=properties.get(User.name);
+  String password=properties.get(User.password);
+  if (name != null && password != null) {
+    User user=(User)securityContext.doLogin(name,password);
+    if (user != null) {
+      logger.log(Level.INFO,"Login successfull: {0}",new Object[]{user});
+      RestMethodResult methodResult=new RestMethodResult(200);
+      methodResult.addContent(user);
+      return methodResult;
+    }
+  }
+  logger.log(Level.INFO,"Invalid credentials (name, password): {0}, {1}, {2}",new Object[]{name,password});
+  return new RestMethodResult(401);
+}

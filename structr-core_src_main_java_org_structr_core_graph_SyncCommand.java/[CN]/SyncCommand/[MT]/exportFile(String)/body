@@ -1,47 +1,15 @@
 {
-  int nodeCount=0;
-  int relCount=0;
   try {
     double t0=System.nanoTime();
-    PrintWriter writer=new PrintWriter(new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(fileName)))));
-    GlobalGraphOperations ggop=GlobalGraphOperations.at(graphDb);
-    for (    Node node : ggop.getAllNodes()) {
-      if (node.hasProperty(GraphObject.uuid.dbName())) {
-        writer.print("N");
-        for (        String key : node.getPropertyKeys()) {
-          serialize(writer,key);
-          serialize(writer,node.getProperty(key));
-        }
-        writer.print("\n");
-        nodeCount++;
-      }
-    }
-    writer.flush();
-    for (    Relationship rel : ggop.getAllRelationships()) {
-      if (rel.hasProperty(GraphObject.uuid.dbName())) {
-        Node startNode=rel.getStartNode();
-        Node endNode=rel.getEndNode();
-        if (startNode.hasProperty("uuid") && endNode.hasProperty("uuid")) {
-          String startId=(String)startNode.getProperty("uuid");
-          String endId=(String)endNode.getProperty("uuid");
-          writer.print("R");
-          serialize(writer,startId);
-          serialize(writer,endId);
-          serialize(writer,rel.getType().name());
-          for (          String key : rel.getPropertyKeys()) {
-            serialize(writer,key);
-            serialize(writer,rel.getProperty(key));
-          }
-          writer.print("\n");
-          relCount++;
-        }
-      }
-    }
-    writer.flush();
+    ZipOutputStream zos=new ZipOutputStream(new FileOutputStream(fileName));
+    PrintWriter writer=new PrintWriter(new BufferedWriter(new OutputStreamWriter(zos)));
+    zos.setLevel(6);
+    exportDirectory(zos,new File("files"),"");
+    exportDatabase(zos,writer);
+    zos.finish();
     writer.close();
     double t1=System.nanoTime();
     double time=((t1 - t0) / 1000000000.0);
-    logger.log(Level.INFO,"Exported {0} nodes and {1} rels in {2} s",new Object[]{nodeCount,relCount,decimalFormat.format(time)});
   }
  catch (  Throwable t) {
     t.printStackTrace();

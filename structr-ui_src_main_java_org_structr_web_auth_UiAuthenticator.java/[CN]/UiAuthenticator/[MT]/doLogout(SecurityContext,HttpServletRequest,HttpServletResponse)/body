@@ -1,2 +1,15 @@
 {
+  try {
+    Principal user=securityContext.getUser(false);
+    if (user != null) {
+      user.setProperty(Principal.sessionId,null);
+    }
+    request.getSession().setAttribute(SESSION_USER,null);
+    request.getSession(false).invalidate();
+    request.logout();
+    securityContext.setUser(null);
+  }
+ catch (  Exception ex) {
+    logger.log(Level.WARNING,"Error while logging out user",ex);
+  }
 }

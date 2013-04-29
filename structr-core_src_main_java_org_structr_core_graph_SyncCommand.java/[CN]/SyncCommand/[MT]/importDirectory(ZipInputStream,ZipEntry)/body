@@ -1,0 +1,27 @@
+{
+  if (entry.isDirectory()) {
+    File newDir=new File(entry.getName());
+    if (!newDir.exists()) {
+      newDir.mkdirs();
+    }
+  }
+ else {
+    File newFile=new File(entry.getName());
+    boolean overwrite=false;
+    if (!newFile.exists()) {
+      overwrite=true;
+    }
+ else {
+      if (newFile.lastModified() < entry.getTime()) {
+        logger.log(Level.INFO,"Overwriting existing file {0} because import file is newer.",entry.getName());
+        overwrite=true;
+      }
+    }
+    if (overwrite) {
+      FileOutputStream fos=new FileOutputStream(newFile);
+      IOUtils.copy(zis,fos);
+      fos.flush();
+      fos.close();
+    }
+  }
+}

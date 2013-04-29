@@ -1,0 +1,18 @@
+{
+  try {
+    ZipInputStream zis=new ZipInputStream(new FileInputStream(fileName));
+    ZipEntry entry=zis.getNextEntry();
+    while (entry != null) {
+      if (STRUCTR_ZIP_DB_NAME.equals(entry.getName())) {
+        importDatabase(zis);
+      }
+ else {
+        importDirectory(zis,entry);
+      }
+      entry=zis.getNextEntry();
+    }
+  }
+ catch (  IOException ioex) {
+    ioex.printStackTrace();
+  }
+}

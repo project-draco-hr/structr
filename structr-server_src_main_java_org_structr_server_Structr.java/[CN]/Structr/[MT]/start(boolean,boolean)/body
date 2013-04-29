@@ -160,6 +160,25 @@
       callback.execute();
     }
   }
+  File seedFile=new File(basePath + "/" + INITIAL_SEED_FILE);
+  if (seedFile.exists()) {
+    logger.log(Level.INFO,"Found initial seed file, checking database status..");
+    GraphDatabaseService graphDb=Services.getService(NodeService.class).getGraphDb();
+    boolean hasApplicationNodes=false;
+    for (    Node node : GlobalGraphOperations.at(graphDb).getAllNodes()) {
+      if (node.hasProperty(GraphObject.uuid.dbName())) {
+        hasApplicationNodes=true;
+        break;
+      }
+    }
+    if (!hasApplicationNodes) {
+      logger.log(Level.INFO,"No application nodes found, applying initial seed..");
+      Map<String,Object> attributes=new LinkedHashMap<String,Object>();
+      attributes.put("mode","import");
+      attributes.put("file",seedFile.getAbsoluteFile().getAbsolutePath());
+      Services.command(SecurityContext.getSuperUserInstance(),SyncCommand.class).execute(attributes);
+    }
+  }
   if (waitForExit) {
     server.join();
     if (!quiet) {

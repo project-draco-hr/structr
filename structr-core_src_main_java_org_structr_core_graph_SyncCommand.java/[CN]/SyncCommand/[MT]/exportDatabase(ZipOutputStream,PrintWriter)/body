@@ -1,0 +1,42 @@
+{
+  GlobalGraphOperations ggop=GlobalGraphOperations.at(graphDb);
+  ZipEntry dbEntry=new ZipEntry(STRUCTR_ZIP_DB_NAME);
+  int nodeCount=0;
+  int relCount=0;
+  zos.putNextEntry(dbEntry);
+  for (  Node node : ggop.getAllNodes()) {
+    if (node.hasProperty(GraphObject.uuid.dbName())) {
+      writer.print("N");
+      for (      String key : node.getPropertyKeys()) {
+        serialize(writer,key);
+        serialize(writer,node.getProperty(key));
+      }
+      writer.print("\n");
+      nodeCount++;
+    }
+  }
+  writer.flush();
+  for (  Relationship rel : ggop.getAllRelationships()) {
+    if (rel.hasProperty(GraphObject.uuid.dbName())) {
+      Node startNode=rel.getStartNode();
+      Node endNode=rel.getEndNode();
+      if (startNode.hasProperty("uuid") && endNode.hasProperty("uuid")) {
+        String startId=(String)startNode.getProperty("uuid");
+        String endId=(String)endNode.getProperty("uuid");
+        writer.print("R");
+        serialize(writer,startId);
+        serialize(writer,endId);
+        serialize(writer,rel.getType().name());
+        for (        String key : rel.getPropertyKeys()) {
+          serialize(writer,key);
+          serialize(writer,rel.getProperty(key));
+        }
+        writer.print("\n");
+        relCount++;
+      }
+    }
+  }
+  writer.flush();
+  zos.closeEntry();
+  logger.log(Level.INFO,"Exported {0} nodes and {1} rels",new Object[]{nodeCount,relCount});
+}

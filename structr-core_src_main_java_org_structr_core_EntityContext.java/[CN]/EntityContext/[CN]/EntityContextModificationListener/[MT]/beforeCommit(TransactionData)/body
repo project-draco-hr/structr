@@ -22,7 +22,7 @@
     boolean hasError=false;
     globalChangeSets.put(transactionKey,changeSet);
     for (    StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
-      listener.begin(securityContext,transactionKey);
+      listener.commitStarts(securityContext,transactionKey);
     }
     hasError|=collectRemovedNodeProperties(securityContext,transactionKey,errorBuffer,data,changeSet,nodeFactory,removedNodeProperties);
     hasError|=collectRemovedRelationshipProperties(securityContext,transactionKey,errorBuffer,data,changeSet,relFactory,removedRelProperties);
@@ -42,12 +42,12 @@
     }
     if (hasError) {
       for (      StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
-        listener.rollback(securityContext,transactionKey);
+        listener.willRollback(securityContext,transactionKey);
       }
       throw new FrameworkException(422,errorBuffer);
     }
     for (    StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
-      listener.commit(securityContext,transactionKey);
+      listener.commitFinishes(securityContext,transactionKey);
     }
   }
  catch (  FrameworkException fex) {

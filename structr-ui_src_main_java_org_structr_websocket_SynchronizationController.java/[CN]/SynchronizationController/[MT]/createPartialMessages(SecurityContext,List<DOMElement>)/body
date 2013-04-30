@@ -1,0 +1,29 @@
+{
+  HttpServletRequest request=mock(HttpServletRequest.class);
+  List<WebSocketMessage> partialMessages=new LinkedList<WebSocketMessage>();
+  RenderContext ctx=new RenderContext(request,null,false,Locale.GERMAN);
+  ctx.setResourceProvider(resourceProvider);
+  for (  DOMElement el : elements) {
+    try {
+      Page page=el.getProperty(DOMNode.ownerDocument);
+      if (page != null) {
+        DOMElement parent=(DOMElement)el.getParentNode();
+        if (parent != null) {
+          parent.render(securityContext,ctx,0);
+          String partialContent=ctx.getBuffer().toString();
+          WebSocketMessage message=new WebSocketMessage();
+          message.setCommand("PARTIAL");
+          message.setNodeData("pageId",page.getUuid());
+          message.setNodeData("pagePath","/" + page.getName());
+          message.setNodeData("parentPositionPath",parent.getPositionPath());
+          message.setMessage(StringUtils.remove(partialContent,"\n"));
+          partialMessages.add(message);
+        }
+      }
+    }
+ catch (    FrameworkException ex) {
+      logger.log(Level.SEVERE,null,ex);
+    }
+  }
+  return partialMessages;
+}

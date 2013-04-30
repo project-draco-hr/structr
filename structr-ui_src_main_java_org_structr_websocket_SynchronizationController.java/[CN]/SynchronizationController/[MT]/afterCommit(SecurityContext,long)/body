@@ -1,0 +1,28 @@
+{
+  TransactionChangeSet changeSet=EntityContext.getTransactionChangeSet(transactionKey);
+  if (changeSet != null) {
+    Set<String> types=new LinkedHashSet<String>();
+    for (    AbstractNode node : changeSet.getCreatedNodes()) {
+      types.add(node.getType());
+    }
+    for (    AbstractNode node : changeSet.getDeletedNodes()) {
+      types.add(node.getType());
+    }
+    for (    AbstractNode node : changeSet.getModifiedNodes()) {
+      types.add(node.getType());
+    }
+    for (    String type : types) {
+      try {
+        if (type != null) {
+          broadcastPartials(type);
+        }
+      }
+ catch (      Throwable t) {
+        logger.log(Level.WARNING,"Unable to broadcast partials for type {0}: {1}",new Object[]{type,t.getMessage()});
+      }
+    }
+  }
+ else {
+    logger.log(Level.WARNING,"Unable to broadcast partial updates, changeSet not found");
+  }
+}

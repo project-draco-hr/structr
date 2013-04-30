@@ -1,0 +1,37 @@
+{
+  SecurityContext superUserSecurityContext=SecurityContext.getSuperUserInstance();
+  List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
+  attrs.add(Search.andExactTypeAndSubtypes(DOMElement.class.getSimpleName()));
+  SearchAttributeGroup g=new SearchAttributeGroup(SearchOperator.AND);
+  g.add(Search.orExactProperty(DOMElement.dataKey,EntityContext.denormalizeEntityName(type)));
+  g.add(Search.orExactProperty(DOMElement.partialUpdateKey,EntityContext.denormalizeEntityName(type)));
+  attrs.add(g);
+  Result results=Services.command(superUserSecurityContext,SearchNodeCommand.class).execute(attrs);
+  List<DOMElement> dynamicElements=results.getResults();
+  for (  StructrWebSocket socket : clients) {
+    List<DOMElement> filteredElements=filter(socket.getSecurityContext(),dynamicElements);
+    List<WebSocketMessage> partialMessages=createPartialMessages(superUserSecurityContext,filteredElements);
+    for (    WebSocketMessage webSocketData : partialMessages) {
+      webSocketData.setSessionValid(true);
+      String pagePath=(String)webSocketData.getNodeData().get("pagePath");
+      String clientPagePath=socket.getPathPath();
+      if (clientPagePath != null && !clientPagePath.equals(URIUtil.encodePath(pagePath))) {
+        continue;
+      }
+      Connection socketConnection=socket.getConnection();
+      webSocketData.setCallback(socket.getCallback());
+      if ((socketConnection != null)) {
+        String message=gson.toJson(webSocketData,WebSocketMessage.class);
+        try {
+          socketConnection.sendMessage(message);
+        }
+ catch (        org.eclipse.jetty.io.EofException eof) {
+          logger.log(Level.FINE,"EofException irgnored, may occour on SSL connections.",eof);
+        }
+catch (        Throwable t) {
+          logger.log(Level.WARNING,"Error sending message to client.",t);
+        }
+      }
+    }
+  }
+}

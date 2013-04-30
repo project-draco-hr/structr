@@ -1,0 +1,19 @@
+{
+  TransactionCommand command=currentCommand.get();
+  if (command != null) {
+    TransactionChangeSet changeSet=command.getChangeSet();
+    if (changeSet != null) {
+      changeSet.delete(relationship);
+      AbstractNode startNode=relationship.getStartNode();
+      AbstractNode endNode=relationship.getEndNode();
+      changeSet.modifyRelationshipEndpoint(startNode,relationship.getRelType());
+      changeSet.modifyRelationshipEndpoint(endNode,relationship.getRelType());
+    }
+ else {
+      logger.log(Level.SEVERE,"Got empty changeSet from command!");
+    }
+  }
+ else {
+    logger.log(Level.SEVERE,"Relationship deleted while outside of transaction!");
+  }
+}

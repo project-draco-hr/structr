@@ -1,0 +1,27 @@
+{
+  IndexRelationshipCommand indexRelCommand=Services.command(securityContext,IndexRelationshipCommand.class);
+  NewIndexNodeCommand indexNodeCommand=Services.command(securityContext,NewIndexNodeCommand.class);
+  PropertyMap properties=new PropertyMap();
+  for (  AbstractNode node : changeSet.getCreatedNodes()) {
+    node.beforeCreation(securityContext,errorBuffer);
+    indexNodeCommand.addNode(node);
+  }
+  for (  AbstractNode node : changeSet.getModifiedNodes()) {
+    node.beforeModification(securityContext,errorBuffer);
+    indexNodeCommand.updateNode(node);
+  }
+  for (  AbstractNode node : changeSet.getDeletedNodes()) {
+    node.beforeDeletion(securityContext,errorBuffer,properties);
+  }
+  for (  AbstractRelationship rel : changeSet.getCreatedRelationships()) {
+    rel.beforeCreation(securityContext,errorBuffer);
+    indexRelCommand.execute(rel);
+  }
+  for (  AbstractRelationship rel : changeSet.getModifiedRelationships()) {
+    rel.beforeModification(securityContext,errorBuffer);
+    indexRelCommand.execute(rel);
+  }
+  for (  AbstractRelationship rel : changeSet.getDeletedRelationships()) {
+    rel.beforeDeletion(securityContext,errorBuffer,properties);
+  }
+}

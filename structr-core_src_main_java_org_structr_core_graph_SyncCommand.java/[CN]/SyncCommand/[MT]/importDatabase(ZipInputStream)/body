@@ -5,6 +5,8 @@
   Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
     @Override public Object execute() throws FrameworkException {
       Map<String,Node> uuidMap=new LinkedHashMap<String,Node>();
+      List<Relationship> rels=new LinkedList<Relationship>();
+      List<Node> nodes=new LinkedList<Node>();
       PropertyContainer currentObject=null;
       BufferedReader reader=null;
       String currentKey=null;
@@ -23,6 +25,7 @@
             if ("N".equals(objectType)) {
               currentObject=graphDb.createNode();
               nodeCount++;
+              nodes.add((Node)currentObject);
             }
  else             if ("R".equals(objectType)) {
               String startId=(String)deserialize(reader);
@@ -33,6 +36,7 @@
               if (startNode != null && endNode != null) {
                 RelationshipType relType=DynamicRelationshipType.withName(relTypeName);
                 currentObject=startNode.createRelationshipTo(endNode,relType);
+                rels.add((Relationship)currentObject);
               }
               relCount++;
             }
@@ -68,6 +72,14 @@
       logger.log(Level.INFO,"Imported {0} nodes and {1} rels, committing transaction..",new Object[]{nodeCount,relCount});
       nodeCountValue.set(securityContext,nodeCount);
       relCountValue.set(securityContext,relCount);
+      RelationshipFactory relFactory=new RelationshipFactory(securityContext);
+      NodeFactory nodeFactory=new NodeFactory(securityContext);
+      for (      Node node : nodes) {
+        TransactionCommand.nodeCreated(nodeFactory.createNode(node));
+      }
+      for (      Relationship rel : rels) {
+        TransactionCommand.relationshipCreated(relFactory.instantiateRelationship(securityContext,rel));
+      }
       return null;
     }
   }

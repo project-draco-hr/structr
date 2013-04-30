@@ -27,6 +27,7 @@
       Relationship rel=startNode.createRelationshipTo(endNode,relType);
       T newRel=relationshipFactory.instantiateRelationship(securityContext,rel);
       if (newRel != null) {
+        TransactionCommand.relationshipCreated(newRel);
         newRel.unlockReadOnlyPropertiesOnce();
         newRel.setProperty(AbstractRelationship.createdDate,new Date());
         if (properties != null && !properties.isEmpty()) {

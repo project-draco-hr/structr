@@ -1,0 +1,15 @@
+{
+  TransactionCommand command=currentCommand.get();
+  if (command != null) {
+    TransactionChangeSet changeSet=command.getChangeSet();
+    if (changeSet != null) {
+      changeSet.delete(node);
+    }
+ else {
+      logger.log(Level.SEVERE,"Got empty changeSet from command!");
+    }
+  }
+ else {
+    logger.log(Level.SEVERE,"Node deleted while outside of transaction!");
+  }
+}

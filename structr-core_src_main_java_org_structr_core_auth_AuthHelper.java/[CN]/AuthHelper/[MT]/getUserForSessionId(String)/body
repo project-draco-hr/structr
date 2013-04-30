@@ -2,7 +2,7 @@
   Principal user=null;
   List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
   attrs.add(Search.andExactProperty(Principal.sessionId,sessionId));
-  attrs.add(Search.andExactType("User"));
+  attrs.add(Search.andExactTypeAndSubtypes(Principal.class.getSimpleName()));
   try {
     Result results=Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class).execute(attrs);
     if (!results.isEmpty()) {

@@ -1,5 +1,9 @@
 {
-  Principal user=(Principal)request.getSession().getAttribute(SESSION_USER);
+  Principal user=checkSessionAuthentication(request,response);
+  if (user != null) {
+    securityContext.setUser(user);
+    return user;
+  }
   if (tryLogin && user == null) {
     user=checkBasicAuthentication(request,response);
   }

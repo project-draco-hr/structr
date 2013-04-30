@@ -2,10 +2,8 @@
   config=this.getServletConfig();
   final Gson gson=new GsonBuilder().setPrettyPrinting().registerTypeAdapter(WebSocketMessage.class,new WebSocketDataGSONAdapter(idProperty)).create();
   syncController=new SynchronizationController(gson);
-  PartialUpdateController partialsController=syncController.getPartialsNotifier();
-  partialsController.setResourceProvider(resourceProvider);
+  syncController.setResourceProvider(resourceProvider);
   EntityContext.registerTransactionListener(syncController);
-  EntityContext.registerTransactionNotifier(partialsController);
   factory=new WebSocketFactory(new Acceptor(){
     @Override public WebSocket doWebSocketConnect(    final HttpServletRequest request,    final String protocol){
       if (STRUCTR_PROTOCOL.equals(protocol)) {

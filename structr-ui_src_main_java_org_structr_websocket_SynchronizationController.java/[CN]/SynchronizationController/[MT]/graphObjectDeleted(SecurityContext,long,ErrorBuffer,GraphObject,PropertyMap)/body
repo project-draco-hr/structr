@@ -9,7 +9,6 @@
     WebSocketMessage message=new WebSocketMessage();
     String startNodeId=relationship.getCachedStartNodeId();
     String endNodeId=relationship.getCachedEndNodeId();
-    String pageId=properties.get(new StringProperty("pageId"));
     if ((startNodeId != null) && (endNodeId != null)) {
       message.setCommand("REMOVE_CHILD");
       message.setId(endNodeId);
@@ -22,7 +21,6 @@
     String uuid=properties.get(AbstractNode.uuid).toString();
     message.setId(uuid);
     message.setCommand("DELETE");
-    partialController.sendPartial(securityContext,properties.get(AbstractNode.type));
     messageStack.add(message);
   }
   return true;

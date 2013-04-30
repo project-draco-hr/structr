@@ -9,8 +9,17 @@
   Result results=Services.command(superUserSecurityContext,SearchNodeCommand.class).execute(attrs);
   List<DOMElement> dynamicElements=results.getResults();
   for (  StructrWebSocket socket : clients) {
-    List<DOMElement> filteredElements=filter(socket.getSecurityContext(),dynamicElements);
-    List<WebSocketMessage> partialMessages=createPartialMessages(superUserSecurityContext,filteredElements);
+    SecurityContext securityContext=socket.getSecurityContext();
+    if (securityContext == null) {
+      try {
+        securityContext=SecurityContext.getInstance(null,AccessMode.Frontend);
+      }
+ catch (      FrameworkException ex) {
+        continue;
+      }
+    }
+    List<DOMElement> filteredElements=filter(securityContext,dynamicElements);
+    List<WebSocketMessage> partialMessages=createPartialMessages(securityContext,filteredElements);
     for (    WebSocketMessage webSocketData : partialMessages) {
       webSocketData.setSessionValid(true);
       String pagePath=(String)webSocketData.getNodeData().get("pagePath");

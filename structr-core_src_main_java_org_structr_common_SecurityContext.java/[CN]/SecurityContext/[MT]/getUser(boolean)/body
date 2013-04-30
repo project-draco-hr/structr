@@ -1,11 +1,15 @@
 {
-  if (cachedUser == null) {
-    try {
-      cachedUser=authenticator.getUser(this,request,response,tryLogin);
-    }
- catch (    Throwable t) {
-      logger.log(Level.WARNING,"No user found");
-    }
+  if (cachedUser != null) {
+    return cachedUser;
+  }
+  if (authenticator == null) {
+    return null;
+  }
+  try {
+    cachedUser=authenticator.getUser(this,request,response,tryLogin);
+  }
+ catch (  Throwable t) {
+    logger.log(Level.WARNING,"No user found");
   }
   return cachedUser;
 }

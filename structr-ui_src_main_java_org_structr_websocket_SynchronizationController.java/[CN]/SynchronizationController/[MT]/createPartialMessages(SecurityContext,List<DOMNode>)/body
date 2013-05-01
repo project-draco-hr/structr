@@ -3,12 +3,26 @@
   List<WebSocketMessage> partialMessages=new LinkedList<WebSocketMessage>();
   RenderContext ctx=new RenderContext(request,null,false,Locale.GERMAN);
   ctx.setResourceProvider(resourceProvider);
-  for (  DOMElement el : elements) {
+  Set<DOMNode> parents=new HashSet();
+  for (  DOMNode el : elements) {
+    DOMNode parent=(DOMNode)el.getParentNode();
+    if (parent != null && !(parent instanceof Html)) {
+      boolean ancestorAlreadyInSet=false;
+      for (      Node ancestor : parent.getAncestors()) {
+        if (parents.contains((DOMNode)ancestor)) {
+          ancestorAlreadyInSet=true;
+        }
+      }
+      if (!ancestorAlreadyInSet) {
+        parents.add(parent);
+      }
+    }
+  }
+  for (  DOMNode parent : parents) {
     try {
-      Page page=el.getProperty(DOMNode.ownerDocument);
-      if (page != null) {
-        DOMElement parent=(DOMElement)el.getParentNode();
-        if (parent != null) {
+      if (parent != null) {
+        Page page=parent.getProperty(DOMNode.ownerDocument);
+        if (page != null) {
           parent.render(securityContext,ctx,0);
           String partialContent=ctx.getBuffer().toString();
           WebSocketMessage message=new WebSocketMessage();

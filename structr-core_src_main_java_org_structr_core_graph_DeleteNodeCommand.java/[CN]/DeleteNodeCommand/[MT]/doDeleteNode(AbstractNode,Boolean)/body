@@ -4,7 +4,6 @@
     logger.log(Level.WARNING,"Will not delete node which has no UUID");
     return null;
   }
-  TransactionCommand.nodeDeleted(node);
   final RemoveNodeFromIndex removeNodeFromIndex=Services.command(securityContext,RemoveNodeFromIndex.class);
   final DeleteRelationshipCommand deleteRel=Services.command(securityContext,DeleteRelationshipCommand.class);
   Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
@@ -44,6 +43,7 @@
         }
         removeNodeFromIndex.execute(node);
         node.getNode().delete();
+        TransactionCommand.nodeDeleted(node);
         if (cascade) {
           for (          AbstractNode nodeToCheck : nodesToCheckAfterDeletion) {
             ErrorBuffer errorBuffer=new ErrorBuffer();

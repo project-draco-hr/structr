@@ -1,13 +1,13 @@
 {
   TransactionCommand command=currentCommand.get();
   if (command != null) {
-    TransactionChangeSet changeSet=command.getChangeSet();
-    if (changeSet != null) {
-      changeSet.delete(relationship);
+    ModificationQueue modificationQueue=command.getModificationQueue();
+    if (modificationQueue != null) {
+      modificationQueue.delete(relationship);
       AbstractNode startNode=relationship.getStartNode();
       AbstractNode endNode=relationship.getEndNode();
-      changeSet.modifyRelationshipEndpoint(startNode,relationship.getRelType());
-      changeSet.modifyRelationshipEndpoint(endNode,relationship.getRelType());
+      modificationQueue.modify(startNode,null,null);
+      modificationQueue.modify(endNode,null,null);
     }
  else {
       logger.log(Level.SEVERE,"Got empty changeSet from command!");

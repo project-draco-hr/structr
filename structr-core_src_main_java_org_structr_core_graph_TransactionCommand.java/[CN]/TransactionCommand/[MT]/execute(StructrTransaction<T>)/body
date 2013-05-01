@@ -1,34 +1,42 @@
 {
+  indexRelationshipCommand=Services.command(SecurityContext.getSuperUserInstance(),IndexRelationshipCommand.class);
+  indexNodeCommand=Services.command(SecurityContext.getSuperUserInstance(),NewIndexNodeCommand.class);
+  ;
   GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
+  Transaction tx=transactions.get();
+  boolean topLevel=(tx == null);
   FrameworkException error=null;
-  Transaction tx=graphDb.beginTx();
-  boolean topLevel=!(tx instanceof PlaceboTransaction);
   T result=null;
   if (topLevel) {
-    this.changeSet=new TransactionChangeSet();
+    this.modificationQueue=new ModificationQueue();
+    this.errorBuffer=new ErrorBuffer();
+    tx=graphDb.beginTx();
+    transactions.set(tx);
     currentCommand.set(this);
   }
   try {
     result=transaction.execute();
-    if (topLevel && !changeSet.systemOnly()) {
-      ErrorBuffer errorBuffer=new ErrorBuffer();
-      callBeforeMethods(changeSet,errorBuffer);
-      if (errorBuffer.hasError()) {
-        error=new FrameworkException(422,errorBuffer);
-        throw new IllegalStateException();
+    if (topLevel) {
+      if (!modificationQueue.doInnerCallbacks(securityContext,errorBuffer)) {
+        throw new FrameworkException(422,errorBuffer);
       }
-      callAfterMethods(changeSet);
     }
-    tx.success();
   }
  catch (  Throwable t) {
+    t.printStackTrace();
     tx.failure();
-  }
- finally {
-    tx.finish();
+    if (t instanceof FrameworkException) {
+      error=(FrameworkException)t;
+    }
   }
   if (topLevel) {
+    tx.success();
+    tx.finish();
     currentCommand.remove();
+    transactions.remove();
+    if (error == null) {
+      modificationQueue.doOuterCallbacks(securityContext);
+    }
   }
   if (error != null) {
     throw error;

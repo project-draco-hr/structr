@@ -1,8 +1,17 @@
 {
-  String errorMsg=null;
-  Principal user=AuthHelper.getUserForUsernameAndPassword(SecurityContext.getSuperUserInstance(request,response),userName,password);
-  if (errorMsg != null) {
-    throw new AuthenticationException(errorMsg);
+  Principal user=AuthHelper.getUserForUsernameAndPassword(SecurityContext.getSuperUserInstance(),userName,password);
+  if (user != null) {
+    HttpSession session=request.getSession(false);
+    if (session != null) {
+      String sessionIdFromRequest=session.getId();
+      try {
+        user.setProperty(Principal.sessionId,sessionIdFromRequest);
+      }
+ catch (      Exception ex) {
+        logger.log(Level.SEVERE,null,ex);
+      }
+    }
+    securityContext.setUser(user);
   }
   return user;
 }

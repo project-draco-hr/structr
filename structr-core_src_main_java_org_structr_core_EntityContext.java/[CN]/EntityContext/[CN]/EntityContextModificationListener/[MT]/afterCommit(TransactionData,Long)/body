@@ -1,5 +1,6 @@
 {
-  for (  TransactionNotifier notifier : EntityContext.getTransactionNotifiers()) {
-    notifier.notify(data);
+  SecurityContext securityContext=securityContextMap.get();
+  for (  StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
+    listener.afterCommit(securityContext,transactionKey);
   }
 }

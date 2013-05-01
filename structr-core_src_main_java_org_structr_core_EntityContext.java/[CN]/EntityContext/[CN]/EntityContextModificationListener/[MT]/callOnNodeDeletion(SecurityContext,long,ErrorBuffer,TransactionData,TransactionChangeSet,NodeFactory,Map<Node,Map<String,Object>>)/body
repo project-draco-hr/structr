@@ -1,20 +1,15 @@
 {
   boolean hasError=false;
   for (  Node node : data.deletedNodes()) {
-    Map<String,Object> removedProperties=removedNodeProperties.get(node);
-    if (removedProperties != null) {
-      String type=(String)removedProperties.get(AbstractNode.type.dbName());
-      if (type != null) {
-        AbstractNode entity=nodeFactory.createDummyNode(type);
-        if (entity != null) {
-          PropertyMap properties=PropertyMap.databaseTypeToJavaType(securityContext,entity,removedNodeProperties.get(node));
-          hasError|=!entity.beforeDeletion(securityContext,errorBuffer,properties);
-          for (          StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
-            hasError|=!listener.graphObjectDeleted(securityContext,transactionKey,errorBuffer,entity,properties);
-          }
-          changeSet.delete(entity);
-        }
+    String type=(String)removedNodeProperties.get(node).get(AbstractNode.type.dbName());
+    AbstractNode entity=nodeFactory.instantiateDummyNode(type);
+    if (entity != null) {
+      PropertyMap properties=PropertyMap.databaseTypeToJavaType(securityContext,entity,removedNodeProperties.get(node));
+      hasError|=!entity.beforeDeletion(securityContext,errorBuffer,properties);
+      for (      StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
+        hasError|=!listener.graphObjectDeleted(securityContext,transactionKey,errorBuffer,entity,properties);
       }
+      changeSet.delete(entity);
     }
   }
   return hasError;

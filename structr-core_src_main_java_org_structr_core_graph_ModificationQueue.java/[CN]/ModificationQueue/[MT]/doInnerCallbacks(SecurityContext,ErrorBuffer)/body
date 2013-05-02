@@ -1,0 +1,13 @@
+{
+  boolean valid=true;
+  while (!modifications.isEmpty()) {
+    Map.Entry<String,GraphObjectModificationState> entry=modifications.pollFirstEntry();
+    if (entry != null) {
+      valid&=entry.getValue().doInnerCallback(securityContext,errorBuffer);
+      if (!immutableState.containsKey(entry.getKey())) {
+        immutableState.put(entry.getKey(),entry.getValue());
+      }
+    }
+  }
+  return valid;
+}

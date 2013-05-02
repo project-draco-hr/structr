@@ -24,15 +24,17 @@
           logger.log(Level.INFO,"User {0} is blocked",user);
           errorMsg=STANDARD_ERROR_MSG;
         }
-        if (password == null) {
-          logger.log(Level.INFO,"Password for user {0} is null",user);
+        if (StringUtils.isEmpty(password)) {
+          logger.log(Level.INFO,"Empty password for user {0}",user);
           errorMsg="You should enter a password.";
         }
-        String encryptedPasswordValue=DigestUtils.sha512Hex(password);
-        String pw=user.getEncryptedPassword();
-        if (pw == null || !encryptedPasswordValue.equals(pw)) {
-          logger.log(Level.INFO,"Wrong password for user {0}",user);
-          errorMsg=STANDARD_ERROR_MSG;
+ else {
+          String encryptedPasswordValue=DigestUtils.sha512Hex(password);
+          String pw=user.getEncryptedPassword();
+          if (pw == null || !encryptedPasswordValue.equals(pw)) {
+            logger.log(Level.INFO,"Wrong password for user {0}",user);
+            errorMsg=STANDARD_ERROR_MSG;
+          }
         }
       }
     }

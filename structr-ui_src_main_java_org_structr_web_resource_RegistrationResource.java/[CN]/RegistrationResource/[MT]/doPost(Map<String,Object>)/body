@@ -2,6 +2,9 @@
   if (propertySet.containsKey(User.email.jsonName()) && propertySet.size() == 1) {
     User user;
     final String emailString=(String)propertySet.get(User.email.jsonName());
+    if (StringUtils.isEmpty(emailString)) {
+      return new RestMethodResult(HttpServletResponse.SC_BAD_REQUEST);
+    }
     localeString=(String)propertySet.get(MailTemplate.locale.jsonName());
     confKey=UUID.randomUUID().toString();
     Result result=Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class).execute(Search.andExactType(User.class.getSimpleName()),Search.andExactProperty(User.email,emailString));
@@ -18,7 +21,9 @@
 );
     }
     if (user != null) {
-      sendInvitationLink(user);
+      if (!sendInvitationLink(user)) {
+        return new RestMethodResult(HttpServletResponse.SC_BAD_REQUEST);
+      }
     }
   }
   return new RestMethodResult(HttpServletResponse.SC_OK);

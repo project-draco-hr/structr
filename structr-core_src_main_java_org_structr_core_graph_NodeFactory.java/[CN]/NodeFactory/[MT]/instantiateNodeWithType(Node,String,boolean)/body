@@ -21,6 +21,16 @@
     }
     newNode.init(factoryProfile.getSecurityContext(),node);
     newNode.onNodeInstantiation();
+    String newNodeType=newNode.getProperty(AbstractNode.type);
+    if (newNodeType == null) {
+      try {
+        newNode.unlockReadOnlyPropertiesOnce();
+        newNode.setType(nodeType);
+      }
+ catch (      Throwable t) {
+        logger.log(Level.SEVERE,"Unable to set type property {0} on node {1}: {2}",new Object[]{nodeType,newNode,t.getMessage()});
+      }
+    }
     securityContext.store(newNode);
   }
   if (isCreation || securityContext.isReadable(newNode,factoryProfile.includeDeletedAndHidden(),factoryProfile.publicOnly())) {

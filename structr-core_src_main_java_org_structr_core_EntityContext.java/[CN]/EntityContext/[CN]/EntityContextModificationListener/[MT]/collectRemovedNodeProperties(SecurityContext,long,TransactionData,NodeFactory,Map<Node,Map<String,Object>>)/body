@@ -1,0 +1,20 @@
+{
+  for (  PropertyEntry<Node> entry : data.removedNodeProperties()) {
+    Node node=entry.entity();
+    Map<String,Object> propertyMap=removedNodeProperties.get(node);
+    if (propertyMap == null) {
+      propertyMap=new LinkedHashMap<String,Object>();
+      removedNodeProperties.put(node,propertyMap);
+    }
+    propertyMap.put(entry.key(),entry.previouslyCommitedValue());
+    if (!data.isDeleted(node)) {
+      AbstractNode modifiedNode=nodeFactory.instantiateNode(node,true,false);
+      if (modifiedNode != null) {
+        PropertyKey key=getPropertyKeyForDatabaseName(modifiedNode.getClass(),entry.key());
+        for (        StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
+          listener.propertyRemoved(securityContext,transactionKey,modifiedNode,key,entry.previouslyCommitedValue());
+        }
+      }
+    }
+  }
+}

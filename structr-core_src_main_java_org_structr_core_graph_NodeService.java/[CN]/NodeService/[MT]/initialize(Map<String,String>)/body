@@ -12,6 +12,9 @@
     logger.log(Level.INFO,"Database config {0}/neo4j.conf not found",dbPath);
     graphDb=new EmbeddedGraphDatabase(dbPath,MapUtil.stringMap("enable_remote_shell","true"));
   }
+  if (graphDb != null) {
+    graphDb.registerTransactionEventHandler(EntityContext.getTransactionEventHandler());
+  }
   if (graphDb == null) {
     logger.log(Level.SEVERE,"Database could not be started ({0}) ...",dbPath);
     return;

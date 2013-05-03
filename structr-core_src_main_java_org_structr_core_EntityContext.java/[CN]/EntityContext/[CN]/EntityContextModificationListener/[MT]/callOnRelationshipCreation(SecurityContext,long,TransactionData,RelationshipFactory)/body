@@ -1,0 +1,12 @@
+{
+  boolean hasError=false;
+  for (  Relationship rel : sortRelationships(data.createdRelationships())) {
+    AbstractRelationship entity=relFactory.instantiateRelationship(securityContext,rel);
+    if (entity != null) {
+      for (      StructrTransactionListener listener : EntityContext.getTransactionListeners()) {
+        listener.graphObjectCreated(securityContext,transactionKey,entity);
+      }
+    }
+  }
+  return hasError;
+}

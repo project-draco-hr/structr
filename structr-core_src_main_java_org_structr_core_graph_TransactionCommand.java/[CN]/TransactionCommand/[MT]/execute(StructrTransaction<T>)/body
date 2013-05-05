@@ -16,15 +16,16 @@
     result=transaction.execute();
     if (topLevel) {
       long t1=System.currentTimeMillis();
-      if (!modificationQueue.doInnerCallbacks(securityContext,errorBuffer)) {
+      if (!modificationQueue.doInnerCallbacks(securityContext,errorBuffer,transaction.doValidation)) {
         throw new FrameworkException(422,errorBuffer);
       }
       long t2=System.currentTimeMillis();
-      logger.log(Level.INFO,"inner callbacks took {0} ms",t2 - t1);
+      if (t2 - t1 > THRESHOLD) {
+        logger.log(Level.INFO,"Inner callbacks took {0} ms",t2 - t1);
+      }
     }
   }
  catch (  Throwable t) {
-    t.printStackTrace();
     tx.failure();
     if (t instanceof FrameworkException) {
       error=(FrameworkException)t;
@@ -35,13 +36,21 @@
     tx.success();
     tx.finish();
     long t4=System.currentTimeMillis();
+    if (t4 - t3 > THRESHOLD) {
+      logger.log(Level.INFO,"Neo tx took {0} ms",t4 - t3);
+    }
     currentCommand.remove();
     transactions.remove();
     if (error == null) {
       modificationQueue.doOuterCallbacksAndCleanup(securityContext);
     }
     long t5=System.currentTimeMillis();
-    logger.log(Level.INFO,"neo tx took {0} ms, outer callbacks took {1} ms, toplevel transaction took {2} ms",new Object[]{t4 - t3,t5 - t4,t5 - t0});
+    if (t5 - t4 > THRESHOLD) {
+      logger.log(Level.INFO,"Outer callbacks took {0} ms",t5 - t4);
+    }
+    if (t5 - t0 > THRESHOLD) {
+      logger.log(Level.INFO,"Transaction took {0} ms",t5 - t0);
+    }
   }
   if (error != null) {
     throw error;

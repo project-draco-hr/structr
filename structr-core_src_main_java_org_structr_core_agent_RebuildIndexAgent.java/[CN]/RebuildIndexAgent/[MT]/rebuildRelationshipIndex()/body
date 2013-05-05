@@ -8,7 +8,7 @@
   logger.log(Level.INFO,"Start indexing of relationships.");
   final Iterator<Relationship> relationshipIterator=allRelationships.iterator();
   while (relationshipIterator.hasNext()) {
-    relationshipCount+=Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction<Integer>(){
+    relationshipCount+=Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction<Integer>(false){
       @Override public Integer execute() throws FrameworkException {
         int count=0;
         while (relationshipIterator.hasNext()) {
@@ -16,7 +16,7 @@
             Relationship dbRelationship=relationshipIterator.next();
             if (dbRelationship.hasProperty(GraphObject.uuid.dbName())) {
               indexer.execute(relFactory.instantiateRelationship(securityContext,dbRelationship));
-              if (++count == 1000) {
+              if (++count == 2000) {
                 break;
               }
             }

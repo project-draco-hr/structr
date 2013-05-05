@@ -1,6 +1,16 @@
 {
   String mode=(String)attributes.get("mode");
   String fileName=(String)attributes.get("file");
+  String validate=(String)attributes.get("validate");
+  boolean doValidation=false;
+  if (validate != null) {
+    try {
+      doValidation=Boolean.valueOf(validate);
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"Unable to parse value for validation flag: {0}",t.getMessage());
+    }
+  }
   if (fileName == null) {
     throw new FrameworkException(400,"Please specify sync file.");
   }
@@ -8,7 +18,7 @@
     exportFile(fileName);
   }
  else   if ("import".equals(mode)) {
-    importFile(fileName);
+    importFile(fileName,doValidation);
   }
  else {
     throw new FrameworkException(400,"Please specify sync mode (import|export).");

@@ -5,13 +5,14 @@
     response.setCharacterEncoding("UTF-8");
     response.setContentType("application/json; charset=UTF-8");
     final JsonInput propertySet=gson.get().fromJson(request.getReader(),JsonInput.class);
-    securityContext.initializeAndExamineRequest(request,response);
     if (securityContext != null) {
+      securityContext.initializeAndExamineRequest(request,response);
       List<Resource> chain=ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,defaultIdProperty);
-      Resource resourceConstraint=ResourceHelper.optimizeConstraintChain(chain,defaultIdProperty);
+      Resource resource=ResourceHelper.optimizeNestedResourceChain(chain,defaultIdProperty);
       Map<String,Object> properties=convertPropertySetToMap(propertySet);
-      securityContext.examineRequest(request,resourceConstraint.getResourceSignature(),resourceConstraint.getGrant(request,response),propertyView.get(securityContext));
-      RestMethodResult result=resourceConstraint.doPost(properties);
+      String resourceSignature=resource.getResourceSignature();
+      securityContext.examineRequest(request,resourceSignature,ResourceAccess.findGrant(resourceSignature),propertyView.get(securityContext));
+      RestMethodResult result=resource.doPost(properties);
       propertyView.set(securityContext,defaultPropertyView);
       result.commitResponse(gson.get(),response);
     }

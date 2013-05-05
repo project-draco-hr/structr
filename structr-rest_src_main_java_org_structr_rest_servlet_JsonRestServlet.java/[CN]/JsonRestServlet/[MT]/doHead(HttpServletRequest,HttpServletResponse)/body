@@ -5,9 +5,10 @@
     response.setCharacterEncoding("UTF-8");
     response.setContentType("application/json; charset=UTF-8");
     List<Resource> chain=ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,defaultIdProperty);
-    Resource resourceConstraint=ResourceHelper.optimizeConstraintChain(chain,defaultIdProperty);
-    securityContext.examineRequest(request,resourceConstraint.getResourceSignature(),resourceConstraint.getGrant(request,response),propertyView.get(securityContext));
-    RestMethodResult result=resourceConstraint.doHead();
+    Resource resource=ResourceHelper.optimizeNestedResourceChain(chain,defaultIdProperty);
+    String resourceSignature=resource.getResourceSignature();
+    securityContext.examineRequest(request,resourceSignature,ResourceAccess.findGrant(resourceSignature),propertyView.get(securityContext));
+    RestMethodResult result=resource.doHead();
     result.commitResponse(gson.get(),response);
   }
  catch (  FrameworkException frameworkException) {

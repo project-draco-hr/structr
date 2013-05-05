@@ -1,18 +1,17 @@
 {
+  boolean hasModifications=true;
   boolean valid=true;
-  int count=0;
-  while (!modifications.isEmpty()) {
-    Map.Entry<String,GraphObjectModificationState> entry=modifications.pollFirstEntry();
-    if (entry != null) {
-      valid&=entry.getValue().doInnerCallback(this,securityContext,errorBuffer,doValidation);
-      if (!immutableState.containsKey(entry.getKey())) {
-        immutableState.put(entry.getKey(),entry.getValue());
+  while (hasModifications) {
+    hasModifications=false;
+    for (    GraphObjectModificationState state : modifications.values()) {
+      if (state.wasModified()) {
+        valid&=state.doInnerCallback(this,securityContext,errorBuffer);
+        hasModifications=true;
       }
     }
-    if (count++ > 100000) {
-      logger.log(Level.WARNING,"################################################################################### Too many modification callbacks, aborting!");
-      break;
-    }
+  }
+  for (  Entry<String,GraphObjectModificationState> entry : modifications.entrySet()) {
+    valid&=entry.getValue().doValidationAndIndexing(this,securityContext,errorBuffer,doValidation);
   }
   return valid;
 }

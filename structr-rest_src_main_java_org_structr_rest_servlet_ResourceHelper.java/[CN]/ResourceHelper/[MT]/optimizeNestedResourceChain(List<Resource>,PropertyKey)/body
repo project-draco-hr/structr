@@ -1,0 +1,51 @@
+{
+  ViewFilterResource view=null;
+  int num=resourceChain.size();
+  boolean found=false;
+  do {
+    StringBuilder chain=new StringBuilder();
+    for (Iterator<Resource> it=resourceChain.iterator(); it.hasNext(); ) {
+      Resource constr=it.next();
+      chain.append(constr.getClass().getSimpleName());
+      chain.append(", ");
+      if (constr instanceof ViewFilterResource) {
+        view=(ViewFilterResource)constr;
+        it.remove();
+      }
+    }
+    found=false;
+    try {
+      for (int i=0; i < num; i++) {
+        Resource firstElement=resourceChain.get(i);
+        Resource secondElement=resourceChain.get(i + 1);
+        Resource combinedConstraint=firstElement.tryCombineWith(secondElement);
+        if (combinedConstraint != null) {
+          resourceChain.remove(firstElement);
+          resourceChain.remove(secondElement);
+          resourceChain.add(i,combinedConstraint);
+          found=true;
+          if (combinedConstraint instanceof RelationshipFollowingResource) {
+            break;
+          }
+        }
+      }
+    }
+ catch (    Throwable t) {
+    }
+  }
+ while (found);
+  StringBuilder chain=new StringBuilder();
+  for (  Resource constr : resourceChain) {
+    chain.append(constr.getClass().getSimpleName());
+    chain.append(", ");
+  }
+  if (resourceChain.size() == 1) {
+    Resource finalConstraint=resourceChain.get(0);
+    if (view != null) {
+      finalConstraint=finalConstraint.tryCombineWith(view);
+    }
+    finalConstraint.configureIdProperty(defaultIdProperty);
+    return finalConstraint;
+  }
+  throw new IllegalPathException();
+}

@@ -1,0 +1,17 @@
+{
+  boolean hasModifications=true;
+  boolean valid=true;
+  while (hasModifications) {
+    hasModifications=false;
+    for (    GraphObjectModificationState state : modifications.values()) {
+      if (state.wasModified()) {
+        valid&=state.doInnerCallback(this,securityContext,errorBuffer);
+        hasModifications=true;
+      }
+    }
+  }
+  for (  Entry<String,GraphObjectModificationState> entry : modifications.entrySet()) {
+    valid&=entry.getValue().doValidationAndIndexing(this,securityContext,errorBuffer,doValidation);
+  }
+  return valid;
+}

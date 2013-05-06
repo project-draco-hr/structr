@@ -12,6 +12,7 @@
     boolean isCreation=true;
     node=nodeFactory.instantiateNodeWithType(graphDb.createNode(),nodeType,isCreation);
     if (node != null) {
+      TransactionCommand.nodeCreated(node);
       if ((user != null) && user instanceof AbstractNode) {
         AbstractNode owner=(AbstractNode)user;
         createRel.execute(owner,node,RelType.OWNS,false);
@@ -24,7 +25,6 @@
       node.setProperty(AbstractNode.createdDate,now);
       node.unlockReadOnlyPropertiesOnce();
       node.setProperty(AbstractNode.lastModifiedDate,now);
-      properties.remove(AbstractNode.type);
       for (      Entry<PropertyKey,Object> attr : properties.entrySet()) {
         Object value=attr.getValue();
         PropertyKey key=attr.getKey();

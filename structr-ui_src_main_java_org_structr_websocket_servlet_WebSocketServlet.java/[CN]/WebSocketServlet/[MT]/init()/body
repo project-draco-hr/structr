@@ -3,7 +3,8 @@
   final Gson gson=new GsonBuilder().setPrettyPrinting().registerTypeAdapter(WebSocketMessage.class,new WebSocketDataGSONAdapter(idProperty)).create();
   syncController=new SynchronizationController(gson);
   syncController.setResourceProvider(resourceProvider);
-  EntityContext.registerTransactionListener(syncController);
+  GraphDatabaseService graphDb=Services.getService(NodeService.class).getGraphDb();
+  graphDb.registerTransactionEventHandler(syncController);
   factory=new WebSocketFactory(new Acceptor(){
     @Override public WebSocket doWebSocketConnect(    final HttpServletRequest request,    final String protocol){
       if (STRUCTR_PROTOCOL.equals(protocol)) {

@@ -8,7 +8,7 @@
   logger.log(Level.INFO,"Start indexing of nodes.");
   final Iterator<Node> nodeIterator=allNodes.iterator();
   while (nodeIterator.hasNext()) {
-    nodeCount+=Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction<Integer>(){
+    nodeCount+=Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction<Integer>(false){
       @Override public Integer execute() throws FrameworkException {
         int count=0;
         while (nodeIterator.hasNext()) {
@@ -16,7 +16,7 @@
             Node dbNode=nodeIterator.next();
             if (dbNode.hasProperty(GraphObject.uuid.dbName())) {
               indexer.updateNode(nodeFactory.instantiateNode(dbNode));
-              if (++count == 1000) {
+              if (++count == 2000) {
                 break;
               }
             }

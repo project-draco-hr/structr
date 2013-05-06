@@ -4,7 +4,7 @@
     throw new NoResultsException();
   }
   String[] pathParts=path.split("[/]+");
-  List<Resource> constraintChain=new ArrayList<Resource>(pathParts.length);
+  List<Resource> resourceChain=new ArrayList<Resource>(pathParts.length);
   for (int i=0; i < pathParts.length; i++) {
     String part=pathParts[i].trim();
     if (part.length() > 0) {
@@ -19,15 +19,15 @@
             resource=type.newInstance();
           }
  catch (          Throwable t) {
-            logger.log(Level.WARNING,"Error instantiating constraint class",t);
+            logger.log(Level.WARNING,"Error instantiating resource class",t);
           }
           if (resource != null) {
             resource.setSecurityContext(securityContext);
             if (resource.checkAndConfigure(part,securityContext,request)) {
-              logger.log(Level.FINE,"{0} matched, adding constraint of type {1} for part {2}",new Object[]{matcher.pattern(),type.getName(),part});
+              logger.log(Level.FINE,"{0} matched, adding resource of type {1} for part {2}",new Object[]{matcher.pattern(),type.getName(),part});
               resource.configurePropertyView(propertyView);
               resource.configureIdProperty(defaultIdProperty);
-              constraintChain.add(resource);
+              resourceChain.add(resource);
               found=true;
               break;
             }
@@ -39,5 +39,5 @@
       }
     }
   }
-  return constraintChain;
+  return resourceChain;
 }

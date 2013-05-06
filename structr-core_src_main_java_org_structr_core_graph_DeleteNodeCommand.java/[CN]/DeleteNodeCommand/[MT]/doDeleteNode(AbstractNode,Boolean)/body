@@ -1,9 +1,9 @@
 {
-  deletedNodes.add(node);
-  if (node.getProperty(AbstractNode.uuid) == null) {
+  if (!deletedNodes.contains(node) && node.getUuid() == null) {
     logger.log(Level.WARNING,"Will not delete node which has no UUID");
     return null;
   }
+  deletedNodes.add(node);
   final RemoveNodeFromIndex removeNodeFromIndex=Services.command(securityContext,RemoveNodeFromIndex.class);
   final DeleteRelationshipCommand deleteRel=Services.command(securityContext,DeleteRelationshipCommand.class);
   Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
@@ -39,14 +39,15 @@
         node.onNodeDeletion();
         List<AbstractRelationship> rels=node.getRelationships();
         for (        AbstractRelationship r : rels) {
-          deleteRel.execute(r);
+          deleteRel.execute(r,true);
         }
         removeNodeFromIndex.execute(node);
         node.getNode().delete();
+        TransactionCommand.nodeDeleted(node);
         if (cascade) {
           for (          AbstractNode nodeToCheck : nodesToCheckAfterDeletion) {
             ErrorBuffer errorBuffer=new ErrorBuffer();
-            if (!nodeToCheck.isValid(errorBuffer)) {
+            if (!deletedNodes.contains(nodeToCheck) && !nodeToCheck.isValid(errorBuffer)) {
               removeNodeFromIndex.execute(nodeToCheck);
               doDeleteNode(nodeToCheck,cascade);
             }

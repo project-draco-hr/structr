@@ -1,0 +1,10 @@
+{
+  for (  PropertyEntry<Relationship> entry : data.assignedRelationshipProperties()) {
+    AbstractRelationship relEntity=relFactory.instantiateRelationship(securityContext,entry.entity());
+    if (relEntity != null) {
+      PropertyKey key=getPropertyKeyForDatabaseName(relEntity.getClass(),entry.key());
+      Object value=entry.value();
+      propertyModified(securityContext,transactionKey,relEntity,key,entry.previouslyCommitedValue(),value);
+    }
+  }
+}

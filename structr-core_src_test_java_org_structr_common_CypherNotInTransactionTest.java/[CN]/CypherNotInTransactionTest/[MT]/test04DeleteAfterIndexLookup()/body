@@ -16,12 +16,8 @@
   finally {
       tx.finish();
     }
-    try {
-      rel.getUuid();
-      fail("Should have raised an org.neo4j.graphdb.NotFoundException");
-    }
- catch (    org.neo4j.graphdb.NotFoundException e) {
-    }
+    String uuid=rel.getUuid();
+    assertNull("UUID of deleted relationship should be null",uuid);
   }
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,ex.toString());

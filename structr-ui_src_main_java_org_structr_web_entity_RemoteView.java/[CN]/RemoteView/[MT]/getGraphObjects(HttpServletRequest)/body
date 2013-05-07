@@ -7,26 +7,6 @@
     String password=getProperty(RemoteView.remotePassword);
     RelationshipFactory relFactory=new RelationshipFactory(securityContext);
     NodeFactory nodeFactory=new NodeFactory(securityContext);
-    GraphDatabaseService gds=new RestGraphDatabase(repositoryUrl,username,password);
-    ExecutionEngine engine=new ExecutionEngine(gds);
-    ExecutionResult result=engine.execute(query);
-    for (    String column : result.columns()) {
-      for (      Object o : IteratorUtil.asIterable(result.columnAs(column))) {
-        if (o instanceof Node) {
-          AbstractNode node=nodeFactory.instantiateNode((Node)o);
-          if (node != null) {
-            resultList.add(node);
-          }
-        }
- else         if (o instanceof Relationship) {
-          AbstractRelationship rel=relFactory.instantiateRelationship(securityContext,(Relationship)o);
-          if (rel != null) {
-            resultList.add(rel);
-          }
-        }
-      }
-    }
-    gds.shutdown();
     return resultList;
   }
  catch (  Throwable t) {

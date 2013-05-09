@@ -2,7 +2,7 @@
   Class<T> relClass=null;
   T newRel=null;
   try {
-    if (relationship.hasProperty(AbstractRelationship.combinedType.dbName())) {
+    if (relClass == null && relationship.hasProperty(AbstractRelationship.combinedType.dbName())) {
       String combinedRelType=(String)relationship.getProperty(AbstractRelationship.combinedType.dbName());
       relClass=EntityContext.getNamedRelationClass(combinedRelType);
       if (relClass != null) {
@@ -12,7 +12,10 @@
     if (relClass == null) {
       relClass=findNamedRelation(relationship);
     }
-    if (relClass != null) {
+    if (relClass == null && SECURITY.name().equals(relationship.getType().name())) {
+      relClass=(Class)SecurityRelationship.class;
+    }
+    if (relClass != null && newRel == null) {
       try {
         newRel=relClass.newInstance();
       }

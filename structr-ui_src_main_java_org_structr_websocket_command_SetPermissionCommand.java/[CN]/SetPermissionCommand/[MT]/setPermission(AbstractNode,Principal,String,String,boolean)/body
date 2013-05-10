@@ -1,0 +1,19 @@
+{
+  SecurityContext securityContext=getWebSocket().getSecurityContext();
+  if (!securityContext.isAllowed(obj,Permission.accessControl)) {
+    logger.log(Level.WARNING,"Not allowed to set permissions");
+    getWebSocket().send(MessageBuilder.status().code(403).build(),true);
+  }
+  Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+    @Override public Object execute() throws FrameworkException {
+      if ("grant".equals(action)) {
+        principal.grant(Permission.valueOf(permission),obj);
+      }
+ else       if ("revoke".equals(action)) {
+        principal.revoke(Permission.valueOf(permission),obj);
+      }
+      return null;
+    }
+  }
+);
+}

@@ -10,7 +10,7 @@
     Result result=Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class).execute(Search.andExactType(User.class.getSimpleName()),Search.andExactProperty(User.email,emailString));
     if (!result.isEmpty()) {
       user=(User)result.get(0);
-      user.setConfirmationKey(confKey);
+      user.setProperty(User.confirmationKey,confKey);
     }
  else {
       user=Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction<User>(){

@@ -13,7 +13,7 @@
     String password="testpassword-01";
     User testUser=createTestNodes(User.class,1).get(0);
     testUser.setName(name);
-    testUser.setPassword(password);
+    testUser.setProperty(User.password,password);
     RestAssured.given().headers("X-User",name,"X-Password",password).contentType("application/json; charset=UTF-8").expect().statusCode(403).when().delete("/folder/" + testFolder.getUuid());
     testFolder.setOwner(testUser);
     RestAssured.given().headers("X-User",name,"X-Password",password).contentType("application/json; charset=UTF-8").expect().statusCode(200).when().delete("/folder/" + testFolder.getUuid());

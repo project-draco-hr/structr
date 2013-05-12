@@ -1,3 +1,12 @@
 {
-  obj.getSecurityRelationship(this).addPermission(permission);
+  SecurityRelationship secRel=obj.getSecurityRelationship(this);
+  if (secRel == null) {
+    try {
+      secRel=createSecurityRelationshipTo(obj);
+    }
+ catch (    FrameworkException ex) {
+      logger.log(Level.SEVERE,"Could not create security relationship!",ex);
+    }
+  }
+  secRel.addPermission(permission);
 }

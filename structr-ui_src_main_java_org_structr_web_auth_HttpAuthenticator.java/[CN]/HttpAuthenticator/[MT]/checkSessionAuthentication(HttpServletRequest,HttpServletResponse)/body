@@ -1,9 +1,8 @@
 {
-  HttpSession session=request.getSession(false);
-  if (session == null) {
+  String sessionIdFromRequest=request.getRequestedSessionId();
+  if (sessionIdFromRequest == null) {
     return null;
   }
-  String sessionIdFromRequest=request.getSession(false).getId();
   Principal user=AuthHelper.getUserForSessionId(sessionIdFromRequest);
   if (user != null) {
     return user;

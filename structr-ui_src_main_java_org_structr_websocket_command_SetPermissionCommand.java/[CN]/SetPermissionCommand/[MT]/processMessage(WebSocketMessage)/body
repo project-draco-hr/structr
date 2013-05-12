@@ -16,6 +16,11 @@
   webSocketData.getNodeData().remove("recursive");
   boolean rec=StringUtils.isNotBlank(recString) ? Boolean.parseBoolean(recString) : false;
   if (obj != null) {
+    if (!getWebSocket().getSecurityContext().isAllowed(((AbstractNode)obj),Permission.accessControl)) {
+      logger.log(Level.WARNING,"No access control permission for {0} on {1}",new Object[]{getWebSocket().getCurrentUser().toString(),obj.toString()});
+      getWebSocket().send(MessageBuilder.status().message("No access control permission").code(400).build(),true);
+      return;
+    }
     try {
       setPermission(obj,principal,action,permission,rec);
     }

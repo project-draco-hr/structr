@@ -2,8 +2,15 @@
   for (  RelationshipMapping relMapping : EntityContext.getNamedRelations()) {
     resourceMap.put(Pattern.compile(relMapping.getName()),NamedRelationResource.class);
   }
+  boolean indentJson=true;
+  try {
+    indentJson=Boolean.parseBoolean(Services.getConfigurationValue(Services.JSON_INDENTATION,"true"));
+  }
+ catch (  Throwable t) {
+    logger.log(Level.WARNING,"Unable to parse value for {0}: {1}",new Object[]{Services.JSON_INDENTATION,t.getMessage()});
+  }
   resourceMap.putAll(resourceProvider.getResources());
   this.propertyView=new ThreadLocalPropertyView();
   this.gson=new ThreadLocalGson();
-  this.jsonWriter=new ThreadLocalJsonWriter(propertyView);
+  this.jsonWriter=new ThreadLocalJsonWriter(propertyView,indentJson);
 }

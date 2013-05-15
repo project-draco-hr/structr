@@ -1,0 +1,27 @@
+{
+  try {
+    HtmlServlet htmlServlet=new HtmlServlet();
+    ServletHolder htmlServletHolder=new ServletHolder(htmlServlet);
+    Map<String,String> htmlInitParams=new HashMap<String,String>();
+    htmlInitParams.put("Authenticator","org.structr.web.auth.HttpAuthenticator");
+    htmlServletHolder.setInitParameters(htmlInitParams);
+    htmlServletHolder.setInitOrder(1);
+    CsvServlet csvServlet=new CsvServlet(DefaultResourceProvider.class.newInstance(),PropertyView.All,AbstractNode.uuid);
+    ServletHolder csvServletHolder=new ServletHolder(csvServlet);
+    Map<String,String> servletParams=new HashMap<String,String>();
+    servletParams.put("Authenticator","org.structr.web.auth.HttpAuthenticator");
+    csvServletHolder.setInitParameters(servletParams);
+    csvServletHolder.setInitOrder(2);
+    WebSocketServlet wsServlet=new WebSocketServlet(AbstractNode.uuid);
+    ServletHolder wsServletHolder=new ServletHolder(wsServlet);
+    Map<String,String> wsInitParams=new HashMap<String,String>();
+    wsInitParams.put("Authenticator","org.structr.web.auth.UiAuthenticator");
+    wsInitParams.put("IdProperty","uuid");
+    wsServletHolder.setInitParameters(wsInitParams);
+    wsServletHolder.setInitOrder(3);
+    Structr.createServer(Ui.class,"${artifactId} ${version}",8082).addServlet("/structr/html/*",htmlServletHolder).addServlet("/structr/ws/*",wsServletHolder).addServlet("/structr/csv/*",csvServletHolder).addResourceHandler("/structr","src/main/resources/structr",true,new String[]{"index.html"}).enableRewriteFilter().resourceProvider(UiResourceProvider.class).authenticator(UiAuthenticator.class).start(true);
+  }
+ catch (  Throwable t) {
+    t.printStackTrace();
+  }
+}

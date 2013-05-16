@@ -1,0 +1,26 @@
+{
+  String configuredOauthServers=Services.getConfigurationValue(CONFIGURED_OAUTH_SERVERS,"twitter facebook google github stackoverflow");
+  String[] authServers=configuredOauthServers.split(" ");
+  for (  String authServer : authServers) {
+    if (authServer.equals(name)) {
+      String authLocation=Services.getConfigurationValue("oauth." + authServer + ".authorization_location",null);
+      String tokenLocation=Services.getConfigurationValue("oauth." + authServer + ".token_location",null);
+      String clientId=Services.getConfigurationValue("oauth." + authServer + ".client_id",null);
+      String clientSecret=Services.getConfigurationValue("oauth." + authServer + ".client_secret",null);
+      String redirectUri=Services.getConfigurationValue("oauth." + authServer + ".redirect_uri",null);
+      if (authLocation != null && clientId != null && clientSecret != null && redirectUri != null) {
+        Class serverClass=getServerClassForName(name);
+        OAuth2Server oauthServer;
+        try {
+          oauthServer=(OAuth2Server)serverClass.newInstance();
+          oauthServer.init(authLocation,tokenLocation,clientId,clientSecret,redirectUri);
+          return oauthServer;
+        }
+ catch (        Exception ex) {
+          logger.log(Level.SEVERE,"Could not instantiate auth server",ex);
+        }
+      }
+    }
+  }
+  return null;
+}

@@ -1,0 +1,16 @@
+{
+  if (userResponse != null) {
+    return userResponse;
+  }
+  try {
+    OAuthClientRequest clientReq=new OAuthBearerClientRequest(getUserResourceUri()).setAccessToken(getAccessToken(request)).buildQueryMessage();
+    OAuthClient oAuthClient=new OAuthClient(new URLConnectionClient());
+    userResponse=oAuthClient.resource(clientReq,"GET",OAuthResourceResponse.class);
+    logger.log(Level.INFO,"User response: {0}",userResponse.getBody());
+    return userResponse;
+  }
+ catch (  Throwable t) {
+    logger.log(Level.SEVERE,"Could not get user response",t);
+  }
+  return null;
+}

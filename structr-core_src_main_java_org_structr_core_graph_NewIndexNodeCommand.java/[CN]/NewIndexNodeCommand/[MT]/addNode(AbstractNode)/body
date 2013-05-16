@@ -3,7 +3,6 @@
   try {
     String uuid=node.getProperty(AbstractNode.uuid);
     Node dbNode=node.getNode();
-    long id=node.getId();
     if (uuid == null) {
       return;
     }
@@ -14,13 +13,13 @@
       for (      PropertyKey key : searchableProperties) {
         boolean emptyKey=StringUtils.isEmpty(key.dbName());
         if (emptyKey) {
-          logger.log(Level.SEVERE,"Node {0} has empty, not-null key, removing property",new Object[]{id});
+          logger.log(Level.SEVERE,"Node {0} has empty, not-null key, removing property",new Object[]{uuid});
           dbNode.removeProperty(key.dbName());
           return;
         }
         Object valueForIndexing=node.getPropertyForIndexing(key);
         Object value=node.getProperty(key);
-        if ((value == null && key.databaseConverter(securityContext,null) == null) || (value != null && value instanceof String && StringUtils.isEmpty((String)value))) {
+        if ((value == null && key.databaseConverter(securityContext,null) == null) || (value instanceof String && StringUtils.isEmpty((String)value))) {
           valueForIndexing=SearchNodeCommand.IMPROBABLE_SEARCH_VALUE;
         }
         if (valueForIndexing != null) {
@@ -49,6 +48,6 @@ catch (        Throwable t) {
   }
  catch (  Throwable t) {
     t.printStackTrace();
-    logger.log(Level.WARNING,"Unable to index node {0}: {1}",new Object[]{node.getNode().getId(),t.getMessage()});
+    logger.log(Level.WARNING,"Unable to index node {0}: {1}",new Object[]{node,t.getMessage()});
   }
 }

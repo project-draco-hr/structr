@@ -2,5 +2,10 @@
   Principal user=checkSessionAuthentication(request,response);
   if (user != null) {
     securityContext.setUser(user);
+    return;
+  }
+  user=checkExternalAuthentication(securityContext,request,response);
+  if (user != null) {
+    securityContext.setUser(user);
   }
 }

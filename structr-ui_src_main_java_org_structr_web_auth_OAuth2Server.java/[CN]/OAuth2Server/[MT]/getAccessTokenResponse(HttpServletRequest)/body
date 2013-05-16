@@ -1,0 +1,21 @@
+{
+  if (tokenResponse != null) {
+    return tokenResponse;
+  }
+  try {
+    OAuthClientRequest clientReq=OAuthClientRequest.tokenLocation(tokenLocation).setGrantType(GrantType.AUTHORIZATION_CODE).setClientId(clientId).setClientSecret(clientSecret).setRedirectURI(getAbsoluteRedirectUri(request,redirectUri)).setCode(getCode(request)).buildBodyMessage();
+    OAuthClient oAuthClient=new OAuthClient(new URLConnectionClient());
+    if (ResponseType.urlEncoded.equals(getResponseType())) {
+      tokenResponse=oAuthClient.accessToken(clientReq,GitHubTokenResponse.class);
+    }
+ else {
+      tokenResponse=oAuthClient.accessToken(clientReq);
+    }
+    logger.log(Level.INFO,"Access token response: {0}",tokenResponse.getBody());
+    return tokenResponse;
+  }
+ catch (  Throwable t) {
+    logger.log(Level.SEVERE,"Could not get access token response",t);
+  }
+  return null;
+}

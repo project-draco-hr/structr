@@ -23,7 +23,7 @@
   File confFile=checkStructrConf(basePath,sourceJarName);
   Properties configuration=getConfiguration(confFile);
   checkPrerequisites(configuration);
-  Server server=new Server(restPort);
+  Server server=new Server(httpPort);
   ContextHandlerCollection contexts=new ContextHandlerCollection();
   contexts.addHandler(new DefaultHandler());
   List<Connector> connectors=new LinkedList<Connector>();
@@ -125,10 +125,10 @@
       logger.log(Level.WARNING,"Unable to configure SSL, please make sure that application.https.port, application.keystore.path and application.keystore.password are set correctly in structr.conf.");
     }
   }
-  if (host != null && !host.isEmpty() && restPort > -1) {
+  if (host != null && !host.isEmpty() && httpPort > -1) {
     SelectChannelConnector httpConnector=new SelectChannelConnector();
     httpConnector.setHost(host);
-    httpConnector.setPort(restPort);
+    httpConnector.setPort(httpPort);
     httpConnector.setMaxIdleTime(maxIdleTime);
     httpConnector.setRequestHeaderSize(requestHeaderSize);
     connectors.add(httpConnector);
@@ -147,10 +147,10 @@
   server.setStopAtShutdown(true);
   if (!quiet) {
     System.out.println();
-    System.out.println("Starting " + applicationName + " (host="+ host+ ":"+ restPort+ ", maxIdleTime="+ maxIdleTime+ ", requestHeaderSize="+ requestHeaderSize+ ")");
+    System.out.println("Starting " + applicationName + " (host="+ host+ ":"+ httpPort+ ", maxIdleTime="+ maxIdleTime+ ", requestHeaderSize="+ requestHeaderSize+ ")");
     System.out.println("Base path " + basePath);
     System.out.println();
-    System.out.println(applicationName + " started:        http://" + host+ ":"+ restPort+ restUrl);
+    System.out.println(applicationName + " started:        http://" + host+ ":"+ httpPort+ restUrl);
     System.out.println();
   }
   server.start();

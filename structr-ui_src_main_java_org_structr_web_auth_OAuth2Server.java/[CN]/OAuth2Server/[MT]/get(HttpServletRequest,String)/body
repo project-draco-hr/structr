@@ -1,0 +1,11 @@
+{
+  try {
+    String body=getUserResponse(request).getBody();
+    logger.log(Level.INFO,"User response body: {0}",body);
+    return (String)JSONUtils.parseJSON(body).get(key);
+  }
+ catch (  JSONException ex) {
+    logger.log(Level.WARNING,"Could not extract {0} from JSON response",ex);
+  }
+  return null;
+}

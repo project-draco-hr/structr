@@ -3,11 +3,10 @@
     return Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction<User>(){
       @Override public User execute() throws FrameworkException {
         User user;
-        Result result=Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class).execute(Search.andExactType(Person.class.getSimpleName()),Search.andExactProperty(Person.email,emailString));
-        if (!result.isEmpty()) {
-          Person person=(Person)result.get(0);
+        Person person=(Person)AuthHelper.getPrincipalForEmail(emailString);
+        if (person != null) {
           person.unlockReadOnlyPropertiesOnce();
-          person.setType(User.class.getSimpleName());
+          person.setProperty(AbstractNode.type,User.class.getSimpleName());
           user=new User();
           user.init(securityContext,person.getNode());
           Services.command(securityContext,NewIndexNodeCommand.class).updateNode(person);

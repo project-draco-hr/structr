@@ -1,9 +1,11 @@
 {
   PropertyMap properties=PropertyMap.inputTypeToJavaType(securityContext,User.class,propertySet);
   String name=properties.get(User.name);
+  String email=properties.get(User.email);
   String password=properties.get(User.password);
-  if (name != null && password != null) {
-    User user=(User)securityContext.doLogin(name,password);
+  String emailOrUsername=StringUtils.isNotEmpty(email) ? email : name;
+  if (StringUtils.isNotEmpty(emailOrUsername) && StringUtils.isNotEmpty(password)) {
+    User user=(User)securityContext.doLogin(emailOrUsername,password);
     if (user != null) {
       logger.log(Level.INFO,"Login successfull: {0}",new Object[]{user});
       RestMethodResult methodResult=new RestMethodResult(200);

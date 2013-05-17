@@ -1,0 +1,14 @@
+{
+  Principal principal=null;
+  Result result=Result.EMPTY_RESULT;
+  try {
+    result=Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class).execute(Search.andExactTypeAndSubtypes(Principal.class.getSimpleName()),Search.andExactProperty(Person.email,email));
+  }
+ catch (  FrameworkException ex) {
+    logger.log(Level.WARNING,"Could not search for person",ex);
+  }
+  if (!result.isEmpty()) {
+    principal=(Principal)result.get(0);
+  }
+  return principal;
+}

@@ -1,9 +1,22 @@
 {
-  User user=null;
   try {
-    user=Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction<User>(){
+    return Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction<User>(){
       @Override public User execute() throws FrameworkException {
-        return (User)Services.command(securityContext,CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.type,User.class.getSimpleName()),new NodeAttribute(User.email,emailString),new NodeAttribute(User.name,emailString),new NodeAttribute(User.confirmationKey,confKey));
+        User user;
+        Result result=Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class).execute(Search.andExactType(Person.class.getSimpleName()),Search.andExactProperty(Person.email,emailString));
+        if (!result.isEmpty()) {
+          Person person=(Person)result.get(0);
+          person.unlockReadOnlyPropertiesOnce();
+          person.setType(User.class.getSimpleName());
+          user=new User();
+          user.init(securityContext,person.getNode());
+          Services.command(securityContext,NewIndexNodeCommand.class).updateNode(person);
+          user.setProperty(User.confirmationKey,confKey);
+        }
+ else {
+          user=(User)Services.command(securityContext,CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.type,User.class.getSimpleName()),new NodeAttribute(User.email,emailString),new NodeAttribute(User.name,emailString),new NodeAttribute(User.confirmationKey,confKey));
+        }
+        return user;
       }
     }
 );
@@ -11,5 +24,5 @@
  catch (  FrameworkException ex) {
     Logger.getLogger(RegistrationResource.class.getName()).log(Level.SEVERE,null,ex);
   }
-  return user;
+  return null;
 }

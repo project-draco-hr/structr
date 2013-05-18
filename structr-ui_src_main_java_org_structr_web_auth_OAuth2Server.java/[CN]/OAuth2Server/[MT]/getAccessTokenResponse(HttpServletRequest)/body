@@ -3,9 +3,15 @@
     return tokenResponse;
   }
   try {
+    String code=getCode(request);
+    if (code == null) {
+      logger.log(Level.SEVERE,"Could not get code from request, cancelling authorization process");
+      return null;
+    }
     OAuthClientRequest clientReq=OAuthClientRequest.tokenLocation(tokenLocation).setGrantType(GrantType.AUTHORIZATION_CODE).setClientId(clientId).setClientSecret(clientSecret).setRedirectURI(getAbsoluteRedirectUri(request,redirectUri)).setCode(getCode(request)).buildBodyMessage();
+    logger.log(Level.INFO,"Request body: {0}",clientReq.getBody());
     OAuthClient oAuthClient=new OAuthClient(new URLConnectionClient());
-    if (ResponseType.urlEncoded.equals(getResponseType())) {
+    if (ResponseFormat.urlEncoded.equals(getResponseType())) {
       tokenResponse=oAuthClient.accessToken(clientReq,GitHubTokenResponse.class);
     }
  else {

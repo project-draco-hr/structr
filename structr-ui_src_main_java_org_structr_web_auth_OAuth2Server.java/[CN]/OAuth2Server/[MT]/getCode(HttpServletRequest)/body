@@ -1,11 +1,14 @@
 {
   OAuthAuthzResponse oar;
   try {
+    logger.log(Level.INFO,"Trying to get authorization code from request {0}",request);
     oar=OAuthAuthzResponse.oauthCodeAuthzResponse(request);
+    String code=oar.getCode();
+    logger.log(Level.INFO,"Got code {0} from authorization request",code);
     return oar.getCode();
   }
- catch (  Throwable t) {
-    logger.log(Level.SEVERE,"Could not read authorization response",t);
+ catch (  OAuthProblemException e) {
+    logger.log(Level.SEVERE,"Could not read authorization request: {0}, {1}",new Object[]{e.getError(),e.getDescription()});
   }
   return null;
 }

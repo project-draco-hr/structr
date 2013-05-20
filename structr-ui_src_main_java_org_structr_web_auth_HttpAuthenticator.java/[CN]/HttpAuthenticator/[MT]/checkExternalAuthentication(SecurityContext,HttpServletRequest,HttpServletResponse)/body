@@ -25,9 +25,9 @@
  else   if ("auth".equals(action)) {
     String accessToken=oauthServer.getAccessToken(request);
     if (accessToken != null) {
-      logger.log(Level.INFO,"Got access token {0}",accessToken);
+      logger.log(Level.FINE,"Got access token {0}",accessToken);
       String email=oauthServer.getEmail(request);
-      logger.log(Level.INFO,"Got email: {0}",new Object[]{email});
+      logger.log(Level.FINE,"Got email: {0}",new Object[]{email});
       if (email != null) {
         Principal user=AuthHelper.getPrincipalForEmail(email);
         if (user == null) {
@@ -39,7 +39,7 @@
             securityContext.setUser(user);
             HtmlServlet.setNoCacheHeaders(response);
             try {
-              logger.log(Level.INFO,"Response status: {0}",response.getStatus());
+              logger.log(Level.FINE,"Response status: {0}",response.getStatus());
               response.sendRedirect(oauthServer.getReturnUri());
             }
  catch (            Exception ex) {

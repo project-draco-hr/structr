@@ -11,18 +11,28 @@
     result=engine.execute(query);
   }
   for (  Map<String,Object> row : result) {
-    for (    Object o : row.values()) {
-      if (o instanceof Node) {
-        AbstractNode node=nodeFactory.instantiateNode((Node)o,includeHiddenAndDeleted,publicOnly);
+    GraphObjectMap dummyObject=null;
+    for (    Entry<String,Object> entry : row.entrySet()) {
+      String key=entry.getKey();
+      Object value=entry.getValue();
+      if (value instanceof Node) {
+        AbstractNode node=nodeFactory.instantiateNode((Node)value,includeHiddenAndDeleted,publicOnly);
         if (node != null) {
           resultList.add(node);
         }
       }
- else       if (o instanceof Relationship) {
-        AbstractRelationship rel=relFactory.instantiateRelationship(securityContext,(Relationship)o);
+ else       if (value instanceof Relationship) {
+        AbstractRelationship rel=relFactory.instantiateRelationship(securityContext,(Relationship)value);
         if (rel != null) {
           resultList.add(rel);
         }
+      }
+ else {
+        if (dummyObject == null) {
+          dummyObject=new GraphObjectMap();
+          resultList.add(dummyObject);
+        }
+        dummyObject.setProperty(new GenericProperty(key),value);
       }
     }
   }

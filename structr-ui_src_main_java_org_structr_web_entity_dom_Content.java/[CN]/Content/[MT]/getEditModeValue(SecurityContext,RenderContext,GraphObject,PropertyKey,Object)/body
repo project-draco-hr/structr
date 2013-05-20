@@ -1,6 +1,7 @@
 {
   Object value=dataObject.getProperty(EntityContext.getPropertyKeyForJSONName(dataObject.getClass(),referenceKeyProperty.jsonName()));
-  if (renderContext.getEdit() && renderContext.inBody() && securityContext.isAllowed((AbstractNode)dataObject,Permission.write)&& !referenceKeyProperty.isReadOnlyProperty()) {
+  boolean isAllowed=dataObject instanceof AbstractNode ? securityContext.isAllowed((AbstractNode)dataObject,Permission.write) : true;
+  if (renderContext.getEdit() && renderContext.inBody() && isAllowed&& !referenceKeyProperty.isReadOnlyProperty()) {
     String editModeValue="<span data-structr-type=\"" + referenceKeyProperty.typeName() + "\" data-structr-id=\""+ dataObject.getUuid()+ "\" data-structr-key=\""+ referenceKeyProperty.jsonName()+ "\">"+ value+ "</span>";
     logger.log(Level.INFO,"Edit mode value: {0}",editModeValue);
     return editModeValue;

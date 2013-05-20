@@ -8,7 +8,7 @@
     File confFile=checkStructrConf(basePath,sourceJarName);
     List<Connector> connectors=new LinkedList<Connector>();
     HandlerCollection handlerCollection=new HandlerCollection();
-    server=new Server(restPort);
+    server=new Server(httpPort);
     ServletContextHandler servletContext=new ServletContextHandler(server,contextPath,ServletContextHandler.SESSIONS);
     servletContext.setBaseResource(new ResourceCollection(Resource.newResource(basePath),JarResource.newJarResource(Resource.newResource(sourceJarName))));
     servletContext.setInitParameter("configfile.path",basePath + "/structr.conf");
@@ -31,16 +31,16 @@
     servletContext.addEventListener(new ApplicationContextListener());
     handlerCollection.addHandler(servletContext);
     server.setHandler(handlerCollection);
-    if (host != null && !host.isEmpty() && restPort > -1) {
+    if (host != null && !host.isEmpty() && httpPort > -1) {
       SelectChannelConnector httpConnector=new SelectChannelConnector();
       httpConnector.setHost(host);
-      httpConnector.setPort(restPort);
+      httpConnector.setPort(httpPort);
       httpConnector.setMaxIdleTime(30000);
       httpConnector.setRequestHeaderSize(8192);
       connectors.add(httpConnector);
     }
  else {
-      logger.log(Level.WARNING,"Unable to configure REST port, please make sure that application.host, application.rest.port and application.rest.path are set correctly in structr.conf.");
+      logger.log(Level.WARNING,"Unable to configure REST port, please make sure that application.host, application.http.port and application.rest.path are set correctly in structr.conf.");
     }
     if (!connectors.isEmpty()) {
       server.setConnectors(connectors.toArray(new Connector[0]));

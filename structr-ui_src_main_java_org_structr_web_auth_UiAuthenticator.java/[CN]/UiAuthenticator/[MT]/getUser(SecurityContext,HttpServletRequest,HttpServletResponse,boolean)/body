@@ -8,11 +8,11 @@
   String password=request.getHeader("X-Password");
   String token=request.getHeader("X-StructrSessionToken");
   if (token != null) {
-    user=AuthHelper.getUserForSessionId(token);
+    user=AuthHelper.getPrincipalForSessionId(token);
   }
  else   if ((userName != null) && (password != null)) {
     if (tryLogin) {
-      user=AuthHelper.getUserForUsernameAndPassword(SecurityContext.getSuperUserInstance(request,response),userName,password);
+      user=AuthHelper.getPrincipalForPassword(AbstractNode.name,userName,password);
     }
   }
   if (user != null) {

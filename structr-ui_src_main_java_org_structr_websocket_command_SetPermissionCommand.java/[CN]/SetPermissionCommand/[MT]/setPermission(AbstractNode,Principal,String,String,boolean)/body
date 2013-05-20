@@ -1,0 +1,14 @@
+{
+  Services.command(getWebSocket().getSecurityContext(),TransactionCommand.class).execute(new StructrTransaction(){
+    @Override public Object execute() throws FrameworkException {
+      if ("grant".equals(action)) {
+        principal.grant(Permission.valueOf(permission),obj);
+      }
+ else       if ("revoke".equals(action)) {
+        principal.revoke(Permission.valueOf(permission),obj);
+      }
+      return null;
+    }
+  }
+);
+}

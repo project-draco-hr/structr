@@ -1,0 +1,16 @@
+{
+  AbstractNode node=getNode(webSocketData.getId());
+  String view=webSocketData.getView();
+  if (node != null) {
+    if (view == null) {
+      view=PropertyView.All;
+    }
+    for (    PropertyKey key : node.getPropertyKeys(view)) {
+      webSocketData.setNodeData(key.jsonName(),node.getProperty(key));
+    }
+    getWebSocket().send(webSocketData,true);
+  }
+ else {
+    logger.log(Level.WARNING,"Node not found for id {0}!",webSocketData.getId());
+  }
+}

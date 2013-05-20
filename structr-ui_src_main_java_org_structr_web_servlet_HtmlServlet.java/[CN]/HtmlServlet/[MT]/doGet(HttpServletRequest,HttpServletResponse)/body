@@ -3,11 +3,15 @@
   try {
     request.setCharacterEncoding("UTF-8");
     response.setCharacterEncoding("UTF-8");
+    request.getSession();
     boolean dontCache=false;
     String path=PathHelper.clean(request.getPathInfo());
     logger.log(Level.FINE,"Path info {0}",path);
     SecurityContext securityContext=SecurityContext.getInstance(this.getServletConfig(),request,response,AccessMode.Frontend);
     securityContext.initializeAndExamineRequest(request,response);
+    if (response.getStatus() == 302) {
+      return;
+    }
     if (securityContext.getUser(false) != null) {
       dontCache=true;
     }
@@ -16,12 +20,15 @@
     edit=renderContext.getEdit();
     DOMNode rootElement=null;
     AbstractNode dataNode=null;
-    String[] urlParts=PathHelper.getParts(path);
-    if ((urlParts == null) || (urlParts.length == 0)) {
+    String[] uriParts=PathHelper.getParts(path);
+    if ((uriParts == null) || (uriParts.length == 0)) {
       rootElement=findIndexPage();
       logger.log(Level.FINE,"No path supplied, trying to find index page");
     }
  else {
+      if (checkGetSessionId(request,response,path)) {
+        return;
+      }
       if (checkRegistration(securityContext,request,response,path)) {
         return;
       }
@@ -41,9 +48,9 @@
       }
       Matcher matcher=threadLocalUUIDMatcher.get();
       boolean requestUriContainsUuids=false;
-      for (int i=0; i < urlParts.length; i++) {
-        request.setAttribute(urlParts[i],i);
-        matcher.reset(urlParts[i]);
+      for (int i=0; i < uriParts.length; i++) {
+        request.setAttribute(uriParts[i],i);
+        matcher.reset(uriParts[i]);
         requestUriContainsUuids|=matcher.matches();
       }
       if (!requestUriContainsUuids) {
@@ -76,13 +83,12 @@
     }
     logger.log(Level.FINE,"Page found in {0} seconds",decimalFormat.format((System.nanoTime() - start) / 1000000000.0));
     if (edit || dontCache) {
-      response.setHeader("Pragma","no-cache");
+      setNoCacheHeaders(response);
     }
  else {
       lastModified=rootElement.getLastModifiedDate();
     }
     if (securityContext.isVisible(rootElement)) {
-      request.getSession().setAttribute(LAST_GET_URL,request.getPathInfo());
       PrintWriter out=response.getWriter();
       double setup=System.nanoTime();
       logger.log(Level.FINE,"Setup time: {0} seconds",decimalFormat.format((setup - start) / 1000000000.0));
@@ -96,10 +102,8 @@
         double end=System.nanoTime();
         logger.log(Level.FINE,"Content for path {0} in {1} seconds",new Object[]{path,decimalFormat.format((end - setup) / 1000000000.0)});
         String contentType=rootElement.getProperty(Page.contentType);
-        if (contentType != null) {
-          if (contentType.equals("text/html")) {
-            contentType=contentType.concat(";charset=UTF-8");
-          }
+        if (contentType != null && contentType.equals("text/html")) {
+          contentType=contentType.concat(";charset=UTF-8");
           response.setContentType(contentType);
         }
  else {
@@ -109,10 +113,12 @@
       }
     }
  else {
+      response.sendError(HttpServletResponse.SC_NOT_FOUND);
     }
   }
  catch (  Throwable t) {
-    logger.log(Level.WARNING,"Exception while processing request",t);
+    t.printStackTrace();
+    logger.log(Level.SEVERE,"Exception while processing request",t);
     HttpAuthenticator.writeInternalServerError(response);
   }
 }

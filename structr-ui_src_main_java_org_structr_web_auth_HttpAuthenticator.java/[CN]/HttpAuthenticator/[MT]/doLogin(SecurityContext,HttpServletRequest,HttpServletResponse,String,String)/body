@@ -1,8 +1,11 @@
 {
-  Principal user=AuthHelper.getUserForUsernameAndPassword(SecurityContext.getSuperUserInstance(),userName,password);
+  Principal user=AuthHelper.getPrincipalForPassword(Person.email,emailOrUsername,password);
+  if (user == null) {
+    user=AuthHelper.getPrincipalForPassword(AbstractNode.name,emailOrUsername,password);
+  }
   if (user != null) {
     securityContext.setUser(user);
-    String sessionIdFromRequest=request.getSession(false).getId();
+    String sessionIdFromRequest=request.getRequestedSessionId();
     try {
       user.setProperty(Principal.sessionId,sessionIdFromRequest);
     }

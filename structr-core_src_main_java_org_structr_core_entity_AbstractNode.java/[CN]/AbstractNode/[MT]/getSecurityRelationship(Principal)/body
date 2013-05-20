@@ -1,13 +1,11 @@
 {
-  if (principal == null) {
+  if (p == null) {
     return null;
   }
-  long userId=principal.getId();
-  if (securityRelationships == null) {
-    securityRelationships=new HashMap<Long,AbstractRelationship>();
+  for (  AbstractRelationship r : getRelationships(RelType.SECURITY,Direction.INCOMING)) {
+    if (r.getStartNode().equals(p)) {
+      return (SecurityRelationship)r;
+    }
   }
-  if (!(securityRelationships.containsKey(userId))) {
-    populateSecurityRelationshipCacheMap();
-  }
-  return securityRelationships.get(userId);
+  return null;
 }

@@ -1,15 +1,12 @@
 {
   logger.log(Level.INFO,"AgentService started");
   while (run) {
-    Task nextTask=null;
-synchronized (taskQueue) {
-      nextTask=taskQueue.poll();
-      if (nextTask != null) {
-        assignNextAgentForTask(nextTask);
-      }
+    Task nextTask=taskQueue.poll();
+    if (nextTask != null) {
+      assignNextAgentForTask(nextTask);
     }
     try {
-      Thread.sleep(10);
+      Thread.yield();
     }
  catch (    Throwable ignore) {
     }

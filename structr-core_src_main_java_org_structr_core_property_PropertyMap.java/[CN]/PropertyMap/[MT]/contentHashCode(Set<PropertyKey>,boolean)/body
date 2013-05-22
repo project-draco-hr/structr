@@ -1,0 +1,23 @@
+{
+  Map<PropertyKey,Object> sortedMap=new TreeMap<PropertyKey,Object>(new PropertyKeyComparator());
+  int hashCode=42;
+  sortedMap.putAll(properties);
+  if (comparableKeys == null) {
+    for (    Entry<PropertyKey,Object> entry : sortedMap.entrySet()) {
+      if (includeSystemProperties || !entry.getKey().isSystemProperty()) {
+        hashCode^=entry.hashCode();
+      }
+    }
+  }
+ else {
+    for (    Entry<PropertyKey,Object> entry : sortedMap.entrySet()) {
+      PropertyKey key=entry.getKey();
+      if (comparableKeys.contains(key)) {
+        if (includeSystemProperties || !key.isSystemProperty()) {
+          hashCode^=entry.hashCode();
+        }
+      }
+    }
+  }
+  return hashCode;
+}

@@ -9,8 +9,7 @@ case ManyToOne:
 case OneToOne:
 {
             String destType=finalTargetNode.getType();
-            List<AbstractRelationship> rels=sourceNode.getRelationships(getRelType(),getDirection());
-            for (            AbstractRelationship rel : rels) {
+            for (            AbstractRelationship rel : sourceNode.getRelationships(getRelType(),getDirection())) {
               if (rel.getOtherNode(sourceNode).getType().equals(destType)) {
                 deleteRel.execute(rel);
               }
@@ -20,8 +19,7 @@ case OneToOne:
 case OneToMany:
 {
           String sourceType=sourceNode.getType();
-          List<AbstractRelationship> rels=finalTargetNode.getRelationships(getRelType(),Direction.INCOMING);
-          for (          AbstractRelationship rel : rels) {
+          for (          AbstractRelationship rel : finalTargetNode.getRelationships(getRelType(),Direction.INCOMING)) {
             if (rel.getOtherNode(finalTargetNode).getType().equals(sourceType)) {
               deleteRel.execute(rel);
             }
@@ -29,8 +27,7 @@ case OneToMany:
         }
 case ManyToMany:
 {
-        List<AbstractRelationship> rels=finalTargetNode.getRelationships(getRelType(),Direction.BOTH);
-        for (        AbstractRelationship rel : rels) {
+        for (        AbstractRelationship rel : finalTargetNode.getRelationships(getRelType(),Direction.BOTH)) {
           if (rel.getOtherNode(finalTargetNode).equals(sourceNode)) {
             deleteRel.execute(rel);
           }

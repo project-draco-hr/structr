@@ -1,9 +1,14 @@
 {
-  try {
-    return (List<AbstractRelationship>)Services.command(securityContext,NodeRelationshipsCommand.class).execute(this,type,dir);
+  RelationshipFactory factory=new RelationshipFactory(securityContext);
+  Iterable<Relationship> rels=null;
+  if (type != null && dir != null) {
+    rels=dbNode.getRelationships(type,dir);
   }
- catch (  FrameworkException fex) {
-    logger.log(Level.WARNING,"Unable to get relationships",fex);
+ else   if (type != null) {
+    rels=dbNode.getRelationships(type);
   }
-  return null;
+ else   if (dir != null) {
+    rels=dbNode.getRelationships(dir);
+  }
+  return new IterableAdapter<Relationship,AbstractRelationship>(rels,factory);
 }

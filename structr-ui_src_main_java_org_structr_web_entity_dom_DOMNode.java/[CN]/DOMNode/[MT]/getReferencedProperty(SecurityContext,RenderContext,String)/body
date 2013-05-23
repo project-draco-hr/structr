@@ -24,6 +24,12 @@
         _data=(GraphObject)value;
         continue;
       }
+      if (i > 0 && "size".equals(part.toLowerCase())) {
+        Object val=_data.getProperty(EntityContext.getPropertyKeyForJSONName(_data.getClass(),parts[i - 1]));
+        if (val instanceof List) {
+          return ((List)val).size();
+        }
+      }
       if ("link".equals(part.toLowerCase()) && _data instanceof AbstractNode) {
         for (        AbstractRelationship rel : ((AbstractNode)_data).getRelationships(org.structr.web.common.RelType.LINK,Direction.OUTGOING)) {
           _data=rel.getEndNode();
@@ -78,12 +84,15 @@
         }
         continue;
       }
-      if ("result_size".equals(part.toLowerCase())) {
+      if ("search_result_size".equals(part.toLowerCase())) {
         Set<Page> pages=getResultPages(securityContext,(Page)_page);
         if (!pages.isEmpty()) {
           return pages.size();
         }
         return 0;
+      }
+      if ("result_size".equals(part.toLowerCase())) {
+        return IteratorUtils.toArray(renderContext.getListSource().iterator()).length;
       }
     }
   }

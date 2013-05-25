@@ -31,19 +31,7 @@
         sortKey=AbstractNode.name;
       }
     }
-    Integer sortType=null;
-    boolean sortFinalResults=false;
-    if (sortKey != null) {
-      PropertyConverter converter=sortKey.inputConverter(securityContext);
-      if (converter != null) {
-        sortType=converter.getSortType();
-        sortFinalResults=converter.sortFinalResults();
-      }
-    }
-    Result results=Services.command(securityContext,SearchNodeCommand.class).execute(includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDescending,pageSize,page,offsetId,sortType);
-    if (sortFinalResults) {
-      Collections.sort(results.getResults(),new GraphObjectComparator(sortKey,sortDescending ? GraphObjectComparator.DESCENDING : GraphObjectComparator.ASCENDING));
-    }
+    Result results=Services.command(securityContext,SearchNodeCommand.class).execute(includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDescending,pageSize,page,offsetId);
     return results;
   }
  else {

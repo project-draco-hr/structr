@@ -1,8 +1,14 @@
 {
   try {
-    for (    Node node : nodes) {
-      ((GraphObject)node).setProperty(GraphObject.visibleToPublicUsers,true);
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        for (        Node node : nodes) {
+          ((GraphObject)node).setProperty(GraphObject.visibleToPublicUsers,true);
+        }
+        return null;
+      }
     }
+);
   }
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,null,ex);

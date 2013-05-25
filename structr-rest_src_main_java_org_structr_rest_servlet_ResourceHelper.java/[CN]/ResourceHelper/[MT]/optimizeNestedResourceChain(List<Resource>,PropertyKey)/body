@@ -40,12 +40,15 @@
     chain.append(", ");
   }
   if (resourceChain.size() == 1) {
-    Resource finalConstraint=resourceChain.get(0);
+    Resource finalResource=resourceChain.get(0);
     if (view != null) {
-      finalConstraint=finalConstraint.tryCombineWith(view);
+      finalResource=finalResource.tryCombineWith(view);
     }
-    finalConstraint.configureIdProperty(defaultIdProperty);
-    return finalConstraint;
+    if (finalResource == null) {
+      finalResource=resourceChain.get(0);
+    }
+    finalResource.configureIdProperty(defaultIdProperty);
+    return finalResource;
   }
   throw new IllegalPathException();
 }

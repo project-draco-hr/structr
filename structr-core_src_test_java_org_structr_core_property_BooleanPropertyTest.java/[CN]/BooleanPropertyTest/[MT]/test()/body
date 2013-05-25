@@ -1,19 +1,19 @@
 {
-  Property<Boolean> instance=TestFour.booleanProperty;
-  TestFour testEntity=null;
   try {
-    testEntity=createTestNode(TestFour.class);
-  }
- catch (  FrameworkException fex) {
-    fail("Unable to create test node.");
-  }
-  assertNotNull(testEntity);
-  Boolean value=Boolean.TRUE;
-  try {
-    instance.setProperty(securityContext,testEntity,value);
+    final Property<Boolean> instance=TestFour.booleanProperty;
+    final TestFour testEntity=createTestNode(TestFour.class);
+    assertNotNull(testEntity);
+    final Boolean value=Boolean.TRUE;
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        instance.setProperty(securityContext,testEntity,value);
+        return null;
+      }
+    }
+);
+    assertEquals(value,instance.getProperty(securityContext,testEntity,true));
   }
  catch (  FrameworkException fex) {
     fail("Unable to store array");
   }
-  assertEquals(value,instance.getProperty(securityContext,testEntity,true));
 }

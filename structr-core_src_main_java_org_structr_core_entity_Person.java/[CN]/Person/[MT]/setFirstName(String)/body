@@ -1,5 +1,11 @@
 {
-  setProperty(Person.firstName,firstName);
-  String lastName=((getLastName() != null) && !(getLastName().isEmpty())) ? getLastName() : "";
-  setName(lastName + ", " + firstName);
+  Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+    @Override public Object execute() throws FrameworkException {
+      setProperty(Person.firstName,firstName);
+      String lastName=((getLastName() != null) && !(getLastName().isEmpty())) ? getLastName() : "";
+      setName(lastName + ", " + firstName);
+      return null;
+    }
+  }
+);
 }

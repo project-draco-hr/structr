@@ -1,4 +1,10 @@
 {
-  cachedFlags=null;
-  setProperty(ResourceAccess.flags,getFlags() & ~flag);
+  Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+    @Override public Object execute() throws FrameworkException {
+      cachedFlags=null;
+      setProperty(ResourceAccess.flags,getFlags() & ~flag);
+      return null;
+    }
+  }
+);
 }

@@ -1,19 +1,19 @@
 {
-  Property<Integer> instance=TestFour.integerProperty;
-  TestFour testEntity=null;
   try {
-    testEntity=createTestNode(TestFour.class);
-  }
- catch (  FrameworkException fex) {
-    fail("Unable to create test node.");
-  }
-  assertNotNull(testEntity);
-  Integer value=2345;
-  try {
-    instance.setProperty(securityContext,testEntity,value);
+    final Property<Integer> instance=TestFour.integerProperty;
+    final TestFour testEntity=createTestNode(TestFour.class);
+    assertNotNull(testEntity);
+    final Integer value=2345;
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        instance.setProperty(securityContext,testEntity,value);
+        return null;
+      }
+    }
+);
+    assertEquals(value,instance.getProperty(securityContext,testEntity,true));
   }
  catch (  FrameworkException fex) {
     fail("Unable to store array");
   }
-  assertEquals(value,instance.getProperty(securityContext,testEntity,true));
 }

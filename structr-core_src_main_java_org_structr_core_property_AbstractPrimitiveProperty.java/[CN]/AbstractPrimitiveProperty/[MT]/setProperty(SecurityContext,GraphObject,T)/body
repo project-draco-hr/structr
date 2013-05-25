@@ -9,38 +9,37 @@
   }
   final PropertyContainer propertyContainer=obj.getPropertyContainer();
   if (propertyContainer != null) {
-    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-      @Override public Object execute() throws FrameworkException {
-        try {
-          if (!isSystemProperty) {
-            if (obj instanceof AbstractNode) {
-              TransactionCommand.nodeModified((AbstractNode)obj,AbstractPrimitiveProperty.this,propertyContainer.hasProperty(dbName()) ? propertyContainer.getProperty(dbName()) : null);
-            }
- else             if (obj instanceof AbstractRelationship) {
-              TransactionCommand.relationshipModified((AbstractRelationship)obj,AbstractPrimitiveProperty.this,propertyContainer.hasProperty(dbName()) ? propertyContainer.getProperty(dbName()) : null);
-            }
-          }
-          if (convertedValue == null) {
-            propertyContainer.removeProperty(dbName());
-          }
+    if (!TransactionCommand.inTransaction()) {
+      logger.log(Level.SEVERE,"setProperty outside of transaction, dumping stack.");
+      Thread.dumpStack();
+      return;
+    }
+    try {
+      if (!isSystemProperty) {
+        if (obj instanceof AbstractNode) {
+          TransactionCommand.nodeModified((AbstractNode)obj,AbstractPrimitiveProperty.this,propertyContainer.hasProperty(dbName()) ? propertyContainer.getProperty(dbName()) : null);
+        }
+ else         if (obj instanceof AbstractRelationship) {
+          TransactionCommand.relationshipModified((AbstractRelationship)obj,AbstractPrimitiveProperty.this,propertyContainer.hasProperty(dbName()) ? propertyContainer.getProperty(dbName()) : null);
+        }
+      }
+      if (convertedValue == null) {
+        propertyContainer.removeProperty(dbName());
+      }
  else {
-            if (!AbstractPrimitiveProperty.this.equals(AbstractNode.lastModifiedDate)) {
-              propertyContainer.setProperty(dbName(),convertedValue);
-              propertyContainer.setProperty(AbstractNode.lastModifiedDate.dbName(),System.currentTimeMillis());
-            }
+        if (!AbstractPrimitiveProperty.this.equals(AbstractNode.lastModifiedDate)) {
+          propertyContainer.setProperty(dbName(),convertedValue);
+          propertyContainer.setProperty(AbstractNode.lastModifiedDate.dbName(),System.currentTimeMillis());
+        }
  else {
-              logger.log(Level.FINE,"Tried to set lastModifiedDate explicitely (action was denied)");
-            }
-          }
+          logger.log(Level.FINE,"Tried to set lastModifiedDate explicitely (action was denied)");
         }
- catch (        Throwable t) {
-          t.printStackTrace();
-        }
- finally {
-        }
-        return null;
       }
     }
-);
+ catch (    Throwable t) {
+      t.printStackTrace();
+    }
+ finally {
+    }
   }
 }

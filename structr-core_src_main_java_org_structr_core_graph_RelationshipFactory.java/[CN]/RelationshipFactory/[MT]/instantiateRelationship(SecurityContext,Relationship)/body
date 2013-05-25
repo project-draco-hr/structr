@@ -4,15 +4,12 @@
   try {
     if (relClass == null && relationship.hasProperty(AbstractRelationship.combinedType.dbName())) {
       String combinedRelType=(String)relationship.getProperty(AbstractRelationship.combinedType.dbName());
-      relClass=EntityContext.getNamedRelationClass(combinedRelType);
-      if (relClass != null) {
-        newRel=instantiateRelationship(securityContext,combinedRelType);
-      }
+      newRel=instantiateRelationship(securityContext,combinedRelType);
     }
-    if (relClass == null) {
+ else {
       relClass=findNamedRelation(relationship);
     }
-    if (relClass == null && SECURITY.name().equals(relationship.getType().name())) {
+    if (newRel == null && relClass == null && SECURITY.name().equals(relationship.getType().name())) {
       relClass=(Class)SecurityRelationship.class;
     }
     if (relClass != null && newRel == null) {

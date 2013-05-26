@@ -19,6 +19,12 @@
       if (t1 - t0 > THRESHOLD) {
         logger.log(Level.INFO,"Actual StructrTransaction took {0} ms",t1 - t0);
       }
+      try {
+        semaphore.acquire();
+      }
+ catch (      InterruptedException iex) {
+        return null;
+      }
       if (!modificationQueue.doInnerCallbacks(securityContext,errorBuffer,transaction.doValidation)) {
         throw new FrameworkException(422,errorBuffer);
       }
@@ -38,6 +44,7 @@
     long t3=System.currentTimeMillis();
     tx.success();
     tx.finish();
+    semaphore.release();
     long t4=System.currentTimeMillis();
     if (t4 - t3 > THRESHOLD) {
       logger.log(Level.INFO,"Neo tx took {0} ms",t4 - t3);

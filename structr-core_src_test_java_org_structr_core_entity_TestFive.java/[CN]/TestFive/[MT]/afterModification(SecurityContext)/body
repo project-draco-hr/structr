@@ -1,7 +1,13 @@
 {
   try {
-    int value=getIncreasedValue(modifiedInAfterModification);
-    setProperty(modifiedInAfterModification,value);
+    final int value=getIncreasedValue(modifiedInAfterModification);
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        setProperty(modifiedInAfterModification,value);
+        return null;
+      }
+    }
+);
   }
  catch (  Throwable t) {
     t.printStackTrace();

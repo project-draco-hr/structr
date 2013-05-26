@@ -4,16 +4,22 @@
     boolean publicOnly=false;
     String type=TestOne.class.getSimpleName();
     int number=43;
-    List<AbstractNode> nodes=this.createTestNodes(type,number);
-    int offset=10;
-    int i=offset;
-    String name;
+    final List<AbstractNode> nodes=this.createTestNodes(type,number);
+    final int offset=10;
     Collections.shuffle(nodes,new Random(System.nanoTime()));
-    for (    AbstractNode node : nodes) {
-      name=Integer.toString(i);
-      i++;
-      node.setName(name);
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        int i=offset;
+        String name;
+        for (        AbstractNode node : nodes) {
+          name=Integer.toString(i);
+          i++;
+          node.setName(name);
+        }
+        return null;
+      }
     }
+);
     List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
     searchAttributes.add(Search.andType(type));
     Result result=searchNodeCommand.execute(includeDeletedAndHidden,publicOnly,searchAttributes);

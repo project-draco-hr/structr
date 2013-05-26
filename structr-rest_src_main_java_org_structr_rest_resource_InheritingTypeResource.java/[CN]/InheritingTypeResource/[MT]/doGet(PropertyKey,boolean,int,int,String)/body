@@ -1,6 +1,5 @@
 {
   final List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
-  final AbstractNode topNode=null;
   final boolean includeDeletedAndHidden=false;
   final boolean publicOnly=false;
   if (rawType != null) {
@@ -19,14 +18,7 @@
         sortKey=AbstractNode.name;
       }
     }
-    Integer sortType=null;
-    if (sortKey != null) {
-      final PropertyConverter converter=sortKey.inputConverter(securityContext);
-      if (converter != null) {
-        sortType=converter.getSortType();
-      }
-    }
-    final Result results=Services.command(securityContext,SearchNodeCommand.class).execute(includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDescending,pageSize,page,offsetId,sortType);
+    final Result results=Services.command(securityContext,SearchNodeCommand.class).execute(includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDescending,pageSize,page,offsetId);
     return results;
   }
  else {

@@ -21,7 +21,14 @@
   assertEquals("modifiedInBeforeModification should have a value of 0: ",zero,entity.getProperty(TestFive.modifiedInBeforeModification));
   assertEquals("modifiedInAfterModification should have a value of 0:  ",zero,entity.getProperty(TestFive.modifiedInAfterModification));
   try {
-    entity.setProperty(TestFive.intProperty,123);
+    final TestFive finalEntity=entity;
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        finalEntity.setProperty(TestFive.intProperty,123);
+        return null;
+      }
+    }
+);
   }
  catch (  Throwable t) {
     t.printStackTrace();

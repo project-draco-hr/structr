@@ -26,14 +26,26 @@
     Element html=doc.createElement("html");
     Element body=doc.createElement("body");
     Element b=doc.createElement("b");
-    Element p1=doc.createElement("p");
-    ((DOMElement)p1).setProperty(DOMElement.restQuery,"users?sort=name");
-    ((DOMElement)p1).setProperty(DOMElement.dataKey,"user");
+    final Element p1=doc.createElement("p");
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        ((DOMElement)p1).setProperty(DOMElement.restQuery,"users?sort=name");
+        ((DOMElement)p1).setProperty(DOMElement.dataKey,"user");
+        return null;
+      }
+    }
+);
     p1.appendChild(doc.createTextNode("${user.name}"));
     Element div=doc.createElement("div");
-    Element p2=doc.createElement("p");
-    ((DOMElement)p2).setProperty(DOMElement.restQuery,"files?sort=name");
-    ((DOMElement)p2).setProperty(DOMElement.dataKey,"file");
+    final Element p2=doc.createElement("p");
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        ((DOMElement)p2).setProperty(DOMElement.restQuery,"files?sort=name");
+        ((DOMElement)p2).setProperty(DOMElement.dataKey,"file");
+        return null;
+      }
+    }
+);
     p2.appendChild(doc.createTextNode("${file.name}"));
     doc.appendChild(html);
     html.appendChild(body);

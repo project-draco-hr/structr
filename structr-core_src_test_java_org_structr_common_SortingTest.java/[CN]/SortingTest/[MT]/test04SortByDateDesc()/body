@@ -4,16 +4,27 @@
     boolean publicOnly=false;
     String type=TestOne.class.getSimpleName();
     int number=131;
-    List<AbstractNode> nodes=this.createTestNodes(type,number);
-    String name;
-    int offset=10;
-    int i=offset;
+    final List<AbstractNode> nodes=this.createTestNodes(type,number);
+    final int offset=10;
     Collections.shuffle(nodes,new Random(System.nanoTime()));
-    for (    AbstractNode node : nodes) {
-      name=Integer.toString(i);
-      i++;
-      node.setName(name);
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        int i=offset;
+        String name;
+        for (        AbstractNode node : nodes) {
+          name=Integer.toString(i);
+          i++;
+          node.setName(name);
+          try {
+            Thread.sleep(2);
+          }
+ catch (          Throwable t) {
+          }
+        }
+        return null;
+      }
     }
+);
     List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
     searchAttributes.add(Search.andType(type));
     Result result=searchNodeCommand.execute(includeDeletedAndHidden,publicOnly,searchAttributes);
@@ -22,7 +33,7 @@
     boolean sortDesc=true;
     int pageSize=10;
     int page=1;
-    result=searchNodeCommand.execute(includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDesc,pageSize,page,null,SortField.LONG);
+    result=searchNodeCommand.execute(includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDesc,pageSize,page,null);
     logger.log(Level.INFO,"Raw result size: {0}, expected: {1}",new Object[]{result.getRawResultCount(),number});
     assertTrue(result.getRawResultCount() == number);
     logger.log(Level.INFO,"Result size: {0}, expected: {1}",new Object[]{result.size(),pageSize});

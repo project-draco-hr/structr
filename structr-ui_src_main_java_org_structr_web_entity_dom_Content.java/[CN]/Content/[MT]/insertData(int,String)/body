@@ -1,14 +1,20 @@
 {
   checkWriteAccess();
-  String text=getProperty(content);
-  String leftPart=text.substring(0,offset);
-  String rightPart=text.substring(offset);
-  StringBuilder buf=new StringBuilder(text.length() + data.length() + 1);
-  buf.append(leftPart);
-  buf.append(data);
-  buf.append(rightPart);
   try {
-    setProperty(content,buf.toString());
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        String text=getProperty(content);
+        String leftPart=text.substring(0,offset);
+        String rightPart=text.substring(offset);
+        StringBuilder buf=new StringBuilder(text.length() + data.length() + 1);
+        buf.append(leftPart);
+        buf.append(data);
+        buf.append(rightPart);
+        setProperty(content,buf.toString());
+        return null;
+      }
+    }
+);
   }
  catch (  FrameworkException fex) {
     throw new DOMException(DOMException.INVALID_STATE_ERR,fex.toString());

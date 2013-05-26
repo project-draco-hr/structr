@@ -1,5 +1,11 @@
 {
-  List<User> _users=getProperty(users);
-  _users.add(user);
-  setProperty(users,_users);
+  Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+    @Override public Object execute() throws FrameworkException {
+      List<User> _users=getProperty(users);
+      _users.add(user);
+      setProperty(users,_users);
+      return null;
+    }
+  }
+);
 }

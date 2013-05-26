@@ -1,7 +1,13 @@
 {
   try {
-    setProperty(checksum,FileHelper.getChecksum(this));
-    setProperty(size,FileHelper.getSize(this));
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        setProperty(checksum,FileHelper.getChecksum(File.this));
+        setProperty(size,FileHelper.getSize(File.this));
+        return null;
+      }
+    }
+);
   }
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,"Could not set checksum and size",ex);

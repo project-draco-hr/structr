@@ -1,11 +1,17 @@
 {
-  HtmlProperty htmlProperty=findOrCreateAttributeKey(name);
-  if (htmlProperty != null) {
-    try {
-      htmlProperty.setProperty(securityContext,this,value);
+  try {
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        HtmlProperty htmlProperty=findOrCreateAttributeKey(name);
+        if (htmlProperty != null) {
+          htmlProperty.setProperty(securityContext,DOMElement.this,value);
+        }
+        return null;
+      }
     }
- catch (    FrameworkException fex) {
-      throw new DOMException(DOMException.INVALID_STATE_ERR,fex.getMessage());
-    }
+);
+  }
+ catch (  FrameworkException fex) {
+    throw new DOMException(DOMException.INVALID_STATE_ERR,fex.getMessage());
   }
 }

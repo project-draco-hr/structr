@@ -48,32 +48,38 @@
     doc.appendChild(html);
     Element body=doc.createElement("body");
     html.appendChild(body);
-    Element div=doc.createElement("div");
+    final Element div=doc.createElement("div");
     body.appendChild(div);
     div.appendChild(doc.createTextNode("${root.name}"));
-    Element ul1=doc.createElement("ul");
+    final Element ul1=doc.createElement("ul");
     div.appendChild(ul1);
-    Element li1=doc.createElement("li");
+    final Element li1=doc.createElement("li");
     ul1.appendChild(li1);
     li1.appendChild(doc.createTextNode("${folders.name}"));
-    Element li2=doc.createElement("li");
+    final Element li2=doc.createElement("li");
     ul1.appendChild(li2);
     li2.appendChild(doc.createTextNode("${files.name}"));
-    Element ul2=doc.createElement("ul");
+    final Element ul2=doc.createElement("ul");
     li1.appendChild(ul2);
-    Element li3=doc.createElement("li");
+    final Element li3=doc.createElement("li");
     ul2.appendChild(li3);
     li3.appendChild(doc.createTextNode("${files.name}"));
-    Element li4=doc.createElement("li");
+    final Element li4=doc.createElement("li");
     ul2.appendChild(li4);
     li4.appendChild(doc.createTextNode("${folders.name}"));
     PropertyMap properties=new PropertyMap();
     Services.command(securityContext,CreateRelationshipCommand.class).execute((DOMElement)div,rootNode,RelType.RENDER_NODE,properties,false);
-    ((DOMElement)div).setProperty(DOMElement.dataKey,"root");
-    ((DOMElement)li1).setProperty(DOMElement.dataKey,"folders");
-    ((DOMElement)li2).setProperty(DOMElement.dataKey,"files");
-    ((DOMElement)li3).setProperty(DOMElement.dataKey,"files");
-    ((DOMElement)li4).setProperty(DOMElement.dataKey,"folders");
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        ((DOMElement)div).setProperty(DOMElement.dataKey,"root");
+        ((DOMElement)li1).setProperty(DOMElement.dataKey,"folders");
+        ((DOMElement)li2).setProperty(DOMElement.dataKey,"files");
+        ((DOMElement)li3).setProperty(DOMElement.dataKey,"files");
+        ((DOMElement)li4).setProperty(DOMElement.dataKey,"folders");
+        return null;
+      }
+    }
+);
     RenderContext ctx=new RenderContext(null,null,false,Locale.GERMAN);
     doc.render(securityContext,ctx,0);
     System.out.println(ctx.getBuffer().toString());

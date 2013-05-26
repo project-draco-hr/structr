@@ -1,17 +1,29 @@
 {
   try {
-    AbstractRelationship rel=((List<AbstractRelationship>)createTestRelationships(RelType.IS_AT,1)).get(0);
-    PropertyKey key1=new StringProperty("jghsdkhgshdhgsdjkfgh");
-    String val1="54354354546806849870";
-    rel.setProperty(key1,val1);
+    final AbstractRelationship rel=((List<AbstractRelationship>)createTestRelationships(RelType.IS_AT,1)).get(0);
+    final PropertyKey key1=new StringProperty("jghsdkhgshdhgsdjkfgh");
+    final String val1="54354354546806849870";
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        rel.setProperty(key1,val1);
+        return null;
+      }
+    }
+);
     assertTrue("Expected relationship to have a value for key '" + key1.dbName() + "'",rel.getRelationship().hasProperty(key1.dbName()));
     assertEquals(val1,rel.getRelationship().getProperty(key1.dbName()));
     Object vrfy1=rel.getProperty(key1);
     assertEquals(val1,vrfy1);
-    val1="??ljkh??oh??8osdfho??dhi";
-    rel.setProperty(key1,val1);
+    final String val2="??ljkh??oh??8osdfho??dhi";
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        rel.setProperty(key1,val2);
+        return null;
+      }
+    }
+);
     Object vrfy2=rel.getProperty(key1);
-    assertEquals(val1,vrfy2);
+    assertEquals(val2,vrfy2);
   }
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,ex.toString());

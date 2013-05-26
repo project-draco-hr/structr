@@ -21,7 +21,10 @@ case 3:
   final PropertyKey key=(PropertyKey)parameters[1];
   final NodeIndex idx=(NodeIndex)parameters[2];
   final Index<Node> index=getIndexFromArguments(idx,arguments);
-  final IndexHits<Node> indexHits=index.query(key.dbName(),"\"" + userNickName + "\"");
+  IndexHits<Node> indexHits=null;
+synchronized (index) {
+    indexHits=index.query(key.dbName(),"\"" + userNickName + "\"");
+  }
   try {
     for (    final Node n : indexHits) {
       final Object u=nodeFactory.instantiateNode(n);

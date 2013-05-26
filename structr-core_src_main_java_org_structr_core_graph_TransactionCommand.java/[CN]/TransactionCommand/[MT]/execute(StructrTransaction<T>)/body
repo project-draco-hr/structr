@@ -4,7 +4,6 @@
   boolean topLevel=(tx == null);
   FrameworkException error=null;
   T result=null;
-  long t0=System.currentTimeMillis();
   if (topLevel) {
     this.modificationQueue=new ModificationQueue();
     this.errorBuffer=new ErrorBuffer();
@@ -15,10 +14,6 @@
   try {
     result=transaction.execute();
     if (topLevel) {
-      long t1=System.currentTimeMillis();
-      if (t1 - t0 > THRESHOLD) {
-        logger.log(Level.INFO,"Actual StructrTransaction took {0} ms",t1 - t0);
-      }
       try {
         semaphore.acquire();
       }
@@ -27,10 +22,6 @@
       }
       if (!modificationQueue.doInnerCallbacks(securityContext,errorBuffer,transaction.doValidation)) {
         throw new FrameworkException(422,errorBuffer);
-      }
-      long t2=System.currentTimeMillis();
-      if (t2 - t1 > THRESHOLD) {
-        logger.log(Level.INFO,"Inner callbacks took {0} ms",t2 - t1);
       }
     }
   }
@@ -41,26 +32,14 @@
     }
   }
   if (topLevel) {
-    long t3=System.currentTimeMillis();
     tx.success();
     tx.finish();
     semaphore.release();
-    long t4=System.currentTimeMillis();
-    if (t4 - t3 > THRESHOLD) {
-      logger.log(Level.INFO,"Neo tx took {0} ms",t4 - t3);
-    }
     transactions.remove();
     if (error == null) {
       modificationQueue.doOuterCallbacksAndCleanup(securityContext);
     }
     currentCommand.remove();
-    long t5=System.currentTimeMillis();
-    if (t5 - t4 > THRESHOLD) {
-      logger.log(Level.INFO,"Outer callbacks took {0} ms",t5 - t4);
-    }
-    if (t5 - t0 > THRESHOLD) {
-      logger.log(Level.INFO,"Transaction took {0} ms",t5 - t0);
-    }
   }
   if (error != null) {
     throw error;

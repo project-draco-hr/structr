@@ -13,16 +13,22 @@
         logger.log(Level.FINEST,"Decoded data: {0}",data);
       }
     }
-    File file=(File)getNode(uuid);
+    final File file=(File)getNode(uuid);
     if (!getWebSocket().getSecurityContext().isAllowed(file,Permission.write)) {
       logger.log(Level.WARNING,"No write permission for {0} on {1}",new Object[]{getWebSocket().getCurrentUser().toString(),file.toString()});
       getWebSocket().send(MessageBuilder.status().message("No write permission").code(400).build(),true);
       return;
     }
-    long size=(long)(sequenceNumber * chunkSize) + data.length;
-    file.setProperty(File.size,size);
+    final long size=(long)(sequenceNumber * chunkSize) + data.length;
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        file.setProperty(File.size,size);
+        file.setChecksum(0L);
+        return null;
+      }
+    }
+);
     getWebSocket().handleFileChunk(uuid,sequenceNumber,chunkSize,data);
-    file.setChecksum(0L);
     getWebSocket().send(MessageBuilder.status().code(200).message(size + " bytes of " + file.getName()+ " successfully saved.").build(),true);
   }
  catch (  Throwable t) {

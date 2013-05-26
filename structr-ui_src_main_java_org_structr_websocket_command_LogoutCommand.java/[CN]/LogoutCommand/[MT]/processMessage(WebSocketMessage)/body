@@ -1,8 +1,14 @@
 {
-  Principal user=getWebSocket().getCurrentUser();
+  final Principal user=getWebSocket().getCurrentUser();
   if (user != null) {
     try {
-      user.setProperty(Principal.sessionId,null);
+      Services.command(getWebSocket().getSecurityContext(),TransactionCommand.class).execute(new StructrTransaction(){
+        @Override public Object execute() throws FrameworkException {
+          user.setProperty(Principal.sessionId,null);
+          return null;
+        }
+      }
+);
     }
  catch (    FrameworkException fex) {
       fex.printStackTrace();

@@ -1,54 +1,63 @@
 {
-  Map<String,Object> nodeData=webSocketData.getNodeData();
-  String parentId=(String)nodeData.get("parentId");
+  final Map<String,Object> nodeData=webSocketData.getNodeData();
+  final String parentId=(String)nodeData.get("parentId");
+  final String pageId=webSocketData.getPageId();
   nodeData.remove("parentId");
-  String pageId=webSocketData.getPageId();
   if (pageId != null) {
     if (parentId == null) {
       getWebSocket().send(MessageBuilder.status().code(422).message("Cannot add node without parentId").build(),true);
       return;
     }
-    DOMNode parentNode=getDOMNode(parentId);
+    final DOMNode parentNode=getDOMNode(parentId);
     if (parentNode == null) {
       getWebSocket().send(MessageBuilder.status().code(404).message("Parent node not found").build(),true);
       return;
     }
-    Document document=getPage(pageId);
+    final Document document=getPage(pageId);
     if (document != null) {
-      String tagName=(String)nodeData.get("tagName");
+      final String tagName=(String)nodeData.get("tagName");
       nodeData.remove("tagName");
-      DOMNode newNode=null;
       try {
-        if (tagName != null && !tagName.isEmpty()) {
-          newNode=(DOMNode)document.createElement(tagName);
-        }
+        Services.command(getWebSocket().getSecurityContext(),TransactionCommand.class).execute(new StructrTransaction(){
+          @Override public Object execute() throws FrameworkException {
+            DOMNode newNode=null;
+            if (tagName != null && !tagName.isEmpty()) {
+              newNode=(DOMNode)document.createElement(tagName);
+            }
  else {
-          newNode=(DOMNode)document.createTextNode("#text");
-        }
-        if (newNode != null) {
-          parentNode.appendChild(newNode);
-          for (          Entry entry : nodeData.entrySet()) {
-            String key=(String)entry.getKey();
-            Object val=entry.getValue();
-            PropertyKey propertyKey=EntityContext.getPropertyKeyForDatabaseName(newNode.getClass(),key);
-            if (propertyKey != null) {
-              try {
-                Object convertedValue=val;
-                PropertyConverter inputConverter=propertyKey.inputConverter(SecurityContext.getSuperUserInstance());
-                if (inputConverter != null) {
-                  convertedValue=inputConverter.convert(val);
+              newNode=(DOMNode)document.createTextNode("#text");
+            }
+            if (newNode != null) {
+              parentNode.appendChild(newNode);
+              for (              Entry entry : nodeData.entrySet()) {
+                String key=(String)entry.getKey();
+                Object val=entry.getValue();
+                PropertyKey propertyKey=EntityContext.getPropertyKeyForDatabaseName(newNode.getClass(),key);
+                if (propertyKey != null) {
+                  try {
+                    Object convertedValue=val;
+                    PropertyConverter inputConverter=propertyKey.inputConverter(SecurityContext.getSuperUserInstance());
+                    if (inputConverter != null) {
+                      convertedValue=inputConverter.convert(val);
+                    }
+                    newNode.setProperty(propertyKey,convertedValue);
+                  }
+ catch (                  FrameworkException fex) {
+                    logger.log(Level.WARNING,"Unable to set node property {0} of node {1} to {2}: {3}",new Object[]{propertyKey,newNode.getUuid(),val,fex.getMessage()});
+                  }
                 }
-                newNode.setProperty(propertyKey,convertedValue);
-              }
- catch (              FrameworkException fex) {
-                logger.log(Level.WARNING,"Unable to set node property {0} of node {1} to {2}: {3}",new Object[]{propertyKey,newNode.getUuid(),val,fex.getMessage()});
               }
             }
+            return null;
           }
         }
+);
       }
  catch (      DOMException dex) {
         getWebSocket().send(MessageBuilder.status().code(422).message(dex.getMessage()).build(),true);
+      }
+catch (      FrameworkException ex) {
+        Logger.getLogger(CreateAndAppendDOMNodeCommand.class.getName()).log(Level.SEVERE,null,ex);
       }
     }
  else {

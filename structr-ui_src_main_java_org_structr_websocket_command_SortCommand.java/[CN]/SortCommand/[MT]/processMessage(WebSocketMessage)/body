@@ -1,24 +1,35 @@
 {
-  String pageId=webSocketData.getId();
-  AbstractNode node=getNode(pageId);
-  Map<String,Object> nodeData=webSocketData.getNodeData();
+  final Map<String,Object> nodeData=webSocketData.getNodeData();
+  final String pageId=webSocketData.getId();
+  final AbstractNode node=getNode(pageId);
   if (node != null) {
-    for (    String id : nodeData.keySet()) {
-      AbstractNode nodeToSort=getNode(id);
-      Long pos=Long.parseLong((String)nodeData.get(id));
-      Iterable<AbstractRelationship> rels=nodeToSort.getRelationships(RelType.CONTAINS,Direction.INCOMING);
-      PropertyKey<Long> pageIdProperty=new LongProperty(pageId);
-      for (      AbstractRelationship rel : rels) {
-        try {
-          Long oldPos=rel.getProperty(pageIdProperty);
-          if ((oldPos != null) && !(oldPos.equals(pos))) {
-            rel.setProperty(pageIdProperty,pos);
+    try {
+      Services.command(getWebSocket().getSecurityContext(),TransactionCommand.class).execute(new StructrTransaction(){
+        @Override public Object execute() throws FrameworkException {
+          for (          String id : nodeData.keySet()) {
+            AbstractNode nodeToSort=getNode(id);
+            Long pos=Long.parseLong((String)nodeData.get(id));
+            Iterable<AbstractRelationship> rels=nodeToSort.getRelationships(RelType.CONTAINS,Direction.INCOMING);
+            PropertyKey<Long> pageIdProperty=new LongProperty(pageId);
+            for (            AbstractRelationship rel : rels) {
+              try {
+                Long oldPos=rel.getProperty(pageIdProperty);
+                if ((oldPos != null) && !(oldPos.equals(pos))) {
+                  rel.setProperty(pageIdProperty,pos);
+                }
+              }
+ catch (              FrameworkException fex) {
+                fex.printStackTrace();
+              }
+            }
           }
-        }
- catch (        FrameworkException fex) {
-          fex.printStackTrace();
+          return null;
         }
       }
+);
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"Unable to sort children",t);
     }
   }
  else {

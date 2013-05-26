@@ -34,8 +34,15 @@
           user=RegistrationResource.createUser(securityContext,email);
         }
         if (user != null) {
+          final Principal principal=user;
           try {
-            user.setProperty(Principal.sessionId,HttpAuthenticator.getSessionId(request));
+            Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+              @Override public Object execute() throws FrameworkException {
+                principal.setProperty(Principal.sessionId,HttpAuthenticator.getSessionId(request));
+                return null;
+              }
+            }
+);
             securityContext.setUser(user);
             HtmlServlet.setNoCacheHeaders(response);
             try {

@@ -3,9 +3,16 @@
   if (user != null) {
     HttpSession session=request.getSession(false);
     if (session != null) {
-      String sessionIdFromRequest=session.getId();
+      final String sessionIdFromRequest=session.getId();
+      final Principal principal=useR;
       try {
-        user.setProperty(Principal.sessionId,sessionIdFromRequest);
+        Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+          @Override public Object execute() throws FrameworkException {
+            principal.setProperty(Principal.sessionId,sessionIdFromRequest);
+            return null;
+          }
+        }
+);
       }
  catch (      Exception ex) {
         logger.log(Level.SEVERE,null,ex);

@@ -2,7 +2,14 @@
   try {
     Principal user=securityContext.getUser(false);
     if (user != null) {
-      user.setProperty(Principal.sessionId,null);
+      final Principal principal=user;
+      Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+        @Override public Object execute() throws FrameworkException {
+          principal.setProperty(Principal.sessionId,null);
+          return null;
+        }
+      }
+);
     }
     request.getSession(false).invalidate();
     request.logout();

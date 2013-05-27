@@ -3,6 +3,7 @@
   Transaction tx=transactions.get();
   boolean topLevel=(tx == null);
   FrameworkException error=null;
+  Set<String> types=null;
   T result=null;
   if (topLevel) {
     this.modificationQueue=new ModificationQueue();
@@ -14,13 +15,17 @@
   try {
     result=transaction.execute();
     if (topLevel) {
+      if (!modificationQueue.doInnerCallbacks(securityContext,errorBuffer)) {
+        throw new FrameworkException(422,errorBuffer);
+      }
+      types=modificationQueue.getTypes();
       try {
-        semaphore.acquire();
+        semaphore.acquire(types);
       }
  catch (      InterruptedException iex) {
         return null;
       }
-      if (!modificationQueue.doInnerCallbacks(securityContext,errorBuffer,transaction.doValidation)) {
+      if (!modificationQueue.doValidation(securityContext,errorBuffer,transaction.doValidation)) {
         throw new FrameworkException(422,errorBuffer);
       }
     }
@@ -34,7 +39,7 @@
   if (topLevel) {
     tx.success();
     tx.finish();
-    semaphore.release();
+    semaphore.release(types);
     transactions.remove();
     if (error == null) {
       modificationQueue.doOuterCallbacksAndCleanup(securityContext);

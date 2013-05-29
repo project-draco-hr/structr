@@ -2,13 +2,15 @@
   return (T)Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
     @Override public Object execute() throws FrameworkException {
       if (checkDuplicates) {
+        RelationshipFactory relationshipFactory=new RelationshipFactory(securityContext);
         int contentHashCode=properties != null ? properties.contentHashCode(null,false) : -1;
-        for (        AbstractRelationship rel : toNode.getIncomingRelationships(relType)) {
-          Relationship dbRelationship=rel.getRelationship();
+        Node dbToNode=toNode.getNode();
+        for (        Relationship dbRelationship : dbToNode.getRelationships(relType,Direction.INCOMING)) {
           Node dbRelStartNode=dbRelationship.getStartNode();
           Node dbFromNode=fromNode.getNode();
           if (dbRelStartNode.getId() == dbFromNode.getId()) {
             if (properties != null) {
+              AbstractRelationship rel=relationshipFactory.instantiateRelationship(securityContext,dbRelationship);
               if (contentHashCode == rel.getProperties().contentHashCode(properties.keySet(),false)) {
                 return null;
               }

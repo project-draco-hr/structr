@@ -1,21 +1,20 @@
 {
   if (obj instanceof AbstractNode) {
+    Set<T> toBeDeleted=new LinkedHashSet<T>(getProperty(securityContext,obj,true));
+    Set<T> toBeCreated=new LinkedHashSet<T>();
     AbstractNode sourceNode=(AbstractNode)obj;
-    if (collection != null && !collection.isEmpty()) {
-      for (      GraphObject targetNode : collection) {
-        if (targetNode != null) {
-          createRelationship(securityContext,sourceNode,(AbstractNode)targetNode);
-        }
-      }
+    if (collection != null) {
+      toBeCreated.addAll(collection);
     }
- else {
-      List<T> existingCollection=getProperty(securityContext,obj,true);
-      if (existingCollection == null || (existingCollection != null && existingCollection.isEmpty())) {
-        return;
-      }
-      for (      GraphObject targetNode : existingCollection) {
-        removeRelationship(securityContext,sourceNode,(AbstractNode)targetNode);
-      }
+    Set<T> intersection=new LinkedHashSet<T>(toBeCreated);
+    intersection.retainAll(toBeDeleted);
+    toBeCreated.removeAll(intersection);
+    toBeDeleted.removeAll(intersection);
+    for (    T targetNode : toBeDeleted) {
+      removeRelationship(securityContext,sourceNode,(AbstractNode)targetNode);
+    }
+    for (    T targetNode : toBeCreated) {
+      createRelationship(securityContext,sourceNode,(AbstractNode)targetNode);
     }
   }
  else {

@@ -3,7 +3,7 @@
   Transaction tx=transactions.get();
   boolean topLevel=(tx == null);
   FrameworkException error=null;
-  Set<String> types=null;
+  Set<String> synchronizationKeys=null;
   T result=null;
   if (topLevel) {
     this.modificationQueue=new ModificationQueue();
@@ -18,9 +18,9 @@
       if (!modificationQueue.doInnerCallbacks(securityContext,errorBuffer)) {
         throw new FrameworkException(422,errorBuffer);
       }
-      types=modificationQueue.getTypes();
+      synchronizationKeys=modificationQueue.getSynchronizationKeys();
       try {
-        semaphore.acquire(types);
+        semaphore.acquire(synchronizationKeys);
       }
  catch (      InterruptedException iex) {
         return null;
@@ -39,7 +39,7 @@
   if (topLevel) {
     tx.success();
     tx.finish();
-    semaphore.release(types);
+    semaphore.release(synchronizationKeys);
     transactions.remove();
     if (error == null) {
       modificationQueue.doOuterCallbacksAndCleanup(securityContext);

@@ -16,7 +16,9 @@
     result=transaction.execute();
     if (topLevel) {
       if (!modificationQueue.doInnerCallbacks(securityContext,errorBuffer)) {
-        throw new FrameworkException(422,errorBuffer);
+        if (transaction.doValidation) {
+          throw new FrameworkException(422,errorBuffer);
+        }
       }
       synchronizationKeys=modificationQueue.getSynchronizationKeys();
       try {

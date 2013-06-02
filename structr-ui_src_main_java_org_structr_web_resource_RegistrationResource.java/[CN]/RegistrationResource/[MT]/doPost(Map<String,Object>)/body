@@ -10,7 +10,14 @@
     Result result=Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class).execute(Search.andExactType(User.class.getSimpleName()),Search.andExactProperty(User.email,emailString));
     if (!result.isEmpty()) {
       user=(User)result.get(0);
-      user.setProperty(User.confirmationKey,confKey);
+      final User finalUser=user;
+      Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+        @Override public Object execute() throws FrameworkException {
+          finalUser.setProperty(User.confirmationKey,confKey);
+          return null;
+        }
+      }
+);
     }
  else {
       user=createUser(securityContext,emailString);

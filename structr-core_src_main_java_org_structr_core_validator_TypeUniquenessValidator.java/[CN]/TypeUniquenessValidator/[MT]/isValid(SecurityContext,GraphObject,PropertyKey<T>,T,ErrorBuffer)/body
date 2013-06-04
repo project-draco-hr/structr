@@ -3,11 +3,14 @@
     errorBuffer.add(object.getType(),new EmptyPropertyToken(key));
     return false;
   }
+  if (!type.isAssignableFrom(object.getClass())) {
+    return true;
+  }
   if (key != null) {
     List<SearchAttribute> attributes=new LinkedList<SearchAttribute>();
     boolean nodeExists=false;
     String id=null;
-    attributes.add(Search.andExactType(type));
+    attributes.add(Search.andExactType(type.getSimpleName()));
     attributes.add(Search.andExactProperty(key,value));
     Result resultList=null;
     try {

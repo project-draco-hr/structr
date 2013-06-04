@@ -2,13 +2,16 @@
   if (key == null) {
     return false;
   }
+  if (!type.isAssignableFrom(object.getClass())) {
+    return true;
+  }
   if (StringUtils.isBlank(value)) {
     errorBuffer.add(object.getType(),new EmptyPropertyToken(key));
     return false;
   }
   List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
   attrs.add(Search.andExactName(value));
-  attrs.add(Search.andType(type));
+  attrs.add(Search.andType(type.getSimpleName()));
   try {
     Result nodes=Services.command(securityContext,SearchNodeCommand.class).execute(attrs);
     if (nodes != null && !nodes.isEmpty()) {

@@ -44,19 +44,21 @@
  else {
       newNode=(org.structr.web.entity.dom.DOMElement)page.createElement(tag);
     }
-    if (StringUtils.isNotBlank(id)) {
-      newNode.setProperty(DOMElement._id,id);
-    }
-    if (StringUtils.isNotBlank(classString.toString())) {
-      newNode.setProperty(DOMElement._class,StringUtils.trim(classString.toString()));
-    }
-    for (    Attribute nodeAttr : node.attributes()) {
-      String key=nodeAttr.getKey();
-      if (!key.equals("text")) {
-        newNode.setProperty(new StringProperty(PropertyView.Html.concat(nodeAttr.getKey())),nodeAttr.getValue());
+    if (newNode != null) {
+      if (StringUtils.isNotBlank(id)) {
+        newNode.setProperty(DOMElement._id,id);
       }
+      if (StringUtils.isNotBlank(classString.toString())) {
+        newNode.setProperty(DOMElement._class,StringUtils.trim(classString.toString()));
+      }
+      for (      Attribute nodeAttr : node.attributes()) {
+        String key=nodeAttr.getKey();
+        if (!key.equals("text")) {
+          newNode.setProperty(new StringProperty(PropertyView.Html.concat(nodeAttr.getKey())),nodeAttr.getValue());
+        }
+      }
+      parent.appendChild(newNode);
+      createChildNodes(node,newNode,page,baseUrl);
     }
-    parent.appendChild(newNode);
-    createChildNodes(node,newNode,page,baseUrl);
   }
 }

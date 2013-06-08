@@ -47,4 +47,10 @@
       logger.log(Level.WARNING,"Unable to instantiate {0}: {1}",new Object[]{type,t.getMessage()});
     }
   }
+  Set<Method> typeMethods=exportedMethodMap.get(type);
+  if (typeMethods == null) {
+    typeMethods=new LinkedHashSet<Method>();
+    exportedMethodMap.put(type,typeMethods);
+  }
+  typeMethods.addAll(getAnnotatedMethods(type,Export.class));
 }

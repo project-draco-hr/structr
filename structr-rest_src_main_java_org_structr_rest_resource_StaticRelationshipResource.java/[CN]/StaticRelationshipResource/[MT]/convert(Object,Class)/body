@@ -1,0 +1,40 @@
+{
+  Object convertedObject=null;
+  if (type.equals(String.class)) {
+    convertedObject=value.toString();
+  }
+ else   if (value instanceof Number) {
+    Number number=(Number)value;
+    if (type.equals(Integer.class) || type.equals(Integer.TYPE)) {
+      return number.intValue();
+    }
+ else     if (type.equals(Long.class) || type.equals(Long.TYPE)) {
+      return number.longValue();
+    }
+ else     if (type.equals(Double.class) || type.equals(Double.TYPE)) {
+      return number.doubleValue();
+    }
+ else     if (type.equals(Float.class) || type.equals(Float.TYPE)) {
+      return number.floatValue();
+    }
+ else     if (type.equals(Short.class) || type.equals(Integer.TYPE)) {
+      return number.shortValue();
+    }
+ else     if (type.equals(Byte.class) || type.equals(Byte.TYPE)) {
+      return number.byteValue();
+    }
+  }
+  try {
+    Method valueOf=type.getMethod("valueOf",String.class);
+    if (valueOf != null) {
+      convertedObject=valueOf.invoke(null,value.toString());
+    }
+ else {
+      logger.log(Level.WARNING,"Unable to find static valueOf method for type {0}",type);
+    }
+  }
+ catch (  Throwable t) {
+    logger.log(Level.WARNING,"Unable to deserialize value {0} of type {1}, Class has no static valueOf method.",new Object[]{value,type});
+  }
+  return convertedObject;
+}

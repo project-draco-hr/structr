@@ -13,7 +13,10 @@
       Element title=page.createElement("title");
       Element h1=page.createElement("h1");
       Element div=page.createElement("div");
-      makeNodesPublic(page,html,head,body,title,h1,div);
+      Text titleText=page.createTextNode(pageTitle);
+      Text heading=page.createTextNode(pageTitle);
+      Text bodyContent=page.createTextNode(bodyText);
+      makeNodesPublic(page,html,head,body,title,h1,div,titleText,heading,bodyContent);
       try {
         page.appendChild(html);
         html.appendChild(head);
@@ -23,9 +26,9 @@
         h1.setAttribute("class",h1ClassAttr);
         body.appendChild(div);
         div.setAttribute("class",divClassAttr);
-        title.appendChild(page.createTextNode(pageTitle));
-        h1.appendChild(page.createTextNode(pageTitle));
-        div.appendChild(page.createTextNode(bodyText));
+        title.appendChild(titleText);
+        h1.appendChild(heading);
+        div.appendChild(bodyContent);
       }
  catch (      DOMException dex) {
         throw new FrameworkException(422,dex.getMessage());

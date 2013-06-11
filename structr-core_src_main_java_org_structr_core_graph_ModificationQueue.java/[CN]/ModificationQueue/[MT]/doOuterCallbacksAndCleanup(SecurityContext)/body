@@ -1,8 +1,13 @@
 {
+  long t0=System.currentTimeMillis();
   for (  GraphObjectModificationState state : modifications.values()) {
     if (!state.isDeleted()) {
       state.doOuterCallback(securityContext);
     }
+  }
+  long t=System.currentTimeMillis() - t0;
+  if (t > 100) {
+    logger.log(Level.INFO,"{0} ms",t);
   }
   alreadyPropagated.clear();
   modifications.clear();

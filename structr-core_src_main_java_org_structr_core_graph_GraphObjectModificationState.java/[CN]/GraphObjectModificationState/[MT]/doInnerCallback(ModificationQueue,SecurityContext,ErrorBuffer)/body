@@ -1,9 +1,11 @@
 {
   boolean valid=true;
   if ((status & STATE_PROPAGATED_MODIFICATION) == STATE_PROPAGATED_MODIFICATION && object instanceof AbstractNode) {
-    AbstractNode srcNode=(AbstractNode)object;
-    for (    AbstractNode node : srcNode.getNodesForModificationPropagation()) {
-      modificationQueue.propagatedModification(node);
+    Set<AbstractNode> nodes=((AbstractNode)object).getNodesForModificationPropagation();
+    if (nodes != null) {
+      for (      AbstractNode node : nodes) {
+        modificationQueue.propagatedModification(node);
+      }
     }
   }
 switch (status & 0x000f) {

@@ -1,0 +1,62 @@
+{
+  GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
+  Transaction tx=transactions.get();
+  boolean topLevel=(tx == null);
+  boolean deadlock=false;
+  Set<String> synchronizationKeys=null;
+  FrameworkException error=null;
+  T result=null;
+  if (topLevel) {
+    this.modificationQueue=new ModificationQueue();
+    this.errorBuffer=new ErrorBuffer();
+    tx=graphDb.beginTx();
+    transactions.set(tx);
+    currentCommand.set(this);
+  }
+  try {
+    result=transaction.execute();
+    if (topLevel) {
+      if (!modificationQueue.doInnerCallbacks(securityContext,errorBuffer)) {
+        if (transaction.doValidation) {
+          throw new FrameworkException(422,errorBuffer);
+        }
+      }
+      synchronizationKeys=modificationQueue.getSynchronizationKeys();
+      try {
+        semaphore.acquire(synchronizationKeys);
+      }
+ catch (      InterruptedException iex) {
+        return null;
+      }
+      if (!modificationQueue.doValidation(securityContext,errorBuffer,transaction.doValidation)) {
+        throw new FrameworkException(422,errorBuffer);
+      }
+    }
+  }
+ catch (  Throwable t) {
+    tx.failure();
+    if (t instanceof FrameworkException) {
+      error=(FrameworkException)t;
+    }
+    if (t instanceof DeadlockDetectedException || t instanceof RetryException) {
+      deadlock=true;
+    }
+  }
+  if (topLevel) {
+    tx.success();
+    tx.finish();
+    semaphore.release(synchronizationKeys);
+    currentCommand.remove();
+    transactions.remove();
+    if (error == null) {
+      modificationQueue.doOuterCallbacksAndCleanup(securityContext);
+    }
+  }
+  if (error != null) {
+    throw error;
+  }
+  if (deadlock) {
+    throw new RetryException();
+  }
+  return result;
+}

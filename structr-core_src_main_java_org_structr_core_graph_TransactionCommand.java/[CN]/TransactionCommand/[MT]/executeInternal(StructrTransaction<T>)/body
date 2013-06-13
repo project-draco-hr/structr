@@ -2,9 +2,10 @@
   GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
   Transaction tx=transactions.get();
   boolean topLevel=(tx == null);
+  boolean error=false;
   boolean deadlock=false;
   Set<String> synchronizationKeys=null;
-  FrameworkException error=null;
+  FrameworkException exception=null;
   T result=null;
   if (topLevel) {
     this.modificationQueue=new ModificationQueue();
@@ -33,30 +34,47 @@
       }
     }
   }
- catch (  Throwable t) {
+ catch (  DeadlockDetectedException ddex) {
     tx.failure();
-    if (t instanceof FrameworkException) {
-      error=(FrameworkException)t;
-    }
-    if (t instanceof DeadlockDetectedException || t instanceof RetryException) {
-      deadlock=true;
-    }
+    deadlock=true;
+    error=true;
   }
-  if (topLevel) {
-    tx.success();
-    tx.finish();
-    semaphore.release(synchronizationKeys);
-    currentCommand.remove();
-    transactions.remove();
-    if (error == null) {
-      modificationQueue.doOuterCallbacksAndCleanup(securityContext);
-    }
+catch (  RetryException rex) {
+    tx.failure();
+    deadlock=true;
+    error=true;
   }
-  if (error != null) {
-    throw error;
+catch (  FrameworkException fex) {
+    tx.failure();
+    exception=fex;
+    error=true;
+  }
+catch (  Throwable t) {
+    tx.failure();
+    t.printStackTrace();
+    error=true;
+  }
+ finally {
+    if (topLevel) {
+      try {
+        tx.success();
+        tx.finish();
+      }
+  finally {
+        semaphore.release(synchronizationKeys);
+        currentCommand.remove();
+        transactions.remove();
+      }
+      if (!error) {
+        modificationQueue.doOuterCallbacksAndCleanup(securityContext);
+      }
+    }
   }
   if (deadlock) {
     throw new RetryException();
+  }
+  if (exception != null && error) {
+    throw exception;
   }
   return result;
 }

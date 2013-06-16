@@ -8,7 +8,10 @@
   StringBuilder buffer=renderContext.getBuffer();
   String id=getUuid();
   String tag=getProperty(DOMElement.tag);
-  buffer.append(indent(depth,true));
+  boolean anyChildNodeCreatesNewLine=false;
+  if (!avoidWhitespace()) {
+    buffer.append(indent(depth));
+  }
   if (StringUtils.isNotBlank(tag)) {
     buffer.append("<").append(tag);
     if (edit) {
@@ -47,6 +50,9 @@
       boolean detailMode=details != null;
       if (!detailMode && subNode.getProperty(hideOnIndex)) {
         continue;
+      }
+      if (subNode instanceof DOMElement) {
+        anyChildNodeCreatesNewLine=(anyChildNodeCreatesNewLine || !((DOMElement)subNode).avoidWhitespace());
       }
       String subKey=subNode.getProperty(dataKey);
       if (StringUtils.isNotBlank(subKey)) {
@@ -96,7 +102,9 @@
       }
     }
     if (StringUtils.isNotBlank(tag) && (!isVoid)) {
-      buffer.append(indent(depth,!avoidWhitespace()));
+      if (anyChildNodeCreatesNewLine) {
+        buffer.append(indent(depth));
+      }
       buffer.append("</").append(tag).append(">");
     }
   }

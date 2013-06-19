@@ -1,0 +1,31 @@
+{
+  final SecurityContext securityContext=getWebSocket().getSecurityContext();
+  List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
+  searchAttributes.add(Search.andExactTypeAndSubtypes(DOMElement.class.getSimpleName()));
+  final String sortOrder=webSocketData.getSortOrder();
+  final String sortKey=webSocketData.getSortKey();
+  final int pageSize=webSocketData.getPageSize();
+  final int page=webSocketData.getPage();
+  PropertyKey sortProperty=EntityContext.getPropertyKeyForJSONName(DOMElement.class,sortKey);
+  try {
+    Result result=(Result)Services.command(securityContext,SearchNodeCommand.class).execute(true,false,searchAttributes,sortProperty,"desc".equals(sortOrder));
+    List<AbstractNode> filteredResults=new LinkedList<AbstractNode>();
+    List<? extends GraphObject> resultList=result.getResults();
+    for (    GraphObject obj : resultList) {
+      if (obj instanceof AbstractNode) {
+        AbstractNode node=(AbstractNode)obj;
+        if (node.hasRelationship(RelType.SYNC,Direction.OUTGOING) && node.hasRelationship(RelType.CONTAINS,Direction.OUTGOING)) {
+          filteredResults.add(node);
+        }
+      }
+    }
+    int resultCountBeforePaging=filteredResults.size();
+    webSocketData.setResult(PagingHelper.subList(filteredResults,pageSize,page,null));
+    webSocketData.setRawResultCount(resultCountBeforePaging);
+    getWebSocket().send(webSocketData,true);
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"Exception occured",fex);
+    getWebSocket().send(MessageBuilder.status().code(fex.getStatus()).message(fex.getMessage()).build(),true);
+  }
+}

@@ -1,15 +1,17 @@
 {
-  if ((status & STATE_PROPAGATED_MODIFICATION) == STATE_PROPAGATED_MODIFICATION) {
-    object.propagatedModification(securityContext);
-  }
-  if ((status & STATE_LOCATION_MODIFIED) == STATE_LOCATION_MODIFIED) {
-    object.locationModified(securityContext);
-  }
-  if ((status & STATE_SECURITY_MODIFIED) == STATE_SECURITY_MODIFIED) {
-    object.securityModified(securityContext);
-  }
-  if ((status & STATE_OWNER_MODIFIED) == STATE_OWNER_MODIFIED) {
-    object.ownerModified(securityContext);
+  if ((status & (STATE_DELETED | STATE_DELETED_PASSIVELY)) == 0) {
+    if ((status & STATE_PROPAGATED_MODIFICATION) == STATE_PROPAGATED_MODIFICATION) {
+      object.propagatedModification(securityContext);
+    }
+    if ((status & STATE_LOCATION_MODIFIED) == STATE_LOCATION_MODIFIED) {
+      object.locationModified(securityContext);
+    }
+    if ((status & STATE_SECURITY_MODIFIED) == STATE_SECURITY_MODIFIED) {
+      object.securityModified(securityContext);
+    }
+    if ((status & STATE_OWNER_MODIFIED) == STATE_OWNER_MODIFIED) {
+      object.ownerModified(securityContext);
+    }
   }
 switch (status & 0x000f) {
 case 15:
@@ -32,13 +34,11 @@ case 4:
 object.afterCreation(securityContext);
 break;
 case 3:
-object.afterDeletion(securityContext);
 break;
 case 2:
 object.afterModification(securityContext);
 break;
 case 1:
-object.afterDeletion(securityContext);
 break;
 case 0:
 break;

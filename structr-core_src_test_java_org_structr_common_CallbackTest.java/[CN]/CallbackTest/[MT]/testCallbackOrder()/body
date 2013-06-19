@@ -1,8 +1,8 @@
 {
   try {
-    TestEight test=(TestEight)Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+    final TestEight test=(TestEight)Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
       @Override public Object execute() throws FrameworkException {
-        return (TestEight)Services.command(securityContext,CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.type,TestEight.class.getSimpleName()));
+        return (TestEight)Services.command(securityContext,CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.type,TestEight.class.getSimpleName()),new NodeAttribute(TestEight.testProperty,123));
       }
     }
 );
@@ -11,7 +11,45 @@
     assertEquals("onDeletionTimestamp should be == 0",0L,test.getOnDeletionTimestamp());
     assertTrue("afterCreationTimestamp should be != 0",test.getAfterCreationTimestamp() != 0L);
     assertEquals("afterModificationTimestamp should be == 0",0L,test.getAfterModificationTimestamp());
-    assertEquals("afterDeletionTimestamp should be == 0",0L,test.getAfterDeletionTimestamp());
+    test.resetTimestamps();
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        test.setProperty(TestEight.testProperty,234);
+        return null;
+      }
+    }
+);
+    assertEquals("onCreationTimestamp should be == 0",0L,test.getOnCreationTimestamp());
+    assertTrue("onModificationTimestamp should be != 0",test.getOnModificationTimestamp() != 0L);
+    assertEquals("onDeletionTimestamp should be == 0",0L,test.getOnDeletionTimestamp());
+    assertEquals("afterCreationTimestamp should be == 0",0L,test.getAfterCreationTimestamp());
+    assertTrue("afterModificationTimestamp should be != 0",test.getAfterModificationTimestamp() != 0L);
+    test.resetTimestamps();
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        test.setProperty(TestEight.testProperty,234);
+        return null;
+      }
+    }
+);
+    assertEquals("onCreationTimestamp should be == 0",0L,test.getOnCreationTimestamp());
+    assertEquals("onModificationTimestamp should be == 0",0L,test.getOnModificationTimestamp());
+    assertEquals("onDeletionTimestamp should be == 0",0L,test.getOnDeletionTimestamp());
+    assertEquals("afterCreationTimestamp should be == 0",0L,test.getAfterCreationTimestamp());
+    assertEquals("afterModificationTimestamp should be == 0",0L,test.getAfterModificationTimestamp());
+    test.resetTimestamps();
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        Services.command(securityContext,DeleteNodeCommand.class).execute(test);
+        return null;
+      }
+    }
+);
+    assertEquals("onCreationTimestamp should be == 0",0L,test.getOnCreationTimestamp());
+    assertEquals("onModificationTimestamp should be == 0",0L,test.getOnModificationTimestamp());
+    assertTrue("onDeletionTimestamp should be != 0",test.getOnDeletionTimestamp() != 0L);
+    assertEquals("afterCreationTimestamp should be == 0",0L,test.getAfterCreationTimestamp());
+    assertEquals("afterModificationTimestamp should be == 0",0L,test.getAfterModificationTimestamp());
   }
  catch (  FrameworkException ex) {
     Logger.getLogger(CallbackTest.class.getName()).log(Level.SEVERE,null,ex);

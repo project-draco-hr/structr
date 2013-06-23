@@ -8,6 +8,12 @@
       if (node instanceof DOMNode) {
         DOMNode domNode=(DOMNode)node;
         domNode.getParentNode().removeChild(domNode);
+        try {
+          domNode.setProperty(DOMNode.pageId,null);
+        }
+ catch (        FrameworkException ex) {
+          logger.log(Level.SEVERE,"Could not remove node from page " + domNode,ex);
+        }
       }
  else {
         DeleteRelationshipCommand deleteRel=Services.command(securityContext,DeleteRelationshipCommand.class);

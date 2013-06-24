@@ -1,0 +1,34 @@
+{
+  String nestedPath=path + dir.getName() + "/";
+  ZipEntry dirEntry=new ZipEntry(nestedPath);
+  zos.putNextEntry(dirEntry);
+  File[] contents=dir.listFiles();
+  if (contents != null) {
+    for (    File file : contents) {
+      if (file.isDirectory()) {
+        exportDirectory(zos,file,nestedPath,filesToInclude);
+      }
+ else {
+        String relativePath=nestedPath + file.getName();
+        boolean includeFile=true;
+        if (filesToInclude != null) {
+          includeFile=false;
+          if (filesToInclude.contains(relativePath)) {
+            includeFile=true;
+          }
+        }
+        if (includeFile) {
+          ZipEntry fileEntry=new ZipEntry(relativePath);
+          fileEntry.setTime(file.lastModified());
+          zos.putNextEntry(fileEntry);
+          FileInputStream fis=new FileInputStream(file);
+          IOUtils.copy(fis,zos);
+          fis.close();
+          zos.flush();
+          zos.closeEntry();
+        }
+      }
+    }
+  }
+  zos.closeEntry();
+}

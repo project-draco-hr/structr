@@ -1,4 +1,5 @@
 {
+  GraphDatabaseService graphDb=Services.getService(NodeService.class).getGraphDb();
   String mode=(String)attributes.get("mode");
   String fileName=(String)attributes.get("file");
   String validate=(String)attributes.get("validate");
@@ -15,10 +16,10 @@
     throw new FrameworkException(400,"Please specify sync file.");
   }
   if ("export".equals(mode)) {
-    exportFile(fileName);
+    exportToFile(graphDb,fileName);
   }
  else   if ("import".equals(mode)) {
-    importFile(fileName,doValidation);
+    importFromFile(graphDb,securityContext,fileName,doValidation);
   }
  else {
     throw new FrameworkException(400,"Please specify sync mode (import|export).");

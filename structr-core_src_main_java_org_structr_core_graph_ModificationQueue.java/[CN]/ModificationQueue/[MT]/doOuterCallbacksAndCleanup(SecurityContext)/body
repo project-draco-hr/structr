@@ -1,7 +1,9 @@
 {
   long t0=System.currentTimeMillis();
   for (  GraphObjectModificationState state : modifications.values()) {
-    state.doOuterCallback(securityContext);
+    if (!state.isDeleted()) {
+      state.doOuterCallback(securityContext);
+    }
   }
   long t=System.currentTimeMillis() - t0;
   if (t > 100) {

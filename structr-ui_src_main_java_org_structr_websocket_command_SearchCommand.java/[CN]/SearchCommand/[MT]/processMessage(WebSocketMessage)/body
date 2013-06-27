@@ -1,12 +1,16 @@
 {
   final SecurityContext securityContext=getWebSocket().getSecurityContext();
   String searchString=(String)webSocketData.getNodeData().get("searchString");
+  String type=(String)webSocketData.getNodeData().get("type");
   List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
   if (searchString == null) {
     getWebSocket().send(MessageBuilder.status().code(204).message("Empty search string").build(),true);
     return;
   }
   searchAttributes.add(Search.andName(searchString));
+  if (type != null) {
+    searchAttributes.add(Search.andExactType(type));
+  }
   final String sortOrder=webSocketData.getSortOrder();
   final String sortKey=webSocketData.getSortKey();
   PropertyKey sortProperty=EntityContext.getPropertyKeyForJSONName(AbstractNode.class,sortKey);

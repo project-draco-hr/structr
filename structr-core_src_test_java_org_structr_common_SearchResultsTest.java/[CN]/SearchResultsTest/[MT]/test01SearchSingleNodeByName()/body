@@ -2,17 +2,17 @@
   try {
     PropertyMap props=new PropertyMap();
     final PropertyKey key=AbstractNode.name;
-    final String name="89w3hklsdfghsdkljth";
+    final String name="89w3hkl sdfghsdkljth";
     props.put(key,name);
     final AbstractNode node=createTestNode(TestOne.class.getSimpleName(),props);
     boolean includeDeletedAndHidden=true;
     boolean publicOnly=false;
     List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
-    searchAttributes.add(new TextualSearchAttribute(key,name,SearchOperator.AND));
+    searchAttributes.add(new StringSearchAttribute(key,name,Occur.MUST,true));
     Result result=searchNodeCommand.execute(includeDeletedAndHidden,publicOnly,searchAttributes);
     assertTrue(result.size() == 1);
     assertTrue(result.get(0).equals(node));
-    final String name2="klppptzoehig??soiutz??w0e9hg";
+    final String name2="klppptzoehi g??soiu tz??w0e9hg";
     Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
       @Override public Object execute() throws FrameworkException {
         node.setProperty(key,name2);
@@ -21,7 +21,7 @@
     }
 );
     searchAttributes.clear();
-    searchAttributes.add(new TextualSearchAttribute(key,name2,SearchOperator.AND));
+    searchAttributes.add(new StringSearchAttribute(key,name2,Occur.MUST,true));
     result=searchNodeCommand.execute(includeDeletedAndHidden,publicOnly,searchAttributes);
     assertTrue(result.size() == 1);
     assertTrue(result.get(0).equals(node));

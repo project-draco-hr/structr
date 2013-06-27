@@ -15,7 +15,7 @@
           }
           rangeStartConverted=key.getSearchValue(rangeStartConverted);
           rangeEndConverted=key.getSearchValue(rangeEndConverted);
-          return new RangeSearchAttribute(key,rangeStartConverted,rangeEndConverted,SearchOperator.AND);
+          return new RangeSearchAttribute(key,rangeStartConverted,rangeEndConverted,Occur.SHOULD);
         }
  catch (        Throwable t) {
           t.printStackTrace();
@@ -25,12 +25,12 @@
     }
  else {
       final String strippedValue=StringUtils.stripEnd(StringUtils.stripStart(searchValue,"["),"]");
-      return Search.andMatchExactValues(key,strippedValue,SearchOperator.OR);
+      return Search.andMatchExactValues(key,strippedValue,Occur.SHOULD);
     }
   }
  else   if (StringUtils.startsWith(searchValue,"(") && StringUtils.endsWith(searchValue,")")) {
     final String strippedValue=StringUtils.stripEnd(StringUtils.stripStart(searchValue,"("),")");
-    return Search.andMatchExactValues(key,strippedValue,SearchOperator.AND);
+    return Search.andMatchExactValues(key,strippedValue,Occur.MUST);
   }
  else {
     PropertyConverter inputConverter=key.inputConverter(securityContext);

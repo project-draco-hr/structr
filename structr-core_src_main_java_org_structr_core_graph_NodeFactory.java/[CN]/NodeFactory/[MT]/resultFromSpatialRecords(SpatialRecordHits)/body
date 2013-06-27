@@ -1,20 +1,17 @@
 {
   final int pageSize=factoryProfile.getPageSize();
-  final int page=factoryProfile.getPage();
   final SecurityContext securityContext=factoryProfile.getSecurityContext();
   final boolean includeDeletedAndHidden=factoryProfile.includeDeletedAndHidden();
   final boolean publicOnly=factoryProfile.publicOnly();
-  List<AbstractNode> nodes=new LinkedList<AbstractNode>();
+  List<T> nodes=new LinkedList<T>();
+  int size=spatialRecordHits.size();
   int position=0;
   int count=0;
   int offset=0;
-  int size=spatialRecordHits.size();
-  GraphDatabaseCommand graphDbCommand=Services.command(securityContext,GraphDatabaseCommand.class);
-  GraphDatabaseService graphDb=graphDbCommand.execute();
   for (  Node node : spatialRecordHits) {
     Node realNode=node;
     if (realNode != null) {
-      AbstractNode n=instantiateNode(realNode);
+      T n=instantiate(realNode);
       nodes.add(n);
       if (n != null) {
         List<AbstractNode> nodesAt=getNodesAt(n);
@@ -25,7 +22,7 @@
               if (++count > pageSize) {
                 return new Result(nodes,size,true,false);
               }
-              nodes.add(nodeAt);
+              nodes.add((T)nodeAt);
             }
           }
         }

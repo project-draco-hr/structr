@@ -8,7 +8,7 @@
   if (CONFIRM_REGISTRATION_PAGE.equals(path)) {
     List<SearchAttribute> searchAttrs=new LinkedList<SearchAttribute>();
     searchAttrs.add(Search.andExactType(User.class.getSimpleName()));
-    searchAttrs.add(Search.andMatchValues(User.confirmationKey,key,SearchOperator.AND));
+    searchAttrs.add(Search.andMatchValues(User.confirmationKey,key,Occur.MUST));
     Result results=(Result)searchNodesAsSuperuser.execute(searchAttrs);
     if (!results.isEmpty()) {
       final User user=(User)results.get(0);

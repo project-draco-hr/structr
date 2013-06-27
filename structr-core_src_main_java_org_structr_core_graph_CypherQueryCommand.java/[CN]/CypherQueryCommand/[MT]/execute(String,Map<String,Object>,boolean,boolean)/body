@@ -1,6 +1,6 @@
 {
-  RelationshipFactory relFactory=(RelationshipFactory)arguments.get("relationshipFactory");
   ExecutionEngine engine=(ExecutionEngine)arguments.get("cypherExecutionEngine");
+  RelationshipFactory relFactory=new RelationshipFactory(securityContext);
   NodeFactory nodeFactory=new NodeFactory(securityContext);
   List<GraphObject> resultList=new LinkedList<GraphObject>();
   ExecutionResult result=null;
@@ -16,13 +16,13 @@
       String key=entry.getKey();
       Object value=entry.getValue();
       if (value instanceof Node) {
-        AbstractNode node=nodeFactory.instantiateNode((Node)value,includeHiddenAndDeleted,publicOnly);
+        AbstractNode node=nodeFactory.instantiate((Node)value,includeHiddenAndDeleted,publicOnly);
         if (node != null) {
           resultList.add(node);
         }
       }
  else       if (value instanceof Relationship) {
-        AbstractRelationship rel=relFactory.instantiateRelationship(securityContext,(Relationship)value);
+        AbstractRelationship rel=relFactory.instantiate((Relationship)value);
         if (rel != null) {
           resultList.add(rel);
         }

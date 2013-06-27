@@ -10,7 +10,7 @@
           Node dbFromNode=fromNode.getNode();
           if (dbRelStartNode.getId() == dbFromNode.getId()) {
             if (properties != null) {
-              AbstractRelationship rel=relationshipFactory.instantiateRelationship(securityContext,dbRelationship);
+              AbstractRelationship rel=relationshipFactory.instantiate(dbRelationship);
               if (contentHashCode == rel.getProperties().contentHashCode(properties.keySet(),false)) {
                 return null;
               }
@@ -25,7 +25,7 @@
       Node startNode=fromNode.getNode();
       Node endNode=toNode.getNode();
       Relationship rel=startNode.createRelationshipTo(endNode,relType);
-      T newRel=relationshipFactory.instantiateRelationship(securityContext,rel);
+      T newRel=relationshipFactory.instantiate(rel);
       if (newRel != null) {
         TransactionCommand.relationshipCreated(newRel);
         newRel.unlockReadOnlyPropertiesOnce();

@@ -1,13 +1,13 @@
 {
   final GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
-  final RelationshipFactory relFactory=(RelationshipFactory)arguments.get("relationshipFactory");
+  final RelationshipFactory relFactory=new RelationshipFactory(securityContext);
   final String sourceKey=(String)map.get("sourceKey");
   final String destKey=(String)map.get("destKey");
   if (sourceKey == null || destKey == null) {
     throw new IllegalArgumentException("This command requires one argument of type Map. Map must contain values for 'sourceKey' and 'destKey'.");
   }
   if (graphDb != null) {
-    List<AbstractRelationship> rels=relFactory.instantiateRelationships(securityContext,GlobalGraphOperations.at(graphDb).getAllRelationships());
+    List<AbstractRelationship> rels=relFactory.instantiate(GlobalGraphOperations.at(graphDb).getAllRelationships());
     long count=bulkGraphOperation(securityContext,rels,1000,"CopyRelationshipProperties",new BulkGraphOperation<AbstractRelationship>(){
       @Override public void handleGraphObject(      SecurityContext securityContext,      AbstractRelationship rel){
         if (rel.getProperty(AbstractNode.uuid) != null) {

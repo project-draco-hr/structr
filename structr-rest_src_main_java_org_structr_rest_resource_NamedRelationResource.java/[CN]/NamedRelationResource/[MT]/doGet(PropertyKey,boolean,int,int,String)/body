@@ -12,7 +12,7 @@
     final List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
     searchAttributes.add(Search.andExactRelType(namedRelation));
     searchAttributes.addAll(extractSearchableAttributesForRelationships(securityContext,namedRelation.getEntityClass(),request));
-    relationResults.addAll((List<AbstractRelationship>)Services.command(securityContext,SearchRelationshipCommand.class).execute(searchAttributes));
+    relationResults.addAll(Services.command(securityContext,SearchRelationshipCommand.class).execute(searchAttributes).getResults());
   }
   final List<SearchAttribute> filterAttributes=extractSearchableAttributesForRelationships(securityContext,namedRelation.getEntityClass(),request);
   if (!filterAttributes.isEmpty()) {
@@ -21,9 +21,9 @@
         if (objs.length > 0) {
           final GraphObject obj=objs[0];
           for (          final SearchAttribute attr : filterAttributes) {
-            final String value=((TextualSearchAttribute)attr).getValue();
-            final PropertyKey key=((TextualSearchAttribute)attr).getKey();
-            final Object val="\"" + obj.getProperty(key) + "\"";
+            final String value=(String)attr.getValue();
+            final PropertyKey key=attr.getKey();
+            final Object val=obj.getProperty(key);
             if (val != null && val.equals(value)) {
               return true;
             }

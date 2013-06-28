@@ -1,0 +1,15 @@
+{
+  FilterSearchAttribute attr=new FilterSearchAttribute(this,searchValue,occur);
+  SecurityContext securityContext=SecurityContext.getSuperUserInstance();
+  EntityProperty entityProperty=(EntityProperty)base;
+  try {
+    Result<AbstractNode> result=Services.command(securityContext,SearchNodeCommand.class).execute(Search.andExactType(base.relatedType().getSimpleName()),Search.andExactProperty(notion.getPrimaryPropertyKey(),searchValue));
+    for (    AbstractNode node : result.getResults()) {
+      attr.addToResult(entityProperty.getRelatedNodeReverse(securityContext,node,declaringClass));
+    }
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+  }
+  return attr;
+}

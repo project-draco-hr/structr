@@ -1,9 +1,8 @@
 {
-  List<SearchAttribute> searchAttributes=Collections.emptyList();
-  if (searchableProperties != null) {
-    checkForIllegalSearchKeys(request,type,searchableProperties);
-    searchAttributes=new LinkedList<SearchAttribute>();
-    for (    final PropertyKey key : searchableProperties) {
+  List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
+  if (type != null && request != null && !request.getParameterMap().isEmpty()) {
+    final boolean looseSearch=parseInteger(request.getParameter(JsonRestServlet.REQUEST_PARAMETER_LOOSE_SEARCH)) == 1;
+    for (    final PropertyKey key : EntityContext.getPropertySet(type,PropertyView.All)) {
       String searchValue=request.getParameter(key.jsonName());
       if (searchValue != null) {
         if (looseSearch) {

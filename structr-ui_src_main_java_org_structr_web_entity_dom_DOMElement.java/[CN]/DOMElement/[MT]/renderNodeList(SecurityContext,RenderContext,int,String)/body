@@ -4,12 +4,6 @@
     for (    GraphObject dataObject : listSource) {
       renderContext.putDataObject(dataKey,dataObject);
       render(securityContext,renderContext,depth + 1);
-      if (renderContext.getEdit()) {
-        boolean canWrite=dataObject instanceof AbstractNode ? securityContext.isAllowed((AbstractNode)dataObject,Permission.write) : true;
-        if (canWrite) {
-          renderContext.getBuffer().append("\n<button class=\"deleteButton\" data-structr-id=\"").append(dataObject.getUuid()).append("\">Delete ").append(dataObject.getType()).append("</button>\n");
-        }
-      }
     }
     renderContext.clearDataObject(dataKey);
   }

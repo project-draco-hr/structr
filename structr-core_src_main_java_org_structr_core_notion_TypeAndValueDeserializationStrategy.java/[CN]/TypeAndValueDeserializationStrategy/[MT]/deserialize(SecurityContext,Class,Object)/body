@@ -10,13 +10,13 @@
       Object value=((JsonInput)convertedSource).getAttributes().get(propertyKey.jsonName());
       if (value != null) {
         String stringValue=value.toString();
-        attrs.add(Search.andExactProperty(propertyKey,stringValue));
+        attrs.add(Search.andExactProperty(securityContext,propertyKey,stringValue));
       }
     }
  else     if (convertedSource instanceof GraphObject) {
       GraphObject obj=(GraphObject)convertedSource;
       if (propertyKey != null) {
-        attrs.add(Search.andExactProperty(propertyKey,obj.getProperty(propertyKey)));
+        attrs.add(Search.andExactProperty(securityContext,propertyKey,obj.getProperty(propertyKey)));
       }
  else {
         PropertyKey<String> idProperty=EntityContext.getPropertyKeyForDatabaseName(obj.getClass(),AbstractNode.uuid.dbName());
@@ -24,7 +24,7 @@
       }
     }
  else {
-      attrs.add(Search.andExactProperty(propertyKey,convertedSource));
+      attrs.add(Search.andExactProperty(securityContext,propertyKey,convertedSource));
     }
   }
   Result result=Services.command(securityContext,SearchNodeCommand.class).execute(attrs);

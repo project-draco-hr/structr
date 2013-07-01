@@ -1,8 +1,9 @@
 {
+  SecurityContext securityContext=SecurityContext.getSuperUserInstance();
   Principal principal=null;
   Result result=Result.EMPTY_RESULT;
   try {
-    result=Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class).execute(Search.andExactTypeAndSubtypes(Principal.class.getSimpleName()),Search.andExactProperty(Person.email,email));
+    result=Services.command(securityContext,SearchNodeCommand.class).execute(Search.andExactTypeAndSubtypes(Principal.class.getSimpleName()),Search.andExactProperty(securityContext,Person.email,email));
   }
  catch (  FrameworkException ex) {
     logger.log(Level.WARNING,"Could not search for person",ex);

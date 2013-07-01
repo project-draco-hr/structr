@@ -9,8 +9,8 @@
     boolean includeDeletedAndHidden=true;
     boolean publicOnly=false;
     List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
-    searchAttributes.add(new StringSearchAttribute(AbstractNode.type,type,Occur.MUST,true));
-    searchAttributes.add(new FilterSearchAttribute(key,date,Occur.MUST));
+    searchAttributes.add(Search.andExactType(type));
+    searchAttributes.add(Search.andExactProperty(securityContext,key,date));
     Result result=searchNodeCommand.execute(includeDeletedAndHidden,publicOnly,searchAttributes);
     assertEquals(1,result.size());
     assertTrue(result.get(0).equals(node));

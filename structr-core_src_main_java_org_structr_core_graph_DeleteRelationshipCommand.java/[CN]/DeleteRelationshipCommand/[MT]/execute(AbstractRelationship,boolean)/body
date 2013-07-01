@@ -5,14 +5,13 @@
       logger.log(Level.WARNING,"Will not delete relationship which has no UUID: {0} --[:{1}]-->{2}",new Object[]{rel.getStartNode(),rel.getType(),rel.getEndNode()});
       return null;
     }
-    final RemoveRelationshipFromIndex removeRel=Services.command(SecurityContext.getSuperUserInstance(),RemoveRelationshipFromIndex.class);
     final Relationship relToDelete=rel.getRelationship();
     final AbstractRelationship finalRel=rel;
     Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
       @Override public Object execute() throws FrameworkException {
         TransactionCommand.relationshipDeleted(finalRel,passiveDeletion);
         try {
-          removeRel.execute(finalRel);
+          finalRel.removeFromIndex();
           relToDelete.delete();
         }
  catch (        IllegalStateException ise) {

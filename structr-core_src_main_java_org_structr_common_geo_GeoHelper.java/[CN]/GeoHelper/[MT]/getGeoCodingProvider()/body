@@ -1,13 +1,15 @@
 {
-  try {
-    if (providerClass == null) {
-      String geocodingProvider=Services.getConfigurationValue(Services.GEOCODING_PROVIDER,GoogleGeoCodingProvider.class.getName());
-      providerClass=(Class<GeoCodingProvider>)Class.forName(geocodingProvider);
+  if (providerInstance == null) {
+    try {
+      if (providerClass == null) {
+        String geocodingProvider=Services.getConfigurationValue(Services.GEOCODING_PROVIDER,GoogleGeoCodingProvider.class.getName());
+        providerClass=(Class<GeoCodingProvider>)Class.forName(geocodingProvider);
+      }
+      providerInstance=providerClass.newInstance();
     }
-    return providerClass.newInstance();
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"Unable to instantiate geocoding provider: {0}",t.getMessage());
+    }
   }
- catch (  Throwable t) {
-    logger.log(Level.WARNING,"Unable to instantiate geocoding provider: {0}",t.getMessage());
-  }
-  return null;
+  return providerInstance;
 }

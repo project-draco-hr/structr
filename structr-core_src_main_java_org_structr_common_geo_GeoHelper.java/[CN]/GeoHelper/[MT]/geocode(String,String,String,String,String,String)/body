@@ -1,8 +1,21 @@
 {
-  GeoCodingProvider provider=getGeoCodingProvider();
-  if (provider != null) {
-    String language=Services.getConfigurationValue(Services.GEOCODING_LANGUAGE,"de");
-    return provider.geocode(street,house,postalCode,city,state,country,language);
+  String language=Services.getConfigurationValue(Services.GEOCODING_LANGUAGE,"de");
+  String cacheKey=cacheKey(street,house,postalCode,city,state,country,language);
+  GeoCodingResult result=geoCache.get(cacheKey);
+  if (result == null) {
+    GeoCodingProvider provider=getGeoCodingProvider();
+    if (provider != null) {
+      result=provider.geocode(street,house,postalCode,city,state,country,language);
+      if (result != null) {
+        geoCache.put(cacheKey,result);
+      }
+ else {
+        geoCache.put(cacheKey,new NullResult());
+      }
+    }
   }
-  return null;
+  if (result instanceof NullResult) {
+    return null;
+  }
+  return result;
 }

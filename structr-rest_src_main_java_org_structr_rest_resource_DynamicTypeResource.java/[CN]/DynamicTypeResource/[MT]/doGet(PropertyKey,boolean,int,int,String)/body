@@ -7,7 +7,7 @@
       throw new NotFoundException();
     }
     searchAttributes.add(Search.andExactType(normalizedTypeName));
-    searchAttributes.addAll(extractSearchableAttributesFromRequest(securityContext));
+    searchAttributes.addAll(extractSearchableAttributes(securityContext,entityClass,request));
     Result results=Services.command(securityContext,SearchNodeCommand.class).execute(includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDescending,pageSize,page,offsetId);
     return results;
   }

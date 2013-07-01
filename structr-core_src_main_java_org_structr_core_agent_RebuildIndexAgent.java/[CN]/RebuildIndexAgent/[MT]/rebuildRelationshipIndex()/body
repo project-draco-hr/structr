@@ -3,7 +3,7 @@
   final GraphDatabaseService graphDb=Services.command(securityContext,GraphDatabaseCommand.class).execute();
   final RelationshipFactory relFactory=new RelationshipFactory(securityContext);
   final Iterable<Relationship> allRelationships=GlobalGraphOperations.at(graphDb).getAllRelationships();
-  final IndexRelationshipCommand indexer=Services.command(securityContext,IndexRelationshipCommand.class);
+  final NodeService nodeService=Services.getService(NodeService.class);
   long relationshipCount=0L;
   logger.log(Level.INFO,"Start indexing of relationships.");
   final Iterator<Relationship> relationshipIterator=allRelationships.iterator();
@@ -15,7 +15,7 @@
           try {
             Relationship dbRelationship=relationshipIterator.next();
             if (dbRelationship.hasProperty(GraphObject.uuid.dbName())) {
-              indexer.execute(relFactory.instantiate(dbRelationship));
+              relFactory.instantiate(dbRelationship).updateInIndex();
               if (++count == 2000) {
                 break;
               }

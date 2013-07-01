@@ -1,0 +1,12 @@
+{
+  List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
+  if (type != null && request != null && !request.getParameterMap().isEmpty()) {
+    boolean looseSearch=parseInteger(request.getParameter(JsonRestServlet.REQUEST_PARAMETER_LOOSE_SEARCH)) == 1;
+    for (    final PropertyKey key : EntityContext.getPropertySet(type,PropertyView.All)) {
+      if (key.isIndexedProperty()) {
+        searchAttributes.addAll(key.extractSearchableAttribute(securityContext,request,looseSearch));
+      }
+    }
+  }
+  return searchAttributes;
+}

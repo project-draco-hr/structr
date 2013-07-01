@@ -4,6 +4,8 @@
   props.put(AbstractNode.type,imageType == null ? Image.class.getSimpleName() : imageType.getSimpleName());
   props.put(Image.isThumbnail,markAsThumbnail);
   Image newImage=createNodeCommand.execute(props);
-  setImageData(newImage,imageData,contentType);
+  if (imageData != null && imageData.length > 0) {
+    setFileData(newImage,imageData,contentType);
+  }
   return newImage;
 }

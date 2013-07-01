@@ -1,0 +1,25 @@
+{
+  final SecurityContext securityContext=getWebSocket().getSecurityContext();
+  try {
+    final String name=(String)webSocketData.getNodeData().get("name");
+    final String rawData=(String)webSocketData.getNodeData().get("fileData");
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        try {
+          org.structr.web.entity.File newFile=FileHelper.createFileBase64(securityContext,rawData,null);
+          newFile.setName(name);
+          return newFile;
+        }
+ catch (        IOException ex) {
+          logger.log(Level.WARNING,"Could not upload file",ex);
+        }
+        return null;
+      }
+    }
+);
+  }
+ catch (  Throwable t) {
+    String msg=t.toString();
+    getWebSocket().send(MessageBuilder.status().code(400).message("Could not upload file: ".concat((msg != null) ? msg : "")).build(),true);
+  }
+}

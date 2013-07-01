@@ -19,17 +19,21 @@
       getWebSocket().send(MessageBuilder.status().message("No write permission").code(400).build(),true);
       return;
     }
-    final long size=(long)(sequenceNumber * chunkSize) + data.length;
-    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-      @Override public Object execute() throws FrameworkException {
-        file.setProperty(File.size,size);
-        file.setChecksum(0L);
-        return null;
-      }
-    }
-);
     getWebSocket().handleFileChunk(uuid,sequenceNumber,chunkSize,data);
-    getWebSocket().send(MessageBuilder.status().code(200).message(size + " bytes of " + file.getName()+ " successfully saved.").build(),true);
+    final long size=(long)(sequenceNumber * chunkSize) + data.length;
+    long overallSize=file.getProperty(File.size);
+    logger.log(Level.FINE,"Overall size: {0}, part: {1}",new Object[]{overallSize,size});
+    if (size >= overallSize) {
+      Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+        @Override public Object execute() throws FrameworkException {
+          file.setProperty(File.size,FileHelper.getSize(file));
+          file.setProperty(File.checksum,FileHelper.getChecksum(file));
+          return null;
+        }
+      }
+);
+    }
+    getWebSocket().send(MessageBuilder.status().code(200).message("{\"id\":\"" + file.getUuid() + "\",\"size\":"+ size+ "}").build(),true);
   }
  catch (  Throwable t) {
     String msg=t.toString();

@@ -1,10 +1,11 @@
 {
   ResourceAccess grant=grantCache.get(signature);
   if (grant == null) {
-    SearchNodeCommand search=Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class);
+    SecurityContext securityContext=SecurityContext.getSuperUserInstance();
+    SearchNodeCommand search=Services.command(securityContext,SearchNodeCommand.class);
     List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
     searchAttributes.add(Search.andExactType(ResourceAccess.class.getSimpleName()));
-    searchAttributes.add(Search.andExactProperty(ResourceAccess.signature,signature));
+    searchAttributes.add(Search.andExactProperty(securityContext,ResourceAccess.signature,signature));
     Result result=search.execute(searchAttributes);
     if (result.isEmpty()) {
       logger.log(Level.WARNING,"No resource access object found for {0}",signature);

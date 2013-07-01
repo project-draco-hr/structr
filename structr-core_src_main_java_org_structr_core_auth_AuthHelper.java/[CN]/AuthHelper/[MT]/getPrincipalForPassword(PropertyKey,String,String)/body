@@ -7,12 +7,13 @@
   }
  else {
     try {
-      SearchNodeCommand searchNode=Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class);
+      SecurityContext securityContext=SecurityContext.getSuperUserInstance();
+      SearchNodeCommand searchNode=Services.command(securityContext,SearchNodeCommand.class);
       List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
       attrs.add(Search.andExactTypeAndSubtypes(Principal.class.getSimpleName()));
       SearchAttributeGroup group=new SearchAttributeGroup(Occur.MUST);
-      group.add(Search.orExactProperty(key,value));
-      group.add(Search.orExactProperty(AbstractNode.name,value));
+      group.add(Search.orExactProperty(securityContext,key,value));
+      group.add(Search.orExactProperty(securityContext,AbstractNode.name,value));
       attrs.add(group);
       Result userList=searchNode.execute(attrs);
       if (!userList.isEmpty()) {

@@ -1,0 +1,18 @@
+{
+  PropertyKey propertyKey=notion.getPrimaryPropertyKey();
+  List<T> list=new LinkedList<T>();
+  if (propertyKey != null) {
+    PropertyConverter inputConverter=propertyKey.inputConverter(securityContext);
+    if (inputConverter != null) {
+      for (      String part : requestParameter.split("[,;]+")) {
+        list.add((T)inputConverter.convert(part));
+      }
+    }
+ else {
+      for (      String part : requestParameter.split("[,;]+")) {
+        list.add((T)part);
+      }
+    }
+  }
+  return list;
+}

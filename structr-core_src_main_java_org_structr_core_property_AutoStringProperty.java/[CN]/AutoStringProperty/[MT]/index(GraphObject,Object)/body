@@ -1,0 +1,15 @@
+{
+  Object indexValue=value;
+  if (indexValue == null) {
+    indexValue=createValue(entity);
+    if (indexValue != null) {
+      try {
+        entity.setProperty(this,(String)indexValue);
+      }
+ catch (      FrameworkException fex) {
+        logger.log(Level.WARNING,"Unable to set value {0} on entity {1}: {2}",new Object[]{indexValue,entity,fex.getMessage()});
+      }
+    }
+  }
+  super.index(entity,indexValue);
+}

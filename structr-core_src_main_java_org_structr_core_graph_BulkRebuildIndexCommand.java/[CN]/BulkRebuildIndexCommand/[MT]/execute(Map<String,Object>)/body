@@ -8,8 +8,7 @@
   if (entityType != null) {
     final Class type=EntityContext.getEntityClassForRawType(entityType);
     if (type != null) {
-      final NewIndexNodeCommand indexNode=Services.command(securityContext,NewIndexNodeCommand.class);
-      final Result<AbstractNode> result=nodeFactory.instantiateAllNodes(GlobalGraphOperations.at(graphDb).getAllNodes());
+      final Result<AbstractNode> result=nodeFactory.instantiateAll(GlobalGraphOperations.at(graphDb).getAllNodes());
       final List<AbstractNode> nodes=new ArrayList<AbstractNode>();
       for (      AbstractNode node : result.getResults()) {
         if (node.getClass().equals(type)) {
@@ -19,7 +18,7 @@
       logger.log(Level.INFO,"Start (re-)indexing all nodes of type {0}",new Object[]{type.getSimpleName()});
       long count=bulkGraphOperation(securityContext,nodes,1000,"RebuildIndex",new BulkGraphOperation<AbstractNode>(){
         @Override public void handleGraphObject(        SecurityContext securityContext,        AbstractNode node){
-          indexNode.updateNode(node);
+          node.updateInIndex();
         }
         @Override public void handleThrowable(        SecurityContext securityContext,        Throwable t,        AbstractNode node){
           logger.log(Level.WARNING,"Unable to index node {0}: {1}",new Object[]{node,t.getMessage()});
@@ -34,8 +33,7 @@
     }
   }
  else   if (relType != null) {
-    final IndexRelationshipCommand indexRel=Services.command(securityContext,IndexRelationshipCommand.class);
-    final List<AbstractRelationship> unfilteredRels=relFactory.instantiateRelationships(superUserContext,GlobalGraphOperations.at(graphDb).getAllRelationships());
+    final List<AbstractRelationship> unfilteredRels=relFactory.instantiate(GlobalGraphOperations.at(graphDb).getAllRelationships());
     final List<AbstractRelationship> rels=new ArrayList<AbstractRelationship>();
     for (    AbstractRelationship rel : unfilteredRels) {
       if (!rel.getType().equals(relType)) {
@@ -45,12 +43,7 @@
     logger.log(Level.INFO,"Start setting UUID on all rels of type {0}",new Object[]{relType});
     long count=bulkGraphOperation(securityContext,rels,1000,"SetRelationshipUuid",new BulkGraphOperation<AbstractRelationship>(){
       @Override public void handleGraphObject(      SecurityContext securityContext,      AbstractRelationship rel){
-        try {
-          indexRel.execute(rel);
-        }
- catch (        FrameworkException fex) {
-          logger.log(Level.WARNING,"Unable to index relationship {0}: {1}",new Object[]{rel,fex.getMessage()});
-        }
+        rel.updateInIndex();
       }
       @Override public void handleThrowable(      SecurityContext securityContext,      Throwable t,      AbstractRelationship rel){
         logger.log(Level.WARNING,"Unable to index relationship {0}: {1}",new Object[]{rel,t.getMessage()});

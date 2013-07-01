@@ -3,9 +3,13 @@
   NodeFactory<T> nodeFactory=new NodeFactory<T>(securityContext);
   List<T> nodeList=new LinkedList<T>();
   for (  Node n : nodes) {
-    T abstractNode=nodeFactory.instantiateNode(n);
-    if (abstractNode != null) {
-      nodeList.add(abstractNode);
+    try {
+      T abstractNode=nodeFactory.instantiate(n);
+      if (abstractNode != null) {
+        nodeList.add(abstractNode);
+      }
+    }
+ catch (    FrameworkException fex) {
     }
   }
   if (comparator != null) {

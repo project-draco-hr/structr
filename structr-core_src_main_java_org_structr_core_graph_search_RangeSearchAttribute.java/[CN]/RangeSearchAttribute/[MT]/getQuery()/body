@@ -1,0 +1,17 @@
+{
+  Query q;
+  if (rangeStart == null && rangeEnd == null) {
+    return null;
+  }
+  if ((rangeStart != null && rangeStart instanceof Date) || (rangeEnd != null && rangeEnd instanceof Date)) {
+    q=LuceneUtil.rangeQuery(searchKey.dbName(),rangeStart == null ? null : ((Date)rangeStart).getTime(),rangeEnd == null ? null : ((Date)rangeEnd).getTime(),true,true);
+  }
+ else   if ((rangeStart != null && rangeStart instanceof Number) || (rangeEnd != null && rangeEnd instanceof Number)) {
+    q=LuceneUtil.rangeQuery(searchKey.dbName(),rangeStart == null ? null : (Number)rangeStart,rangeEnd == null ? null : (Number)rangeEnd,true,true);
+  }
+ else {
+    q=new TermRangeQuery(searchKey.dbName(),rangeStart == null ? null : rangeStart.toString(),rangeEnd == null ? null : rangeEnd.toString(),true,true);
+  }
+  logger.log(Level.FINE,"Range query: {0}",q);
+  return q;
+}

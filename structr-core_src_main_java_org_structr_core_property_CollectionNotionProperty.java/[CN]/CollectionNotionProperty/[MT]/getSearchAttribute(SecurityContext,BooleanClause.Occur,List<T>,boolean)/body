@@ -1,0 +1,34 @@
+{
+  SourceSearchAttribute attr=new SourceSearchAttribute(occur);
+  Set<GraphObject> intersectionResult=new LinkedHashSet<GraphObject>();
+  CollectionProperty collectionProperty=(CollectionProperty)base;
+  boolean alreadyAdded=false;
+  try {
+    for (    T searchValue : searchValues) {
+      Result<AbstractNode> result=Services.command(securityContext,SearchNodeCommand.class).execute(Search.andExactType(base.relatedType().getSimpleName()),Search.andExactProperty(securityContext,notion.getPrimaryPropertyKey(),searchValue));
+      for (      AbstractNode node : result.getResults()) {
+switch (occur) {
+case MUST:
+          if (!alreadyAdded) {
+            intersectionResult.addAll(collectionProperty.getRelatedNodesReverse(securityContext,node,declaringClass));
+            alreadyAdded=true;
+          }
+ else {
+            intersectionResult.retainAll(collectionProperty.getRelatedNodesReverse(securityContext,node,declaringClass));
+          }
+        break;
+case SHOULD:
+      intersectionResult.addAll(collectionProperty.getRelatedNodesReverse(securityContext,node,declaringClass));
+    break;
+case MUST_NOT:
+  break;
+}
+}
+}
+attr.setResult(new LinkedList<GraphObject>(intersectionResult));
+}
+ catch (FrameworkException fex) {
+fex.printStackTrace();
+}
+return attr;
+}

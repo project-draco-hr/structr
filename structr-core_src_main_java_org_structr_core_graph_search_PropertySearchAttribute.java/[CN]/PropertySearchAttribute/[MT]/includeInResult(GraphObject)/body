@@ -1,0 +1,23 @@
+{
+  Occur occur=getOccur();
+  T searchValue=getValue();
+  T nodeValue=entity.getProperty(getKey());
+  if (occur.equals(Occur.MUST_NOT)) {
+    if ((nodeValue != null) && !(nodeValue.equals(searchValue))) {
+      return false;
+    }
+  }
+ else {
+    if (nodeValue != null) {
+      if (!nodeValue.equals(searchValue)) {
+        return false;
+      }
+    }
+ else {
+      if (searchValue != null) {
+        return false;
+      }
+    }
+  }
+  return true;
+}

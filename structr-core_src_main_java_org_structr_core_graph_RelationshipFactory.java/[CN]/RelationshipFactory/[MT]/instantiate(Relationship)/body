@@ -1,0 +1,33 @@
+{
+  SecurityContext securityContext=factoryProfile.getSecurityContext();
+  Class<T> relClass=null;
+  T newRel=null;
+  try {
+    if (relClass == null && relationship.hasProperty(AbstractRelationship.combinedType.dbName())) {
+      String combinedRelType=(String)relationship.getProperty(AbstractRelationship.combinedType.dbName());
+      newRel=instantiate(combinedRelType);
+    }
+ else {
+      relClass=findNamedRelation(relationship);
+    }
+    if (newRel == null && relClass == null && SECURITY.name().equals(relationship.getType().name())) {
+      relClass=(Class)SecurityRelationship.class;
+    }
+    if (relClass != null && newRel == null) {
+      try {
+        newRel=relClass.newInstance();
+      }
+ catch (      Throwable t2) {
+        newRel=null;
+      }
+    }
+  }
+ catch (  Throwable t) {
+  }
+  if (newRel == null) {
+    newRel=(T)EntityContext.getFactoryDefinition().createGenericRelationship();
+  }
+  newRel.init(securityContext,relationship);
+  newRel.onRelationshipInstantiation();
+  return newRel;
+}

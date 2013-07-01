@@ -1,0 +1,21 @@
+{
+  if (isExactMatch) {
+    String value=getStringValue();
+    if (StringUtils.isEmpty(value)) {
+      value=SearchNodeCommand.IMPROBABLE_SEARCH_VALUE;
+    }
+    if (value.matches("[\\s]+")) {
+      value="\"" + value + "\"";
+    }
+    return new TermQuery(new Term(getKey().dbName(),value));
+  }
+ else {
+    BooleanQuery query=new BooleanQuery();
+    String[] words=StringUtils.split(getStringValue()," ");
+    for (    String word : words) {
+      word="*" + Search.escapeForLucene(word.toLowerCase()) + "*";
+      query.add(new WildcardQuery(new Term(getKey().dbName(),word)),Occur.SHOULD);
+    }
+    return query;
+  }
+}

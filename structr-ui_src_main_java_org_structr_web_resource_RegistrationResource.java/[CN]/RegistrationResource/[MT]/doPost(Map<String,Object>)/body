@@ -1,5 +1,6 @@
 {
   if (propertySet.containsKey(User.email.jsonName()) && propertySet.size() == 1) {
+    SecurityContext superUserContext=SecurityContext.getSuperUserInstance();
     User user;
     final String emailString=(String)propertySet.get(User.email.jsonName());
     if (StringUtils.isEmpty(emailString)) {
@@ -7,7 +8,7 @@
     }
     localeString=(String)propertySet.get(MailTemplate.locale.jsonName());
     confKey=UUID.randomUUID().toString();
-    Result result=Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class).execute(Search.andExactType(User.class.getSimpleName()),Search.andExactProperty(User.email,emailString));
+    Result result=Services.command(superUserContext,SearchNodeCommand.class).execute(Search.andExactType(User.class.getSimpleName()),Search.andExactProperty(superUserContext,User.email,emailString));
     if (!result.isEmpty()) {
       user=(User)result.get(0);
       final User finalUser=user;

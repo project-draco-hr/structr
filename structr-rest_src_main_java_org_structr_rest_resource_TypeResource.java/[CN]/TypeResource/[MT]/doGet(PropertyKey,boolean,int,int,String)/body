@@ -1,23 +1,19 @@
 {
   List<SearchAttribute> searchAttributes=new LinkedList();
-  List<SearchAttribute> validAttributes;
+  List<SearchAttribute> validAttributes=null;
   boolean includeDeletedAndHidden=false;
   boolean publicOnly=false;
   if (rawType != null) {
     if (entityClass == null) {
       throw new NotFoundException();
     }
-    validAttributes=extractSearchableAttributesFromRequest(securityContext);
+    validAttributes=extractSearchableAttributes(securityContext,entityClass,request);
     DistanceSearchAttribute distanceSearch=getDistanceSearch(request,keys(validAttributes));
     if (distanceSearch != null) {
       searchAttributes.add(distanceSearch);
-      searchAttributes.add(new FilterSearchAttribute(AbstractNode.type,EntityContext.normalizeEntityName(rawType),SearchOperator.AND));
-      searchAttributes.addAll(toFilters(validAttributes));
     }
- else {
-      searchAttributes.add(Search.andExactTypeAndSubtypes(EntityContext.normalizeEntityName(rawType)));
-      searchAttributes.addAll(validAttributes);
-    }
+    searchAttributes.add(Search.andExactTypeAndSubtypes(EntityContext.normalizeEntityName(rawType)));
+    searchAttributes.addAll(validAttributes);
     if (sortKey == null) {
       try {
         GraphObject templateEntity=((GraphObject)entityClass.newInstance());
@@ -25,6 +21,9 @@
         sortDescending=GraphObjectComparator.DESCENDING.equals(templateEntity.getDefaultSortOrder());
         if (sortKeyProperty != null) {
           sortKey=sortKeyProperty;
+        }
+ else {
+          sortKey=AbstractNode.name;
         }
       }
  catch (      Throwable t) {

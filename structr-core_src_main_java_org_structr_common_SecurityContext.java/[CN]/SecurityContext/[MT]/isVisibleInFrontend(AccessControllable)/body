@@ -6,6 +6,10 @@
     return false;
   }
   Principal user=getUser(false);
+  Principal owner=node.getOwnerNode();
+  if (user.equals(node) || user.equals(owner) || user.getParents().contains(owner)) {
+    return true;
+  }
   if (node.isVisibleToPublicUsers() && user == null) {
     return true;
   }

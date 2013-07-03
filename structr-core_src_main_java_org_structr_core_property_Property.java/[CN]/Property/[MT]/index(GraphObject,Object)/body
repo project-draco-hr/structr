@@ -2,16 +2,19 @@
   if (entity instanceof AbstractNode) {
     NodeService nodeService=Services.getService(NodeService.class);
     AbstractNode node=(AbstractNode)entity;
+    Node dbNode=node.getNode();
     for (    NodeIndex indexName : nodeIndices()) {
       Index<Node> index=nodeService.getNodeIndex(indexName);
       if (index != null) {
 synchronized (index) {
-          index.remove(node.getNode(),dbName);
-          if (value != null) {
-            index.add(node.getNode(),dbName,value);
+          index.remove(dbNode,dbName);
+          if (value != null && !StringUtils.isBlank(value.toString())) {
+            index.add(dbNode,dbName,value);
           }
  else {
-            index.add(node.getNode(),dbName,SearchCommand.IMPROBABLE_SEARCH_VALUE);
+            if (this instanceof StringProperty) {
+              index.add(dbNode,dbName,SearchCommand.IMPROBABLE_SEARCH_VALUE);
+            }
           }
         }
       }
@@ -20,16 +23,19 @@ synchronized (index) {
  else {
     NodeService nodeService=Services.getService(NodeService.class);
     AbstractRelationship rel=(AbstractRelationship)entity;
+    Relationship dbRel=rel.getRelationship();
     for (    RelationshipIndex indexName : relationshipIndices()) {
       Index<Relationship> index=nodeService.getRelationshipIndex(indexName);
       if (index != null) {
 synchronized (index) {
-          index.remove(rel.getRelationship(),dbName);
-          if (value != null) {
-            index.add(rel.getRelationship(),dbName,value);
+          index.remove(dbRel,dbName);
+          if (value != null && !StringUtils.isBlank(value.toString())) {
+            index.add(dbRel,dbName,value);
           }
  else {
-            index.add(rel.getRelationship(),dbName,SearchCommand.IMPROBABLE_SEARCH_VALUE);
+            if (this instanceof StringProperty) {
+              index.add(dbRel,dbName,SearchCommand.IMPROBABLE_SEARCH_VALUE);
+            }
           }
         }
       }

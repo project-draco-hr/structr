@@ -11,9 +11,10 @@ synchronized (index) {
           if (value != null && !StringUtils.isBlank(value.toString())) {
             index.add(dbNode,dbName,value);
           }
- else {
-            if (this instanceof StringProperty) {
-              index.add(dbNode,dbName,SearchCommand.IMPROBABLE_SEARCH_VALUE);
+ else           if (isIndexedWhenEmpty()) {
+            value=getValueForEmptyFields();
+            if (value != null) {
+              index.add(dbNode,dbName,value);
             }
           }
         }
@@ -32,9 +33,10 @@ synchronized (index) {
           if (value != null && !StringUtils.isBlank(value.toString())) {
             index.add(dbRel,dbName,value);
           }
- else {
-            if (this instanceof StringProperty) {
-              index.add(dbRel,dbName,SearchCommand.IMPROBABLE_SEARCH_VALUE);
+ else           if (isIndexedWhenEmpty()) {
+            value=getValueForEmptyFields();
+            if (value != null) {
+              index.add(dbRel,dbName,value);
             }
           }
         }

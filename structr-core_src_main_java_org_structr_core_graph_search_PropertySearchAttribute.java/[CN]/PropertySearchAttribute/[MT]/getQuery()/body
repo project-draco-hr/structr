@@ -2,7 +2,7 @@
   if (isExactMatch) {
     String value=getStringValue();
     if (StringUtils.isEmpty(value)) {
-      value=SearchNodeCommand.IMPROBABLE_SEARCH_VALUE;
+      value=SearchNodeCommand.EMPTY_FIELD_VALUE;
     }
     if (value.matches("[\\s]+")) {
       value="\"" + value + "\"";
@@ -13,7 +13,7 @@
     BooleanQuery query=new BooleanQuery();
     String[] words=StringUtils.split(getStringValue()," ");
     for (    String word : words) {
-      word="*" + Search.escapeForLucene(word.toLowerCase()) + "*";
+      word="*" + Search.escapeForLucene(word) + "*";
       query.add(new WildcardQuery(new Term(getKey().dbName(),word)),Occur.SHOULD);
     }
     return query;

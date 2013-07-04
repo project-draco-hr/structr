@@ -1,4 +1,5 @@
 {
+  boolean inexactSearch=parseInteger(request.getParameter(JsonRestServlet.REQUEST_PARAMETER_LOOSE_SEARCH)) == 1;
   List<SearchAttribute> searchAttributes=new LinkedList();
   List<SearchAttribute> validAttributes=null;
   boolean includeDeletedAndHidden=false;
@@ -12,7 +13,7 @@
     if (distanceSearch != null) {
       searchAttributes.add(distanceSearch);
     }
-    searchAttributes.add(Search.andExactTypeAndSubtypes(EntityContext.normalizeEntityName(rawType)));
+    searchAttributes.add(Search.andExactTypeAndSubtypes(EntityContext.normalizeEntityName(rawType),!inexactSearch));
     searchAttributes.addAll(validAttributes);
     if (sortKey == null) {
       try {

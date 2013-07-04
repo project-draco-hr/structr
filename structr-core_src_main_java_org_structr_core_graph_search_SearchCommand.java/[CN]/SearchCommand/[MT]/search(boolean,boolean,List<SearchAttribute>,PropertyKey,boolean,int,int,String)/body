@@ -3,7 +3,6 @@
     return Result.EMPTY_RESULT;
   }
   Factory<S,T> factory=getFactory(securityContext,includeDeletedAndHidden,publicOnly,pageSize,page,offsetId);
-  boolean optionalOnly=false;
   boolean filterResults=true;
   final Index<S> index;
   List<SourceSearchAttribute> sources=new ArrayList<SourceSearchAttribute>();
@@ -12,9 +11,6 @@
   Double dist=null;
   for (Iterator<SearchAttribute> it=searchAttrs.iterator(); it.hasNext(); ) {
     SearchAttribute attr=it.next();
-    if (attr.forcesExclusivelyOptionalQueries()) {
-      optionalOnly=true;
-    }
     if (attr instanceof DistanceSearchAttribute) {
       distanceSearch=(DistanceSearchAttribute)attr;
       coords=GeoHelper.geocode(distanceSearch);
@@ -36,7 +32,7 @@
     for (    SearchAttribute attr : searchAttrs) {
       Query queryElement=attr.getQuery();
       if (queryElement != null) {
-        query.add(queryElement,optionalOnly ? Occur.SHOULD : attr.getOccur());
+        query.add(queryElement,attr.getOccur());
       }
       allExactMatch&=attr.isExactMatch();
     }

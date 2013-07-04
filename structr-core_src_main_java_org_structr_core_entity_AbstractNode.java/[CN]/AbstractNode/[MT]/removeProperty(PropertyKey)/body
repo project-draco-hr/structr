@@ -4,7 +4,7 @@
       logger.log(Level.SEVERE,"Tried to set property with null key (action was denied)");
       return;
     }
-    if (key.isReadOnlyProperty()) {
+    if (key.isReadOnly()) {
       if (readOnlyPropertiesUnlocked || securityContext.isSuperUser()) {
         readOnlyPropertiesUnlocked=false;
       }
@@ -15,6 +15,7 @@
     Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
       @Override public Object execute() throws FrameworkException {
         dbNode.removeProperty(key.dbName());
+        removeFromIndex(key);
         return null;
       }
     }

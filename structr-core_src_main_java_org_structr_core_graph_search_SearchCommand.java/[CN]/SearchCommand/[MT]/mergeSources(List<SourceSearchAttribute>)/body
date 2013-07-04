@@ -1,0 +1,25 @@
+{
+  LinkedList<GraphObject> mergedResult=new LinkedList<GraphObject>();
+  boolean alreadyAdded=false;
+  for (Iterator<SourceSearchAttribute> it=sources.iterator(); it.hasNext(); ) {
+    SourceSearchAttribute attr=it.next();
+    if (!alreadyAdded) {
+      mergedResult.addAll(attr.getResult());
+      alreadyAdded=true;
+    }
+ else {
+switch (attr.getOccur()) {
+case MUST:
+        mergedResult.retainAll(attr.getResult());
+      break;
+case SHOULD:
+    mergedResult.addAll(attr.getResult());
+  break;
+case MUST_NOT:
+mergedResult.removeAll(attr.getResult());
+break;
+}
+}
+}
+return mergedResult;
+}

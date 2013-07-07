@@ -1,7 +1,22 @@
 {
   boolean includeInResult=true;
   for (  SearchAttribute attr : getSearchAttributes()) {
-    includeInResult&=attr.includeInResult(entity);
+switch (attr.getOccur()) {
+case MUST:
+      includeInResult&=attr.includeInResult(entity);
+    break;
+case SHOULD:
+  if (attr.includeInResult(entity)) {
+    return true;
   }
-  return includeInResult;
+ else {
+    includeInResult=false;
+  }
+break;
+case MUST_NOT:
+includeInResult&=!attr.includeInResult(entity);
+break;
+}
+}
+return includeInResult;
 }

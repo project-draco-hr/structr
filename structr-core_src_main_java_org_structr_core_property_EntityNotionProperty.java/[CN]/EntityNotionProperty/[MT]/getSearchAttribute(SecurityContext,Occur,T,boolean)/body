@@ -4,26 +4,31 @@
   EntityProperty entityProperty=(EntityProperty)base;
   boolean alreadyAdded=false;
   try {
-    Result<AbstractNode> result=Services.command(securityContext,SearchNodeCommand.class).execute(Search.andExactType(base.relatedType().getSimpleName()),Search.andExactProperty(securityContext,notion.getPrimaryPropertyKey(),searchValue));
-    for (    AbstractNode node : result.getResults()) {
+    if (searchValue != null && !StringUtils.isBlank(searchValue.toString())) {
+      Result<AbstractNode> result=Services.command(securityContext,SearchNodeCommand.class).execute(Search.andExactType(base.relatedType().getSimpleName()),Search.andExactProperty(securityContext,notion.getPrimaryPropertyKey(),searchValue));
+      for (      AbstractNode node : result.getResults()) {
 switch (occur) {
 case MUST:
-        if (!alreadyAdded) {
-          intersectionResult.addAll(entityProperty.getRelatedNodesReverse(securityContext,node,declaringClass));
-          alreadyAdded=true;
-        }
+          if (!alreadyAdded) {
+            intersectionResult.addAll(entityProperty.getRelatedNodesReverse(securityContext,node,declaringClass));
+            alreadyAdded=true;
+          }
  else {
-          intersectionResult.retainAll(entityProperty.getRelatedNodesReverse(securityContext,node,declaringClass));
-        }
-      break;
+            intersectionResult.retainAll(entityProperty.getRelatedNodesReverse(securityContext,node,declaringClass));
+          }
+        break;
 case SHOULD:
-    intersectionResult.addAll(entityProperty.getRelatedNodesReverse(securityContext,node,declaringClass));
-  break;
+      intersectionResult.addAll(entityProperty.getRelatedNodesReverse(securityContext,node,declaringClass));
+    break;
 case MUST_NOT:
-break;
+  break;
 }
 }
 attr.setResult(new LinkedList<GraphObject>(intersectionResult));
+}
+ else {
+return new EmptySearchAttribute(this,null);
+}
 }
  catch (FrameworkException fex) {
 fex.printStackTrace();

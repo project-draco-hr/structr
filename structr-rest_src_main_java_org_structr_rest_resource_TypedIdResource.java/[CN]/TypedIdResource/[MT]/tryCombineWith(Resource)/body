@@ -10,5 +10,13 @@
     resource.addTypedIdResource((TypedIdResource)next);
     return resource;
   }
+ else   if (next instanceof RelationshipResource) {
+    ((RelationshipResource)next).wrapResource(this);
+    return next;
+  }
+ else   if (next instanceof RelationshipIdResource) {
+    ((RelationshipIdResource)next).getRelationshipResource().wrapResource(this);
+    return next;
+  }
   return super.tryCombineWith(next);
 }

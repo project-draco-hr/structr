@@ -23,7 +23,7 @@
     }
   }
   Result intermediateResult;
-  if (searchAttrs.isEmpty() || !sources.isEmpty()) {
+  if (distanceSearch == null && !sources.isEmpty()) {
     intermediateResult=new Result(new ArrayList<AbstractNode>(),null,false,false);
   }
  else {
@@ -59,6 +59,7 @@ synchronized (spatialIndex) {
           }
         }
       }
+      intermediateResult=new NodeFactory(securityContext).instantiate(hits);
     }
  else     if (allExactMatch) {
       index=getKeywordIndex();
@@ -73,6 +74,7 @@ synchronized (index) {
         }
       }
       filterResults=false;
+      intermediateResult=factory.instantiate(hits);
     }
  else {
       index=getFulltextIndex();
@@ -80,8 +82,8 @@ synchronized (index) {
         hits=index.query(queryContext);
       }
       filterResults=false;
+      intermediateResult=factory.instantiate(hits);
     }
-    intermediateResult=factory.instantiate(hits);
     if (hits != null) {
       hits.close();
     }
@@ -90,7 +92,12 @@ synchronized (index) {
     List<GraphObject> finalResult=new LinkedList<GraphObject>();
     List<GraphObject> intermediateResultList=intermediateResult.getResults();
     int resultCount=0;
-    intermediateResultList.addAll(mergeSources(sources));
+    if (intermediateResultList.isEmpty()) {
+      intermediateResultList.addAll(mergeSources(sources));
+    }
+ else     if (!sources.isEmpty()) {
+      intermediateResultList.retainAll(mergeSources(sources));
+    }
     for (    GraphObject obj : intermediateResultList) {
       boolean addToResult=true;
       for (      SearchAttribute attr : searchAttrs) {

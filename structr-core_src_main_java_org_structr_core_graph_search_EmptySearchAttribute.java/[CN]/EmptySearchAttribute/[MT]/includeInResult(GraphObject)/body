@@ -1,0 +1,23 @@
+{
+  BooleanClause.Occur occur=getOccur();
+  T searchValue=getValue();
+  T nodeValue=entity.getProperty(getKey());
+  if (occur.equals(BooleanClause.Occur.MUST_NOT)) {
+    if ((nodeValue != null) && !equal(nodeValue,searchValue)) {
+      return false;
+    }
+  }
+ else {
+    if (nodeValue != null) {
+      if (!equal(nodeValue,searchValue)) {
+        return false;
+      }
+    }
+ else {
+      if (searchValue != null) {
+        return false;
+      }
+    }
+  }
+  return true;
+}

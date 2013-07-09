@@ -5,7 +5,14 @@
   boolean alreadyAdded=false;
   try {
     if (searchValues != null && !searchValues.isEmpty()) {
+      boolean allBlank=true;
       for (      T searchValue : searchValues) {
+        if (StringUtils.isBlank(searchValue.toString())) {
+          continue;
+        }
+ else {
+          allBlank=false;
+        }
         Result<AbstractNode> result=Services.command(securityContext,SearchNodeCommand.class).execute(Search.andExactType(base.relatedType().getSimpleName()),Search.andExactProperty(securityContext,notion.getPrimaryPropertyKey(),searchValue));
         for (        AbstractNode node : result.getResults()) {
 switch (occur) {
@@ -26,7 +33,12 @@ case MUST_NOT:
 }
 }
 }
+if (allBlank) {
+return new EmptySearchAttribute(this,Collections.emptyList());
+}
+ else {
 attr.setResult(new LinkedList<GraphObject>(intersectionResult));
+}
 }
  else {
 return new EmptySearchAttribute(this,Collections.emptyList());

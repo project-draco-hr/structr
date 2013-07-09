@@ -1,0 +1,61 @@
+{
+  final TestSix a=createTestNode(TestSix.class);
+  final TestSix c=createTestNode(TestSix.class);
+  final TestThree b=createTestNode(TestThree.class);
+  final TestThree d=createTestNode(TestThree.class);
+  try {
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        a.setProperty(AbstractNode.name,"a");
+        c.setProperty(AbstractNode.name,"c");
+        b.setProperty(AbstractNode.name,"b");
+        d.setProperty(AbstractNode.name,"d");
+        return null;
+      }
+    }
+);
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+    fail("Unable to create test nodes");
+  }
+  assertNotNull(a);
+  assertNotNull(b);
+  assertNotNull(c);
+  assertNotNull(d);
+  try {
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        a.setProperty(TestSix.oneToManyTestThrees,b);
+        c.setProperty(TestSix.oneToManyTestThrees,d);
+        return null;
+      }
+    }
+);
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+    fail("Unable to link test nodes");
+  }
+  TestThree verifyB=a.getProperty(TestSix.oneToManyTestThrees);
+  TestThree verifyD=c.getProperty(TestSix.oneToManyTestThrees);
+  assertTrue(verifyB != null && verifyB.equals(b));
+  assertTrue(verifyD != null && verifyD.equals(d));
+  try {
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        a.setProperty(TestSix.oneToManyTestThrees,d);
+        return null;
+      }
+    }
+);
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+    fail("Unable to link test nodes");
+  }
+  TestThree verifyD2=a.getProperty(TestSix.oneToManyTestThrees);
+  assertTrue(verifyD2 != null && verifyD2.equals(d));
+  TestThree vrfy4=c.getProperty(TestSix.oneToManyTestThrees);
+  assertEquals(d,vrfy4);
+}

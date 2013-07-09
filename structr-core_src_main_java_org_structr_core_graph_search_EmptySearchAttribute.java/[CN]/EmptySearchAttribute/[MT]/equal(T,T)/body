@@ -1,0 +1,30 @@
+{
+  if (nodeValue == null && searchValue == null) {
+    return true;
+  }
+  if (nodeValue == null && searchValue != null) {
+    return false;
+  }
+  if (nodeValue != null && searchValue == null) {
+    if (nodeValue instanceof Collection) {
+      return isEmptyOrValue((Collection)nodeValue);
+    }
+ else {
+      return StringUtils.isBlank(nodeValue.toString());
+    }
+  }
+  if (nodeValue instanceof Collection && searchValue instanceof Collection) {
+    Collection nodeCollection=(Collection)nodeValue;
+    Collection searchCollection=(Collection)searchValue;
+    if (nodeCollection.isEmpty() && searchCollection.isEmpty()) {
+      return true;
+    }
+    if (isEmptyOrValue(nodeCollection) && searchCollection.isEmpty()) {
+      return true;
+    }
+    if (nodeCollection.isEmpty() && isEmptyOrValue(searchCollection)) {
+      return true;
+    }
+  }
+  return false;
+}

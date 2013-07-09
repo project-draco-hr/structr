@@ -6,6 +6,7 @@
   boolean filterResults=true;
   final Index<S> index;
   List<SourceSearchAttribute> sources=new ArrayList<SourceSearchAttribute>();
+  boolean hasEmptySearchFields=false;
   DistanceSearchAttribute distanceSearch=null;
   GeoCodingResult coords=null;
   Double dist=null;
@@ -20,6 +21,9 @@
     if (attr instanceof SourceSearchAttribute) {
       sources.add((SourceSearchAttribute)attr);
       it.remove();
+    }
+    if (attr instanceof EmptySearchAttribute) {
+      hasEmptySearchFields=true;
     }
   }
   Result intermediateResult;
@@ -73,7 +77,7 @@ synchronized (index) {
           hits=index.query(queryContext);
         }
       }
-      filterResults=false;
+      filterResults=hasEmptySearchFields;
       intermediateResult=factory.instantiate(hits);
     }
  else {
@@ -81,7 +85,7 @@ synchronized (index) {
 synchronized (index) {
         hits=index.query(queryContext);
       }
-      filterResults=false;
+      filterResults=hasEmptySearchFields;
       intermediateResult=factory.instantiate(hits);
     }
     if (hits != null) {

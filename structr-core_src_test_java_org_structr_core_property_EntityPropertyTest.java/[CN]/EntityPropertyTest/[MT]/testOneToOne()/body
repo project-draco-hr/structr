@@ -1,16 +1,15 @@
 {
-  final EntityProperty<TestThree> instance=TestSix.oneToOneTestThree;
-  final TestSix testSix1=createTestNode(TestSix.class);
-  final TestSix testSix2=createTestNode(TestSix.class);
-  final TestThree testThree1=createTestNode(TestThree.class);
-  final TestThree testThree2=createTestNode(TestThree.class);
+  final TestSix a=createTestNode(TestSix.class);
+  final TestSix c=createTestNode(TestSix.class);
+  final TestThree b=createTestNode(TestThree.class);
+  final TestThree d=createTestNode(TestThree.class);
   try {
     Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
       @Override public Object execute() throws FrameworkException {
-        testSix1.setProperty(AbstractNode.name,"testSix1");
-        testSix2.setProperty(AbstractNode.name,"testSix2");
-        testThree1.setProperty(AbstractNode.name,"testThree1");
-        testThree2.setProperty(AbstractNode.name,"testThree2");
+        a.setProperty(AbstractNode.name,"a");
+        c.setProperty(AbstractNode.name,"c");
+        b.setProperty(AbstractNode.name,"b");
+        d.setProperty(AbstractNode.name,"d");
         return null;
       }
     }
@@ -20,15 +19,15 @@
     fex.printStackTrace();
     fail("Unable to create test nodes");
   }
-  assertNotNull(testSix1);
-  assertNotNull(testSix2);
-  assertNotNull(testThree1);
-  assertNotNull(testThree2);
+  assertNotNull(a);
+  assertNotNull(c);
+  assertNotNull(b);
+  assertNotNull(d);
   try {
     Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
       @Override public Object execute() throws FrameworkException {
-        instance.setProperty(securityContext,testSix1,testThree1);
-        instance.setProperty(securityContext,testSix2,testThree2);
+        a.setProperty(TestSix.oneToOneTestThree,b);
+        c.setProperty(TestSix.oneToOneTestThree,d);
         return null;
       }
     }
@@ -38,14 +37,14 @@
     fex.printStackTrace();
     fail("Unable to link test nodes");
   }
-  TestThree vrfy1=instance.getProperty(securityContext,testSix1,true);
-  TestThree vrfy2=instance.getProperty(securityContext,testSix2,true);
-  assertTrue(vrfy1 != null && vrfy1.equals(testThree1));
-  assertTrue(vrfy2 != null && vrfy2.equals(testThree2));
+  TestThree verifyB=a.getProperty(TestSix.oneToOneTestThree);
+  TestThree verifyD=c.getProperty(TestSix.oneToOneTestThree);
+  assertTrue(verifyB != null && verifyB.equals(b));
+  assertTrue(verifyD != null && verifyD.equals(d));
   try {
     Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
       @Override public Object execute() throws FrameworkException {
-        instance.setProperty(securityContext,testSix1,testThree2);
+        a.setProperty(TestSix.oneToOneTestThree,d);
         return null;
       }
     }
@@ -55,8 +54,8 @@
     fex.printStackTrace();
     fail("Unable to link test nodes");
   }
-  TestThree vrfy3=instance.getProperty(securityContext,testSix1,true);
-  assertTrue(vrfy3 != null && vrfy3.equals(testThree2));
-  TestThree vrfy4=instance.getProperty(securityContext,testSix2,true);
+  TestThree verifyD2=a.getProperty(TestSix.oneToOneTestThree);
+  assertTrue(verifyD2 != null && verifyD2.equals(d));
+  TestThree vrfy4=c.getProperty(TestSix.oneToOneTestThree);
   assertNull(vrfy4);
 }

@@ -1,9 +1,9 @@
 {
   SearchAttributeGroup group=new SearchAttributeGroup(occur);
   for (  PropertyKey key : propertyKeys.values()) {
-    Object value=searchValues.get(key);
+    Object value=searchValues.get(new GenericProperty(key.jsonName()));
     if (value != null) {
-      group.add(new PropertySearchAttribute(new GroupPropertyWrapper(key),value.toString(),Occur.MUST,exactMatch));
+      group.add(new PropertySearchAttribute(key,value.toString(),Occur.MUST,exactMatch));
     }
   }
   return group;

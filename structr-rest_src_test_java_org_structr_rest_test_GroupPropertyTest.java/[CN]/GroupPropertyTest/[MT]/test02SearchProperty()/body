@@ -1,16 +1,16 @@
 {
   String test01=createEntity("/test_group_prop_four","{gP:{sP:text,iP:1337}}");
-  RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(200).body("result",hasSize(1)).body("result_count",equalTo(1)).body("result[0].id",equalTo(test01)).when().get(concat("/test_group_prop_four/?gP.sP=text"));
+  RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(200).body("result",hasSize(1)).body("result_count",equalTo(1)).body("result[0].id",equalTo(test01)).body("result[0].gP.sP",equalTo("text")).when().get(concat("/test_group_prop_four/?gP.sP=text"));
   RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(200).body("result",hasSize(0)).body("result_count",equalTo(0)).when().get(concat("/test_group_prop_four/?gP.iP=1336"));
   String test02=createEntity("/test_group_prop_four","{twitter:{uid:11111}}");
   String test03=createEntity("/test_group_prop_four","{facebook:{uid:11111}}");
   RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(200).body("result",hasSize(1)).body("result_count",equalTo(1)).body("result[0].id",equalTo(test02)).when().get(concat("/test_group_prop_four/?twitter.uid=11111"));
-  RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(200).body("result",hasSize(1)).body("result_count",equalTo(1)).body("result[0].id",equalTo(test03)).when().get(concat("/test_group_prop_four/?facebook.uid=11111"));
+  RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(200).body("result",hasSize(1)).body("result_count",equalTo(1)).body("result[0].id",equalTo(test03)).body("result[0].facebook.uid",equalTo(11111)).when().get(concat("/test_group_prop_four/?facebook.uid=11111"));
   String test04=createEntity("/test_group_prop_four","{facebook:{uid:11111},twitter:{uid:22222}}");
   String test05=createEntity("/test_group_prop_four","{facebook:{uid:22222},twitter:{uid:11111}}");
   String test06=createEntity("/test_group_prop_four","{facebook:{uid:33333},twitter:{uid:22222}}");
   String test07=createEntity("/test_group_prop_four","{facebook:{uid:33333},twitter:{uid:33333}}");
   RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(200).body("result",hasSize(0)).body("result_count",equalTo(0)).when().get(concat("/test_group_prop_four/?facebook.uid=11111&twitter.uid=11111"));
-  RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(200).body("result",hasSize(2)).body("result_count",equalTo(2)).when().get(concat("/test_group_prop_four/?facebook.uid=33333"));
-  RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(200).body("result",hasSize(1)).body("result_count",equalTo(1)).when().get(concat("/test_group_prop_four/?twitter.uid=33333"));
+  RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(200).body("result",hasSize(2)).body("result_count",equalTo(2)).body("result[0].facebook.uid",equalTo(33333)).body("result[1].facebook.uid",equalTo(33333)).body("result[0].twitter.uid",equalTo(33333)).body("result[1].twitter.uid",equalTo(22222)).when().get(concat("/test_group_prop_four/?facebook.uid=33333&sort=twitter.uid&order=desc"));
+  RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(200).body("result",hasSize(1)).body("result_count",equalTo(1)).body("result[0].id",equalTo(test07)).body("result[0].twitter.uid",equalTo(33333)).body("result[0].facebook.uid",equalTo(33333)).when().get(concat("/test_group_prop_four/?twitter.uid=33333"));
 }

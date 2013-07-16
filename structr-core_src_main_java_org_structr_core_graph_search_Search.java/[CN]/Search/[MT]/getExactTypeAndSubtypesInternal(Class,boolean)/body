@@ -1,0 +1,21 @@
+{
+  List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
+  ModuleService moduleService=Services.getService(ModuleService.class);
+  Map<String,Class> entities=moduleService.getCachedNodeEntities();
+  if (type == null) {
+    Set<Class> classesForInterface=moduleService.getClassesForInterface(type.getSimpleName());
+    if (classesForInterface != null) {
+      for (      Class clazz : classesForInterface) {
+        attrs.addAll(getExactTypeAndSubtypesInternal(clazz,isExactMatch));
+      }
+    }
+    return attrs;
+  }
+  for (  Map.Entry<String,Class> entity : entities.entrySet()) {
+    Class entityClass=entity.getValue();
+    if (type.isAssignableFrom(entityClass)) {
+      attrs.add(Search.orExactType(entityClass,isExactMatch));
+    }
+  }
+  return attrs;
+}

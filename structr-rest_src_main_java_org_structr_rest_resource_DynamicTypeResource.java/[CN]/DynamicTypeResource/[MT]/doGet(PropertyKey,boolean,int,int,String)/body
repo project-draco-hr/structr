@@ -6,7 +6,7 @@
     if (entityClass == null) {
       throw new NotFoundException();
     }
-    searchAttributes.add(Search.andExactType(normalizedTypeName));
+    searchAttributes.add(Search.andExactType(entityClass));
     searchAttributes.addAll(extractSearchableAttributes(securityContext,entityClass,request));
     Result results=Services.command(securityContext,SearchNodeCommand.class).execute(includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDescending,pageSize,page,offsetId);
     return results;

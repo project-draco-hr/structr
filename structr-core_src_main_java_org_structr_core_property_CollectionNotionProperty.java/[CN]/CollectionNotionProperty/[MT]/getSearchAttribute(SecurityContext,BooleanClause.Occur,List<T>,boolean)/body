@@ -13,23 +13,31 @@
  else {
           allBlank=false;
         }
-        Result<AbstractNode> result=Services.command(securityContext,SearchNodeCommand.class).execute(Search.andExactType(base.relatedType().getSimpleName()),Search.andExactProperty(securityContext,notion.getPrimaryPropertyKey(),searchValue));
-        for (        AbstractNode node : result.getResults()) {
+        if (exactMatch) {
+          Result<AbstractNode> result=Services.command(securityContext,SearchNodeCommand.class).execute(Search.andExactTypeAndSubtypes(base.relatedType(),exactMatch),Search.andExactProperty(securityContext,notion.getPrimaryPropertyKey(),searchValue));
+          for (          AbstractNode node : result.getResults()) {
 switch (occur) {
 case MUST:
-            if (!alreadyAdded) {
-              intersectionResult.addAll(collectionProperty.getRelatedNodesReverse(securityContext,node,declaringClass));
-              alreadyAdded=true;
-            }
+              if (!alreadyAdded) {
+                intersectionResult.addAll(collectionProperty.getRelatedNodesReverse(securityContext,node,declaringClass));
+                alreadyAdded=true;
+              }
  else {
-              intersectionResult.retainAll(collectionProperty.getRelatedNodesReverse(securityContext,node,declaringClass));
-            }
-          break;
+                intersectionResult.retainAll(collectionProperty.getRelatedNodesReverse(securityContext,node,declaringClass));
+              }
+            break;
 case SHOULD:
-        intersectionResult.addAll(collectionProperty.getRelatedNodesReverse(securityContext,node,declaringClass));
-      break;
+          intersectionResult.addAll(collectionProperty.getRelatedNodesReverse(securityContext,node,declaringClass));
+        break;
 case MUST_NOT:
-    break;
+      break;
+  }
+}
+}
+ else {
+Result<AbstractNode> result=Services.command(securityContext,SearchNodeCommand.class).execute(Search.andExactTypeAndSubtypes(base.relatedType(),exactMatch),Search.andProperty(securityContext,notion.getPrimaryPropertyKey(),searchValue));
+for (AbstractNode node : result.getResults()) {
+  intersectionResult.addAll(collectionProperty.getRelatedNodesReverse(securityContext,node,declaringClass));
 }
 }
 }

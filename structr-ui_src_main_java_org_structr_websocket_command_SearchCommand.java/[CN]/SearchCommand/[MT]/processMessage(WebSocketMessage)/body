@@ -1,7 +1,8 @@
 {
   final SecurityContext securityContext=getWebSocket().getSecurityContext();
   String searchString=(String)webSocketData.getNodeData().get("searchString");
-  String type=(String)webSocketData.getNodeData().get("type");
+  String typeString=(String)webSocketData.getNodeData().get("type");
+  Class type=EntityContext.getEntityClassForRawType(typeString);
   List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
   if (searchString == null) {
     getWebSocket().send(MessageBuilder.status().code(204).message("Empty search string").build(),true);

@@ -1,0 +1,25 @@
+{
+  try {
+    final TestOne testOne=createTestNode(TestOne.class);
+    final TestFour testFour=createTestNode(TestFour.class);
+    final Property<Long> key=TestRelationship.longProperty;
+    assertNotNull(testOne);
+    assertNotNull(testFour);
+    final TestRelationship testEntity=(TestRelationship)createTestRelationship(testOne,testFour,RelType.IS_AT);
+    assertNotNull(testEntity);
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        testEntity.setProperty(key,2857312362L);
+        return null;
+      }
+    }
+);
+    assertEquals((Long)2857312362L,(Long)testEntity.getProperty(key));
+    Result<TestFour> result=Services.command(securityContext,SearchRelationshipCommand.class).execute(Search.andExactRelType(EntityContext.getNamedRelation(TestRelationship.Relation.test_relationships.name())),Search.andExactProperty(securityContext,key,2857312362L));
+    assertEquals(result.size(),1);
+    assertEquals(result.get(0),testEntity);
+  }
+ catch (  FrameworkException fex) {
+    fail("Unable to store array");
+  }
+}

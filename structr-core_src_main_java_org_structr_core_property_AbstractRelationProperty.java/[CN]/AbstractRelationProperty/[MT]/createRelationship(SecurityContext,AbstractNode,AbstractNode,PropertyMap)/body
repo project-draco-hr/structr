@@ -4,8 +4,8 @@
   if ((sourceNode != null) && (targetNode != null)) {
     final AbstractNode finalTargetNode=targetNode;
     final AbstractNode finalSourceNode=(AbstractNode)sourceNode;
-    StructrTransaction transaction=new StructrTransaction(){
-      @Override public Object execute() throws FrameworkException {
+    StructrTransaction<AbstractRelationship> transaction=new StructrTransaction<AbstractRelationship>(){
+      @Override public AbstractRelationship execute() throws FrameworkException {
         PropertyMap props=new PropertyMap(properties);
         AbstractRelationship newRel=null;
         if (getCascadeDelete() > 0) {
@@ -40,7 +40,7 @@ return newRel;
 }
 }
 ;
-Services.command(securityContext,TransactionCommand.class).execute(transaction);
+return Services.command(securityContext,TransactionCommand.class).execute(transaction);
 }
  else {
 String type="unknown";
@@ -59,4 +59,5 @@ logger.log(Level.WARNING,"No target node!");
 throw new FrameworkException(type,new IdNotFoundToken(targetNode));
 }
 }
+return null;
 }

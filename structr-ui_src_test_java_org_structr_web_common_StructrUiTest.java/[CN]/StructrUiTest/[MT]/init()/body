@@ -5,7 +5,8 @@
     File basePathFile=new File(basePath);
     basePathFile.mkdirs();
     String sourceJarName=getClass().getProtectionDomain().getCodeSource().getLocation().toString();
-    File confFile=checkStructrConf(basePath,sourceJarName);
+    checkUrlrewriteConf(basePath);
+    checkStructrConf(basePath,sourceJarName);
     List<Connector> connectors=new LinkedList<Connector>();
     HandlerCollection handlerCollection=new HandlerCollection();
     server=new Server(httpPort);
@@ -20,10 +21,18 @@
     structrRestServletHolder.setInitOrder(0);
     Map<String,ServletHolder> servlets=new LinkedHashMap<String,ServletHolder>();
     servlets.put(restUrl + "/*",structrRestServletHolder);
+    WebSocketServlet wsServlet=new WebSocketServlet(AbstractNode.uuid);
+    ServletHolder wsServletHolder=new ServletHolder(wsServlet);
+    Map<String,String> wsInitParams=new HashMap<String,String>();
+    wsInitParams.put("Authenticator","org.structr.web.auth.UiAuthenticator");
+    wsInitParams.put("IdProperty","uuid");
+    wsServletHolder.setInitParameters(wsInitParams);
+    wsServletHolder.setInitOrder(3);
+    servlets.put(wsUrl + "/*",wsServletHolder);
     HtmlServlet htmlServlet=new HtmlServlet();
     ServletHolder htmlServletHolder=new ServletHolder(htmlServlet);
     Map<String,String> htmlInitParams=new HashMap<String,String>();
-    htmlInitParams.put("Authenticator",UiAuthenticator.class.getName());
+    htmlInitParams.put("Authenticator","org.structr.web.auth.HttpAuthenticator");
     htmlServletHolder.setInitParameters(htmlInitParams);
     htmlServletHolder.setInitOrder(1);
     servlets.put(htmlUrl + "/*",htmlServletHolder);
@@ -35,6 +44,18 @@
       logger.log(Level.INFO,"Adding servlet {0} for {1}",new Object[]{servletHolder,path});
       servletContext.addServlet(servletHolder,path);
     }
+    ResourceHandler resourceHandler=new ResourceHandler();
+    resourceHandler.setDirectoriesListed(true);
+    resourceHandler.setWelcomeFiles(new String[]{"index.html"});
+    resourceHandler.setResourceBase("src/main/resources/structr");
+    ContextHandler staticResourceHandler=new ContextHandler();
+    staticResourceHandler.setContextPath("/structr");
+    staticResourceHandler.setHandler(resourceHandler);
+    handlerCollection.addHandler(staticResourceHandler);
+    FilterHolder rewriteFilter=new FilterHolder(UrlRewriteFilter.class);
+    rewriteFilter.setInitParameter("confPath",basePath + "/urlrewrite.xml");
+    servletContext.addFilter(rewriteFilter,"/*",EnumSet.of(DispatcherType.REQUEST,DispatcherType.FORWARD));
+    handlerCollection.addHandler(servletContext);
     servletContext.addEventListener(new ApplicationContextListener());
     handlerCollection.addHandler(servletContext);
     server.setHandler(handlerCollection);

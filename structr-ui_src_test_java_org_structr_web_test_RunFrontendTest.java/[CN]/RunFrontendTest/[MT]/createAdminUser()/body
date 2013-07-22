@@ -1,0 +1,13 @@
+{
+  final CreateNodeCommand cmd=Services.command(securityContext,CreateNodeCommand.class);
+  final PropertyMap properties=new PropertyMap();
+  properties.put(AbstractNode.type,User.class.getSimpleName());
+  properties.put(User.name,"admin");
+  properties.put(User.password,"admin");
+  Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction<User>(){
+    @Override public User execute() throws FrameworkException {
+      return (User)cmd.execute(properties);
+    }
+  }
+);
+}

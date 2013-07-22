@@ -1,0 +1,18 @@
+{
+  try {
+    try {
+      createAdminUser();
+      createResourceAccess("_login",UiAuthenticator.NON_AUTH_USER_POST);
+    }
+ catch (    FrameworkException ex) {
+      logger.log(Level.SEVERE,"Could not create admin user",ex);
+    }
+    String[] args={"/bin/sh","-c","cd src/test/javascript;./run_tests.sh"};
+    Process proc=Runtime.getRuntime().exec(args);
+    logger.log(Level.INFO,IOUtils.toString(proc.getInputStream()));
+    logger.log(Level.WARNING,IOUtils.toString(proc.getErrorStream()));
+  }
+ catch (  IOException ex) {
+    logger.log(Level.SEVERE,null,ex);
+  }
+}

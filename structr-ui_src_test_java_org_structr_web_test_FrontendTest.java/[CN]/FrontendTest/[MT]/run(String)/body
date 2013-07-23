@@ -7,12 +7,16 @@
  catch (    FrameworkException ex) {
       logger.log(Level.SEVERE,"Could not create admin user",ex);
     }
-    String[] args={"/bin/sh","-c","cd src/test/javascript;./run_tests.sh"};
+    String[] args={"/bin/sh","-c","cd src/test/javascript; PATH=$PATH:./bin/ casperjs/bin/casperjs test " + testName + ".js"};
     Process proc=Runtime.getRuntime().exec(args);
     logger.log(Level.INFO,IOUtils.toString(proc.getInputStream()));
     logger.log(Level.WARNING,IOUtils.toString(proc.getErrorStream()));
+    int exitValue=proc.exitValue();
+    logger.log(Level.INFO,"casperjs subprocess returned with {0}",exitValue);
+    return exitValue;
   }
  catch (  IOException ex) {
     logger.log(Level.SEVERE,null,ex);
   }
+  return 1;
 }

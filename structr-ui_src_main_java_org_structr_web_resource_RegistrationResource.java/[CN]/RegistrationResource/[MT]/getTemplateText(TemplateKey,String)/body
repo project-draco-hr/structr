@@ -1,6 +1,12 @@
 {
   try {
-    List<MailTemplate> templates=(List<MailTemplate>)Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class).execute(Search.andExactType(MailTemplate.class),Search.andExactName(key.name()),Search.andMatchExactValues(securityContext,MailTemplate.locale,localeString,Occur.MUST)).getResults();
+    List<SearchAttribute> attrs=new LinkedList();
+    attrs.add(Search.andExactType(MailTemplate.class));
+    attrs.add(Search.andExactName(key.name()));
+    if (localeString != null) {
+      attrs.add(Search.andExactProperty(securityContext,MailTemplate.locale,localeString));
+    }
+    List<MailTemplate> templates=(List<MailTemplate>)Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class).execute(attrs).getResults();
     if (!templates.isEmpty()) {
       return templates.get(0).getProperty(MailTemplate.text).getProperty(Content.content);
     }

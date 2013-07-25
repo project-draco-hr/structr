@@ -43,7 +43,7 @@
     servletContext.addFilter(rewriteFilter,"/*",EnumSet.of(DispatcherType.REQUEST,DispatcherType.FORWARD));
   }
   contexts.addHandler(servletContext);
-  if (logRequests) {
+  if (logRequests || "true".equals(configuration.getProperty("log.requests","false"))) {
     String etcPath=basePath + "/etc";
     File etcDir=new File(etcPath);
     if (!etcDir.exists()) {

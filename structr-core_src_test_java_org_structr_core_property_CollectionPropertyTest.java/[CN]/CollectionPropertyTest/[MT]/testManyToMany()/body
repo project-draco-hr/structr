@@ -17,15 +17,22 @@
   assertNotNull(testSix2);
   assertNotNull(testOne1);
   assertNotNull(testOne2);
-  List<TestOne> testOnesToSet=new LinkedList<TestOne>();
-  testOnesToSet.add(testOne1);
-  testOnesToSet.add(testOne2);
-  instance.setProperty(securityContext,testSix1,testOnesToSet);
-  instance.setProperty(securityContext,testSix2,testOnesToSet);
+  List<TestOne> twoTestOnesList=new LinkedList<TestOne>();
+  twoTestOnesList.add(testOne1);
+  twoTestOnesList.add(testOne2);
+  instance.setProperty(securityContext,testSix1,twoTestOnesList);
+  instance.setProperty(securityContext,testSix2,twoTestOnesList);
   List<TestOne> testOnesFromTestSix1=instance.getProperty(securityContext,testSix1,true);
   List<TestOne> testOnesFromTestSix2=instance.getProperty(securityContext,testSix2,true);
   assertNotNull(testOnesFromTestSix1);
   assertNotNull(testOnesFromTestSix2);
   assertEquals(2,testOnesFromTestSix1.size());
   assertEquals(2,testOnesFromTestSix2.size());
+  List<TestOne> oneTestOneList=new LinkedList<TestOne>();
+  oneTestOneList.add(testOne1);
+  instance.setProperty(securityContext,testSix1,oneTestOneList);
+  List<TestOne> oneTestOnesFromTestSix1=instance.getProperty(securityContext,testSix1,true);
+  assertNotNull(oneTestOnesFromTestSix1);
+  assertEquals(1,oneTestOnesFromTestSix1.size());
+  assertEquals(oneTestOnesFromTestSix1.get(0).getUuid(),testOne1.getUuid());
 }

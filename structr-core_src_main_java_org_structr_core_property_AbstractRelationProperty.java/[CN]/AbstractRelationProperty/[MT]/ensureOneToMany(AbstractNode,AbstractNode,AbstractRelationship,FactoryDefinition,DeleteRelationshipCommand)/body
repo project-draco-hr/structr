@@ -1,13 +1,13 @@
 {
   Class newRelationshipClass=newRel.getClass();
-  Class targetType=finalTargetNode.getClass();
-  for (  AbstractRelationship rel : finalSourceNode.getRelationships(getRelType(),getDirection())) {
+  Class sourceType=sourceNode.getClass();
+  for (  AbstractRelationship rel : targetNode.getRelationships(getRelType(),getDirection().reverse())) {
     if (rel.equals(newRel)) {
       continue;
     }
     Class relationshipClass=rel.getClass();
     boolean isGeneric=factoryDefinition.isGeneric(relationshipClass);
-    if ((!isGeneric && newRelationshipClass.isAssignableFrom(relationshipClass)) || targetType.isAssignableFrom(rel.getOtherNode(finalSourceNode).getClass())) {
+    if ((!isGeneric && newRelationshipClass.isAssignableFrom(relationshipClass)) || sourceType.isAssignableFrom(rel.getOtherNode(targetNode).getClass())) {
       deleteRel.execute(rel);
     }
   }

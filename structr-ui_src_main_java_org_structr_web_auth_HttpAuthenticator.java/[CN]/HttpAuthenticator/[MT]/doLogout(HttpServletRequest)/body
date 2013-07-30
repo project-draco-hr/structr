@@ -1,0 +1,23 @@
+{
+  try {
+    Principal user=getUser(request,false);
+    if (user != null) {
+      final Principal principal=user;
+      Services.command(SecurityContext.getSuperUserInstance(),TransactionCommand.class).execute(new StructrTransaction(){
+        @Override public Object execute() throws FrameworkException {
+          principal.setProperty(Principal.sessionId,null);
+          return null;
+        }
+      }
+);
+    }
+    HttpSession session=request.getSession(false);
+    if (session != null) {
+      session.invalidate();
+    }
+    request.logout();
+  }
+ catch (  Exception ex) {
+    logger.log(Level.WARNING,"Error while logging out user",ex);
+  }
+}

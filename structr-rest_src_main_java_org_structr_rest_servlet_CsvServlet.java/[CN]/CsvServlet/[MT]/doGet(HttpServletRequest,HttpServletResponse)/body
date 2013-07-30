@@ -1,14 +1,16 @@
 {
+  SecurityContext securityContext=null;
   try {
+    Authenticator authenticator=getAuthenticator();
+    securityContext=authenticator.initializeAndExamineRequest(request,response);
     request.setCharacterEncoding("UTF-8");
     response.setCharacterEncoding("UTF-8");
     response.setContentType("text/csv; charset=utf-8");
-    SecurityContext securityContext=getSecurityContext(request,response);
     propertyView.set(securityContext,defaultPropertyView);
     double queryTimeStart=System.nanoTime();
     Resource resource=ResourceHelper.applyViewTransformation(request,securityContext,ResourceHelper.optimizeNestedResourceChain(ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,defaultIdProperty),defaultIdProperty),propertyView);
     String resourceSignature=resource.getResourceSignature();
-    securityContext.examineRequest(request,resourceSignature,ResourceAccess.findGrant(resourceSignature),propertyView.get(securityContext));
+    authenticator.checkResourceAccess(request,resourceSignature,propertyView.get(securityContext));
     String pageSizeParameter=request.getParameter(JsonRestServlet.REQUEST_PARAMETER_PAGE_SIZE);
     String pageParameter=request.getParameter(JsonRestServlet.REQUEST_PARAMETER_PAGE_NUMBER);
     String offsetId=request.getParameter(JsonRestServlet.REQUEST_PARAMETER_OFFSET_ID);

@@ -1,0 +1,71 @@
+{
+  String path=PathHelper.clean(request.getPathInfo());
+  String[] uriParts=PathHelper.getParts(path);
+  logger.log(Level.FINE,"Checking external authentication ...");
+  if (uriParts == null || uriParts.length != 3 || !("oauth".equals(uriParts[0]))) {
+    logger.log(Level.FINE,"Incorrect URI parts for OAuth process, need /oauth/<name>/<action>");
+    return null;
+  }
+  String name=uriParts[1];
+  String action=uriParts[2];
+  OAuth2Server oauthServer=OAuth2Server.getServer(name);
+  if (oauthServer == null) {
+    logger.log(Level.FINE,"No OAuth2 authentication server configured for {0}",path);
+    return null;
+  }
+  if ("login".equals(action)) {
+    try {
+      response.sendRedirect(oauthServer.getEndUserAuthorizationRequest(request).getLocationUri());
+      return null;
+    }
+ catch (    Exception ex) {
+      logger.log(Level.SEVERE,"Could not send redirect to authorization server",ex);
+    }
+  }
+ else   if ("auth".equals(action)) {
+    String accessToken=oauthServer.getAccessToken(request);
+    SecurityContext superUserContext=SecurityContext.getSuperUserInstance();
+    if (accessToken != null) {
+      logger.log(Level.FINE,"Got access token {0}",accessToken);
+      String email=oauthServer.getEmail(request);
+      logger.log(Level.FINE,"Got email: {0}",new Object[]{email});
+      if (email != null) {
+        Principal user=AuthHelper.getPrincipalForEmail(email);
+        if (user == null) {
+          user=RegistrationResource.createUser(superUserContext,email);
+        }
+        if (user != null) {
+          final Principal principal=user;
+          try {
+            Services.command(superUserContext,TransactionCommand.class).execute(new StructrTransaction(){
+              @Override public Object execute() throws FrameworkException {
+                principal.setProperty(Principal.sessionId,HttpAuthenticator.getSessionId(request));
+                return null;
+              }
+            }
+);
+            HtmlServlet.setNoCacheHeaders(response);
+            try {
+              logger.log(Level.FINE,"Response status: {0}",response.getStatus());
+              response.sendRedirect(oauthServer.getReturnUri());
+            }
+ catch (            Exception ex) {
+              logger.log(Level.SEVERE,"Could not redirect to {0}: {1}",new Object[]{oauthServer.getReturnUri(),ex});
+            }
+            return user;
+          }
+ catch (          FrameworkException ex) {
+            logger.log(Level.SEVERE,"Could not set session id for user {0}",user.toString());
+          }
+        }
+      }
+    }
+  }
+  try {
+    response.sendRedirect(oauthServer.getErrorUri());
+  }
+ catch (  Exception ex) {
+    logger.log(Level.SEVERE,"Could not redirect to {0}: {1}",new Object[]{oauthServer.getReturnUri(),ex});
+  }
+  return null;
+}

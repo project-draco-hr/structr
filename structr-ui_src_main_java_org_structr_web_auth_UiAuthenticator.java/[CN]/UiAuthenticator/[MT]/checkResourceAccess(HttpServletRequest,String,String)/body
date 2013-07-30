@@ -1,0 +1,49 @@
+{
+  ResourceAccess resourceAccess=ResourceAccess.findGrant(rawResourceSignature);
+  Method method=methods.get(request.getMethod());
+  Principal user=getUser(request,true);
+  boolean validUser=(user != null);
+  if (validUser && user instanceof SuperUser) {
+    return;
+  }
+  if (resourceAccess == null) {
+    throw new UnauthorizedException("Forbidden");
+  }
+ else {
+switch (method) {
+case GET:
+      if (!validUser && resourceAccess.hasFlag(NON_AUTH_USER_GET)) {
+        return;
+      }
+    if (validUser && resourceAccess.hasFlag(AUTH_USER_GET)) {
+      return;
+    }
+  break;
+case PUT:
+if (!validUser && resourceAccess.hasFlag(NON_AUTH_USER_PUT)) {
+  return;
+}
+if (validUser && resourceAccess.hasFlag(AUTH_USER_PUT)) {
+return;
+}
+break;
+case POST:
+if (!validUser && resourceAccess.hasFlag(NON_AUTH_USER_POST)) {
+return;
+}
+if (validUser && resourceAccess.hasFlag(AUTH_USER_POST)) {
+return;
+}
+break;
+case DELETE:
+if (!validUser && resourceAccess.hasFlag(NON_AUTH_USER_DELETE)) {
+return;
+}
+if (validUser && resourceAccess.hasFlag(AUTH_USER_DELETE)) {
+return;
+}
+break;
+}
+}
+throw new UnauthorizedException("Forbidden");
+}

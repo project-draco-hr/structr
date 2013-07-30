@@ -1,0 +1,16 @@
+{
+  SecurityContext securityContext;
+  Principal user=checkSessionAuthentication(request);
+  if (user == null) {
+    user=checkExternalAuthentication(request,response);
+  }
+  if (user != null) {
+    securityContext=SecurityContext.getInstance(user,request,AccessMode.Backend);
+  }
+ else {
+    securityContext=SecurityContext.getInstance(user,request,AccessMode.Frontend);
+  }
+  securityContext.setAuthenticator(this);
+  examined=true;
+  return securityContext;
+}

@@ -1,0 +1,35 @@
+{
+  try {
+    List<AbstractNode> persons=createTestNodes(Person.class,2);
+    Person user1=(Person)persons.get(0);
+    final Person user2=(Person)persons.get(1);
+    Class type=TestOne.class;
+    final TestOne t1=createTestNode(TestOne.class,user1);
+    transactionCommand.execute(new StructrTransaction<Object>(){
+      @Override public Object execute() throws FrameworkException {
+        user2.grant(Permission.read,t1);
+        return null;
+      }
+    }
+);
+    SecurityContext user2Context=SecurityContext.getInstance(user2,AccessMode.Backend);
+    List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
+    searchAttributes.add(Search.andExactTypeAndSubtypes(type));
+    Result result=Services.command(user2Context,SearchNodeCommand.class).execute(searchAttributes);
+    assertEquals(1,result.size());
+    assertEquals(t1.getUuid(),result.get(0).getUuid());
+    transactionCommand.execute(new StructrTransaction<Object>(){
+      @Override public Object execute() throws FrameworkException {
+        user2.revoke(Permission.read,t1);
+        return null;
+      }
+    }
+);
+    result=Services.command(user2Context,SearchNodeCommand.class).execute(searchAttributes);
+    assertTrue(result.isEmpty());
+  }
+ catch (  FrameworkException ex) {
+    logger.log(Level.SEVERE,ex.toString());
+    fail("Unexpected exception");
+  }
+}

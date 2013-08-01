@@ -1,0 +1,23 @@
+{
+  try {
+    List<AbstractNode> persons=createTestNodes(Person.class,2);
+    Person user1=(Person)persons.get(0);
+    Person user2=(Person)persons.get(1);
+    PropertyMap props=new PropertyMap();
+    props.put(AbstractNode.visibleToPublicUsers,true);
+    Class type=TestOne.class;
+    TestOne t1=createTestNode(TestOne.class,props,user1);
+    props=new PropertyMap();
+    props.put(AbstractNode.visibleToAuthenticatedUsers,true);
+    TestOne t2=createTestNode(TestOne.class,props,user1);
+    SecurityContext user2Context=SecurityContext.getInstance(user2,AccessMode.Frontend);
+    List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
+    searchAttributes.add(Search.andExactTypeAndSubtypes(type));
+    Result result=Services.command(user2Context,SearchNodeCommand.class).execute(searchAttributes);
+    assertEquals(2,result.size());
+  }
+ catch (  FrameworkException ex) {
+    logger.log(Level.SEVERE,ex.toString());
+    fail("Unexpected exception");
+  }
+}

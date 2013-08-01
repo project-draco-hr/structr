@@ -1,0 +1,11 @@
+{
+  SecurityContext context=SecurityContext.getInstance(user,AccessMode.Backend);
+  final CreateNodeCommand create=Services.command(context,CreateNodeCommand.class);
+  props.put(AbstractNode.type,type.getSimpleName());
+  return transactionCommand.execute(new StructrTransaction<T>(){
+    @Override public T execute() throws FrameworkException {
+      return (T)create.execute(props);
+    }
+  }
+);
+}

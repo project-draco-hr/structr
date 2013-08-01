@@ -3,17 +3,29 @@
   int position=0;
   int count=0;
   int overallCount=0;
+  boolean pageFull=false;
+  SecurityContext securityContext=factoryProfile.getSecurityContext();
+  boolean dontCheckCount=securityContext.isSuperUser() || securityContext.getUser(false) == null;
   for (  S node : input) {
     T n=instantiate(node);
-    overallCount++;
     if (n != null) {
+      overallCount++;
       if (++position > offset) {
         if (++count > pageSize) {
+          pageFull=true;
+          if (dontCheckCount) {
+            overallCount=overallResultCount;
+            break;
+          }
+        }
+        if (!pageFull) {
+          nodes.add(n);
+        }
+        if (pageFull && (overallCount >= RESULT_COUNT_ACCURATE_LIMIT)) {
           return new Result(nodes,overallResultCount,true,false);
         }
-        nodes.add(n);
       }
     }
   }
-  return new Result(nodes,overallCount,true,false);
+  return new Result(nodes,overallCount,true,false,true);
 }

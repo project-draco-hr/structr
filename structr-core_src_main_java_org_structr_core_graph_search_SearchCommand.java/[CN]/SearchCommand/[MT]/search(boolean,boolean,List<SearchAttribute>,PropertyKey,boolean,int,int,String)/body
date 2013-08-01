@@ -5,6 +5,9 @@
   Factory<S,T> factory=getFactory(securityContext,includeDeletedAndHidden,publicOnly,pageSize,page,offsetId);
   boolean filterResults=true;
   final Index<S> index;
+  if (securityContext.getUser(false) == null) {
+    searchAttrs.add(Search.andExactProperty(securityContext,GraphObject.visibleToPublicUsers,true));
+  }
   List<SourceSearchAttribute> sources=new ArrayList<SourceSearchAttribute>();
   boolean hasEmptySearchFields=false;
   DistanceSearchAttribute distanceSearch=null;

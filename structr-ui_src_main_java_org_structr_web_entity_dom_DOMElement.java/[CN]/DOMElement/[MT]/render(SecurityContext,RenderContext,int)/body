@@ -3,7 +3,7 @@
     return;
   }
   double start=System.nanoTime();
-  boolean edit=renderContext.getEdit();
+  EditMode edit=renderContext.getEditMode();
   boolean isVoid=isVoidElement();
   StringBuilder buffer=renderContext.getBuffer();
   String id=getUuid();
@@ -14,7 +14,7 @@
   }
   if (StringUtils.isNotBlank(tag)) {
     buffer.append("<").append(tag);
-    if (edit) {
+    if (EditMode.DATA.equals(edit)) {
       buffer.append(" data-structr-id=\"").append(id).append("\"");
       if (renderContext.getDataObject() != null) {
         buffer.append(" data-structr-data-type=\"").append(renderContext.getDataObject().getType()).append("\"");
@@ -58,10 +58,10 @@
       }
       GraphObject details=renderContext.getDetailsDataObject();
       boolean detailMode=details != null;
-      if (edit && subNode.getProperty(hideOnEdit)) {
+      if (EditMode.DATA.equals(edit) && subNode.getProperty(hideOnEdit)) {
         continue;
       }
-      if (!edit && subNode.getProperty(hideOnNonEdit)) {
+      if (!EditMode.DATA.equals(edit) && subNode.getProperty(hideOnNonEdit)) {
         continue;
       }
       if (detailMode && subNode.getProperty(hideOnDetail)) {
@@ -98,7 +98,7 @@
                 int i=0;
                 for (                Object o : (Iterable)elements) {
                   if (o instanceof GraphObject) {
-                    if (i == 0 && edit && o instanceof AbstractNode) {
+                    if (i == 0 && EditMode.DATA.equals(edit) && o instanceof AbstractNode) {
                       typeForCreateButton=((AbstractNode)o).getType();
                     }
                     i++;
@@ -134,7 +134,7 @@
             renderContext.setListSource(listData);
             ((DOMElement)subNode).renderNodeList(securityContext,renderContext,depth,subKey);
           }
-          if (edit && typeForCreateButton != null) {
+          if (EditMode.DATA.equals(edit) && typeForCreateButton != null) {
             buffer.append("\n<button class=\"createButton\"");
             if (sourceId != null) {
               buffer.append(" data-structr-source-id=\"").append(sourceId).append("\"");

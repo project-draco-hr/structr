@@ -1,8 +1,18 @@
 {
-  boolean edit=renderContext.getEdit();
+  String id=getUuid();
+  EditMode edit=renderContext.getEditMode();
+  boolean inBody=renderContext.inBody();
   StringBuilder buffer=renderContext.getBuffer();
   String _content=getPropertyWithVariableReplacement(securityContext,renderContext,Content.content);
-  if (!edit) {
+  if (EditMode.CONTENT.equals(edit) && inBody && securityContext.isAllowed(this,Permission.write)) {
+    if ("text/javascript".equals(getProperty(contentType))) {
+      buffer.append("var dataStructrType='").append(getType()).append("', dataStructrId='").append(id).append("';\n\n");
+    }
+ else {
+      buffer.append("<span data-structr-raw-value=\"").append(getProperty(Content.content)).append("\" data-structr-type=\"").append(getType()).append("\" data-structr-id=\"").append(id).append("\">");
+    }
+  }
+  if (!edit.equals(EditMode.DATA)) {
     String _contentType=getProperty(Content.contentType);
     if (_contentType != null) {
       Adapter<String,String> converter=contentConverters.get(_contentType);
@@ -21,5 +31,8 @@
   }
   if (_content != null) {
     buffer.append(_content);
+  }
+  if (EditMode.CONTENT.equals(edit) && inBody && !("text/javascript".equals(getProperty(contentType)))) {
+    buffer.append("</span>");
   }
 }

@@ -1,3 +1,15 @@
 {
-  return new RenderContext(request,response,request.getParameter("edit") != null,locale);
+  String editString=StringUtils.defaultString(request.getParameter("edit"));
+  EditMode edit;
+switch (editString) {
+case "1":
+    edit=EditMode.DATA;
+  break;
+case "2":
+edit=EditMode.CONTENT;
+break;
+default :
+edit=EditMode.NONE;
+}
+return new RenderContext(request,response,edit,locale);
 }

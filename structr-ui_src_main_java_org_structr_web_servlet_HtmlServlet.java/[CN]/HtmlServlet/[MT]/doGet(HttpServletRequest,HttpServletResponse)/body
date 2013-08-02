@@ -17,7 +17,7 @@
     }
     RenderContext renderContext=RenderContext.getInstance(request,response,Locale.getDefault());
     renderContext.setResourceProvider(resourceProvider);
-    edit=renderContext.getEdit();
+    edit=renderContext.getEditMode();
     DOMNode rootElement=null;
     AbstractNode dataNode=null;
     String[] uriParts=PathHelper.getParts(path);
@@ -82,7 +82,7 @@
       return;
     }
     logger.log(Level.FINE,"Page found in {0} seconds",decimalFormat.format((System.nanoTime() - start) / 1000000000.0));
-    if (edit || dontCache) {
+    if (EditMode.DATA.equals(edit) || dontCache) {
       setNoCacheHeaders(response);
     }
  else {
@@ -92,7 +92,7 @@
       PrintWriter out=response.getWriter();
       double setup=System.nanoTime();
       logger.log(Level.FINE,"Setup time: {0} seconds",decimalFormat.format((setup - start) / 1000000000.0));
-      if (!edit && !dontCache && notModifiedSince(request,response,rootElement)) {
+      if (!EditMode.DATA.equals(edit) && !dontCache && notModifiedSince(request,response,rootElement)) {
         out.flush();
         out.close();
       }

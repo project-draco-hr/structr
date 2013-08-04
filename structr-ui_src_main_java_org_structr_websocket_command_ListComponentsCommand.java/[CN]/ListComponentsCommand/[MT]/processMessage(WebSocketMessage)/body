@@ -1,6 +1,6 @@
 {
   final SecurityContext securityContext=getWebSocket().getSecurityContext();
-  List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
+  List<SearchAttribute> searchAttributes=new LinkedList();
   searchAttributes.add(Search.andExactTypeAndSubtypes(DOMElement.class));
   final String sortOrder=webSocketData.getSortOrder();
   final String sortKey=webSocketData.getSortKey();
@@ -9,7 +9,7 @@
   PropertyKey sortProperty=EntityContext.getPropertyKeyForJSONName(DOMElement.class,sortKey);
   try {
     Result result=(Result)Services.command(securityContext,SearchNodeCommand.class).execute(true,false,searchAttributes,sortProperty,"desc".equals(sortOrder));
-    List<AbstractNode> filteredResults=new LinkedList<AbstractNode>();
+    List<AbstractNode> filteredResults=new LinkedList();
     List<? extends GraphObject> resultList=result.getResults();
     for (    GraphObject obj : resultList) {
       if (obj instanceof AbstractNode) {

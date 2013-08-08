@@ -8,14 +8,14 @@
   }
   String name=uriParts[1];
   String action=uriParts[2];
-  OAuth2Server oauthServer=OAuth2Server.getServer(name);
+  OAuthServer oauthServer=OAuthServer.getServer(name);
   if (oauthServer == null) {
     logger.log(Level.FINE,"No OAuth2 authentication server configured for {0}",path);
     return null;
   }
   if ("login".equals(action)) {
     try {
-      response.sendRedirect(oauthServer.getEndUserAuthorizationRequest(request).getLocationUri());
+      response.sendRedirect(oauthServer.getEndUserAuthorizationRequestUri(request));
       return null;
     }
  catch (    Exception ex) {
@@ -27,12 +27,13 @@
     SecurityContext superUserContext=SecurityContext.getSuperUserInstance();
     if (accessToken != null) {
       logger.log(Level.FINE,"Got access token {0}",accessToken);
-      String email=oauthServer.getEmail(request);
-      logger.log(Level.FINE,"Got email: {0}",new Object[]{email});
-      if (email != null) {
-        Principal user=AuthHelper.getPrincipalForEmail(email);
+      String value=oauthServer.getCredential(request);
+      logger.log(Level.FINE,"Got email: {0}",new Object[]{value});
+      if (value != null) {
+        PropertyKey credentialKey=oauthServer.getCredentialKey();
+        Principal user=AuthHelper.getPrincipalForCredential(credentialKey,value);
         if (user == null) {
-          user=RegistrationResource.createUser(superUserContext,email);
+          user=RegistrationResource.createUser(superUserContext,credentialKey,value);
         }
         if (user != null) {
           final Principal principal=user;

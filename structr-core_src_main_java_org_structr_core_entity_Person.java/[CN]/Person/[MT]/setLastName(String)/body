@@ -2,7 +2,8 @@
   Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
     @Override public Object execute() throws FrameworkException {
       setProperty(Person.lastName,lastName);
-      String firstName=((getFirstName() != null) && !(getFirstName().isEmpty())) ? getFirstName() : "";
+      String _firstName=getProperty(Person.firstName);
+      String firstName=((_firstName != null) && !(_firstName.isEmpty())) ? _firstName : "";
       setProperty(AbstractNode.name,lastName + ", " + firstName);
       return null;
     }

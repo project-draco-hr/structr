@@ -1,0 +1,13 @@
+{
+  String verifier=request.getParameter("oauth_verifier");
+  RequestToken requestToken=(RequestToken)request.getSession().getAttribute("requestToken");
+  AccessToken accessToken;
+  try {
+    accessToken=twitter.getOAuthAccessToken(requestToken,verifier);
+    return accessToken.toString();
+  }
+ catch (  TwitterException ex) {
+    logger.log(Level.SEVERE,null,ex);
+  }
+  return null;
+}

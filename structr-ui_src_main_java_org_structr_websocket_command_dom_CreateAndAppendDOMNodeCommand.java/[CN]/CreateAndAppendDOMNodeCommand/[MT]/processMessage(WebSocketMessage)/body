@@ -1,6 +1,7 @@
 {
   final Map<String,Object> nodeData=webSocketData.getNodeData();
   final String parentId=(String)nodeData.get("parentId");
+  final String childContent=(String)nodeData.get("childContent");
   final String pageId=webSocketData.getPageId();
   nodeData.remove("parentId");
   if (pageId != null) {
@@ -20,7 +21,7 @@
       try {
         Services.command(getWebSocket().getSecurityContext(),TransactionCommand.class).execute(new StructrTransaction(){
           @Override public Object execute() throws FrameworkException {
-            DOMNode newNode=null;
+            DOMNode newNode;
             if (tagName != null && !tagName.isEmpty()) {
               newNode=(DOMNode)document.createElement(tagName);
             }
@@ -45,6 +46,12 @@
  catch (                  FrameworkException fex) {
                     logger.log(Level.WARNING,"Unable to set node property {0} of node {1} to {2}: {3}",new Object[]{propertyKey,newNode.getUuid(),val,fex.getMessage()});
                   }
+                }
+              }
+              if (StringUtils.isNotBlank(childContent)) {
+                DOMNode childNode=(DOMNode)document.createTextNode(childContent);
+                if (newNode != null) {
+                  newNode.appendChild(childNode);
                 }
               }
             }

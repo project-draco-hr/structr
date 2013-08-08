@@ -1,0 +1,26 @@
+{
+  try {
+    return Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction<Principal>(){
+      @Override public Principal execute() throws FrameworkException {
+        Person person=(Person)AuthHelper.getPrincipalForCredential(credentialKey,credentialValue);
+        if (person != null) {
+          person.unlockReadOnlyPropertiesOnce();
+          person.setProperty(AbstractNode.type,User.class.getSimpleName());
+          User user=new User();
+          user.init(securityContext,person.getNode());
+          person.updateInIndex();
+          user.setProperty(User.confirmationKey,confKey);
+          return user;
+        }
+ else {
+          return (Principal)Services.command(securityContext,CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.type,User.class.getSimpleName()),new NodeAttribute(credentialKey,credentialValue),new NodeAttribute(User.name,credentialValue),new NodeAttribute(User.confirmationKey,confKey));
+        }
+      }
+    }
+);
+  }
+ catch (  FrameworkException ex) {
+    Logger.getLogger(RegistrationResource.class.getName()).log(Level.SEVERE,null,ex);
+  }
+  return null;
+}

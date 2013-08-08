@@ -1,0 +1,13 @@
+{
+  RequestToken requestToken;
+  try {
+    requestToken=twitter.getOAuthRequestToken();
+    request.getSession().setAttribute("requestToken",requestToken);
+    logger.log(Level.INFO,"Authorization request location URI: {0}",requestToken.getAuthorizationURL());
+    return requestToken.getAuthorizationURL();
+  }
+ catch (  TwitterException ex) {
+    logger.log(Level.SEVERE,null,ex);
+  }
+  return null;
+}

@@ -1,14 +1,14 @@
 {
-  if (propertySet.containsKey(User.email.jsonName()) && propertySet.size() == 1) {
+  if (propertySet.containsKey(User.eMail.jsonName()) && propertySet.size() == 1) {
     SecurityContext superUserContext=SecurityContext.getSuperUserInstance();
     final Principal user;
-    final String emailString=(String)propertySet.get(User.email.jsonName());
+    final String emailString=(String)propertySet.get(User.eMail.jsonName());
     if (StringUtils.isEmpty(emailString)) {
       return new RestMethodResult(HttpServletResponse.SC_BAD_REQUEST);
     }
     localeString=(String)propertySet.get(MailTemplate.locale.jsonName());
     confKey=UUID.randomUUID().toString();
-    Result result=Services.command(superUserContext,SearchNodeCommand.class).execute(Search.andExactType(User.class),Search.andExactProperty(superUserContext,User.email,emailString));
+    Result result=Services.command(superUserContext,SearchNodeCommand.class).execute(Search.andExactType(User.class),Search.andExactProperty(superUserContext,User.eMail,emailString));
     if (!result.isEmpty()) {
       user=(Principal)result.get(0);
       Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
@@ -20,7 +20,7 @@
 );
     }
  else {
-      user=createUser(securityContext,emailString);
+      user=createUser(securityContext,User.eMail,emailString);
     }
     if (user != null) {
       if (!sendInvitationLink(user)) {

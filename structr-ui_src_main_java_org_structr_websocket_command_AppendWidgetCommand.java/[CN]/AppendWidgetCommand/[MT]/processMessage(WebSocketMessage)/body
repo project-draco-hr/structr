@@ -1,0 +1,41 @@
+{
+  String id=webSocketData.getId();
+  String pageId=webSocketData.getPageId();
+  Map<String,Object> nodeData=webSocketData.getNodeData();
+  String parentId=(String)nodeData.get("parentId");
+  if (id == null) {
+    getWebSocket().send(MessageBuilder.status().code(422).message("Cannot append node, no id is given").build(),true);
+    return;
+  }
+  if (parentId == null) {
+    getWebSocket().send(MessageBuilder.status().code(422).message("Cannot add node without parentId").build(),true);
+    return;
+  }
+  AbstractNode parentNode=getNode(parentId);
+  if (parentNode == null) {
+    getWebSocket().send(MessageBuilder.status().code(404).message("Parent node not found").build(),true);
+    return;
+  }
+  if (parentNode instanceof DOMNode) {
+    DOMNode parentDOMNode=getDOMNode(parentId);
+    if (parentDOMNode == null) {
+      getWebSocket().send(MessageBuilder.status().code(422).message("Parent node is no DOM node").build(),true);
+      return;
+    }
+    Widget widget=getWidget(id);
+    if (widget != null) {
+      Page page=getPage(pageId);
+      if (page != null) {
+        try {
+          widget.expandWidget(getWebSocket().getSecurityContext(),page,parentDOMNode);
+        }
+ catch (        FrameworkException fex) {
+          getWebSocket().send(MessageBuilder.status().code(422).message(fex.getMessage()).build(),true);
+        }
+      }
+    }
+  }
+ else {
+    getWebSocket().send(MessageBuilder.status().code(422).message("Cannot use given node, not instance of DOMNode").build(),true);
+  }
+}

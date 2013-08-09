@@ -3,6 +3,7 @@
   String pageId=webSocketData.getPageId();
   Map<String,Object> nodeData=webSocketData.getNodeData();
   String parentId=(String)nodeData.get("parentId");
+  String source=(String)nodeData.get("source");
   if (id == null) {
     getWebSocket().send(MessageBuilder.status().code(422).message("Cannot append node, no id is given").build(),true);
     return;
@@ -22,16 +23,13 @@
       getWebSocket().send(MessageBuilder.status().code(422).message("Parent node is no DOM node").build(),true);
       return;
     }
-    Widget widget=getWidget(id);
-    if (widget != null) {
-      Page page=getPage(pageId);
-      if (page != null) {
-        try {
-          widget.expandWidget(getWebSocket().getSecurityContext(),page,parentDOMNode);
-        }
- catch (        FrameworkException fex) {
-          getWebSocket().send(MessageBuilder.status().code(422).message(fex.getMessage()).build(),true);
-        }
+    Page page=getPage(pageId);
+    if (page != null) {
+      try {
+        Widget.expandWidget(getWebSocket().getSecurityContext(),page,parentDOMNode,source);
+      }
+ catch (      FrameworkException fex) {
+        getWebSocket().send(MessageBuilder.status().code(422).message(fex.getMessage()).build(),true);
       }
     }
   }

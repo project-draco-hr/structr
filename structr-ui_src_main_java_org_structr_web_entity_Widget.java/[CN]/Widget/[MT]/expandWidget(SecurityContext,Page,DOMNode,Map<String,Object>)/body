@@ -1,0 +1,22 @@
+{
+  String _source=(String)parameters.get("source");
+  ErrorBuffer errorBuffer=new ErrorBuffer();
+  if (_source == null) {
+    errorBuffer.add(Widget.class.getSimpleName(),new EmptyPropertyToken(source));
+  }
+ else {
+    Matcher matcher=threadLocalTemplateMatcher.get();
+    matcher.reset(_source);
+    while (matcher.find()) {
+      String group=matcher.group();
+    }
+  }
+  if (!errorBuffer.hasError()) {
+    Importer importer=new Importer(securityContext,_source,null,null,1,true,true);
+    importer.parse();
+    importer.createChildNodes(parent,page);
+  }
+ else {
+    throw new FrameworkException(422,errorBuffer);
+  }
+}

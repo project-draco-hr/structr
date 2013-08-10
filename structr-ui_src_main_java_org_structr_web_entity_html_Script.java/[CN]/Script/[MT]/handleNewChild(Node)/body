@@ -1,0 +1,16 @@
+{
+  if (newChild instanceof Content) {
+    try {
+      Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+        @Override public Object execute() throws FrameworkException {
+          ((Content)newChild).setProperty(Content.contentType,"text/javascript");
+          return null;
+        }
+      }
+);
+    }
+ catch (    FrameworkException fex) {
+      logger.log(Level.WARNING,"Unable to set property on new child: {0}",fex.getMessage());
+    }
+  }
+}

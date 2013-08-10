@@ -2,7 +2,6 @@
   String pageId=webSocketData.getPageId();
   Map<String,Object> nodeData=webSocketData.getNodeData();
   String parentId=(String)nodeData.get("parentId");
-  String source=(String)nodeData.get("source");
   if (parentId == null) {
     getWebSocket().send(MessageBuilder.status().code(422).message("Cannot add node without parentId").build(),true);
     return;
@@ -21,7 +20,7 @@
     Page page=getPage(pageId);
     if (page != null) {
       try {
-        Widget.expandWidget(getWebSocket().getSecurityContext(),page,parentDOMNode,source);
+        Widget.expandWidget(getWebSocket().getSecurityContext(),page,parentDOMNode,nodeData);
       }
  catch (      FrameworkException fex) {
         getWebSocket().send(MessageBuilder.status().code(422).message(fex.getMessage()).build(),true);

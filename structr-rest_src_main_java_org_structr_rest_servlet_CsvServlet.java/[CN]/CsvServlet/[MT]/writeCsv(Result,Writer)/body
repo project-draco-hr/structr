@@ -1,27 +1,3 @@
 {
-  List<GraphObject> list=result.getResults();
-  boolean headerWritten=false;
-  for (  GraphObject obj : list) {
-    if (!headerWritten) {
-      StringBuilder row=new StringBuilder();
-      for (      PropertyKey key : obj.getPropertyKeys(defaultPropertyView)) {
-        row.append("\"").append(key.dbName()).append("\",");
-      }
-      int pos=row.lastIndexOf(",");
-      if (pos >= 0) {
-        row.deleteCharAt(pos);
-      }
-      out.append(row).append("\n");
-      out.flush();
-      headerWritten=true;
-    }
-    StringBuilder row=new StringBuilder();
-    for (    PropertyKey key : obj.getPropertyKeys(defaultPropertyView)) {
-      Object value=obj.getProperty(key);
-      row.append("\"").append((value != null ? StringUtils.replace(value.toString(),"\"","\\\"") : "")).append("\",");
-    }
-    row.deleteCharAt(row.lastIndexOf(","));
-    out.append(row).append("\n");
-    out.flush();
-  }
+  writeCsv(result,out,defaultPropertyView);
 }

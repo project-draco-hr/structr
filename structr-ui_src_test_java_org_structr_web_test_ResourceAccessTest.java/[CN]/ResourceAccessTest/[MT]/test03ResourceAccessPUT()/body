@@ -21,7 +21,7 @@
     }
 );
     RestAssured.given().headers("X-User",name,"X-Password",password).contentType("application/json; charset=UTF-8").expect().statusCode(403).when().put("/folder/" + testFolder.getUuid());
-    testFolder.setOwner(testUser);
+    testFolder.setProperty(AbstractNode.owner,testUser);
     RestAssured.given().headers("X-User",name,"X-Password",password).contentType("application/json; charset=UTF-8").expect().statusCode(200).when().put("/folder/" + testFolder.getUuid());
   }
  catch (  FrameworkException ex) {

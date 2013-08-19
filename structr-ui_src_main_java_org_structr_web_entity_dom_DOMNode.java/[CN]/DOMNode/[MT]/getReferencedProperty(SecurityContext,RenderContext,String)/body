@@ -45,9 +45,8 @@
     if ("request".equals(part.toLowerCase())) {
       HttpServletRequest request=renderContext.getRequest();
       if (request != null) {
-        if (StringUtils.contains(referenceKey,"!")) {
-          String[] ref=StringUtils.split(referenceKey,"!");
-          return StringUtils.defaultString(request.getParameter(ref[0]),ref.length > 1 ? ref[1] : "");
+        if (StringUtils.contains(refKey,"!")) {
+          return StringUtils.defaultIfBlank(request.getParameter(referenceKey),defaultValue);
         }
  else {
           return StringUtils.defaultString(request.getParameter(referenceKey));

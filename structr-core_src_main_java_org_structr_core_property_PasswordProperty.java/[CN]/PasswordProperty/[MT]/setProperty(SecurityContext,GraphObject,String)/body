@@ -10,7 +10,7 @@
     }
     String salt=RandomStringUtils.randomAlphanumeric(16);
     obj.setProperty(Principal.salt,salt);
-    super.setProperty(securityContext,obj,DigestUtils.sha512Hex(clearTextPassword + salt));
+    super.setProperty(securityContext,obj,AuthHelper.getHash(clearTextPassword,salt));
   }
  else {
     super.setProperty(securityContext,obj,null);

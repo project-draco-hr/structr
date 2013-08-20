@@ -34,11 +34,13 @@
         }
  else {
           String salt=principal.getProperty(Principal.salt);
-          String saltedPw=password;
+          String encryptedPasswordValue;
           if (salt != null) {
-            saltedPw=password.concat(salt);
+            encryptedPasswordValue=getHash(password,salt);
           }
-          String encryptedPasswordValue=DigestUtils.sha512Hex(saltedPw);
+ else {
+            encryptedPasswordValue=getSimpleHash(password);
+          }
           String pw=principal.getEncryptedPassword();
           if (pw == null || !encryptedPasswordValue.equals(pw)) {
             logger.log(Level.INFO,"Wrong password for principal {0}",principal);

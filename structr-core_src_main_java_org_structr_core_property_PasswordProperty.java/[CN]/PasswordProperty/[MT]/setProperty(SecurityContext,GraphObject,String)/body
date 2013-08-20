@@ -8,7 +8,9 @@
         throw new FrameworkException(errorType,new TooShortToken(errorKey,minLength));
       }
     }
-    super.setProperty(securityContext,obj,DigestUtils.sha512Hex(clearTextPassword));
+    String salt=RandomStringUtils.randomAlphanumeric(16);
+    obj.setProperty(Principal.salt,salt);
+    super.setProperty(securityContext,obj,DigestUtils.sha512Hex(clearTextPassword + salt));
   }
  else {
     super.setProperty(securityContext,obj,null);

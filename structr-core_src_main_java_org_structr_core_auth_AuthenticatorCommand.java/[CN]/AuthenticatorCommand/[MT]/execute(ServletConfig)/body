@@ -2,11 +2,13 @@
   Authenticator authenticator=null;
   if (servletConfig != null) {
     String authenticatorClassName=servletConfig.getInitParameter(AuthenticationService.SERVLET_PARAMETER_AUTHENTICATOR);
+    boolean userAutoCreate=Boolean.parseBoolean(servletConfig.getInitParameter(AuthenticationService.SERVLET_PARAMETER_USER_AUTO_CREATE));
     if (authenticatorClassName != null) {
       try {
         Class authenticatorClass=Class.forName(authenticatorClassName);
         authenticator=(Authenticator)authenticatorClass.newInstance();
         servletConfig.getServletContext().setAttribute(AuthenticationService.SERVLET_PARAMETER_AUTHENTICATOR,authenticator);
+        authenticator.setUserAutoCreate(userAutoCreate);
       }
  catch (      Throwable t) {
         logger.log(Level.SEVERE,"Error instantiating authenticator for servlet with context path {0}: {1}",new Object[]{servletConfig.getServletName(),t});

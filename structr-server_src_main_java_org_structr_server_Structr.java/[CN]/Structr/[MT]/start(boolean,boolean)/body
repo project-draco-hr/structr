@@ -95,7 +95,8 @@
   JsonRestServlet structrRestServlet=new JsonRestServlet(resourceProviderInstance,defaultPropertyView,AbstractNode.uuid);
   ServletHolder structrRestServletHolder=new ServletHolder(structrRestServlet);
   servletParams.put("PropertyFormat","FlatNameValue");
-  servletParams.put("Authenticator",authenticator.getName());
+  servletParams.put(AuthenticationService.SERVLET_PARAMETER_AUTHENTICATOR,authenticator.getName());
+  servletParams.put(AuthenticationService.SERVLET_PARAMETER_USER_AUTO_CREATE,Boolean.toString(userAutoCreate));
   structrRestServletHolder.setInitParameters(servletParams);
   structrRestServletHolder.setInitOrder(0);
   servlets.put(restUrl + "/*",structrRestServletHolder);

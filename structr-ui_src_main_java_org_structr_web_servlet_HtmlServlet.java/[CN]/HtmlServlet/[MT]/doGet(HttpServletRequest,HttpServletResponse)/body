@@ -12,12 +12,13 @@
     if (response.getStatus() == 302) {
       return;
     }
-    if (securityContext.getUser(false) != null) {
+    Principal user=securityContext.getUser(false);
+    if (user != null) {
       dontCache=true;
     }
     RenderContext renderContext=RenderContext.getInstance(request,response,Locale.getDefault());
     renderContext.setResourceProvider(resourceProvider);
-    edit=renderContext.getEditMode();
+    edit=renderContext.getEditMode(user);
     DOMNode rootElement=null;
     AbstractNode dataNode=null;
     String[] uriParts=PathHelper.getParts(path);

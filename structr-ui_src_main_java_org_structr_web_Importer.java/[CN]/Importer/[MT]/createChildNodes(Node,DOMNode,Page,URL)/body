@@ -54,7 +54,14 @@
       for (      Attribute nodeAttr : node.attributes()) {
         String key=nodeAttr.getKey();
         if (!key.equals("text")) {
-          newNode.setProperty(new StringProperty(PropertyView.Html.concat(nodeAttr.getKey())),nodeAttr.getValue());
+          if (key.startsWith("data-structr-")) {
+            String upperCaseKey=WordUtils.capitalize(key.substring(13),new char[]{'-'}).replaceAll("-","");
+            String camelCaseKey=key.substring(13,14).concat(upperCaseKey.substring(1));
+            newNode.setProperty(new StringProperty(camelCaseKey),nodeAttr.getValue());
+          }
+ else {
+            newNode.setProperty(new StringProperty(PropertyView.Html.concat(nodeAttr.getKey())),nodeAttr.getValue());
+          }
         }
       }
       parent.appendChild(newNode);

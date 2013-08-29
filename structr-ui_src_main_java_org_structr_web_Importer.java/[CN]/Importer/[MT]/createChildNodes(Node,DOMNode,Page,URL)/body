@@ -54,10 +54,15 @@
       for (      Attribute nodeAttr : node.attributes()) {
         String key=nodeAttr.getKey();
         if (!key.equals("text")) {
-          if (key.startsWith("data-") && !key.startsWith("data-structr-")) {
-            String upperCaseKey=WordUtils.capitalize(key.substring(5),new char[]{'-'}).replaceAll("-","");
-            String camelCaseKey=key.substring(5,6).concat(upperCaseKey.substring(1));
-            newNode.setProperty(new StringProperty(camelCaseKey),nodeAttr.getValue());
+          if (key.startsWith("data-")) {
+            if (key.startsWith("data-structr-")) {
+              newNode.setProperty(new StringProperty(nodeAttr.getKey()),nodeAttr.getValue());
+            }
+ else {
+              String upperCaseKey=WordUtils.capitalize(key.substring(5),new char[]{'-'}).replaceAll("-","");
+              String camelCaseKey=key.substring(5,6).concat(upperCaseKey.substring(1));
+              newNode.setProperty(new StringProperty(camelCaseKey),nodeAttr.getValue());
+            }
           }
  else {
             newNode.setProperty(new StringProperty(PropertyView.Html.concat(nodeAttr.getKey())),nodeAttr.getValue());

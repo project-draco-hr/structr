@@ -18,19 +18,20 @@
   GraphObject _data=null;
   for (int i=0; (i < parts.length); i++) {
     String part=parts[i];
+    String lowerCasePart=part.toLowerCase();
     if (_data != null) {
       Object value=_data.getProperty(EntityContext.getPropertyKeyForJSONName(_data.getClass(),part));
       if (value instanceof GraphObject) {
         _data=(GraphObject)value;
         continue;
       }
-      if (i > 0 && "size".equals(part.toLowerCase())) {
+      if (i > 0 && "size".equals(lowerCasePart)) {
         Object val=_data.getProperty(EntityContext.getPropertyKeyForJSONName(_data.getClass(),parts[i - 1]));
         if (val instanceof List) {
           return ((List)val).size();
         }
       }
-      if ("link".equals(part.toLowerCase()) && _data instanceof AbstractNode) {
+      if ("link".equals(lowerCasePart) && _data instanceof AbstractNode) {
         for (        AbstractRelationship rel : ((AbstractNode)_data).getRelationships(org.structr.web.common.RelType.LINK,Direction.OUTGOING)) {
           _data=rel.getEndNode();
           break;
@@ -41,11 +42,11 @@
         return null;
       }
     }
-    if (renderContext.hasDataForKey(part.toLowerCase())) {
-      _data=renderContext.getDataNode(part.toLowerCase());
+    if (renderContext.hasDataForKey(lowerCasePart)) {
+      _data=renderContext.getDataNode(lowerCasePart);
       continue;
     }
-    if ("request".equals(part.toLowerCase())) {
+    if ("request".equals(lowerCasePart)) {
       HttpServletRequest request=renderContext.getRequest();
       if (request != null) {
         if (StringUtils.contains(refKey,"!")) {
@@ -56,10 +57,10 @@
         }
       }
     }
-    if ("now".equals(part.toLowerCase())) {
+    if ("now".equals(lowerCasePart)) {
       return AbstractNode.createdDate.inputConverter(securityContext).revert(new Date());
     }
-    if ("me".equals(part.toLowerCase())) {
+    if ("me".equals(lowerCasePart)) {
       Principal me=(Principal)securityContext.getUser(false);
       if (me != null) {
         _data=me;
@@ -67,36 +68,40 @@
       }
     }
     if (_data == null) {
-      if ("page".equals(part.toLowerCase())) {
+      if ("this".equals(lowerCasePart)) {
+        _data=renderContext.getDataObject();
+        continue;
+      }
+      if ("page".equals(lowerCasePart)) {
         _data=_page;
         continue;
       }
-      if (_data == null && "link".equals(part.toLowerCase())) {
+      if ("link".equals(lowerCasePart)) {
         for (        AbstractRelationship rel : getRelationships(org.structr.web.common.RelType.LINK,Direction.OUTGOING)) {
           _data=rel.getEndNode();
           break;
         }
         continue;
       }
-      if ("parent".equals(part.toLowerCase())) {
+      if ("parent".equals(lowerCasePart)) {
         _data=(DOMNode)getParentNode();
         continue;
       }
-      if ("owner".equals(part.toLowerCase())) {
+      if ("owner".equals(lowerCasePart)) {
         for (        AbstractRelationship rel : getRelationships(org.structr.common.RelType.OWNS,Direction.INCOMING)) {
           _data=rel.getStartNode();
           break;
         }
         continue;
       }
-      if ("search_result_size".equals(part.toLowerCase())) {
+      if ("search_result_size".equals(lowerCasePart)) {
         Set<Page> pages=getResultPages(securityContext,(Page)_page);
         if (!pages.isEmpty()) {
           return pages.size();
         }
         return 0;
       }
-      if ("result_size".equals(part.toLowerCase())) {
+      if ("result_size".equals(lowerCasePart)) {
         return IteratorUtils.toArray(renderContext.getListSource().iterator()).length;
       }
     }

@@ -14,19 +14,6 @@
   }
   if (StringUtils.isNotBlank(tag)) {
     buffer.append("<").append(tag);
-    if (EditMode.DATA.equals(edit)) {
-      buffer.append(" data-structr-id=\"").append(id).append("\"");
-      if (renderContext.getDataObject() != null) {
-        buffer.append(" data-structr-data-type=\"").append(renderContext.getDataObject().getType()).append("\"");
-      }
-      PropertyKey r=renderContext.getRelatedProperty();
-      if (r != null) {
-        buffer.append(" data-structr-related-property=\"").append(r.jsonName()).append("\"");
-        buffer.append(" data-structr-source-type=\"").append(r.getDeclaringClass().getSimpleName()).append("\"");
-        buffer.append(" data-structr-source-id=\"").append(renderContext.getSourceDataObject().getUuid()).append("\"");
-        buffer.append(" data-structr-data-id=\"").append(renderContext.getDataObject().getUuid()).append("\"");
-      }
-    }
     renderCustomAttributes(buffer,securityContext,renderContext);
     for (    PropertyKey attribute : EntityContext.getPropertySet(getClass(),PropertyView.Html)) {
       try {
@@ -58,12 +45,6 @@
       }
       GraphObject details=renderContext.getDetailsDataObject();
       boolean detailMode=details != null;
-      if (EditMode.DATA.equals(edit) && subNode.getProperty(hideOnEdit)) {
-        continue;
-      }
-      if (!EditMode.DATA.equals(edit) && subNode.getProperty(hideOnNonEdit)) {
-        continue;
-      }
       if (detailMode && subNode.getProperty(hideOnDetail)) {
         continue;
       }
@@ -98,9 +79,6 @@
                 int i=0;
                 for (                Object o : (Iterable)elements) {
                   if (o instanceof GraphObject) {
-                    if (i == 0 && EditMode.DATA.equals(edit) && o instanceof AbstractNode) {
-                      typeForCreateButton=((AbstractNode)o).getClass();
-                    }
                     i++;
                     GraphObject graphObject=(GraphObject)o;
                     renderContext.putDataObject(subKey,graphObject);
@@ -133,15 +111,6 @@
             }
             renderContext.setListSource(listData);
             ((DOMElement)subNode).renderNodeList(securityContext,renderContext,depth,subKey);
-          }
-          if (EditMode.DATA.equals(edit) && typeForCreateButton != null && !Renderable.class.isAssignableFrom(typeForCreateButton)) {
-            buffer.append("\n<div class=\"structr-edit\"><button class=\"createButton\"");
-            if (sourceId != null) {
-              buffer.append(" data-structr-source-id=\"").append(sourceId).append("\"");
-              buffer.append(" data-structr-source-type=\"").append(sourceType).append("\"");
-              buffer.append(" data-structr-related-property=\"").append(relatedProperty).append("\"");
-            }
-            buffer.append(" data-structr-type=\"").append(typeForCreateButton.getSimpleName()).append("\">").append(relatedProperty != null ? "Add " + typeForCreateButton.getSimpleName() + " to "+ relatedProperty : "Create new " + typeForCreateButton.getSimpleName()).append("</button></div>\n");
           }
         }
       }

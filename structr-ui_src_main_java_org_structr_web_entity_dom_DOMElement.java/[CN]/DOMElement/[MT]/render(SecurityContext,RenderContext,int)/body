@@ -6,7 +6,6 @@
   EditMode edit=renderContext.getEditMode(securityContext.getUser(false));
   boolean isVoid=isVoidElement();
   StringBuilder buffer=renderContext.getBuffer();
-  String id=getUuid();
   String tag=getProperty(DOMElement.tag);
   boolean anyChildNodeCreatesNewLine=false;
   renderStructrAppLib(buffer,renderContext,depth);
@@ -15,10 +14,16 @@
   }
   if (StringUtils.isNotBlank(tag)) {
     buffer.append("<").append(tag);
+    if (EditMode.CONTENT.equals(edit)) {
+      if (depth == 0) {
+        buffer.append(" data-structr-page=\"").append(renderContext.getPageId()).append("\"");
+      }
+      buffer.append(" data-structr-el=\"").append(getUuid()).append("\"");
+    }
     renderCustomAttributes(buffer,securityContext,renderContext);
     for (    PropertyKey attribute : EntityContext.getPropertySet(getClass(),PropertyView.Html)) {
       try {
-        String value=getPropertyWithVariableReplacement(securityContext,renderContext,attribute);
+        String value=escapeForHtmlAttributes(getPropertyWithVariableReplacement(securityContext,renderContext,attribute));
         if (value != null) {
           String key=attribute.jsonName().substring(PropertyView.Html.length());
           buffer.append(" ").append(key).append("=\"").append(value).append("\"");

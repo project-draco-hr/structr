@@ -3,19 +3,22 @@
   EditMode edit=renderContext.getEditMode(securityContext.getUser(false));
   boolean inBody=renderContext.inBody();
   StringBuilder buffer=renderContext.getBuffer();
+  String _contentType=getProperty(contentType);
   String _content=getPropertyWithVariableReplacement(securityContext,renderContext,Content.content);
+  if (_contentType == null || ("text/plain".equals(_contentType))) {
+    _content=escapeForHtml(_content);
+  }
   if (EditMode.CONTENT.equals(edit) && inBody && securityContext.isAllowed(this,Permission.write)) {
-    if ("text/javascript".equals(getProperty(contentType))) {
+    if ("text/javascript".equals(_contentType)) {
       buffer.append("// data-structr-type='").append(getType()).append("'\n// data-structr-id='").append(id).append("'\n");
     }
- else     if ("text/css".equals(getProperty(contentType))) {
+ else     if ("text/css".equals(_contentType)) {
       buffer.append("/* data-structr-type='").append(getType()).append("'*/\n/* data-structr-id='").append(id).append("'*/\n");
     }
  else {
       buffer.append("<!--data-structr-id=\"".concat(id).concat("\" data-structr-raw-value=\"").concat(getProperty(Content.content).replaceAll("\n","\\\\n")).concat("\"-->"));
     }
   }
-  String _contentType=getProperty(Content.contentType);
   if (_contentType != null) {
     Adapter<String,String> converter=contentConverters.get(_contentType);
     if (converter != null) {

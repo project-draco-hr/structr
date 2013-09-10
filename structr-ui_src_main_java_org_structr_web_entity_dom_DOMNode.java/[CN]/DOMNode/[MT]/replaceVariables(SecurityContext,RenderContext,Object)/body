@@ -1,6 +1,9 @@
 {
   String value=null;
-  if ((rawValue != null) && (rawValue instanceof String)) {
+  if (rawValue == null) {
+    return null;
+  }
+  if (rawValue instanceof String) {
     value=(String)rawValue;
     Matcher matcher=threadLocalTemplateMatcher.get();
     matcher.reset(value);
@@ -15,6 +18,12 @@
         value=value.equals(group) ? null : value.replace(group,"");
       }
     }
+  }
+ else   if (rawValue instanceof Boolean) {
+    value=Boolean.toString((Boolean)rawValue);
+  }
+ else {
+    value=rawValue.toString();
   }
   return value;
 }

@@ -1,0 +1,37 @@
+{
+  final SecurityContext securityContext=getWebSocket().getSecurityContext();
+  String id=webSocketData.getId();
+  Map<String,Object> nodeData=webSocketData.getNodeData();
+  String parentId=(String)nodeData.get("parentId");
+  if (id == null) {
+    getWebSocket().send(MessageBuilder.status().code(422).message("Cannot clone component, no id is given").build(),true);
+    return;
+  }
+  if (parentId == null) {
+    getWebSocket().send(MessageBuilder.status().code(422).message("Cannot clone compoinent node without parentId").build(),true);
+    return;
+  }
+  final DOMNode parentNode=(DOMNode)getNode(parentId);
+  if (parentNode == null) {
+    getWebSocket().send(MessageBuilder.status().code(404).message("Parent node not found").build(),true);
+    return;
+  }
+  final DOMNode node=getDOMNode(id);
+  try {
+    final CreateRelationshipCommand<?> createRel=Services.command(securityContext,CreateRelationshipCommand.class);
+    StructrTransaction transaction=new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        DOMNode clonedNode=(DOMNode)node.cloneNode(false);
+        parentNode.appendChild(clonedNode);
+        createRel.execute(node,clonedNode,RelType.SYNC,true);
+        createRel.execute(clonedNode,node,RelType.SYNC,true);
+        return null;
+      }
+    }
+;
+    Services.command(securityContext,TransactionCommand.class).execute(transaction);
+  }
+ catch (  Exception ex) {
+    getWebSocket().send(MessageBuilder.status().code(422).message(ex.getMessage()).build(),true);
+  }
+}

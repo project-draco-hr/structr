@@ -1,7 +1,6 @@
 {
   final SecurityContext securityContext=getWebSocket().getSecurityContext();
   String id=webSocketData.getId();
-  Map<String,Object> nodeData=webSocketData.getNodeData();
   if (id != null) {
     final DOMNode node=getDOMNode(id);
     try {
@@ -9,6 +8,7 @@
       StructrTransaction transaction=new StructrTransaction(){
         @Override public Object execute() throws FrameworkException {
           DOMNode clonedNode=(DOMNode)node.cloneNode(false);
+          moveChildNodes(node,clonedNode);
           ShadowDocument hiddenDoc=getOrCreateHiddenDocument();
           clonedNode.setProperty(DOMNode.ownerDocument,hiddenDoc);
           createRel.execute(node,clonedNode,RelType.SYNC,true);

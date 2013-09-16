@@ -7,7 +7,15 @@
     }
     Class relationshipClass=rel.getClass();
     boolean isGeneric=factoryDefinition.isGeneric(relationshipClass);
-    if ((!isGeneric && newRelationshipClass.isAssignableFrom(relationshipClass)) || sourceType.isAssignableFrom(rel.getOtherNode(targetNode).getClass())) {
+    AbstractNode otherNode=rel.getOtherNode(targetNode);
+    Class otherClass=otherNode.getClass();
+    boolean removeRel=sourceType.isAssignableFrom(otherClass) || (!isGeneric && newRelationshipClass.isAssignableFrom(relationshipClass));
+    if (!removeRel) {
+      for (      Class iface : EntityContext.getInterfacesForType(sourceType)) {
+        removeRel|=iface.isAssignableFrom(otherClass);
+      }
+    }
+    if (removeRel) {
       deleteRel.execute(rel);
     }
   }

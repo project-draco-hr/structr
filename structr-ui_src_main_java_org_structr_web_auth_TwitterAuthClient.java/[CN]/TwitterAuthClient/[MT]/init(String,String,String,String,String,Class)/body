@@ -1,5 +1,11 @@
 {
   super.init(authorizationLocation,tokenLocation,clientId,clientSecret,redirectUri,tokenResponseClass);
-  twitter=new TwitterFactory().getInstance();
+  ConfigurationBuilder cb=new ConfigurationBuilder();
+  cb.setUseSSL(true);
+  cb.setOAuthAuthorizationURL(authorizationLocation);
+  cb.setOAuthAccessTokenURL(tokenLocation);
+  Configuration conf=cb.build();
+  TwitterFactory tf=new TwitterFactory(conf);
+  twitter=tf.getInstance();
   twitter.setOAuthConsumer(clientId,clientSecret);
 }

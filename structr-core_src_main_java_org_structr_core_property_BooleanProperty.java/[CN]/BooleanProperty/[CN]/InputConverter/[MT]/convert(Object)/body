@@ -1,11 +1,13 @@
 {
+  boolean returnValue=false;
   if (source != null) {
     if (source instanceof Boolean) {
       return (Boolean)source;
     }
     if (source instanceof String) {
-      return TRUE_VALUES.contains(source.toString().toLowerCase());
+      returnValue=TRUE_VALUES.contains(source.toString().toLowerCase());
     }
   }
-  return false;
+  logger.log(Level.WARNING,"Wrong input type for {0}. Expected: {1}, found: {2}",new Object[]{jsonName,Boolean.class.getName(),source.getClass().getName()});
+  return returnValue;
 }

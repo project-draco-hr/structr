@@ -1,12 +1,34 @@
 {
   dbNode=this.getNode();
+  EditMode editMode=renderContext.getEditMode(securityContext.getUser(false));
   Iterable<String> props=dbNode.getPropertyKeys();
   for (  String key : props) {
     if (key.startsWith("data-")) {
-      String value=escapeForHtmlAttributes(getPropertyWithVariableReplacement(securityContext,renderContext,new GenericProperty(key)));
+      String value=getPropertyWithVariableReplacement(securityContext,renderContext,new GenericProperty(key));
+      if (!(EditMode.RAW.equals(editMode))) {
+        value=escapeForHtmlAttributes(value);
+      }
       if (StringUtils.isNotBlank(value)) {
         buffer.append(" ").append(key).append("=\"").append(value).append("\"");
       }
+    }
+  }
+  if (EditMode.RAW.equals(editMode)) {
+    String _dataKey=getProperty(dataKey);
+    String _restQuery=getProperty(restQuery);
+    String _cypherQuery=getProperty(cypherQuery);
+    String _xpathQuery=getProperty(xpathQuery);
+    if (StringUtils.isNotBlank(_dataKey)) {
+      buffer.append(" ").append("data-structr-meta-data-key").append("=\"").append(_dataKey).append("\"");
+    }
+    if (StringUtils.isNotBlank(_restQuery)) {
+      buffer.append(" ").append("data-structr-meta-rest-query").append("=\"").append(_restQuery).append("\"");
+    }
+    if (StringUtils.isNotBlank(_cypherQuery)) {
+      buffer.append(" ").append("data-structr-meta-cypher-query").append("=\"").append(_cypherQuery).append("\"");
+    }
+    if (StringUtils.isNotBlank(_xpathQuery)) {
+      buffer.append(" ").append("data-structr-meta-xpath-query").append("=\"").append(_xpathQuery).append("\"");
     }
   }
 }

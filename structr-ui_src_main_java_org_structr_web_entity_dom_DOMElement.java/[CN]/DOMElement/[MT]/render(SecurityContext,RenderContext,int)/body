@@ -1,29 +1,35 @@
 {
+  StringBuilder buffer=renderContext.getBuffer();
+  double start=System.nanoTime();
   if (isDeleted() || isHidden()) {
     return;
   }
-  double start=System.nanoTime();
-  EditMode edit=renderContext.getEditMode(securityContext.getUser(false));
+  EditMode editMode=renderContext.getEditMode(securityContext.getUser(false));
   boolean isVoid=isVoidElement();
-  StringBuilder buffer=renderContext.getBuffer();
-  String tag=getProperty(DOMElement.tag);
+  String _tag=getProperty(DOMElement.tag);
   boolean anyChildNodeCreatesNewLine=false;
-  renderStructrAppLib(buffer,renderContext,depth);
-  if (!avoidWhitespace()) {
+  renderStructrAppLib(buffer,securityContext,renderContext,depth);
+  if (depth > 0 && !avoidWhitespace()) {
     buffer.append(indent(depth));
   }
-  if (StringUtils.isNotBlank(tag)) {
-    buffer.append("<").append(tag);
-    if (EditMode.CONTENT.equals(edit)) {
+  if (StringUtils.isNotBlank(_tag)) {
+    buffer.append("<").append(_tag);
+    if (EditMode.CONTENT.equals(editMode)) {
       if (depth == 0) {
-        buffer.append(" data-structr-page=\"").append(renderContext.getPageId()).append("\"");
+        String pageId=renderContext.getPageId();
+        if (pageId != null) {
+          buffer.append(" data-structr-page=\"").append(pageId).append("\"");
+        }
       }
       buffer.append(" data-structr-el=\"").append(getUuid()).append("\"");
     }
     renderCustomAttributes(buffer,securityContext,renderContext);
     for (    PropertyKey attribute : EntityContext.getPropertySet(getClass(),PropertyView.Html)) {
       try {
-        String value=escapeForHtmlAttributes(getPropertyWithVariableReplacement(securityContext,renderContext,attribute));
+        String value=getPropertyWithVariableReplacement(securityContext,renderContext,attribute);
+        if (!(EditMode.RAW.equals(editMode))) {
+          value=escapeForHtmlAttributes(value);
+        }
         if (value != null) {
           String key=attribute.jsonName().substring(PropertyView.Html.length());
           buffer.append(" ").append(key).append("=\"").append(value).append("\"");
@@ -34,101 +40,101 @@
       }
     }
     buffer.append(">");
-    if (Body.class.getSimpleName().toLowerCase().equals(this.getTagName())) {
-      renderContext.setInBody(true);
-    }
-    List<AbstractRelationship> rels=getChildRelationships();
-    if (rels.isEmpty()) {
-      for (      AbstractRelationship syncRel : getRelationships(RelType.SYNC,Direction.INCOMING)) {
-        DOMElement syncedNode=(DOMElement)syncRel.getStartNode();
-        rels.addAll(syncedNode.getChildRelationships());
+    try {
+      if (Body.class.getSimpleName().toLowerCase().equals(this.getTagName())) {
+        renderContext.setInBody(true);
       }
-    }
-    for (    AbstractRelationship rel : rels) {
-      DOMNode subNode=(DOMNode)rel.getEndNode();
-      if (!securityContext.isVisible(subNode)) {
-        continue;
+      List<AbstractRelationship> rels=getChildRelationships();
+      if (rels.isEmpty()) {
+        for (        AbstractRelationship syncRel : getRelationships(RelType.SYNC,Direction.INCOMING)) {
+          DOMElement syncedNode=(DOMElement)syncRel.getStartNode();
+          rels.addAll(syncedNode.getChildRelationships());
+        }
       }
-      GraphObject details=renderContext.getDetailsDataObject();
-      boolean detailMode=details != null;
-      if (detailMode && subNode.getProperty(hideOnDetail)) {
-        continue;
-      }
-      if (!detailMode && subNode.getProperty(hideOnIndex)) {
-        continue;
-      }
-      if (subNode instanceof DOMElement) {
-        anyChildNodeCreatesNewLine=(anyChildNodeCreatesNewLine || !((DOMElement)subNode).avoidWhitespace());
-      }
-      String subKey=subNode.getProperty(dataKey);
-      if (StringUtils.isNotBlank(subKey)) {
-        setDataRoot(renderContext,subNode,subKey);
-        GraphObject currentDataNode=renderContext.getDataObject();
-        List<GraphObject> listData=((DOMElement)subNode).checkListSources(securityContext,renderContext);
-        PropertyKey propertyKey=null;
-        Class typeForCreateButton=null;
-        String sourceId=null;
-        String sourceType=null;
-        String relatedProperty=null;
-        if (subNode.getProperty(renderDetails) && detailMode) {
-          renderContext.setDataObject(details);
-          renderContext.putDataObject(subKey,details);
+      for (      AbstractRelationship rel : rels) {
+        DOMNode subNode=(DOMNode)rel.getEndNode();
+        if (!securityContext.isVisible(subNode)) {
+          continue;
+        }
+        GraphObject details=renderContext.getDetailsDataObject();
+        boolean detailMode=details != null;
+        if (detailMode && subNode.getProperty(hideOnDetail)) {
+          continue;
+        }
+        if (!detailMode && subNode.getProperty(hideOnIndex)) {
+          continue;
+        }
+        if (subNode instanceof DOMElement) {
+          anyChildNodeCreatesNewLine=(anyChildNodeCreatesNewLine || !((DOMElement)subNode).avoidWhitespace());
+        }
+        if (EditMode.RAW.equals(editMode)) {
           subNode.render(securityContext,renderContext,depth + 1);
         }
  else {
-          if (listData.isEmpty() && currentDataNode != null) {
-            Object elements=currentDataNode.getProperty(new GenericProperty(subKey));
-            renderContext.setRelatedProperty(new GenericProperty(subKey));
-            renderContext.setSourceDataObject(currentDataNode);
-            if (elements != null) {
-              if (elements instanceof Iterable) {
-                int i=0;
-                for (                Object o : (Iterable)elements) {
-                  if (o instanceof GraphObject) {
-                    i++;
-                    GraphObject graphObject=(GraphObject)o;
-                    renderContext.putDataObject(subKey,graphObject);
-                    subNode.render(securityContext,renderContext,depth + 1);
+          String subKey=subNode.getProperty(dataKey);
+          if (StringUtils.isNotBlank(subKey)) {
+            setDataRoot(renderContext,subNode,subKey);
+            GraphObject currentDataNode=renderContext.getDataObject();
+            List<GraphObject> listData=((DOMElement)subNode).checkListSources(securityContext,renderContext);
+            PropertyKey propertyKey=null;
+            if (subNode.getProperty(renderDetails) && detailMode) {
+              renderContext.setDataObject(details);
+              renderContext.putDataObject(subKey,details);
+              subNode.render(securityContext,renderContext,depth + 1);
+            }
+ else {
+              if (listData.isEmpty() && currentDataNode != null) {
+                Object elements=currentDataNode.getProperty(new GenericProperty(subKey));
+                renderContext.setRelatedProperty(new GenericProperty(subKey));
+                renderContext.setSourceDataObject(currentDataNode);
+                if (elements != null) {
+                  if (elements instanceof Iterable) {
+                    int i=0;
+                    for (                    Object o : (Iterable)elements) {
+                      if (o instanceof GraphObject) {
+                        i++;
+                        GraphObject graphObject=(GraphObject)o;
+                        renderContext.putDataObject(subKey,graphObject);
+                        subNode.render(securityContext,renderContext,depth + 1);
+                      }
+                    }
                   }
                 }
-              }
-            }
  else {
-              propertyKey=EntityContext.getPropertyKeyForJSONName(currentDataNode.getClass(),subKey,false);
-              renderContext.setRelatedProperty(propertyKey);
-              if (propertyKey != null && propertyKey instanceof CollectionProperty) {
-                CollectionProperty<AbstractNode> collectionProperty=(CollectionProperty)propertyKey;
-                for (                AbstractNode node : currentDataNode.getProperty(collectionProperty)) {
-                  renderContext.putDataObject(subKey,node);
-                  subNode.render(securityContext,renderContext,depth + 1);
+                  propertyKey=EntityContext.getPropertyKeyForJSONName(currentDataNode.getClass(),subKey,false);
+                  renderContext.setRelatedProperty(propertyKey);
+                  if (propertyKey != null && propertyKey instanceof CollectionProperty) {
+                    CollectionProperty<AbstractNode> collectionProperty=(CollectionProperty)propertyKey;
+                    for (                    AbstractNode node : currentDataNode.getProperty(collectionProperty)) {
+                      renderContext.putDataObject(subKey,node);
+                      subNode.render(securityContext,renderContext,depth + 1);
+                    }
+                  }
                 }
-                typeForCreateButton=collectionProperty.getDestType();
-                sourceId=currentDataNode.getUuid();
-                sourceType=currentDataNode.getType();
-                relatedProperty=collectionProperty.jsonName();
+                renderContext.setDataObject(currentDataNode);
+                renderContext.setRelatedProperty(null);
+              }
+ else {
+                renderContext.setListSource(listData);
+                ((DOMElement)subNode).renderNodeList(securityContext,renderContext,depth,subKey);
               }
             }
-            renderContext.setDataObject(currentDataNode);
-            renderContext.setRelatedProperty(null);
           }
  else {
-            if (!listData.isEmpty()) {
-              typeForCreateButton=listData.get(0).getClass();
-            }
-            renderContext.setListSource(listData);
-            ((DOMElement)subNode).renderNodeList(securityContext,renderContext,depth,subKey);
+            subNode.render(securityContext,renderContext,depth + 1);
           }
         }
       }
- else {
-        subNode.render(securityContext,renderContext,depth + 1);
-      }
     }
-    if (StringUtils.isNotBlank(tag) && (!isVoid)) {
+ catch (    Throwable t) {
+      logger.log(Level.SEVERE,"Error while rendering node {0}: {1}",new java.lang.Object[]{getUuid(),t});
+      buffer.append("Error while rendering node ").append(getUuid()).append(": ").append(t);
+    }
+    if (StringUtils.isNotBlank(_tag) && (!isVoid)) {
       if (anyChildNodeCreatesNewLine) {
         buffer.append(indent(depth));
       }
-      buffer.append("</").append(tag).append(">");
+      buffer.append("</").append(_tag).append(">");
     }
   }
   double end=System.nanoTime();

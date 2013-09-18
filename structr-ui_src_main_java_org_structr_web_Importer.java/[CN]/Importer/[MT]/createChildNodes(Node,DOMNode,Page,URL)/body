@@ -32,8 +32,8 @@
     }
     if (type.equals("#text")) {
       tag="";
-      content=((TextNode)node).toString().trim();
-      if (StringUtils.isBlank(content)) {
+      content=((TextNode)node).text();
+      if (!("p".equals(startNode.nodeName().toLowerCase())) && StringUtils.isWhitespace(content)) {
         continue;
       }
     }
@@ -62,7 +62,18 @@
               int l=DATA_META_PREFIX.length();
               String upperCaseKey=WordUtils.capitalize(key.substring(l),new char[]{'-'}).replaceAll("-","");
               String camelCaseKey=key.substring(l,l + 1).concat(upperCaseKey.substring(1));
-              newNode.setProperty(new StringProperty(camelCaseKey),nodeAttr.getValue());
+              String value=nodeAttr.getValue();
+              if (value != null) {
+                if (value.equalsIgnoreCase("true")) {
+                  newNode.setProperty(new BooleanProperty(camelCaseKey),true);
+                }
+ else                 if (value.equalsIgnoreCase("false")) {
+                  newNode.setProperty(new BooleanProperty(camelCaseKey),false);
+                }
+ else {
+                  newNode.setProperty(new StringProperty(camelCaseKey),nodeAttr.getValue());
+                }
+              }
             }
           }
  else {

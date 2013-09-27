@@ -1,5 +1,5 @@
 {
-  if (propertySet.containsKey(User.eMail.jsonName()) && propertySet.size() == 1) {
+  if (propertySet.containsKey(User.eMail.jsonName())) {
     SecurityContext superUserContext=SecurityContext.getSuperUserInstance();
     final Principal user;
     final String emailString=(String)propertySet.get(User.eMail.jsonName());
@@ -20,7 +20,7 @@
 );
     }
  else {
-      user=createUser(securityContext,User.eMail,emailString,securityContext.getAuthenticator().getUserAutoCreate());
+      user=createUser(securityContext,User.eMail,emailString,propertySet,securityContext.getAuthenticator().getUserAutoCreate());
     }
     if (user != null) {
       if (!sendInvitationLink(user)) {

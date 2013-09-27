@@ -1,28 +1,3 @@
 {
-  try {
-    return Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction<Principal>(){
-      @Override public Principal execute() throws FrameworkException {
-        Person person=(Person)AuthHelper.getPrincipalForCredential(credentialKey,credentialValue);
-        if (person != null) {
-          person.unlockReadOnlyPropertiesOnce();
-          person.setProperty(AbstractNode.type,User.class.getSimpleName());
-          User user=new User();
-          user.init(securityContext,person.getNode());
-          person.updateInIndex();
-          user.setProperty(User.confirmationKey,confKey);
-          return user;
-        }
- else         if (autoCreate) {
-          return (Principal)Services.command(securityContext,CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.type,User.class.getSimpleName()),new NodeAttribute(credentialKey,credentialValue),new NodeAttribute(User.name,credentialValue),new NodeAttribute(User.confirmationKey,confKey));
-        }
-        logger.log(Level.WARNING,"No user created: No matching person found, and auto-creation is off");
-        return null;
-      }
-    }
-);
-  }
- catch (  FrameworkException ex) {
-    logger.log(Level.SEVERE,null,ex);
-  }
-  return null;
+  return createUser(securityContext,credentialKey,credentialValue,Collections.EMPTY_MAP,false);
 }

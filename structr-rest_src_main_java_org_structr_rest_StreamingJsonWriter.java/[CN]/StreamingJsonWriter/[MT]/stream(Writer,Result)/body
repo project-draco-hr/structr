@@ -13,6 +13,7 @@
   String searchString=src.getSearchString();
   String sortKey=src.getSortKey();
   String sortOrder=src.getSortOrder();
+  GraphObject metaData=src.getMetaData();
   int flushSize=pageSize != null ? pageSize.intValue() : 20;
   writer.beginObject();
   if (page != null) {
@@ -80,6 +81,11 @@
   }
   if (sortOrder != null) {
     writer.name("sort_order").value(sortOrder);
+  }
+  if (metaData != null) {
+    String localPropertyView=propertyView.get(null);
+    writer.name("meta_data");
+    root.serialize(writer,metaData,localPropertyView,0);
   }
   writer.name("serialization_time").value(decimalFormat.format((System.nanoTime() - t0) / 1000000000.0));
   writer.endObject();

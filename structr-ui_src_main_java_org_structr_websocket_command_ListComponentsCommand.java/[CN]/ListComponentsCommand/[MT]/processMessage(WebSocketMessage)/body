@@ -1,14 +1,9 @@
 {
   final SecurityContext securityContext=getWebSocket().getSecurityContext();
-  List<SearchAttribute> searchAttributes=new LinkedList();
-  searchAttributes.add(Search.andExactTypeAndSubtypes(DOMElement.class));
-  final String sortOrder=webSocketData.getSortOrder();
-  final String sortKey=webSocketData.getSortKey();
   final int pageSize=webSocketData.getPageSize();
   final int page=webSocketData.getPage();
-  PropertyKey sortProperty=EntityContext.getPropertyKeyForJSONName(DOMElement.class,sortKey);
   try {
-    Result result=(Result)Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class).execute(Search.andExactType(ShadowDocument.class));
+    Result result=(Result)Services.command(securityContext,SearchNodeCommand.class).execute(Search.andExactType(ShadowDocument.class));
     List<AbstractNode> filteredResults=new LinkedList();
     List<AbstractNode> resultList=result.getResults();
     if (result.isEmpty()) {

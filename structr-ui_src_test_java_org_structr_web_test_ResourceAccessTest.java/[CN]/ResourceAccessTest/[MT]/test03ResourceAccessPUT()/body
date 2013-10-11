@@ -1,28 +1,28 @@
 {
   try {
-    Folder testFolder=createTestNodes(Folder.class,1).get(0);
-    assertNotNull(testFolder);
-    RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(401).when().put("/folder/" + testFolder.getUuid());
-    ResourceAccess folderGrant=createResourceAccess("Folder",UiAuthenticator.FORBIDDEN);
-    RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(401).when().put("/folder/" + testFolder.getUuid());
-    folderGrant.setFlag(UiAuthenticator.AUTH_USER_PUT);
-    RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(401).when().put("/folder/" + testFolder.getUuid());
-    folderGrant.setFlag(UiAuthenticator.NON_AUTH_USER_PUT);
-    RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(403).when().put("/folder/" + testFolder.getUuid());
     final String name="testuser-01";
     final String password="testpassword-01";
     final User testUser=createTestNodes(User.class,1).get(0);
-    testUser.setProperty(AbstractNode.name,name);
-    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-      @Override public Object execute() throws FrameworkException {
+    final Folder testFolder=createTestNodes(Folder.class,1).get(0);
+    transactionCommand.execute(new StructrTransaction<AbstractNode>(){
+      @Override public AbstractNode execute() throws FrameworkException {
+        assertNotNull(testFolder);
+        RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(401).when().put("/folder/" + testFolder.getUuid());
+        ResourceAccess folderGrant=createResourceAccess("Folder",UiAuthenticator.FORBIDDEN);
+        RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(401).when().put("/folder/" + testFolder.getUuid());
+        folderGrant.setFlag(UiAuthenticator.AUTH_USER_PUT);
+        RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(401).when().put("/folder/" + testFolder.getUuid());
+        folderGrant.setFlag(UiAuthenticator.NON_AUTH_USER_PUT);
+        RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(403).when().put("/folder/" + testFolder.getUuid());
+        testUser.setProperty(AbstractNode.name,name);
         testUser.setProperty(User.password,password);
+        RestAssured.given().headers("X-User",name,"X-Password",password).contentType("application/json; charset=UTF-8").expect().statusCode(403).when().put("/folder/" + testFolder.getUuid());
+        testFolder.setProperty(AbstractNode.owner,testUser);
+        RestAssured.given().headers("X-User",name,"X-Password",password).contentType("application/json; charset=UTF-8").expect().statusCode(200).when().put("/folder/" + testFolder.getUuid());
         return null;
       }
     }
 );
-    RestAssured.given().headers("X-User",name,"X-Password",password).contentType("application/json; charset=UTF-8").expect().statusCode(403).when().put("/folder/" + testFolder.getUuid());
-    testFolder.setProperty(AbstractNode.owner,testUser);
-    RestAssured.given().headers("X-User",name,"X-Password",password).contentType("application/json; charset=UTF-8").expect().statusCode(200).when().put("/folder/" + testFolder.getUuid());
   }
  catch (  FrameworkException ex) {
     ex.printStackTrace();

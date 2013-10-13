@@ -6,10 +6,14 @@
   java.io.File fileOnDisk=new java.io.File(filePath);
   fileOnDisk.getParentFile().mkdirs();
   URL downloadUrl=null;
+  long size=0;
+  long checksum=0;
   try {
     downloadUrl=new URL(baseUrl,downloadAddress);
     logger.log(Level.INFO,"Starting download from {0}",downloadUrl);
     FileUtils.copyURLToFile(downloadUrl,fileOnDisk);
+    size=fileOnDisk.length();
+    checksum=FileUtils.checksumCRC32(fileOnDisk);
   }
  catch (  IOException ioe) {
     logger.log(Level.WARNING,"Unable to download from " + downloadAddress,ioe);
@@ -28,10 +32,10 @@
     if (!(fileExists(fileName,FileUtils.checksumCRC32(fileOnDisk)))) {
       File fileNode;
       if (ImageHelper.isImageType(fileName)) {
-        fileNode=createImageNode(uuid,fileName,ct);
+        fileNode=createImageNode(uuid,fileName,ct,size,checksum);
       }
  else {
-        fileNode=createFileNode(uuid,fileName,ct);
+        fileNode=createFileNode(uuid,fileName,ct,size,checksum);
       }
       if (fileNode != null) {
         Folder parent=createFolderPath(path);

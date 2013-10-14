@@ -5,6 +5,7 @@
     return false;
   }
   String targetPage=request.getParameter(TARGET_PAGE_KEY);
+  String errorPage=request.getParameter(ERROR_PAGE_KEY);
   if (CONFIRM_REGISTRATION_PAGE.equals(path)) {
     List<SearchAttribute> searchAttrs=new LinkedList();
     searchAttrs.add(Search.andExactTypeAndSubtypes(Principal.class));
@@ -22,6 +23,12 @@
 );
       if (StringUtils.isNotBlank(targetPage)) {
         response.sendRedirect("/" + targetPage);
+        return true;
+      }
+    }
+ else {
+      if (StringUtils.isNotBlank(errorPage)) {
+        response.sendRedirect("/" + errorPage);
         return true;
       }
     }

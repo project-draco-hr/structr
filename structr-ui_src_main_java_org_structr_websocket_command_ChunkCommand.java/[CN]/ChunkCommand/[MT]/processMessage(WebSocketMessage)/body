@@ -21,9 +21,9 @@
     }
     getWebSocket().handleFileChunk(uuid,sequenceNumber,chunkSize,data);
     final long size=(long)(sequenceNumber * chunkSize) + data.length;
-    long overallSize=file.getProperty(File.size);
-    logger.log(Level.FINE,"Overall size: {0}, part: {1}",new Object[]{overallSize,size});
-    if (size >= overallSize) {
+    long oldSize=file.getProperty(File.size);
+    logger.log(Level.FINE,"Overall size: {0}, part: {1}",new Object[]{oldSize,size});
+    if (size != oldSize) {
       Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
         @Override public Object execute() throws FrameworkException {
           file.setProperty(File.size,FileHelper.getSize(file));

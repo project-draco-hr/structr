@@ -1,0 +1,95 @@
+{
+  long t0=System.nanoTime();
+  RestWriter writer=getRestWriter(w);
+  if (indent) {
+    writer.setIndent("   ");
+  }
+  List<? extends GraphObject> results=src.getResults();
+  Integer page=src.getPage();
+  Integer pageCount=src.getPageCount();
+  Integer pageSize=src.getPageSize();
+  String queryTime=src.getQueryTime();
+  Integer resultCount=src.getRawResultCount();
+  String searchString=src.getSearchString();
+  String sortKey=src.getSortKey();
+  String sortOrder=src.getSortOrder();
+  GraphObject metaData=src.getMetaData();
+  int flushSize=pageSize != null ? pageSize.intValue() : 20;
+  writer.beginDocument();
+  writer.beginObject();
+  if (page != null) {
+    writer.name("page").value(page);
+  }
+  if (pageCount != null) {
+    writer.name("page_count").value(pageCount);
+  }
+  if (pageSize != null) {
+    writer.name("page_size").value(pageSize);
+  }
+  if (queryTime != null) {
+    writer.name("query_time").value(queryTime);
+  }
+  if (resultCount != null) {
+    writer.name("result_count").value(resultCount);
+  }
+  if (results != null) {
+    if (results.isEmpty()) {
+      writer.name("result").beginArray().endArray();
+    }
+ else     if (src.isPrimitiveArray()) {
+      writer.name("result").beginArray();
+      for (      GraphObject graphObject : results) {
+        Object value=graphObject.getProperty(AbstractNode.uuid);
+        if (value != null) {
+          writer.value(value.toString());
+        }
+      }
+      writer.endArray();
+    }
+ else {
+      if (results.size() > 1 && !src.isCollection()) {
+        throw new IllegalStateException(src.getClass().getSimpleName() + " is not a collection resource, but result set has size " + results.size());
+      }
+      long startTime=System.currentTimeMillis();
+      String localPropertyView=propertyView.get(null);
+      int flushCounter=0;
+      if (src.isCollection()) {
+        writer.name("result").beginArray();
+        for (        GraphObject graphObject : results) {
+          root.serialize(writer,graphObject,localPropertyView,0);
+          if ((++flushCounter % flushSize) == 0) {
+            writer.flush();
+          }
+          if (System.currentTimeMillis() > startTime + MAX_SERIALIZATION_TIME) {
+            logger.log(Level.SEVERE,"JSON serialization took more than {0} ms, aborted. Please review output view size or adjust timeout.",MAX_SERIALIZATION_TIME);
+            writer.flush();
+            break;
+          }
+        }
+        writer.endArray();
+      }
+ else {
+        writer.name("result");
+        root.serialize(writer,results.get(0),localPropertyView,0);
+      }
+    }
+  }
+  if (searchString != null) {
+    writer.name("search_string").value(searchString);
+  }
+  if (sortKey != null) {
+    writer.name("sort_key").value(sortKey);
+  }
+  if (sortOrder != null) {
+    writer.name("sort_order").value(sortOrder);
+  }
+  if (metaData != null) {
+    String localPropertyView=propertyView.get(null);
+    writer.name("meta_data");
+    root.serialize(writer,metaData,localPropertyView,0);
+  }
+  writer.name("serialization_time").value(decimalFormat.format((System.nanoTime() - t0) / 1000000000.0));
+  writer.endObject();
+  writer.endDocument();
+  writer.flush();
+}

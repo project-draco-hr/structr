@@ -1,0 +1,27 @@
+{
+  writer.println();
+  if (!hasName) {
+    beginTag(LI,true);
+    beginTag("b",false);
+    if (graphObject != null) {
+      final String name=graphObject.getProperty(AbstractNode.name);
+      final String uuid=graphObject.getUuid();
+      final String type=graphObject.getType();
+      if (name != null) {
+        writer.print("<span class=\"name\">" + name + "</span>");
+      }
+      if (uuid != null) {
+        writer.print(" <span class=\"id\">" + uuid + "</span>");
+      }
+      if (type != null) {
+        writer.print(" <span class=\"type\">" + type + "</span>");
+      }
+    }
+    endTag("b",false);
+  }
+  writer.println(" {");
+  beginTag(UL,true);
+  level++;
+  hasName=false;
+  return this;
+}

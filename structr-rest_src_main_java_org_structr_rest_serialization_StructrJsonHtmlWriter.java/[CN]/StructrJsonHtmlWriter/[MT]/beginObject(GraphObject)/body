@@ -1,27 +1,31 @@
 {
-  writer.println();
   if (!hasName) {
     beginTag(LI,true);
-    beginTag("b",false);
+    beginTag("b",true);
     if (graphObject != null) {
       final String name=graphObject.getProperty(AbstractNode.name);
       final String uuid=graphObject.getUuid();
       final String type=graphObject.getType();
       if (name != null) {
-        writer.print("<span class=\"name\">" + name + "</span>");
+        beginTag("span",false,new Css("name"));
+        writer.print(name);
+        endTag("span",false);
       }
       if (uuid != null) {
-        writer.print(" <span class=\"id\">" + uuid + "</span>");
+        beginTag("span",false,new Css("id"));
+        writer.print(uuid);
+        endTag("span",false);
       }
       if (type != null) {
-        writer.print(" <span class=\"type\">" + type + "</span>");
+        beginTag("span",false,new Css("type"));
+        writer.print(type);
+        endTag("span",false);
       }
     }
-    endTag("b",false);
+    endTag("b",true);
   }
   writer.println(" {");
-  beginTag(UL,true);
-  level++;
+  beginTag(UL,true,new Conditional(level > CLOSE_LEVEL,new Css("collapsibleList")));
   hasName=false;
   return this;
 }

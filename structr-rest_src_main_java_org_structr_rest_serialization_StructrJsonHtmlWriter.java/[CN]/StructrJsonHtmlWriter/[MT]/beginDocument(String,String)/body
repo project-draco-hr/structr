@@ -1,0 +1,41 @@
+{
+  String restPath=Services.getConfigurationValue(Services.REST_PATH);
+  String currentType=baseUrl.replace(restPath + "/","").replace("/" + propertyView,"");
+  beginTag("html",true);
+  beginTag("head",true);
+  beginTag("link",true,true,new Rel("stylesheet"),new Type("text/css"),new Href("//structr.org/rest.css"));
+  beginTag("script",false,new Type("text/javascript"),new Src("//structr.org/CollapsibleLists.js"));
+  endTag("script",false);
+  beginTag("title",false);
+  writer.print(baseUrl);
+  endTag("title",false);
+  endTag("head",true);
+  beginTag("body",true,new Onload("CollapsibleLists.apply(true);"));
+  beginTag("div",true,new Id("top"));
+  beginTag("ul",true);
+  for (  String view : EntityContext.getPropertyViews()) {
+    beginTag("li",true);
+    beginTag("a",false,new Href(restPath + "/" + currentType+ "/"+ view),new Conditional(view.equals(propertyView),new Css("active")));
+    writer.print(view);
+    endTag("a",false);
+    endTag("li",true);
+  }
+  endTag("ul",true);
+  endTag("div",true);
+  beginTag("div",true,new Id("left"));
+  ModuleService moduleService=(ModuleService)Services.getService(ModuleService.class);
+  for (  String rawType : moduleService.getCachedNodeEntityTypes()) {
+    beginTag("p",true);
+    beginTag("a",false,new Href(restPath + "/" + rawType),new Conditional(rawType.equals(currentType),new Css("active")));
+    writer.print(rawType);
+    endTag("a",false);
+    endTag("p",true);
+  }
+  endTag("div",true);
+  beginTag("div",true,new Id("right"));
+  beginTag("h1",false);
+  writer.print(baseUrl);
+  endTag("h1",false);
+  beginTag("ul",true);
+  return this;
+}

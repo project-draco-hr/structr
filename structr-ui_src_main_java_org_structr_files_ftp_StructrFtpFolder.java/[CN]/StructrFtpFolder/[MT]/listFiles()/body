@@ -1,0 +1,17 @@
+{
+  logger.log(Level.INFO,"Children of {0} requested",getAbsolutePath());
+  List<FtpFile> ftpFiles=new ArrayList();
+  List<Folder> folders=((Folder)structrFile).getProperty(Folder.folders);
+  for (  Folder f : folders) {
+    FtpFile ftpFile=new StructrFtpFolder(f);
+    logger.log(Level.INFO,"Subfolder found: {0}",ftpFile.getAbsolutePath());
+    ftpFiles.add(ftpFile);
+  }
+  List<File> files=((Folder)structrFile).getProperty(Folder.files);
+  for (  File f : files) {
+    FtpFile ftpFile=new StructrFtpFile(f);
+    logger.log(Level.INFO,"File found: {0}",ftpFile.getAbsolutePath());
+    ftpFiles.add(ftpFile);
+  }
+  return ftpFiles;
+}

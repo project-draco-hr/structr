@@ -1,0 +1,8 @@
+{
+  org.structr.web.entity.User structrUser=(org.structr.web.entity.User)AuthHelper.getPrincipalForCredential(AbstractUser.name,user.getName());
+  Folder workingDir=structrUser.getProperty(org.structr.web.entity.User.workingDirectory);
+  if (workingDir == null) {
+    workingDir=structrUser.getProperty(org.structr.web.entity.User.homeDirectory);
+  }
+  return new StructrFtpFolder(workingDir);
+}

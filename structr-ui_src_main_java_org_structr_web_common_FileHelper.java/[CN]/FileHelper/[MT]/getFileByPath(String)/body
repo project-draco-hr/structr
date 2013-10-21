@@ -1,0 +1,19 @@
+{
+  String[] parts=PathHelper.getParts(path);
+  if (parts == null || parts.length == 0)   return null;
+  if (parts[0].length() == 0)   return null;
+  AbstractFile currentFile=getFileByName(parts[0]);
+  if (currentFile == null)   return null;
+  for (int i=1; i < parts.length; i++) {
+    List<AbstractFile> children=currentFile.getProperty(AbstractFile.children);
+    currentFile=null;
+    for (    AbstractFile child : children) {
+      if (child.getProperty(AbstractFile.name).equals(parts[i])) {
+        currentFile=child;
+        break;
+      }
+    }
+    if (currentFile == null)     return null;
+  }
+  return currentFile;
+}

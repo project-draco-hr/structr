@@ -1,0 +1,18 @@
+{
+  final org.structr.web.entity.User structrUser=(org.structr.web.entity.User)AuthHelper.getPrincipalForCredential(AbstractUser.name,user.getName());
+  final StructrFtpFolder newWorkingDirectory=(StructrFtpFolder)getFile(requestedPath);
+  try {
+    Services.command(SecurityContext.getSuperUserInstance(),TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        structrUser.setProperty(org.structr.web.entity.User.workingDirectory,(Folder)newWorkingDirectory.getStructrFile());
+        return null;
+      }
+    }
+);
+  }
+ catch (  FrameworkException ex) {
+    logger.log(Level.SEVERE,null,ex);
+    return false;
+  }
+  return true;
+}

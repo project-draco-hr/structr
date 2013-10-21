@@ -1,0 +1,21 @@
+{
+  logger.log(Level.INFO,"Authentication: {0}",auth);
+  String userName=null;
+  String password=null;
+  if (auth instanceof UsernamePasswordAuthentication) {
+    UsernamePasswordAuthentication authentication=(UsernamePasswordAuthentication)auth;
+    userName=authentication.getUsername();
+    password=authentication.getPassword();
+    org.structr.web.entity.User user=null;
+    try {
+      user=(org.structr.web.entity.User)AuthHelper.getPrincipalForPassword(AbstractUser.name,userName,password);
+    }
+ catch (    AuthenticationException ex) {
+      Logger.getLogger(StructrUserManager.class.getName()).log(Level.SEVERE,null,ex);
+    }
+    if (user != null) {
+      return new StructrFtpUser(user);
+    }
+  }
+  throw new AuthenticationFailedException("No structr user found for credentials " + userName + "/"+ password);
+}

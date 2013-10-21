@@ -1,0 +1,23 @@
+{
+  while (!Services.isInitialized()) {
+    try {
+      Thread.sleep(1000);
+    }
+ catch (    InterruptedException iex) {
+    }
+  }
+  try {
+    FtpServerFactory serverFactory=new FtpServerFactory();
+    serverFactory.setUserManager(new StructrUserManager());
+    serverFactory.setFileSystem(new StructrFileSystemFactory());
+    ListenerFactory factory=new ListenerFactory();
+    factory.setPort(port);
+    serverFactory.addListener("default",factory.createListener());
+    logger.log(Level.INFO,"Starting FTP server on port {0}",new Object[]{port});
+    FtpServer server=serverFactory.createServer();
+    server.start();
+  }
+ catch (  FtpException ex) {
+    logger.log(Level.SEVERE,null,ex);
+  }
+}

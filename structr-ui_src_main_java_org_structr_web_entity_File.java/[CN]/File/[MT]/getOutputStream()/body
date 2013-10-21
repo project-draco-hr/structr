@@ -1,0 +1,14 @@
+{
+  String path=getRelativeFilePath();
+  if (path != null) {
+    String filePath=Services.getFilePath(Path.Files,path);
+    try {
+      java.io.File fileOnDisk=new java.io.File(filePath);
+      return new FileOutputStream(fileOnDisk);
+    }
+ catch (    FileNotFoundException e) {
+      logger.log(Level.SEVERE,"File not found: {0}",new Object[]{path});
+    }
+  }
+  return null;
+}

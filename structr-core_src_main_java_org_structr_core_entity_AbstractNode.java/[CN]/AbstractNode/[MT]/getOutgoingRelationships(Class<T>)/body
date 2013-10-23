@@ -1,0 +1,10 @@
+{
+  RelationshipFactory<T> factory=new RelationshipFactory<T>(securityContext);
+  RelationshipInterface template=getRelationshipForType(type);
+  RelationshipType relType=template.getRelationshipType();
+  Iterable<Relationship> rels=null;
+  if (type != null) {
+    rels=dbNode.getRelationships(relType,Direction.OUTGOING);
+  }
+  return new IterableAdapter<Relationship,T>(rels,factory);
+}

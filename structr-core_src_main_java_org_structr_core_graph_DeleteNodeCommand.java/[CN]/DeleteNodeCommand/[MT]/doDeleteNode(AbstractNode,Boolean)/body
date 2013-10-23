@@ -10,7 +10,7 @@
       try {
         List<AbstractNode> nodesToCheckAfterDeletion=new LinkedList<AbstractNode>();
         if (cascade) {
-          for (          AbstractRelationship rel : node.getOutgoingRelationships()) {
+          for (          Outgoing rel : node.getOutgoingRelationships()) {
             int cascadeDelete=rel.cascadeDelete();
             AbstractNode endNode=rel.getEndNode();
             if ((cascadeDelete & Relation.DELETE_IF_CONSTRAINT_WOULD_BE_VIOLATED) == Relation.DELETE_IF_CONSTRAINT_WOULD_BE_VIOLATED) {
@@ -21,7 +21,7 @@
               doDeleteNode(endNode,cascade);
             }
           }
-          for (          AbstractRelationship rel : node.getIncomingRelationships()) {
+          for (          Incoming rel : node.getIncomingRelationships()) {
             int cascadeDelete=rel.cascadeDelete();
             AbstractNode startNode=rel.getStartNode();
             if ((cascadeDelete & Relation.DELETE_IF_CONSTRAINT_WOULD_BE_VIOLATED) == Relation.DELETE_IF_CONSTRAINT_WOULD_BE_VIOLATED) {

@@ -1,0 +1,22 @@
+{
+  Class newRelationshipClass=newRel.getClass();
+  Class targetType=targetNode.getClass();
+  for (  AbstractRelationship rel : sourceNode.getRelationships(CollectionProperty.this.relationClass)) {
+    if (rel.equals(newRel)) {
+      continue;
+    }
+    Class relationshipClass=rel.getClass();
+    boolean isGeneric=factoryDefinition.isGeneric(relationshipClass);
+    AbstractNode otherNode=rel.getOtherNode(sourceNode);
+    Class otherClass=otherNode.getClass();
+    boolean removeRel=targetType.isAssignableFrom(otherClass) || (!isGeneric && newRelationshipClass.isAssignableFrom(relationshipClass));
+    if (!removeRel) {
+      for (      Class iface : EntityContext.getInterfacesForType(targetType)) {
+        removeRel|=iface.isAssignableFrom(otherClass);
+      }
+    }
+    if (removeRel) {
+      deleteRel.execute(rel);
+    }
+  }
+}

@@ -1,16 +1,13 @@
 {
   if (cachedOwnerNode == null) {
-    for (    AbstractRelationship s : getRelationships(RelType.OWNS,Direction.INCOMING)) {
-      AbstractNode n=s.getStartNode();
+    for (    Incoming s : getIncomingRelationships(Ownership.class)) {
+      Principal n=s.getStartNode();
       if (n == null) {
         logger.log(Level.WARNING,"Could not determine owner node!");
         return null;
       }
-      if (n instanceof Principal) {
-        cachedOwnerNode=(Principal)n;
-        break;
-      }
-      logger.log(Level.SEVERE,"Owner node is not a user: {0}[{1}]",new Object[]{n.getName(),n.getId()});
+      cachedOwnerNode=(Principal)n;
+      break;
     }
   }
   return cachedOwnerNode;

@@ -1,0 +1,15 @@
+{
+  final T lastChild=treeGetLastChild(type);
+  Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+    @Override public Object execute() throws FrameworkException {
+      PropertyMap properties=new PropertyMap();
+      properties.put(positionProperty,treeGetChildCount(type));
+      linkNodes(type,LinkedTreeNode.this,childElement,properties);
+      if (lastChild != null) {
+        LinkedTreeNode.super.listInsertAfter(getListKey(type),lastChild,childElement);
+      }
+      return null;
+    }
+  }
+);
+}

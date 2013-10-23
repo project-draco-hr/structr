@@ -1,0 +1,14 @@
+{
+  Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+    @Override public Object execute() throws FrameworkException {
+      List<? extends TreeChild> childRels=treeGetChildRelationships(type);
+      int position=0;
+      for (      TreeChild childRel : childRels) {
+        childRel.removeProperty(positionProperty);
+        childRel.setProperty(positionProperty,position++);
+      }
+      return null;
+    }
+  }
+);
+}

@@ -1,6 +1,6 @@
 {
   try {
-    List<AbstractNode> testNodes=this.createTestNodes(GenericNode.class,2);
+    List<NodeInterface> testNodes=this.createTestNodes(GenericNode.class,2);
     assertNotNull(testNodes);
     assertTrue(testNodes.size() == 2);
     AbstractRelationship rel=createRelationshipCommand.execute(testNodes.get(0),testNodes.get(1),TestRelType.ONE_TO_ONE);
@@ -8,7 +8,7 @@
     GraphDatabaseService graphDb=graphDbCommand.execute();
     Transaction tx=graphDb.beginTx();
     try {
-      testNodes.get(0).getRelationships(Direction.BOTH).iterator().next().getRelationship().delete();
+      testNodes.get(0).getRelationships().iterator().next().getRelationship().delete();
       tx.success();
     }
   finally {

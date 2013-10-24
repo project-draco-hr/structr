@@ -1,0 +1,18 @@
+{
+  super(name);
+  try {
+    this.relationship=relationClass.newInstance();
+    this.relationClass=relationClass;
+  }
+ catch (  Throwable t) {
+    t.printStackTrace();
+  }
+  this.notion=notion;
+  this.manyToOne=manyToOne;
+  this.destType=relationship.getDestinationType();
+  this.relType=relationship.getRelationshipType();
+  this.cardinality=manyToOne ? Cardinality.ManyToOne : Cardinality.OneToOne;
+  this.cascadeDelete=cascadeDelete;
+  this.notion.setType(this.relationship.getDestinationType());
+  EntityContext.registerConvertedProperty(this);
+}

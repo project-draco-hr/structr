@@ -1,41 +1,23 @@
 {
   String restPath=Services.getConfigurationValue(Services.REST_PATH);
   String currentType=baseUrl.replace(restPath + "/","").replace("/" + propertyView,"");
-  beginTag("html",true);
-  beginTag("head",true);
-  beginTag("link",true,true,new Rel("stylesheet"),new Type("text/css"),new Href("//structr.org/rest.css"));
-  beginTag("script",false,new Type("text/javascript"),new Src("//structr.org/CollapsibleLists.js"));
-  endTag("script",false);
-  beginTag("title",false);
-  writer.print(baseUrl);
-  endTag("title",false);
-  endTag("head",true);
-  beginTag("body",true,new Onload("CollapsibleLists.apply(true);"));
-  beginTag("div",true,new Id("top"));
-  beginTag("ul",true);
+  Tag head=doc.block("head");
+  head.empty("link").attr(new Rel("stylesheet"),new Type("text/css"),new Href("//structr.org/rest.css"));
+  head.inline("script").attr(new Type("text/javascript"),new Src("//structr.org/CollapsibleLists.js"));
+  head.inline("title").text(baseUrl);
+  Tag body=doc.block("body").attr(new Onload("CollapsibleLists.apply(true);"));
+  Tag top=body.block("div").id("top");
+  Tag ul1=top.block("ul");
   for (  String view : EntityContext.getPropertyViews()) {
-    beginTag("li",true);
-    beginTag("a",false,new Href(restPath + "/" + currentType+ "/"+ view),new Conditional(view.equals(propertyView),new Css("active")));
-    writer.print(view);
-    endTag("a",false);
-    endTag("li",true);
+    ul1.block("li").inline("a").attr(new Href(restPath + "/" + currentType+ "/"+ view),new If(view.equals(propertyView),new Css("active"))).text(view);
   }
-  endTag("ul",true);
-  endTag("div",true);
-  beginTag("div",true,new Id("left"));
+  Tag left=body.block("div").id("left");
   ModuleService moduleService=(ModuleService)Services.getService(ModuleService.class);
   for (  String rawType : moduleService.getCachedNodeEntityTypes()) {
-    beginTag("p",true);
-    beginTag("a",false,new Href(restPath + "/" + rawType),new Conditional(rawType.equals(currentType),new Css("active")));
-    writer.print(rawType);
-    endTag("a",false);
-    endTag("p",true);
+    left.block("p").inline("a").attr(new Href(restPath + "/" + rawType),new If(rawType.equals(currentType),new Css("active"))).text(rawType);
   }
-  endTag("div",true);
-  beginTag("div",true,new Id("right"));
-  beginTag("h1",false);
-  writer.print(baseUrl);
-  endTag("h1",false);
-  beginTag("ul",true);
+  currentElement=body.block("div").id("right");
+  currentElement.block("h1").text(baseUrl);
+  currentElement=currentElement.block("ul");
   return this;
 }

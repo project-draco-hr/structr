@@ -1,0 +1,30 @@
+{
+  final Context context=new Context(level);
+  writer.flush();
+  for (int i=0; i < level; i++) {
+    writer.print(indent);
+  }
+  writer.print("<" + tagName);
+  for (  Attr attr : attributes) {
+    String output=attr.format(context);
+    if (output.length() > 0) {
+      writer.print(" " + output);
+    }
+  }
+  if (newline) {
+    if (empty) {
+      writer.println("/>");
+    }
+ else {
+      writer.println(">");
+    }
+  }
+ else {
+    if (empty) {
+      writer.print("/>");
+    }
+ else {
+      writer.print(">");
+    }
+  }
+}

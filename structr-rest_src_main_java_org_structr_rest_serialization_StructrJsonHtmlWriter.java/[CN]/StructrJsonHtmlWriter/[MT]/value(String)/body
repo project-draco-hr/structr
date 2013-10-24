@@ -1,15 +1,11 @@
 {
   if ("id".equals(lastName)) {
-    beginTag("a",false,new Css("id"),new Href(value));
-    writer.print(value);
-    endTag("a",false);
+    currentElement.inline("a").css("id").attr(new Href(value)).text(value);
   }
  else {
-    beginTag("span",false,new Css("string"));
-    writer.print(value);
-    endTag("span",false);
+    currentElement.inline("span").css("string").text(value);
   }
-  endTag(LI,true);
+  currentElement=currentElement.parent();
   hasName=false;
   return this;
 }

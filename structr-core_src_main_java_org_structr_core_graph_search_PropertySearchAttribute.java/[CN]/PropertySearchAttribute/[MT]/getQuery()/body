@@ -10,8 +10,18 @@
     return new TermQuery(new Term(getKey().dbName(),value));
   }
  else {
+    String value=getInexactValue();
+    if (value.startsWith("\"") && value.endsWith("\"")) {
+      value=StringUtils.stripStart(StringUtils.stripEnd(value,"\""),"\"");
+      String[] words=StringUtils.split(value," ");
+      PhraseQuery query=new PhraseQuery();
+      for (      String word : words) {
+        query.add(new Term(getKey().dbName(),word));
+      }
+      return query;
+    }
     BooleanQuery query=new BooleanQuery();
-    String[] words=StringUtils.split(getInexactValue()," ");
+    String[] words=StringUtils.split(value," ");
     for (    String word : words) {
       query.add(new WildcardQuery(new Term(getKey().dbName(),word)),Occur.SHOULD);
       word="*" + Search.escapeForLucene(word) + "*";

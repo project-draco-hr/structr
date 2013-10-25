@@ -1,6 +1,6 @@
 {
   AbstractNode obj=getNode(webSocketData.getId());
-  String recString=(String)webSocketData.getNodeData().get("recursive");
+  boolean rec=(Boolean)webSocketData.getNodeData().get("recursive");
   String principalId=(String)webSocketData.getNodeData().get("principalId");
   String permission=(String)webSocketData.getNodeData().get("permission");
   String action=(String)webSocketData.getNodeData().get("action");
@@ -14,7 +14,6 @@
     getWebSocket().send(MessageBuilder.status().code(400).build(),true);
   }
   webSocketData.getNodeData().remove("recursive");
-  boolean rec=StringUtils.isNotBlank(recString) ? Boolean.parseBoolean(recString) : false;
   if (obj != null) {
     if (!getWebSocket().getSecurityContext().isAllowed(((AbstractNode)obj),Permission.accessControl)) {
       logger.log(Level.WARNING,"No access control permission for {0} on {1}",new Object[]{getWebSocket().getCurrentUser().toString(),obj.toString()});

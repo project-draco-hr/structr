@@ -1,0 +1,23 @@
+{
+  FTPClient ftp=setupFTPClient();
+  try {
+    FTPFile[] dirs=ftp.listDirectories();
+    assertNotNull(dirs);
+    assertEquals(0,dirs.length);
+    String name1="/FTPdir1";
+    String name2="/FTPdir2";
+    ftp.makeDirectory(name1);
+    ftp.makeDirectory(name2);
+    ftp.changeWorkingDirectory(name1);
+    String newWorkingDirectory=ftp.printWorkingDirectory();
+    assertEquals(name1,newWorkingDirectory);
+    ftp.changeWorkingDirectory("../" + name2);
+    newWorkingDirectory=ftp.printWorkingDirectory();
+    assertEquals(name2,newWorkingDirectory);
+    ftp.disconnect();
+  }
+ catch (  IOException ex) {
+    logger.log(Level.SEVERE,"Error while changing FTP directories",ex);
+    fail("Unexpected exception: " + ex.getMessage());
+  }
+}

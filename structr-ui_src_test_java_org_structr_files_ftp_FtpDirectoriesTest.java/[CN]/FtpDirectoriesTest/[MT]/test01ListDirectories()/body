@@ -1,0 +1,26 @@
+{
+  FTPClient ftp=setupFTPClient();
+  try {
+    FTPFile[] dirs=ftp.listDirectories();
+    assertNotNull(dirs);
+    assertEquals(0,dirs.length);
+    String name1="FTPdir1";
+    createFTPDirectory(null,name1);
+    dirs=ftp.listDirectories();
+    assertNotNull(dirs);
+    assertEquals(1,dirs.length);
+    assertEquals(name1,dirs[0].getName());
+    String name2="FTPdir2";
+    createFTPDirectory(null,name2);
+    dirs=ftp.listDirectories();
+    assertNotNull(dirs);
+    assertEquals(2,dirs.length);
+    assertEquals(name1,dirs[0].getName());
+    assertEquals(name2,dirs[1].getName());
+    ftp.disconnect();
+  }
+ catch (  IOException|FrameworkException ex) {
+    logger.log(Level.SEVERE,"Error while listing FTP directories",ex);
+    fail("Unexpected exception: " + ex.getMessage());
+  }
+}

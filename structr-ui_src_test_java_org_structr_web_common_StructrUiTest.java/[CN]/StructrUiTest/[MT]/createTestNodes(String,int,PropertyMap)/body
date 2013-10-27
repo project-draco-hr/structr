@@ -1,0 +1,13 @@
+{
+  props.put(AbstractNode.type,type);
+  return (List<AbstractNode>)transactionCommand.execute(new StructrTransaction(){
+    @Override public Object execute() throws FrameworkException {
+      List<AbstractNode> nodes=new LinkedList<>();
+      for (int i=0; i < number; i++) {
+        nodes.add((AbstractNode)createNodeCommand.execute(props));
+      }
+      return nodes;
+    }
+  }
+);
+}

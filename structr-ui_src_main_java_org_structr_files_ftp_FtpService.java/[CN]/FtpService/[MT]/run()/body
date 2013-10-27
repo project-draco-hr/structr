@@ -1,11 +1,10 @@
 {
-  while (!Services.isInitialized()) {
-    try {
-      Thread.sleep(1000);
-    }
- catch (    InterruptedException iex) {
-    }
+  String configuredPort=Services.getFtpPort();
+  if (StringUtils.isBlank(configuredPort)) {
+    logger.log(Level.SEVERE,"Unable to start FTP service. Reason: No FTP port configured.");
+    return;
   }
+  port=Integer.parseInt(configuredPort);
   try {
     FtpServerFactory serverFactory=new FtpServerFactory();
     serverFactory.setUserManager(new StructrUserManager());
@@ -14,8 +13,9 @@
     factory.setPort(port);
     serverFactory.addListener("default",factory.createListener());
     logger.log(Level.INFO,"Starting FTP server on port {0}",new Object[]{port});
-    FtpServer server=serverFactory.createServer();
+    server=serverFactory.createServer();
     server.start();
+    this.doRun=true;
   }
  catch (  FtpException ex) {
     logger.log(Level.SEVERE,null,ex);

@@ -7,8 +7,7 @@
     searchAttrs.add(Search.orExactTypeAndSubtypes(org.structr.web.entity.Folder.class));
     try {
       Result<Folder> results=Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class).execute(false,false,searchAttrs);
-      logger.log(Level.FINE,"{0} folders found",results.size());
-      if (results.isEmpty())       return null;
+      logger.log(Level.INFO,"{0} folders found",results.size());
       for (      Folder f : results.getResults()) {
         if (f.getProperty(AbstractFile.parent) != null) {
           continue;
@@ -25,8 +24,7 @@
     searchAttrs.add(Search.orExactTypeAndSubtypes(org.structr.web.entity.File.class));
     try {
       Result<File> results=Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class).execute(false,false,searchAttrs);
-      logger.log(Level.FINE,"{0} files found",results.size());
-      if (results.isEmpty())       return null;
+      logger.log(Level.INFO,"{0} files found",results.size());
       for (      File f : results.getResults()) {
         if (f.getProperty(AbstractFile.parent) != null) {
           continue;

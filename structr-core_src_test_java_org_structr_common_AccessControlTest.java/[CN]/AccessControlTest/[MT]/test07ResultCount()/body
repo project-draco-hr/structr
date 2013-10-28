@@ -1,9 +1,9 @@
 {
   try {
-    List<AbstractNode> persons=createTestNodes(Person.class,1);
+    List<NodeInterface> persons=createTestNodes(Person.class,1);
     Person user=(Person)persons.get(0);
     Class type=TestOne.class;
-    final List<AbstractNode> nodes=createTestNodes(type,10);
+    final List<NodeInterface> nodes=createTestNodes(type,10);
     transactionCommand.execute(new StructrTransaction<Object>(){
       @Override public Object execute() throws FrameworkException {
         nodes.get(3).setProperty(AbstractNode.visibleToPublicUsers,true);
@@ -14,7 +14,7 @@
     }
 );
     SecurityContext publicContext=SecurityContext.getInstance(null,AccessMode.Frontend);
-    List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
+    List<SearchAttribute> searchAttributes=new LinkedList<>();
     searchAttributes.add(Search.andExactTypeAndSubtypes(type));
     Result result=Services.command(publicContext,SearchNodeCommand.class).execute(searchAttributes);
     assertEquals(3,result.size());

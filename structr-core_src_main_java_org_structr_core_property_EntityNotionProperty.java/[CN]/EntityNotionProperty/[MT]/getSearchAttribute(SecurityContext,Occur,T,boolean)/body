@@ -1,7 +1,6 @@
 {
   SourceSearchAttribute attr=new SourceSearchAttribute(occur);
-  Set<GraphObject> intersectionResult=new LinkedHashSet<GraphObject>();
-  End entityProperty=(End)base;
+  Set<GraphObject> intersectionResult=new LinkedHashSet<>();
   boolean alreadyAdded=false;
   try {
     if (searchValue != null && !StringUtils.isBlank(searchValue.toString())) {
@@ -11,25 +10,21 @@
 switch (occur) {
 case MUST:
             if (!alreadyAdded) {
-              intersectionResult.addAll(entityProperty.getRelatedNodesReverse(securityContext,node,declaringClass));
               alreadyAdded=true;
             }
  else {
-              intersectionResult.retainAll(entityProperty.getRelatedNodesReverse(securityContext,node,declaringClass));
             }
           break;
 case SHOULD:
-        intersectionResult.addAll(entityProperty.getRelatedNodesReverse(securityContext,node,declaringClass));
-      break;
+        break;
 case MUST_NOT:
-    break;
-}
+      break;
+  }
 }
 }
  else {
 Result<AbstractNode> result=Services.command(securityContext,SearchNodeCommand.class).execute(Search.andExactTypeAndSubtypes(base.relatedType(),exactMatch),Search.andProperty(securityContext,notion.getPrimaryPropertyKey(),searchValue));
 for (AbstractNode node : result.getResults()) {
-intersectionResult.addAll(entityProperty.getRelatedNodesReverse(securityContext,node,declaringClass));
 }
 }
 attr.setResult(new LinkedList<GraphObject>(intersectionResult));

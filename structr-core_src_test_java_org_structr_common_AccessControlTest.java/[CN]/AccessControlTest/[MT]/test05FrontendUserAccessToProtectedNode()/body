@@ -1,6 +1,6 @@
 {
   try {
-    List<AbstractNode> users=createTestNodes(User.class,2);
+    List<NodeInterface> users=createTestNodes(User.class,2);
     User user1=(User)users.get(0);
     User user2=(User)users.get(1);
     PropertyMap props=new PropertyMap();
@@ -11,7 +11,7 @@
     props.put(AbstractNode.visibleToAuthenticatedUsers,true);
     TestOne t2=createTestNode(TestOne.class,props,user1);
     SecurityContext user2Context=SecurityContext.getInstance(user2,AccessMode.Frontend);
-    List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
+    List<SearchAttribute> searchAttributes=new LinkedList<>();
     searchAttributes.add(Search.andExactTypeAndSubtypes(type));
     Result result=Services.command(user2Context,SearchNodeCommand.class).execute(searchAttributes);
     assertEquals(2,result.size());

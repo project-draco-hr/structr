@@ -4,14 +4,14 @@
     boolean publicOnly=false;
     Class type=TestOne.class;
     int number=61;
-    final List<AbstractNode> nodes=this.createTestNodes(type,number);
+    final List<NodeInterface> nodes=this.createTestNodes(type,number);
     final PropertyKey key=TestOne.anInt;
     final int offset=10;
     Collections.shuffle(nodes,new Random(System.nanoTime()));
     Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
       @Override public Object execute() throws FrameworkException {
         int i=offset;
-        for (        AbstractNode node : nodes) {
+        for (        NodeInterface node : nodes) {
           node.setProperty(AbstractNode.name,Integer.toString(i));
           node.setProperty(key,i);
           i++;
@@ -20,7 +20,7 @@
       }
     }
 );
-    List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
+    List<SearchAttribute> searchAttributes=new LinkedList<>();
     searchAttributes.add(Search.andExactType(type));
     Result result=searchNodeCommand.execute(includeDeletedAndHidden,publicOnly,searchAttributes);
     assertEquals(number,result.size());

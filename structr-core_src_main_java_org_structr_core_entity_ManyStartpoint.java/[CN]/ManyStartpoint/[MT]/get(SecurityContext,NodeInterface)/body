@@ -1,0 +1,13 @@
+{
+  final NodeFactory<S> nodeFactory=new NodeFactory<>(securityContext);
+  final Iterable<Relationship> rels=getRaw(node.getNode());
+  if (rels != null) {
+    return Iterables.map(nodeFactory,Iterables.map(new Function<Relationship,Node>(){
+      @Override public Node apply(      Relationship from){
+        return from.getStartNode();
+      }
+    }
+,rels));
+  }
+  return null;
+}

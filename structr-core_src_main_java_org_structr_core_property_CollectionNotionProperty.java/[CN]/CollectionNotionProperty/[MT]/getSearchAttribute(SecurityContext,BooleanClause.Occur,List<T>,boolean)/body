@@ -1,7 +1,7 @@
 {
   SourceSearchAttribute attr=new SourceSearchAttribute(occur);
-  Set<GraphObject> intersectionResult=new LinkedHashSet<GraphObject>();
-  Endpoints collectionProperty=(Endpoints)base;
+  Set<GraphObject> intersectionResult=new LinkedHashSet<>();
+  EndNodes collectionProperty=(EndNodes)base;
   boolean alreadyAdded=false;
   try {
     if (searchValues != null && !searchValues.isEmpty()) {
@@ -19,33 +19,29 @@
 switch (occur) {
 case MUST:
               if (!alreadyAdded) {
-                intersectionResult.addAll(collectionProperty.getRelatedNodesReverse(securityContext,node,declaringClass));
                 alreadyAdded=true;
               }
  else {
-                intersectionResult.retainAll(collectionProperty.getRelatedNodesReverse(securityContext,node,declaringClass));
               }
             break;
 case SHOULD:
-          intersectionResult.addAll(collectionProperty.getRelatedNodesReverse(securityContext,node,declaringClass));
-        break;
+          break;
 case MUST_NOT:
-      break;
+        break;
+    }
   }
 }
-}
  else {
-Result<AbstractNode> result=Services.command(securityContext,SearchNodeCommand.class).execute(Search.andExactTypeAndSubtypes(base.relatedType(),exactMatch),Search.andProperty(securityContext,notion.getPrimaryPropertyKey(),searchValue));
-for (AbstractNode node : result.getResults()) {
-  intersectionResult.addAll(collectionProperty.getRelatedNodesReverse(securityContext,node,declaringClass));
-}
+  Result<AbstractNode> result=Services.command(securityContext,SearchNodeCommand.class).execute(Search.andExactTypeAndSubtypes(base.relatedType(),exactMatch),Search.andProperty(securityContext,notion.getPrimaryPropertyKey(),searchValue));
+  for (  AbstractNode node : result.getResults()) {
+  }
 }
 }
 if (allBlank) {
 return new EmptySearchAttribute(this,Collections.emptyList());
 }
  else {
-attr.setResult(new LinkedList<GraphObject>(intersectionResult));
+attr.setResult(new LinkedList<>(intersectionResult));
 }
 }
  else {

@@ -8,11 +8,11 @@
   Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
     @Override public Object execute() throws FrameworkException {
       try {
-        List<AbstractNode> nodesToCheckAfterDeletion=new LinkedList<AbstractNode>();
+        List<NodeInterface> nodesToCheckAfterDeletion=new LinkedList<>();
         if (cascade) {
-          for (          Outgoing rel : node.getOutgoingRelationships()) {
+          for (          AbstractRelationship rel : node.getOutgoingRelationships()) {
             int cascadeDelete=rel.cascadeDelete();
-            AbstractNode endNode=rel.getEndNode();
+            NodeInterface endNode=rel.getEndNode();
             if ((cascadeDelete & Relation.DELETE_IF_CONSTRAINT_WOULD_BE_VIOLATED) == Relation.DELETE_IF_CONSTRAINT_WOULD_BE_VIOLATED) {
               nodesToCheckAfterDeletion.add(endNode);
             }
@@ -21,9 +21,9 @@
               doDeleteNode(endNode,cascade);
             }
           }
-          for (          Incoming rel : node.getIncomingRelationships()) {
+          for (          AbstractRelationship rel : node.getIncomingRelationships()) {
             int cascadeDelete=rel.cascadeDelete();
-            AbstractNode startNode=rel.getStartNode();
+            NodeInterface startNode=rel.getStartNode();
             if ((cascadeDelete & Relation.DELETE_IF_CONSTRAINT_WOULD_BE_VIOLATED) == Relation.DELETE_IF_CONSTRAINT_WOULD_BE_VIOLATED) {
               nodesToCheckAfterDeletion.add(startNode);
             }
@@ -41,7 +41,7 @@
         node.getNode().delete();
         TransactionCommand.nodeDeleted(node);
         if (cascade) {
-          for (          AbstractNode nodeToCheck : nodesToCheckAfterDeletion) {
+          for (          NodeInterface nodeToCheck : nodesToCheckAfterDeletion) {
             ErrorBuffer errorBuffer=new ErrorBuffer();
             if (!deletedNodes.contains(nodeToCheck) && !nodeToCheck.isValid(errorBuffer)) {
               nodeToCheck.removeFromIndex();

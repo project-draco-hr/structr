@@ -3,7 +3,7 @@
   final SecurityContext securityContext=factoryProfile.getSecurityContext();
   final boolean includeDeletedAndHidden=factoryProfile.includeDeletedAndHidden();
   final boolean publicOnly=factoryProfile.publicOnly();
-  List<T> nodes=new LinkedList<T>();
+  List<T> nodes=new LinkedList<>();
   int size=spatialRecordHits.size();
   int position=0;
   int count=0;
@@ -14,7 +14,7 @@
       T n=instantiate(realNode);
       nodes.add(n);
       if (n != null) {
-        List<T> nodesAt=getNodesAt(n);
+        List<T> nodesAt=(List<T>)getNodesAt(n);
         size+=nodesAt.size();
         for (        T nodeAt : nodesAt) {
           if (nodeAt != null && securityContext.isReadable(nodeAt,includeDeletedAndHidden,publicOnly)) {

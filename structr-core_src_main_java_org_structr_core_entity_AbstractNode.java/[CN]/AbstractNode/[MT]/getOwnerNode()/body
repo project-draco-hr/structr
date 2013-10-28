@@ -1,13 +1,9 @@
 {
   if (cachedOwnerNode == null) {
-    for (    Incoming s : getIncomingRelationships(Ownership.class)) {
-      Principal n=s.getStartNode();
-      if (n == null) {
-        logger.log(Level.WARNING,"Could not determine owner node!");
-        return null;
-      }
-      cachedOwnerNode=(Principal)n;
-      break;
+    final Ownership ownership=getIncomingRelationship(Ownership.class);
+    if (ownership != null) {
+      Principal principal=ownership.getStartNode();
+      cachedOwnerNode=(Principal)principal;
     }
   }
   return cachedOwnerNode;

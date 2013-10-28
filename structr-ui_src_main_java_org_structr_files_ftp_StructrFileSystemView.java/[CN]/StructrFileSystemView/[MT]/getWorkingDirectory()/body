@@ -1,8 +1,7 @@
 {
-  org.structr.web.entity.User structrUser=(org.structr.web.entity.User)AuthHelper.getPrincipalForCredential(AbstractUser.name,user.getName());
-  Folder workingDir=structrUser.getProperty(org.structr.web.entity.User.workingDirectory);
-  if (workingDir == null) {
-    workingDir=structrUser.getProperty(org.structr.web.entity.User.homeDirectory);
+  AbstractFile structrWorkingDir=FileHelper.getFileByAbsolutePath(workingDir);
+  if (structrWorkingDir == null || structrWorkingDir instanceof File) {
+    return new StructrFtpFolder(null);
   }
-  return new StructrFtpFolder(workingDir);
+  return new StructrFtpFolder((Folder)structrWorkingDir);
 }

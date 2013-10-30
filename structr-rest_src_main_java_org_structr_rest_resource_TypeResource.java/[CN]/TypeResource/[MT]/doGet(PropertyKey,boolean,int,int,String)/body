@@ -1,15 +1,14 @@
 {
   boolean inexactSearch=parseInteger(request.getParameter(JsonRestServlet.REQUEST_PARAMETER_LOOSE_SEARCH)) == 1;
-  List<SearchAttribute> searchAttributes=new LinkedList();
-  List<SearchAttribute> validAttributes=null;
+  List<SearchAttribute> searchAttributes=new LinkedList<>();
   boolean includeDeletedAndHidden=false;
   boolean publicOnly=false;
   if (rawType != null) {
     if (entityClass == null) {
       throw new NotFoundException();
     }
-    validAttributes=extractSearchableAttributes(securityContext,entityClass,request);
-    DistanceSearchAttribute distanceSearch=getDistanceSearch(request,keys(validAttributes));
+    final List<SearchAttribute> validAttributes=extractSearchableAttributes(securityContext,entityClass,request);
+    final DistanceSearchAttribute distanceSearch=getDistanceSearch(request,keys(validAttributes));
     if (distanceSearch != null) {
       searchAttributes.add(distanceSearch);
     }
@@ -31,7 +30,7 @@
         sortKey=AbstractNode.name;
       }
     }
-    Result results=Services.command(securityContext,SearchNodeCommand.class).execute(includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDescending,pageSize,page,offsetId);
+    Result results=Services.command(securityContext,searchCommandType).execute(includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDescending,pageSize,page,offsetId);
     return results;
   }
  else {

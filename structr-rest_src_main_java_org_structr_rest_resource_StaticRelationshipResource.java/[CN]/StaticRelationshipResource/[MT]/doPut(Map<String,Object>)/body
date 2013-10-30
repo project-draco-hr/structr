@@ -4,47 +4,26 @@
   if (results != null) {
     final PropertyKey key=findPropertyKey(typedIdResource,typeResource);
     if (key != null && key instanceof RelationProperty) {
-      final RelationProperty staticRel=(RelationProperty)key;
-      final AbstractNode startNode=typedIdResource.getTypesafeNode();
-      if (startNode != null) {
-        Class startNodeType=startNode.getClass();
-        if (EntityContext.getPropertyKeyForJSONName(startNodeType,typeResource.getRawType()).isReadOnly()) {
-          logger.log(Level.INFO,"Read-only property on {1}: {0}",new Object[]{startNode.getClass(),typeResource.getRawType()});
+      final GraphObject sourceEntity=typedIdResource.getEntity();
+      if (sourceEntity != null) {
+        if (key.isReadOnly()) {
+          logger.log(Level.INFO,"Read-only property on {1}: {0}",new Object[]{sourceEntity.getClass(),typeResource.getRawType()});
           return new RestMethodResult(HttpServletResponse.SC_FORBIDDEN);
         }
-        final DeleteRelationshipCommand deleteRel=Services.command(securityContext,DeleteRelationshipCommand.class);
-        final Iterable<AbstractRelationship> rels=startNode.getRelationships(staticRel.getRelType(),staticRel.getDirection());
         final StructrTransaction transaction=new StructrTransaction(){
           @Override public Object execute() throws FrameworkException {
-            for (            final AbstractRelationship rel : rels) {
-              final AbstractNode otherNode=rel.getOtherNode(startNode);
-              final Class otherNodeType=otherNode.getClass();
-              final String id=otherNode.getProperty(AbstractNode.uuid);
-              if (staticRel.getDestType().equals(otherNodeType) && !propertySet.containsValue(id)) {
-                deleteRel.execute(rel);
-              }
- else {
-                propertySet.values().remove(id);
-              }
-            }
+            final List<NodeInterface> nodes=new LinkedList<>();
             for (            final Object obj : propertySet.values()) {
-              final String uuid=(String)obj;
-              final List<SearchAttribute> attrs=new LinkedList<>();
-              attrs.add(Search.andExactUuid(uuid));
-              final Result results=searchNode.execute(attrs);
+              final Result<NodeInterface> results=searchNode.execute(Search.andExactUuid(obj.toString()));
               if (results.isEmpty()) {
                 throw new NotFoundException();
               }
               if (results.size() > 1) {
-                throw new SystemException("More than one result found for uuid " + uuid + "!");
+                throw new SystemException("More than one result found for uuid " + obj.toString() + "!");
               }
-              final AbstractNode targetNode=(AbstractNode)results.get(0);
-              final Class type=staticRel.getDestType();
-              if (!type.equals(targetNode.getClass())) {
-                throw new FrameworkException(startNode.getClass().getSimpleName(),new TypeToken(AbstractNode.uuid,type.getSimpleName()));
-              }
-              staticRel.createRelationship(securityContext,startNode,targetNode);
+              nodes.addAll(results.getResults());
             }
+            sourceEntity.setProperty(key,nodes);
             return null;
           }
         }

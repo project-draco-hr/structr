@@ -4,6 +4,14 @@
   this.rawType=part;
   if (rawType != null) {
     entityClass=EntityContext.getEntityClassForRawType(rawType);
+    if (entityClass != null) {
+      if (AbstractNode.class.isAssignableFrom(entityClass)) {
+        searchCommandType=SearchNodeCommand.class;
+      }
+      if (AbstractRelationship.class.isAssignableFrom(entityClass)) {
+        searchCommandType=SearchRelationshipCommand.class;
+      }
+    }
   }
   return true;
 }

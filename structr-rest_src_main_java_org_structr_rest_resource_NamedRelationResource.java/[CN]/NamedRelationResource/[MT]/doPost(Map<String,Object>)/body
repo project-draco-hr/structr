@@ -1,32 +1,3 @@
 {
-  final AbstractRelationship relationshipEntity=namedRelation.newEntityClass();
-  if (relationshipEntity != null) {
-    relationshipEntity.init(securityContext);
-    CreateRelationshipCommand createRel=Services.command(securityContext,CreateRelationshipCommand.class);
-    AbstractNode startNode=relationshipEntity.identifyStartNode(namedRelation,propertySet);
-    AbstractNode endNode=relationshipEntity.identifyEndNode(namedRelation,propertySet);
-    RelationshipType relType=namedRelation.getRelType();
-    ErrorBuffer errorBuffer=new ErrorBuffer();
-    boolean hasError=false;
-    if (startNode == null) {
-      errorBuffer.add(namedRelation.getName(),new EmptyPropertyToken(relationshipEntity.getStartNodeIdKey()));
-      hasError=true;
-    }
-    if (endNode == null) {
-      errorBuffer.add(namedRelation.getName(),new EmptyPropertyToken(relationshipEntity.getEndNodeIdKey()));
-      hasError=true;
-    }
-    if (hasError) {
-      throw new FrameworkException(422,errorBuffer);
-    }
-    final Class sourceType=namedRelation.getSourceType();
-    final Class destType=namedRelation.getDestType();
-    propertySet.put(AbstractRelationship.combinedType.dbName(),EntityContext.createCombinedRelationshipType(sourceType,relType,destType));
-    PropertyMap properties=PropertyMap.inputTypeToJavaType(securityContext,relationshipEntity.getClass(),propertySet);
-    final AbstractRelationship newRel=createRel.execute(startNode,endNode,relType,properties,false);
-    final RestMethodResult result=new RestMethodResult(201);
-    result.addHeader("Location",buildLocationHeader(newRel));
-    return result;
-  }
   throw new FrameworkException(422,"FIXME");
 }

@@ -1,5 +1,9 @@
 {
   final RelationshipFactory<R> factory=new RelationshipFactory<>(securityContext);
   final R template=getRelationshipForType(type);
-  return factory.adapt(template.getSource().getRaw(dbNode));
+  final Relationship relationship=template.getSource().getRaw(dbNode);
+  if (relationship != null) {
+    return factory.adapt(relationship);
+  }
+  return null;
 }

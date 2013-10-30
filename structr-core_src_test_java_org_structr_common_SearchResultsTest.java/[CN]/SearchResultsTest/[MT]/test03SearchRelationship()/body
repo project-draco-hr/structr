@@ -1,6 +1,6 @@
 {
   try {
-    final AbstractRelationship rel=((List<AbstractRelationship>)createTestRelationships(RelType.IS_AT,1)).get(0);
+    final LocationRelationship rel=(createTestRelationships(LocationRelationship.class,1)).get(0);
     final PropertyKey key1=new StringProperty("jghsdkhgshdhgsdjkfgh").indexed();
     final String val1="54354354546806849870";
     Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
@@ -11,7 +11,7 @@
     }
 );
     assertTrue(rel.getProperty(key1).equals(val1));
-    List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
+    List<SearchAttribute> searchAttributes=new LinkedList<>();
     searchAttributes.add(Search.andExactProperty(securityContext,key1,val1));
     Result<AbstractRelationship> result=searchRelationshipCommand.execute(searchAttributes);
     assertTrue(result.size() == 1);

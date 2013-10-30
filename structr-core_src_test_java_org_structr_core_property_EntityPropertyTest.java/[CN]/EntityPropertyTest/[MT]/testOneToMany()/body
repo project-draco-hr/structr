@@ -1,15 +1,21 @@
 {
-  final TestSix a=createTestNode(TestSix.class);
-  final TestSix c=createTestNode(TestSix.class);
-  final TestThree b=createTestNode(TestThree.class);
-  final TestThree d=createTestNode(TestThree.class);
+  final TestSix s1=createTestNode(TestSix.class);
+  final TestSix s2=createTestNode(TestSix.class);
+  final TestSix s3=createTestNode(TestSix.class);
+  final TestThree t1=createTestNode(TestThree.class);
+  final TestThree t2=createTestNode(TestThree.class);
+  final TestThree t3=createTestNode(TestThree.class);
+  final TestThree t4=createTestNode(TestThree.class);
   try {
     Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
       @Override public Object execute() throws FrameworkException {
-        a.setProperty(AbstractNode.name,"a");
-        c.setProperty(AbstractNode.name,"c");
-        b.setProperty(AbstractNode.name,"b");
-        d.setProperty(AbstractNode.name,"d");
+        s1.setProperty(AbstractNode.name,"s1");
+        s2.setProperty(AbstractNode.name,"s2");
+        s3.setProperty(AbstractNode.name,"s3");
+        t1.setProperty(AbstractNode.name,"t1");
+        t2.setProperty(AbstractNode.name,"t2");
+        t3.setProperty(AbstractNode.name,"t3");
+        t4.setProperty(AbstractNode.name,"t4");
         return null;
       }
     }
@@ -19,15 +25,18 @@
     fex.printStackTrace();
     fail("Unable to create test nodes");
   }
-  assertNotNull(a);
-  assertNotNull(b);
-  assertNotNull(c);
-  assertNotNull(d);
+  assertNotNull(s1);
+  assertNotNull(s2);
+  assertNotNull(s3);
+  assertNotNull(t1);
+  assertNotNull(t2);
+  assertNotNull(t3);
+  assertNotNull(t4);
   try {
     Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
       @Override public Object execute() throws FrameworkException {
-        a.setProperty(TestSix.oneToManyTestThrees,b);
-        c.setProperty(TestSix.oneToManyTestThrees,d);
+        s1.setProperty(TestSix.oneToManyTestThrees,toList(t1,t2));
+        s2.setProperty(TestSix.oneToManyTestThrees,toList(t3,t4));
         return null;
       }
     }
@@ -35,16 +44,81 @@
   }
  catch (  FrameworkException fex) {
     fex.printStackTrace();
-    fail("Unable to link test nodes");
+    fail("Unexpected exception");
   }
-  TestThree verifyB=a.getProperty(TestSix.oneToManyTestThrees);
-  TestThree verifyD=c.getProperty(TestSix.oneToManyTestThrees);
-  assertTrue(verifyB != null && verifyB.equals(b));
-  assertTrue(verifyD != null && verifyD.equals(d));
   try {
     Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
       @Override public Object execute() throws FrameworkException {
-        a.setProperty(TestSix.oneToManyTestThrees,d);
+        s3.setProperty(TestSix.oneToManyTestThrees,toList(t1));
+        return null;
+      }
+    }
+);
+    fail("Linking a node to an already connected 1:n node should fail.");
+  }
+ catch (  FrameworkException fex) {
+  }
+  try {
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        s1.setProperty(TestSix.oneToManyTestThrees,toList(t1,t2,t4));
+        return null;
+      }
+    }
+);
+    fail("Linking a node to an already connected 1:n node should fail.");
+  }
+ catch (  FrameworkException fex) {
+  }
+  try {
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        t1.setProperty(TestThree.oneToManyTestSix,s3);
+        return null;
+      }
+    }
+);
+    fail("Linking a node to an already connected 1:n node should fail.");
+  }
+ catch (  FrameworkException fex) {
+  }
+  try {
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        t4.setProperty(TestThree.oneToManyTestSix,s1);
+        return null;
+      }
+    }
+);
+    fail("Linking a node to an already connected 1:n node should fail.");
+  }
+ catch (  FrameworkException fex) {
+  }
+  try {
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        t4.setProperty(TestThree.oneToManyTestSix,s1);
+        t4.setProperty(TestThree.oneToManyTestSix,s1);
+        return null;
+      }
+    }
+);
+    fail("Creating a duplicate node should fail.");
+  }
+ catch (  FrameworkException fex) {
+  }
+  try {
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        s1.setProperty(TestSix.oneToManyTestThrees,toList(t1));
+        s2.setProperty(TestSix.oneToManyTestThrees,toList(t2,t3));
+        s3.setProperty(TestSix.oneToManyTestThrees,toList(t4));
+        s1.setProperty(TestSix.oneToManyTestThrees,null);
+        s2.setProperty(TestSix.oneToManyTestThrees,null);
+        s3.setProperty(TestSix.oneToManyTestThrees,null);
+        s1.setProperty(TestSix.oneToManyTestThrees,toList(t1));
+        s2.setProperty(TestSix.oneToManyTestThrees,toList(t2));
+        s3.setProperty(TestSix.oneToManyTestThrees,toList(t3,t4));
         return null;
       }
     }
@@ -52,10 +126,16 @@
   }
  catch (  FrameworkException fex) {
     fex.printStackTrace();
-    fail("Unable to link test nodes");
+    fail("Unexpected exception");
   }
-  TestThree verifyD2=a.getProperty(TestSix.oneToManyTestThrees);
-  assertTrue(verifyD2 != null && verifyD2.equals(d));
-  TestThree vrfy4=c.getProperty(TestSix.oneToManyTestThrees);
-  assertEquals(d,vrfy4);
+  List<TestThree> resultS1=s1.getProperty(TestSix.oneToManyTestThrees);
+  List<TestThree> resultS2=s2.getProperty(TestSix.oneToManyTestThrees);
+  List<TestThree> resultS3=s3.getProperty(TestSix.oneToManyTestThrees);
+  assertEquals("Result has wrong size.",1,resultS1.size());
+  assertEquals("Result has wrong size.",1,resultS2.size());
+  assertEquals("Result has wrong size.",2,resultS3.size());
+  assertEquals(t1,resultS1.get(0));
+  assertEquals(t2,resultS2.get(0));
+  assertEquals(t3,resultS3.get(1));
+  assertEquals(t4,resultS3.get(0));
 }

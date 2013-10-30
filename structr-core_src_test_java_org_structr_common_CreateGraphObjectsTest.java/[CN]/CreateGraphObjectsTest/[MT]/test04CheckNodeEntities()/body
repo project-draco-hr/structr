@@ -7,10 +7,7 @@
         try {
           entityList=getClasses("org.structr.core.entity");
         }
- catch (        ClassNotFoundException ex) {
-          logger.log(Level.SEVERE,null,ex);
-        }
-catch (        IOException ex) {
+ catch (        IOException|ClassNotFoundException ex) {
           logger.log(Level.SEVERE,null,ex);
         }
         assertTrue(entityList.contains(AbstractNode.class));
@@ -21,6 +18,7 @@ catch (        IOException ex) {
         assertTrue(entityList.contains(ResourceAccess.class));
         assertTrue(entityList.contains(PropertyAccess.class));
         entityList.remove(TestTwo.class);
+        entityList.remove(TestNine.class);
         entityList.remove(PropertyDefinition.class);
         for (        Class entityClass : entityList) {
           if (AbstractNode.class.isAssignableFrom(entityClass)) {

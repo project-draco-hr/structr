@@ -4,11 +4,12 @@
   final SearchRelationshipCommand searchRel=Services.command(SecurityContext.getSuperUserInstance(),SearchRelationshipCommand.class);
   if (graphDb != null) {
     List<AbstractRelationship> rels=null;
-    if (properties.containsKey(AbstractRelationship.combinedType.dbName())) {
-      List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
-      attrs.add(Search.andExactProperty(securityContext,AbstractRelationship.type,(String)properties.get(AbstractRelationship.combinedType.dbName())));
+    final String combinedTypeName="combinedType";
+    if (properties.containsKey(combinedTypeName)) {
+      List<SearchAttribute> attrs=new LinkedList<>();
+      attrs.add(Search.andExactProperty(securityContext,AbstractRelationship.type,(String)properties.get(combinedTypeName)));
       rels=searchRel.execute(attrs).getResults();
-      properties.remove(AbstractRelationship.combinedType.dbName());
+      properties.remove(combinedTypeName);
     }
  else {
       rels=(List<AbstractRelationship>)relationshipFactory.instantiate(GlobalGraphOperations.at(graphDb).getAllRelationships());

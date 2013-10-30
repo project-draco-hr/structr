@@ -6,10 +6,7 @@
         try {
           entityList=getClasses("org.structr.core.entity");
         }
- catch (        ClassNotFoundException ex) {
-          Logger.getLogger(CreateGraphObjectsTest.class.getName()).log(Level.SEVERE,null,ex);
-        }
-catch (        IOException ex) {
+ catch (        IOException|ClassNotFoundException ex) {
           Logger.getLogger(CreateGraphObjectsTest.class.getName()).log(Level.SEVERE,null,ex);
         }
         assertTrue(entityList.contains(AbstractRelationship.class));
@@ -22,7 +19,7 @@ catch (        IOException ex) {
             final NodeInterface startNode=nodes.get(0);
             final NodeInterface endNode=nodes.get(1);
             final RelationshipType relType=RelType.IS_AT;
-            AbstractRelationship rel=(AbstractRelationship)createRelationshipCommand.execute(startNode,endNode,relType);
+            LocationRelationship rel=createRelationshipCommand.execute(startNode,endNode,LocationRelationship.class);
             assertTrue(rel != null);
             assertTrue(rel.getType().equals(relType.name()));
           }

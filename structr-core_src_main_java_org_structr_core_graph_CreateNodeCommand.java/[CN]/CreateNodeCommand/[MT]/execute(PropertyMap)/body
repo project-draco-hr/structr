@@ -7,19 +7,23 @@
     Date now=new Date();
     PropertyMap properties=new PropertyMap(attributes);
     Object typeObject=properties.get(AbstractNode.type);
-    String nodeType=(typeObject != null) ? typeObject.toString() : EntityContext.getFactoryDefinition().getGenericNodeType();
-    NodeFactory<T> nodeFactory=new NodeFactory<T>(securityContext);
+    Class nodeType=typeObject != null ? EntityContext.getEntityClassForRawType(typeObject.toString()) : EntityContext.getFactoryDefinition().getGenericNodeType();
+    NodeFactory<T> nodeFactory=new NodeFactory<>(securityContext);
     boolean isCreation=true;
     node=nodeFactory.instantiateWithType(graphDb.createNode(),nodeType,isCreation);
     if (node != null) {
       TransactionCommand.nodeCreated(node);
       if ((user != null) && user instanceof AbstractNode) {
         AbstractNode owner=(AbstractNode)user;
-        createRel.execute(owner,node,RelType.OWNS,false);
-        Security securityRel=(Security)createRel.execute(owner,node,RelType.SECURITY,false);
+        createRel.execute(owner,node,Ownership.class);
+        Security securityRel=createRel.execute(owner,node,Security.class);
         securityRel.setAllowed(Permission.values());
         node.unlockReadOnlyPropertiesOnce();
         node.setProperty(AbstractNode.createdBy,user.getProperty(AbstractNode.uuid));
+      }
+      if (nodeType != null) {
+        node.unlockReadOnlyPropertiesOnce();
+        node.setProperty(GraphObject.type,nodeType.getSimpleName());
       }
       node.unlockReadOnlyPropertiesOnce();
       node.setProperty(AbstractNode.createdDate,now);

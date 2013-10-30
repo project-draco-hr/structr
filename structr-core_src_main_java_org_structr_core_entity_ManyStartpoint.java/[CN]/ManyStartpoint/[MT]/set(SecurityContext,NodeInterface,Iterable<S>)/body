@@ -1,2 +1,30 @@
 {
+  final Set<S> toBeDeleted=new LinkedHashSet<>(Iterables.toList(get(securityContext,targetNode)));
+  final Set<S> toBeCreated=new LinkedHashSet<>();
+  if (collection != null) {
+    Iterables.addAll(toBeCreated,collection);
+  }
+  final Set<S> intersection=new LinkedHashSet<>(toBeCreated);
+  intersection.retainAll(toBeDeleted);
+  toBeCreated.removeAll(intersection);
+  toBeDeleted.removeAll(intersection);
+  Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+    @Override public Object execute() throws FrameworkException {
+      final CreateRelationshipCommand create=Services.command(securityContext,CreateRelationshipCommand.class);
+      final DeleteRelationshipCommand delete=Services.command(securityContext,DeleteRelationshipCommand.class);
+      for (      S sourceNode : toBeDeleted) {
+        for (        AbstractRelationship rel : targetNode.getIncomingRelationships()) {
+          if (rel.getRelType().equals(relation.getRelationshipType()) && rel.getSourceNode().equals(sourceNode)) {
+            delete.execute(rel);
+          }
+        }
+      }
+      for (      S sourceNode : toBeCreated) {
+        relation.checkMultiplicity(sourceNode,targetNode);
+        create.execute(sourceNode,targetNode,relation.getClass());
+      }
+      return null;
+    }
+  }
+);
 }

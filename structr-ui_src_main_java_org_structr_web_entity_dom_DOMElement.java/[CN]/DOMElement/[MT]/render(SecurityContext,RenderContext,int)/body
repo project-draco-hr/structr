@@ -21,12 +21,12 @@
       List<AbstractRelationship> rels=getChildRelationships();
       if (rels.isEmpty()) {
         for (        AbstractRelationship syncRel : getRelationships(RelType.SYNC,Direction.INCOMING)) {
-          DOMElement syncedNode=(DOMElement)syncRel.getStartNode();
+          DOMElement syncedNode=(DOMElement)syncRel.getSourceNode();
           rels.addAll(syncedNode.getChildRelationships());
         }
       }
       for (      AbstractRelationship rel : rels) {
-        DOMNode subNode=(DOMNode)rel.getEndNode();
+        DOMNode subNode=(DOMNode)rel.getTargetNode();
         if (!securityContext.isVisible(subNode)) {
           continue;
         }

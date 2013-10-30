@@ -19,7 +19,7 @@
       Integer h=(Integer)r.getProperty(Image.height);
       if ((w != null) && (h != null)) {
         if (((w == maxWidth) && (h <= maxHeight)) || ((w <= maxWidth) && (h == maxHeight)) || ((origWidth <= w) && (origHeight <= h))) {
-          thumbnail=(Image)r.getEndNode();
+          thumbnail=(Image)r.getTargetNode();
           Long storedChecksum=r.getProperty(Image.checksum);
           if (storedChecksum != null && storedChecksum.equals(newChecksum)) {
             return thumbnail;
@@ -57,7 +57,7 @@
           }
           if (thumbnail != null) {
             AbstractRelationship thumbnailRelationship=createRel.execute(originalImage,thumbnail,RelType.THUMBNAIL,true);
-            thumbnailRelationship.setProperty(AbstractRelationship.cascadeDelete,Relation.DELETE_OUTGOING);
+            thumbnailRelationship.setProperty(AbstractRelationship.cascadeDelete,Relation.SOURCE_TO_TARGET);
             long size=data.length;
             thumbnail.setSize(size);
             thumbnail.setProperty(name,originalImage.getName() + "_thumb_" + tnWidth+ "x"+ tnHeight);

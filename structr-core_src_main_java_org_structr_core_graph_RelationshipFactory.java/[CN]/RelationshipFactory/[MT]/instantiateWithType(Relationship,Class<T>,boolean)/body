@@ -1,0 +1,30 @@
+{
+  SecurityContext securityContext=factoryProfile.getSecurityContext();
+  T newRel=null;
+  try {
+    try {
+      newRel=relClass.newInstance();
+    }
+ catch (    Throwable t2) {
+      newRel=null;
+    }
+  }
+ catch (  Throwable t) {
+  }
+  if (newRel == null) {
+    newRel=(T)EntityContext.getFactoryDefinition().createGenericRelationship();
+  }
+  newRel.init(securityContext,relationship);
+  newRel.onRelationshipInstantiation();
+  String newRelType=newRel.getProperty(GraphObject.type);
+  if (newRelType == null) {
+    try {
+      newRel.unlockReadOnlyPropertiesOnce();
+      newRel.setProperty(GraphObject.type,relClass.getSimpleName());
+    }
+ catch (    Throwable t) {
+      logger.log(Level.SEVERE,"Unable to set type property {0} on relationship {1}: {2}",new Object[]{relClass,newRel,t.getMessage()});
+    }
+  }
+  return newRel;
+}

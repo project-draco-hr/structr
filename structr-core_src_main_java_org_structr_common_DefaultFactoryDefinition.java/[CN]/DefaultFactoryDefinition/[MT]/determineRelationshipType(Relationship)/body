@@ -1,0 +1,21 @@
+{
+  final String type=GraphObject.type.dbName();
+  if (relationship.hasProperty(type)) {
+    Object obj=relationship.getProperty(type);
+    if (obj != null) {
+      return getModuleService().getRelationshipEntityClass(obj.toString());
+    }
+  }
+  final String combinedTypeName="combinedType";
+  if (relationship.hasProperty(combinedTypeName)) {
+    Object obj=relationship.getProperty(combinedTypeName);
+    if (obj != null) {
+      final String combinedType=obj.toString();
+      final Class entityType=getClassForCombinedType(combinedType);
+      if (entityType != null) {
+        return entityType;
+      }
+    }
+  }
+  return getGenericRelationshipType();
+}

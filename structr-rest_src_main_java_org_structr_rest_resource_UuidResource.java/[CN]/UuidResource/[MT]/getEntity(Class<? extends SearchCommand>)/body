@@ -1,0 +1,23 @@
+{
+  List<SearchAttribute> attrs=new LinkedList<>();
+  attrs.add(Search.andExactUuid(uuid));
+  Result results=Services.command(SecurityContext.getSuperUserInstance(),searchCommandType).execute(attrs);
+  int size=results.size();
+  GraphObject entity=null;
+switch (size) {
+case 0:
+    throw new NotFoundException();
+case 1:
+  entity=results.get(0);
+if (entity instanceof AbstractNode && !securityContext.isReadable((AbstractNode)entity,true,false)) {
+  throw new NotAllowedException();
+}
+entity.setSecurityContext(securityContext);
+return entity;
+default :
+logger.log(Level.SEVERE,"Got more than one result for UUID {0}, this is very likely to be a UUID collision!",uuid);
+entity=results.get(0);
+entity.setSecurityContext(securityContext);
+return entity;
+}
+}

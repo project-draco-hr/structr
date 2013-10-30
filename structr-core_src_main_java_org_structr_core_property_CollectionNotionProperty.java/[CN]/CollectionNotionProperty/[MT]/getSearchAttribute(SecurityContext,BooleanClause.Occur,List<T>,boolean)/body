@@ -1,7 +1,6 @@
 {
   SourceSearchAttribute attr=new SourceSearchAttribute(occur);
   Set<GraphObject> intersectionResult=new LinkedHashSet<>();
-  EndNodes collectionProperty=(EndNodes)base;
   boolean alreadyAdded=false;
   try {
     if (searchValues != null && !searchValues.isEmpty()) {
@@ -14,27 +13,31 @@
           allBlank=false;
         }
         if (exactMatch) {
-          Result<AbstractNode> result=Services.command(securityContext,SearchNodeCommand.class).execute(Search.andExactTypeAndSubtypes(base.relatedType(),exactMatch),Search.andExactProperty(securityContext,notion.getPrimaryPropertyKey(),searchValue));
+          Result<AbstractNode> result=Services.command(securityContext,SearchNodeCommand.class).execute(Search.andExactTypeAndSubtypes(collectionProperty.relatedType(),exactMatch),Search.andExactProperty(securityContext,notion.getPrimaryPropertyKey(),searchValue));
           for (          AbstractNode node : result.getResults()) {
 switch (occur) {
 case MUST:
               if (!alreadyAdded) {
+                intersectionResult.addAll(collectionProperty.getRelatedNodesReverse(securityContext,node,declaringClass));
                 alreadyAdded=true;
               }
  else {
+                intersectionResult.retainAll(collectionProperty.getRelatedNodesReverse(securityContext,node,declaringClass));
               }
             break;
 case SHOULD:
-          break;
-case MUST_NOT:
+          intersectionResult.addAll(collectionProperty.getRelatedNodesReverse(securityContext,node,declaringClass));
         break;
-    }
+case MUST_NOT:
+      break;
   }
 }
+}
  else {
-  Result<AbstractNode> result=Services.command(securityContext,SearchNodeCommand.class).execute(Search.andExactTypeAndSubtypes(base.relatedType(),exactMatch),Search.andProperty(securityContext,notion.getPrimaryPropertyKey(),searchValue));
-  for (  AbstractNode node : result.getResults()) {
-  }
+Result<AbstractNode> result=Services.command(securityContext,SearchNodeCommand.class).execute(Search.andExactTypeAndSubtypes(collectionProperty.relatedType(),exactMatch),Search.andProperty(securityContext,notion.getPrimaryPropertyKey(),searchValue));
+for (AbstractNode node : result.getResults()) {
+  intersectionResult.addAll(collectionProperty.getRelatedNodesReverse(securityContext,node,declaringClass));
+}
 }
 }
 if (allBlank) {

@@ -1,0 +1,39 @@
+{
+  final String id=webSocketData.getId();
+  String pageId=webSocketData.getPageId();
+  final Map<String,Object> nodeData=webSocketData.getNodeData();
+  final String parentId=(String)nodeData.get("parentId");
+  final String baseUrl=(String)nodeData.get("widgetHostBaseUrl");
+  final Page page=getPage(pageId);
+  final AbstractNode origNode=getNode(id);
+  final CreateNodeCommand createNode=Services.command(getWebSocket().getSecurityContext(),CreateNodeCommand.class);
+  final DeleteNodeCommand deleteNode=Services.command(getWebSocket().getSecurityContext(),DeleteNodeCommand.class);
+  try {
+    Services.command(getWebSocket().getSecurityContext(),TransactionCommand.class).execute(new StructrTransaction<Object>(){
+      @Override public Object execute() throws FrameworkException {
+        DOMNode existingParent=null;
+        if (parentId != null) {
+          existingParent=(DOMNode)getNode(parentId);
+        }
+        DOMNode parent=(Div)createNode.execute(new NodeAttribute(AbstractNode.type,Div.class.getSimpleName()));
+        Widget.expandWidget(getWebSocket().getSecurityContext(),page,parent,baseUrl,nodeData);
+        DOMNode newWidget=(DOMNode)parent.getChildNodes().item(0);
+        moveSyncRels((DOMElement)origNode,(DOMElement)newWidget);
+        if (existingParent != null) {
+          existingParent.removeChild((DOMNode)origNode);
+        }
+        deleteRecursively((DOMNode)origNode);
+        newWidget.setProperty(AbstractNode.uuid,id);
+        if (existingParent != null) {
+          existingParent.appendChild(newWidget);
+        }
+        deleteNode.execute(parent);
+        return null;
+      }
+    }
+);
+  }
+ catch (  FrameworkException ex) {
+    logger.log(Level.SEVERE,null,ex);
+  }
+}

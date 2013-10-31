@@ -1,0 +1,23 @@
+{
+  FTPClient ftp=setupFTPClient();
+  try {
+    FTPFile[] files=ftp.listFiles();
+    assertNotNull(files);
+    assertEquals(0,files.length);
+    String name1="file1";
+    createFTPFile(null,name1);
+    String name2="dir1";
+    createFTPDirectory(null,name2);
+    ftp.rename("/" + name1,"/" + name2 + "/"+ name1);
+    ftp.changeWorkingDirectory("/" + name2);
+    String[] fileNames=ftp.listNames();
+    assertNotNull(fileNames);
+    assertEquals(1,fileNames.length);
+    assertEquals(name1,fileNames[0]);
+    ftp.disconnect();
+  }
+ catch (  IOException|FrameworkException ex) {
+    logger.log(Level.SEVERE,"Error while moving FTP file",ex);
+    fail("Unexpected exception: " + ex.getMessage());
+  }
+}

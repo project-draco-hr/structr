@@ -1,7 +1,7 @@
 {
   Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
     @Override public Object execute() throws FrameworkException {
-      relation.checkMultiplicity(sourceNode,targetNode);
+      relation.ensureCardinality(sourceNode,targetNode);
       Services.command(securityContext,CreateRelationshipCommand.class).execute(sourceNode,targetNode,relation.getClass());
       return null;
     }

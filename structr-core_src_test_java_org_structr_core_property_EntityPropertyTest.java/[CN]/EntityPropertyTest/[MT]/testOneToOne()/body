@@ -49,44 +49,13 @@
       }
     }
 );
-    fail("Linking two nodes that are already connected to other nodes via 1:1 relationship should fail.");
   }
  catch (  FrameworkException fex) {
+    fex.printStackTrace();
+    fail("Unable to link test nodes");
   }
-  try {
-    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-      @Override public Object execute() throws FrameworkException {
-        c.setProperty(TestSix.oneToOneTestThree,b);
-        return null;
-      }
-    }
-);
-    fail("Linking two nodes that are already connected to other nodes via 1:1 relationship should fail.");
-  }
- catch (  FrameworkException fex) {
-  }
-  try {
-    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-      @Override public Object execute() throws FrameworkException {
-        d.setProperty(TestThree.oneToOneTestSix,a);
-        return null;
-      }
-    }
-);
-    fail("Linking two nodes that are already connected to other nodes via 1:1 relationship should fail.");
-  }
- catch (  FrameworkException fex) {
-  }
-  try {
-    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-      @Override public Object execute() throws FrameworkException {
-        b.setProperty(TestThree.oneToOneTestSix,c);
-        return null;
-      }
-    }
-);
-    fail("Linking two nodes that are already connected to other nodes via 1:1 relationship should fail.");
-  }
- catch (  FrameworkException fex) {
-  }
+  TestThree verifyD2=a.getProperty(TestSix.oneToOneTestThree);
+  assertTrue(verifyD2 != null && verifyD2.equals(d));
+  TestThree vrfy4=c.getProperty(TestSix.oneToOneTestThree);
+  assertNull(vrfy4);
 }

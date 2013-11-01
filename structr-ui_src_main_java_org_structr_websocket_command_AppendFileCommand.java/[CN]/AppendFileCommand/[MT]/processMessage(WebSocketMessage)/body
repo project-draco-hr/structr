@@ -20,11 +20,11 @@
     AbstractFile file=(AbstractFile)getNode(id);
     if (file != null) {
       try {
-        LinkedTreeNode currentParent=file.treeGetParent(RelType.CONTAINS);
+        Folder currentParent=(Folder)file.treeGetParent(Folders.class);
         if (currentParent != null) {
-          currentParent.treeRemoveChild(RelType.CONTAINS,file);
+          currentParent.treeRemoveChild(FileChildren.class,file);
         }
-        folder.treeAppendChild(RelType.CONTAINS,file);
+        folder.treeAppendChild(FileChildren.class,file);
       }
  catch (      FrameworkException ex) {
         logger.log(Level.SEVERE,null,ex);

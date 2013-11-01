@@ -32,10 +32,7 @@
         }
       }
       if ("link".equals(lowerCasePart) && _data instanceof AbstractNode) {
-        for (        AbstractRelationship rel : ((AbstractNode)_data).getRelationships(org.structr.web.common.RelType.LINK,Direction.OUTGOING)) {
-          _data=rel.getTargetNode();
-          break;
-        }
+        _data=((AbstractNode)_data).getOutgoingRelationship(LinkRelationship.class);
         continue;
       }
       if (value == null) {
@@ -77,10 +74,7 @@
         continue;
       }
       if ("link".equals(lowerCasePart)) {
-        for (        AbstractRelationship rel : getRelationships(org.structr.web.common.RelType.LINK,Direction.OUTGOING)) {
-          _data=rel.getTargetNode();
-          break;
-        }
+        _data=((AbstractNode)_data).getOutgoingRelationship(LinkRelationship.class);
         continue;
       }
       if ("parent".equals(lowerCasePart)) {
@@ -88,9 +82,9 @@
         continue;
       }
       if ("owner".equals(lowerCasePart)) {
-        for (        AbstractRelationship rel : getRelationships(IncomingOwnership.class)) {
+        Ownership rel=getIncomingRelationship(Ownership.class);
+        if (rel != null) {
           _data=rel.getSourceNode();
-          break;
         }
         continue;
       }

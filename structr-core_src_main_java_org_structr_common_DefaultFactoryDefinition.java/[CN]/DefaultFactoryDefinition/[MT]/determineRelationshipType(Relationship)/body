@@ -17,5 +17,12 @@
       }
     }
   }
+  final String sourceType=relationship.getStartNode().hasProperty(type) ? relationship.getStartNode().getProperty(type).toString() : null;
+  final String targetType=relationship.getEndNode().hasProperty(type) ? relationship.getEndNode().getProperty(type).toString() : null;
+  final String relType=relationship.getType().name();
+  final Class entityType=getClassForCombinedType(sourceType,relType,targetType);
+  if (entityType != null) {
+    return entityType;
+  }
   return getGenericRelationshipType();
 }

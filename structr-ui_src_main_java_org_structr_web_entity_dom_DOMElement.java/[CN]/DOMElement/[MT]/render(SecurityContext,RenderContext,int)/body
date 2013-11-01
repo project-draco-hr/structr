@@ -18,9 +18,9 @@
       if (Body.class.getSimpleName().toLowerCase().equals(this.getTagName())) {
         renderContext.setInBody(true);
       }
-      List<AbstractRelationship> rels=getChildRelationships();
+      List<DOMChildren> rels=getChildRelationships();
       if (rels.isEmpty()) {
-        for (        AbstractRelationship syncRel : getRelationships(RelType.SYNC,Direction.INCOMING)) {
+        for (        Sync syncRel : getIncomingRelationships(Sync.class)) {
           DOMElement syncedNode=(DOMElement)syncRel.getSourceNode();
           rels.addAll(syncedNode.getChildRelationships());
         }
@@ -63,10 +63,8 @@
                 renderContext.setSourceDataObject(currentDataNode);
                 if (elements != null) {
                   if (elements instanceof Iterable) {
-                    int i=0;
                     for (                    Object o : (Iterable)elements) {
                       if (o instanceof GraphObject) {
-                        i++;
                         GraphObject graphObject=(GraphObject)o;
                         renderContext.putDataObject(subKey,graphObject);
                         subNode.render(securityContext,renderContext,depth + 1);
@@ -77,11 +75,17 @@
  else {
                   propertyKey=EntityContext.getPropertyKeyForJSONName(currentDataNode.getClass(),subKey,false);
                   renderContext.setRelatedProperty(propertyKey);
-                  if (propertyKey != null && propertyKey instanceof EndNodes) {
-                    EndNodes<AbstractNode> collectionProperty=(EndNodes)propertyKey;
-                    for (                    AbstractNode node : currentDataNode.getProperty(collectionProperty)) {
-                      renderContext.putDataObject(subKey,node);
-                      subNode.render(securityContext,renderContext,depth + 1);
+                  if (propertyKey != null) {
+                    final Object value=currentDataNode.getProperty(propertyKey);
+                    if (value != null) {
+                      if (value instanceof Iterable) {
+                        for (                        Object o : ((Iterable)value)) {
+                          if (o instanceof GraphObject) {
+                            renderContext.putDataObject(subKey,(GraphObject)o);
+                            subNode.render(securityContext,renderContext,depth + 1);
+                          }
+                        }
+                      }
                     }
                   }
                 }

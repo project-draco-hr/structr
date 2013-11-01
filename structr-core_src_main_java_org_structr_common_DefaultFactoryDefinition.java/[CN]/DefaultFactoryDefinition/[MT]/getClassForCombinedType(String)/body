@@ -3,16 +3,5 @@
   final String sourceType=parts[0];
   final String relType=parts[1];
   final String targetType=parts[2];
-  for (  final Class candidate : getModuleService().getCachedRelationshipEntities().values()) {
-    final Relation rel=instantiate(candidate);
-    if (rel != null) {
-      final String sourceTypeName=rel.getSourceType().getSimpleName();
-      final String relTypeName=rel.getRelationshipType().name();
-      final String targetTypeName=rel.getTargetType().getSimpleName();
-      if (sourceType.equals(sourceTypeName) && relType.equals(relTypeName) && targetType.equals(targetTypeName)) {
-        return candidate;
-      }
-    }
-  }
-  return null;
+  return getClassForCombinedType(sourceType,relType,targetType);
 }

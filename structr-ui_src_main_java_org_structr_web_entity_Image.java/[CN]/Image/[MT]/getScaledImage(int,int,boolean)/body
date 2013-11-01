@@ -1,5 +1,5 @@
 {
-  Iterable<AbstractRelationship> thumbnailRelationships=getThumbnailRelationships();
+  Iterable<Thumbnails> thumbnailRelationships=getThumbnailRelationships();
   final List<Image> oldThumbnails=new LinkedList();
   Image thumbnail=null;
   final Image originalImage=this;
@@ -14,7 +14,7 @@
     newChecksum=currentChecksum;
   }
   if ((origWidth != null) && (origHeight != null) && thumbnailRelationships != null) {
-    for (    final AbstractRelationship r : thumbnailRelationships) {
+    for (    final Thumbnails r : thumbnailRelationships) {
       Integer w=(Integer)r.getProperty(Image.width);
       Integer h=(Integer)r.getProperty(Image.height);
       if ((w != null) && (h != null)) {
@@ -56,7 +56,7 @@
             logger.log(Level.WARNING,"Could not create thumbnail image",ex);
           }
           if (thumbnail != null) {
-            AbstractRelationship thumbnailRelationship=createRel.execute(originalImage,thumbnail,RelType.THUMBNAIL,true);
+            Thumbnails thumbnailRelationship=createRel.execute(originalImage,thumbnail,Thumbnails.class);
             thumbnailRelationship.setProperty(AbstractRelationship.cascadeDelete,Relation.SOURCE_TO_TARGET);
             long size=data.length;
             thumbnail.setSize(size);

@@ -18,13 +18,13 @@
   }
   final DOMNode node=getDOMNode(id);
   try {
-    final CreateRelationshipCommand<?> createRel=Services.command(securityContext,CreateRelationshipCommand.class);
+    final CreateRelationshipCommand createRel=Services.command(securityContext,CreateRelationshipCommand.class);
     StructrTransaction transaction=new StructrTransaction(){
       @Override public Object execute() throws FrameworkException {
         DOMNode clonedNode=(DOMNode)node.cloneNode(false);
         parentNode.appendChild(clonedNode);
-        createRel.execute(node,clonedNode,RelType.SYNC,true);
-        createRel.execute(clonedNode,node,RelType.SYNC,true);
+        createRel.execute(node,clonedNode,Sync.class);
+        createRel.execute(clonedNode,node,Sync.class);
         return null;
       }
     }

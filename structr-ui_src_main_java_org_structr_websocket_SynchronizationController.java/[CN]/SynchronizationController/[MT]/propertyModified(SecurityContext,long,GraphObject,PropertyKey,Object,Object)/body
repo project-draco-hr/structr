@@ -5,8 +5,8 @@
   String uuid=graphObject.getProperty(AbstractNode.uuid);
   if (graphObject instanceof AbstractRelationship) {
     AbstractRelationship relationship=(AbstractRelationship)graphObject;
-    AbstractNode startNode=relationship.getSourceNode();
-    AbstractNode endNode=relationship.getTargetNode();
+    NodeInterface startNode=relationship.getSourceNode();
+    NodeInterface endNode=relationship.getTargetNode();
     try {
       PropertyMap relProperties=relationship.getProperties();
       relProperties.put(new StringProperty("startNodeId"),startNode.getUuid());
@@ -22,7 +22,7 @@
     AbstractNode node=(AbstractNode)graphObject;
     try {
       registerPartialType(graphObject,transactionKey);
-      Map<String,Object> nodeProperties=new HashMap<String,Object>();
+      Map<String,Object> nodeProperties=new HashMap<>();
       nodeProperties.put(key.dbName(),newValue);
       nodeProperties.put(AbstractNode.type.dbName(),node.getType());
       Map<String,Object> properties=PropertyMap.javaTypeToInputType(securityContext,node.getClass(),PropertyMap.databaseTypeToJavaType(securityContext,graphObject,nodeProperties));

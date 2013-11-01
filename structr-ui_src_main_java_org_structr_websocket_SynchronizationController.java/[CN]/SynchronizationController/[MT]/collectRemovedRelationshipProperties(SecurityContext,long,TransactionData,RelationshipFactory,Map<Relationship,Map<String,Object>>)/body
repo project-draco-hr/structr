@@ -3,12 +3,12 @@
     Relationship rel=entry.entity();
     Map<String,Object> propertyMap=removedRelProperties.get(rel);
     if (propertyMap == null) {
-      propertyMap=new LinkedHashMap<String,Object>();
+      propertyMap=new LinkedHashMap<>();
       removedRelProperties.put(rel,propertyMap);
     }
     propertyMap.put(entry.key(),entry.previouslyCommitedValue());
     if (!data.isDeleted(rel)) {
-      AbstractRelationship modifiedRel=relFactory.instantiate(rel);
+      RelationshipInterface modifiedRel=relFactory.instantiate(rel);
       if (modifiedRel != null) {
         PropertyKey key=getPropertyKeyForDatabaseName(modifiedRel.getClass(),entry.key());
         propertyRemoved(securityContext,transactionKey,modifiedRel,key,entry.previouslyCommitedValue());

@@ -32,7 +32,6 @@ final String finalUrlString=urlString;
 return Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
 @Override public Object execute() throws FrameworkException {
 Image newImageNode=(Image)Services.command(securityContext,CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.type,Image.class.getSimpleName()),new NodeAttribute(org.structr.web.entity.File.url,finalUrlString),new NodeAttribute(AbstractNode.visibleToAuthenticatedUsers,true),new NodeAttribute(AbstractNode.visibleToPublicUsers,true));
-Services.command(securityContext,CreateRelationshipCommand.class).execute(finalParentNode,newImageNode,RelType.CONTAINS);
 refreshImageFromUrl(newImageNode);
 return newImageNode;
 }

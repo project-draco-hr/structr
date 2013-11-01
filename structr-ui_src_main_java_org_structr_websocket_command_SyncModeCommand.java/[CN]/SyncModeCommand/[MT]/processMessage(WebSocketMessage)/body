@@ -8,12 +8,12 @@
   final AbstractNode targetNode=getNode(targetId);
   if ((sourceNode != null) && (targetNode != null)) {
     try {
-      final CreateRelationshipCommand<?> createRel=Services.command(securityContext,CreateRelationshipCommand.class);
+      final CreateRelationshipCommand createRel=Services.command(securityContext,CreateRelationshipCommand.class);
       StructrTransaction transaction=new StructrTransaction(){
         @Override public Object execute() throws FrameworkException {
-          createRel.execute(sourceNode,targetNode,RelType.SYNC,true);
+          createRel.execute(sourceNode,targetNode,Sync.class);
           if (syncMode.equals("bidir")) {
-            createRel.execute(targetNode,sourceNode,RelType.SYNC,true);
+            createRel.execute(targetNode,sourceNode,Sync.class);
           }
           return null;
         }

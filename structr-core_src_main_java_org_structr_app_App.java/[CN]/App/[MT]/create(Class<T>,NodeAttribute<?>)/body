@@ -1,3 +1,11 @@
 {
+  final CreateNodeCommand<T> cmd=getCommand(CreateNodeCommand.class);
+  final TransactionCommand tx=getCommand(TransactionCommand.class);
+  tx.execute(new StructrTransaction<T>(){
+    @Override public T execute() throws FrameworkException {
+      return cmd.execute(attributes);
+    }
+  }
+);
   return null;
 }

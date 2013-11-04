@@ -1,6 +1,6 @@
 {
   if (source != null) {
-    List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
+    List<SearchAttribute> attrs=new LinkedList<>();
     if (source instanceof JsonInput) {
       JsonInput properties=(JsonInput)source;
       PropertyMap map=PropertyMap.inputTypeToJavaType(securityContext,type,properties.getAttributes());
@@ -38,9 +38,9 @@ default :
 }
 }
  else if (createIfNotExisting) {
-return (T)Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction<AbstractNode>(){
-@Override public AbstractNode execute() throws FrameworkException {
-  AbstractNode newNode=Services.command(securityContext,CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.type,type.getSimpleName()));
+return (T)Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction<NodeInterface>(){
+@Override public NodeInterface execute() throws FrameworkException {
+  NodeInterface newNode=Services.command(securityContext,CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.type,type.getSimpleName()));
   if (newNode == null) {
     logger.log(Level.WARNING,"Unable to create node of type {0} for property {1}",new Object[]{type.getSimpleName(),propertyKey.dbName()});
   }

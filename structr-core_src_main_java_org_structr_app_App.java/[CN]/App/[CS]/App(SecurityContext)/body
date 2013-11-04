@@ -1,0 +1,29 @@
+{
+  this.securityContext=securityContext;
+  if (!Services.isInitialized()) {
+    final Map<String,String> context=new LinkedHashMap<>();
+    final String basePath="/tmp/structr-test-" + System.currentTimeMillis();
+    logger.log(Level.INFO,"Initializing Structr with base path {0}..",basePath);
+    context.put(Services.CONFIGURED_SERVICES,"ModuleService NodeService");
+    context.put(Services.TMP_PATH,"/tmp/");
+    context.put(Services.BASE_PATH,basePath);
+    context.put(Services.DATABASE_PATH,basePath + "/db");
+    context.put(Services.FILES_PATH,basePath + "/files");
+    context.put(Services.LOG_DATABASE_PATH,basePath + "/logDb.dat");
+    Services.initialize(context);
+    while (!Services.isInitialized()) {
+      try {
+        Thread.sleep(100);
+      }
+ catch (      Throwable t) {
+      }
+    }
+    Runtime.getRuntime().addShutdownHook(new Thread(new Runnable(){
+      @Override public void run(){
+        Services.shutdown();
+      }
+    }
+));
+    logger.log(Level.INFO,"Initialization done.");
+  }
+}

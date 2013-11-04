@@ -1,11 +1,12 @@
 {
-  final CreateNodeCommand<T> cmd=getCommand(CreateNodeCommand.class);
-  final TransactionCommand tx=getCommand(TransactionCommand.class);
-  tx.execute(new StructrTransaction<T>(){
+  final CreateNodeCommand<T> cmd=command(CreateNodeCommand.class);
+  final TransactionCommand tx=command(TransactionCommand.class);
+  return tx.execute(new StructrTransaction<T>(){
     @Override public T execute() throws FrameworkException {
-      return cmd.execute(attributes);
+      List<NodeAttribute<?>> attrs=new LinkedList<>(Arrays.asList(attributes));
+      attrs.add(new NodeAttribute(AbstractNode.type,type.getSimpleName()));
+      return cmd.execute(attrs);
     }
   }
 );
-  return null;
 }

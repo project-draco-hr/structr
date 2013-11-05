@@ -13,19 +13,19 @@
       node.setProperty(AbstractNode.name,_name);
     }
     app.commitTx();
-    Result result=app.nodeQuery().type(type).getResult();
+    Result result=app.nodeQuery(type).getResult();
     assertEquals(number,result.size());
     PropertyKey sortKey=AbstractNode.name;
     boolean sortDesc=false;
     int pageSize=2;
     int page=-5;
-    result=app.nodeQuery().type(type).sort(sortKey).order(sortDesc).pageSize(pageSize).page(page).getResult();
+    result=app.nodeQuery(type).sort(sortKey).order(sortDesc).pageSize(pageSize).page(page).getResult();
     assertEquals(2,result.size());
     assertEquals("TestOne-0",result.get(0).getProperty(AbstractNode.name));
     assertEquals("TestOne-1",result.get(1).getProperty(AbstractNode.name));
     page=1;
     try {
-      app.nodeQuery().type(type).sort(sortKey).order(sortDesc).pageSize(pageSize).page(page).offsetId("000000000000000000000").getResult();
+      app.nodeQuery(type).sort(sortKey).order(sortDesc).pageSize(pageSize).page(page).offsetId("000000000000000000000").getResult();
       fail("Should have failed with a FrameworkException with 'id not found' token");
     }
  catch (    FrameworkException fex) {

@@ -14,13 +14,13 @@
       node.setProperty(AbstractNode.name,name);
     }
     app.commitTx();
-    Result result=app.nodeQuery().type(type).getResult();
+    Result result=app.nodeQuery(type).getResult();
     assertEquals(number,result.size());
     PropertyKey sortKey=AbstractNode.name;
     boolean sortDesc=true;
     int pageSize=10;
     int page=1;
-    result=app.nodeQuery().type(type).sort(sortKey).order(sortDesc).page(page).pageSize(pageSize).getResult();
+    result=app.nodeQuery(type).sort(sortKey).order(sortDesc).page(page).pageSize(pageSize).getResult();
     logger.log(Level.INFO,"Raw result size: {0}, expected: {1}",new Object[]{result.getRawResultCount(),number});
     assertTrue(result.getRawResultCount() == number);
     logger.log(Level.INFO,"Result size: {0}, expected: {1}",new Object[]{result.size(),Math.min(number,pageSize)});

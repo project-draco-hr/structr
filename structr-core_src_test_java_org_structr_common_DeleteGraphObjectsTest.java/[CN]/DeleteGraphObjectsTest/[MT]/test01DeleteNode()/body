@@ -5,25 +5,16 @@
     String name="GenericNode-name";
     props.put(AbstractNode.type,type);
     props.put(AbstractNode.name,name);
-    final NodeInterface node=transactionCommand.execute(new StructrTransaction<NodeInterface>(){
-      @Override public NodeInterface execute() throws FrameworkException {
-        return createNodeCommand.execute(props);
-      }
-    }
-);
+    app.beginTx();
+    final NodeInterface node=app.create(NodeInterface.class,props);
+    app.commitTx();
     assertTrue(node != null);
     String uuid=node.getUuid();
-    transactionCommand.execute(new StructrTransaction(){
-      @Override public Object execute() throws FrameworkException {
-        deleteNodeCommand.execute(node);
-        return null;
-      }
-    }
-);
+    app.beginTx();
+    app.delete(node);
+    app.commitTx();
     try {
-      List<SearchAttribute> attrs=new LinkedList<>();
-      attrs.add(Search.andExactUuid(uuid));
-      Result result=searchNodeCommand.execute(attrs);
+      Result result=app.nodeQuery().uuid(uuid).getResult();
       assertEquals("Node should have been deleted",0,result.size());
     }
  catch (    FrameworkException fe) {

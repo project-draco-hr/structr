@@ -1,16 +1,13 @@
 {
+  final App app=StructrApp.getInstance(securityContext);
   final AtomicLong objectCount=new AtomicLong(0L);
   while (!stopCondition.evaluate(securityContext,objectCount.get())) {
-    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-      @Override public Object execute() throws FrameworkException {
-        long loopCount=0;
-        while (loopCount++ < commitCount && !stopCondition.evaluate(securityContext,objectCount.get())) {
-          transaction.execute();
-          objectCount.incrementAndGet();
-        }
-        return null;
-      }
+    app.beginTx();
+    long loopCount=0;
+    while (loopCount++ < commitCount && !stopCondition.evaluate(securityContext,objectCount.get())) {
+      transaction.execute();
+      objectCount.incrementAndGet();
     }
-);
+    app.commitTx();
   }
 }

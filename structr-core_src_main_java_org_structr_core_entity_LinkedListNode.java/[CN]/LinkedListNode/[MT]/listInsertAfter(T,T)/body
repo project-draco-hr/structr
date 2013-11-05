@@ -1,26 +1,19 @@
 {
+  final App app=StructrApp.getInstance(securityContext);
   if (currentElement.getId() == newElement.getId()) {
     throw new IllegalStateException("Cannot link a node to itself!");
   }
   final T next=listGetNext(currentElement);
   if (next == null) {
-    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-      @Override public Object execute() throws FrameworkException {
-        linkNodes(getSiblingLinkType(),currentElement,newElement);
-        return null;
-      }
-    }
-);
+    app.beginTx();
+    linkNodes(getSiblingLinkType(),currentElement,newElement);
+    app.commitTx();
   }
  else {
-    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-      @Override public Object execute() throws FrameworkException {
-        unlinkNodes(getSiblingLinkType(),currentElement,next);
-        linkNodes(getSiblingLinkType(),currentElement,newElement);
-        linkNodes(getSiblingLinkType(),newElement,next);
-        return null;
-      }
-    }
-);
+    app.beginTx();
+    unlinkNodes(getSiblingLinkType(),currentElement,next);
+    linkNodes(getSiblingLinkType(),currentElement,newElement);
+    linkNodes(getSiblingLinkType(),newElement,next);
+    app.commitTx();
   }
 }

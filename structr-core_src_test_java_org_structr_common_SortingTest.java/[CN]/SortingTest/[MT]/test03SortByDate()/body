@@ -1,40 +1,32 @@
 {
   try {
-    boolean includeDeletedAndHidden=false;
-    boolean publicOnly=false;
     Class type=TestOne.class;
     int number=97;
     final List<NodeInterface> nodes=this.createTestNodes(type,number);
     final int offset=10;
     Collections.shuffle(nodes,new Random(System.nanoTime()));
-    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-      @Override public Object execute() throws FrameworkException {
-        int i=offset;
-        String name;
-        for (        NodeInterface node : nodes) {
-          name=Integer.toString(i);
-          i++;
-          node.setProperty(AbstractNode.name,"TestOne-" + name);
-          node.setProperty(TestOne.aDate,new Date());
-          try {
-            Thread.sleep(2);
-          }
- catch (          Throwable t) {
-          }
-        }
-        return null;
+    app.beginTx();
+    int i=offset;
+    String name;
+    for (    NodeInterface node : nodes) {
+      name=Integer.toString(i);
+      i++;
+      node.setProperty(AbstractNode.name,"TestOne-" + name);
+      node.setProperty(TestOne.aDate,new Date());
+      try {
+        Thread.sleep(2);
+      }
+ catch (      Throwable t) {
       }
     }
-);
-    List<SearchAttribute> searchAttributes=new LinkedList<>();
-    searchAttributes.add(Search.andExactType(type));
-    Result result=searchNodeCommand.execute(includeDeletedAndHidden,publicOnly,searchAttributes);
+    app.commitTx();
+    Result result=app.nodeQuery().type(type).getResult();
     assertEquals(number,result.size());
     PropertyKey sortKey=TestOne.aDate;
     boolean sortDesc=false;
     int pageSize=10;
     int page=1;
-    result=searchNodeCommand.execute(includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDesc,pageSize,page,null);
+    result=app.nodeQuery().type(type).sort(sortKey).order(sortDesc).page(page).pageSize(pageSize).getResult();
     logger.log(Level.INFO,"Raw result size: {0}, expected: {1}",new Object[]{result.getRawResultCount(),number});
     assertTrue(result.getRawResultCount() == number);
     logger.log(Level.INFO,"Result size: {0}, expected: {1}",new Object[]{result.size(),pageSize});

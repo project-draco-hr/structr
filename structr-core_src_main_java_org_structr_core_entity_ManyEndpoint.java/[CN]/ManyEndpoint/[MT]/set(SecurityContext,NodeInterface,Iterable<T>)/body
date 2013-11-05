@@ -1,4 +1,5 @@
 {
+  final App app=StructrApp.getInstance(securityContext);
   final Set<T> toBeDeleted=new LinkedHashSet<>(Iterables.toList(get(securityContext,sourceNode)));
   final Set<T> toBeCreated=new LinkedHashSet<>();
   if (collection != null) {
@@ -8,23 +9,15 @@
   intersection.retainAll(toBeDeleted);
   toBeCreated.removeAll(intersection);
   toBeDeleted.removeAll(intersection);
-  Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-    @Override public Object execute() throws FrameworkException {
-      final CreateRelationshipCommand create=Services.command(securityContext,CreateRelationshipCommand.class);
-      final DeleteRelationshipCommand delete=Services.command(securityContext,DeleteRelationshipCommand.class);
-      for (      T targetNode : toBeDeleted) {
-        for (        AbstractRelationship rel : sourceNode.getOutgoingRelationships()) {
-          if (rel.getRelType().equals(relation) && rel.getTargetNode().equals(targetNode)) {
-            delete.execute(rel);
-          }
-        }
+  for (  T targetNode : toBeDeleted) {
+    for (    AbstractRelationship rel : sourceNode.getOutgoingRelationships()) {
+      if (rel.getRelType().equals(relation) && rel.getTargetNode().equals(targetNode)) {
+        app.delete(rel);
       }
-      for (      T targetNode : toBeCreated) {
-        relation.ensureCardinality(sourceNode,targetNode);
-        create.execute(sourceNode,targetNode,relation.getClass());
-      }
-      return null;
     }
   }
-);
+  for (  T targetNode : toBeCreated) {
+    relation.ensureCardinality(sourceNode,targetNode);
+    app.create(sourceNode,targetNode,relation.getClass());
+  }
 }

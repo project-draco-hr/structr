@@ -12,13 +12,7 @@
         throw new FrameworkException(this.getType(),new ReadOnlyPropertyToken(key));
       }
     }
-    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-      @Override public Object execute() throws FrameworkException {
-        dbNode.removeProperty(key.dbName());
-        removeFromIndex(key);
-        return null;
-      }
-    }
-);
+    dbNode.removeProperty(key.dbName());
+    removeFromIndex(key);
   }
 }

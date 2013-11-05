@@ -7,20 +7,9 @@
     }
     final Relationship relToDelete=rel.getRelationship();
     final RelationshipInterface finalRel=rel;
-    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-      @Override public Object execute() throws FrameworkException {
-        TransactionCommand.relationshipDeleted(finalRel,passiveDeletion);
-        try {
-          finalRel.removeFromIndex();
-          relToDelete.delete();
-        }
- catch (        IllegalStateException ise) {
-          logger.log(Level.WARNING,ise.getMessage());
-        }
-        return null;
-      }
-    }
-);
+    TransactionCommand.relationshipDeleted(finalRel,passiveDeletion);
+    finalRel.removeFromIndex();
+    relToDelete.delete();
   }
   return null;
 }

@@ -6,11 +6,5 @@
   props.put(AbstractNode.type,type);
   props.put(Location.latitude,latitude);
   props.put(Location.longitude,longitude);
-  StructrTransaction transaction=new StructrTransaction<NodeInterface>(){
-    @Override public NodeInterface execute() throws FrameworkException {
-      return Services.command(SecurityContext.getSuperUserInstance(),CreateNodeCommand.class).execute(props);
-    }
-  }
-;
-  return (Location)Services.command(SecurityContext.getSuperUserInstance(),TransactionCommand.class).execute(transaction);
+  return StructrApp.getInstance().create(Location.class,props);
 }

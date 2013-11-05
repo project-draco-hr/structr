@@ -1,33 +1,25 @@
 {
   try {
-    boolean includeDeletedAndHidden=false;
-    boolean publicOnly=false;
     Class type=TestOne.class;
     int number=10;
     final List<NodeInterface> nodes=this.createTestNodes(type,number);
     final int offset=0;
     Collections.shuffle(nodes,new Random(System.nanoTime()));
-    transactionCommand.execute(new StructrTransaction<AbstractNode>(){
-      @Override public AbstractNode execute() throws FrameworkException {
-        int i=offset;
-        for (        NodeInterface node : nodes) {
-          String _name="TestOne-" + i;
-          i++;
-          node.setProperty(AbstractNode.name,_name);
-        }
-        return null;
-      }
+    app.beginTx();
+    int i=offset;
+    for (    NodeInterface node : nodes) {
+      String _name="TestOne-" + i;
+      i++;
+      node.setProperty(AbstractNode.name,_name);
     }
-);
-    List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
-    searchAttributes.add(Search.andExactTypeAndSubtypes(type));
-    Result result=searchNodeCommand.execute(includeDeletedAndHidden,publicOnly,searchAttributes);
-    assertTrue(result.size() == number);
+    app.commitTx();
+    Result result=app.nodeQuery().type(type).getResult();
+    assertEquals(number,result.size());
     PropertyKey sortKey=AbstractNode.name;
     boolean sortDesc=false;
     int pageSize=10;
     int page=1;
-    result=searchNodeCommand.execute(includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDesc,pageSize,page,nodes.get(3).getUuid());
+    result=app.nodeQuery().type(type).sort(sortKey).order(sortDesc).pageSize(pageSize).page(page).offsetId(nodes.get(3).getUuid()).getResult();
     assertEquals(7,result.size());
     assertEquals("TestOne-3",result.get(0).getProperty(AbstractNode.name));
     assertEquals("TestOne-4",result.get(1).getProperty(AbstractNode.name));
@@ -38,6 +30,7 @@
     assertEquals("TestOne-9",result.get(6).getProperty(AbstractNode.name));
   }
  catch (  FrameworkException ex) {
+    ex.printStackTrace();
     logger.log(Level.SEVERE,ex.toString());
     fail("Unexpected exception");
   }

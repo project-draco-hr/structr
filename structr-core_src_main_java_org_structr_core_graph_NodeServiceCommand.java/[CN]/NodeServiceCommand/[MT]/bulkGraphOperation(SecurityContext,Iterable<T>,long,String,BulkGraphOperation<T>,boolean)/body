@@ -1,27 +1,23 @@
 {
+  final App app=StructrApp.getInstance(securityContext);
   final Iterator<T> iterator=nodes.iterator();
   long objectCount=0L;
   while (iterator.hasNext()) {
     try {
-      objectCount+=Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction<Integer>(validation){
-        @Override public Integer execute() throws FrameworkException {
-          int count=0;
-          while (iterator.hasNext()) {
-            T node=iterator.next();
-            try {
-              operation.handleGraphObject(securityContext,node);
-            }
- catch (            Throwable t) {
-              operation.handleThrowable(securityContext,t,node);
-            }
-            if (++count >= commitCount) {
-              break;
-            }
-          }
-          return count;
+      app.beginTx();
+      while (iterator.hasNext()) {
+        T node=iterator.next();
+        try {
+          operation.handleGraphObject(securityContext,node);
+        }
+ catch (        Throwable t) {
+          operation.handleThrowable(securityContext,t,node);
+        }
+        if ((++objectCount % commitCount) == 0) {
+          break;
         }
       }
-);
+      app.commitTx();
     }
  catch (    Throwable t) {
       operation.handleTransactionFailure(securityContext,t);

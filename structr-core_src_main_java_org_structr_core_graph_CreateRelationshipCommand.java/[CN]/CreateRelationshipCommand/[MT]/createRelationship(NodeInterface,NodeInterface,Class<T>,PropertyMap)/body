@@ -1,39 +1,34 @@
 {
-  return (T)Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-    @Override public Object execute() throws FrameworkException {
-      final RelationshipFactory<T> factory=new RelationshipFactory(securityContext);
-      final T template=instantiate(relType);
-      final Node startNode=fromNode.getNode();
-      final Node endNode=toNode.getNode();
-      final Relationship rel=startNode.createRelationshipTo(endNode,template);
-      final T newRel=factory.instantiateWithType(rel,relType,true);
-      final Date now=new Date();
-      if (newRel != null) {
-        newRel.unlockReadOnlyPropertiesOnce();
-        newRel.setProperty(GraphObject.type,relType.getSimpleName());
-        newRel.unlockReadOnlyPropertiesOnce();
-        newRel.setProperty(AbstractRelationship.createdDate,now);
-        newRel.unlockReadOnlyPropertiesOnce();
-        newRel.setProperty(AbstractRelationship.lastModifiedDate,now);
-        newRel.unlockReadOnlyPropertiesOnce();
-        newRel.setProperty(AbstractRelationship.cascadeDelete,template.getCascadingDeleteFlag());
-        TransactionCommand.relationshipCreated(newRel);
-        if (properties != null) {
-          for (          Entry<PropertyKey,Object> entry : properties.entrySet()) {
-            PropertyKey key=entry.getKey();
-            if (key.isReadOnly() || key.isWriteOnce()) {
-              newRel.unlockReadOnlyPropertiesOnce();
-            }
-            newRel.setProperty(entry.getKey(),entry.getValue());
-          }
+  final RelationshipFactory<T> factory=new RelationshipFactory(securityContext);
+  final T template=instantiate(relType);
+  final Node startNode=fromNode.getNode();
+  final Node endNode=toNode.getNode();
+  final Relationship rel=startNode.createRelationshipTo(endNode,template);
+  final T newRel=factory.instantiateWithType(rel,relType,true);
+  final Date now=new Date();
+  if (newRel != null) {
+    newRel.unlockReadOnlyPropertiesOnce();
+    newRel.setProperty(GraphObject.type,relType.getSimpleName());
+    newRel.unlockReadOnlyPropertiesOnce();
+    newRel.setProperty(AbstractRelationship.createdDate,now);
+    newRel.unlockReadOnlyPropertiesOnce();
+    newRel.setProperty(AbstractRelationship.lastModifiedDate,now);
+    newRel.unlockReadOnlyPropertiesOnce();
+    newRel.setProperty(AbstractRelationship.cascadeDelete,template.getCascadingDeleteFlag());
+    TransactionCommand.relationshipCreated(newRel);
+    if (properties != null) {
+      for (      Entry<PropertyKey,Object> entry : properties.entrySet()) {
+        PropertyKey key=entry.getKey();
+        if (key.isReadOnly() || key.isWriteOnce()) {
+          newRel.unlockReadOnlyPropertiesOnce();
         }
-        newRel.onRelationshipInstantiation();
-        for (        Transformation<GraphObject> transformation : EntityContext.getEntityCreationTransformations(newRel.getClass())) {
-          transformation.apply(securityContext,newRel);
-        }
+        newRel.setProperty(entry.getKey(),entry.getValue());
       }
-      return newRel;
+    }
+    newRel.onRelationshipInstantiation();
+    for (    Transformation<GraphObject> transformation : EntityContext.getEntityCreationTransformations(newRel.getClass())) {
+      transformation.apply(securityContext,newRel);
     }
   }
-);
+  return newRel;
 }

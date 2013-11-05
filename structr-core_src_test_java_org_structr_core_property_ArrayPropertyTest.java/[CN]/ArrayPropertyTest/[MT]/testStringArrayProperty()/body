@@ -4,13 +4,9 @@
     final TestFour testEntity=createTestNode(TestFour.class);
     assertNotNull(testEntity);
     final String[] arr=new String[]{"one","two","three","four","five"};
-    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-      @Override public Object execute() throws FrameworkException {
-        instance.setProperty(securityContext,testEntity,arr);
-        return null;
-      }
-    }
-);
+    app.beginTx();
+    instance.setProperty(securityContext,testEntity,arr);
+    app.commitTx();
     String[] newArr=instance.getProperty(securityContext,testEntity,true);
     assertTrue(ArrayUtils.isEquals(arr,newArr));
   }

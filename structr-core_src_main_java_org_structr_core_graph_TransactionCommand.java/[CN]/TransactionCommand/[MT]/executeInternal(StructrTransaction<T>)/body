@@ -1,6 +1,6 @@
 {
   GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
-  Transaction tx=transactions.get();
+  TransactionReference tx=transactions.get();
   boolean topLevel=(tx == null);
   boolean error=false;
   boolean deadlock=false;
@@ -10,7 +10,7 @@
   if (topLevel) {
     this.modificationQueue=new ModificationQueue();
     this.errorBuffer=new ErrorBuffer();
-    tx=graphDb.beginTx();
+    tx=new TransactionReference(graphDb.beginTx());
     transactions.set(tx);
     currentCommand.set(this);
   }

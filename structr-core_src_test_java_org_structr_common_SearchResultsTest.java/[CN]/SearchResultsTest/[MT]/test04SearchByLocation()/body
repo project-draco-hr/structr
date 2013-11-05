@@ -8,12 +8,7 @@
     props.put(lon,8.73923d);
     props.put(AbstractNode.name,"TestSeven-0");
     AbstractNode node=createTestNode(type,props);
-    boolean includeDeletedAndHidden=true;
-    boolean publicOnly=false;
-    List<SearchAttribute> searchAttributes=new LinkedList<>();
-    searchAttributes.add(new TypeSearchAttribute(type,Occur.MUST,true));
-    searchAttributes.add(new DistanceSearchAttribute("Hanauer Landstra??e","200","60314","Frankfurt",null,"Germany",10.0,Occur.MUST));
-    Result result=searchNodeCommand.execute(includeDeletedAndHidden,publicOnly,searchAttributes);
+    Result result=app.nodeQuery().type(type).location("Hanauer Landstra??e","200","60314","Frankfurt","Germany",10.0).includeDeletedAndHidden().getResult();
     assertEquals(1,result.size());
     assertTrue(result.get(0).equals(node));
   }

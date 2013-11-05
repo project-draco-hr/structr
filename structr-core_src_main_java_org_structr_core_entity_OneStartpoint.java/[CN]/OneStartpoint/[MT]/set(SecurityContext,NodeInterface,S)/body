@@ -1,12 +1,6 @@
 {
-  Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-    @Override public Object execute() throws FrameworkException {
-      relation.ensureCardinality(sourceNode,targetNode);
-      if (sourceNode != null) {
-        Services.command(securityContext,CreateRelationshipCommand.class).execute(sourceNode,targetNode,relation.getClass());
-      }
-      return null;
-    }
+  relation.ensureCardinality(sourceNode,targetNode);
+  if (sourceNode != null) {
+    StructrApp.getInstance(securityContext).create(sourceNode,targetNode,relation.getClass());
   }
-);
 }

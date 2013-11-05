@@ -1,0 +1,42 @@
+{
+  TransactionReference tx=transactions.get();
+  Set<String> synchronizationKeys=null;
+  if (tx != null) {
+    if (tx.isToplevel()) {
+      if (!modificationQueue.doInnerCallbacks(securityContext,errorBuffer)) {
+        if (doValidation) {
+          tx.failure();
+          tx.finish();
+          currentCommand.remove();
+          transactions.remove();
+          throw new FrameworkException(422,errorBuffer);
+        }
+      }
+      synchronizationKeys=modificationQueue.getSynchronizationKeys();
+      try {
+        semaphore.acquire(synchronizationKeys);
+      }
+ catch (      InterruptedException iex) {
+        return;
+      }
+      if (!modificationQueue.doValidation(securityContext,errorBuffer,doValidation)) {
+        tx.failure();
+        tx.finish();
+        semaphore.release(synchronizationKeys);
+        currentCommand.remove();
+        transactions.remove();
+        throw new FrameworkException(422,errorBuffer);
+      }
+      tx.success();
+      tx.finish();
+      semaphore.release(synchronizationKeys);
+      currentCommand.remove();
+      transactions.remove();
+      modificationQueue.doOuterCallbacks(securityContext);
+      modificationQueue.clear();
+    }
+ else {
+      tx.end();
+    }
+  }
+}

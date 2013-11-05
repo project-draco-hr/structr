@@ -3,10 +3,12 @@
     List<NodeInterface> testNodes=this.createTestNodes(GenericNode.class,2);
     assertNotNull(testNodes);
     assertTrue(testNodes.size() == 2);
-    AbstractRelationship rel=createRelationshipCommand.execute(testNodes.get(0),testNodes.get(1),SixOneOneToOne.class);
+    app.beginTx();
+    AbstractRelationship rel=app.create(testNodes.get(0),testNodes.get(1),SixOneOneToOne.class);
+    app.commitTx();
     assertNotNull(rel);
     GraphDatabaseService graphDb=graphDbCommand.execute();
-    List<AbstractNode> searchRes=searchNodeCommand.execute(Search.andExactUuid(testNodes.get(0).getUuid())).getResults();
+    List<NodeInterface> searchRes=app.nodeQuery().uuid(testNodes.get(0).getUuid()).getAsList();
     assertTrue(searchRes.size() == 1);
     Transaction tx=graphDb.beginTx();
     try {

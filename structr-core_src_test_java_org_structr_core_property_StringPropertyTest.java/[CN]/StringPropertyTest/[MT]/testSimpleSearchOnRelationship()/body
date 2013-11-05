@@ -7,13 +7,9 @@
     assertNotNull(testFour);
     final OneFourOneToOne testEntity=createTestRelationship(testOne,testFour,OneFourOneToOne.class);
     assertNotNull(testEntity);
-    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-      @Override public Object execute() throws FrameworkException {
-        testEntity.setProperty(key,"test");
-        return null;
-      }
-    }
-);
+    app.beginTx();
+    testEntity.setProperty(key,"test");
+    app.commitTx();
     assertEquals("test",testEntity.getProperty(key));
     Result<TestFour> result=Services.command(securityContext,SearchRelationshipCommand.class).execute(Search.andExactRelType(OneFourOneToOne.class),Search.andExactProperty(securityContext,key,"test"));
     assertEquals(result.size(),1);

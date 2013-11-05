@@ -1,33 +1,29 @@
 {
   try {
-    transactionCommand.execute(new StructrTransaction(){
-      @Override public Object execute() throws FrameworkException {
-        List<Class> entityList=null;
-        try {
-          entityList=getClasses("org.structr.core.entity");
-        }
- catch (        IOException|ClassNotFoundException ex) {
-          Logger.getLogger(CreateGraphObjectsTest.class.getName()).log(Level.SEVERE,null,ex);
-        }
-        assertTrue(entityList.contains(AbstractRelationship.class));
-        assertTrue(entityList.contains(GenericRelationship.class));
-        for (        Class entityClass : entityList) {
-          if (AbstractRelationship.class.isAssignableFrom(entityClass)) {
-            String type=entityClass.getSimpleName();
-            logger.log(Level.INFO,"Creating relationship of type {0}",type);
-            List<NodeInterface> nodes=createTestNodes(GenericNode.class,2);
-            final NodeInterface startNode=nodes.get(0);
-            final NodeInterface endNode=nodes.get(1);
-            final RelationshipType relType=RelType.IS_AT;
-            LocationRelationship rel=createRelationshipCommand.execute(startNode,endNode,LocationRelationship.class);
-            assertTrue(rel != null);
-            assertTrue(rel.getType().equals(relType.name()));
-          }
-        }
-        return null;
+    app.beginTx();
+    List<Class> entityList=null;
+    try {
+      entityList=getClasses("org.structr.core.entity");
+    }
+ catch (    IOException|ClassNotFoundException ex) {
+      Logger.getLogger(CreateGraphObjectsTest.class.getName()).log(Level.SEVERE,null,ex);
+    }
+    assertTrue(entityList.contains(AbstractRelationship.class));
+    assertTrue(entityList.contains(GenericRelationship.class));
+    for (    Class entityClass : entityList) {
+      if (AbstractRelationship.class.isAssignableFrom(entityClass)) {
+        String type=entityClass.getSimpleName();
+        logger.log(Level.INFO,"Creating relationship of type {0}",type);
+        List<NodeInterface> nodes=createTestNodes(GenericNode.class,2);
+        final NodeInterface startNode=nodes.get(0);
+        final NodeInterface endNode=nodes.get(1);
+        final RelationshipType relType=RelType.IS_AT;
+        LocationRelationship rel=app.create(startNode,endNode,LocationRelationship.class);
+        assertTrue(rel != null);
+        assertTrue(rel.getType().equals(relType.name()));
       }
     }
-);
+    app.commitTx();
   }
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,ex.toString());

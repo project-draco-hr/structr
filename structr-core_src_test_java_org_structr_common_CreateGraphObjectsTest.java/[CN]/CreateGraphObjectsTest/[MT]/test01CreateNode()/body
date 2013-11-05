@@ -1,30 +1,26 @@
 {
   try {
-    AbstractNode node;
     try {
-      createNodeCommand.execute();
+      app.create(TestOne.class);
+      fail("Should have raised an org.neo4j.graphdb.NotInTransactionException");
+    }
+ catch (    org.neo4j.graphdb.NotInTransactionException e) {
+      e.printStackTrace();
+    }
+    try {
+      app.create(TestOne.class);
       fail("Should have raised an org.neo4j.graphdb.NotInTransactionException");
     }
  catch (    org.neo4j.graphdb.NotInTransactionException e) {
     }
-    final PropertyMap props=new PropertyMap();
-    props.put(AbstractNode.type,"UnknownTestType????L??");
-    try {
-      createNodeCommand.execute();
-      fail("Should have raised an org.neo4j.graphdb.NotInTransactionException");
-    }
- catch (    org.neo4j.graphdb.NotInTransactionException e) {
-    }
-    node=transactionCommand.execute(new StructrTransaction<AbstractNode>(){
-      @Override public AbstractNode execute() throws FrameworkException {
-        return (AbstractNode)createNodeCommand.execute(props);
-      }
-    }
-);
+    app.beginTx();
+    AbstractNode node=app.create(TestOne.class);
+    app.commitTx();
     assertTrue(node != null);
-    assertTrue(node instanceof GenericNode);
+    assertTrue(node instanceof TestOne);
   }
  catch (  FrameworkException ex) {
+    ex.printStackTrace();
     logger.log(Level.SEVERE,ex.toString());
     fail("Unexpected exception");
   }

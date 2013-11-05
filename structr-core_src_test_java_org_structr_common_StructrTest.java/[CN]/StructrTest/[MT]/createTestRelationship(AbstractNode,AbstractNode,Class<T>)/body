@@ -1,8 +1,6 @@
 {
-  return transactionCommand.execute(new StructrTransaction<T>(){
-    @Override public T execute() throws FrameworkException {
-      return createRelationshipCommand.execute(startNode,endNode,relType);
-    }
-  }
-);
+  app.beginTx();
+  final T rel=app.create(startNode,endNode,relType);
+  app.commitTx();
+  return rel;
 }

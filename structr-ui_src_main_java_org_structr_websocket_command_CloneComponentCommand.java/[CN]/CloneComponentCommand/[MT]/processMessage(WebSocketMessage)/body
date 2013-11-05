@@ -1,5 +1,6 @@
 {
   final SecurityContext securityContext=getWebSocket().getSecurityContext();
+  final App app=StructrApp.getInstance(securityContext);
   String id=webSocketData.getId();
   Map<String,Object> nodeData=webSocketData.getNodeData();
   String parentId=(String)nodeData.get("parentId");
@@ -18,20 +19,17 @@
   }
   final DOMNode node=getDOMNode(id);
   try {
-    final CreateRelationshipCommand createRel=Services.command(securityContext,CreateRelationshipCommand.class);
-    StructrTransaction transaction=new StructrTransaction(){
-      @Override public Object execute() throws FrameworkException {
-        DOMNode clonedNode=(DOMNode)node.cloneNode(false);
-        parentNode.appendChild(clonedNode);
-        createRel.execute(node,clonedNode,Sync.class);
-        createRel.execute(clonedNode,node,Sync.class);
-        return null;
-      }
-    }
-;
-    Services.command(securityContext,TransactionCommand.class).execute(transaction);
+    app.beginTx();
+    DOMNode clonedNode=(DOMNode)node.cloneNode(false);
+    parentNode.appendChild(clonedNode);
+    app.create(node,clonedNode,Sync.class);
+    app.create(clonedNode,node,Sync.class);
+    app.commitTx();
   }
- catch (  Exception ex) {
+ catch (  FrameworkException ex) {
     getWebSocket().send(MessageBuilder.status().code(422).message(ex.getMessage()).build(),true);
+  }
+ finally {
+    app.finishTx();
   }
 }

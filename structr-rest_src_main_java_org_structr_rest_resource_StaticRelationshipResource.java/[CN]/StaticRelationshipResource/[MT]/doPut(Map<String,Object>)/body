@@ -1,6 +1,6 @@
 {
   final List<? extends GraphObject> results=typedIdResource.doGet(null,false,NodeFactory.DEFAULT_PAGE_SIZE,NodeFactory.DEFAULT_PAGE,null).getResults();
-  final SearchNodeCommand searchNode=Services.command(securityContext,SearchNodeCommand.class);
+  final App app=StructrApp.getInstance(securityContext);
   if (results != null) {
     final PropertyKey key=findPropertyKey(typedIdResource,typeResource);
     if (key != null && key instanceof RelationProperty) {
@@ -10,25 +10,13 @@
           logger.log(Level.INFO,"Read-only property on {1}: {0}",new Object[]{sourceEntity.getClass(),typeResource.getRawType()});
           return new RestMethodResult(HttpServletResponse.SC_FORBIDDEN);
         }
-        final StructrTransaction transaction=new StructrTransaction(){
-          @Override public Object execute() throws FrameworkException {
-            final List<NodeInterface> nodes=new LinkedList<>();
-            for (            final Object obj : propertySet.values()) {
-              final Result<NodeInterface> results=searchNode.execute(Search.andExactUuid(obj.toString()));
-              if (results.isEmpty()) {
-                throw new NotFoundException();
-              }
-              if (results.size() > 1) {
-                throw new SystemException("More than one result found for uuid " + obj.toString() + "!");
-              }
-              nodes.addAll(results.getResults());
-            }
-            sourceEntity.setProperty(key,nodes);
-            return null;
-          }
+        app.beginTx();
+        final List<GraphObject> nodes=new LinkedList<>();
+        for (        final Object obj : propertySet.values()) {
+          nodes.add(app.get(obj.toString()));
         }
-;
-        Services.command(securityContext,TransactionCommand.class).execute(transaction);
+        sourceEntity.setProperty(key,nodes);
+        app.commitTx();
       }
     }
   }

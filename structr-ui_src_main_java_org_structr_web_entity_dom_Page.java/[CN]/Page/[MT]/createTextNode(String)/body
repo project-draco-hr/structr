@@ -1,16 +1,17 @@
 {
+  final App app=StructrApp.getInstance(securityContext);
   try {
-    return Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction<Content>(){
-      @Override public Content execute() throws FrameworkException {
-        Content content=(Content)Services.command(securityContext,CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.type,Content.class.getSimpleName()),new NodeAttribute(Content.content,text));
-        ((RelationProperty<DOMNode>)Page.elements).addSingleElement(securityContext,Page.this,content);
-        return content;
-      }
-    }
-);
+    app.beginTx();
+    Content content=(Content)Services.command(securityContext,CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.type,Content.class.getSimpleName()),new NodeAttribute(Content.content,text));
+    ((RelationProperty<DOMNode>)Page.elements).addSingleElement(securityContext,Page.this,content);
+    app.commitTx();
+    return content;
   }
  catch (  FrameworkException fex) {
     fex.printStackTrace();
+  }
+ finally {
+    app.finishTx();
   }
   return null;
 }

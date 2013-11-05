@@ -14,16 +14,14 @@
   }
   try {
     final SecurityContext securityContext=getWebSocket().getSecurityContext();
-    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-      @Override public Object execute() throws FrameworkException {
-        PropertyMap properties=new PropertyMap();
-        properties.put(AbstractNode.type,Widget.class.getSimpleName());
-        properties.put(AbstractNode.name,name);
-        properties.put(Widget.source,source);
-        return Services.command(securityContext,CreateNodeCommand.class).execute(properties);
-      }
-    }
-);
+    final App app=StructrApp.getInstance(securityContext);
+    PropertyMap properties=new PropertyMap();
+    properties.put(AbstractNode.type,Widget.class.getSimpleName());
+    properties.put(AbstractNode.name,name);
+    properties.put(Widget.source,source);
+    app.beginTx();
+    final Widget newWidget=app.create(Widget.class,properties);
+    app.commitTx();
   }
  catch (  Throwable t) {
     logger.log(Level.WARNING,t.toString());

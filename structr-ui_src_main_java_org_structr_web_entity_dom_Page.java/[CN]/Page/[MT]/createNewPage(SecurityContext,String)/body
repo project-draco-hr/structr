@@ -1,14 +1,17 @@
 {
-  final CreateNodeCommand cmd=Services.command(securityContext,CreateNodeCommand.class);
+  final App app=StructrApp.getInstance(securityContext);
   final PropertyMap properties=new PropertyMap();
   properties.put(AbstractNode.name,name != null ? name : "page");
   properties.put(AbstractNode.type,Page.class.getSimpleName());
   properties.put(Page.contentType,"text/html");
-  Page newPage=Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction<Page>(){
-    @Override public Page execute() throws FrameworkException {
-      return (Page)cmd.execute(properties);
-    }
+  Page newPage=null;
+  try {
+    app.beginTx();
+    newPage=app.create(Page.class,properties);
+    app.commitTx();
   }
-);
+  finally {
+    app.finishTx();
+  }
   return newPage;
 }

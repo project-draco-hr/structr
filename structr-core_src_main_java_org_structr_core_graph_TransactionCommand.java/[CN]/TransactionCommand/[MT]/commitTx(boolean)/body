@@ -1,18 +1,15 @@
 {
-  TransactionReference tx=transactions.get();
-  Set<String> synchronizationKeys=null;
+  final TransactionReference tx=transactions.get();
   if (tx != null) {
     if (tx.isToplevel()) {
       if (!modificationQueue.doInnerCallbacks(securityContext,errorBuffer)) {
         if (doValidation) {
           tx.failure();
-          tx.finish();
-          currentCommand.remove();
-          transactions.remove();
+          finishTx();
           throw new FrameworkException(422,errorBuffer);
         }
       }
-      synchronizationKeys=modificationQueue.getSynchronizationKeys();
+      Set<String> synchronizationKeys=modificationQueue.getSynchronizationKeys();
       try {
         semaphore.acquire(synchronizationKeys);
       }
@@ -21,19 +18,11 @@
       }
       if (!modificationQueue.doValidation(securityContext,errorBuffer,doValidation)) {
         tx.failure();
-        tx.finish();
-        semaphore.release(synchronizationKeys);
-        currentCommand.remove();
-        transactions.remove();
+        finishTx();
         throw new FrameworkException(422,errorBuffer);
       }
       tx.success();
-      tx.finish();
-      semaphore.release(synchronizationKeys);
-      currentCommand.remove();
-      transactions.remove();
-      modificationQueue.doOuterCallbacks(securityContext);
-      modificationQueue.clear();
+      finishTx();
     }
  else {
       tx.end();

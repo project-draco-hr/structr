@@ -2,15 +2,17 @@
   String uuid=fileNode.getProperty(AbstractNode.uuid);
   if (uuid == null) {
     final String newUuid=UUID.randomUUID().toString().replaceAll("[\\-]+","");
+    final App app=StructrApp.getInstance(fileNode.getSecurityContext());
     uuid=newUuid;
-    Services.command(fileNode.getSecurityContext(),TransactionCommand.class).execute(new StructrTransaction(){
-      @Override public Object execute() throws FrameworkException {
-        fileNode.unlockReadOnlyPropertiesOnce();
-        fileNode.setProperty(AbstractNode.uuid,newUuid);
-        return null;
-      }
+    try {
+      app.beginTx();
+      fileNode.unlockReadOnlyPropertiesOnce();
+      fileNode.setProperty(AbstractNode.uuid,newUuid);
+      app.commitTx();
     }
-);
+  finally {
+      app.finishTx();
+    }
   }
   fileNode.setRelativeFilePath(org.structr.web.entity.File.getDirectoryPath(uuid) + "/" + uuid);
   java.io.File fileOnDisk=new java.io.File(Services.getFilesPath() + "/" + fileNode.getRelativeFilePath());

@@ -1,12 +1,9 @@
 {
   try {
-    Services.command(SecurityContext.getSuperUserInstance(),TransactionCommand.class).execute(new StructrTransaction(){
-      @Override public Object execute() throws FrameworkException {
-        structrFile.setProperty(AbstractFile.lastModifiedDate,new Date(l));
-        return null;
-      }
-    }
-);
+    final App app=StructrApp.getInstance();
+    app.beginTx();
+    structrFile.setProperty(AbstractFile.lastModifiedDate,new Date(l));
+    app.commitTx();
   }
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,null,ex);

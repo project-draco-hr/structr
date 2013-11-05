@@ -1,16 +1,17 @@
 {
+  final App app=StructrApp.getInstance(securityContext);
   try {
-    return Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction<Comment>(){
-      @Override public org.structr.web.entity.dom.Comment execute() throws FrameworkException {
-        org.structr.web.entity.dom.Comment content=(org.structr.web.entity.dom.Comment)Services.command(securityContext,CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.type,org.structr.web.entity.dom.Comment.class.getSimpleName()));
-        ((RelationProperty<DOMNode>)Page.elements).addSingleElement(securityContext,Page.this,content);
-        return content;
-      }
-    }
-);
+    app.beginTx();
+    org.structr.web.entity.dom.Comment content=(org.structr.web.entity.dom.Comment)Services.command(securityContext,CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.type,org.structr.web.entity.dom.Comment.class.getSimpleName()));
+    ((RelationProperty<DOMNode>)Page.elements).addSingleElement(securityContext,Page.this,content);
+    app.commitTx();
+    return content;
   }
  catch (  FrameworkException fex) {
     fex.printStackTrace();
+  }
+ finally {
+    app.finishTx();
   }
   return null;
 }

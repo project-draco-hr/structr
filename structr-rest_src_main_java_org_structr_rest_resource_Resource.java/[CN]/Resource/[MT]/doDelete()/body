@@ -10,24 +10,21 @@
   }
   if (results != null) {
     final Iterable<? extends GraphObject> finalResults=results;
-    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-      @Override public Object execute() throws FrameworkException {
-        for (        final GraphObject obj : finalResults) {
-          if (obj instanceof AbstractRelationship) {
-            deleteRel.execute((AbstractRelationship)obj);
-          }
- else           if (obj instanceof AbstractNode) {
-            if (!securityContext.isAllowed((AbstractNode)obj,Permission.delete)) {
-              logger.log(Level.WARNING,"Could not delete {0} because {1} has no delete permission",new Object[]{obj,securityContext.getUser(true)});
-              throw new NotAllowedException();
-            }
-            deleteNode.execute((AbstractNode)obj);
-          }
+    final App app=StructrApp.getInstance(securityContext);
+    app.beginTx();
+    for (    final GraphObject obj : finalResults) {
+      if (obj instanceof AbstractRelationship) {
+        deleteRel.execute((AbstractRelationship)obj);
+      }
+ else       if (obj instanceof AbstractNode) {
+        if (!securityContext.isAllowed((AbstractNode)obj,Permission.delete)) {
+          logger.log(Level.WARNING,"Could not delete {0} because {1} has no delete permission",new Object[]{obj,securityContext.getUser(true)});
+          throw new NotAllowedException();
         }
-        return null;
+        deleteNode.execute((AbstractNode)obj);
       }
     }
-);
+    app.commitTx();
   }
   return new RestMethodResult(HttpServletResponse.SC_OK);
 }

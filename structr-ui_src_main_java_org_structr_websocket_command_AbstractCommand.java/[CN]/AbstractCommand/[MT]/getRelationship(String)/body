@@ -3,21 +3,9 @@
     return null;
   }
   final SecurityContext securityContext=getWebSocket().getSecurityContext();
+  final App app=StructrApp.getInstance(securityContext);
   try {
-    if (idProperty != null) {
-      List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
-      attrs.add(Search.andExactProperty(securityContext,idProperty,id));
-      List<AbstractRelationship> results=Services.command(securityContext,SearchRelationshipCommand.class).execute(attrs).getResults();
-      if (!results.isEmpty()) {
-        return results.get(0);
-      }
-    }
- else {
-      List<AbstractRelationship> results=(List<AbstractRelationship>)Services.command(securityContext,FindRelationshipCommand.class).execute(id);
-      if (!results.isEmpty()) {
-        return results.get(0);
-      }
-    }
+    return (AbstractRelationship)app.get(id);
   }
  catch (  FrameworkException fex) {
     logger.log(Level.WARNING,"Unable to get relationship",fex);

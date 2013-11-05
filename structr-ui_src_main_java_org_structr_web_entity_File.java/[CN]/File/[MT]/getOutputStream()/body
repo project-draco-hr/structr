@@ -1,24 +1,24 @@
 {
-  String path=getRelativeFilePath();
+  final String path=getRelativeFilePath();
   if (path != null) {
-    String filePath=Services.getFilePath(Path.Files,path);
+    final String filePath=Services.getFilePath(Path.Files,path);
+    final App app=StructrApp.getInstance(securityContext);
     try {
       java.io.File fileOnDisk=new java.io.File(filePath);
       FileOutputStream fos=new FileOutputStream(fileOnDisk){
         @Override public void close() throws IOException {
           super.close();
           try {
-            Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-              @Override public Object execute() throws FrameworkException {
-                setProperty(checksum,FileHelper.getChecksum(File.this));
-                setProperty(size,FileHelper.getSize(File.this));
-                return null;
-              }
-            }
-);
+            app.beginTx();
+            setProperty(checksum,FileHelper.getChecksum(File.this));
+            setProperty(size,FileHelper.getSize(File.this));
+            app.commitTx();
           }
  catch (          FrameworkException ex) {
             logger.log(Level.SEVERE,"Could not determine or save checksum and size after closing file output stream",ex);
+          }
+ finally {
+            app.finishTx();
           }
         }
       }

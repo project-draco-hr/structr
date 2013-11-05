@@ -20,8 +20,10 @@
   List<TestOne> twoTestOnesList=new LinkedList<>();
   twoTestOnesList.add(testOne1);
   twoTestOnesList.add(testOne2);
+  app.beginTx();
   instance.setProperty(securityContext,testSix1,twoTestOnesList);
   instance.setProperty(securityContext,testSix2,twoTestOnesList);
+  app.commitTx();
   List<TestOne> testOnesFromTestSix1=instance.getProperty(securityContext,testSix1,true);
   List<TestOne> testOnesFromTestSix2=instance.getProperty(securityContext,testSix2,true);
   assertNotNull(testOnesFromTestSix1);
@@ -30,7 +32,9 @@
   assertEquals(2,testOnesFromTestSix2.size());
   List<TestOne> oneTestOneList=new LinkedList<>();
   oneTestOneList.add(testOne1);
+  app.beginTx();
   instance.setProperty(securityContext,testSix1,oneTestOneList);
+  app.commitTx();
   List<TestOne> oneTestOnesFromTestSix1=instance.getProperty(securityContext,testSix1,true);
   assertNotNull(oneTestOnesFromTestSix1);
   assertEquals(1,oneTestOnesFromTestSix1.size());

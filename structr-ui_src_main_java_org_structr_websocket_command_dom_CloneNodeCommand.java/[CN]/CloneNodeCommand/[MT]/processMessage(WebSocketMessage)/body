@@ -1,5 +1,6 @@
 {
   final SecurityContext securityContext=getWebSocket().getSecurityContext();
+  final App app=StructrApp.getInstance(securityContext);
   String id=webSocketData.getId();
   Map<String,Object> nodeData=webSocketData.getNodeData();
   String parentId=(String)nodeData.get("parentId");
@@ -15,7 +16,6 @@
       return;
     }
     try {
-      final App app=StructrApp.getInstance();
       app.beginTx();
       DOMNode clonedNode=(DOMNode)node.cloneNode(false);
       parent.appendChild(clonedNode);
@@ -24,6 +24,9 @@
     }
  catch (    FrameworkException ex) {
       getWebSocket().send(MessageBuilder.status().code(422).message(ex.getMessage()).build(),true);
+    }
+ finally {
+      app.finishTx();
     }
   }
  else {

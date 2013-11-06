@@ -1,12 +1,15 @@
 {
-  final Set<String> synchronizationKeys=modificationQueue.getSynchronizationKeys();
   final TransactionReference tx=transactions.get();
-  if (tx != null && tx.isToplevel()) {
-    tx.finish();
-    semaphore.release(synchronizationKeys);
-    currentCommand.remove();
-    transactions.remove();
-    modificationQueue.doOuterCallbacks(securityContext);
-    modificationQueue.clear();
+  if (tx != null) {
+    if (tx.isToplevel()) {
+      tx.finish();
+      currentCommand.remove();
+      transactions.remove();
+      modificationQueue.doOuterCallbacks(securityContext);
+      modificationQueue.clear();
+    }
+ else {
+      tx.end();
+    }
   }
 }

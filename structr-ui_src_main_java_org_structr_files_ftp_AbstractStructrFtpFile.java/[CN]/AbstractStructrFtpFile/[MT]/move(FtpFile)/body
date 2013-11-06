@@ -1,9 +1,9 @@
 {
   logger.log(Level.INFO,"move()");
-  AbstractStructrFtpFile targetFile=(AbstractStructrFtpFile)target;
+  final AbstractStructrFtpFile targetFile=(AbstractStructrFtpFile)target;
   final String path=targetFile instanceof StructrFtpFile ? "/" : targetFile.getAbsolutePath();
+  final App app=StructrApp.getInstance();
   try {
-    final App app=StructrApp.getInstance();
     app.beginTx();
     if (path.contains("/")) {
       String newParentPath=StringUtils.substringBeforeLast(path,"/");
@@ -25,6 +25,9 @@
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,"Could not move ftp file",ex);
     return false;
+  }
+ finally {
+    app.finishTx();
   }
   return true;
 }

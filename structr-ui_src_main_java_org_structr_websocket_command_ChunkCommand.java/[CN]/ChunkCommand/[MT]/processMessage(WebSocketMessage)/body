@@ -25,10 +25,15 @@
     long oldSize=file.getProperty(File.size);
     logger.log(Level.FINE,"Overall size: {0}, part: {1}",new Object[]{oldSize,size});
     if (size != oldSize) {
-      app.beginTx();
-      file.setProperty(File.size,FileHelper.getSize(file));
-      file.setProperty(File.checksum,FileHelper.getChecksum(file));
-      app.commitTx();
+      try {
+        app.beginTx();
+        file.setProperty(File.size,FileHelper.getSize(file));
+        file.setProperty(File.checksum,FileHelper.getChecksum(file));
+        app.commitTx();
+      }
+  finally {
+        app.finishTx();
+      }
     }
     getWebSocket().send(MessageBuilder.status().code(200).message("{\"id\":\"" + file.getUuid() + "\", \"name\":\""+ file.getName()+ "\",\"size\":"+ size+ "}").build(),true);
   }

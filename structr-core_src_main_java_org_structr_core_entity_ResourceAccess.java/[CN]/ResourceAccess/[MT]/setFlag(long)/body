@@ -1,7 +1,12 @@
 {
   App app=StructrApp.getInstance(securityContext);
-  app.beginTx();
-  cachedFlags=null;
-  setProperty(ResourceAccess.flags,getFlags() | flag);
-  app.commitTx();
+  try {
+    app.beginTx();
+    cachedFlags=null;
+    setProperty(ResourceAccess.flags,getFlags() | flag);
+    app.commitTx();
+  }
+  finally {
+    app.finishTx();
+  }
 }

@@ -9,9 +9,14 @@
     assertTrue(result.size() == 1);
     assertTrue(result.get(0).equals(node));
     final String name2="klppptzoehi g??soiu tz??w0e9hg";
-    app.beginTx();
-    node.setProperty(key,name2);
-    app.commitTx();
+    try {
+      app.beginTx();
+      node.setProperty(key,name2);
+      app.commitTx();
+    }
+  finally {
+      app.finishTx();
+    }
     result=app.nodeQuery(TestOne.class).name(name2).includeDeletedAndHidden().getResult();
     assertTrue(result.size() == 1);
     assertTrue(result.get(0).equals(node));

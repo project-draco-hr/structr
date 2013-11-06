@@ -15,6 +15,9 @@
     fex.printStackTrace();
     fail("Unable to create test nodes");
   }
+ finally {
+    app.finishTx();
+  }
   assertNotNull(a);
   assertNotNull(c);
   assertNotNull(b);
@@ -29,6 +32,9 @@
     fex.printStackTrace();
     fail("Unable to link test nodes");
   }
+ finally {
+    app.finishTx();
+  }
   TestThree verifyB=a.getProperty(TestSix.oneToOneTestThree);
   TestThree verifyD=c.getProperty(TestSix.oneToOneTestThree);
   assertTrue(verifyB != null && verifyB.equals(b));
@@ -41,6 +47,9 @@
  catch (  FrameworkException fex) {
     fex.printStackTrace();
     fail("Unable to link test nodes");
+  }
+ finally {
+    app.finishTx();
   }
   TestThree verifyD2=a.getProperty(TestSix.oneToOneTestThree);
   assertTrue(verifyD2 != null && verifyD2.equals(d));

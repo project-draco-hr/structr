@@ -6,8 +6,8 @@
     return false;
   }
   final Folder parentFolder=(Folder)FileHelper.getFileByAbsolutePath(StringUtils.substringBeforeLast(newPath,"/"));
+  final App app=StructrApp.getInstance();
   try {
-    final App app=StructrApp.getInstance();
     app.beginTx();
     Folder newFolder=(Folder)Services.command(SecurityContext.getSuperUserInstance(),CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.type,Folder.class.getSimpleName()),new NodeAttribute(AbstractNode.owner,owner.getStructrUser()),new NodeAttribute(AbstractNode.name,getName()));
     if (parentFolder != null) {
@@ -18,6 +18,9 @@
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,null,ex);
     return false;
+  }
+ finally {
+    app.finishTx();
   }
   return true;
 }

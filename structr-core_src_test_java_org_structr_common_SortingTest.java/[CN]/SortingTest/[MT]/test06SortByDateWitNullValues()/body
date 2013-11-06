@@ -1,7 +1,5 @@
 {
   try {
-    boolean includeDeletedAndHidden=false;
-    boolean publicOnly=false;
     Class type=TestOne.class;
     int number=20;
     final List<NodeInterface> nodes=this.createTestNodes(type,number);
@@ -9,26 +7,31 @@
     Collections.shuffle(nodes,new Random(System.nanoTime()));
     int i=offset;
     String name;
-    app.beginTx();
-    for (    NodeInterface node : nodes) {
-      name=Integer.toString(i);
-      i++;
-      node.setProperty(AbstractNode.name,"TestOne-" + name);
-      if ((i % 2) != 0) {
-        node.setProperty(TestOne.aDate,new Date());
-        System.out.println("TestOne-" + name + ": indexed with date");
-      }
+    try {
+      app.beginTx();
+      for (      NodeInterface node : nodes) {
+        name=Integer.toString(i);
+        i++;
+        node.setProperty(AbstractNode.name,"TestOne-" + name);
+        if ((i % 2) != 0) {
+          node.setProperty(TestOne.aDate,new Date());
+          System.out.println("TestOne-" + name + ": indexed with date");
+        }
  else {
-        node.setProperty(TestOne.aDate,null);
-        System.out.println("TestOne-" + name + ": null date");
+          node.setProperty(TestOne.aDate,null);
+          System.out.println("TestOne-" + name + ": null date");
+        }
+        try {
+          Thread.sleep(2);
+        }
+ catch (        Throwable t) {
+        }
       }
-      try {
-        Thread.sleep(2);
-      }
- catch (      Throwable t) {
-      }
+      app.commitTx();
     }
-    app.commitTx();
+  finally {
+      app.finishTx();
+    }
     Result result=app.nodeQuery(type).getResult();
     assertEquals(number,result.size());
     PropertyKey sortKey=TestOne.aDate;

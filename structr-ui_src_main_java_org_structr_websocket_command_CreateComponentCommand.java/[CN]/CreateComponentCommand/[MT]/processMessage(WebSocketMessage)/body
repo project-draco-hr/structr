@@ -1,10 +1,10 @@
 {
   final SecurityContext securityContext=getWebSocket().getSecurityContext();
+  final App app=StructrApp.getInstance(securityContext);
   String id=webSocketData.getId();
   if (id != null) {
     final DOMNode node=getDOMNode(id);
     try {
-      final App app=StructrApp.getInstance(securityContext);
       app.beginTx();
       DOMNode clonedNode=(DOMNode)node.cloneNode(false);
       moveChildNodes(node,clonedNode);
@@ -19,6 +19,9 @@
     }
  catch (    Exception ex) {
       getWebSocket().send(MessageBuilder.status().code(422).message(ex.getMessage()).build(),true);
+    }
+ finally {
+      app.finishTx();
     }
   }
  else {

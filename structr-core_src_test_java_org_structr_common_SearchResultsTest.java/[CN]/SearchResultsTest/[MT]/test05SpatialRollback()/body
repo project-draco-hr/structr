@@ -9,14 +9,19 @@
     props.put(lon,8.73923d);
     props.put(AbstractNode.name,"TestSeven-0");
     ;
-    app.beginTx();
-    TestSeven node=app.create(TestSeven.class,props);
-    props.remove(AbstractNode.name);
-    props.put(lat,50.12285d);
-    props.put(lon,8.73924d);
-    TestSeven node2=app.create(TestSeven.class,props);
-    TestSeven node3=app.create(TestSeven.class,props);
-    app.commitTx();
+    try {
+      app.beginTx();
+      TestSeven node=app.create(TestSeven.class,props);
+      props.remove(AbstractNode.name);
+      props.put(lat,50.12285d);
+      props.put(lon,8.73924d);
+      TestSeven node2=app.create(TestSeven.class,props);
+      TestSeven node3=app.create(TestSeven.class,props);
+      app.commitTx();
+    }
+  finally {
+      app.finishTx();
+    }
     fail("Expected a FrameworkException (name must_not_be_empty)");
   }
  catch (  FrameworkException nfe) {

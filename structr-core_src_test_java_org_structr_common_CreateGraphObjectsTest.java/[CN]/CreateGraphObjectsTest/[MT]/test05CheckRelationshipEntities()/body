@@ -1,6 +1,5 @@
 {
   try {
-    app.beginTx();
     List<Class> entityList=null;
     try {
       entityList=getClasses("org.structr.core.entity");
@@ -10,6 +9,7 @@
     }
     assertTrue(entityList.contains(AbstractRelationship.class));
     assertTrue(entityList.contains(GenericRelationship.class));
+    app.beginTx();
     for (    Class entityClass : entityList) {
       if (AbstractRelationship.class.isAssignableFrom(entityClass)) {
         String type=entityClass.getSimpleName();
@@ -25,8 +25,12 @@
     }
     app.commitTx();
   }
- catch (  FrameworkException ex) {
+ catch (  Throwable ex) {
+    ex.printStackTrace();
     logger.log(Level.SEVERE,ex.toString());
     fail("Unexpected exception");
+  }
+ finally {
+    app.finishTx();
   }
 }

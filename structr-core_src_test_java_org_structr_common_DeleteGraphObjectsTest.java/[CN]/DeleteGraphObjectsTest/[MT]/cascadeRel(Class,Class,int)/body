@@ -1,9 +1,14 @@
 {
-  app.beginTx();
-  AbstractNode start=createTestNode(type1);
-  AbstractNode end=createTestNode(type2);
-  AbstractRelationship rel=createTestRelationship(start,end,LocationRelationship.class);
-  rel.setProperty(AbstractRelationship.cascadeDelete,cascadeDeleteFlag);
-  app.commitTx();
-  return rel;
+  try {
+    app.beginTx();
+    AbstractNode start=createTestNode(type1);
+    AbstractNode end=createTestNode(type2);
+    AbstractRelationship rel=createTestRelationship(start,end,LocationRelationship.class);
+    rel.setProperty(AbstractRelationship.cascadeDelete,cascadeDeleteFlag);
+    app.commitTx();
+    return rel;
+  }
+  finally {
+    app.finishTx();
+  }
 }

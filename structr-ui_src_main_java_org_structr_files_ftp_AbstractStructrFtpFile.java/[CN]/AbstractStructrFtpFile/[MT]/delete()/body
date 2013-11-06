@@ -1,12 +1,15 @@
 {
+  final App app=StructrApp.getInstance();
   try {
-    final App app=StructrApp.getInstance();
     app.beginTx();
     app.delete(structrFile);
     app.commitTx();
   }
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,null,ex);
+  }
+ finally {
+    app.finishTx();
   }
   return true;
 }

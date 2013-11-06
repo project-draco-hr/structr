@@ -1,13 +1,19 @@
 {
   try {
-    List<NodeInterface> nodes=createTestNodes(GenericNode.class,2);
+    final List<NodeInterface> nodes=createTestNodes(GenericNode.class,2);
     final NodeInterface startNode=nodes.get(0);
     final NodeInterface endNode=nodes.get(1);
+    LocationRelationship rel=null;
     assertTrue(startNode != null);
     assertTrue(endNode != null);
-    app.beginTx();
-    LocationRelationship rel=app.create(startNode,endNode,LocationRelationship.class);
-    app.commitTx();
+    try {
+      app.beginTx();
+      rel=app.create(startNode,endNode,LocationRelationship.class);
+      app.commitTx();
+    }
+  finally {
+      app.finishTx();
+    }
     assertEquals(startNode.getUuid(),rel.getStartNodeId());
     assertEquals(endNode.getUuid(),rel.getEndNodeId());
     assertEquals(RelType.IS_AT.name(),rel.getType());

@@ -4,9 +4,14 @@
     final TestFour testEntity=createTestNode(TestFour.class);
     assertNotNull(testEntity);
     final Long value=2857312362L;
-    app.beginTx();
-    instance.setProperty(securityContext,testEntity,value);
-    app.commitTx();
+    try {
+      app.beginTx();
+      instance.setProperty(securityContext,testEntity,value);
+      app.commitTx();
+    }
+  finally {
+      app.finishTx();
+    }
     assertEquals(value,instance.getProperty(securityContext,testEntity,true));
   }
  catch (  FrameworkException fex) {

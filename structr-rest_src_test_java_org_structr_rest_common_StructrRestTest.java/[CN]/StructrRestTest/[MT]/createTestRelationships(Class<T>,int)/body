@@ -1,13 +1,18 @@
 {
+  final App app=StructrApp.getInstance(securityContext);
   final List<TestOne> nodes=createTestNodes(TestOne.class,2);
   final TestOne startNode=nodes.get(0);
   final TestOne endNode=nodes.get(1);
-  final App app=StructrApp.getInstance(securityContext);
-  app.beginTx();
-  List<T> rels=new LinkedList<>();
-  for (int i=0; i < number; i++) {
-    rels.add(createRelationshipCommand.execute(startNode,endNode,relType));
+  final List<T> rels=new LinkedList<>();
+  try {
+    app.beginTx();
+    for (int i=0; i < number; i++) {
+      rels.add(createRelationshipCommand.execute(startNode,endNode,relType));
+    }
+    app.commitTx();
   }
-  app.commitTx();
+  finally {
+    app.finishTx();
+  }
   return rels;
 }

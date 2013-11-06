@@ -7,9 +7,14 @@
     properties.put(AbstractNode.name,"__ShadowDocument__");
     properties.put(AbstractNode.hidden,true);
     properties.put(AbstractNode.visibleToAuthenticatedUsers,true);
-    app.beginTx();
-    doc=app.create(ShadowDocument.class,properties);
-    app.commitTx();
+    try {
+      app.beginTx();
+      doc=app.create(ShadowDocument.class,properties);
+      app.commitTx();
+    }
+  finally {
+      app.finishTx();
+    }
   }
   return doc;
 }

@@ -1,8 +1,14 @@
 {
   try {
-    app.beginTx();
-    TestImage img=(TestImage)ImageHelper.createFileBase64(securityContext,base64Image,TestImage.class);
-    app.commitTx();
+    TestImage img=null;
+    try {
+      app.beginTx();
+      img=(TestImage)ImageHelper.createFileBase64(securityContext,base64Image,TestImage.class);
+      app.commitTx();
+    }
+  finally {
+      app.finishTx();
+    }
     assertNotNull(img);
     assertTrue(img instanceof TestImage);
     Image tn=img.getProperty(TestImage.thumbnail);
@@ -14,8 +20,5 @@
  catch (  Exception ex) {
     logger.log(Level.SEVERE,ex.toString());
     fail("Unexpected exception");
-  }
- finally {
-    app.finishTx();
   }
 }

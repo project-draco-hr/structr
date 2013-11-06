@@ -4,14 +4,19 @@
   final App app=StructrApp.getInstance(securityContext);
   if (results != null && !results.isEmpty()) {
     final Class type=results.get(0).getClass();
-    app.beginTx();
-    PropertyMap properties=PropertyMap.inputTypeToJavaType(securityContext,type,propertySet);
-    for (    final GraphObject obj : results) {
-      for (      final Entry<PropertyKey,Object> attr : properties.entrySet()) {
-        obj.setProperty(attr.getKey(),attr.getValue());
+    try {
+      app.beginTx();
+      PropertyMap properties=PropertyMap.inputTypeToJavaType(securityContext,type,propertySet);
+      for (      final GraphObject obj : results) {
+        for (        final Entry<PropertyKey,Object> attr : properties.entrySet()) {
+          obj.setProperty(attr.getKey(),attr.getValue());
+        }
       }
+      app.commitTx();
     }
-    app.commitTx();
+  finally {
+      app.finishTx();
+    }
     return new RestMethodResult(HttpServletResponse.SC_OK);
   }
   throw new IllegalPathException();

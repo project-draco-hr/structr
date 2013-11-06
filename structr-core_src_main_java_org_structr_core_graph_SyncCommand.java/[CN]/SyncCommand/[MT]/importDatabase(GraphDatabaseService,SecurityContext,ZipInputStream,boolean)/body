@@ -13,8 +13,8 @@
     boolean finished=false;
     long nodeCount=0;
     long relCount=0;
-    app.beginTx();
     try {
+      app.beginTx();
       reader=new BufferedReader(new InputStreamReader(zis));
       do {
         try {
@@ -89,6 +89,9 @@
   }
  catch (  FrameworkException fex) {
     fex.printStackTrace();
+  }
+ finally {
+    app.finishTx();
   }
   double t1=System.nanoTime();
   double time=((t1 - t0) / 1000000000.0);

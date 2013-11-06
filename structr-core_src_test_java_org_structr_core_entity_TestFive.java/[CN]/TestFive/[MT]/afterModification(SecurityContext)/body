@@ -1,12 +1,15 @@
 {
+  final App app=StructrApp.getInstance(securityContext);
   try {
     final int value=getIncreasedValue(modifiedInAfterModification);
-    App app=StructrApp.getInstance(securityContext);
     app.beginTx();
     setProperty(modifiedInAfterModification,value);
     app.commitTx();
   }
  catch (  Throwable t) {
     t.printStackTrace();
+  }
+ finally {
+    app.finishTx();
   }
 }

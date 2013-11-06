@@ -13,9 +13,15 @@
     }
  catch (    org.neo4j.graphdb.NotInTransactionException e) {
     }
-    app.beginTx();
-    AbstractNode node=app.create(TestOne.class);
-    app.commitTx();
+    AbstractNode node=null;
+    try {
+      app.beginTx();
+      node=app.create(TestOne.class);
+      app.commitTx();
+    }
+  finally {
+      app.finishTx();
+    }
     assertTrue(node != null);
     assertTrue(node instanceof TestOne);
   }

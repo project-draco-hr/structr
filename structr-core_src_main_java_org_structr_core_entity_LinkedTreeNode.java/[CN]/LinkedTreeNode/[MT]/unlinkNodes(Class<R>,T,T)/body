@@ -1,10 +1,15 @@
 {
   final App app=StructrApp.getInstance(securityContext);
-  app.beginTx();
-  for (  RelationshipInterface rel : startNode.getRelationships(linkType)) {
-    if (rel != null && rel.getTargetNode().equals(endNode)) {
-      app.delete(rel);
+  try {
+    app.beginTx();
+    for (    RelationshipInterface rel : startNode.getRelationships(linkType)) {
+      if (rel != null && rel.getTargetNode().equals(endNode)) {
+        app.delete(rel);
+      }
     }
+    app.commitTx();
   }
-  app.commitTx();
+  finally {
+    app.finishTx();
+  }
 }

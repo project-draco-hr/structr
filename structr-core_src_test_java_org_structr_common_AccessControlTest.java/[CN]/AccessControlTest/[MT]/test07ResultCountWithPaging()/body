@@ -1,15 +1,19 @@
 {
   try {
-    List<NodeInterface> persons=createTestNodes(Person.class,1);
-    Person user=(Person)persons.get(0);
-    Class type=TestOne.class;
+    final List<NodeInterface> persons=createTestNodes(Person.class,1);
+    final Class type=TestOne.class;
     final List<NodeInterface> nodes=createTestNodes(type,10);
-    app.beginTx();
-    nodes.get(3).setProperty(AbstractNode.visibleToPublicUsers,true);
-    nodes.get(5).setProperty(AbstractNode.visibleToPublicUsers,true);
-    nodes.get(7).setProperty(AbstractNode.visibleToPublicUsers,true);
-    nodes.get(9).setProperty(AbstractNode.visibleToPublicUsers,true);
-    app.commitTx();
+    try {
+      app.beginTx();
+      nodes.get(3).setProperty(AbstractNode.visibleToPublicUsers,true);
+      nodes.get(5).setProperty(AbstractNode.visibleToPublicUsers,true);
+      nodes.get(7).setProperty(AbstractNode.visibleToPublicUsers,true);
+      nodes.get(9).setProperty(AbstractNode.visibleToPublicUsers,true);
+      app.commitTx();
+    }
+  finally {
+      app.finishTx();
+    }
     SecurityContext publicContext=SecurityContext.getInstance(null,AccessMode.Frontend);
     App publicApp=StructrApp.getInstance(publicContext);
     PropertyKey sortKey=AbstractNode.name;

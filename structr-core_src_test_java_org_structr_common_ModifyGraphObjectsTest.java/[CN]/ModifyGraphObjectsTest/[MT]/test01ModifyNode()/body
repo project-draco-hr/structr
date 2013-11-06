@@ -3,11 +3,17 @@
     final PropertyMap props=new PropertyMap();
     final String type="UnknownTestType";
     final String name="GenericNode-name";
+    NodeInterface node=null;
     props.put(AbstractNode.type,type);
     props.put(AbstractNode.name,name);
-    app.beginTx();
-    final NodeInterface node=app.create(GenericNode.class,props);
-    app.commitTx();
+    try {
+      app.beginTx();
+      node=app.create(GenericNode.class,props);
+      app.commitTx();
+    }
+  finally {
+      app.finishTx();
+    }
     assertEquals(GenericNode.class.getSimpleName(),node.getProperty(AbstractNode.type));
     assertTrue(node.getProperty(AbstractNode.name).equals(name));
     assertTrue(!node.getProperty(AbstractNode.hidden));
@@ -15,13 +21,18 @@
     assertTrue(!node.getProperty(AbstractNode.visibleToAuthenticatedUsers));
     assertTrue(!node.getProperty(AbstractNode.visibleToPublicUsers));
     final String name2="GenericNode-name-????????";
-    app.beginTx();
-    node.setProperty(AbstractNode.name,name2);
-    node.setProperty(AbstractNode.hidden,true);
-    node.setProperty(AbstractNode.deleted,true);
-    node.setProperty(AbstractNode.visibleToAuthenticatedUsers,true);
-    node.setProperty(AbstractNode.visibleToPublicUsers,true);
-    app.commitTx();
+    try {
+      app.beginTx();
+      node.setProperty(AbstractNode.name,name2);
+      node.setProperty(AbstractNode.hidden,true);
+      node.setProperty(AbstractNode.deleted,true);
+      node.setProperty(AbstractNode.visibleToAuthenticatedUsers,true);
+      node.setProperty(AbstractNode.visibleToPublicUsers,true);
+      app.commitTx();
+    }
+  finally {
+      app.finishTx();
+    }
     assertTrue(node.getProperty(AbstractNode.name).equals(name2));
     assertTrue(node.getProperty(AbstractNode.hidden));
     assertTrue(node.getProperty(AbstractNode.deleted));

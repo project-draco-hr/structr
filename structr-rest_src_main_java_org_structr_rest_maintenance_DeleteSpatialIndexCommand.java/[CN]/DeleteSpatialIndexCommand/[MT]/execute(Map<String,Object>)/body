@@ -11,19 +11,23 @@
     }
   }
   final App app=StructrApp.getInstance(securityContext);
-  app.beginTx();
-  ;
-  for (  Node node : toDelete) {
-    logger.log(Level.INFO,"Deleting node {0}",node);
-    try {
-      for (      Relationship rel : node.getRelationships()) {
-        rel.delete();
+  try {
+    app.beginTx();
+    for (    Node node : toDelete) {
+      logger.log(Level.INFO,"Deleting node {0}",node);
+      try {
+        for (        Relationship rel : node.getRelationships()) {
+          rel.delete();
+        }
+        node.delete();
       }
-      node.delete();
+ catch (      Throwable t) {
+        t.printStackTrace();
+      }
     }
- catch (    Throwable t) {
-      t.printStackTrace();
-    }
+    app.commitTx();
   }
-  app.commitTx();
+  finally {
+    app.finishTx();
+  }
 }

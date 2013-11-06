@@ -4,9 +4,14 @@
     final TestFour testEntity=createTestNode(TestFour.class);
     assertNotNull(testEntity);
     final Boolean value=Boolean.TRUE;
-    app.beginTx();
-    testEntity.setProperty(key,value);
-    app.commitTx();
+    try {
+      app.beginTx();
+      testEntity.setProperty(key,value);
+      app.commitTx();
+    }
+  finally {
+      app.finishTx();
+    }
     assertEquals(value,testEntity.getProperty(key));
   }
  catch (  FrameworkException fex) {

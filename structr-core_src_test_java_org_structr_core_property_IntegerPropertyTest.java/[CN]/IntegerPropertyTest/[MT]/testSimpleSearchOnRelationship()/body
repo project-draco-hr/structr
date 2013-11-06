@@ -7,9 +7,14 @@
     assertNotNull(testFour);
     final OneFourOneToOne testEntity=createTestRelationship(testOne,testFour,OneFourOneToOne.class);
     assertNotNull(testEntity);
-    app.beginTx();
-    testEntity.setProperty(key,2345);
-    app.commitTx();
+    try {
+      app.beginTx();
+      testEntity.setProperty(key,2345);
+      app.commitTx();
+    }
+  finally {
+      app.finishTx();
+    }
     assertEquals((Integer)2345,(Integer)testEntity.getProperty(key));
     Result<TestFour> result=Services.command(securityContext,SearchRelationshipCommand.class).execute(Search.andExactRelType(OneFourOneToOne.class),Search.andExactProperty(securityContext,key,2345));
     assertEquals(result.size(),1);

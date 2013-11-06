@@ -12,16 +12,21 @@
     }
     final Notion notion=relationProperty.getNotion();
     final PropertyKey primaryPropertyKey=notion.getPrimaryPropertyKey();
-    app.beginTx();
-    if (primaryPropertyKey != null && propertySet.containsKey(primaryPropertyKey.jsonName()) && propertySet.size() == 1) {
-    }
- else {
-      newNode=typeResource.createNode(propertySet);
-      if (newNode != null) {
-        relationProperty.addSingleElement(securityContext,sourceNode,newNode);
+    try {
+      app.beginTx();
+      if (primaryPropertyKey != null && propertySet.containsKey(primaryPropertyKey.jsonName()) && propertySet.size() == 1) {
       }
+ else {
+        newNode=typeResource.createNode(propertySet);
+        if (newNode != null) {
+          relationProperty.addSingleElement(securityContext,sourceNode,newNode);
+        }
+      }
+      app.commitTx();
     }
-    app.commitTx();
+  finally {
+      app.finishTx();
+    }
     if (newNode != null) {
       RestMethodResult result=new RestMethodResult(HttpServletResponse.SC_CREATED);
       result.addHeader("Location",buildLocationHeader(newNode));

@@ -7,14 +7,19 @@
     final List<NodeInterface> nodes=this.createTestNodes(type,number);
     final int offset=10;
     Collections.shuffle(nodes,new Random(System.nanoTime()));
-    app.beginTx();
-    int i=offset;
-    for (    NodeInterface node : nodes) {
-      String _name="TestOne-" + i;
-      i++;
-      node.setProperty(AbstractNode.name,_name);
+    try {
+      app.beginTx();
+      int i=offset;
+      for (      NodeInterface node : nodes) {
+        String _name="TestOne-" + i;
+        i++;
+        node.setProperty(AbstractNode.name,_name);
+      }
+      app.commitTx();
     }
-    app.commitTx();
+  finally {
+      app.finishTx();
+    }
     List<NodeInterface> result=app.get(type);
     assertTrue(result.size() == number);
     PropertyKey sortKey=AbstractNode.name;

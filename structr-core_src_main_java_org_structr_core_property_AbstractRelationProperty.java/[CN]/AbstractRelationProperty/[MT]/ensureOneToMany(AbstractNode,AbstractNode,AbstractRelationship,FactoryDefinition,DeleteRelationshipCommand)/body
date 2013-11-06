@@ -10,11 +10,6 @@
     AbstractNode otherNode=rel.getOtherNode(targetNode);
     Class otherClass=otherNode.getClass();
     boolean removeRel=sourceType.isAssignableFrom(otherClass) || (!isGeneric && newRelationshipClass.isAssignableFrom(relationshipClass));
-    if (!removeRel) {
-      for (      Class iface : EntityContext.getInterfacesForType(sourceType)) {
-        removeRel|=iface.isAssignableFrom(otherClass);
-      }
-    }
     if (removeRel) {
       deleteRel.execute(rel);
     }

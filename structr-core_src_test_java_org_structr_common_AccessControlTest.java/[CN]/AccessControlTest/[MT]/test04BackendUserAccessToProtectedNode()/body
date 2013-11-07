@@ -11,9 +11,7 @@
     props.put(AbstractNode.visibleToAuthenticatedUsers,true);
     TestOne t2=createTestNode(TestOne.class,props,user1);
     SecurityContext user2Context=SecurityContext.getInstance(user2,AccessMode.Backend);
-    List<SearchAttribute> searchAttributes=new LinkedList<>();
-    searchAttributes.add(Search.andExactTypeAndSubtypes(type));
-    Result result=Services.command(user2Context,SearchNodeCommand.class).execute(searchAttributes);
+    Result result=StructrApp.getInstance(user2Context).nodeQuery(type).getResult();
     assertEquals(2,result.size());
   }
  catch (  FrameworkException ex) {

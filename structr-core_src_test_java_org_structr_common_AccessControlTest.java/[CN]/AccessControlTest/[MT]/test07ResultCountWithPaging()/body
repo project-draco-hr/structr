@@ -15,12 +15,11 @@
       app.finishTx();
     }
     SecurityContext publicContext=SecurityContext.getInstance(null,AccessMode.Frontend);
-    App publicApp=StructrApp.getInstance(publicContext);
     PropertyKey sortKey=AbstractNode.name;
     boolean sortDesc=false;
     int pageSize=2;
     int page=1;
-    Result result=publicapp.nodeQuery(type).sort(sortKey).order(sortDesc).page(page).pageSize(pageSize).getResult();
+    Result result=StructrApp.getInstance(publicContext).nodeQuery(type).sort(sortKey).order(sortDesc).page(page).pageSize(pageSize).getResult();
     assertEquals(2,result.size());
     assertEquals(4,(int)result.getRawResultCount());
     assertEquals(nodes.get(3).getUuid(),result.get(0).getUuid());

@@ -4,7 +4,7 @@
     return null;
   }
   deletedNodes.add(node);
-  final DeleteRelationshipCommand deleteRel=Services.command(securityContext,DeleteRelationshipCommand.class);
+  App app=StructrApp.getInstance(securityContext);
   try {
     List<NodeInterface> nodesToCheckAfterDeletion=new LinkedList<>();
     for (    AbstractRelationship rel : node.getOutgoingRelationships()) {
@@ -31,7 +31,7 @@
     }
     node.onNodeDeletion();
     for (    AbstractRelationship r : node.getRelationships()) {
-      deleteRel.execute(r,true);
+      app.delete(r);
     }
     node.removeFromIndex();
     node.getNode().delete();

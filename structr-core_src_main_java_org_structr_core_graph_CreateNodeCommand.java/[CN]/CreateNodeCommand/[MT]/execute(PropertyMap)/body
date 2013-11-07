@@ -3,7 +3,6 @@
   Principal user=securityContext.getUser(false);
   T node=null;
   if (graphDb != null) {
-    CreateRelationshipCommand createRel=Services.command(securityContext,CreateRelationshipCommand.class);
     Date now=new Date();
     PropertyMap properties=new PropertyMap(attributes);
     Object typeObject=properties.get(AbstractNode.type);
@@ -15,8 +14,9 @@
       TransactionCommand.nodeCreated(node);
       if ((user != null) && user instanceof AbstractNode) {
         AbstractNode owner=(AbstractNode)user;
-        createRel.execute(owner,node,Ownership.class);
-        Security securityRel=createRel.execute(owner,node,Security.class);
+        App app=StructrApp.getInstance(securityContext);
+        app.create(owner,node,Ownership.class);
+        Security securityRel=app.create(owner,node,Security.class);
         securityRel.setAllowed(Permission.values());
         node.unlockReadOnlyPropertiesOnce();
         node.setProperty(AbstractNode.createdBy,user.getProperty(AbstractNode.uuid));

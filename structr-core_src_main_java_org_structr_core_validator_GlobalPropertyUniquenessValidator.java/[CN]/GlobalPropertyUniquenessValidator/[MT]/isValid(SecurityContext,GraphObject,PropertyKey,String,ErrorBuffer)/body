@@ -1,5 +1,5 @@
 {
-  if (value == null || (value != null && value.toString().length() == 0)) {
+  if (StringUtils.isEmpty(value)) {
     errorBuffer.add(object.getType(),new EmptyPropertyToken(key));
     return false;
   }
@@ -10,7 +10,7 @@
     attributes.add(new PropertySearchAttribute(key,value,Occur.MUST,true));
     Result<AbstractNode> resultList=null;
     try {
-      resultList=Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class).execute(attributes);
+      resultList=StructrApp.getInstance().nodeQuery(AbstractNode.class).and(key,value).getResult();
       nodeExists=!resultList.isEmpty();
     }
  catch (    FrameworkException fex) {

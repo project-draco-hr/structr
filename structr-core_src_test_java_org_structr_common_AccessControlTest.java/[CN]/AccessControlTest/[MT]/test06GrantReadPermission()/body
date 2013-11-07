@@ -14,9 +14,7 @@
       app.finishTx();
     }
     SecurityContext user2Context=SecurityContext.getInstance(user2,AccessMode.Backend);
-    List<SearchAttribute> searchAttributes=new LinkedList<>();
-    searchAttributes.add(Search.andExactTypeAndSubtypes(type));
-    Result result=Services.command(user2Context,SearchNodeCommand.class).execute(searchAttributes);
+    Result result=StructrApp.getInstance(user2Context).nodeQuery(type).getResult();
     assertEquals(1,result.size());
     assertEquals(t1.getUuid(),result.get(0).getUuid());
     try {
@@ -27,7 +25,7 @@
   finally {
       app.finishTx();
     }
-    result=Services.command(user2Context,SearchNodeCommand.class).execute(searchAttributes);
+    result=StructrApp.getInstance(user2Context).nodeQuery(type).getResult();
     assertTrue(result.isEmpty());
   }
  catch (  FrameworkException ex) {

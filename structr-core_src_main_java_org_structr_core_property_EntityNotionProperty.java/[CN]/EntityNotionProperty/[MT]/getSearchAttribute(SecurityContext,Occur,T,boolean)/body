@@ -4,8 +4,9 @@
   boolean alreadyAdded=false;
   try {
     if (searchValue != null && !StringUtils.isBlank(searchValue.toString())) {
+      final App app=StructrApp.getInstance(securityContext);
       if (exactMatch) {
-        Result<AbstractNode> result=Services.command(securityContext,SearchNodeCommand.class).execute(Search.andExactTypeAndSubtypes(entityProperty.relatedType(),exactMatch),Search.andExactProperty(securityContext,notion.getPrimaryPropertyKey(),searchValue));
+        Result<AbstractNode> result=app.nodeQuery(entityProperty.relatedType()).and(notion.getPrimaryPropertyKey(),searchValue).getResult();
         for (        AbstractNode node : result.getResults()) {
 switch (occur) {
 case MUST:
@@ -26,7 +27,7 @@ case MUST_NOT:
 }
 }
  else {
-Result<AbstractNode> result=Services.command(securityContext,SearchNodeCommand.class).execute(Search.andExactTypeAndSubtypes(entityProperty.relatedType(),exactMatch),Search.andProperty(securityContext,notion.getPrimaryPropertyKey(),searchValue));
+Result<AbstractNode> result=app.nodeQuery(entityProperty.relatedType(),true).and(notion.getPrimaryPropertyKey(),searchValue,true).getResult();
 for (AbstractNode node : result.getResults()) {
 intersectionResult.addAll(entityProperty.getRelatedNodesReverse(securityContext,node,declaringClass));
 }

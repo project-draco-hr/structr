@@ -14,9 +14,7 @@
       app.finishTx();
     }
     SecurityContext publicContext=SecurityContext.getInstance(null,AccessMode.Frontend);
-    List<SearchAttribute> searchAttributes=new LinkedList<>();
-    searchAttributes.add(Search.andExactTypeAndSubtypes(type));
-    Result result=Services.command(publicContext,SearchNodeCommand.class).execute(searchAttributes);
+    Result result=StructrApp.getInstance(publicContext).nodeQuery(type).getResult();
     assertEquals(3,result.size());
     assertEquals(3,(int)result.getRawResultCount());
     assertEquals(nodes.get(3).getUuid(),result.get(0).getUuid());

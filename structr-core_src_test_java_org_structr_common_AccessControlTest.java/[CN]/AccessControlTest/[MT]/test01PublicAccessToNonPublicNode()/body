@@ -5,9 +5,7 @@
     Class type=TestOne.class;
     TestOne t1=createTestNode(TestOne.class,user);
     SecurityContext publicContext=SecurityContext.getInstance(null,AccessMode.Frontend);
-    List<SearchAttribute> searchAttributes=new LinkedList<>();
-    searchAttributes.add(Search.andExactTypeAndSubtypes(type));
-    Result result=Services.command(publicContext,SearchNodeCommand.class).execute(searchAttributes);
+    Result result=StructrApp.getInstance(publicContext).nodeQuery(type).getResult();
     assertTrue(result.isEmpty());
   }
  catch (  FrameworkException ex) {

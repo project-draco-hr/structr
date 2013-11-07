@@ -2,7 +2,6 @@
   final GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
   final SecurityContext superUserContext=SecurityContext.getSuperUserInstance();
   final NodeFactory nodeFactory=new NodeFactory(superUserContext,true,false);
-  final DeleteNodeCommand deleteNode=Services.command(SecurityContext.getSuperUserInstance(),DeleteNodeCommand.class);
   if (graphDb != null) {
     Result<AbstractNode> nodes=nodeFactory.instantiateAll(GlobalGraphOperations.at(graphDb).getAllNodes());
     final boolean erase;
@@ -18,7 +17,7 @@
           logger.log(Level.INFO,"Found deleted node: {0}",node);
           if (erase) {
             try {
-              deleteNode.execute(node);
+              StructrApp.getInstance(securityContext).delete(node);
             }
  catch (            FrameworkException ex) {
               logger.log(Level.WARNING,"Could not delete node " + node,ex);

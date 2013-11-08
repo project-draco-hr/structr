@@ -5,7 +5,8 @@
   try {
     app.beginTx();
     final PropertyMap properties=PropertyMap.inputTypeToJavaType(securityContext,nodeData);
-    final AbstractNode newNode=app.create(AbstractNode.class,properties);
+    Class type=EntityContext.getEntityClassForRawType(properties.get(AbstractNode.type));
+    final NodeInterface newNode=app.create(type,properties);
     if (newNode instanceof File) {
       long size=(Long)webSocketData.getNodeData().get("size");
       String contentType=(String)webSocketData.getNodeData().get("contentType");

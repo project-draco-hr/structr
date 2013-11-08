@@ -35,12 +35,7 @@
   final App app=StructrApp.getInstance(securityContext);
   try {
     app.beginTx();
-    try {
-      originalImage.setChecksum(newChecksum);
-    }
- catch (    Exception ex) {
-      logger.log(Level.SEVERE,"Could not store checksum for original image",ex);
-    }
+    originalImage.setChecksum(newChecksum);
     Thumbnail thumbnailData=ImageHelper.createThumbnail(originalImage,maxWidth,maxHeight,cropToFit);
     if (thumbnailData != null) {
       Integer tnWidth=thumbnailData.getWidth();
@@ -72,12 +67,11 @@
           tn.setProperty(deleted,true);
         }
       }
-      app.commitTx();
     }
  else {
       logger.log(Level.WARNING,"Could not create thumbnail for image {0} ({1})",new Object[]{getName(),getId()});
-      return null;
     }
+    app.commitTx();
   }
  catch (  FrameworkException fex) {
     logger.log(Level.WARNING,"Unable to create thumbnail",fex);

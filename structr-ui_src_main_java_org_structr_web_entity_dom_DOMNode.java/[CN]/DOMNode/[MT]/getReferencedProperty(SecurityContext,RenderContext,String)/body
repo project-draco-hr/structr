@@ -32,7 +32,11 @@
         }
       }
       if ("link".equals(lowerCasePart) && _data instanceof AbstractNode) {
-        _data=((AbstractNode)_data).getOutgoingRelationship(LinkRelationship.class);
+        ResourceLink rel=((AbstractNode)_data).getOutgoingRelationship(ResourceLink.class);
+        if (rel != null) {
+          _data=rel.getTargetNode();
+          break;
+        }
         continue;
       }
       if (value == null) {
@@ -74,8 +78,11 @@
         continue;
       }
       if ("link".equals(lowerCasePart)) {
-        _data=((AbstractNode)_data).getOutgoingRelationship(LinkRelationship.class);
-        continue;
+        ResourceLink rel=getOutgoingRelationship(ResourceLink.class);
+        if (rel != null) {
+          _data=rel.getTargetNode();
+          break;
+        }
       }
       if ("parent".equals(lowerCasePart)) {
         _data=(DOMNode)getParentNode();

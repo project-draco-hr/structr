@@ -1,0 +1,16 @@
+{
+  final App app=StructrApp.getInstance(securityContext);
+  final Class<? extends ManyToOne> clazz=this.getClass();
+  final Class<S> sourceType=getSourceType();
+  final Relation<?,T,?,?> outgoingRel=sourceNode.getOutgoingRelationship(clazz);
+  if (outgoingRel != null && outgoingRel.getTargetNode().getClass().equals(sourceType)) {
+    try {
+      app.beginTx();
+      app.delete(outgoingRel);
+      app.commitTx();
+    }
+  finally {
+      app.finishTx();
+    }
+  }
+}

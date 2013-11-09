@@ -2,6 +2,7 @@
   final String type=GraphObject.type.dbName();
   if (relationship.hasProperty(type)) {
     Object obj=relationship.getProperty(type);
+    logger.log(Level.FINEST,"Type property: {0}",obj);
     if (obj != null) {
       return getModuleService().getRelationshipEntityClass(obj.toString());
     }
@@ -9,6 +10,7 @@
   final String combinedTypeName="combinedType";
   if (relationship.hasProperty(combinedTypeName)) {
     Object obj=relationship.getProperty(combinedTypeName);
+    logger.log(Level.FINE,"Combined type property: {0}",obj);
     if (obj != null) {
       final String combinedType=obj.toString();
       final Class entityType=getClassForCombinedType(combinedType);
@@ -22,7 +24,9 @@
   final String relType=relationship.getType().name();
   final Class entityType=getClassForCombinedType(sourceType,relType,targetType);
   if (entityType != null) {
+    logger.log(Level.FINE,"Class for assembled combined {0}",entityType.getName());
     return entityType;
   }
+  logger.log(Level.WARNING,"No instantiable class for relationship found, returning generic relationship class");
   return getGenericRelationshipType();
 }

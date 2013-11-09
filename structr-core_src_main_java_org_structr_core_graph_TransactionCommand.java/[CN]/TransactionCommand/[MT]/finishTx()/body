@@ -2,9 +2,9 @@
   final TransactionReference tx=transactions.get();
   if (tx != null) {
     if (tx.isToplevel()) {
+      tx.finish();
       currentCommand.remove();
       transactions.remove();
-      tx.finish();
       if (modificationQueue != null) {
         modificationQueue.doOuterCallbacks(securityContext);
         modificationQueue.clear();

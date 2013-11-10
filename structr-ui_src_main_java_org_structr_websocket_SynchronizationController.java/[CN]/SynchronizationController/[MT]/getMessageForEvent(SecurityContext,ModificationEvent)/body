@@ -1,0 +1,76 @@
+{
+  if (modificationEvent.isNode()) {
+    final NodeInterface node=(NodeInterface)modificationEvent.getGraphObject();
+    if (modificationEvent.isDeleted()) {
+      final WebSocketMessage message=createMessage("DELETE");
+      message.setId(node.getUuid());
+      return message;
+    }
+    if (modificationEvent.isCreated()) {
+      final WebSocketMessage message=createMessage("CREATE");
+      message.setGraphObject(node);
+      message.setResult(Arrays.asList(new GraphObject[]{node}));
+      return message;
+    }
+    if (modificationEvent.isModified()) {
+      final WebSocketMessage message=createMessage("UPDATE");
+      message.setGraphObject(node);
+      message.setResult(Arrays.asList(new GraphObject[]{node}));
+      message.setId(node.getUuid());
+      message.getModifiedProperties().addAll(modificationEvent.getModifiedProperties());
+      message.getRemovedProperties().addAll(modificationEvent.getRemovedProperties());
+      message.setNodeData(modificationEvent.getData(securityContext));
+      return message;
+    }
+  }
+ else {
+    final RelationshipInterface relationship=(RelationshipInterface)modificationEvent.getGraphObject();
+    final RelationshipType relType=modificationEvent.getRelationshipType();
+    if (RelType.CONTAINS.equals(relType)) {
+      if (modificationEvent.isDeleted()) {
+        final WebSocketMessage message=createMessage("REMOVE_CHILD");
+        message.setNodeData("parentId",relationship.getSourceNodeId());
+        message.setId(relationship.getTargetNodeId());
+        return message;
+      }
+      if (modificationEvent.isCreated()) {
+        final WebSocketMessage message=new WebSocketMessage();
+        final NodeInterface startNode=relationship.getSourceNode();
+        final NodeInterface endNode=relationship.getTargetNode();
+        message.setResult(Arrays.asList(new GraphObject[]{endNode}));
+        message.setId(endNode.getUuid());
+        message.setNodeData("parentId",startNode.getUuid());
+        message.setCommand("APPEND_CHILD");
+        if (endNode instanceof DOMNode) {
+          org.w3c.dom.Node refNode=((DOMNode)endNode).getNextSibling();
+          if (refNode != null) {
+            message.setCommand("INSERT_BEFORE");
+            message.setNodeData("refId",((AbstractNode)refNode).getUuid());
+          }
+        }
+ else         if (endNode instanceof User) {
+          message.setCommand("APPEND_USER");
+          message.setNodeData("refId",startNode.getUuid());
+        }
+        return message;
+      }
+      if (modificationEvent.isModified()) {
+        final WebSocketMessage message=createMessage("UPDATE");
+        message.setGraphObject(relationship);
+        message.setId(relationship.getUuid());
+        message.getModifiedProperties().addAll(modificationEvent.getModifiedProperties());
+        message.getRemovedProperties().addAll(modificationEvent.getRemovedProperties());
+        message.setNodeData(modificationEvent.getData(securityContext));
+        final PropertyMap relProperties=relationship.getProperties();
+        final NodeInterface startNode=relationship.getSourceNode();
+        final NodeInterface endNode=relationship.getTargetNode();
+        relProperties.put(new StringProperty("startNodeId"),startNode.getUuid());
+        relProperties.put(new StringProperty("endNodeId"),endNode.getUuid());
+        final Map<String,Object> properties=PropertyMap.javaTypeToInputType(securityContext,relationship.getClass(),relProperties);
+        message.setRelData(properties);
+        return message;
+      }
+    }
+  }
+  return null;
+}

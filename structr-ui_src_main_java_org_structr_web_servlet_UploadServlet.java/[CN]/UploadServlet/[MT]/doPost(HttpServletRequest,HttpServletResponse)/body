@@ -21,8 +21,12 @@
       Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
         @Override public Object execute() throws FrameworkException {
           try {
-            org.structr.web.entity.File newFile=FileHelper.createFile(securityContext,IOUtils.toByteArray(fileItem.getInputStream()),fileItem.getContentType(),org.structr.web.entity.File.class);
-            newFile.setProperty(AbstractNode.name,PathHelper.getName(fileItem.getName()));
+            String contentType=fileItem.getContentType();
+            boolean isImage=(contentType != null && contentType.startsWith("image"));
+            Class type=isImage ? Image.class : org.structr.web.entity.File.class;
+            String name=fileItem.getName().replaceAll("\\\\","/");
+            org.structr.web.entity.File newFile=FileHelper.createFile(securityContext,IOUtils.toByteArray(fileItem.getInputStream()),contentType,type);
+            newFile.setProperty(AbstractNode.name,PathHelper.getName(name));
             newFile.setProperty(AbstractNode.visibleToPublicUsers,true);
             newFile.setProperty(AbstractNode.visibleToAuthenticatedUsers,true);
             out.write(newFile.getUuid());

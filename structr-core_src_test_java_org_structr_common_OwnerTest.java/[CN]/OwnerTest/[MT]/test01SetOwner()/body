@@ -1,0 +1,29 @@
+{
+  try {
+    List<NodeInterface> users=createTestNodes(User.class,2);
+    User user1=(User)users.get(0);
+    User user2=(User)users.get(1);
+    Class type=TestOne.class;
+    TestOne t1=createTestNode(TestOne.class);
+    t1.setProperty(AbstractNode.owner,user1);
+    assertEquals(user1,t1.getProperty(AbstractNode.owner));
+    SecurityContext user1Context=SecurityContext.getInstance(user1,AccessMode.Frontend);
+    List<SearchAttribute> searchAttributes=new LinkedList<>();
+    searchAttributes.add(Search.andExactTypeAndSubtypes(type));
+    Result result=Services.command(user1Context,SearchNodeCommand.class).execute(searchAttributes);
+    assertEquals(1,result.size());
+    assertEquals(t1,result.get(0));
+    t1.setProperty(AbstractNode.owner,user2);
+    assertEquals(user2,t1.getProperty(AbstractNode.owner));
+    Ownership ownerRel=t1.getIncomingRelationship(Ownership.class);
+    assertNotNull(ownerRel);
+    SecurityContext user2Context=SecurityContext.getInstance(user2,AccessMode.Frontend);
+    result=Services.command(user2Context,SearchNodeCommand.class).execute(searchAttributes);
+    assertEquals(1,result.size());
+    assertEquals(t1,result.get(0));
+  }
+ catch (  FrameworkException ex) {
+    logger.log(Level.SEVERE,ex.toString());
+    fail("Unexpected exception");
+  }
+}

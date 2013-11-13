@@ -1,0 +1,18 @@
+{
+  try {
+    List<NodeInterface> users=createTestNodes(User.class,2);
+    User user1=(User)users.get(0);
+    List<NodeInterface> groups=createTestNodes(Group.class,1);
+    Group group1=(Group)groups.get(0);
+    TestOne t1=createTestNode(TestOne.class);
+    t1.setProperty(AbstractNode.owner,user1);
+    t1.setProperty(AbstractNode.owner,group1);
+    assertEquals(group1,t1.getProperty(AbstractNode.owner));
+    Ownership ownerRel=t1.getIncomingRelationship(Ownership.class);
+    assertNotNull(ownerRel);
+  }
+ catch (  FrameworkException ex) {
+    logger.log(Level.SEVERE,ex.toString());
+    fail("Unexpected exception");
+  }
+}

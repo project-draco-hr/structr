@@ -3,7 +3,7 @@
   final Class<? extends OneToMany> clazz=this.getClass();
   final Class<S> sourceType=getSourceType();
   final Relation<?,T,?,?> incomingRel=targetNode.getIncomingRelationship(clazz);
-  if (incomingRel != null && incomingRel.getSourceNode().getClass().equals(sourceType)) {
+  if (incomingRel != null && incomingRel.getSourceType().isAssignableFrom(sourceType)) {
     try {
       app.beginTx();
       app.delete(incomingRel);

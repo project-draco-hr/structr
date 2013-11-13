@@ -5,10 +5,10 @@
   final Class<T> targetType=getTargetType();
   final Relation<S,?,?,?> outgoingRel=sourceNode.getOutgoingRelationship(clazz);
   final Relation<?,T,?,?> incomingRel=targetNode.getIncomingRelationship(clazz);
-  if (outgoingRel != null && outgoingRel.getTargetNode().getClass().equals(targetType)) {
+  if (outgoingRel != null && outgoingRel.getTargetType().isAssignableFrom(targetType)) {
     app.delete(outgoingRel);
   }
-  if (incomingRel != null && incomingRel.getSourceNode().getClass().equals(sourceType)) {
+  if (incomingRel != null && incomingRel.getSourceType().isAssignableFrom(sourceType)) {
     app.delete(incomingRel);
   }
 }

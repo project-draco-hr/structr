@@ -3,6 +3,8 @@
   List<SearchAttribute> searchAttributes=new LinkedList<>();
   boolean includeDeletedAndHidden=false;
   boolean publicOnly=false;
+  PropertyKey actualSortKey=sortKey;
+  boolean actualSortOrder=sortDescending;
   if (rawType != null) {
     if (entityClass == null) {
       throw new NotFoundException();
@@ -14,23 +16,23 @@
     }
     searchAttributes.add(Search.andTypeAndSubtypes(entityClass,!inexactSearch));
     searchAttributes.addAll(validAttributes);
-    if (sortKey == null) {
+    if (actualSortKey == null) {
       try {
         GraphObject templateEntity=((GraphObject)entityClass.newInstance());
         PropertyKey sortKeyProperty=templateEntity.getDefaultSortKey();
-        sortDescending=GraphObjectComparator.DESCENDING.equals(templateEntity.getDefaultSortOrder());
+        actualSortOrder=GraphObjectComparator.DESCENDING.equals(templateEntity.getDefaultSortOrder());
         if (sortKeyProperty != null) {
-          sortKey=sortKeyProperty;
+          actualSortKey=sortKeyProperty;
         }
  else {
-          sortKey=AbstractNode.name;
+          actualSortKey=AbstractNode.name;
         }
       }
  catch (      Throwable t) {
-        sortKey=AbstractNode.name;
+        actualSortKey=AbstractNode.name;
       }
     }
-    Result results=Services.command(securityContext,searchCommandType).execute(includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDescending,pageSize,page,offsetId);
+    Result results=Services.command(securityContext,searchCommandType).execute(includeDeletedAndHidden,publicOnly,searchAttributes,actualSortKey,actualSortOrder,pageSize,page,offsetId);
     return results;
   }
  else {

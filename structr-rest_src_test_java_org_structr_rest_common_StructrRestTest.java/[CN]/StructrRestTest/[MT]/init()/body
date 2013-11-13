@@ -6,7 +6,7 @@
     basePathFile.mkdirs();
     String sourceJarName=getClass().getProtectionDomain().getCodeSource().getLocation().toString();
     File confFile=checkStructrConf(basePath,sourceJarName);
-    List<Connector> connectors=new LinkedList<Connector>();
+    List<Connector> connectors=new LinkedList<>();
     HandlerCollection handlerCollection=new HandlerCollection();
     server=new Server(httpPort);
     ServletContextHandler servletContext=new ServletContextHandler(server,contextPath,ServletContextHandler.SESSIONS);
@@ -14,11 +14,11 @@
     servletContext.setInitParameter("configfile.path",basePath + "/structr.conf");
     JsonRestServlet structrRestServlet=new JsonRestServlet(new TestResourceProvider(),PropertyView.Public,AbstractNode.uuid);
     ServletHolder structrRestServletHolder=new ServletHolder(structrRestServlet);
-    Map<String,String> servletParams=new LinkedHashMap<String,String>();
+    Map<String,String> servletParams=new LinkedHashMap<>();
     servletParams.put("Authenticator",SuperUserAuthenticator.class.getName());
     structrRestServletHolder.setInitParameters(servletParams);
     structrRestServletHolder.setInitOrder(0);
-    Map<String,ServletHolder> servlets=new LinkedHashMap<String,ServletHolder>();
+    Map<String,ServletHolder> servlets=new LinkedHashMap<>();
     servlets.put(restUrl + "/*",structrRestServletHolder);
     int position=1;
     for (    Map.Entry<String,ServletHolder> servlet : servlets.entrySet()) {

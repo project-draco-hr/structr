@@ -1,9 +1,9 @@
 {
-  final AbstractNode sourceNode=typedIdResource.getTypesafeNode();
-  if (sourceNode != null) {
+  final GraphObject sourceEntity=typedIdResource.getEntity();
+  if (sourceEntity != null) {
     final PropertyKey key=findPropertyKey(typedIdResource,typeResource);
     if (key != null) {
-      final Object value=sourceNode.getProperty(key);
+      final Object value=sourceEntity.getProperty(key);
       if (value != null) {
         if (value instanceof List) {
           final List<GraphObject> list=(List<GraphObject>)value;
@@ -11,7 +11,7 @@
           return new Result(PagingHelper.subList(list,pageSize,page,offsetId),list.size(),isCollectionResource(),isPrimitiveArray());
         }
  else         if (value instanceof Iterable) {
-          final List<GraphObject> propertyListResult=new LinkedList<GraphObject>();
+          final List<GraphObject> propertyListResult=new LinkedList<>();
           final Iterable sourceIterable=(Iterable)value;
           for (          final Object o : sourceIterable) {
             if (o instanceof GraphObject) {

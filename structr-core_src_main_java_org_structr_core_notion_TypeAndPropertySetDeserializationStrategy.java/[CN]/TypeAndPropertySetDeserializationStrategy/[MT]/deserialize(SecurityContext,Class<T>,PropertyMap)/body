@@ -1,6 +1,8 @@
 {
+  final App app=StructrApp.getInstance(securityContext);
   if (attributes != null) {
-    List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
+    Result<T> result=Result.EMPTY_RESULT;
+    List<SearchAttribute> attrs=new LinkedList<>();
     if (attributes.containsKey(GraphObject.uuid)) {
       attrs.add(Search.andExactUuid(attributes.get(GraphObject.uuid)));
     }
@@ -10,19 +12,14 @@
         attributesComplete&=attributes.containsKey(key);
       }
       if (attributesComplete) {
-        attrs.add(Search.andExactTypeAndSubtypes(type));
-        for (        Entry<PropertyKey,Object> entry : attributes.entrySet()) {
-          attrs.add(Search.andExactProperty(securityContext,entry.getKey(),entry.getValue() != null ? entry.getValue().toString() : null));
-        }
+        result=app.nodeQuery(type).and(attributes).getResult();
       }
     }
-    Result<T> result=Services.command(securityContext,SearchNodeCommand.class).execute(attrs);
     int size=result.size();
 switch (size) {
 case 0:
       if (createIfNotExisting) {
-        attributes.put(AbstractNode.type,type.getSimpleName());
-        T newNode=(T)Services.command(securityContext,CreateNodeCommand.class).execute(attributes);
+        T newNode=app.create(type);
         if (newNode != null) {
           return newNode;
         }

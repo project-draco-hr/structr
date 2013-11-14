@@ -11,14 +11,16 @@
     confKey=UUID.randomUUID().toString();
     Result result=Services.command(superUserContext,SearchNodeCommand.class).execute(Search.andExactTypeAndSubtypes(User.class),Search.andExactProperty(superUserContext,User.eMail,emailString));
     if (!result.isEmpty()) {
+      final App app=StructrApp.getInstance(securityContext);
       user=(Principal)result.get(0);
-      Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-        @Override public Object execute() throws FrameworkException {
-          user.setProperty(User.confirmationKey,confKey);
-          return null;
-        }
+      try {
+        app.beginTx();
+        user.setProperty(User.confirmationKey,confKey);
+        app.commitTx();
       }
-);
+  finally {
+        app.finishTx();
+      }
       existingUser=true;
     }
  else {

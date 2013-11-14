@@ -1,11 +1,7 @@
 {
-  List<Principal> parents=new LinkedList();
-  Iterable<AbstractRelationship> parentRels=getIncomingRelationships(RelType.CONTAINS);
-  for (  AbstractRelationship rel : parentRels) {
-    AbstractNode node=rel.getEndNode();
-    if (node instanceof Principal) {
-      parents.add((Principal)node);
-    }
+  final List<Principal> principals=new LinkedList<>();
+  for (  final Groups groups : getIncomingRelationships(Groups.class)) {
+    principals.add(groups.getSourceNode());
   }
-  return parents;
+  return principals;
 }

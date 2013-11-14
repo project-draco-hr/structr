@@ -1,17 +1,17 @@
 {
   if (currentObject != null && currentObject instanceof AbstractNode) {
-    AbstractNode sourceNode=(AbstractNode)currentObject;
-    List<AbstractNode> nodes=new LinkedList<AbstractNode>();
-    for (    CollectionProperty<? extends AbstractNode> property : aggregation.getAggregationProperties()) {
+    NodeInterface sourceNode=(NodeInterface)currentObject;
+    List<NodeInterface> nodes=new LinkedList<NodeInterface>();
+    for (    EndNodes<?,?> property : aggregation.getAggregationProperties()) {
       nodes.addAll(sourceNode.getProperty(property));
     }
-    Comparator<AbstractNode> comparator=aggregation.getComparator();
+    Comparator<NodeInterface> comparator=aggregation.getComparator();
     if (nodes.isEmpty() && comparator != null) {
       Collections.sort(nodes,comparator);
     }
     List results=new LinkedList();
     try {
-      for (      AbstractNode node : nodes) {
+      for (      NodeInterface node : nodes) {
         Notion notion=aggregation.getNotionForType(node.getClass());
         if (notion != null) {
           results.add(notion.getAdapterForGetter(securityContext).adapt(node));

@@ -1,15 +1,11 @@
 {
-  SecurityContext securityContext=SecurityContext.getSuperUserInstance();
-  Principal principal=null;
-  Result result=Result.EMPTY_RESULT;
+  final App app=StructrApp.getInstance();
+  final Query<Principal> query=app.nodeQuery(Principal.class).and(key,value);
   try {
-    result=Services.command(securityContext,SearchNodeCommand.class).execute(Search.andExactTypeAndSubtypes(Principal.class),Search.andExactProperty(securityContext,key,value));
+    return query.getFirst();
   }
- catch (  FrameworkException ex) {
-    logger.log(Level.WARNING,"Error while searching for principal",ex);
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"Error while searching for principal",fex);
   }
-  if (!result.isEmpty()) {
-    principal=(Principal)result.get(0);
-  }
-  return principal;
+  return null;
 }

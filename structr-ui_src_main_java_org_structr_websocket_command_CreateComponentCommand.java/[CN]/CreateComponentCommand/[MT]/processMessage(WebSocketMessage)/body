@@ -1,29 +1,27 @@
 {
   final SecurityContext securityContext=getWebSocket().getSecurityContext();
+  final App app=StructrApp.getInstance(securityContext);
   String id=webSocketData.getId();
   if (id != null) {
     final DOMNode node=getDOMNode(id);
     try {
-      final CreateRelationshipCommand<?> createRel=Services.command(securityContext,CreateRelationshipCommand.class);
-      StructrTransaction transaction=new StructrTransaction(){
-        @Override public Object execute() throws FrameworkException {
-          DOMNode clonedNode=(DOMNode)node.cloneNode(false);
-          moveChildNodes(node,clonedNode);
-          ShadowDocument hiddenDoc=getOrCreateHiddenDocument();
-          clonedNode.setProperty(DOMNode.ownerDocument,hiddenDoc);
-          for (          DOMNode child : DOMNode.getAllChildNodes(clonedNode)) {
-            child.setProperty((DOMNode.ownerDocument),hiddenDoc);
-          }
-          createRel.execute(node,clonedNode,RelType.SYNC,true);
-          createRel.execute(clonedNode,node,RelType.SYNC,true);
-          return null;
-        }
+      app.beginTx();
+      DOMNode clonedNode=(DOMNode)node.cloneNode(false);
+      moveChildNodes(node,clonedNode);
+      ShadowDocument hiddenDoc=getOrCreateHiddenDocument();
+      clonedNode.setProperty(DOMNode.ownerDocument,hiddenDoc);
+      for (      DOMNode child : DOMNode.getAllChildNodes(clonedNode)) {
+        child.setProperty((DOMNode.ownerDocument),hiddenDoc);
       }
-;
-      Services.command(securityContext,TransactionCommand.class).execute(transaction);
+      app.create(node,clonedNode,Sync.class);
+      app.create(clonedNode,node,Sync.class);
+      app.commitTx();
     }
  catch (    Exception ex) {
       getWebSocket().send(MessageBuilder.status().code(422).message(ex.getMessage()).build(),true);
+    }
+ finally {
+      app.finishTx();
     }
   }
  else {

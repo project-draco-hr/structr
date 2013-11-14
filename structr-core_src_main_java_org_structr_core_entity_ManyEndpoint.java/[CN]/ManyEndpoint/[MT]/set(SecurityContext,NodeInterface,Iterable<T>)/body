@@ -1,0 +1,23 @@
+{
+  final App app=StructrApp.getInstance(securityContext);
+  final Set<T> toBeDeleted=new LinkedHashSet<>(Iterables.toList(get(securityContext,sourceNode)));
+  final Set<T> toBeCreated=new LinkedHashSet<>();
+  if (collection != null) {
+    Iterables.addAll(toBeCreated,collection);
+  }
+  final Set<T> intersection=new LinkedHashSet<>(toBeCreated);
+  intersection.retainAll(toBeDeleted);
+  toBeCreated.removeAll(intersection);
+  toBeDeleted.removeAll(intersection);
+  for (  T targetNode : toBeDeleted) {
+    for (    AbstractRelationship rel : sourceNode.getOutgoingRelationships()) {
+      if (rel.getRelType().equals(relation) && rel.getTargetNode().equals(targetNode)) {
+        app.delete(rel);
+      }
+    }
+  }
+  for (  T targetNode : toBeCreated) {
+    relation.ensureCardinality(sourceNode,targetNode);
+    app.create(sourceNode,targetNode,relation.getClass());
+  }
+}

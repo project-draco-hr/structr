@@ -2,7 +2,7 @@
   final SecurityContext securityContext=getWebSocket().getSecurityContext();
   String rawType=(String)webSocketData.getNodeData().get("type");
   Class type=EntityContext.getEntityClassForRawType(rawType);
-  List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
+  List<SearchAttribute> searchAttributes=new LinkedList<>();
   if (type == null) {
     getWebSocket().send(MessageBuilder.status().code(404).message("Type " + rawType + " not found").build(),true);
     return;
@@ -18,12 +18,12 @@
   PropertyKey sortProperty=EntityContext.getPropertyKeyForJSONName(type,sortKey);
   try {
     Result result=(Result)Services.command(securityContext,SearchNodeCommand.class).execute(true,false,searchAttributes,sortProperty,"desc".equals(sortOrder));
-    List<AbstractNode> filteredResults=new LinkedList<AbstractNode>();
+    List<AbstractNode> filteredResults=new LinkedList<>();
     List<? extends GraphObject> resultList=result.getResults();
     for (    GraphObject obj : resultList) {
       if (obj instanceof AbstractNode) {
         AbstractNode node=(AbstractNode)obj;
-        if (!node.hasRelationship(RelType.CONTAINS,Direction.INCOMING)) {
+        if (!node.hasIncomingRelationships(DOMChildren.class)) {
           filteredResults.add(node);
         }
       }

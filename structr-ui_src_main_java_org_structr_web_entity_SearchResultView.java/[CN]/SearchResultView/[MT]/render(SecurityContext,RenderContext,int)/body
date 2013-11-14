@@ -5,9 +5,8 @@
   String searchString=(String)request.getParameter("search");
   if (StringUtils.isNotBlank(searchString)) {
     for (    Page resultPage : getResultPages(securityContext,page)) {
-      List<AbstractRelationship> rels=resultPage.getChildRelationships();
-      for (      AbstractRelationship rel : rels) {
-        DOMElement subNode=(DOMElement)rel.getEndNode();
+      for (      DOMChildren rel : resultPage.getChildRelationships()) {
+        DOMElement subNode=(DOMElement)rel.getTargetNode();
         if (subNode.isNotDeleted() && subNode.isNotDeleted()) {
           subNode.render(securityContext,renderContext,depth + 1);
         }

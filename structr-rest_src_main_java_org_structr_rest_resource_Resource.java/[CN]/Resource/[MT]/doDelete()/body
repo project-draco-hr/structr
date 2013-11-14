@@ -1,6 +1,4 @@
 {
-  final DeleteNodeCommand deleteNode=Services.command(securityContext,DeleteNodeCommand.class);
-  final DeleteRelationshipCommand deleteRel=Services.command(securityContext,DeleteRelationshipCommand.class);
   Iterable<? extends GraphObject> results=null;
   try {
     results=doGet(null,false,NodeFactory.DEFAULT_PAGE_SIZE,NodeFactory.DEFAULT_PAGE,null).getResults();
@@ -10,24 +8,26 @@
   }
   if (results != null) {
     final Iterable<? extends GraphObject> finalResults=results;
-    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-      @Override public Object execute() throws FrameworkException {
-        for (        final GraphObject obj : finalResults) {
-          if (obj instanceof AbstractRelationship) {
-            deleteRel.execute((AbstractRelationship)obj);
-          }
- else           if (obj instanceof AbstractNode) {
-            if (!securityContext.isAllowed((AbstractNode)obj,Permission.delete)) {
-              logger.log(Level.WARNING,"Could not delete {0} because {1} has no delete permission",new Object[]{obj,securityContext.getUser(true)});
-              throw new NotAllowedException();
-            }
-            deleteNode.execute((AbstractNode)obj,true);
-          }
+    final App app=StructrApp.getInstance(securityContext);
+    try {
+      app.beginTx();
+      for (      final GraphObject obj : finalResults) {
+        if (obj instanceof AbstractRelationship) {
+          app.delete((AbstractRelationship)obj);
         }
-        return null;
+ else         if (obj instanceof AbstractNode) {
+          if (!securityContext.isAllowed((AbstractNode)obj,Permission.delete)) {
+            logger.log(Level.WARNING,"Could not delete {0} because {1} has no delete permission",new Object[]{obj,securityContext.getUser(true)});
+            throw new NotAllowedException();
+          }
+          app.delete((AbstractNode)obj);
+        }
       }
+      app.commitTx();
     }
-);
+  finally {
+      app.finishTx();
+    }
   }
   return new RestMethodResult(HttpServletResponse.SC_OK);
 }

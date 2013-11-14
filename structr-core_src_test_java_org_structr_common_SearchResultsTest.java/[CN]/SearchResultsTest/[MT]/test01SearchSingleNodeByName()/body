@@ -5,24 +5,19 @@
     final String name="89w3hkl sdfghsdkljth";
     props.put(key,name);
     final AbstractNode node=createTestNode(TestOne.class,props);
-    boolean includeDeletedAndHidden=true;
-    boolean publicOnly=false;
-    List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
-    searchAttributes.add(new PropertySearchAttribute(key,name,Occur.MUST,true));
-    Result result=searchNodeCommand.execute(includeDeletedAndHidden,publicOnly,searchAttributes);
+    Result result=app.nodeQuery(TestOne.class).andName(name).includeDeletedAndHidden().getResult();
     assertTrue(result.size() == 1);
     assertTrue(result.get(0).equals(node));
     final String name2="klppptzoehi g??soiu tz??w0e9hg";
-    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-      @Override public Object execute() throws FrameworkException {
-        node.setProperty(key,name2);
-        return null;
-      }
+    try {
+      app.beginTx();
+      node.setProperty(key,name2);
+      app.commitTx();
     }
-);
-    searchAttributes.clear();
-    searchAttributes.add(new PropertySearchAttribute(key,name2,Occur.MUST,true));
-    result=searchNodeCommand.execute(includeDeletedAndHidden,publicOnly,searchAttributes);
+  finally {
+      app.finishTx();
+    }
+    result=app.nodeQuery(TestOne.class).andName(name2).includeDeletedAndHidden().getResult();
     assertTrue(result.size() == 1);
     assertTrue(result.get(0).equals(node));
   }

@@ -1,15 +1,17 @@
 {
-  Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-    @Override public Object execute() throws FrameworkException {
-      Integer _version=getProperty(Page.version);
-      if (_version == null) {
-        setProperty(Page.version,1);
-      }
- else {
-        setProperty(Page.version,_version + 1);
-      }
-      return null;
+  final App app=StructrApp.getInstance(securityContext);
+  try {
+    app.beginTx();
+    final Integer _version=getProperty(Page.version);
+    if (_version == null) {
+      setProperty(Page.version,1);
     }
+ else {
+      setProperty(Page.version,_version + 1);
+    }
+    app.commitTx();
   }
-);
+  finally {
+    app.finishTx();
+  }
 }

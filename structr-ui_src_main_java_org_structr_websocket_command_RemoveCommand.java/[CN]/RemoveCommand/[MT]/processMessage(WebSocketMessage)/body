@@ -2,7 +2,7 @@
   final SecurityContext securityContext=getWebSocket().getSecurityContext();
   String id=webSocketData.getId();
   if (id != null) {
-    final AbstractNode node=getNode(id);
+    final NodeInterface node=getNode(id);
     if (node != null) {
       if (node instanceof DOMNode) {
         DOMNode domNode=(DOMNode)node;
@@ -16,8 +16,8 @@
       }
  else {
         DeleteRelationshipCommand deleteRel=Services.command(securityContext,DeleteRelationshipCommand.class);
-        Iterable<AbstractRelationship> rels=node.getIncomingRelationships(RelType.CONTAINS);
-        for (        AbstractRelationship rel : rels) {
+        DOMChildren rel=node.getIncomingRelationship(DOMChildren.class);
+        if (rel != null) {
           try {
             deleteRel.execute(rel);
           }

@@ -1,7 +1,6 @@
 {
   SourceSearchAttribute attr=new SourceSearchAttribute(occur);
-  Set<GraphObject> intersectionResult=new LinkedHashSet<GraphObject>();
-  CollectionProperty collectionProperty=(CollectionProperty)base;
+  Set<GraphObject> intersectionResult=new LinkedHashSet<>();
   boolean alreadyAdded=false;
   try {
     if (searchValues != null && !searchValues.isEmpty()) {
@@ -13,8 +12,9 @@
  else {
           allBlank=false;
         }
+        final App app=StructrApp.getInstance(securityContext);
         if (exactMatch) {
-          Result<AbstractNode> result=Services.command(securityContext,SearchNodeCommand.class).execute(Search.andExactTypeAndSubtypes(base.relatedType(),exactMatch),Search.andExactProperty(securityContext,notion.getPrimaryPropertyKey(),searchValue));
+          Result<AbstractNode> result=app.nodeQuery(collectionProperty.relatedType()).and(notion.getPrimaryPropertyKey(),searchValue).getResult();
           for (          AbstractNode node : result.getResults()) {
 switch (occur) {
 case MUST:
@@ -35,7 +35,7 @@ case MUST_NOT:
 }
 }
  else {
-Result<AbstractNode> result=Services.command(securityContext,SearchNodeCommand.class).execute(Search.andExactTypeAndSubtypes(base.relatedType(),exactMatch),Search.andProperty(securityContext,notion.getPrimaryPropertyKey(),searchValue));
+Result<AbstractNode> result=app.nodeQuery(collectionProperty.relatedType(),true).and(notion.getPrimaryPropertyKey(),searchValue,true).getResult();
 for (AbstractNode node : result.getResults()) {
   intersectionResult.addAll(collectionProperty.getRelatedNodesReverse(securityContext,node,declaringClass));
 }
@@ -45,7 +45,7 @@ if (allBlank) {
 return new EmptySearchAttribute(this,Collections.emptyList());
 }
  else {
-attr.setResult(new LinkedList<GraphObject>(intersectionResult));
+attr.setResult(new LinkedList<>(intersectionResult));
 }
 }
  else {

@@ -1,3 +1,12 @@
 {
-  return (SecurityRelationship)Services.command(SecurityContext.getSuperUserInstance(),CreateRelationshipCommand.class).execute(this,obj,org.structr.common.RelType.SECURITY);
+  final App app=StructrApp.getInstance();
+  try {
+    app.beginTx();
+    final Security rel=app.create(this,obj,Security.class);
+    app.commitTx();
+    return rel;
+  }
+  finally {
+    app.finishTx();
+  }
 }

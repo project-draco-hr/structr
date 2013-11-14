@@ -1,0 +1,26 @@
+{
+  FTPClient ftp=setupFTPClient();
+  try {
+    assertEmptyDirectory(ftp);
+    String name1="FTPdir1";
+    boolean success=ftp.makeDirectory(name1);
+    assertTrue(success);
+    FTPFile[] dirs=ftp.listDirectories();
+    assertNotNull(dirs);
+    assertEquals(1,dirs.length);
+    assertEquals(name1,dirs[0].getName());
+    String name2="FTPdir2";
+    success=ftp.makeDirectory(name2);
+    assertTrue(success);
+    dirs=ftp.listDirectories();
+    assertNotNull(dirs);
+    assertEquals(2,dirs.length);
+    assertEquals(name1,dirs[0].getName());
+    assertEquals(name2,dirs[1].getName());
+    ftp.disconnect();
+  }
+ catch (  IOException ex) {
+    logger.log(Level.SEVERE,"Error while making FTP directories",ex);
+    fail("Unexpected exception: " + ex.getMessage());
+  }
+}

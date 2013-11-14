@@ -1,0 +1,16 @@
+{
+  PropertyMap props=new PropertyMap();
+  props.put(File.name,name);
+  props.put(File.size,0L);
+  props.put(File.owner,ftpUser);
+  File file=(File)createTestNodes(File.class.getSimpleName(),1,props).get(0);
+  if (StringUtils.isNotBlank(path)) {
+    AbstractFile parent=FileHelper.getFileByAbsolutePath(path);
+    if (parent != null && parent instanceof Folder) {
+      Folder parentFolder=(Folder)parent;
+      file.setProperty(Folder.parent,parentFolder);
+    }
+  }
+  logger.log(Level.INFO,"FTP file {0} created successfully.",file);
+  return file;
+}

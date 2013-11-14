@@ -1,0 +1,23 @@
+{
+  FTPClient ftp=setupFTPClient();
+  try {
+    assertEmptyDirectory(ftp);
+    String name1="/FTPdir1";
+    ftp.makeDirectory(name1);
+    ftp.changeWorkingDirectory(name1);
+    String newWorkingDirectory=ftp.printWorkingDirectory();
+    assertEquals(name1,newWorkingDirectory);
+    assertEmptyDirectory(ftp);
+    String name2=name1.concat("/").concat("FTPdir2");
+    ftp.makeDirectory(name2);
+    ftp.changeWorkingDirectory(name2);
+    newWorkingDirectory=ftp.printWorkingDirectory();
+    assertEquals(name2,newWorkingDirectory);
+    assertEmptyDirectory(ftp);
+    ftp.disconnect();
+  }
+ catch (  IOException ex) {
+    logger.log(Level.SEVERE,"Error",ex);
+    fail("Unexpected exception: " + ex.getMessage());
+  }
+}

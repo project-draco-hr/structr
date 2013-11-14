@@ -1,0 +1,32 @@
+{
+  if (structrFile == null) {
+    final Folder parentFolder=(Folder)FileHelper.getFileByAbsolutePath(StringUtils.substringBeforeLast(newPath,"/"));
+    try {
+      structrFile=Services.command(SecurityContext.getSuperUserInstance(),TransactionCommand.class).execute(new StructrTransaction<File>(){
+        @Override public File execute() throws FrameworkException {
+          File newFile;
+          try {
+            newFile=FileHelper.createFile(SecurityContext.getSuperUserInstance(),new byte[0],null,File.class);
+            newFile.setProperty(AbstractNode.type,File.class.getSimpleName());
+            newFile.setProperty(AbstractNode.owner,owner.getStructrUser());
+            newFile.setProperty(AbstractNode.name,getName());
+            if (parentFolder != null) {
+              newFile.setProperty(AbstractFile.parent,parentFolder);
+            }
+            return newFile;
+          }
+ catch (          IOException ex) {
+            Logger.getLogger(FileOrFolder.class.getName()).log(Level.SEVERE,null,ex);
+          }
+          return null;
+        }
+      }
+);
+    }
+ catch (    FrameworkException ex) {
+      logger.log(Level.SEVERE,null,ex);
+      return null;
+    }
+  }
+  return ((File)structrFile).getOutputStream();
+}

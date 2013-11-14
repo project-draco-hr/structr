@@ -60,7 +60,7 @@
             thumbnailRelationship.setProperty(AbstractRelationship.cascadeDelete,Relation.DELETE_OUTGOING);
             long size=data.length;
             thumbnail.setSize(size);
-            thumbnail.setName(originalImage.getName() + "_thumb_" + tnWidth+ "x"+ tnHeight);
+            thumbnail.setProperty(name,originalImage.getName() + "_thumb_" + tnWidth+ "x"+ tnHeight);
             thumbnail.setProperty(Image.width,tnWidth);
             thumbnail.setProperty(Image.height,tnHeight);
             thumbnail.setProperty(AbstractNode.hidden,originalImage.getProperty(AbstractNode.hidden));
@@ -71,7 +71,7 @@
             thumbnailRelationship.setProperty(Image.height,tnHeight);
             thumbnailRelationship.setProperty(Image.checksum,newChecksum);
             for (            Image tn : oldThumbnails) {
-              tn.setDeleted(true);
+              tn.setProperty(deleted,true);
             }
           }
           return thumbnail;

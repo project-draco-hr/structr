@@ -1,8 +1,8 @@
 {
   GraphObject obj=getNode(webSocketData.getId());
-  String recString=(String)webSocketData.getNodeData().get("recursive");
+  Boolean recValue=(Boolean)webSocketData.getNodeData().get("recursive");
+  boolean rec=recValue != null ? recValue : false;
   webSocketData.getNodeData().remove("recursive");
-  boolean rec=StringUtils.isNotBlank(recString) ? Boolean.parseBoolean(recString) : false;
   if (obj != null) {
     if (!getWebSocket().getSecurityContext().isAllowed(((AbstractNode)obj),Permission.write)) {
       logger.log(Level.WARNING,"No write permission for {0} on {1}",new Object[]{getWebSocket().getCurrentUser().toString(),obj.toString()});

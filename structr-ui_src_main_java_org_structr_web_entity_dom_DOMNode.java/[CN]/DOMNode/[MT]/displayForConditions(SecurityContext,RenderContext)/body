@@ -1,0 +1,27 @@
+{
+  if (EditMode.RAW.equals(renderContext.getEditMode(securityContext.getUser(false)))) {
+    return true;
+  }
+  String _showConditions=getProperty(DOMNode.showConditions);
+  String _hideConditions=getProperty(DOMNode.hideConditions);
+  if (StringUtils.isBlank(_hideConditions) && StringUtils.isBlank(_showConditions)) {
+    return true;
+  }
+  try {
+    if (StringUtils.isNotBlank(_hideConditions) && "true".equals(extractFunctions(securityContext,renderContext,_hideConditions))) {
+      return false;
+    }
+  }
+ catch (  FrameworkException ex) {
+    logger.log(Level.SEVERE,"Hide conditions " + _hideConditions + " could not be evaluated.",ex);
+  }
+  try {
+    if (StringUtils.isNotBlank(_showConditions) && !("true".equals(extractFunctions(securityContext,renderContext,_showConditions)))) {
+      return false;
+    }
+  }
+ catch (  FrameworkException ex) {
+    logger.log(Level.SEVERE,"Show conditions " + _showConditions + " could not be evaluated.",ex);
+  }
+  return true;
+}

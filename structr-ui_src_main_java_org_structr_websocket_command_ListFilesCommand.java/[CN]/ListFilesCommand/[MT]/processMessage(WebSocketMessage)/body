@@ -2,7 +2,7 @@
   final SecurityContext securityContext=getWebSocket().getSecurityContext();
   String rawType=(String)webSocketData.getNodeData().get("type");
   Class type=EntityContext.getEntityClassForRawType(rawType);
-  List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
+  List<SearchAttribute> searchAttributes=new LinkedList();
   searchAttributes.add(Search.andExactType(type));
   if (type.equals(Image.class)) {
     searchAttributes.add(Search.andExactProperty(securityContext,Image.isThumbnail,false));
@@ -14,7 +14,7 @@
   PropertyKey sortProperty=EntityContext.getPropertyKeyForJSONName(type,sortKey);
   try {
     Result result=(Result)Services.command(securityContext,SearchNodeCommand.class).execute(true,false,searchAttributes,sortProperty,"desc".equals(sortOrder));
-    List<AbstractNode> filteredResults=new LinkedList<AbstractNode>();
+    List<AbstractNode> filteredResults=new LinkedList();
     List<? extends GraphObject> resultList=result.getResults();
     for (    GraphObject obj : resultList) {
       if (obj instanceof AbstractNode) {

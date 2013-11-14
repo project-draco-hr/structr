@@ -1,0 +1,11 @@
+{
+  List<DOMElement> syncedNodes=source.getProperty(DOMElement.syncedNodes);
+  if (syncedNodes != null) {
+    for (    DOMElement syncedNode : syncedNodes) {
+      List<DOMElement> masterNodes=syncedNode.getProperty(DOMElement.syncedNodes);
+      masterNodes.add(target);
+      syncedNode.setProperty(DOMElement.syncedNodes,masterNodes);
+    }
+  }
+  target.setProperty(DOMElement.syncedNodes,source.getProperty(DOMElement.syncedNodes));
+}

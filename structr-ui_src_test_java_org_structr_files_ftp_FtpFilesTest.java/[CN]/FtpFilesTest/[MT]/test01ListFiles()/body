@@ -1,0 +1,26 @@
+{
+  FTPClient ftp=setupFTPClient();
+  try {
+    FTPFile[] files=ftp.listFiles();
+    assertNotNull(files);
+    assertEquals(0,files.length);
+    String name1="file1";
+    createFTPFile(null,name1);
+    String[] fileNames=ftp.listNames();
+    assertNotNull(fileNames);
+    assertEquals(1,fileNames.length);
+    assertEquals(name1,fileNames[0]);
+    String name2="file2";
+    createFTPFile(null,name2);
+    fileNames=ftp.listNames();
+    assertNotNull(fileNames);
+    assertEquals(2,fileNames.length);
+    assertEquals(name1,fileNames[0]);
+    assertEquals(name2,fileNames[1]);
+    ftp.disconnect();
+  }
+ catch (  IOException|FrameworkException ex) {
+    logger.log(Level.SEVERE,"Error while listing FTP files",ex);
+    fail("Unexpected exception: " + ex.getMessage());
+  }
+}

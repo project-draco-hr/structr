@@ -1,0 +1,16 @@
+{
+  logger.log(Level.FINE,"Search for file with uuid: {0}",uuid);
+  List<SearchAttribute> searchAttrs=new LinkedList<>();
+  searchAttrs.add(Search.andExactUuid(uuid));
+  searchAttrs.add(Search.orExactTypeAndSubtypes(org.structr.web.entity.AbstractFile.class));
+  try {
+    Result<AbstractFile> results=searchNodesAsSuperuser.execute(false,false,searchAttrs);
+    logger.log(Level.FINE,"{0} files found",results.size());
+    if (results.isEmpty())     return null;
+    return (AbstractFile)results.get(0);
+  }
+ catch (  FrameworkException ex) {
+    logger.log(Level.SEVERE,null,ex);
+  }
+  return null;
+}

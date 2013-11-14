@@ -1,0 +1,27 @@
+{
+  try {
+    java.io.File fileOnDisk=new java.io.File(Services.getFilesPath() + "/" + getRelativeFilePath());
+    if (fileOnDisk.exists()) {
+      return;
+    }
+    fileOnDisk.getParentFile().mkdirs();
+    try {
+      fileOnDisk.createNewFile();
+    }
+ catch (    IOException ex) {
+      logger.log(Level.SEVERE,"Could not create file",ex);
+      return;
+    }
+    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+      @Override public Object execute() throws FrameworkException {
+        setProperty(checksum,FileHelper.getChecksum(File.this));
+        setProperty(size,FileHelper.getSize(File.this));
+        return null;
+      }
+    }
+);
+  }
+ catch (  FrameworkException ex) {
+    logger.log(Level.SEVERE,"Could not create file",ex);
+  }
+}

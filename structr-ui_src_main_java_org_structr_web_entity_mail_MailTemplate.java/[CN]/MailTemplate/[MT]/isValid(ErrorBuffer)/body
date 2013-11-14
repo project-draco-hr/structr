@@ -1,0 +1,20 @@
+{
+  boolean hasError=false;
+  String _name=getProperty(name);
+  String _locale=getProperty(locale);
+  String _uuid=getProperty(uuid);
+  hasError|=ValidationHelper.checkStringNotBlank(this,name,errorBuffer);
+  hasError|=ValidationHelper.checkStringNotBlank(this,locale,errorBuffer);
+  try {
+    Result<MailTemplate> res=(Result)Services.command(securityContext,SearchNodeCommand.class).execute(Search.andExactType(MailTemplate.class),Search.andExactName(_name),Search.andExactProperty(securityContext,locale,_locale));
+    if (!res.isEmpty() && res.size() > 1) {
+      hasError=true;
+      errorBuffer.add(MailTemplate.class.getName(),new UniqueToken(_uuid,name,_name));
+      errorBuffer.add(MailTemplate.class.getName(),new UniqueToken(_uuid,locale,_locale));
+    }
+  }
+ catch (  FrameworkException fe) {
+    logger.log(Level.WARNING,"Could not search a MailTemplate with name {0} and locale {1}",new Object[]{getProperty(name),getProperty(locale)});
+  }
+  return !hasError;
+}

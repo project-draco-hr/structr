@@ -14,21 +14,15 @@
     }
   }
   if (EditMode.RAW.equals(editMode)) {
-    String _dataKey=getProperty(dataKey);
-    String _restQuery=getProperty(restQuery);
-    String _cypherQuery=getProperty(cypherQuery);
-    String _xpathQuery=getProperty(xpathQuery);
-    if (StringUtils.isNotBlank(_dataKey)) {
-      buffer.append(" ").append("data-structr-meta-data-key").append("=\"").append(_dataKey).append("\"");
-    }
-    if (StringUtils.isNotBlank(_restQuery)) {
-      buffer.append(" ").append("data-structr-meta-rest-query").append("=\"").append(_restQuery).append("\"");
-    }
-    if (StringUtils.isNotBlank(_cypherQuery)) {
-      buffer.append(" ").append("data-structr-meta-cypher-query").append("=\"").append(_cypherQuery).append("\"");
-    }
-    if (StringUtils.isNotBlank(_xpathQuery)) {
-      buffer.append(" ").append("data-structr-meta-xpath-query").append("=\"").append(_xpathQuery).append("\"");
+    Property[] rawProps=new Property[]{dataKey,restQuery,cypherQuery,xpathQuery,hideOnIndex,hideOnDetail,showForLocales,hideForLocales,showConditions,hideConditions};
+    for (    Property p : rawProps) {
+      if (p instanceof BooleanProperty) {
+      }
+      String htmlName="data-structr-meta-" + CaseHelper.toUnderscore(p.jsonName(),false).replaceAll("_","-");
+      Object value=getProperty(p);
+      if ((p instanceof BooleanProperty && (boolean)value) || (!(p instanceof BooleanProperty) && value != null && StringUtils.isNotBlank(value.toString()))) {
+        buffer.append(" ").append(htmlName).append("=\"").append(value).append("\"");
+      }
     }
   }
 }

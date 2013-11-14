@@ -1,5 +1,6 @@
 {
-  if (propertySet.containsKey(User.eMail.jsonName()) && propertySet.size() == 1) {
+  boolean existingUser=false;
+  if (propertySet.containsKey(User.eMail.jsonName())) {
     SecurityContext superUserContext=SecurityContext.getSuperUserInstance();
     final Principal user;
     final String emailString=(String)propertySet.get(User.eMail.jsonName());
@@ -8,7 +9,7 @@
     }
     localeString=(String)propertySet.get(MailTemplate.locale.jsonName());
     confKey=UUID.randomUUID().toString();
-    Result result=Services.command(superUserContext,SearchNodeCommand.class).execute(Search.andExactType(User.class),Search.andExactProperty(superUserContext,User.eMail,emailString));
+    Result result=Services.command(superUserContext,SearchNodeCommand.class).execute(Search.andExactTypeAndSubtypes(User.class),Search.andExactProperty(superUserContext,User.eMail,emailString));
     if (!result.isEmpty()) {
       user=(Principal)result.get(0);
       Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
@@ -18,15 +19,28 @@
         }
       }
 );
+      existingUser=true;
     }
  else {
-      user=createUser(securityContext,User.eMail,emailString,securityContext.getAuthenticator().getUserAutoCreate());
+      Authenticator auth=securityContext.getAuthenticator();
+      user=createUser(securityContext,User.eMail,emailString,propertySet,auth.getUserAutoCreate(),auth.getUserClass());
     }
     if (user != null) {
-      if (!sendInvitationLink(user)) {
+      if (!sendInvitationLink(user,propertySet)) {
         return new RestMethodResult(HttpServletResponse.SC_BAD_REQUEST);
       }
+      if (existingUser) {
+        return new RestMethodResult(HttpServletResponse.SC_OK);
+      }
+ else {
+        return new RestMethodResult(HttpServletResponse.SC_CREATED);
+      }
+    }
+ else {
+      return new RestMethodResult(HttpServletResponse.SC_BAD_REQUEST);
     }
   }
-  return new RestMethodResult(HttpServletResponse.SC_OK);
+ else {
+    return new RestMethodResult(HttpServletResponse.SC_BAD_REQUEST);
+  }
 }

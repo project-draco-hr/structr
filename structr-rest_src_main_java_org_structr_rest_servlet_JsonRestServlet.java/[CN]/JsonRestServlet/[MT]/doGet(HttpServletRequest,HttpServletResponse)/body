@@ -5,7 +5,6 @@
     securityContext=authenticator.initializeAndExamineRequest(request,response);
     request.setCharacterEncoding("UTF-8");
     response.setCharacterEncoding("UTF-8");
-    response.setContentType("application/json; charset=utf-8");
     propertyView.set(securityContext,defaultPropertyView);
     double queryTimeStart=System.nanoTime();
     Resource resource=ResourceHelper.applyViewTransformation(request,securityContext,ResourceHelper.optimizeNestedResourceChain(ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,defaultIdProperty),defaultIdProperty),propertyView);
@@ -19,6 +18,7 @@
     boolean sortDescending=(sortOrder != null && "desc".equals(sortOrder.toLowerCase()));
     int pageSize=parseInt(pageSizeParameter,NodeFactory.DEFAULT_PAGE_SIZE);
     int page=parseInt(pageParameter,NodeFactory.DEFAULT_PAGE);
+    String baseUrl=request.getRequestURI();
     PropertyKey sortKey=null;
     if (sortKeyName != null) {
       Class<? extends GraphObject> type=resource.getEntityClass();
@@ -34,7 +34,15 @@
     DecimalFormat decimalFormat=new DecimalFormat("0.000000000",DecimalFormatSymbols.getInstance(Locale.ENGLISH));
     result.setQueryTime(decimalFormat.format((queryTimeEnd - queryTimeStart) / 1000000000.0));
     Writer writer=response.getWriter();
-    jsonWriter.get().stream(writer,result);
+    String accept=request.getHeader("Accept");
+    if (accept != null && accept.contains("text/html")) {
+      response.setContentType("text/html; charset=utf-8");
+      htmlWriter.get().stream(writer,result,baseUrl);
+    }
+ else {
+      response.setContentType("application/json; charset=utf-8");
+      jsonWriter.get().stream(writer,result,baseUrl);
+    }
     if (result.hasPartialContent()) {
       response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
     }

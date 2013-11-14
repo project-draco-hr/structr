@@ -1,0 +1,18 @@
+{
+  if (EditMode.RAW.equals(renderContext.getEditMode(securityContext.getUser(false)))) {
+    return true;
+  }
+  String localeString=renderContext.getLocale().toString();
+  String show=getProperty(DOMNode.showForLocales);
+  String hide=getProperty(DOMNode.hideForLocales);
+  if (StringUtils.isBlank(hide) && StringUtils.isBlank(show)) {
+    return true;
+  }
+  if (StringUtils.contains(hide,localeString)) {
+    return false;
+  }
+  if (StringUtils.isNotBlank(show) && !StringUtils.contains(show,localeString)) {
+    return false;
+  }
+  return true;
+}

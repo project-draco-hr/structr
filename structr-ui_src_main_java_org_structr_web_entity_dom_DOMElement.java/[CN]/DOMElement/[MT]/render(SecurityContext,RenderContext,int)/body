@@ -1,7 +1,7 @@
 {
   StringBuilder buffer=renderContext.getBuffer();
   double start=System.nanoTime();
-  if (isDeleted() || isHidden()) {
+  if (isDeleted() || isHidden() || !displayForLocale(renderContext)|| !displayForConditions(securityContext,renderContext)) {
     return;
   }
   EditMode editMode=renderContext.getEditMode(securityContext.getUser(false));
@@ -13,33 +13,7 @@
     buffer.append(indent(depth));
   }
   if (StringUtils.isNotBlank(_tag)) {
-    buffer.append("<").append(_tag);
-    if (EditMode.CONTENT.equals(editMode)) {
-      if (depth == 0) {
-        String pageId=renderContext.getPageId();
-        if (pageId != null) {
-          buffer.append(" data-structr-page=\"").append(pageId).append("\"");
-        }
-      }
-      buffer.append(" data-structr-el=\"").append(getUuid()).append("\"");
-    }
-    renderCustomAttributes(buffer,securityContext,renderContext);
-    for (    PropertyKey attribute : EntityContext.getPropertySet(getClass(),PropertyView.Html)) {
-      try {
-        String value=getPropertyWithVariableReplacement(securityContext,renderContext,attribute);
-        if (!(EditMode.RAW.equals(editMode))) {
-          value=escapeForHtmlAttributes(value);
-        }
-        if (value != null) {
-          String key=attribute.jsonName().substring(PropertyView.Html.length());
-          buffer.append(" ").append(key).append("=\"").append(value).append("\"");
-        }
-      }
- catch (      Throwable t) {
-        t.printStackTrace();
-      }
-    }
-    buffer.append(">");
+    openingTag(securityContext,buffer,_tag,editMode,renderContext,depth);
     try {
       if (Body.class.getSimpleName().toLowerCase().equals(this.getTagName())) {
         renderContext.setInBody(true);

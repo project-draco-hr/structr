@@ -28,7 +28,7 @@
         wrapper.add(key,list);
       }
  else       if (elem.isJsonPrimitive()) {
-        wrapper.add(key,fromPrimitive((JsonPrimitive)elem));
+        wrapper.add(key,fromPrimitive(elem.getAsJsonPrimitive()));
       }
     }
   }
@@ -36,7 +36,7 @@
     JsonArray array=json.getAsJsonArray();
     for (    JsonElement elem : array) {
       if (elem.isJsonPrimitive()) {
-        wrapper.add(elem.toString(),((JsonPrimitive)elem).getAsString());
+        wrapper.add(elem.toString(),fromPrimitive(elem.getAsJsonPrimitive()));
       }
  else       if (elem.isJsonObject()) {
         wrapper.add(elem.toString(),deserialize(elem,typeOfT,context));

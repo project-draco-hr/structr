@@ -1,0 +1,49 @@
+{
+  if (!ServletFileUpload.isMultipartContent(request)) {
+    throw new ServletException("Content type is not multipart/form-data");
+  }
+  try {
+    final SecurityContext securityContext=getAuthenticator().initializeAndExamineRequest(request,response);
+    securityContext.setAccessMode(AccessMode.Frontend);
+    request.setCharacterEncoding("UTF-8");
+    response.setCharacterEncoding("UTF-8");
+    if (response.getStatus() == 302) {
+      return;
+    }
+    uploader.setFileSizeMax(MAX_FILE_SIZE);
+    uploader.setSizeMax(MAX_REQUEST_SIZE);
+    response.setContentType("text/html");
+    final PrintWriter out=response.getWriter();
+    List<FileItem> fileItemsList=uploader.parseRequest(request);
+    Iterator<FileItem> fileItemsIterator=fileItemsList.iterator();
+    while (fileItemsIterator.hasNext()) {
+      final FileItem fileItem=fileItemsIterator.next();
+      Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
+        @Override public Object execute() throws FrameworkException {
+          try {
+            String contentType=fileItem.getContentType();
+            boolean isImage=(contentType != null && contentType.startsWith("image"));
+            Class type=isImage ? Image.class : org.structr.web.entity.File.class;
+            String name=fileItem.getName().replaceAll("\\\\","/");
+            org.structr.web.entity.File newFile=FileHelper.createFile(securityContext,IOUtils.toByteArray(fileItem.getInputStream()),contentType,type);
+            newFile.setProperty(AbstractNode.name,PathHelper.getName(name));
+            newFile.setProperty(AbstractNode.visibleToPublicUsers,true);
+            newFile.setProperty(AbstractNode.visibleToAuthenticatedUsers,true);
+            out.write(newFile.getUuid());
+            return newFile;
+          }
+ catch (          IOException ex) {
+            logger.log(Level.WARNING,"Could not upload file",ex);
+          }
+          return null;
+        }
+      }
+);
+    }
+  }
+ catch (  Throwable t) {
+    t.printStackTrace();
+    logger.log(Level.SEVERE,"Exception while processing request",t);
+    HttpAuthenticator.writeInternalServerError(response);
+  }
+}

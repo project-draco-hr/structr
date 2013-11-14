@@ -1,0 +1,23 @@
+{
+  String restPath=Services.getConfigurationValue(Services.REST_PATH);
+  String currentType=baseUrl.replace(restPath + "/","").replace("/" + propertyView,"");
+  Tag head=doc.block("head");
+  head.empty("link").attr(new Rel("stylesheet"),new Type("text/css"),new Href("//structr.org/rest.css"));
+  head.inline("script").attr(new Type("text/javascript"),new Src("//structr.org/CollapsibleLists.js"));
+  head.inline("title").text(baseUrl);
+  Tag body=doc.block("body").attr(new Onload("CollapsibleLists.apply(true);"));
+  Tag top=body.block("div").id("top");
+  Tag ul1=top.block("ul");
+  for (  String view : EntityContext.getPropertyViews()) {
+    ul1.block("li").inline("a").attr(new Href(restPath + "/" + currentType+ "/"+ view),new If(view.equals(propertyView),new Css("active"))).text(view);
+  }
+  Tag left=body.block("div").id("left");
+  ModuleService moduleService=(ModuleService)Services.getService(ModuleService.class);
+  for (  String rawType : moduleService.getCachedNodeEntityTypes()) {
+    left.block("p").inline("a").attr(new Href(restPath + "/" + rawType),new If(rawType.equals(currentType),new Css("active"))).text(rawType);
+  }
+  currentElement=body.block("div").id("right");
+  currentElement.block("h1").text(baseUrl);
+  currentElement=currentElement.block("ul");
+  return this;
+}

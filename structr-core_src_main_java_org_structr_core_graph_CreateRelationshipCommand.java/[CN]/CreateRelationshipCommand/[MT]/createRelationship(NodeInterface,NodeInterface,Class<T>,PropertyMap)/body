@@ -8,13 +8,11 @@
   final Date now=new Date();
   if (newRel != null) {
     newRel.unlockReadOnlyPropertiesOnce();
-    newRel.setProperty(GraphObject.type,relType.getSimpleName());
-    newRel.unlockReadOnlyPropertiesOnce();
     newRel.setProperty(AbstractRelationship.createdDate,now);
     newRel.unlockReadOnlyPropertiesOnce();
     newRel.setProperty(AbstractRelationship.lastModifiedDate,now);
     newRel.unlockReadOnlyPropertiesOnce();
-    newRel.setProperty(AbstractRelationship.cascadeDelete,template.getCascadingDeleteFlag());
+    newRel.setProperty(AbstractRelationship.cascadeDelete,factory.instantiate(rel).getCascadingDeleteFlag());
     TransactionCommand.relationshipCreated(newRel);
     if (properties != null) {
       for (      Entry<PropertyKey,Object> entry : properties.entrySet()) {

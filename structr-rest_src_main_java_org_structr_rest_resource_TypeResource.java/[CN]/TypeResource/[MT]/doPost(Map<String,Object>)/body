@@ -1,17 +1,53 @@
 {
-  final App app=StructrApp.getInstance(securityContext);
-  NodeInterface newNode=null;
-  try {
-    app.beginTx();
-    newNode=createNode(propertySet);
-    app.commitTx();
-  }
+  if (isNode) {
+    final App app=StructrApp.getInstance(securityContext);
+    NodeInterface newNode=null;
+    try {
+      app.beginTx();
+      newNode=createNode(propertySet);
+      app.commitTx();
+    }
   finally {
-    app.finishTx();
+      app.finishTx();
+    }
+    RestMethodResult result=new RestMethodResult(HttpServletResponse.SC_CREATED);
+    if (newNode != null) {
+      result.addHeader("Location",buildLocationHeader(newNode));
+    }
+    return result;
   }
-  RestMethodResult result=new RestMethodResult(HttpServletResponse.SC_CREATED);
-  if (newNode != null) {
-    result.addHeader("Location",buildLocationHeader(newNode));
+ else {
+    final App app=StructrApp.getInstance(securityContext);
+    final Relation template=getRelationshipTemplate();
+    final ErrorBuffer errorBuffer=new ErrorBuffer();
+    if (template != null) {
+      final NodeInterface sourceNode=identifyStartNode(template,propertySet);
+      final NodeInterface targetNode=identifyEndNode(template,propertySet);
+      final PropertyMap properties=PropertyMap.inputTypeToJavaType(securityContext,entityClass,propertySet);
+      RelationshipInterface newRelationship=null;
+      if (sourceNode == null) {
+        errorBuffer.add(entityClass.getSimpleName(),new EmptyPropertyToken(template.getSourceIdProperty()));
+      }
+      if (targetNode == null) {
+        errorBuffer.add(entityClass.getSimpleName(),new EmptyPropertyToken(template.getTargetIdProperty()));
+      }
+      if (errorBuffer.hasError()) {
+        throw new FrameworkException(422,errorBuffer);
+      }
+      try {
+        app.beginTx();
+        newRelationship=app.create(sourceNode,targetNode,entityClass,properties);
+        app.commitTx();
+      }
+  finally {
+        app.finishTx();
+      }
+      RestMethodResult result=new RestMethodResult(HttpServletResponse.SC_CREATED);
+      if (newRelationship != null) {
+        result.addHeader("Location",buildLocationHeader(newRelationship));
+      }
+      return result;
+    }
+    throw new NotFoundException();
   }
-  return result;
 }

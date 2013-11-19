@@ -3,12 +3,12 @@
     final List<NodeInterface> nodes=createTestNodes(GenericNode.class,2);
     final NodeInterface startNode=nodes.get(0);
     final NodeInterface endNode=nodes.get(1);
-    LocationRelationship rel=null;
+    NodeHasLocation rel=null;
     assertTrue(startNode != null);
     assertTrue(endNode != null);
     try {
       app.beginTx();
-      rel=app.create(startNode,endNode,LocationRelationship.class);
+      rel=app.create(startNode,endNode,NodeHasLocation.class);
       app.commitTx();
     }
   finally {
@@ -17,7 +17,7 @@
     assertEquals(startNode.getUuid(),rel.getSourceNodeId());
     assertEquals(endNode.getUuid(),rel.getTargetNodeId());
     assertEquals(RelType.IS_AT.name(),rel.getType());
-    assertEquals(LocationRelationship.class,rel.getClass());
+    assertEquals(NodeHasLocation.class,rel.getClass());
   }
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,ex.toString());

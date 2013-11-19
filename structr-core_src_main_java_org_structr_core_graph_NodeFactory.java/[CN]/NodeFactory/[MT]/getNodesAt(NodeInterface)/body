@@ -1,12 +1,9 @@
 {
   final List<NodeInterface> nodes=new LinkedList<>();
-  final Iterable<LocationRelationship> rels=locationNode.getRelationships(LocationRelationship.class);
-  if (rels != null) {
-    for (    LocationRelationship rel : rels) {
-      NodeInterface startNode=rel.getSourceNode();
-      nodes.add(startNode);
-      nodes.addAll(getNodesAt(startNode));
-    }
+  for (  RelationshipInterface rel : locationNode.getIncomingRelationships(NodeHasLocation.class)) {
+    NodeInterface startNode=rel.getSourceNode();
+    nodes.add(startNode);
+    nodes.addAll(getNodesAt(startNode));
   }
   return nodes;
 }

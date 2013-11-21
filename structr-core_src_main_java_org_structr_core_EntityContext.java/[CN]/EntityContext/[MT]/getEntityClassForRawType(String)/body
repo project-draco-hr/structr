@@ -1,10 +1,7 @@
 {
-  String normalizedEntityName=normalizeEntityName(rawType);
-  if (cachedEntities.containsKey(normalizedEntityName)) {
-    return (Class)cachedEntities.get(normalizedEntityName);
+  Class type=getEntityClassForRawType(rawType,false);
+  if (type == null) {
+    type=getEntityClassForRawType(rawType,true);
   }
-  if (reverseInterfaceMap.containsKey(normalizedEntityName)) {
-    return (Class)reverseInterfaceMap.get(normalizedEntityName);
-  }
-  return null;
+  return type;
 }

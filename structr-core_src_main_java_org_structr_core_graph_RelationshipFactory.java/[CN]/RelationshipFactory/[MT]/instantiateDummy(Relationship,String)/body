@@ -1,0 +1,15 @@
+{
+  Class<T> relClass=Services.getService(ModuleService.class).getRelationshipEntityClass(entityType);
+  T newRel=null;
+  if (relClass != null) {
+    try {
+      newRel=relClass.newInstance();
+      newRel.init(factoryProfile.getSecurityContext(),entity);
+      newRel.onRelationshipInstantiation();
+    }
+ catch (    Throwable t) {
+      newRel=null;
+    }
+  }
+  return newRel;
+}

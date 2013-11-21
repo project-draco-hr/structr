@@ -1,0 +1,38 @@
+{
+  SecurityContext securityContext=factoryProfile.getSecurityContext();
+  T newNode=(T)securityContext.lookup(node);
+  if (newNode == null) {
+    try {
+      Constructor<T> constructor=constructors.get(nodeClass);
+      if (constructor == null) {
+        constructor=nodeClass.getConstructor();
+        constructors.put(nodeClass,constructor);
+      }
+      newNode=constructor.newInstance();
+    }
+ catch (    Throwable t) {
+      newNode=null;
+    }
+    if (newNode == null) {
+      newNode=(T)factoryDefinition.createGenericNode();
+    }
+    newNode.init(factoryProfile.getSecurityContext(),node);
+    newNode.onNodeInstantiation();
+    String newNodeType=newNode.getProperty(GraphObject.type);
+    if (newNodeType == null && nodeClass != null) {
+      try {
+        newNode.unlockReadOnlyPropertiesOnce();
+        newNode.setProperty(GraphObject.type,nodeClass.getSimpleName());
+      }
+ catch (      Throwable t) {
+        t.printStackTrace();
+        logger.log(Level.SEVERE,"Unable to set type property {0} on node {1}: {2}",new Object[]{nodeClass,newNode,t.getMessage()});
+      }
+    }
+    securityContext.store(newNode);
+  }
+  if (isCreation || securityContext.isReadable(newNode,factoryProfile.includeDeletedAndHidden(),factoryProfile.publicOnly())) {
+    return newNode;
+  }
+  return null;
+}

@@ -1,6 +1,7 @@
 {
-  String id=webSocketData.getId();
-  Map<String,Object> nodeData=webSocketData.getNodeData();
+  final App app=StructrApp.getInstance(getWebSocket().getSecurityContext());
+  final String id=webSocketData.getId();
+  final Map<String,Object> nodeData=webSocketData.getNodeData();
   final String source=(String)nodeData.get("source");
   final String name=(String)nodeData.get("name");
   if (id == null) {
@@ -13,20 +14,19 @@
     return;
   }
   try {
-    final SecurityContext securityContext=getWebSocket().getSecurityContext();
-    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-      @Override public Object execute() throws FrameworkException {
-        PropertyMap properties=new PropertyMap();
-        properties.put(AbstractNode.type,Widget.class.getSimpleName());
-        properties.put(AbstractNode.name,name);
-        properties.put(Widget.source,source);
-        return Services.command(securityContext,CreateNodeCommand.class).execute(properties);
-      }
-    }
-);
+    PropertyMap properties=new PropertyMap();
+    properties.put(AbstractNode.type,Widget.class.getSimpleName());
+    properties.put(AbstractNode.name,name);
+    properties.put(Widget.source,source);
+    app.beginTx();
+    app.create(Widget.class,properties);
+    app.commitTx();
   }
  catch (  Throwable t) {
     logger.log(Level.WARNING,t.toString());
     getWebSocket().send(MessageBuilder.status().code(422).message(t.toString()).build(),true);
+  }
+ finally {
+    app.finishTx();
   }
 }

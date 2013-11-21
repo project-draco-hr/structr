@@ -1,15 +1,15 @@
 {
+  final App app=StructrApp.getInstance();
   try {
-    Services.command(SecurityContext.getSuperUserInstance(),TransactionCommand.class).execute(new StructrTransaction(){
-      @Override public Object execute() throws FrameworkException {
-        Services.command(SecurityContext.getSuperUserInstance(),DeleteNodeCommand.class).execute(structrFile);
-        return null;
-      }
-    }
-);
+    app.beginTx();
+    app.delete(structrFile);
+    app.commitTx();
   }
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,null,ex);
+  }
+ finally {
+    app.finishTx();
   }
   return true;
 }

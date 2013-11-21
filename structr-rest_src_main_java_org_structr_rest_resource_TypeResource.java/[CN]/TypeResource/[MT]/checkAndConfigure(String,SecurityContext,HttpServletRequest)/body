@@ -3,7 +3,22 @@
   this.request=request;
   this.rawType=part;
   if (rawType != null) {
+    final App app=StructrApp.getInstance(securityContext);
     entityClass=EntityContext.getEntityClassForRawType(rawType);
+    if (entityClass != null) {
+      if (AbstractNode.class.isAssignableFrom(entityClass)) {
+        searchCommandType=SearchNodeCommand.class;
+        query=app.nodeQuery(entityClass);
+        isNode=true;
+        return true;
+      }
+      if (AbstractRelationship.class.isAssignableFrom(entityClass)) {
+        searchCommandType=SearchRelationshipCommand.class;
+        query=app.relationshipQuery(entityClass);
+        isNode=false;
+        return true;
+      }
+    }
   }
   return true;
 }

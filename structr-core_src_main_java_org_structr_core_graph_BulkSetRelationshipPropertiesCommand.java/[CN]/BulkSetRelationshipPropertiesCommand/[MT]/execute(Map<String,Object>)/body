@@ -1,14 +1,12 @@
 {
   final GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
   final RelationshipFactory relationshipFactory=new RelationshipFactory(securityContext);
-  final SearchRelationshipCommand searchRel=Services.command(SecurityContext.getSuperUserInstance(),SearchRelationshipCommand.class);
   if (graphDb != null) {
     List<AbstractRelationship> rels=null;
-    if (properties.containsKey(AbstractRelationship.combinedType.dbName())) {
-      List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
-      attrs.add(Search.andExactProperty(securityContext,AbstractRelationship.type,(String)properties.get(AbstractRelationship.combinedType.dbName())));
-      rels=searchRel.execute(attrs).getResults();
-      properties.remove(AbstractRelationship.combinedType.dbName());
+    final String typeName="type";
+    if (properties.containsKey(typeName)) {
+      rels=StructrApp.getInstance(securityContext).relationshipQuery(EntityContext.getEntityClassForRawType(typeName)).getAsList();
+      properties.remove(typeName);
     }
  else {
       rels=(List<AbstractRelationship>)relationshipFactory.instantiate(GlobalGraphOperations.at(graphDb).getAllRelationships());

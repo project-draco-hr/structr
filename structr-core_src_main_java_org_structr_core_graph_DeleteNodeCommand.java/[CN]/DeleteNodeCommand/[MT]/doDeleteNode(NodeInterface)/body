@@ -1,0 +1,51 @@
+{
+  if (!deletedNodes.contains(node) && node.getUuid() == null) {
+    logger.log(Level.WARNING,"Will not delete node which has no UUID");
+    return null;
+  }
+  deletedNodes.add(node);
+  App app=StructrApp.getInstance(securityContext);
+  try {
+    List<NodeInterface> nodesToCheckAfterDeletion=new LinkedList<>();
+    for (    AbstractRelationship rel : node.getOutgoingRelationships()) {
+      int cascadeDelete=rel.cascadeDelete();
+      NodeInterface endNode=rel.getTargetNode();
+      if ((cascadeDelete & Relation.CONSTRAINT_BASED) == Relation.CONSTRAINT_BASED) {
+        nodesToCheckAfterDeletion.add(endNode);
+      }
+      if (!deletedNodes.contains(endNode) && ((cascadeDelete & Relation.SOURCE_TO_TARGET) == Relation.SOURCE_TO_TARGET)) {
+        endNode.removeFromIndex();
+        doDeleteNode(endNode);
+      }
+    }
+    for (    AbstractRelationship rel : node.getIncomingRelationships()) {
+      int cascadeDelete=rel.cascadeDelete();
+      NodeInterface startNode=rel.getSourceNode();
+      if ((cascadeDelete & Relation.CONSTRAINT_BASED) == Relation.CONSTRAINT_BASED) {
+        nodesToCheckAfterDeletion.add(startNode);
+      }
+      if (!deletedNodes.contains(startNode) && ((cascadeDelete & Relation.TARGET_TO_SOURCE) == Relation.TARGET_TO_SOURCE)) {
+        startNode.removeFromIndex();
+        doDeleteNode(startNode);
+      }
+    }
+    node.onNodeDeletion();
+    for (    AbstractRelationship r : node.getRelationships()) {
+      app.delete(r);
+    }
+    node.removeFromIndex();
+    TransactionCommand.nodeDeleted(node);
+    node.getNode().delete();
+    for (    NodeInterface nodeToCheck : nodesToCheckAfterDeletion) {
+      ErrorBuffer errorBuffer=new ErrorBuffer();
+      if (!deletedNodes.contains(nodeToCheck) && !nodeToCheck.isValid(errorBuffer)) {
+        nodeToCheck.removeFromIndex();
+        doDeleteNode(nodeToCheck);
+      }
+    }
+  }
+ catch (  Throwable t) {
+    logger.log(Level.WARNING,"Exception while deleting node: {0}",t);
+  }
+  return null;
+}

@@ -1,4 +1,5 @@
 {
+  final App app=StructrApp.getInstance(securityContext);
   try {
     java.io.File fileOnDisk=new java.io.File(Services.getFilesPath() + "/" + getRelativeFilePath());
     if (fileOnDisk.exists()) {
@@ -12,16 +13,15 @@
       logger.log(Level.SEVERE,"Could not create file",ex);
       return;
     }
-    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-      @Override public Object execute() throws FrameworkException {
-        setProperty(checksum,FileHelper.getChecksum(File.this));
-        setProperty(size,FileHelper.getSize(File.this));
-        return null;
-      }
-    }
-);
+    app.beginTx();
+    setProperty(checksum,FileHelper.getChecksum(File.this));
+    setProperty(size,FileHelper.getSize(File.this));
+    app.commitTx();
   }
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,"Could not create file",ex);
+  }
+ finally {
+    app.finishTx();
   }
 }

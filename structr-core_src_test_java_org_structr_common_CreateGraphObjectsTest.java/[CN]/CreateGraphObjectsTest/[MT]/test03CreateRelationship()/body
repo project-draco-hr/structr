@@ -1,20 +1,23 @@
 {
   try {
-    List<AbstractNode> nodes=createTestNodes(GenericNode.class,2);
-    final AbstractNode startNode=nodes.get(0);
-    final AbstractNode endNode=nodes.get(1);
-    final RelationshipType relType=RelType.IS_AT;
+    final List<NodeInterface> nodes=createTestNodes(GenericNode.class,2);
+    final NodeInterface startNode=nodes.get(0);
+    final NodeInterface endNode=nodes.get(1);
+    NodeHasLocation rel=null;
     assertTrue(startNode != null);
     assertTrue(endNode != null);
-    AbstractRelationship rel=(AbstractRelationship)transactionCommand.execute(new StructrTransaction(){
-      @Override public Object execute() throws FrameworkException {
-        return (AbstractRelationship)createRelationshipCommand.execute(startNode,endNode,relType);
-      }
+    try {
+      app.beginTx();
+      rel=app.create(startNode,endNode,NodeHasLocation.class);
+      app.commitTx();
     }
-);
-    assertTrue(rel.getStartNodeId().equals(startNode.getUuid()));
-    assertTrue(rel.getEndNodeId().equals(endNode.getUuid()));
-    assertTrue(rel.getType().equals(relType.name()));
+  finally {
+      app.finishTx();
+    }
+    assertEquals(startNode.getUuid(),rel.getSourceNodeId());
+    assertEquals(endNode.getUuid(),rel.getTargetNodeId());
+    assertEquals(RelType.IS_AT.name(),rel.getType());
+    assertEquals(NodeHasLocation.class,rel.getClass());
   }
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,ex.toString());

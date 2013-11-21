@@ -36,15 +36,11 @@
           user=RegistrationResource.createUser(superUserContext,credentialKey,value,true,userClass);
         }
         if (user != null) {
-          final Principal principal=user;
+          final App app=StructrApp.getInstance();
           try {
-            Services.command(superUserContext,TransactionCommand.class).execute(new StructrTransaction(){
-              @Override public Object execute() throws FrameworkException {
-                principal.setProperty(Principal.sessionId,HttpAuthenticator.getSessionId(request));
-                return null;
-              }
-            }
-);
+            app.beginTx();
+            user.setProperty(Principal.sessionId,HttpAuthenticator.getSessionId(request));
+            app.commitTx();
             HtmlServlet.setNoCacheHeaders(response);
             try {
               logger.log(Level.FINE,"Response status: {0}",response.getStatus());
@@ -57,6 +53,9 @@
           }
  catch (          FrameworkException ex) {
             logger.log(Level.SEVERE,"Could not set session id for user {0}",user.toString());
+          }
+ finally {
+            app.finishTx();
           }
         }
       }

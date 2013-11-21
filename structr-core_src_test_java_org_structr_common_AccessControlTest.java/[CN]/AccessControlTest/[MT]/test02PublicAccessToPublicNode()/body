@@ -1,6 +1,6 @@
 {
   try {
-    List<AbstractNode> users=createTestNodes(User.class,1);
+    List<NodeInterface> users=createTestNodes(User.class,1);
     User user=(User)users.get(0);
     PropertyMap props=new PropertyMap();
     props.put(AbstractNode.visibleToPublicUsers,true);
@@ -8,9 +8,7 @@
     TestOne t1=createTestNode(TestOne.class,props,user);
     TestOne t2=createTestNode(TestOne.class,user);
     SecurityContext publicContext=SecurityContext.getInstance(null,AccessMode.Frontend);
-    List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
-    searchAttributes.add(Search.andExactTypeAndSubtypes(type));
-    Result result=Services.command(publicContext,SearchNodeCommand.class).execute(searchAttributes);
+    Result result=StructrApp.getInstance(publicContext).nodeQuery(type).getResult();
     assertEquals(1,result.size());
     assertEquals(t1.getUuid(),result.get(0).getUuid());
   }

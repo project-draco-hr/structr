@@ -9,11 +9,8 @@
     errorBuffer.add(object.getType(),new EmptyPropertyToken(key));
     return false;
   }
-  List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
-  attrs.add(Search.andExactName(value));
-  attrs.add(Search.andExactType(type));
   try {
-    Result nodes=Services.command(securityContext,SearchNodeCommand.class).execute(attrs);
+    Result nodes=StructrApp.getInstance(securityContext).nodeQuery(type).andName(value).getResult();
     if (nodes != null && !nodes.isEmpty()) {
       return true;
     }

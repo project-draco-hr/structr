@@ -2,15 +2,12 @@
   final GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
   final SecurityContext superUserContext=SecurityContext.getSuperUserInstance();
   final NodeFactory nodeFactory=new NodeFactory(superUserContext);
-  final SearchNodeCommand searchNode=Services.command(superUserContext,SearchNodeCommand.class);
   String type=null;
   if (graphDb != null) {
     Result<AbstractNode> nodes=null;
     if (properties.containsKey(AbstractNode.type.dbName())) {
       type=(String)properties.get(AbstractNode.type.dbName());
-      List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
-      attrs.add(Search.andExactType(EntityContext.getEntityClassForRawType(type)));
-      nodes=searchNode.execute(attrs);
+      nodes=StructrApp.getInstance(securityContext).nodeQuery(EntityContext.getEntityClassForRawType(type)).getResult();
       properties.remove(AbstractNode.type.dbName());
     }
  else {

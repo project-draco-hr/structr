@@ -1,11 +1,13 @@
 {
-  Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-    @Override public Object execute() throws FrameworkException {
-      List<Principal> _users=getProperty(members);
-      _users.add(user);
-      setProperty(members,_users);
-      return null;
-    }
+  final App app=StructrApp.getInstance(securityContext);
+  try {
+    app.beginTx();
+    List<Principal> _users=getProperty(members);
+    _users.add(user);
+    setProperty(members,_users);
+    app.commitTx();
   }
-);
+  finally {
+    app.finishTx();
+  }
 }

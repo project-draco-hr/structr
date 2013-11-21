@@ -1,0 +1,13 @@
+{
+  final Property<String> sourceIdProperty=template.getSourceIdProperty();
+  final Class sourceType=template.getSourceType();
+  final Notion notion=template.getStartNodeNotion();
+  notion.setType(sourceType);
+  PropertyKey startNodeIdentifier=notion.getPrimaryPropertyKey();
+  if (startNodeIdentifier != null) {
+    Object identifierValue=properties.get(startNodeIdentifier.dbName());
+    properties.remove(sourceIdProperty.dbName());
+    return (NodeInterface)notion.getAdapterForSetter(securityContext).adapt(identifierValue);
+  }
+  return null;
+}

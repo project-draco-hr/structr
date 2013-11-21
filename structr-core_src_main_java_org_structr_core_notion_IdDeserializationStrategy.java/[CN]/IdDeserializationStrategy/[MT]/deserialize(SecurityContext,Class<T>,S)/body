@@ -1,32 +1,30 @@
 {
+  final App app=StructrApp.getInstance(securityContext);
   if (source != null) {
-    List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
+    Result<T> results=Result.EMPTY_RESULT;
     if (source instanceof JsonInput) {
       JsonInput properties=(JsonInput)source;
       PropertyMap map=PropertyMap.inputTypeToJavaType(securityContext,type,properties.getAttributes());
       if (map.containsKey(GraphObject.uuid)) {
-        attrs.add(Search.andExactUuid(map.get(GraphObject.uuid)));
+        return (T)app.get(map.get(GraphObject.uuid));
       }
  else {
-        for (        Entry<PropertyKey,Object> entry : map.entrySet()) {
-          attrs.add(Search.andExactProperty(securityContext,entry.getKey(),entry.getValue().toString()));
-        }
+        throw new FrameworkException(type.getSimpleName(),new IdNotFoundToken(source));
       }
     }
  else     if (source instanceof GraphObject) {
       GraphObject obj=(GraphObject)source;
       if (propertyKey != null) {
-        attrs.add(Search.andExactProperty(securityContext,propertyKey,obj.getProperty(propertyKey)));
+        results=(Result<T>)app.nodeQuery(NodeInterface.class).and(propertyKey,obj.getProperty(propertyKey)).getResult();
       }
  else {
         PropertyKey<String> idProperty=EntityContext.getPropertyKeyForDatabaseName(obj.getClass(),AbstractNode.uuid.dbName());
-        attrs.add(Search.andExactUuid(obj.getProperty(idProperty)));
+        return (T)app.get(obj.getProperty(idProperty));
       }
     }
  else {
-      attrs.add(Search.andExactUuid(source.toString()));
+      return (T)app.get(source.toString());
     }
-    Result<T> results=Services.command(securityContext,SearchNodeCommand.class).execute(attrs);
     int size=results.size();
 switch (size) {
 case 0:
@@ -38,16 +36,18 @@ default :
 }
 }
  else if (createIfNotExisting) {
-return (T)Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction<AbstractNode>(){
-@Override public AbstractNode execute() throws FrameworkException {
-  AbstractNode newNode=Services.command(securityContext,CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.type,type.getSimpleName()));
-  if (newNode == null) {
-    logger.log(Level.WARNING,"Unable to create node of type {0} for property {1}",new Object[]{type.getSimpleName(),propertyKey.dbName()});
-  }
-  return newNode;
+try {
+app.beginTx();
+final T newNode=app.create(type);
+app.commitTx();
+return newNode;
 }
+ catch (FrameworkException fex) {
+logger.log(Level.WARNING,"Unable to create node of type {0} for property {1}",new Object[]{type.getSimpleName(),propertyKey.dbName()});
 }
-);
+ finally {
+app.finishTx();
+}
 }
 return null;
 }

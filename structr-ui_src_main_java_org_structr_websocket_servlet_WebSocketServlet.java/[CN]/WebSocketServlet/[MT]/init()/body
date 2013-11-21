@@ -1,10 +1,8 @@
 {
   config=this.getServletConfig();
   final Gson gson=new GsonBuilder().setPrettyPrinting().registerTypeAdapter(WebSocketMessage.class,new WebSocketDataGSONAdapter(idProperty)).create();
-  syncController=new SynchronizationController(gson);
-  syncController.setResourceProvider(resourceProvider);
-  GraphDatabaseService graphDb=Services.getService(NodeService.class).getGraphDb();
-  graphDb.registerTransactionEventHandler(syncController);
+  final SynchronizationController syncController=new SynchronizationController(gson);
+  TransactionCommand.registerTransactionListener(syncController);
   factory=new WebSocketFactory(new Acceptor(){
     @Override public WebSocket doWebSocketConnect(    final HttpServletRequest request,    final String protocol){
       if (STRUCTR_PROTOCOL.equals(protocol)) {

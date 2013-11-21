@@ -1,31 +1,33 @@
 {
   try {
-    final AbstractRelationship rel=((List<AbstractRelationship>)createTestRelationships(RelType.IS_AT,1)).get(0);
+    final NodeHasLocation rel=createTestRelationships(NodeHasLocation.class,1).get(0);
     final PropertyKey key1=new StringProperty("jghsdkhgshdhgsdjkfgh").indexed();
+    final Class type=NodeHasLocation.class;
     final String val1="54354354546806849870";
-    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-      @Override public Object execute() throws FrameworkException {
-        rel.setProperty(key1,val1);
-        return null;
-      }
+    try {
+      app.beginTx();
+      rel.setProperty(key1,val1);
+      app.commitTx();
     }
-);
+  finally {
+      app.finishTx();
+    }
     assertTrue(rel.getProperty(key1).equals(val1));
-    List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
+    List<SearchAttribute> searchAttributes=new LinkedList<>();
     searchAttributes.add(Search.andExactProperty(securityContext,key1,val1));
-    Result<AbstractRelationship> result=searchRelationshipCommand.execute(searchAttributes);
+    Result<RelationshipInterface> result=app.relationshipQuery(type).and(key1,val1).getResult();
     assertTrue(result.size() == 1);
     assertTrue(result.get(0).equals(rel));
     searchAttributes.clear();
     final String val2="??lllldj??oa8w4rasf";
-    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-      @Override public Object execute() throws FrameworkException {
-        rel.setProperty(key1,val2);
-        return null;
-      }
+    try {
+      app.beginTx();
+      rel.setProperty(key1,val2);
+      app.commitTx();
     }
-);
-    searchAttributes.add(Search.andExactProperty(securityContext,key1,val2));
+  finally {
+      app.finishTx();
+    }
     assertTrue(result.size() == 1);
     assertTrue(result.get(0).equals(rel));
   }

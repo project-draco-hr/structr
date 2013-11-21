@@ -1,2 +1,33 @@
 {
+  final GraphObject sourceEntity=typedIdResource.getEntity();
+  if (sourceEntity != null) {
+    if (!typeResource.isNode && sourceEntity instanceof NodeInterface) {
+      final List<GraphObject> list=Iterables.toList(((NodeInterface)sourceEntity).getRelationships(typeResource.entityClass));
+      applyDefaultSorting(list,sortKey,sortDescending);
+      return new Result(PagingHelper.subList(list,pageSize,page,offsetId),list.size(),isCollectionResource(),isPrimitiveArray());
+    }
+    final PropertyKey key=findPropertyKey(typedIdResource,typeResource);
+    if (key != null) {
+      final Object value=sourceEntity.getProperty(key);
+      if (value != null) {
+        if (value instanceof List) {
+          final List<GraphObject> list=(List<GraphObject>)value;
+          applyDefaultSorting(list,sortKey,sortDescending);
+          return new Result(PagingHelper.subList(list,pageSize,page,offsetId),list.size(),isCollectionResource(),isPrimitiveArray());
+        }
+ else         if (value instanceof Iterable) {
+          final List<GraphObject> propertyListResult=new LinkedList<>();
+          final Iterable sourceIterable=(Iterable)value;
+          for (          final Object o : sourceIterable) {
+            if (o instanceof GraphObject) {
+              propertyListResult.add((GraphObject)o);
+            }
+          }
+          applyDefaultSorting(propertyListResult,sortKey,sortDescending);
+          return new Result(PagingHelper.subList(propertyListResult,pageSize,page,offsetId),propertyListResult.size(),isCollectionResource(),isPrimitiveArray());
+        }
+      }
+    }
+  }
+  return Result.EMPTY_RESULT;
 }

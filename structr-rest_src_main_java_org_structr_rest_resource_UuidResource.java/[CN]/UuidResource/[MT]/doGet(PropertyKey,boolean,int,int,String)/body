@@ -1,17 +1,17 @@
 {
   GraphObject obj=null;
   try {
-    obj=getNode();
+    obj=getEntity(SearchNodeCommand.class);
   }
  catch (  NotFoundException nfex1) {
     try {
-      obj=getRelationship();
+      obj=getEntity(SearchRelationshipCommand.class);
     }
  catch (    NotFoundException nfex2) {
     }
   }
   if (obj != null) {
-    List<GraphObject> results=new LinkedList<GraphObject>();
+    List<GraphObject> results=new LinkedList<>();
     results.add(obj);
     return new Result(results,null,isCollectionResource(),isPrimitiveArray());
   }

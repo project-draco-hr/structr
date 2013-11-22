@@ -9,7 +9,7 @@
  catch (  MalformedURLException ex) {
     logger.log(Level.SEVERE,"Malformed URL: {0}",ex);
   }
-  List<Image> result=new LinkedList<Image>();
+  List<Image> result=new LinkedList<>();
   if (flashUrl != null) {
     try {
       FileUtils.copyURLToFile(flashUrl,flashFile);
@@ -79,7 +79,6 @@
             logger.log(Level.INFO,"Found image (w, h, id, format): {0}, {1}, {2}, {3}",new Object[]{width,height,id,format});
             String name=flashObjectName + "_" + id+ "_"+ width+ "x"+ height+ fileExtension;
             Image newImageNode=(Image)Services.command(securityContext,CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.type,Image.class.getSimpleName()),new NodeAttribute(AbstractNode.name,name),new NodeAttribute(Image.width,width),new NodeAttribute(Image.height,height),new NodeAttribute(org.structr.web.entity.File.contentType,contentType),new NodeAttribute(AbstractNode.visibleToAuthenticatedUsers,true));
-            Services.command(securityContext,CreateRelationshipCommand.class).execute(parentNode,newImageNode,RelType.CONTAINS);
             String relativeFilePath=newImageNode.getId() + "_" + System.currentTimeMillis();
             String path=Services.getFilePath(Path.Files,relativeFilePath);
             File imageFile=new File(path);

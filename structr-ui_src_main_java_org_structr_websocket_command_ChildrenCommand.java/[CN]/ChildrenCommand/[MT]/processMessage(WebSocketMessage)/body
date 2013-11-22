@@ -1,12 +1,13 @@
 {
-  AbstractNode node=getNode(webSocketData.getId());
+  final RelationshipFactory factory=new RelationshipFactory(this.getWebSocket().getSecurityContext());
+  final AbstractNode node=getNode(webSocketData.getId());
   if (node == null) {
     return;
   }
-  Iterable<AbstractRelationship> rels=node.getOutgoingRelationships(RelType.CONTAINS);
+  Iterable<RelationshipInterface> rels=new IterableAdapter<>(node.getNode().getRelationships(RelType.CONTAINS,Direction.OUTGOING),factory);
   List<GraphObject> result=new LinkedList();
-  for (  AbstractRelationship rel : rels) {
-    AbstractNode endNode=rel.getEndNode();
+  for (  RelationshipInterface rel : rels) {
+    NodeInterface endNode=rel.getTargetNode();
     if (endNode == null) {
       continue;
     }

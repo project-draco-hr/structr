@@ -1,18 +1,9 @@
 {
   try {
-    try {
-      transactionCommand.execute(new StructrTransaction<AbstractNode>(){
-        @Override public AbstractNode execute() throws FrameworkException {
-          createAdminUser();
-          createResourceAccess("_login",UiAuthenticator.NON_AUTH_USER_POST);
-          return null;
-        }
-      }
-);
-    }
- catch (    FrameworkException ex) {
-      logger.log(Level.SEVERE,"Could not create admin user",ex);
-    }
+    app.beginTx();
+    createAdminUser();
+    createResourceAccess("_login",UiAuthenticator.NON_AUTH_USER_POST);
+    app.commitTx();
     String[] args={"/bin/sh","-c","cd src/test/javascript; PATH=$PATH:./bin/`uname`/ casperjs/bin/casperjs test " + testName + ".js"};
     Process proc=Runtime.getRuntime().exec(args);
     logger.log(Level.INFO,IOUtils.toString(proc.getInputStream()));
@@ -21,8 +12,11 @@
     logger.log(Level.INFO,"casperjs subprocess returned with {0}",exitValue);
     return exitValue;
   }
- catch (  IOException ex) {
+ catch (  Exception ex) {
     logger.log(Level.SEVERE,null,ex);
+  }
+ finally {
+    app.finishTx();
   }
   return 1;
 }

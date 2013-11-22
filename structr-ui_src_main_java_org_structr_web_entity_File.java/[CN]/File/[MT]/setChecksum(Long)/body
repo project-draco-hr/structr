@@ -1,9 +1,11 @@
 {
-  Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-    @Override public Object execute() throws FrameworkException {
-      setProperty(File.checksum,checksum);
-      return null;
-    }
+  final App app=StructrApp.getInstance(securityContext);
+  try {
+    app.beginTx();
+    setProperty(File.checksum,checksum);
+    app.commitTx();
   }
-);
+  finally {
+    app.finishTx();
+  }
 }

@@ -1,0 +1,29 @@
+{
+  final App app=StructrApp.getInstance(securityContext);
+  if (currentElement.getId() == newElement.getId()) {
+    throw new IllegalStateException("Cannot link a node to itself!");
+  }
+  final T previousElement=listGetPrevious(currentElement);
+  if (previousElement == null) {
+    try {
+      app.beginTx();
+      linkNodes(getSiblingLinkType(),newElement,currentElement);
+      app.commitTx();
+    }
+  finally {
+      app.finishTx();
+    }
+  }
+ else {
+    try {
+      app.beginTx();
+      unlinkNodes(getSiblingLinkType(),previousElement,currentElement);
+      linkNodes(getSiblingLinkType(),previousElement,newElement);
+      linkNodes(getSiblingLinkType(),newElement,currentElement);
+      app.commitTx();
+    }
+  finally {
+      app.finishTx();
+    }
+  }
+}

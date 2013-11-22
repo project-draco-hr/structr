@@ -2,7 +2,6 @@
   final GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
   final SecurityContext superUserContext=SecurityContext.getSuperUserInstance();
   final NodeFactory nodeFactory=new NodeFactory(superUserContext);
-  final SearchNodeCommand searchNode=Services.command(superUserContext,SearchNodeCommand.class);
   String type=null;
   final String oldKey=(String)properties.get("oldKey");
   final String newKey=(String)properties.get("newKey");
@@ -10,9 +9,7 @@
     Result<AbstractNode> nodes=null;
     if (properties.containsKey(AbstractNode.type.dbName())) {
       type=(String)properties.get(AbstractNode.type.dbName());
-      List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
-      attrs.add(Search.andExactType(EntityContext.getEntityClassForRawType(type)));
-      nodes=searchNode.execute(attrs);
+      nodes=StructrApp.getInstance(securityContext).nodeQuery(EntityContext.getEntityClassForRawType(type)).getResult();
       properties.remove(AbstractNode.type.dbName());
     }
  else {
@@ -24,22 +21,6 @@
         if (node.getProperty(AbstractNode.uuid) != null) {
           for (          Entry entry : properties.entrySet()) {
             String key=(String)entry.getKey();
-            Object val=null;
-            if (key.equals("newType")) {
-              key="type";
-            }
-            PropertyConverter inputConverter=EntityContext.getPropertyKeyForJSONName(cls,key).inputConverter(securityContext);
-            if (inputConverter != null) {
-              try {
-                val=inputConverter.convert(entry.getValue());
-              }
- catch (              FrameworkException ex) {
-                logger.log(Level.SEVERE,null,ex);
-              }
-            }
- else {
-              val=entry.getValue();
-            }
             PropertyKey propertyKey=EntityContext.getPropertyKeyForDatabaseName(node.getClass(),key);
             if (propertyKey != null) {
               Node dbNode=node.getNode();

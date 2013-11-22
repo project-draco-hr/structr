@@ -2,15 +2,15 @@
   Page hiddenDoc=getOrCreateHiddenDocument();
   SecurityContext securityContext=SecurityContext.getSuperUserInstance();
   Result<DOMNode> result=(Result<DOMNode>)Services.command(securityContext,SearchNodeCommand.class).execute(Search.andExactTypeAndSubtypes(DOMNode.class));
-  final CreateRelationshipCommand<?> createRel=Services.command(securityContext,CreateRelationshipCommand.class);
+  final CreateRelationshipCommand createRel=Services.command(securityContext,CreateRelationshipCommand.class);
   for (  DOMNode node : result.getResults()) {
-    if (node.hasChildNodes() && (node.hasRelationship(RelType.SYNC,Direction.INCOMING) || node.hasRelationship(RelType.SYNC,Direction.OUTGOING)) && (!hiddenDoc.equals(node.getOwnerDocument()))) {
+    if (node.hasChildNodes() && (node.hasIncomingRelationships(Sync.class) || node.hasRelationship(Sync.class)) && (!hiddenDoc.equals(node.getOwnerDocument()))) {
       try {
         DOMNode clonedNode=(DOMNode)node.cloneNode(false);
         moveChildNodes(node,clonedNode);
         clonedNode.setProperty(DOMNode.ownerDocument,hiddenDoc);
-        createRel.execute(node,clonedNode,RelType.SYNC,true);
-        createRel.execute(clonedNode,node,RelType.SYNC,true);
+        createRel.execute(node,clonedNode,Sync.class);
+        createRel.execute(clonedNode,node,Sync.class);
       }
  catch (      Exception ex) {
         logger.log(Level.SEVERE,"Could not fix component " + node,ex);

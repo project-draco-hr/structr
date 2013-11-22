@@ -1,0 +1,15 @@
+{
+  final String normalizedEntityName=normalize ? normalizeEntityName(rawType) : rawType;
+  final ModuleService moduleService=getModuleService();
+  Class type=moduleService.getNodeEntityClass(normalizedEntityName);
+  if (type == null) {
+    type=moduleService.getRelationshipEntityClass(normalizedEntityName);
+  }
+  if (type == null) {
+    type=reverseInterfaceMap.get(normalizedEntityName);
+  }
+  if (type != null) {
+    normalizedEntityNameCache.put(rawType,type.getSimpleName());
+  }
+  return type;
+}

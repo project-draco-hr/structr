@@ -1,0 +1,14 @@
+{
+  final App app=StructrApp.getInstance();
+  final Class<? extends OneToOne> clazz=getClass();
+  final Class<S> sourceType=getSourceType();
+  final Class<T> targetType=getTargetType();
+  final Relation<S,?,?,?> outgoingRel=sourceNode.getOutgoingRelationship(clazz);
+  final Relation<?,T,?,?> incomingRel=targetNode.getIncomingRelationship(clazz);
+  if (outgoingRel != null && targetType.isAssignableFrom(outgoingRel.getTargetType())) {
+    app.delete(outgoingRel);
+  }
+  if (incomingRel != null && sourceType.isAssignableFrom(incomingRel.getSourceType())) {
+    app.delete(incomingRel);
+  }
+}

@@ -1,19 +1,15 @@
 {
   try {
-    boolean includeDeletedAndHidden=true;
-    boolean publicOnly=false;
     Class type=TestOne.class;
     int number=43;
-    List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
     this.createTestNodes(type,number);
-    searchAttributes.add(Search.andExactType(type));
-    Result result=searchNodeCommand.execute(includeDeletedAndHidden,publicOnly,searchAttributes);
+    Result result=app.nodeQuery(type).getResult();
     assertTrue(result.size() == number);
     PropertyKey sortKey=AbstractNode.name;
     boolean sortDesc=false;
     int pageSize=10;
     int page=1;
-    result=(Result)searchNodeCommand.execute(includeDeletedAndHidden,publicOnly,searchAttributes,sortKey,sortDesc,pageSize,page);
+    result=app.nodeQuery(type).includeDeletedAndHidden().sort(sortKey).order(sortDesc).page(page).pageSize(pageSize).getResult();
     logger.log(Level.INFO,"Raw result size: {0}, expected: {1}",new Object[]{result.getRawResultCount(),number});
     assertTrue(result.getRawResultCount() == number);
     logger.log(Level.INFO,"Result size: {0}, expected: {1}",new Object[]{result.size(),pageSize});

@@ -1,0 +1,24 @@
+{
+  String[] _allowed=getPermissions();
+  if (!ArrayUtils.contains(_allowed,permission.name())) {
+    return;
+  }
+  String[] newPermissions=(String[])ArrayUtils.removeElement(_allowed,permission.name());
+  if (newPermissions.length > 0) {
+    setAllowed(newPermissions);
+  }
+ else {
+    final App app=StructrApp.getInstance(securityContext);
+    try {
+      app.beginTx();
+      app.delete(this);
+      app.commitTx();
+    }
+ catch (    FrameworkException ex) {
+      logger.log(Level.SEVERE,"Could not remove security relationship!",ex);
+    }
+ finally {
+      app.finishTx();
+    }
+  }
+}

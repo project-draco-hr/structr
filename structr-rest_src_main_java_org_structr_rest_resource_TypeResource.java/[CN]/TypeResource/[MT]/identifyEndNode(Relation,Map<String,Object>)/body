@@ -1,0 +1,13 @@
+{
+  final Property<String> targetIdProperty=template.getTargetIdProperty();
+  final Class targetType=template.getTargetType();
+  final Notion notion=template.getEndNodeNotion();
+  notion.setType(targetType);
+  final PropertyKey endNodeIdentifier=notion.getPrimaryPropertyKey();
+  if (endNodeIdentifier != null) {
+    Object identifierValue=properties.get(endNodeIdentifier.dbName());
+    properties.remove(targetIdProperty.dbName());
+    return (NodeInterface)notion.getAdapterForSetter(securityContext).adapt(identifierValue);
+  }
+  return null;
+}

@@ -1,16 +1,15 @@
 {
   try {
-    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-      @Override public Object execute() throws FrameworkException {
-        for (        Node node : nodes) {
-          ((GraphObject)node).setProperty(GraphObject.visibleToPublicUsers,true);
-        }
-        return null;
-      }
+    app.beginTx();
+    for (    Node node : nodes) {
+      ((GraphObject)node).setProperty(GraphObject.visibleToPublicUsers,true);
     }
-);
+    app.commitTx();
   }
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,null,ex);
+  }
+ finally {
+    app.finishTx();
   }
 }

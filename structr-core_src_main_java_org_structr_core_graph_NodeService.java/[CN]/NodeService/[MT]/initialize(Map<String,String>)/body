@@ -1,16 +1,20 @@
 {
-  String dbPath=Services.getDatabasePath();
+  final Map<String,String> neo4jConfiguration=new LinkedHashMap<>();
+  final String dbPath=Services.getDatabasePath();
   logger.log(Level.INFO,"Initializing database ({0}) ...",dbPath);
   if (graphDb != null) {
     logger.log(Level.INFO,"Database already running ({0}) ...",dbPath);
     return;
   }
+  if ("true".equals(Services.getConfigurationValue(Services.NEO4J_SHELL_ENABLED,"false"))) {
+    neo4jConfiguration.put(ShellSettings.remote_shell_enabled.name(),"true");
+  }
   try {
-    graphDb=new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(dbPath).loadPropertiesFromFile(dbPath + "/neo4j.conf").newGraphDatabase();
+    graphDb=new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(dbPath).setConfig(neo4jConfiguration).loadPropertiesFromFile(dbPath + "/neo4j.conf").newGraphDatabase();
   }
  catch (  Throwable t) {
     logger.log(Level.INFO,"Database config {0}/neo4j.conf not found",dbPath);
-    graphDb=new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(dbPath).setConfig(ShellSettings.remote_shell_enabled,"true").newGraphDatabase();
+    graphDb=new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(dbPath).setConfig(neo4jConfiguration).newGraphDatabase();
   }
   if (graphDb == null) {
     logger.log(Level.SEVERE,"Database could not be started ({0}) ...",dbPath);
@@ -43,7 +47,7 @@
   nodeIndices.put(NodeIndex.keyword,keywordIndex);
   logger.log(Level.FINE,"Keyword node index ready.");
   logger.log(Level.FINE,"Initializing layer index...");
-  final Map<String,String> config=new HashMap<String,String>();
+  final Map<String,String> config=new HashMap<>();
   config.put(LayerNodeIndex.LAT_PROPERTY_KEY,Location.latitude.dbName());
   config.put(LayerNodeIndex.LON_PROPERTY_KEY,Location.longitude.dbName());
   config.put(SpatialIndexProvider.GEOMETRY_TYPE,LayerNodeIndex.POINT_PARAMETER);

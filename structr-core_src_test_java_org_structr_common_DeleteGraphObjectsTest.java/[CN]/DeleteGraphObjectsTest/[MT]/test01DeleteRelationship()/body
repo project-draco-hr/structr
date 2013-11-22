@@ -1,9 +1,17 @@
 {
   try {
-    List<AbstractNode> nodes=this.createTestNodes(GenericNode.class,2);
+    final List<NodeInterface> nodes=this.createTestNodes(GenericNode.class,2);
+    RelationshipInterface rel=null;
     assertNotNull(nodes);
     assertTrue(nodes.size() == 2);
-    AbstractRelationship rel=createRelationshipCommand.execute(nodes.get(0),nodes.get(1),TestRelType.ONE_TO_ONE);
+    try {
+      app.beginTx();
+      rel=app.create(nodes.get(0),nodes.get(1),SixOneOneToOne.class);
+      app.commitTx();
+    }
+  finally {
+      app.finishTx();
+    }
     assertNotNull(rel);
     try {
       rel.getRelationship().delete();
@@ -12,7 +20,14 @@
  catch (    org.neo4j.graphdb.NotInTransactionException e) {
     }
     assertNotNull(rel);
-    deleteRelationshipCommand.execute(rel);
+    try {
+      app.beginTx();
+      app.delete(rel);
+      app.commitTx();
+    }
+  finally {
+      app.finishTx();
+    }
     String uuid=rel.getUuid();
     assertNull("UUID of deleted relationship should be null",uuid);
   }

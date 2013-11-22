@@ -1,20 +1,8 @@
 {
   final SecurityContext securityContext=getWebSocket().getSecurityContext();
+  final App app=StructrApp.getInstance(securityContext);
   try {
-    if (idProperty != null) {
-      List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
-      attrs.add(Search.andExactProperty(securityContext,idProperty,id));
-      Result results=Services.command(securityContext,SearchNodeCommand.class).execute(true,false,attrs);
-      if (!results.isEmpty()) {
-        return (AbstractNode)results.get(0);
-      }
-    }
- else {
-      List<AbstractNode> results=(List<AbstractNode>)Services.command(securityContext,FindNodeCommand.class).execute(id);
-      if (!results.isEmpty()) {
-        return results.get(0);
-      }
-    }
+    return (AbstractNode)app.get(id);
   }
  catch (  FrameworkException fex) {
     logger.log(Level.WARNING,"Unable to get node",fex);

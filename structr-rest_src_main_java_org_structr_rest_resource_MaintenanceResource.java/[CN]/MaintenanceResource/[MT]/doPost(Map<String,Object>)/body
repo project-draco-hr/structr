@@ -2,9 +2,10 @@
   if ((securityContext != null) && securityContext.isSuperUser()) {
     if (this.taskOrCommand != null) {
       try {
+        final App app=StructrApp.getInstance(securityContext);
         if (Task.class.isAssignableFrom(taskOrCommand)) {
           Task task=(Task)taskOrCommand.newInstance();
-          Services.command(securityContext,ProcessTaskCommand.class).execute(task);
+          app.processTasks(task);
         }
  else         if (MaintenanceCommand.class.isAssignableFrom(taskOrCommand)) {
           MaintenanceCommand cmd=(MaintenanceCommand)Services.command(securityContext,taskOrCommand);

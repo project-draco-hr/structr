@@ -4,13 +4,14 @@
     final TestFour testEntity=createTestNode(TestFour.class);
     assertNotNull(testEntity);
     final Boolean value=Boolean.TRUE;
-    Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-      @Override public Object execute() throws FrameworkException {
-        testEntity.setProperty(key,value);
-        return null;
-      }
+    try {
+      app.beginTx();
+      testEntity.setProperty(key,value);
+      app.commitTx();
     }
-);
+  finally {
+      app.finishTx();
+    }
     assertEquals(value,testEntity.getProperty(key));
   }
  catch (  FrameworkException fex) {

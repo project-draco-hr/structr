@@ -1,0 +1,23 @@
+{
+  final String type=this.getClass().getSimpleName();
+  final App app=StructrApp.getInstance(securityContext);
+  final PropertyMap _props=getProperties();
+  if (getSourceNodeId().equals(startNodeId)) {
+    return;
+  }
+  try {
+    app.beginTx();
+    final NodeInterface newStartNode=(NodeInterface)app.get(startNodeId);
+    final NodeInterface endNode=getTargetNode();
+    final Class relationType=getClass();
+    if (newStartNode == null) {
+      throw new FrameworkException(type,new IdNotFoundToken(startNodeId));
+    }
+    dbRelationship.delete();
+    app.create(newStartNode,endNode,relationType,_props);
+    app.commitTx();
+  }
+  finally {
+    app.finishTx();
+  }
+}

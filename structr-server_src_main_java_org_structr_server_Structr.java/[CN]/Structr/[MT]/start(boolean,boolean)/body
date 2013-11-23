@@ -15,7 +15,6 @@
   if (!baseDir.exists()) {
     baseDir.mkdirs();
   }
-  configuredServices.add(ModuleService.class);
   configuredServices.add(NodeService.class);
   configuredServices.add(AgentService.class);
   configuredServices.add(CronService.class);
@@ -167,7 +166,7 @@
   File seedFile=new File(basePath + "/" + INITIAL_SEED_FILE);
   if (seedFile.exists()) {
     logger.log(Level.INFO,"Found initial seed file, checking database status..");
-    GraphDatabaseService graphDb=Services.getService(NodeService.class).getGraphDb();
+    GraphDatabaseService graphDb=Services.getInstance().getService(NodeService.class).getGraphDb();
     boolean hasApplicationNodes=false;
     for (    Node node : GlobalGraphOperations.at(graphDb).getAllNodes()) {
       if (node.hasProperty(GraphObject.uuid.dbName())) {
@@ -181,7 +180,7 @@
       attributes.put("mode","import");
       attributes.put("validate","false");
       attributes.put("file",seedFile.getAbsoluteFile().getAbsolutePath());
-      Services.command(SecurityContext.getSuperUserInstance(),SyncCommand.class).execute(attributes);
+      StructrApp.getInstance().command(SyncCommand.class).execute(attributes);
     }
  else {
       logger.log(Level.INFO,"Applications nodes found, not applying initial seed.");

@@ -1,6 +1,5 @@
 {
   final String type=GraphObject.type.dbName();
-  final ModuleService moduleService=getModuleService();
   final String sourceType=relationship.getStartNode().hasProperty(type) ? relationship.getStartNode().getProperty(type).toString() : null;
   final String targetType=relationship.getEndNode().hasProperty(type) ? relationship.getEndNode().getProperty(type).toString() : null;
   final String relType=relationship.getType().name();
@@ -13,8 +12,8 @@
     Object obj=relationship.getProperty(type);
     logger.log(Level.FINEST,"Type property: {0}",obj);
     if (obj != null) {
-      Class relationClass=moduleService.getRelationshipEntityClass(obj.toString());
-      moduleService.setRelationClassForCombinedType(sourceType,relType,targetType,relationClass);
+      Class relationClass=StructrApp.getConfiguration().getRelationshipEntityClass(obj.toString());
+      StructrApp.getConfiguration().setRelationClassForCombinedType(sourceType,relType,targetType,relationClass);
       return relationClass;
     }
   }

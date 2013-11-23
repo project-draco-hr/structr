@@ -6,7 +6,7 @@
   hasError|=ValidationHelper.checkStringNotBlank(this,name,errorBuffer);
   hasError|=ValidationHelper.checkStringNotBlank(this,locale,errorBuffer);
   try {
-    Result<MailTemplate> res=(Result)Services.command(securityContext,SearchNodeCommand.class).execute(Search.andExactType(MailTemplate.class),Search.andExactName(_name),Search.andExactProperty(securityContext,locale,_locale));
+    Result<MailTemplate> res=(Result)StructrApp.getInstance(securityContext).command(SearchNodeCommand.class).execute(Search.andExactType(MailTemplate.class),Search.andExactName(_name),Search.andExactProperty(securityContext,locale,_locale));
     if (!res.isEmpty() && res.size() > 1) {
       hasError=true;
       errorBuffer.add(MailTemplate.class.getName(),new UniqueToken(_uuid,name,_name));

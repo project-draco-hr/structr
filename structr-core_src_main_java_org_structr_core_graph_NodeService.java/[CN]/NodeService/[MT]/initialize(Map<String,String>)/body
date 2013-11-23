@@ -1,12 +1,12 @@
 {
   final Map<String,String> neo4jConfiguration=new LinkedHashMap<>();
-  final String dbPath=Services.getDatabasePath();
+  final String dbPath=Services.getInstance().getDatabasePath();
   logger.log(Level.INFO,"Initializing database ({0}) ...",dbPath);
   if (graphDb != null) {
     logger.log(Level.INFO,"Database already running ({0}) ...",dbPath);
     return;
   }
-  if ("true".equals(Services.getConfigurationValue(Services.NEO4J_SHELL_ENABLED,"false"))) {
+  if ("true".equals(StructrApp.getConfigurationValue(Services.NEO4J_SHELL_ENABLED,"false"))) {
     neo4jConfiguration.put(ShellSettings.remote_shell_enabled.name(),"true");
   }
   try {
@@ -20,7 +20,7 @@
     logger.log(Level.SEVERE,"Database could not be started ({0}) ...",dbPath);
     return;
   }
-  String filesPath=Services.getFilesPath();
+  String filesPath=Services.getInstance().getFilesPath();
   File files=new File(filesPath);
   if (!files.exists()) {
     files.mkdir();

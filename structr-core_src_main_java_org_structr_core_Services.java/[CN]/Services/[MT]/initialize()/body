@@ -5,7 +5,8 @@
     return;
   }
   configFilePath=getConfigValue(config,Services.CONFIG_FILE_PATH,"./structr.conf");
-  configuredServices=getConfigValue(config,Services.CONFIGURED_SERVICES,"ModuleService NodeService AgentService CloudService CacheService LogService NotificationService");
+  configuredServices=getConfigValue(config,Services.CONFIGURED_SERVICES,"NodeService AgentService CloudService CacheService LogService NotificationService");
+  configurationClass=getConfigValue(config,Services.CONFIGURATION,ModuleService.class.getName());
   appTitle=getConfigValue(config,Services.APPLICATION_TITLE,"structr");
   appHost=getConfigValue(config,Services.APPLICATION_HOST,"localhost");
   appHttpPort=getConfigValue(config,Services.APPLICATION_HTTP_PORT,"8082");
@@ -29,15 +30,10 @@
   smtpUser=getConfigValue(config,Services.SMTP_USER,"");
   smtpPassword=getConfigValue(config,Services.SMTP_PASSWORD,"");
   superuserUsername=getConfigValue(config,Services.SUPERUSER_USERNAME,"superadmin");
-  superuserPassword=getConfigValue(config,Services.SUPERUSER_PASSWORD,"");
+  superuserPassword=getConfigValue(config,Services.SUPERUSER_PASSWORD,RandomStringUtils.randomAlphanumeric(12));
   jsonDepth=getConfigValue(config,Services.JSON_OUTPUT_DEPTH,"3");
   logger.log(Level.INFO,"Starting services");
-  try {
-    Services.command(null,InitializeModuleServiceCommand.class).execute();
-  }
- catch (  FrameworkException fex) {
-    fex.printStackTrace();
-  }
+  getConfiguration();
   for (  Class serviceClass : registeredServiceClasses) {
     if (Service.class.isAssignableFrom(serviceClass) && isConfigured(serviceClass)) {
       try {

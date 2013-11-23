@@ -31,7 +31,7 @@ final App app=StructrApp.getInstance(securityContext);
 final String finalUrlString=urlString;
 try {
 app.beginTx();
-Image newImageNode=(Image)Services.command(securityContext,CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.type,Image.class.getSimpleName()),new NodeAttribute(org.structr.web.entity.File.url,finalUrlString),new NodeAttribute(AbstractNode.visibleToAuthenticatedUsers,true),new NodeAttribute(AbstractNode.visibleToPublicUsers,true));
+Image newImageNode=(Image)StructrApp.getInstance(securityContext).command(CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.type,Image.class.getSimpleName()),new NodeAttribute(org.structr.web.entity.File.url,finalUrlString),new NodeAttribute(AbstractNode.visibleToAuthenticatedUsers,true),new NodeAttribute(AbstractNode.visibleToPublicUsers,true));
 refreshImageFromUrl(newImageNode);
 app.commitTx();
 return newImageNode;

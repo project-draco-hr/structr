@@ -4,7 +4,6 @@
   ServletContext servletContext=sce.getServletContext();
   String configFilePath=servletContext.getInitParameter(Services.CONFIG_FILE_PATH);
   configMap.put(Services.CONFIG_FILE_PATH,configFilePath);
-  configMap.put(Services.SERVLET_REAL_ROOT_PATH,servletContext.getRealPath("/"));
   try {
     Properties properties=new Properties();
     properties.load(new FileInputStream(configFilePath));
@@ -72,6 +71,6 @@
  catch (  Throwable t) {
     logger.log(Level.WARNING,"Could not inititialize all values");
   }
-  Services.initialize(configMap);
+  Services.getInstance(configMap);
   logger.log(Level.INFO,"structr application context initialized (structr started successfully)");
 }

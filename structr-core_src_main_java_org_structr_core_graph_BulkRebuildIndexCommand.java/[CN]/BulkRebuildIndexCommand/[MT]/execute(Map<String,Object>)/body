@@ -7,10 +7,10 @@
   final RelationshipFactory relFactory=new RelationshipFactory(superUserContext);
   Class type=null;
   if (entityType != null) {
-    type=EntityContext.getEntityClassForRawType(entityType);
+    type=SchemaHelper.getEntityClassForRawType(entityType);
   }
   final Result<AbstractNode> result=nodeFactory.instantiateAll(GlobalGraphOperations.at(graphDb).getAllNodes());
-  final List<AbstractNode> nodes=new ArrayList<AbstractNode>();
+  final List<AbstractNode> nodes=new ArrayList<>();
   for (  AbstractNode node : result.getResults()) {
     if (type == null || node.getClass().equals(type)) {
       nodes.add(node);

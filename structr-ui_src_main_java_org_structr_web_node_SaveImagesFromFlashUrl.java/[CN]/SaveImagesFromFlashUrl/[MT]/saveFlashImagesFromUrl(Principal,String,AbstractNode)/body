@@ -1,6 +1,6 @@
 {
   String flashObjectName=urlString.substring(urlString.lastIndexOf("/") + 1);
-  String tmpFilePath=Services.getFilePath(Path.Temp,"_ " + flashObjectName + "_"+ System.nanoTime());
+  String tmpFilePath=Services.getInstance().getFilePath(Path.Temp,"_ " + flashObjectName + "_"+ System.nanoTime());
   File flashFile=new File(tmpFilePath);
   URL flashUrl=null;
   try {
@@ -78,9 +78,9 @@
             int id=image.getIdentifier();
             logger.log(Level.INFO,"Found image (w, h, id, format): {0}, {1}, {2}, {3}",new Object[]{width,height,id,format});
             String name=flashObjectName + "_" + id+ "_"+ width+ "x"+ height+ fileExtension;
-            Image newImageNode=(Image)Services.command(securityContext,CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.type,Image.class.getSimpleName()),new NodeAttribute(AbstractNode.name,name),new NodeAttribute(Image.width,width),new NodeAttribute(Image.height,height),new NodeAttribute(org.structr.web.entity.File.contentType,contentType),new NodeAttribute(AbstractNode.visibleToAuthenticatedUsers,true));
+            Image newImageNode=(Image)StructrApp.getInstance(securityContext).command(CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.type,Image.class.getSimpleName()),new NodeAttribute(AbstractNode.name,name),new NodeAttribute(Image.width,width),new NodeAttribute(Image.height,height),new NodeAttribute(org.structr.web.entity.File.contentType,contentType),new NodeAttribute(AbstractNode.visibleToAuthenticatedUsers,true));
             String relativeFilePath=newImageNode.getId() + "_" + System.currentTimeMillis();
-            String path=Services.getFilePath(Path.Files,relativeFilePath);
+            String path=Services.getInstance().getFilePath(Path.Files,relativeFilePath);
             File imageFile=new File(path);
             if (imageAsByteArray != null) {
               writeBufferToFile(imageFile,ImageHelper.normalizeJpegImage(imageAsByteArray));

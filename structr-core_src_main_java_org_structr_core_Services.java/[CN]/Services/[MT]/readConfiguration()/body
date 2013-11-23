@@ -1,0 +1,73 @@
+{
+  logger.log(Level.INFO,"Servlet context created");
+  Map<String,String> configMap=new ConcurrentHashMap<>(20,0.9f,8);
+  String configFilePath="structr.conf";
+  configMap.put(Services.CONFIG_FILE_PATH,configFilePath);
+  try {
+    Properties properties=new Properties();
+    properties.load(new FileInputStream(configFilePath));
+    String configuredServices=properties.getProperty(Services.CONFIGURED_SERVICES);
+    logger.log(Level.INFO,"Config file configured services: {0}",configuredServices);
+    String appTitle=properties.getProperty(Services.APPLICATION_TITLE);
+    logger.log(Level.INFO,"Config file application title: {0}",appTitle);
+    String tmpPath=properties.getProperty(Services.TMP_PATH);
+    logger.log(Level.INFO,"Config file temp path: {0}",tmpPath);
+    String basePath=properties.getProperty(Services.BASE_PATH);
+    logger.log(Level.INFO,"Config file base path: {0}",basePath);
+    String databasePath=properties.getProperty(Services.DATABASE_PATH);
+    logger.log(Level.INFO,"Config file database path: {0}",databasePath);
+    String filesPath=properties.getProperty(Services.FILES_PATH);
+    logger.log(Level.INFO,"Config file files path: {0}",filesPath);
+    String serverIp=properties.getProperty(Services.SERVER_IP);
+    logger.log(Level.INFO,"Config file server IP: {0}",serverIp);
+    String tcpPort=properties.getProperty(Services.TCP_PORT);
+    logger.log(Level.INFO,"Config file TCP port: {0}",tcpPort);
+    String udpPort=properties.getProperty(Services.UDP_PORT);
+    logger.log(Level.INFO,"Config file UDP port: {0}",udpPort);
+    String superuserUsername=properties.getProperty(Services.SUPERUSER_USERNAME);
+    logger.log(Level.INFO,"Config file superuser username: {0}",superuserUsername);
+    String superuserPassword=properties.getProperty(Services.SUPERUSER_PASSWORD);
+    logger.log(Level.INFO,"Config file superuser password: {0}",superuserPassword);
+    if (configuredServices != null) {
+      configMap.put(Services.CONFIGURED_SERVICES,configuredServices);
+    }
+    if (appTitle != null) {
+      configMap.put(Services.APPLICATION_TITLE,appTitle);
+    }
+    if (tmpPath != null) {
+      configMap.put(Services.TMP_PATH,tmpPath);
+    }
+    if (basePath != null) {
+      configMap.put(Services.BASE_PATH,basePath);
+    }
+    if (databasePath != null) {
+      configMap.put(Services.DATABASE_PATH,databasePath);
+    }
+    if (filesPath != null) {
+      configMap.put(Services.FILES_PATH,filesPath);
+    }
+    if (tcpPort != null) {
+      configMap.put(Services.TCP_PORT,tcpPort);
+    }
+    if (serverIp != null) {
+      configMap.put(Services.SERVER_IP,serverIp);
+    }
+    if (udpPort != null) {
+      configMap.put(Services.UDP_PORT,udpPort);
+    }
+    if (superuserUsername != null) {
+      configMap.put(Services.SUPERUSER_USERNAME,superuserUsername);
+    }
+    if (superuserPassword != null) {
+      configMap.put(Services.SUPERUSER_PASSWORD,superuserPassword);
+    }
+    for (    String name : properties.stringPropertyNames()) {
+      if (!configMap.containsKey(name)) {
+        configMap.put(name,properties.getProperty(name));
+      }
+    }
+  }
+ catch (  Throwable t) {
+    logger.log(Level.WARNING,"Could not inititialize all values");
+  }
+}

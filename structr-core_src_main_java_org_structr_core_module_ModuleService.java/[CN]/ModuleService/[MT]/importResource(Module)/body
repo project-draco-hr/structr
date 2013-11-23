@@ -1,5 +1,6 @@
 {
-  Set<String> classes=module.getClasses();
+  final Configuration configuration=StructrApp.getConfiguration();
+  final Set<String> classes=module.getClasses();
   for (  final String name : classes) {
     String className=StringUtils.removeStart(name,".");
     logger.log(Level.FINE,"Instantiating class {0} ",className);
@@ -8,7 +9,7 @@
       logger.log(Level.FINE,"Class {0} instantiated: {1}",new Object[]{className,clazz});
       if (!Modifier.isAbstract(clazz.getModifiers())) {
         if (AbstractNode.class.isAssignableFrom(clazz)) {
-          EntityContext.init(clazz);
+          configuration.registerEntityType(clazz);
           String simpleName=clazz.getSimpleName();
           String fullName=clazz.getName();
           nodeEntityClassCache.put(simpleName,clazz);
@@ -24,7 +25,7 @@
           }
         }
         if (AbstractRelationship.class.isAssignableFrom(clazz)) {
-          EntityContext.init(clazz);
+          configuration.registerEntityType(clazz);
           String simpleName=clazz.getSimpleName();
           String fullName=clazz.getName();
           relationshipEntityClassCache.put(simpleName,clazz);
@@ -40,7 +41,7 @@
           }
         }
         if (Service.class.isAssignableFrom(clazz)) {
-          Services.registerServiceClass(clazz);
+          Services.getInstance().registerServiceClass(clazz);
         }
         if (Agent.class.isAssignableFrom(clazz)) {
           String simpleName=clazz.getSimpleName();

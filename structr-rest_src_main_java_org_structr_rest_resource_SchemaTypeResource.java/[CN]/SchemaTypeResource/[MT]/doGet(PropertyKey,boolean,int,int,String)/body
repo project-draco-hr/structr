@@ -13,11 +13,11 @@
     schema.setProperty(new StringProperty("url"),url);
     schema.setProperty(new StringProperty("type"),type.getSimpleName());
     schema.setProperty(new LongProperty("flags"),SecurityContext.getResourceFlags(rawType));
-    Set<String> propertyViews=new LinkedHashSet<String>(EntityContext.getPropertyViews());
+    Set<String> propertyViews=new LinkedHashSet<String>(StructrApp.getConfiguration().getPropertyViews());
     Map<String,Map<String,Object>> views=new TreeMap();
     schema.setProperty(new StringProperty("views"),views);
     for (    String view : propertyViews) {
-      Set<PropertyKey> properties=new LinkedHashSet<PropertyKey>(EntityContext.getPropertySet(type,view));
+      Set<PropertyKey> properties=new LinkedHashSet<PropertyKey>(StructrApp.getConfiguration().getPropertySet(type,view));
       Map<String,Object> propertyConverterMap=new TreeMap<String,Object>();
       if (PropertyDefinition.exists(type.getSimpleName())) {
         Iterable<PropertyDefinition> dynamicProperties=PropertyDefinition.getPropertiesForKind(type.getSimpleName());

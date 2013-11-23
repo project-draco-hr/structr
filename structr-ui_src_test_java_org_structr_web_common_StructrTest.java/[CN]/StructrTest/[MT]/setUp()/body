@@ -13,11 +13,11 @@
   context.put(Services.UDP_PORT,"13466");
   context.put(Services.SUPERUSER_USERNAME,"superadmin");
   context.put(Services.SUPERUSER_PASSWORD,"sehrgeheim");
-  Services.initialize(context);
+  final Services services=Services.getInstance(context);
   securityContext=SecurityContext.getSuperUserInstance();
-  graphDbCommand=Services.command(securityContext,GraphDatabaseCommand.class);
-  writeLogCommand=Services.command(securityContext,WriteLogCommand.class);
-  readLogCommand=Services.command(securityContext,ReadLogCommand.class);
+  graphDbCommand=StructrApp.getInstance(securityContext).command(GraphDatabaseCommand.class);
+  writeLogCommand=StructrApp.getInstance(securityContext).command(WriteLogCommand.class);
+  readLogCommand=StructrApp.getInstance(securityContext).command(ReadLogCommand.class);
   do {
     try {
       Thread.sleep(100);
@@ -25,6 +25,6 @@
  catch (    Throwable t) {
     }
   }
- while (!Services.isInitialized());
+ while (!services.isInitialized());
   app=StructrApp.getInstance(securityContext);
 }

@@ -1,0 +1,40 @@
+{
+  logger.log(Level.INFO,"Starting {0} (host={1}:{2}, maxIdleTime={3}, requestHeaderSize={4})",new Object[]{applicationName,host,httpPort,maxIdleTime,requestHeaderSize});
+  logger.log(Level.INFO,"Base path {0}",basePath);
+  logger.log(Level.INFO,"{0} started:        http://{1}:{2}{3}",new Object[]{applicationName,host,httpPort,restUrl});
+  try {
+    server.start();
+  }
+ catch (  Exception ex) {
+    logger.log(Level.SEVERE,"Unable to start REST server: {0}",ex.getMessage());
+  }
+  removeDir(basePath,"jsp");
+  File seedFile=new File(basePath + "/" + INITIAL_SEED_FILE);
+  if (seedFile.exists()) {
+    logger.log(Level.INFO,"Found initial seed file, checking database status..");
+    GraphDatabaseService graphDb=Services.getInstance().getService(NodeService.class).getGraphDb();
+    boolean hasApplicationNodes=false;
+    for (    Node node : GlobalGraphOperations.at(graphDb).getAllNodes()) {
+      if (node.hasProperty(GraphObject.uuid.dbName())) {
+        hasApplicationNodes=true;
+        break;
+      }
+    }
+    if (!hasApplicationNodes) {
+      logger.log(Level.INFO,"No application nodes found, applying initial seed..");
+      Map<String,Object> attributes=new LinkedHashMap<>();
+      attributes.put("mode","import");
+      attributes.put("validate","false");
+      attributes.put("file",seedFile.getAbsoluteFile().getAbsolutePath());
+      try {
+        StructrApp.getInstance().command(SyncCommand.class).execute(attributes);
+      }
+ catch (      FrameworkException fex) {
+        logger.log(Level.WARNING,"Unable to import initial seed file.",fex);
+      }
+    }
+ else {
+      logger.log(Level.INFO,"Applications nodes found, not applying initial seed.");
+    }
+  }
+}

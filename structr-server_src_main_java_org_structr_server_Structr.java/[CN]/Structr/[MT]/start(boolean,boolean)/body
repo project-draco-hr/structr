@@ -91,17 +91,6 @@
     }
   }
   ResourceProvider resourceProviderInstance=resourceProvider.newInstance();
-  JsonRestServlet structrRestServlet=new JsonRestServlet(resourceProviderInstance,defaultPropertyView,AbstractNode.uuid);
-  ServletHolder structrRestServletHolder=new ServletHolder(structrRestServlet);
-  servletParams.put("PropertyFormat","FlatNameValue");
-  servletParams.put(AuthenticationService.SERVLET_PARAMETER_AUTHENTICATOR,authenticator.getName());
-  servletParams.put(AuthenticationService.SERVLET_PARAMETER_USER_AUTO_CREATE,Boolean.toString(userAutoCreate));
-  if (userClass != null) {
-    servletParams.put(AuthenticationService.SERVLET_PARAMETER_USER_CLASS,userClass.getName());
-  }
-  structrRestServletHolder.setInitParameters(servletParams);
-  structrRestServletHolder.setInitOrder(0);
-  servlets.put(restUrl + "/*",structrRestServletHolder);
   int position=1;
   for (  Entry<String,ServletHolder> servlet : servlets.entrySet()) {
     String path=servlet.getKey();
@@ -110,7 +99,6 @@
     logger.log(Level.INFO,"Adding servlet {0} for {1}",new Object[]{servletHolder,path});
     servletContext.addServlet(servletHolder,path);
   }
-  servletContext.addEventListener(new ApplicationContextListener());
   contexts.addHandler(servletContext);
   if (enableHttps) {
     if (httpsPort > -1 && keyStorePath != null && !keyStorePath.isEmpty() && keyStorePassword != null) {

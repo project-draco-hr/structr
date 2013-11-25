@@ -1,0 +1,23 @@
+{
+  logger.log(Level.INFO,"Initializing service layer");
+  configurationClass=properties.getProperty(Services.CONFIGURATION);
+  configuredServiceNames=properties.getProperty(Services.CONFIGURED_SERVICES);
+  configuredServiceClasses.addAll(Arrays.asList(configuredServiceNames.split("[ ,]+")));
+  getConfiguration();
+  this.structrConf=properties;
+  logger.log(Level.INFO,"Starting services");
+  for (  Class serviceClass : registeredServiceClasses) {
+    if (Service.class.isAssignableFrom(serviceClass) && configuredServiceClasses.contains(serviceClass.getSimpleName())) {
+      try {
+        createService(serviceClass);
+      }
+ catch (      Throwable t) {
+        logger.log(Level.WARNING,"Exception while registering service {0}: {1}",new Object[]{serviceClass.getName(),t.getMessage()});
+      }
+    }
+  }
+  logger.log(Level.INFO,"{0} service(s) processed",serviceCache.size());
+  registeredServiceClasses.clear();
+  logger.log(Level.INFO,"Initialization complete");
+  initializationDone=true;
+}

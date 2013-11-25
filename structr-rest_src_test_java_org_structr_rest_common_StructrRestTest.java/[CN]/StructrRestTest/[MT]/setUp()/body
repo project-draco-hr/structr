@@ -1,5 +1,41 @@
 {
-  init();
+  final Properties context=Services.getDefaultConfiguration();
+  final Date now=new Date();
+  final long timestamp=now.getTime();
+  basePath="/tmp/structr-test-" + timestamp;
+  context.setProperty(Services.TESTING,"true");
+  context.setProperty(Services.CONFIGURED_SERVICES,"NodeService LogService RestService");
+  context.setProperty(Services.CONFIGURATION,ModuleService.class.getName());
+  context.setProperty(Services.APPLICATION_TITLE,"structr unit test app" + timestamp);
+  context.setProperty(Services.APPLICATION_HOST,host);
+  context.setProperty(Services.APPLICATION_HTTP_PORT,Integer.toString(httpPort));
+  context.setProperty(Services.TMP_PATH,"/tmp/");
+  context.setProperty(Services.BASE_PATH,basePath);
+  context.setProperty(Services.DATABASE_PATH,basePath + "/db");
+  context.setProperty(Services.FILES_PATH,basePath + "/files");
+  context.setProperty(Services.LOG_DATABASE_PATH,basePath + "/logDb.dat");
+  context.setProperty(Services.TCP_PORT,"13465");
+  context.setProperty(Services.UDP_PORT,"13466");
+  context.setProperty(Services.SUPERUSER_USERNAME,"superadmin");
+  context.setProperty(Services.SUPERUSER_PASSWORD,"sehrgeheim");
+  context.setProperty(RestService.SERVLETS,"JsonRestServlet");
+  context.setProperty("JsonRestServlet.class",JsonRestServlet.class.getName());
+  context.setProperty("JsonRestServlet.path",restUrl);
+  context.setProperty("JsonRestServlet.resourceprovider",TestResourceProvider.class.getName());
+  context.setProperty("JsonRestServlet.authenticator",SuperUserAuthenticator.class.getName());
+  context.setProperty("JsonRestServlet.user.class","");
+  context.setProperty("JsonRestServlet.user.autocreate","false");
+  context.setProperty("JsonRestServlet.defaultview",PropertyView.Public);
+  context.setProperty("JsonRestServlet.outputdepth","3");
+  final Services services=Services.getInstance(context);
   securityContext=SecurityContext.getSuperUserInstance();
   app=StructrApp.getInstance(securityContext);
+  do {
+    try {
+      Thread.sleep(100);
+    }
+ catch (    Throwable t) {
+    }
+  }
+ while (!services.isInitialized());
 }

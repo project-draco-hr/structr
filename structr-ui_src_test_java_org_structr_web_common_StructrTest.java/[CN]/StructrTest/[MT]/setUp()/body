@@ -1,24 +1,20 @@
 {
-  final StructrConf config=new StructrConf(Services.getDefaultConfiguration());
-  final Date now=new Date();
-  final long timestamp=now.getTime();
-  config.put(Services.CONFIGURED_SERVICES,"NodeService LogService");
-  config.put(Services.APPLICATION_TITLE,"structr unit test app" + timestamp);
-  config.put(Services.TMP_PATH,"/tmp/");
-  config.put(Services.BASE_PATH,"/tmp/structr-test-" + timestamp);
-  config.put(Services.DATABASE_PATH,"/tmp/structr-test-" + timestamp + "/db");
-  config.put(Services.FILES_PATH,"/tmp/structr-test-" + timestamp + "/files");
-  config.put(Services.LOG_DATABASE_PATH,"/tmp/structr-test-" + timestamp + "/logDb.dat");
-  config.put(Services.TCP_PORT,"13465");
-  config.put(Services.SERVER_IP,"127.0.0.1");
-  config.put(Services.UDP_PORT,"13466");
-  config.put(Services.SUPERUSER_USERNAME,"superadmin");
-  config.put(Services.SUPERUSER_PASSWORD,"sehrgeheim");
+  Date now=new Date();
+  long timestamp=now.getTime();
+  config.setProperty(Services.CONFIGURATION,JarConfigurationProvider.class.getName());
+  config.setProperty(Services.CONFIGURED_SERVICES,"ModuleService NodeService LogService");
+  config.setProperty(Services.APPLICATION_TITLE,"structr unit test app" + timestamp);
+  config.setProperty(Services.TMP_PATH,"/tmp/");
+  config.setProperty(Services.BASE_PATH,"/tmp/structr-test-" + timestamp);
+  config.setProperty(Services.DATABASE_PATH,"/tmp/structr-test-" + timestamp + "/db");
+  config.setProperty(Services.FILES_PATH,"/tmp/structr-test-" + timestamp + "/files");
+  config.setProperty(Services.LOG_DATABASE_PATH,"/tmp/structr-test-" + timestamp + "/logDb.dat");
+  config.setProperty(Services.TCP_PORT,"13465");
+  config.setProperty(Services.SERVER_IP,"127.0.0.1");
+  config.setProperty(Services.UDP_PORT,"13466");
+  config.setProperty(Services.SUPERUSER_USERNAME,"superadmin");
+  config.setProperty(Services.SUPERUSER_PASSWORD,"sehrgeheim");
   final Services services=Services.getInstance(config);
-  securityContext=SecurityContext.getSuperUserInstance();
-  graphDbCommand=StructrApp.getInstance(securityContext).command(GraphDatabaseCommand.class);
-  writeLogCommand=StructrApp.getInstance(securityContext).command(WriteLogCommand.class);
-  readLogCommand=StructrApp.getInstance(securityContext).command(ReadLogCommand.class);
   do {
     try {
       Thread.sleep(100);
@@ -27,5 +23,9 @@
     }
   }
  while (!services.isInitialized());
+  securityContext=SecurityContext.getSuperUserInstance();
   app=StructrApp.getInstance(securityContext);
+  graphDbCommand=app.command(GraphDatabaseCommand.class);
+  writeLogCommand=app.command(WriteLogCommand.class);
+  readLogCommand=app.command(ReadLogCommand.class);
 }

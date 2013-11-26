@@ -1,33 +1,22 @@
 {
-  if (running) {
-    server.stop();
-    do {
-      try {
-        Thread.sleep(100);
+  Services.getInstance().shutdown();
+  File testDir=new File(basePath);
+  int count=0;
+  while (testDir.exists() && count++ < 10) {
+    try {
+      if (testDir.isDirectory()) {
+        FileUtils.deleteDirectory(testDir);
       }
- catch (      Throwable t) {
+ else {
+        testDir.delete();
       }
     }
- while (!server.isStopped());
-    server.destroy();
-    File testDir=new File(basePath);
-    int count=0;
-    while (testDir.exists() && count++ < 10) {
-      try {
-        if (testDir.isDirectory()) {
-          FileUtils.deleteDirectory(testDir);
-        }
- else {
-          testDir.delete();
-        }
-      }
- catch (      Throwable t) {
-      }
-      try {
-        Thread.sleep(500);
-      }
- catch (      Throwable t) {
-      }
+ catch (    Throwable t) {
+    }
+    try {
+      Thread.sleep(500);
+    }
+ catch (    Throwable t) {
     }
   }
   super.tearDown();

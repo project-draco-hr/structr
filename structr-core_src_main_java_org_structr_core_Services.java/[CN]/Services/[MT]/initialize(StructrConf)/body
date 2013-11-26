@@ -1,9 +1,8 @@
 {
-  logger.log(Level.INFO,"Initializing service layer");
+  this.structrConf=properties;
   configurationClass=properties.getProperty(Services.CONFIGURATION);
   configuredServiceNames=properties.getProperty(Services.CONFIGURED_SERVICES);
   configuredServiceClasses.addAll(Arrays.asList(configuredServiceNames.split("[ ,]+")));
-  this.structrConf=properties;
   getConfigurationProvider();
   logger.log(Level.INFO,"Starting services");
   for (  final String serviceClassName : configuredServiceClasses) {
@@ -20,16 +19,6 @@
   }
   logger.log(Level.INFO,"{0} service(s) processed",serviceCache.size());
   registeredServiceClasses.clear();
-  final String configFileName="structr.conf";
-  logger.log(Level.INFO,"Reading {0}..",configFileName);
-  try {
-    final FileInputStream fis=new FileInputStream(configFileName);
-    properties.load(fis);
-    fis.close();
-  }
- catch (  IOException ioex) {
-    logger.log(Level.WARNING,"Unable to read configuration file {0}: {1}",new Object[]{configFileName,ioex.getMessage()});
-  }
   logger.log(Level.INFO,"Initialization complete");
   initializationDone=true;
 }

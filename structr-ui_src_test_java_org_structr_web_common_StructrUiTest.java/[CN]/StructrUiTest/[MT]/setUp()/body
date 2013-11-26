@@ -1,14 +1,11 @@
 {
-  final StructrConf config=Services.getDefaultConfiguration();
+  config=Services.getBaseConfiguration();
   final Date now=new Date();
   final long timestamp=now.getTime();
   basePath="/tmp/structr-test-" + timestamp;
   config.setProperty(Services.TESTING,"true");
   config.setProperty(Services.CONFIGURATION,JarConfigurationProvider.class.getName());
   config.setProperty(Services.CONFIGURED_SERVICES,"NodeService LogService FtpService HttpService");
-  config.setProperty(Services.APPLICATION_TITLE,"structr unit test app" + timestamp);
-  config.setProperty(Services.APPLICATION_HOST,host);
-  config.setProperty(Services.APPLICATION_HTTP_PORT,Integer.toString(httpPort));
   config.setProperty(Services.TMP_PATH,"/tmp/");
   config.setProperty(Services.BASE_PATH,basePath);
   config.setProperty(Services.DATABASE_PATH,basePath + "/db");
@@ -18,7 +15,10 @@
   config.setProperty(Services.UDP_PORT,"13466");
   config.setProperty(Services.SUPERUSER_USERNAME,"superadmin");
   config.setProperty(Services.SUPERUSER_PASSWORD,"sehrgeheim");
-  config.setProperty(Services.APPLICATION_FTP_PORT,Integer.toString(ftpPort));
+  config.setProperty(FtpService.APPLICATION_FTP_PORT,Integer.toString(ftpPort));
+  config.setProperty(HttpService.APPLICATION_TITLE,"structr unit test app" + timestamp);
+  config.setProperty(HttpService.APPLICATION_HOST,host);
+  config.setProperty(HttpService.APPLICATION_HTTP_PORT,Integer.toString(httpPort));
   config.setProperty(HttpService.SERVLETS,"JsonRestServlet WebSocketServlet CsvServlet HtmlServlet");
   config.setProperty("JsonRestServlet.class",JsonRestServlet.class.getName());
   config.setProperty("JsonRestServlet.path",restUrl);

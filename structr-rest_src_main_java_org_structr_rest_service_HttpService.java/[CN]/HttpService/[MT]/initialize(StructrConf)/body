@@ -1,6 +1,22 @@
 {
+  final StructrConf finalConfig=new StructrConf();
+  finalConfig.setProperty(APPLICATION_TITLE,"structr server");
+  finalConfig.setProperty(APPLICATION_HOST,"0.0.0.0");
+  finalConfig.setProperty(APPLICATION_HTTP_PORT,"8082");
+  finalConfig.setProperty(APPLICATION_HTTPS_ENABLED,"false");
+  finalConfig.setProperty(APPLICATION_HTTPS_PORT,"8083");
+  finalConfig.setProperty(SERVLETS,"JsonRestServlet");
+  finalConfig.setProperty("JsonRestServlet.class",JsonRestServlet.class.getName());
+  finalConfig.setProperty("JsonRestServlet.path","/structr/rest/*");
+  finalConfig.setProperty("JsonRestServlet.resourceprovider",DefaultResourceProvider.class.getName());
+  finalConfig.setProperty("JsonRestServlet.authenticator",RestAuthenticator.class.getName());
+  finalConfig.setProperty("JsonRestServlet.user.class",User.class.getName());
+  finalConfig.setProperty("JsonRestServlet.user.autocreate","false");
+  finalConfig.setProperty("JsonRestServlet.defaultview",PropertyView.Public);
+  finalConfig.setProperty("JsonRestServlet.outputdepth","3");
+  Services.mergeConfiguration(finalConfig,additionalConfig);
   String sourceJarName=getClass().getProtectionDomain().getCodeSource().getLocation().toString();
-  final boolean isTest=Boolean.parseBoolean(configurationFile.getProperty(Services.TESTING,"false"));
+  final boolean isTest=Boolean.parseBoolean(finalConfig.getProperty(Services.TESTING,"false"));
   if (!isTest && StringUtils.stripEnd(sourceJarName,System.getProperty("file.separator")).endsWith("classes")) {
     String jarFile=System.getProperty("jarFile");
     if (StringUtils.isEmpty(jarFile)) {
@@ -8,21 +24,21 @@
     }
     sourceJarName=jarFile;
   }
-  applicationName=configurationFile.getProperty(Services.APPLICATION_TITLE);
-  host=configurationFile.getProperty(Services.APPLICATION_HOST);
-  basePath=configurationFile.getProperty(Services.BASE_PATH);
-  httpPort=HttpServiceServlet.parseInt(configurationFile.getProperty(Services.APPLICATION_HTTP_PORT),8082);
+  applicationName=finalConfig.getProperty(APPLICATION_TITLE);
+  host=finalConfig.getProperty(APPLICATION_HOST);
+  basePath=finalConfig.getProperty(Services.BASE_PATH);
+  httpPort=HttpServiceServlet.parseInt(finalConfig.getProperty(APPLICATION_HTTP_PORT),8082);
   maxIdleTime=HttpServiceServlet.parseInt(System.getProperty("maxIdleTime"),30000);
   requestHeaderSize=HttpServiceServlet.parseInt(System.getProperty("requestHeaderSize"),8192);
-  String keyStorePath=configurationFile.getProperty(Services.APPLICATION_KEYSTORE_PATH);
-  String keyStorePassword=configurationFile.getProperty(Services.APPLICATION_KEYSTORE_PASSWORD);
+  String keyStorePath=finalConfig.getProperty(APPLICATION_KEYSTORE_PATH);
+  String keyStorePassword=finalConfig.getProperty(APPLICATION_KEYSTORE_PASSWORD);
   String contextPath=System.getProperty("contextPath","/");
   String logPrefix="structr";
   boolean enableRewriteFilter=true;
-  boolean enableHttps=HttpServiceServlet.parseBoolean(configurationFile.getProperty(Services.APPLICATION_HTTPS_ENABLED),false);
+  boolean enableHttps=HttpServiceServlet.parseBoolean(finalConfig.getProperty(APPLICATION_HTTPS_ENABLED),false);
   boolean enableGzipCompression=true;
   boolean logRequests=false;
-  int httpsPort=HttpServiceServlet.parseInt(configurationFile.getProperty(Services.APPLICATION_HTTP_PORT),8083);
+  int httpsPort=HttpServiceServlet.parseInt(finalConfig.getProperty(APPLICATION_HTTP_PORT),8083);
   basePath=System.getProperty("home",basePath);
   if (basePath.isEmpty()) {
     basePath=System.getProperty("user.dir","/tmp");
@@ -55,7 +71,7 @@
     servletContext.addFilter(rewriteFilter,"/*",EnumSet.of(DispatcherType.REQUEST,DispatcherType.FORWARD));
   }
   contexts.addHandler(servletContext);
-  if (logRequests || "true".equals(configurationFile.getProperty("log.requests","false"))) {
+  if (logRequests || "true".equals(finalConfig.getProperty("log.requests","false"))) {
     String etcPath=basePath + "/etc";
     File etcDir=new File(etcPath);
     if (!etcDir.exists()) {
@@ -103,11 +119,11 @@
  else {
     server.setHandler(contexts);
   }
-  final List<ContextHandler> resourceHandler=collectResourceHandlers(configurationFile);
+  final List<ContextHandler> resourceHandler=collectResourceHandlers(finalConfig);
   for (  ContextHandler contextHandler : resourceHandler) {
     contexts.addHandler(contextHandler);
   }
-  final Map<String,ServletHolder> servlets=collectServlets(configurationFile);
+  final Map<String,ServletHolder> servlets=collectServlets(finalConfig);
   int position=1;
   for (  Map.Entry<String,ServletHolder> servlet : servlets.entrySet()) {
     ServletHolder servletHolder=servlet.getValue();
@@ -130,7 +146,7 @@
       connectors.add(httpsConnector);
     }
  else {
-      logger.log(Level.WARNING,"Unable to configure SSL, please make sure that {0}, {1} and {2} are set correctly in structr.conf.",new Object[]{Services.APPLICATION_HTTPS_PORT,Services.APPLICATION_KEYSTORE_PATH,Services.APPLICATION_KEYSTORE_PASSWORD});
+      logger.log(Level.WARNING,"Unable to configure SSL, please make sure that {0}, {1} and {2} are set correctly in structr.conf.",new Object[]{APPLICATION_HTTPS_PORT,APPLICATION_KEYSTORE_PATH,APPLICATION_KEYSTORE_PASSWORD});
     }
   }
   if (host != null && !host.isEmpty() && httpPort > -1) {
@@ -142,7 +158,7 @@
     connectors.add(httpConnector);
   }
  else {
-    logger.log(Level.WARNING,"Unable to configure HTTP server port, please make sure that {0} and {1} are set correctly in structr.conf.",new Object[]{Services.APPLICATION_HOST,Services.APPLICATION_HTTP_PORT});
+    logger.log(Level.WARNING,"Unable to configure HTTP server port, please make sure that {0} and {1} are set correctly in structr.conf.",new Object[]{APPLICATION_HOST,APPLICATION_HTTP_PORT});
   }
   if (!connectors.isEmpty()) {
     server.setConnectors(connectors.toArray(new Connector[0]));

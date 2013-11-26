@@ -1,10 +1,11 @@
 {
   if (configuration == null) {
     try {
-      configuration=(Configuration)Class.forName(configurationClass).newInstance();
+      configuration=(ConfigurationProvider)Class.forName(configurationClass).newInstance();
       configuration.initialize();
     }
  catch (    Throwable t) {
+      t.printStackTrace();
       logger.log(Level.SEVERE,"Unable to instantiate schema provider of type {0}: {1}",new Object[]{configurationClass,t.getMessage()});
     }
   }

@@ -3,18 +3,19 @@
   configurationClass=properties.getProperty(Services.CONFIGURATION);
   configuredServiceNames=properties.getProperty(Services.CONFIGURED_SERVICES);
   configuredServiceClasses.addAll(Arrays.asList(configuredServiceNames.split("[ ,]+")));
-  getConfiguration();
   this.structrConf=properties;
+  getConfigurationProvider();
   logger.log(Level.INFO,"Starting services");
-  for (  Class serviceClass : registeredServiceClasses) {
-    if (Service.class.isAssignableFrom(serviceClass) && configuredServiceClasses.contains(serviceClass.getSimpleName())) {
-      try {
+  for (  final String serviceClassName : configuredServiceClasses) {
+    try {
+      Class serviceClass=getServiceClassForName(serviceClassName);
+      if (serviceClass != null) {
         createService(serviceClass);
       }
- catch (      Throwable t) {
-        logger.log(Level.WARNING,"Exception while registering service {0}: {1}",new Object[]{serviceClass.getName(),t});
-        t.printStackTrace();
-      }
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"Exception while registering service {0}: {1}",new Object[]{serviceClassName,t});
+      t.printStackTrace();
     }
   }
   logger.log(Level.INFO,"{0} service(s) processed",serviceCache.size());

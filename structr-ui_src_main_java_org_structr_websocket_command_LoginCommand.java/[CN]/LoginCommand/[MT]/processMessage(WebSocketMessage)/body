@@ -1,13 +1,11 @@
 {
-  final SecurityContext securityContext=SecurityContext.getSuperUserInstance();
   final String username=(String)webSocketData.getNodeData().get("username");
   final String password=(String)webSocketData.getNodeData().get("password");
-  final App app=StructrApp.getInstance(securityContext);
   Principal user=null;
   if ((username != null) && (password != null)) {
     try {
       StructrWebSocket socket=this.getWebSocket();
-      Authenticator auth=(Authenticator)StructrApp.getInstance(securityContext).command(AuthenticatorCommand.class).execute(socket.getConfig());
+      Authenticator auth=socket.getAuthenticator();
       user=auth.doLogin(socket.getRequest(),username,password);
       if (user != null) {
         final String sessionId=webSocketData.getSessionId();
@@ -16,6 +14,7 @@
           getWebSocket().send(MessageBuilder.status().code(403).build(),true);
         }
         final Principal principal=user;
+        final App app=StructrApp.getInstance();
         try {
           app.beginTx();
           principal.setProperty(Principal.sessionId,sessionId);

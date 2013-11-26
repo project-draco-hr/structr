@@ -1,12 +1,11 @@
 {
-  config=this.getServletConfig();
   final Gson gson=new GsonBuilder().setPrettyPrinting().registerTypeAdapter(WebSocketMessage.class,new WebSocketDataGSONAdapter(AbstractNode.uuid,outputNestingDepth)).create();
   final SynchronizationController syncController=new SynchronizationController(gson);
   TransactionCommand.registerTransactionListener(syncController);
   factory=new WebSocketFactory(new Acceptor(){
     @Override public WebSocket doWebSocketConnect(    final HttpServletRequest request,    final String protocol){
       if (STRUCTR_PROTOCOL.equals(protocol)) {
-        return new StructrWebSocket(syncController,config,request,gson,AbstractNode.uuid);
+        return new StructrWebSocket(syncController,request,gson,AbstractNode.uuid,getAuthenticator());
       }
  else {
         logger.log(Level.INFO,"Protocol {0} not accepted",protocol);

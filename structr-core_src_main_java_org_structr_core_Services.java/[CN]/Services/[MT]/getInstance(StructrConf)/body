@@ -1,16 +1,6 @@
 {
   if (singletonInstance == null) {
     singletonInstance=new Services();
-    try {
-      final StackTraceElement[] trace=Thread.currentThread().getStackTrace();
-      if (trace != null && trace.length > 0) {
-        final Class mainClass=Class.forName(trace[trace.length - 1].getClassName());
-        singletonInstance.resources=mainClass.getProtectionDomain().getCodeSource().getLocation().toString();
-      }
-    }
- catch (    Throwable t) {
-      t.printStackTrace();
-    }
     singletonInstance.initialize(properties);
   }
   return singletonInstance;

@@ -4,79 +4,25 @@
   Class sourceType=getNodeEntityClass(sourceTypeName);
   Class targetType=getNodeEntityClass(targetTypeName);
   for (  final Class candidate : getRelationshipEntities().values()) {
-    final Relation rel=instantiate(candidate);
-    if (rel != null) {
-      final String relTypeName=rel.name();
-      if (!relTypeName.equals(relType)) {
-        continue;
-      }
-      final String candidateSourceTypeName=rel.getSourceType().getSimpleName();
-      final String candidateTargetTypeName=rel.getTargetType().getSimpleName();
-      if (sourceTypeName.equals(candidateSourceTypeName) && relType.equals(relTypeName) && targetTypeName.equals(candidateTargetTypeName)) {
-        combinedTypeRelationClassCache.put(getCombinedType(sourceTypeName,relType,targetTypeName),candidate);
-        return candidate;
-      }
-      int distance=0;
-      while (!(sourceType.equals(Object.class))) {
-        while (!(targetType.equals(Object.class))) {
-          if (rel.getSourceType().equals(sourceType) && rel.getTargetType().equals(targetType)) {
-            candidates.put(distance,candidate);
-            System.out.println(sourceType + " --> " + targetType+ ":  matching candidate "+ candidate.getName()+ " at distance "+ distance);
-            break;
-          }
-          for (          Class i : sourceType.getInterfaces()) {
-            if (i.isAssignableFrom(rel.getSourceType()) && rel.getTargetType().equals(targetType)) {
-              System.out.println(i + " --> " + targetType+ ": Matching candidate "+ candidate.getName()+ " where source interface matches at distance "+ distance);
-              candidates.put(distance + 1000,candidate);
-              break;
-            }
-            distance++;
-          }
-          for (          Class i : targetType.getInterfaces()) {
-            if (rel.getSourceType().equals(sourceType) && i.isAssignableFrom(rel.getTargetType())) {
-              System.out.println(sourceType + " --> " + i+ ": Matching candidate "+ candidate.getName()+ " where target interface matches at distance "+ distance);
-              candidates.put(distance + 1000,candidate);
-              break;
-            }
-            distance++;
-          }
-          targetType=targetType.getSuperclass();
-          distance++;
-        }
-        targetType=getNodeEntityClass(targetTypeName);
-        sourceType=sourceType.getSuperclass();
-        distance++;
-      }
-      distance=0;
-      sourceType=getNodeEntityClass(sourceTypeName);
-      targetType=getNodeEntityClass(targetTypeName);
-      if (candidates.isEmpty()) {
-        for (        Class i : sourceType.getInterfaces()) {
-          if (i.isAssignableFrom(rel.getSourceType()) && rel.getTargetType().equals(targetType)) {
-            System.out.println("Put matching candidate " + candidate.getName() + " where source interface matches at distance "+ distance);
-            candidates.put(distance,candidate);
-            break;
-          }
-          distance++;
-        }
-        distance=0;
-        for (        Class i : targetType.getInterfaces()) {
-          if (rel.getSourceType().equals(sourceType) && i.isAssignableFrom(rel.getTargetType())) {
-            System.out.println("Put matching candidate " + candidate.getName() + " where target interface matches at distance "+ distance);
-            candidates.put(distance,candidate);
-            break;
-          }
-          distance++;
-        }
-      }
+    Relation rel=instantiate(candidate);
+    System.out.println("? " + candidate.getSimpleName() + " for ["+ sourceTypeName+ " "+ relType+ " "+ targetTypeName+ "]");
+    int distance=matchRelationClass(rel,sourceType,relType,targetType,-1);
+    if (distance >= 1000) {
+      candidates.put(distance - 1000,candidate);
+      System.out.println("\n=========================== Found " + candidate.getSimpleName() + " for "+ sourceTypeName+ " "+ relType+ " "+ targetTypeName+ " at distance "+ (distance - 1000));
+    }
+ else {
+      System.out.println(" no match.");
     }
   }
   if (candidates.isEmpty()) {
+    System.out.println("!!!!!!! No matching relation class found for " + sourceTypeName + " "+ relType+ " "+ targetTypeName);
     return null;
   }
  else {
-    Class c=candidates.entrySet().iterator().next().getValue();
-    System.out.println("returning candidate " + c.getCanonicalName());
+    Entry<Integer,Class> candidateEntry=candidates.entrySet().iterator().next();
+    Class c=candidateEntry.getValue();
+    System.out.println("########### Final nearest relation class : " + c.getSimpleName() + " <"+ candidateEntry.getKey()+ ">############################################\n\n");
     combinedTypeRelationClassCache.put(getCombinedType(sourceTypeName,relType,targetTypeName),c);
     return c;
   }

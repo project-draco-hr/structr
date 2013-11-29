@@ -5,7 +5,7 @@
     final Result<AbstractNode> result=nodeFactory.instantiateAll(GlobalGraphOperations.at(graphDb).getAllNodes());
     long deletedNodes=bulkGraphOperation(securityContext,result.getResults(),1000,"ClearDatabase",new BulkGraphOperation<AbstractNode>(){
       @Override public void handleGraphObject(      SecurityContext securityContext,      AbstractNode node){
-        if (node.getProperty(AbstractNode.uuid) != null) {
+        if (node.getProperty(AbstractNode.id) != null) {
           try {
             StructrApp.getInstance(securityContext).delete(node);
           }

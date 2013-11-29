@@ -1,10 +1,11 @@
 {
-  ZipEntry dbEntry=new ZipEntry(STRUCTR_ZIP_DB_NAME);
+  final ZipEntry dbEntry=new ZipEntry(STRUCTR_ZIP_DB_NAME);
+  final String uuidPropertyName=AbstractNode.id.dbName();
   int nodeCount=0;
   int relCount=0;
   zos.putNextEntry(dbEntry);
   for (  Node node : nodes) {
-    if (node.hasProperty(GraphObject.uuid.dbName())) {
+    if (node.hasProperty(GraphObject.id.dbName())) {
       writer.print("N");
       for (      String key : node.getPropertyKeys()) {
         serialize(writer,key);
@@ -16,12 +17,12 @@
   }
   writer.flush();
   for (  Relationship rel : relationships) {
-    if (rel.hasProperty(GraphObject.uuid.dbName())) {
-      Node startNode=rel.getStartNode();
-      Node endNode=rel.getEndNode();
-      if (startNode.hasProperty("uuid") && endNode.hasProperty("uuid")) {
-        String startId=(String)startNode.getProperty("uuid");
-        String endId=(String)endNode.getProperty("uuid");
+    if (rel.hasProperty(GraphObject.id.dbName())) {
+      final Node startNode=rel.getStartNode();
+      final Node endNode=rel.getEndNode();
+      if (startNode.hasProperty(uuidPropertyName) && endNode.hasProperty(uuidPropertyName)) {
+        String startId=(String)startNode.getProperty(uuidPropertyName);
+        String endId=(String)endNode.getProperty(uuidPropertyName);
         writer.print("R");
         serialize(writer,startId);
         serialize(writer,endId);

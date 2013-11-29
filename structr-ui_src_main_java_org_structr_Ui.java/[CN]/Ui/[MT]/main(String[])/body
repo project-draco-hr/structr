@@ -49,6 +49,17 @@
     config.setProperty("StructrUiHandler.resourceBase","src/main/resources/structr");
     config.setProperty("StructrUiHandler.directoriesListed",Boolean.toString(false));
     config.setProperty("StructrUiHandler.welcomeFiles","index.html");
+    final String configFileName="structr.conf";
+    try {
+      final FileInputStream fis=new FileInputStream(configFileName);
+      final Properties structrConf=new Properties();
+      structrConf.load(fis);
+      fis.close();
+      Logger.getLogger(Ui.class.getName()).log(Level.INFO,"Read {0} entries from {1}",new Object[]{structrConf.size(),configFileName});
+      config.putAll(structrConf);
+    }
+ catch (    IOException ignore) {
+    }
     final Services services=Services.getInstance(config);
     do {
       try {

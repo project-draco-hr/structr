@@ -1,0 +1,24 @@
+{
+  final App app=StructrApp.getInstance();
+  try {
+    app.beginTx();
+    ResourceAccess grant=app.nodeQuery(ResourceAccess.class).and(ResourceAccess.signature,signature).getFirst();
+    long flagsValue=255;
+    if (flags != null) {
+      flagsValue=flags.longValue();
+    }
+    if (grant == null) {
+      app.create(ResourceAccess.class,new NodeAttribute(ResourceAccess.signature,signature),new NodeAttribute(ResourceAccess.flags,flagsValue));
+    }
+ else {
+      grant.setProperty(ResourceAccess.flags,flagsValue);
+    }
+    app.commitTx();
+  }
+ catch (  Throwable t) {
+    t.printStackTrace();
+  }
+ finally {
+    app.finishTx();
+  }
+}

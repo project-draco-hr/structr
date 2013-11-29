@@ -1,5 +1,4 @@
 {
-  final ConfigurationProvider configuration=StructrApp.getConfiguration();
   final Set<String> classes=module.getClasses();
   for (  final String name : classes) {
     String className=StringUtils.removeStart(name,".");
@@ -9,36 +8,10 @@
       logger.log(Level.FINE,"Class {0} instantiated: {1}",new Object[]{className,clazz});
       if (!Modifier.isAbstract(clazz.getModifiers())) {
         if (AbstractNode.class.isAssignableFrom(clazz)) {
-          configuration.registerEntityType(clazz);
-          String simpleName=clazz.getSimpleName();
-          String fullName=clazz.getName();
-          nodeEntityClassCache.put(simpleName,clazz);
-          nodeEntityPackages.add(fullName.substring(0,fullName.lastIndexOf(".")));
-          for (          Class interfaceClass : clazz.getInterfaces()) {
-            String interfaceName=interfaceClass.getSimpleName();
-            Set<Class> classesForInterface=interfaceCache.get(interfaceName);
-            if (classesForInterface == null) {
-              classesForInterface=new LinkedHashSet<>();
-              interfaceCache.put(interfaceName,classesForInterface);
-            }
-            classesForInterface.add(clazz);
-          }
+          registerEntityType(clazz);
         }
         if (AbstractRelationship.class.isAssignableFrom(clazz)) {
-          configuration.registerEntityType(clazz);
-          String simpleName=clazz.getSimpleName();
-          String fullName=clazz.getName();
-          relationshipEntityClassCache.put(simpleName,clazz);
-          relationshipPackages.add(fullName.substring(0,fullName.lastIndexOf(".")));
-          for (          Class interfaceClass : clazz.getInterfaces()) {
-            String interfaceName=interfaceClass.getSimpleName();
-            Set<Class> classesForInterface=interfaceCache.get(interfaceName);
-            if (classesForInterface == null) {
-              classesForInterface=new LinkedHashSet<>();
-              interfaceCache.put(interfaceName,classesForInterface);
-            }
-            classesForInterface.add(clazz);
-          }
+          registerEntityType(clazz);
         }
         if (Service.class.isAssignableFrom(clazz)) {
           Services.getInstance().registerServiceClass(clazz);

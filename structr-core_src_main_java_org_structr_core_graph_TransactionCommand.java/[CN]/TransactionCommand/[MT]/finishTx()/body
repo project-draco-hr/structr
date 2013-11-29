@@ -4,7 +4,12 @@
     if (tx.isToplevel()) {
       currentCommand.remove();
       transactions.remove();
-      tx.finish();
+      try {
+        tx.finish();
+      }
+ catch (      Throwable t) {
+        t.printStackTrace();
+      }
       if (modificationQueue != null && tx.isSuccessful()) {
         modificationQueue.doOuterCallbacks(securityContext);
         final List<ModificationEvent> modificationEvents=modificationQueue.getModificationEvents();

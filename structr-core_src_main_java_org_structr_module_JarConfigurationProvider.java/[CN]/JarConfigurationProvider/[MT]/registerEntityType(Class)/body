@@ -1,6 +1,25 @@
 {
   int modifiers=type.getModifiers();
   if (!Modifier.isAbstract(modifiers) && !Modifier.isInterface(modifiers)) {
+    String simpleName=type.getSimpleName();
+    String fullName=type.getName();
+    if (AbstractNode.class.isAssignableFrom(type)) {
+      nodeEntityClassCache.put(simpleName,type);
+      nodeEntityPackages.add(fullName.substring(0,fullName.lastIndexOf(".")));
+    }
+    if (AbstractRelationship.class.isAssignableFrom(type)) {
+      relationshipEntityClassCache.put(simpleName,type);
+      relationshipPackages.add(fullName.substring(0,fullName.lastIndexOf(".")));
+    }
+    for (    Class interfaceClass : type.getInterfaces()) {
+      String interfaceName=interfaceClass.getSimpleName();
+      Set<Class> classesForInterface=interfaceCache.get(interfaceName);
+      if (classesForInterface == null) {
+        classesForInterface=new LinkedHashSet<>();
+        interfaceCache.put(interfaceName,classesForInterface);
+      }
+      classesForInterface.add(type);
+    }
     try {
       Object entity=type.newInstance();
       Map<Field,PropertyKey> allProperties=getFieldValuesOfType(PropertyKey.class,entity);

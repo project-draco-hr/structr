@@ -2,6 +2,7 @@
   final App app=StructrApp.getInstance();
   final Value<Long> nodeCountValue=new StaticValue<>(0L);
   final Value<Long> relCountValue=new StaticValue<>(0L);
+  final String uuidPropertyName=AbstractNode.id.dbName();
   double t0=System.nanoTime();
   try {
     Map<String,Node> uuidMap=new LinkedHashMap<>();
@@ -49,7 +50,7 @@
  else {
               if (currentObject != null) {
                 Object obj=deserialize(reader);
-                if ("uuid".equals(currentKey) && currentObject instanceof Node) {
+                if (uuidPropertyName.equals(currentKey) && currentObject instanceof Node) {
                   String uuid=(String)obj;
                   uuidMap.put(uuid,(Node)currentObject);
                 }

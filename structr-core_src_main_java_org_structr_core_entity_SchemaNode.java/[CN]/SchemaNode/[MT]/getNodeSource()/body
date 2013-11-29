@@ -1,0 +1,44 @@
+{
+  final Set<String> viewProperties=new LinkedHashSet<>();
+  final StringBuilder src=new StringBuilder();
+  final Class baseType=AbstractNode.class;
+  final String _className=getProperty(className);
+  final Node rawNode=getNode();
+  src.append("package ").append(getProperty(packageName)).append(";\n\n");
+  src.append("import ").append(baseType.getName()).append(";\n");
+  src.append("import ").append(PropertyView.class.getName()).append(";\n");
+  src.append("import ").append(View.class.getName()).append(";\n");
+  src.append("import org.structr.core.property.*;\n");
+  src.append("import org.structr.core.notion.*;\n");
+  src.append("import java.util.List;\n\n");
+  src.append("public class ").append(_className).append(" extends ").append(baseType.getSimpleName()).append(" {\n\n");
+  for (  final String rawPropertyName : getProperties()) {
+    if (rawNode.hasProperty(rawPropertyName)) {
+      final String valueType=rawNode.getProperty(rawPropertyName).toString();
+      final String propertyType=typeMap.get(valueType);
+      src.append(getPropertySource(rawPropertyName,propertyType,valueType));
+      viewProperties.add(rawPropertyName);
+    }
+  }
+  for (  final NodeIsRelatedToNode outRel : getOutgoingRelationships(NodeIsRelatedToNode.class)) {
+    src.append(outRel.getPropertySource(_className));
+    viewProperties.add(outRel.getPropertyName(_className));
+  }
+  for (  final NodeIsRelatedToNode inRel : getIncomingRelationships(NodeIsRelatedToNode.class)) {
+    src.append(inRel.getPropertySource(_className));
+    viewProperties.add(inRel.getPropertyName(_className));
+  }
+  if (!viewProperties.isEmpty()) {
+    src.append("\n\tpublic static final View defaultView = new View(").append(_className).append(".class, PropertyView.Public,\n");
+    src.append("\t\t");
+    for (final Iterator<String> it=viewProperties.iterator(); it.hasNext(); ) {
+      src.append(it.next()).append("Property");
+      if (it.hasNext()) {
+        src.append(", ");
+      }
+    }
+    src.append("\n\t);\n");
+  }
+  src.append("}\n");
+  return src.toString();
+}

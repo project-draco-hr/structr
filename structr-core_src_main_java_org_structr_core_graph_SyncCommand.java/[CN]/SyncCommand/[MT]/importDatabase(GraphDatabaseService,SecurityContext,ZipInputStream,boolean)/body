@@ -1,13 +1,11 @@
 {
-  final App app=StructrApp.getInstance();
+  final Transaction tx=graphDb.beginTx();
   final Value<Long> nodeCountValue=new StaticValue<>(0L);
   final Value<Long> relCountValue=new StaticValue<>(0L);
   final String uuidPropertyName=AbstractNode.id.dbName();
   double t0=System.nanoTime();
   try {
     Map<String,Node> uuidMap=new LinkedHashMap<>();
-    List<Relationship> rels=new LinkedList<>();
-    List<Node> nodes=new LinkedList<>();
     PropertyContainer currentObject=null;
     BufferedReader reader=null;
     String currentKey=null;
@@ -15,7 +13,6 @@
     long nodeCount=0;
     long relCount=0;
     try {
-      app.beginTx();
       reader=new BufferedReader(new InputStreamReader(zis));
       do {
         try {
@@ -27,7 +24,6 @@
           if ("N".equals(objectType)) {
             currentObject=graphDb.createNode();
             nodeCount++;
-            nodes.add((Node)currentObject);
           }
  else           if ("R".equals(objectType)) {
             String startId=(String)deserialize(reader);
@@ -38,7 +34,6 @@
             if (startNode != null && endNode != null) {
               RelationshipType relType=DynamicRelationshipType.withName(relTypeName);
               currentObject=startNode.createRelationshipTo(endNode,relType);
-              rels.add((Relationship)currentObject);
             }
             relCount++;
           }
@@ -74,25 +69,14 @@
     logger.log(Level.INFO,"Imported {0} nodes and {1} rels, committing transaction..",new Object[]{nodeCount,relCount});
     nodeCountValue.set(securityContext,nodeCount);
     relCountValue.set(securityContext,relCount);
-    RelationshipFactory relFactory=new RelationshipFactory(securityContext);
-    NodeFactory nodeFactory=new NodeFactory(securityContext);
-    for (    Node node : nodes) {
-      NodeInterface entity=nodeFactory.instantiate(node);
-      TransactionCommand.nodeCreated(entity);
-      entity.addToIndex();
-    }
-    for (    Relationship rel : rels) {
-      RelationshipInterface entity=relFactory.instantiate(rel);
-      TransactionCommand.relationshipCreated(entity);
-      entity.addToIndex();
-    }
-    app.commitTx();
+    tx.success();
   }
  catch (  FrameworkException fex) {
     fex.printStackTrace();
+    tx.failure();
   }
  finally {
-    app.finishTx();
+    tx.finish();
   }
   double t1=System.nanoTime();
   double time=((t1 - t0) / 1000000000.0);

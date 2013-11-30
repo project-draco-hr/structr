@@ -17,22 +17,20 @@
     }
     long nodeCount=bulkGraphOperation(securityContext,nodes.getResults(),1000,"ChangeNodePropertyKey",new BulkGraphOperation<AbstractNode>(){
       @Override public void handleGraphObject(      SecurityContext securityContext,      AbstractNode node){
-        if (node.getProperty(AbstractNode.id) != null) {
-          for (          Entry entry : properties.entrySet()) {
-            String key=(String)entry.getKey();
-            PropertyKey propertyKey=StructrApp.getConfiguration().getPropertyKeyForDatabaseName(node.getClass(),key);
-            if (propertyKey != null) {
-              Node dbNode=node.getNode();
-              if (dbNode.hasProperty(newKey)) {
-                logger.log(Level.SEVERE,"Node {0} has already a property with key {1}",new Object[]{node,newKey});
-                throw new IllegalStateException("Node has already a property of the new key");
-              }
-              if (dbNode.hasProperty(oldKey)) {
-                dbNode.setProperty(newKey,dbNode.getProperty(oldKey));
-                dbNode.removeProperty(oldKey);
-              }
-              node.updateInIndex();
+        for (        Entry entry : properties.entrySet()) {
+          String key=(String)entry.getKey();
+          PropertyKey propertyKey=StructrApp.getConfiguration().getPropertyKeyForDatabaseName(node.getClass(),key);
+          if (propertyKey != null) {
+            Node dbNode=node.getNode();
+            if (dbNode.hasProperty(newKey)) {
+              logger.log(Level.SEVERE,"Node {0} has already a property with key {1}",new Object[]{node,newKey});
+              throw new IllegalStateException("Node has already a property of the new key");
             }
+            if (dbNode.hasProperty(oldKey)) {
+              dbNode.setProperty(newKey,dbNode.getProperty(oldKey));
+              dbNode.removeProperty(oldKey);
+            }
+            node.updateInIndex();
           }
         }
       }

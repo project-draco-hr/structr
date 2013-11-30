@@ -13,8 +13,10 @@
     logger.log(Level.FINEST,"Type property: {0}",obj);
     if (obj != null) {
       Class relationClass=StructrApp.getConfiguration().getRelationshipEntityClass(obj.toString());
-      StructrApp.getConfiguration().setRelationClassForCombinedType(sourceType,relType,targetType,relationClass);
-      return relationClass;
+      if (relationClass != null) {
+        StructrApp.getConfiguration().setRelationClassForCombinedType(sourceType,relType,targetType,relationClass);
+        return relationClass;
+      }
     }
   }
   final String combinedTypeName="combinedType";
@@ -22,7 +24,10 @@
     Object obj=relationship.getProperty(combinedTypeName);
     logger.log(Level.FINE,"Combined type property: {0}",obj);
     if (obj != null) {
-      return getClassForCombinedType(obj.toString());
+      Class classForCombinedType=getClassForCombinedType(obj.toString());
+      if (classForCombinedType != null) {
+        return classForCombinedType;
+      }
     }
   }
   logger.log(Level.WARNING,"No instantiable class for relationship found for {0} {1} {2}, returning generic relationship class.",new Object[]{sourceType,relType,targetType});

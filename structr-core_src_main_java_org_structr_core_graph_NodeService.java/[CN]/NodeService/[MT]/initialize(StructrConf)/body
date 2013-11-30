@@ -120,12 +120,8 @@
     }
     if (!hasApplicationNodes) {
       logger.log(Level.INFO,"Found initial seed file and no application nodes, applying initial seed..");
-      Map<String,Object> attributes=new LinkedHashMap<>();
-      attributes.put("mode","import");
-      attributes.put("validate","false");
-      attributes.put("file",seedFile.getAbsoluteFile().getAbsolutePath());
       try {
-        StructrApp.getInstance().command(SyncCommand.class).execute(attributes);
+        SyncCommand.importFromFile(graphDb,SecurityContext.getSuperUserInstance(),seedFile.getAbsoluteFile().getAbsolutePath(),false);
       }
  catch (      FrameworkException fex) {
         logger.log(Level.WARNING,"Unable to import initial seed file.",fex);

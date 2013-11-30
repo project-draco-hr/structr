@@ -1,0 +1,76 @@
+{
+  final GraphDatabaseService graphDb=getService(NodeService.class).getGraphDb();
+  final SecurityContext superUserContext=SecurityContext.getSuperUserInstance();
+  final NodeFactory nodeFactory=new NodeFactory(superUserContext);
+  final RelationshipFactory relFactory=new RelationshipFactory(superUserContext);
+  final Iterator<Node> allNodes=GlobalGraphOperations.at(graphDb).getAllNodes().iterator();
+  final Iterator<Relationship> allRels=GlobalGraphOperations.at(graphDb).getAllRelationships().iterator();
+  final App app=StructrApp.getInstance();
+  final StringProperty uuidProperty=new StringProperty("uuid");
+  final int txLimit=100;
+  int actualNodeCount=0;
+  int actualRelCount=0;
+  int count=0;
+  logger.log(Level.INFO,"Migration of ID properties from uuid to id requested.");
+  while (allNodes.hasNext()) {
+    app.beginTx();
+    try {
+      while (allNodes.hasNext() && (++count % txLimit) != 0) {
+        final Node node=allNodes.next();
+        if (node.hasProperty("uuid")) {
+          try {
+            final NodeInterface nodeInterface=nodeFactory.instantiate(node);
+            final String uuid=nodeInterface.getProperty(uuidProperty);
+            if (uuid != null) {
+              nodeInterface.setProperty(GraphObject.id,uuid);
+              nodeInterface.removeProperty(uuidProperty);
+              actualNodeCount++;
+            }
+          }
+ catch (          Throwable t) {
+            t.printStackTrace();
+          }
+        }
+      }
+      app.commitTx(false);
+    }
+ catch (    Throwable t) {
+      t.printStackTrace();
+    }
+ finally {
+      app.finishTx();
+    }
+  }
+  logger.log(Level.INFO,"Migrated {0} nodes to new ID property.",actualNodeCount);
+  count=0;
+  while (allRels.hasNext()) {
+    app.beginTx();
+    try {
+      while (allRels.hasNext() && (++count % txLimit) != 0) {
+        final Relationship rel=allRels.next();
+        if (rel.hasProperty("uuid")) {
+          try {
+            final RelationshipInterface relInterface=relFactory.instantiate(rel);
+            final String uuid=relInterface.getProperty(uuidProperty);
+            if (uuid != null) {
+              relInterface.setProperty(GraphObject.id,uuid);
+              relInterface.removeProperty(uuidProperty);
+              actualRelCount++;
+            }
+          }
+ catch (          Throwable t) {
+            t.printStackTrace();
+          }
+        }
+      }
+      app.commitTx(false);
+    }
+ catch (    Throwable t) {
+      t.printStackTrace();
+    }
+ finally {
+      app.finishTx();
+    }
+  }
+  logger.log(Level.INFO,"Migrated {0} relationships to new ID property.",actualRelCount);
+}

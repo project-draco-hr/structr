@@ -19,6 +19,12 @@
   }
   logger.log(Level.INFO,"{0} service(s) processed",serviceCache.size());
   registeredServiceClasses.clear();
+  if (getService(NodeService.class) != null) {
+    if ("true".equals(properties.getProperty(Services.MIGRATION_KEY))) {
+      migrateDatabase();
+    }
+    importSeedFile(properties.getProperty(Services.BASE_PATH));
+  }
   logger.log(Level.INFO,"Initialization complete");
   initializationDone=true;
 }

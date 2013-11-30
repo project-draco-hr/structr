@@ -1,28 +1,22 @@
 {
-  System.out.println("###### Find nearest matching relation class for " + sourceTypeName + " "+ relType+ " "+ targetTypeName);
   Map<Integer,Class> candidates=new TreeMap<>();
   Class sourceType=getNodeEntityClass(sourceTypeName);
   Class targetType=getNodeEntityClass(targetTypeName);
   for (  final Class candidate : getRelationshipEntities().values()) {
     Relation rel=instantiate(candidate);
-    System.out.println("? " + candidate.getSimpleName() + " for ["+ sourceTypeName+ " "+ relType+ " "+ targetTypeName+ "]");
     int distance=matchRelationClass(rel,sourceType,relType,targetType,-1);
     if (distance >= 1000) {
       candidates.put(distance - 1000,candidate);
-      System.out.println("\n=========================== Found " + candidate.getSimpleName() + " for "+ sourceTypeName+ " "+ relType+ " "+ targetTypeName+ " at distance "+ (distance - 1000));
     }
  else {
-      System.out.println(" no match.");
     }
   }
   if (candidates.isEmpty()) {
-    System.out.println("!!!!!!! No matching relation class found for " + sourceTypeName + " "+ relType+ " "+ targetTypeName);
     return null;
   }
  else {
     Entry<Integer,Class> candidateEntry=candidates.entrySet().iterator().next();
     Class c=candidateEntry.getValue();
-    System.out.println("########### Final nearest relation class : " + c.getSimpleName() + " <"+ candidateEntry.getKey()+ ">############################################\n\n");
     combinedTypeRelationClassCache.put(getCombinedType(sourceTypeName,relType,targetTypeName),c);
     return c;
   }

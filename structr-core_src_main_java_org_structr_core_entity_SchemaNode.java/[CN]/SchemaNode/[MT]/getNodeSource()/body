@@ -1,5 +1,6 @@
 {
   final Set<String> viewProperties=new LinkedHashSet<>();
+  final Set<String> validators=new LinkedHashSet<>();
   final StringBuilder src=new StringBuilder();
   final Class baseType=AbstractNode.class;
   final String _className=getProperty(className);
@@ -8,6 +9,9 @@
   src.append("import ").append(baseType.getName()).append(";\n");
   src.append("import ").append(PropertyView.class.getName()).append(";\n");
   src.append("import ").append(View.class.getName()).append(";\n");
+  src.append("import ").append(ValidationHelper.class.getName()).append(";\n");
+  src.append("import ").append(ErrorBuffer.class.getName()).append(";\n");
+  src.append("import org.structr.core.validator.*;\n");
   src.append("import org.structr.core.property.*;\n");
   src.append("import org.structr.core.notion.*;\n");
   src.append("import java.util.List;\n\n");
@@ -15,8 +19,7 @@
   for (  final String rawPropertyName : getProperties()) {
     if (rawNode.hasProperty(rawPropertyName)) {
       final String valueType=rawNode.getProperty(rawPropertyName).toString();
-      final String propertyType=typeMap.get(valueType);
-      src.append(getPropertySource(rawPropertyName,propertyType,valueType));
+      src.append(getPropertySource(_className,rawPropertyName,valueType,validators));
       viewProperties.add(rawPropertyName);
     }
   }
@@ -38,6 +41,16 @@
       }
     }
     src.append("\n\t);\n");
+  }
+  if (!validators.isEmpty()) {
+    src.append("\n\t@Override\n");
+    src.append("\tpublic boolean isValid(final ErrorBuffer errorBuffer) {\n\n");
+    src.append("\t\tboolean error = false;\n\n");
+    for (    final String validator : validators) {
+      src.append("\t\terror |= ").append(validator).append(";\n");
+    }
+    src.append("\n\t\treturn !error;\n");
+    src.append("\t}\n");
   }
   src.append("}\n");
   return src.toString();

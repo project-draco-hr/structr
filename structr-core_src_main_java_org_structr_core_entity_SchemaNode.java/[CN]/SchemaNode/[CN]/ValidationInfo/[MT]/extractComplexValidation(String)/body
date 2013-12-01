@@ -1,0 +1,22 @@
+{
+  if (source.startsWith("(") && source.endsWith(")")) {
+    final String expression=source.substring(1,source.length() - 1);
+switch (valueType) {
+case Boolean:
+case Date:
+      return;
+case Double:
+case Long:
+case Integer:
+    extractNumericValidation(expression);
+  return;
+case String:
+localValidator=", new SimpleRegexValidator(\"" + expression + "\")";
+return;
+case Enum:
+extractEnumValidation(expression);
+return;
+}
+}
+throw new FrameworkException(SchemaNode.class.getName(),new InvalidPropertySchemaToken(source));
+}

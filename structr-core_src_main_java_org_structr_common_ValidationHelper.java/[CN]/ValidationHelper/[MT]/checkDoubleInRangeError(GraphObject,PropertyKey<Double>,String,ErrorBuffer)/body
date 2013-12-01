@@ -1,0 +1,34 @@
+{
+  final int length=range.length();
+  final String leftBound=range.substring(0,1);
+  final String rightBound=range.substring(length - 1,length);
+  final String[] parts=range.substring(1,length - 1).split("[,]+");
+  final String type=node.getType();
+  if (parts.length == 2) {
+    final String leftPart=parts[0].trim();
+    final String rightPart=parts[1].trim();
+    final double left=Double.parseDouble(leftPart);
+    final double right=Double.parseDouble(rightPart);
+    final Double value=node.getProperty(key);
+    if (value != null) {
+      boolean inRange=true;
+      if ("[".equals(leftBound)) {
+        inRange&=value.intValue() >= left;
+      }
+ else {
+        inRange&=value.intValue() > left;
+      }
+      if ("]".equals(rightBound)) {
+        inRange&=value.intValue() <= right;
+      }
+ else {
+        inRange&=value.intValue() < right;
+      }
+      if (!inRange) {
+        errorBuffer.add(type,new RangeToken(key,range));
+      }
+      return !inRange;
+    }
+  }
+  return false;
+}

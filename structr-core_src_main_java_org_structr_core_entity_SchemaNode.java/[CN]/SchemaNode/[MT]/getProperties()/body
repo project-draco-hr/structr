@@ -1,10 +1,18 @@
 {
   final List<String> keys=new LinkedList<>();
-  final Set<String> types=typeMap.keySet();
+  final Set<Type> types=typeMap.keySet();
   final Node node=getNode();
   for (  final String key : node.getPropertyKeys()) {
-    if (node.hasProperty(key) && types.contains(node.getProperty(key).toString())) {
-      keys.add(key);
+    if (node.hasProperty(key)) {
+      try {
+        final String propertyType=node.getProperty(key).toString();
+        final ValidationInfo info=new ValidationInfo(propertyType);
+        if (types.contains(info.getValueType())) {
+          keys.add(key);
+        }
+      }
+ catch (      Throwable t) {
+      }
     }
   }
   return keys;

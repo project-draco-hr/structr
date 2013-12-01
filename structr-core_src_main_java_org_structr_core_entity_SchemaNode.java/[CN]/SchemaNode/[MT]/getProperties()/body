@@ -1,18 +1,13 @@
 {
+  final Set<String> allKeys=new LinkedHashSet<>();
   final List<String> keys=new LinkedList<>();
-  final Set<Type> types=typeMap.keySet();
   final Node node=getNode();
+  for (  final PropertyKey key : Services.getInstance().getConfigurationProvider().getPropertySet(getClass(),"hidden")) {
+    allKeys.add(key.dbName());
+  }
   for (  final String key : node.getPropertyKeys()) {
-    if (node.hasProperty(key)) {
-      try {
-        final String propertyType=node.getProperty(key).toString();
-        final ValidationInfo info=new ValidationInfo(propertyType);
-        if (types.contains(info.getValueType())) {
-          keys.add(key);
-        }
-      }
- catch (      Throwable t) {
-      }
+    if (node.hasProperty(key) && !allKeys.contains(key)) {
+      keys.add(key);
     }
   }
   return keys;

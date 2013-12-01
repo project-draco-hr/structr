@@ -1,0 +1,13 @@
+{
+  PropertyMap notionProperties=(PropertyMap)securityContext.getAttribute("notionProperties");
+  if (notionProperties != null) {
+    final Set<PropertyKey> keySet=Services.getInstance().getConfigurationProvider().getPropertySet(type,PropertyView.Public);
+    for (final Iterator<PropertyKey> it=notionProperties.keySet().iterator(); it.hasNext(); ) {
+      final PropertyKey key=it.next();
+      if (!keySet.contains(key)) {
+        it.remove();
+      }
+    }
+  }
+  return notionProperties;
+}

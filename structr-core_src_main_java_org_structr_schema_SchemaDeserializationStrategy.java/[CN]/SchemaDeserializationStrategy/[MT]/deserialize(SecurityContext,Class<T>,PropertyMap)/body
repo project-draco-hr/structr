@@ -1,0 +1,48 @@
+{
+  final App app=StructrApp.getInstance(securityContext);
+  if (attributes != null) {
+    Result<T> result=Result.EMPTY_RESULT;
+    if (attributes.containsKey(GraphObject.id)) {
+      result=new Result(app.get(attributes.get(GraphObject.id)),false);
+    }
+ else {
+      boolean attributesComplete=true;
+      for (      PropertyKey key : propertyKeys) {
+        attributesComplete&=attributes.containsKey(key);
+      }
+      if (attributesComplete) {
+        result=app.nodeQuery(type).and(attributes).getResult();
+      }
+    }
+    final int size=result.size();
+switch (size) {
+case 0:
+      if (createIfNotExisting) {
+        if (targetType != null) {
+          final Set<PropertyKey> targetProperties=Services.getInstance().getConfigurationProvider().getPropertySet(targetType,PropertyView.Public);
+          final PropertyMap foreignProperties=new PropertyMap();
+          for (final Iterator<PropertyKey> it=attributes.keySet().iterator(); it.hasNext(); ) {
+            final PropertyKey key=it.next();
+            if (!targetProperties.contains(key)) {
+              foreignProperties.put(key,attributes.get(key));
+              it.remove();
+            }
+          }
+          securityContext.setAttribute("notionProperties",foreignProperties);
+        }
+        T newNode=app.create(type,attributes);
+        if (newNode != null) {
+          return newNode;
+        }
+      }
+    break;
+case 1:
+  return getTypedResult(result,type);
+default :
+logger.log(Level.SEVERE,"Found {0} nodes for given type and properties, property set is ambiguous!\n" + "This is often due to wrong modeling, or you should consider creating a uniquness constraint for " + type.getName(),size);
+break;
+}
+throw new FrameworkException(type.getSimpleName(),new PropertiesNotFoundToken(AbstractNode.base,attributes));
+}
+return null;
+}

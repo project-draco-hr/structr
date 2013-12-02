@@ -7,7 +7,7 @@
     }
  else {
       boolean attributesComplete=true;
-      for (      PropertyKey key : propertyKeys) {
+      for (      PropertyKey key : identifyingPropertyKeys) {
         attributesComplete&=attributes.containsKey(key);
       }
       if (attributesComplete) {
@@ -19,11 +19,10 @@ switch (size) {
 case 0:
       if (createIfNotExisting) {
         if (targetType != null) {
-          final Set<PropertyKey> targetProperties=Services.getInstance().getConfigurationProvider().getPropertySet(targetType,PropertyView.Public);
           final PropertyMap foreignProperties=new PropertyMap();
           for (final Iterator<PropertyKey> it=attributes.keySet().iterator(); it.hasNext(); ) {
             final PropertyKey key=it.next();
-            if (!targetProperties.contains(key)) {
+            if (foreignPropertyKeys.contains(key)) {
               foreignProperties.put(key,attributes.get(key));
               it.remove();
             }

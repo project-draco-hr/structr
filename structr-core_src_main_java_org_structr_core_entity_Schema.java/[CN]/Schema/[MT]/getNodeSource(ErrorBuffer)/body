@@ -41,15 +41,8 @@
     src.append(enumDefition);
   }
   if (!viewProperties.isEmpty()) {
-    src.append("\n\tpublic static final View defaultView = new View(").append(_className).append(".class, PropertyView.Public,\n");
-    src.append("\t\t");
-    for (final Iterator<String> it=viewProperties.iterator(); it.hasNext(); ) {
-      src.append(it.next()).append("Property");
-      if (it.hasNext()) {
-        src.append(", ");
-      }
-    }
-    src.append("\n\t);\n");
+    formatView(src,_className,"default","PropertyView.Public",viewProperties);
+    formatView(src,_className,"ui","PropertyView.Ui",viewProperties);
   }
   if (!validators.isEmpty()) {
     src.append("\n\t@Override\n");

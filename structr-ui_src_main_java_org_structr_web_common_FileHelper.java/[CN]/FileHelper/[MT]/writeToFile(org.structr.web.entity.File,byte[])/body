@@ -1,5 +1,5 @@
 {
-  String uuid=fileNode.getProperty(AbstractNode.id);
+  String uuid=fileNode.getProperty(GraphObject.id);
   if (uuid == null) {
     final String newUuid=UUID.randomUUID().toString().replaceAll("[\\-]+","");
     final App app=StructrApp.getInstance(fileNode.getSecurityContext());
@@ -7,7 +7,7 @@
     try {
       app.beginTx();
       fileNode.unlockReadOnlyPropertiesOnce();
-      fileNode.setProperty(AbstractNode.id,newUuid);
+      fileNode.setProperty(GraphObject.id,newUuid);
       app.commitTx();
     }
   finally {

@@ -4,6 +4,9 @@
   final String _className=getClassName();
   final String _sourceNodeType=getSchemaNodeSourceType();
   final String _targetNodeType=getSchemaNodeTargetType();
+  final Set<String> viewProperties=new LinkedHashSet<>();
+  final Set<String> validators=new LinkedHashSet<>();
+  final Set<String> enums=new LinkedHashSet<>();
   src.append("package org.structr.dynamic;\n\n");
   src.append("import ").append(baseType.getName()).append(";\n");
   src.append("import ").append(PropertyView.class.getName()).append(";\n");
@@ -11,11 +14,28 @@
   src.append("import org.structr.core.property.*;\n");
   src.append("import org.structr.core.entity.*;\n\n");
   src.append("public class ").append(_className).append(" extends ").append(getBaseType()).append(" {\n\n");
+  src.append(SchemaHelper.extractProperties(this,null,null,null,errorBuffer));
   src.append("\tpublic static final Property<String> sourceId = new SourceId(\"sourceId\");\n");
   src.append("\tpublic static final Property<String> targetId = new SourceId(\"targetId\");\n\n");
-  src.append("\tpublic static final View defaultView = new View(");
-  src.append(_className).append(".class, PropertyView.Public,\n");
-  src.append("\t\tsourceId, targetId\n\t);\n\n");
+  viewProperties.add("sourceId");
+  viewProperties.add("targetId");
+  for (  final String enumDefition : enums) {
+    src.append(enumDefition);
+  }
+  if (!viewProperties.isEmpty()) {
+    SchemaHelper.formatView(src,_className,"default","PropertyView.Public",viewProperties);
+    SchemaHelper.formatView(src,_className,"ui","PropertyView.Ui",viewProperties);
+  }
+  if (!validators.isEmpty()) {
+    src.append("\n\t@Override\n");
+    src.append("\tpublic boolean isValid(final ErrorBuffer errorBuffer) {\n\n");
+    src.append("\t\tboolean error = false;\n\n");
+    for (    final String validator : validators) {
+      src.append("\t\terror |= ").append(validator).append(";\n");
+    }
+    src.append("\n\t\treturn !error;\n");
+    src.append("\t}\n");
+  }
   src.append("\t@Override\n");
   src.append("\tpublic Class<").append(_sourceNodeType).append("> getSourceType() {\n");
   src.append("\t\treturn ").append(_sourceNodeType).append(".class;\n");

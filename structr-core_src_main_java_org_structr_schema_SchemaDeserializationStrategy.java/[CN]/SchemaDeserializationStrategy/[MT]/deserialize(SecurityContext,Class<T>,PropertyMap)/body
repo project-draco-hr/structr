@@ -18,19 +18,22 @@
 switch (size) {
 case 0:
       if (createIfNotExisting) {
-        if (targetType != null) {
-          final PropertyMap foreignProperties=new PropertyMap();
-          for (final Iterator<PropertyKey> it=attributes.keySet().iterator(); it.hasNext(); ) {
-            final PropertyKey key=it.next();
-            if (foreignPropertyKeys.contains(key)) {
-              foreignProperties.put(key,attributes.get(key));
-              it.remove();
-            }
+        final PropertyMap foreignProperties=new PropertyMap();
+        for (final Iterator<PropertyKey> it=attributes.keySet().iterator(); it.hasNext(); ) {
+          final PropertyKey key=it.next();
+          if (foreignPropertyKeys.contains(key)) {
+            foreignProperties.put(key,attributes.get(key));
+            it.remove();
           }
-          securityContext.setAttribute("notionProperties",foreignProperties);
         }
         T newNode=app.create(type,attributes);
         if (newNode != null) {
+          Map<String,PropertyMap> notionPropertyMap=(Map<String,PropertyMap>)securityContext.getAttribute("notionProperties");
+          if (notionPropertyMap == null) {
+            notionPropertyMap=new LinkedHashMap<>();
+            securityContext.setAttribute("notionProperties",notionPropertyMap);
+          }
+          notionPropertyMap.put(newNode.getUuid(),foreignProperties);
           return newNode;
         }
       }

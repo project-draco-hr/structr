@@ -34,12 +34,12 @@
     }
   }
  else {
-    GraphObject entity=typedIdResource.getEntity();
+    GraphObject entity=typedIdResource.getIdResource().getEntity(SearchNodeCommand.class);
     Class entityType=typedIdResource.getEntityClass();
     String methodName=typeResource.getRawType();
     boolean success=false;
     if (entityType != null && methodName != null) {
-      for (      Method method : EntityContext.getExportedMethodsForType(entityType)) {
+      for (      Method method : StructrApp.getConfiguration().getExportedMethodsForType(entityType)) {
         if (methodName.equals(method.getName())) {
           if (method.getAnnotation(Export.class) != null) {
             if (method.getReturnType().equals(Void.TYPE)) {

@@ -5,8 +5,8 @@
     if (source instanceof JsonInput) {
       JsonInput properties=(JsonInput)source;
       PropertyMap map=PropertyMap.inputTypeToJavaType(securityContext,type,properties.getAttributes());
-      if (map.containsKey(GraphObject.uuid)) {
-        return (T)app.get(map.get(GraphObject.uuid));
+      if (map.containsKey(GraphObject.id)) {
+        return (T)app.get(map.get(GraphObject.id));
       }
  else {
         throw new FrameworkException(type.getSimpleName(),new IdNotFoundToken(source));
@@ -18,7 +18,7 @@
         results=(Result<T>)app.nodeQuery(NodeInterface.class).and(propertyKey,obj.getProperty(propertyKey)).getResult();
       }
  else {
-        PropertyKey<String> idProperty=EntityContext.getPropertyKeyForDatabaseName(obj.getClass(),AbstractNode.uuid.dbName());
+        PropertyKey<String> idProperty=StructrApp.getConfiguration().getPropertyKeyForDatabaseName(obj.getClass(),GraphObject.id.dbName());
         return (T)app.get(obj.getProperty(idProperty));
       }
     }

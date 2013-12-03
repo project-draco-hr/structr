@@ -1,0 +1,8 @@
+{
+  boolean error=false;
+  error|=ValidationHelper.checkStringNotBlank(this,name,errorBuffer);
+  if (!error && Services.getInstance().getConfigurationProvider().getNodeEntityClass(getProperty(name)) != null) {
+    errorBuffer.add(SchemaNode.class.getSimpleName(),new InvalidSchemaToken(getProperty(name),"type_already_exists"));
+  }
+  return !error && super.isValid(errorBuffer);
+}

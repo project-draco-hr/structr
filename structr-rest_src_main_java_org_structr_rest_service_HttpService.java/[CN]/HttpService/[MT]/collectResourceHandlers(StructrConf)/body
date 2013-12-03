@@ -1,0 +1,49 @@
+{
+  final List<ContextHandler> resourceHandlers=new LinkedList<>();
+  final String resourceHandlerList=properties.getProperty(RESOURCE_HANDLERS,"");
+  if (resourceHandlerList != null) {
+    for (    String resourceHandlerName : resourceHandlerList.split("[ \\t]+")) {
+      try {
+        final String contextPath=properties.getProperty(resourceHandlerName.concat(".contextPath"));
+        if (contextPath != null) {
+          final String resourceBase=properties.getProperty(resourceHandlerName.concat(".resourceBase"));
+          if (resourceBase != null) {
+            final String directoriesListed=properties.getProperty(resourceHandlerName.concat(".directoriesListed"));
+            if (directoriesListed != null) {
+              final String welcomeFiles=properties.getProperty(resourceHandlerName.concat(".welcomeFiles"));
+              if (welcomeFiles != null) {
+                ResourceHandler resourceHandler=new ResourceHandler();
+                resourceHandler.setDirectoriesListed(Boolean.parseBoolean(directoriesListed));
+                resourceHandler.setWelcomeFiles(StringUtils.split(welcomeFiles));
+                resourceHandler.setResourceBase(resourceBase);
+                ContextHandler staticResourceHandler=new ContextHandler();
+                staticResourceHandler.setContextPath(contextPath);
+                staticResourceHandler.setHandler(resourceHandler);
+                resourceHandlers.add(staticResourceHandler);
+              }
+ else {
+                logger.log(Level.WARNING,"Unable to register resource handler {0}, missing {0}.welcomeFiles",resourceHandlerName);
+              }
+            }
+ else {
+              logger.log(Level.WARNING,"Unable to register resource handler {0}, missing {0}.resourceBase",resourceHandlerName);
+            }
+          }
+ else {
+            logger.log(Level.WARNING,"Unable to register resource handler {0}, missing {0}.resourceBase",resourceHandlerName);
+          }
+        }
+ else {
+          logger.log(Level.WARNING,"Unable to register resource handler {0}, missing {0}.contextPath",resourceHandlerName);
+        }
+      }
+ catch (      Throwable t) {
+        logger.log(Level.WARNING,"Unable to initialize resource handler {0}: {1}",new Object[]{resourceHandlerName,t.getMessage()});
+      }
+    }
+  }
+ else {
+    logger.log(Level.WARNING,"No resource handlers configured for HttpService.");
+  }
+  return resourceHandlers;
+}

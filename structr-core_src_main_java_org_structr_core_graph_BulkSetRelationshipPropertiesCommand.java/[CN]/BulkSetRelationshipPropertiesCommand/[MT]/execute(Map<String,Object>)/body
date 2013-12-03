@@ -5,7 +5,7 @@
     List<AbstractRelationship> rels=null;
     final String typeName="type";
     if (properties.containsKey(typeName)) {
-      rels=StructrApp.getInstance(securityContext).relationshipQuery(EntityContext.getEntityClassForRawType(typeName)).getAsList();
+      rels=StructrApp.getInstance(securityContext).relationshipQuery(SchemaHelper.getEntityClassForRawType(typeName)).getAsList();
       properties.remove(typeName);
     }
  else {
@@ -13,11 +13,11 @@
     }
     long count=NodeServiceCommand.bulkGraphOperation(securityContext,rels,1000,"SetRelationshipProperties",new BulkGraphOperation<AbstractRelationship>(){
       @Override public void handleGraphObject(      SecurityContext securityContext,      AbstractRelationship rel){
-        if (rel.getProperty(AbstractRelationship.uuid) != null) {
+        if (rel.getProperty(AbstractRelationship.id) != null) {
           for (          Entry entry : properties.entrySet()) {
             String key=(String)entry.getKey();
             Object val=entry.getValue();
-            PropertyKey propertyKey=EntityContext.getPropertyKeyForDatabaseName(rel.getClass(),key);
+            PropertyKey propertyKey=StructrApp.getConfiguration().getPropertyKeyForDatabaseName(rel.getClass(),key);
             if (propertyKey != null) {
               try {
                 rel.setProperty(propertyKey,val);

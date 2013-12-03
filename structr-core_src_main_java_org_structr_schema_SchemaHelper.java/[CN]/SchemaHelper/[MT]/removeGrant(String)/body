@@ -1,0 +1,17 @@
+{
+  final App app=StructrApp.getInstance();
+  try {
+    app.beginTx();
+    ResourceAccess grant=app.nodeQuery(ResourceAccess.class).and(ResourceAccess.signature,signature).getFirst();
+    if (grant != null) {
+      app.delete(grant);
+    }
+    app.commitTx();
+  }
+ catch (  Throwable t) {
+    t.printStackTrace();
+  }
+ finally {
+    app.finishTx();
+  }
+}

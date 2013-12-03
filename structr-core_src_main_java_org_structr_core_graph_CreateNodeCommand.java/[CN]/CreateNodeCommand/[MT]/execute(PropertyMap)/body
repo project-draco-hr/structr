@@ -6,7 +6,7 @@
     Date now=new Date();
     PropertyMap properties=new PropertyMap(attributes);
     Object typeObject=properties.get(AbstractNode.type);
-    Class nodeType=typeObject != null ? EntityContext.getEntityClassForRawType(typeObject.toString()) : EntityContext.getFactoryDefinition().getGenericNodeType();
+    Class nodeType=typeObject != null ? SchemaHelper.getEntityClassForRawType(typeObject.toString()) : StructrApp.getConfiguration().getFactoryDefinition().getGenericNodeType();
     NodeFactory<T> nodeFactory=new NodeFactory<>(securityContext);
     boolean isCreation=true;
     node=(T)nodeFactory.instantiateWithType(graphDb.createNode(),nodeType,isCreation);
@@ -19,12 +19,14 @@
         Security securityRel=app.create(owner,node,Security.class);
         securityRel.setAllowed(Permission.values());
         node.unlockReadOnlyPropertiesOnce();
-        node.setProperty(AbstractNode.createdBy,user.getProperty(AbstractNode.uuid));
+        node.setProperty(AbstractNode.createdBy,user.getProperty(GraphObject.id));
       }
       if (nodeType != null) {
         node.unlockReadOnlyPropertiesOnce();
         node.setProperty(GraphObject.type,nodeType.getSimpleName());
       }
+      node.unlockReadOnlyPropertiesOnce();
+      node.setProperty(GraphObject.id,getNextUuid());
       node.unlockReadOnlyPropertiesOnce();
       node.setProperty(AbstractNode.createdDate,now);
       node.unlockReadOnlyPropertiesOnce();
@@ -42,7 +44,7 @@
   }
   if (node != null) {
     node.onNodeCreation();
-    for (    Transformation<GraphObject> transformation : EntityContext.getEntityCreationTransformations(node.getClass())) {
+    for (    Transformation<GraphObject> transformation : StructrApp.getConfiguration().getEntityCreationTransformations(node.getClass())) {
       transformation.apply(securityContext,node);
     }
   }

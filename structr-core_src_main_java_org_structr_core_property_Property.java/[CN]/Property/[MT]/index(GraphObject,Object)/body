@@ -1,44 +1,54 @@
 {
   if (entity instanceof AbstractNode) {
-    NodeService nodeService=Services.getService(NodeService.class);
+    NodeService nodeService=Services.getInstance().getService(NodeService.class);
     AbstractNode node=(AbstractNode)entity;
     Node dbNode=node.getNode();
     for (    NodeIndex indexName : nodeIndices()) {
       Index<Node> index=nodeService.getNodeIndex(indexName);
       if (index != null) {
+        try {
 synchronized (index) {
-          index.remove(dbNode,dbName);
-          if (value != null && !StringUtils.isBlank(value.toString())) {
-            index.add(dbNode,dbName,value);
-          }
- else           if (isIndexedWhenEmpty()) {
-            value=getValueForEmptyFields();
-            if (value != null) {
+            index.remove(dbNode,dbName);
+            if (value != null && !StringUtils.isBlank(value.toString())) {
               index.add(dbNode,dbName,value);
             }
+ else             if (isIndexedWhenEmpty()) {
+              value=getValueForEmptyFields();
+              if (value != null) {
+                index.add(dbNode,dbName,value);
+              }
+            }
           }
+        }
+ catch (        Throwable t) {
+          Logger.getLogger(Property.class.getName()).log(Level.INFO,"Unable to index property {0} of type {1} on {2}",new Object[]{value,this.getClass().getSimpleName(),entity});
         }
       }
     }
   }
  else {
-    NodeService nodeService=Services.getService(NodeService.class);
+    NodeService nodeService=Services.getInstance().getService(NodeService.class);
     AbstractRelationship rel=(AbstractRelationship)entity;
     Relationship dbRel=rel.getRelationship();
     for (    RelationshipIndex indexName : relationshipIndices()) {
       Index<Relationship> index=nodeService.getRelationshipIndex(indexName);
       if (index != null) {
+        try {
 synchronized (index) {
-          index.remove(dbRel,dbName);
-          if (value != null && !StringUtils.isBlank(value.toString())) {
-            index.add(dbRel,dbName,value);
-          }
- else           if (isIndexedWhenEmpty()) {
-            value=getValueForEmptyFields();
-            if (value != null) {
+            index.remove(dbRel,dbName);
+            if (value != null && !StringUtils.isBlank(value.toString())) {
               index.add(dbRel,dbName,value);
             }
+ else             if (isIndexedWhenEmpty()) {
+              value=getValueForEmptyFields();
+              if (value != null) {
+                index.add(dbRel,dbName,value);
+              }
+            }
           }
+        }
+ catch (        Throwable t) {
+          Logger.getLogger(Property.class.getName()).log(Level.INFO,"Unable to index property {0} of type {1} on {2}",new Object[]{value,this.getClass().getSimpleName(),entity});
         }
       }
     }

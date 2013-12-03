@@ -1,0 +1,23 @@
+{
+  final String _sourceMultiplicity=getProperty(sourceMultiplicity);
+  final String _targetMultiplicity=getProperty(targetMultiplicity);
+  final String _sourceType=getSchemaNodeSourceType();
+  final String _targetType=getSchemaNodeTargetType();
+  if (_sourceType.equals(relatedClassName)) {
+    if ("1".equals(_targetMultiplicity)) {
+      return CaseHelper.toLowerCamelCase(_targetType);
+    }
+ else {
+      return CaseHelper.toLowerCamelCase(_targetType) + "s";
+    }
+  }
+ else   if (_targetType.equals(relatedClassName)) {
+    if ("1".equals(_sourceMultiplicity)) {
+      return CaseHelper.toLowerCamelCase(_sourceType);
+    }
+ else {
+      return CaseHelper.toLowerCamelCase(_sourceType) + "s";
+    }
+  }
+  return "";
+}

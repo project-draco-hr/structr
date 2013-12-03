@@ -1,0 +1,47 @@
+{
+  final Set<String> viewProperties=new LinkedHashSet<>();
+  final Set<String> validators=new LinkedHashSet<>();
+  final Set<String> enums=new LinkedHashSet<>();
+  final StringBuilder src=new StringBuilder();
+  final Class baseType=AbstractNode.class;
+  final String _className=getProperty(name);
+  src.append("package org.structr.dynamic;\n\n");
+  src.append("import ").append(baseType.getName()).append(";\n");
+  src.append("import ").append(PropertyView.class.getName()).append(";\n");
+  src.append("import ").append(View.class.getName()).append(";\n");
+  src.append("import ").append(ValidationHelper.class.getName()).append(";\n");
+  src.append("import ").append(ErrorBuffer.class.getName()).append(";\n");
+  src.append("import org.structr.core.validator.*;\n");
+  src.append("import org.structr.core.property.*;\n");
+  src.append("import org.structr.core.notion.*;\n");
+  src.append("import java.util.List;\n\n");
+  src.append("public class ").append(_className).append(" extends ").append(baseType.getSimpleName()).append(" {\n\n");
+  src.append(SchemaHelper.extractProperties(this,validators,enums,viewProperties,errorBuffer));
+  for (  final SchemaRelationship outRel : getOutgoingRelationships(SchemaRelationship.class)) {
+    src.append(outRel.getPropertySource(_className));
+    viewProperties.add(outRel.getPropertyName(_className) + "Property");
+  }
+  for (  final SchemaRelationship inRel : getIncomingRelationships(SchemaRelationship.class)) {
+    src.append(inRel.getPropertySource(_className));
+    viewProperties.add(inRel.getPropertyName(_className) + "Property");
+  }
+  for (  final String enumDefition : enums) {
+    src.append(enumDefition);
+  }
+  if (!viewProperties.isEmpty()) {
+    SchemaHelper.formatView(src,_className,"default","PropertyView.Public",viewProperties);
+    SchemaHelper.formatView(src,_className,"ui","PropertyView.Ui",viewProperties);
+  }
+  if (!validators.isEmpty()) {
+    src.append("\n\t@Override\n");
+    src.append("\tpublic boolean isValid(final ErrorBuffer errorBuffer) {\n\n");
+    src.append("\t\tboolean error = false;\n\n");
+    for (    final String validator : validators) {
+      src.append("\t\terror |= ").append(validator).append(";\n");
+    }
+    src.append("\n\t\treturn !error;\n");
+    src.append("\t}\n");
+  }
+  src.append("}\n");
+  return src.toString();
+}

@@ -1,10 +1,7 @@
 {
-  List<GraphObjectMap> resultList=new LinkedList<GraphObjectMap>();
+  List<GraphObjectMap> resultList=new LinkedList<>();
   Class type=typeResource.getEntityClass();
   if (type == null) {
-    if (PropertyDefinition.exists(rawType)) {
-      type=PropertyDefinition.nodeExtender.getType(rawType);
-    }
   }
   if (type != null) {
     GraphObjectMap schema=new GraphObjectMap();
@@ -13,12 +10,12 @@
     schema.setProperty(new StringProperty("url"),url);
     schema.setProperty(new StringProperty("type"),type.getSimpleName());
     schema.setProperty(new LongProperty("flags"),SecurityContext.getResourceFlags(rawType));
-    Set<String> propertyViews=new LinkedHashSet<String>(EntityContext.getPropertyViews());
+    Set<String> propertyViews=new LinkedHashSet<>(StructrApp.getConfiguration().getPropertyViews());
     Map<String,Map<String,Object>> views=new TreeMap();
     schema.setProperty(new StringProperty("views"),views);
     for (    String view : propertyViews) {
-      Set<PropertyKey> properties=new LinkedHashSet<PropertyKey>(EntityContext.getPropertySet(type,view));
-      Map<String,Object> propertyConverterMap=new TreeMap<String,Object>();
+      Set<PropertyKey> properties=new LinkedHashSet<>(StructrApp.getConfiguration().getPropertySet(type,view));
+      Map<String,Object> propertyConverterMap=new TreeMap<>();
       if (PropertyDefinition.exists(type.getSimpleName())) {
         Iterable<PropertyDefinition> dynamicProperties=PropertyDefinition.getPropertiesForKind(type.getSimpleName());
         if (dynamicProperties != null) {

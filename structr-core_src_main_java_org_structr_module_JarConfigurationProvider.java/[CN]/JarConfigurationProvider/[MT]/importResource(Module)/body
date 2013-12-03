@@ -1,0 +1,30 @@
+{
+  final Set<String> classes=module.getClasses();
+  for (  final String name : classes) {
+    String className=StringUtils.removeStart(name,".");
+    logger.log(Level.FINE,"Instantiating class {0} ",className);
+    try {
+      Class clazz=Class.forName(className);
+      logger.log(Level.FINE,"Class {0} instantiated: {1}",new Object[]{className,clazz});
+      if (!Modifier.isAbstract(clazz.getModifiers())) {
+        if (AbstractNode.class.isAssignableFrom(clazz)) {
+          registerEntityType(clazz);
+        }
+        if (AbstractRelationship.class.isAssignableFrom(clazz)) {
+          registerEntityType(clazz);
+        }
+        if (Service.class.isAssignableFrom(clazz)) {
+          Services.getInstance().registerServiceClass(clazz);
+        }
+        if (Agent.class.isAssignableFrom(clazz)) {
+          String simpleName=clazz.getSimpleName();
+          String fullName=clazz.getName();
+          agentClassCache.put(simpleName,clazz);
+          agentPackages.add(fullName.substring(0,fullName.lastIndexOf(".")));
+        }
+      }
+    }
+ catch (    Throwable t) {
+    }
+  }
+}

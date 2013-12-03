@@ -1,56 +1,15 @@
 {
-  logger.log(Level.INFO,"Initializing service layer");
-  if (config == null) {
-    logger.log(Level.SEVERE,"Could not initialize service layer: Service configuration is null");
-    return;
-  }
-  configFilePath=getConfigValue(config,Services.CONFIG_FILE_PATH,"./structr.conf");
-  configuredServices=getConfigValue(config,Services.CONFIGURED_SERVICES,"ModuleService NodeService AgentService CloudService CacheService LogService NotificationService");
-  appTitle=getConfigValue(config,Services.APPLICATION_TITLE,"structr");
-  appHost=getConfigValue(config,Services.APPLICATION_HOST,"localhost");
-  appHttpPort=getConfigValue(config,Services.APPLICATION_HTTP_PORT,"8082");
-  appHttpsPort=getConfigValue(config,Services.APPLICATION_HTTPS_PORT,"8083");
-  appFtpPort=getConfigValue(config,Services.APPLICATION_FTP_PORT,"8022");
-  httpsEnabled=getConfigValue(config,Services.APPLICATION_HTTPS_ENABLED,"false");
-  keystorePath=getConfigValue(config,Services.APPLICATION_KEYSTORE_PATH,"");
-  keystorePassword=getConfigValue(config,Services.APPLICATION_KEYSTORE_PASSWORD,"");
-  tmpPath=getConfigValue(config,Services.TMP_PATH,"/tmp");
-  basePath=getConfigValue(config,Services.BASE_PATH,".");
-  restPath=getConfigValue(config,Services.REST_PATH,"/structr/rest");
-  databasePath=getConfigValue(config,Services.DATABASE_PATH,"./db");
-  logDatabasePath=getConfigValue(config,Services.LOG_DATABASE_PATH,"./logdb.dat");
-  filesPath=getConfigValue(config,Services.FILES_PATH,"./files");
-  resources=getConfigValue(config,Services.RESOURCES,"");
-  serverIp=getConfigValue(config,Services.SERVER_IP,"127.0.0.1");
-  tcpPort=getConfigValue(config,Services.TCP_PORT,"54555");
-  udpPort=getConfigValue(config,Services.UDP_PORT,"57555");
-  smtpHost=getConfigValue(config,Services.SMTP_HOST,"localhost");
-  smtpPort=getConfigValue(config,Services.SMTP_PORT,"25");
-  smtpUser=getConfigValue(config,Services.SMTP_USER,"");
-  smtpPassword=getConfigValue(config,Services.SMTP_PASSWORD,"");
-  superuserUsername=getConfigValue(config,Services.SUPERUSER_USERNAME,"superadmin");
-  superuserPassword=getConfigValue(config,Services.SUPERUSER_PASSWORD,"");
-  jsonDepth=getConfigValue(config,Services.JSON_OUTPUT_DEPTH,"3");
-  logger.log(Level.INFO,"Starting services");
+  final StructrConf config=getBaseConfiguration();
+  final String configFileName="structr.conf";
+  logger.log(Level.INFO,"Reading {0}..",configFileName);
   try {
-    Services.command(null,InitializeModuleServiceCommand.class).execute();
+    final FileInputStream fis=new FileInputStream(configFileName);
+    structrConf.load(fis);
+    fis.close();
   }
- catch (  FrameworkException fex) {
-    fex.printStackTrace();
+ catch (  IOException ioex) {
+    logger.log(Level.WARNING,"Unable to read configuration file {0}: {1}",new Object[]{configFileName,ioex.getMessage()});
   }
-  for (  Class serviceClass : registeredServiceClasses) {
-    if (Service.class.isAssignableFrom(serviceClass) && isConfigured(serviceClass)) {
-      try {
-        createService(serviceClass);
-      }
- catch (      Throwable t) {
-        t.printStackTrace();
-        logger.log(Level.WARNING,"Exception while registering service {0}: {1}",new Object[]{serviceClass.getName(),t.getMessage()});
-      }
-    }
-  }
-  logger.log(Level.INFO,"{0} service(s) processed",serviceCache.size());
-  registeredServiceClasses.clear();
-  logger.log(Level.INFO,"Initialization complete");
-  initializationDone=true;
+  mergeConfiguration(config,structrConf);
+  initialize(config);
 }

@@ -8,7 +8,6 @@
   src.append("package org.structr.dynamic;\n\n");
   SchemaHelper.formatImportStatements(src,baseType);
   src.append("public class ").append(_className).append(" extends ").append(baseType.getSimpleName()).append(" {\n\n");
-  src.append(SchemaHelper.extractProperties(this,validators,enums,viewProperties,errorBuffer));
   for (  final SchemaRelationship outRel : getOutgoingRelationships(SchemaRelationship.class)) {
     src.append(outRel.getPropertySource(_className));
     viewProperties.add(outRel.getPropertyName(_className) + "Property");
@@ -17,6 +16,7 @@
     src.append(inRel.getPropertySource(_className));
     viewProperties.add(inRel.getPropertyName(_className) + "Property");
   }
+  src.append(SchemaHelper.extractProperties(this,validators,enums,viewProperties,errorBuffer));
   for (  final String enumDefition : enums) {
     src.append(enumDefition);
   }

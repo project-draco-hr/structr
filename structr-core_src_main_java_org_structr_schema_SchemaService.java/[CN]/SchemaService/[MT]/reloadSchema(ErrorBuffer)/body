@@ -1,0 +1,20 @@
+{
+  final NodeExtender nodeExtender=new NodeExtender();
+  boolean success=true;
+  try {
+    for (    final SchemaNode schemaNode : StructrApp.getInstance().nodeQuery(SchemaNode.class).getAsList()) {
+      nodeExtender.addClass(schemaNode.getClassName(),schemaNode.getSource(errorBuffer));
+    }
+    for (    final SchemaRelationship schemaRelationships : StructrApp.getInstance().relationshipQuery(SchemaRelationship.class).getAsList()) {
+      nodeExtender.addClass(schemaRelationships.getClassName(),schemaRelationships.getSource(errorBuffer));
+    }
+    for (    final Class newType : nodeExtender.compile(errorBuffer).values()) {
+      Services.getInstance().getConfigurationProvider().registerEntityType(newType);
+    }
+    success=!errorBuffer.hasError();
+  }
+ catch (  Throwable t) {
+    success=false;
+  }
+  return success;
+}

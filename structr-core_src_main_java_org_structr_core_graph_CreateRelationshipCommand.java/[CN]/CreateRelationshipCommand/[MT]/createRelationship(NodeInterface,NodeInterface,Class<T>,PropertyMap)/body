@@ -8,6 +8,10 @@
   final Date now=new Date();
   if (newRel != null) {
     newRel.unlockReadOnlyPropertiesOnce();
+    newRel.setProperty(GraphObject.type,relType.getSimpleName());
+    newRel.unlockReadOnlyPropertiesOnce();
+    newRel.setProperty(GraphObject.id,getNextUuid());
+    newRel.unlockReadOnlyPropertiesOnce();
     newRel.setProperty(AbstractRelationship.createdDate,now);
     newRel.unlockReadOnlyPropertiesOnce();
     newRel.setProperty(AbstractRelationship.lastModifiedDate,now);
@@ -23,8 +27,8 @@
         newRel.setProperty(entry.getKey(),entry.getValue());
       }
     }
-    newRel.onRelationshipInstantiation();
-    for (    Transformation<GraphObject> transformation : EntityContext.getEntityCreationTransformations(newRel.getClass())) {
+    newRel.onRelationshipCreation();
+    for (    Transformation<GraphObject> transformation : StructrApp.getConfiguration().getEntityCreationTransformations(newRel.getClass())) {
       transformation.apply(securityContext,newRel);
     }
   }

@@ -1,0 +1,12 @@
+{
+  final String normalizedEntityName=normalize ? normalizeEntityName(rawType) : rawType;
+  final ConfigurationProvider configuration=StructrApp.getConfiguration();
+  Class type=configuration.getNodeEntities().get(normalizedEntityName);
+  if (type == null) {
+    type=configuration.getRelationshipEntities().get(normalizedEntityName);
+  }
+  if (type != null) {
+    normalizedEntityNameCache.put(rawType,type.getSimpleName());
+  }
+  return type;
+}

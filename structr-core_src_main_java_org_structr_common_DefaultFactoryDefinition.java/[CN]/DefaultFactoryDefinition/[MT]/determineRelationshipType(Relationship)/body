@@ -1,6 +1,5 @@
 {
   final String type=GraphObject.type.dbName();
-  final ModuleService moduleService=getModuleService();
   final String sourceType=relationship.getStartNode().hasProperty(type) ? relationship.getStartNode().getProperty(type).toString() : null;
   final String targetType=relationship.getEndNode().hasProperty(type) ? relationship.getEndNode().getProperty(type).toString() : null;
   final String relType=relationship.getType().name();
@@ -13,9 +12,11 @@
     Object obj=relationship.getProperty(type);
     logger.log(Level.FINEST,"Type property: {0}",obj);
     if (obj != null) {
-      Class relationClass=moduleService.getRelationshipEntityClass(obj.toString());
-      moduleService.setRelationClassForCombinedType(sourceType,relType,targetType,relationClass);
-      return relationClass;
+      Class relationClass=StructrApp.getConfiguration().getRelationshipEntityClass(obj.toString());
+      if (relationClass != null) {
+        StructrApp.getConfiguration().setRelationClassForCombinedType(sourceType,relType,targetType,relationClass);
+        return relationClass;
+      }
     }
   }
   final String combinedTypeName="combinedType";
@@ -23,7 +24,10 @@
     Object obj=relationship.getProperty(combinedTypeName);
     logger.log(Level.FINE,"Combined type property: {0}",obj);
     if (obj != null) {
-      return getClassForCombinedType(obj.toString());
+      Class classForCombinedType=getClassForCombinedType(obj.toString());
+      if (classForCombinedType != null) {
+        return classForCombinedType;
+      }
     }
   }
   logger.log(Level.WARNING,"No instantiable class for relationship found for {0} {1} {2}, returning generic relationship class.",new Object[]{sourceType,relType,targetType});

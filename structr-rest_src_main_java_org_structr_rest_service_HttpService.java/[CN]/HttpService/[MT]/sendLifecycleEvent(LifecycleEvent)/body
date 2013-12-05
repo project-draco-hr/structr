@@ -1,0 +1,22 @@
+{
+  final String listeners=Services.getInstance().getCurrentConfig().getProperty(LIFECYCLE_LISTENERS);
+  if (listeners != null) {
+    final String[] listenerClasses=listeners.split("[\\s ,;]+");
+    for (    String listenerClass : listenerClasses) {
+      try {
+        final HttpServiceLifecycleListener listener=(HttpServiceLifecycleListener)Class.forName(listenerClass).newInstance();
+switch (event) {
+case Started:
+          listener.serverStarted();
+        break;
+case Stopped:
+      listener.serverStopped();
+    break;
+}
+}
+ catch (Throwable t) {
+logger.log(Level.WARNING,"Unable to call HttpServiceLifecycleListener {0}: {1}",new Object[]{listenerClass,t.getMessage()});
+}
+}
+}
+}

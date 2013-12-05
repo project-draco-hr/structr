@@ -5,7 +5,7 @@
     List<AbstractRelationship> rels=relFactory.instantiate(GlobalGraphOperations.at(graphDb).getAllRelationships());
     long count=bulkGraphOperation(securityContext,rels,1000,"MigrateRelationships",new BulkGraphOperation<AbstractRelationship>(){
       @Override public void handleGraphObject(      SecurityContext securityContext,      AbstractRelationship rel){
-        if (rel.getProperty(AbstractNode.uuid) != null) {
+        if (rel.getProperty(GraphObject.id) != null) {
           Class type=rel.getClass();
           if (!type.equals(GenericRelationship.class))           return;
           try {

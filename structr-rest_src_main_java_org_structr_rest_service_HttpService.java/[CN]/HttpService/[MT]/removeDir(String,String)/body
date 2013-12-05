@@ -1,0 +1,15 @@
+{
+  String strippedBasePath=StringUtils.stripEnd(basePath,"/");
+  File file=new File(strippedBasePath + "/" + directoryName);
+  if (file.isDirectory()) {
+    try {
+      FileUtils.deleteDirectory(file);
+    }
+ catch (    IOException ex) {
+      logger.log(Level.SEVERE,"Unable to delete directory {0}: {1}",new Object[]{directoryName,ex.getMessage()});
+    }
+  }
+ else {
+    file.delete();
+  }
+}

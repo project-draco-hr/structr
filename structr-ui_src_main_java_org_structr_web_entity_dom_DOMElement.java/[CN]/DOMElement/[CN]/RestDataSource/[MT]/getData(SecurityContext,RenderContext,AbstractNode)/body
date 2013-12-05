@@ -46,7 +46,7 @@
     }
 ;
     securityContext.setRequest(request);
-    Resource resource=ResourceHelper.applyViewTransformation(request,securityContext,ResourceHelper.optimizeNestedResourceChain(ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,AbstractNode.uuid),AbstractNode.uuid),propertyView);
+    Resource resource=ResourceHelper.applyViewTransformation(request,securityContext,ResourceHelper.optimizeNestedResourceChain(ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,GraphObject.id),GraphObject.id),propertyView);
     String pageSizeParameter=request.getParameter(JsonRestServlet.REQUEST_PARAMETER_PAGE_SIZE);
     String pageParameter=request.getParameter(JsonRestServlet.REQUEST_PARAMETER_PAGE_NUMBER);
     String offsetId=request.getParameter(JsonRestServlet.REQUEST_PARAMETER_OFFSET_ID);
@@ -58,7 +58,7 @@
     PropertyKey sortKey=null;
     if (sortKeyName != null) {
       Class<? extends GraphObject> type=resource.getEntityClass();
-      sortKey=EntityContext.getPropertyKeyForDatabaseName(type,sortKeyName);
+      sortKey=StructrApp.getConfiguration().getPropertyKeyForDatabaseName(type,sortKeyName);
     }
     Result result=resource.doGet(sortKey,sortDescending,pageSize,page,offsetId);
     result.setIsCollection(resource.isCollectionResource());

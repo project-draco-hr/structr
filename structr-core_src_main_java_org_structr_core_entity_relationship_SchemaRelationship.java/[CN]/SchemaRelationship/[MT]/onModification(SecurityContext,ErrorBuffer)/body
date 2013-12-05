@@ -1,0 +1,12 @@
+{
+  if (super.onModification(securityContext,errorBuffer)) {
+    final String signature=getResourceSignature();
+    final Long flags=getProperty(AbstractSchemaNode.accessFlags);
+    if (StringUtils.isNotBlank(signature)) {
+      SchemaHelper.createGrant(signature,flags);
+      TransactionCommand.postProcess("reloadSchema",new ReloadSchema());
+      return true;
+    }
+  }
+  return false;
+}

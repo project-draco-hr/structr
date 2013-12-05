@@ -1,3 +1,13 @@
 {
-  return EntityContext.getPropertySet(this.getClass(),propertyView);
+  if (securityContext != null && securityContext.hasCustomView()) {
+    final Set<PropertyKey> keys=new LinkedHashSet<>(StructrApp.getConfiguration().getPropertySet(entityType,propertyView));
+    final Set<String> customView=securityContext.getCustomView();
+    for (Iterator<PropertyKey> it=keys.iterator(); it.hasNext(); ) {
+      if (!customView.contains(it.next().jsonName())) {
+        it.remove();
+      }
+    }
+    return keys;
+  }
+  return StructrApp.getConfiguration().getPropertySet(entityType,propertyView);
 }

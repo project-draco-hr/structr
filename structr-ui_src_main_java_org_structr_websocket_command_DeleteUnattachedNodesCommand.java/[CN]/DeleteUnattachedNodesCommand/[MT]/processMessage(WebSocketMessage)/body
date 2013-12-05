@@ -6,9 +6,9 @@
   searchAttributes.add(Search.orExactType(Content.class));
   final String sortOrder=webSocketData.getSortOrder();
   final String sortKey=webSocketData.getSortKey();
-  PropertyKey sortProperty=EntityContext.getPropertyKeyForJSONName(DOMNode.class,sortKey);
+  PropertyKey sortProperty=StructrApp.getConfiguration().getPropertyKeyForJSONName(DOMNode.class,sortKey);
   try {
-    Result result=(Result)Services.command(securityContext,SearchNodeCommand.class).execute(true,false,searchAttributes,sortProperty,"desc".equals(sortOrder));
+    Result result=(Result)StructrApp.getInstance(securityContext).command(SearchNodeCommand.class).execute(true,false,searchAttributes,sortProperty,"desc".equals(sortOrder));
     final List<AbstractNode> filteredResults=new LinkedList();
     List<? extends GraphObject> resultList=result.getResults();
     for (    GraphObject obj : resultList) {

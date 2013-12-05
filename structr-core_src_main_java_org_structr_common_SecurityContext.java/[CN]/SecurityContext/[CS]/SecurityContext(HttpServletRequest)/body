@@ -1,4 +1,25 @@
 {
   this.request=request;
   initRequestBasedCache(request);
+  if (request != null) {
+    try {
+      final String contentType=request.getContentType();
+      if (contentType != null && contentType.startsWith("application/json;")) {
+        customView=new LinkedHashSet<>();
+        final Matcher matcher=customViewPattern.matcher(contentType);
+        if (matcher.matches()) {
+          final String properties=matcher.group(1);
+          final String[] parts=properties.split("[,]+");
+          for (          final String part : parts) {
+            final String p=part.trim();
+            if (p.length() > 0) {
+              customView.add(p);
+            }
+          }
+        }
+      }
+    }
+ catch (    Throwable ignore) {
+    }
+  }
 }

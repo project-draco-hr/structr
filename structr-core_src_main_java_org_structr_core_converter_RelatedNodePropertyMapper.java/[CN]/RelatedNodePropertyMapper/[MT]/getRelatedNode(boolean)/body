@@ -7,17 +7,22 @@
       final RelationProperty relationProperty=(RelationProperty)sourceKey;
       final App app=StructrApp.getInstance();
       final Class<T> relatedType=relationProperty.getTargetType();
-      try {
-        app.beginTx();
-        relatedNode=app.create(relatedType);
-        relationProperty.addSingleElement(securityContext,localNode,relatedNode);
-        app.commitTx();
-      }
- catch (      FrameworkException fex) {
-        fex.printStackTrace();
-      }
+      if (relatedType != null) {
+        try {
+          app.beginTx();
+          relatedNode=app.create(relatedType);
+          relationProperty.addSingleElement(securityContext,localNode,relatedNode);
+          app.commitTx();
+        }
+ catch (        FrameworkException fex) {
+          fex.printStackTrace();
+        }
  finally {
-        app.finishTx();
+          app.finishTx();
+        }
+      }
+ else {
+        logger.log(Level.SEVERE,"Related type was null for {0}",currentObject);
       }
     }
   }

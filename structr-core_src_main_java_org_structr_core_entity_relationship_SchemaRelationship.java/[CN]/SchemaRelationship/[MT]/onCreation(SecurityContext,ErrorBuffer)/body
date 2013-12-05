@@ -1,0 +1,16 @@
+{
+  if (super.onCreation(securityContext,errorBuffer)) {
+    if (Services.getInstance().getConfigurationProvider().getRelationshipEntityClass(getClassName()) != null) {
+      errorBuffer.add(SchemaNode.class.getSimpleName(),new InvalidSchemaToken(getClassName(),"type_already_exists"));
+      return false;
+    }
+    final String signature=getResourceSignature();
+    final Long flags=getProperty(AbstractSchemaNode.accessFlags);
+    if (StringUtils.isNotBlank(signature)) {
+      SchemaHelper.createGrant(signature,flags);
+      TransactionCommand.postProcess("reloadSchema",new ReloadSchema());
+      return true;
+    }
+  }
+  return false;
+}

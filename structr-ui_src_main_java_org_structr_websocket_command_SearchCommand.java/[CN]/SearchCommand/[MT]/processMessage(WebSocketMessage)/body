@@ -4,7 +4,7 @@
   String typeString=(String)webSocketData.getNodeData().get("type");
   Class type=null;
   if (typeString != null) {
-    type=EntityContext.getEntityClassForRawType(typeString);
+    type=SchemaHelper.getEntityClassForRawType(typeString);
   }
   List<SearchAttribute> searchAttributes=new LinkedList();
   if (searchString == null) {
@@ -17,9 +17,9 @@
   }
   final String sortOrder=webSocketData.getSortOrder();
   final String sortKey=webSocketData.getSortKey();
-  PropertyKey sortProperty=EntityContext.getPropertyKeyForJSONName(AbstractNode.class,sortKey);
+  PropertyKey sortProperty=StructrApp.getConfiguration().getPropertyKeyForJSONName(AbstractNode.class,sortKey);
   try {
-    Result result=(Result)Services.command(securityContext,SearchNodeCommand.class).execute(true,false,searchAttributes,sortProperty,"desc".equals(sortOrder));
+    Result result=(Result)StructrApp.getInstance(securityContext).command(SearchNodeCommand.class).execute(true,false,searchAttributes,sortProperty,"desc".equals(sortOrder));
     webSocketData.setResult(result.getResults());
     getWebSocket().send(webSocketData,true);
   }

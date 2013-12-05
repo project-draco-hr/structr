@@ -1,7 +1,8 @@
 {
   final App app=StructrApp.getInstance(securityContext);
   try {
-    java.io.File fileOnDisk=new java.io.File(Services.getFilesPath() + "/" + getRelativeFilePath());
+    final String filesPath=Services.getInstance().getConfigurationValue(Services.FILES_PATH);
+    java.io.File fileOnDisk=new java.io.File(filesPath + "/" + getRelativeFilePath());
     if (fileOnDisk.exists()) {
       return;
     }
@@ -15,7 +16,10 @@
     }
     app.beginTx();
     setProperty(checksum,FileHelper.getChecksum(File.this));
-    setProperty(size,FileHelper.getSize(File.this));
+    long fileSize=FileHelper.getSize(File.this);
+    if (fileSize > 0) {
+      setProperty(size,fileSize);
+    }
     app.commitTx();
   }
  catch (  FrameworkException ex) {

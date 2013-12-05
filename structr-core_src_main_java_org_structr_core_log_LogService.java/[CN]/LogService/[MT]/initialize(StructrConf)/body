@@ -1,0 +1,25 @@
+{
+  String logDbPath=configurationFile.getProperty(Services.LOG_DATABASE_PATH);
+  try {
+    logger.log(Level.INFO,"Initializing log database ({0}) ...",logDbPath);
+    if (logDbFactory != null) {
+      logger.log(Level.INFO,"Log database already running ({0}) ...",logDbPath);
+      return;
+    }
+    try {
+      logDbFactory=new TxPageFileFactory();
+      logDbFactory.setFile(new File(logDbPath));
+      logDbFactory.open();
+      logDb=logDbFactory.getTxPageFile();
+    }
+ catch (    Throwable t) {
+      logger.log(Level.INFO,"Log Database could not be started",logDbPath);
+    }
+    logger.log(Level.INFO,"Log database ready.");
+  }
+ catch (  Exception e) {
+    logger.log(Level.SEVERE,"Log database could not be initialized. {0}",e.getMessage());
+    e.printStackTrace(System.out);
+  }
+  isInitialized=true;
+}

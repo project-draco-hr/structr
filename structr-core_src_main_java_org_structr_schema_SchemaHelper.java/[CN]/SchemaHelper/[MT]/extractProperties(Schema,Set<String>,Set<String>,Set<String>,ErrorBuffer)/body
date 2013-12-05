@@ -1,0 +1,22 @@
+{
+  final PropertyContainer propertyContainer=entity.getPropertyContainer();
+  final StringBuilder src=new StringBuilder();
+  for (  final String propertyName : SchemaHelper.getProperties(propertyContainer)) {
+    if (propertyContainer.hasProperty(propertyName)) {
+      String rawType=propertyContainer.getProperty(propertyName).toString();
+      boolean notNull=false;
+      if (rawType.startsWith("+")) {
+        rawType=rawType.substring(1);
+        notNull=true;
+      }
+      PropertyParser parser=SchemaHelper.getParserForRawValue(errorBuffer,entity.getClassName(),propertyName,rawType,notNull);
+      if (parser != null) {
+        src.append(parser.getPropertySource(errorBuffer));
+        validators.addAll(parser.getGlobalValidators());
+        enums.addAll(parser.getEnumDefinitions());
+        viewProperties.add(propertyName.substring(1) + "Property");
+      }
+    }
+  }
+  return src.toString();
+}

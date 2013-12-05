@@ -1,5 +1,5 @@
 {
-  String uuid=fileNode.getProperty(AbstractNode.uuid);
+  String uuid=fileNode.getProperty(GraphObject.id);
   if (uuid == null) {
     final String newUuid=UUID.randomUUID().toString().replaceAll("[\\-]+","");
     final App app=StructrApp.getInstance(fileNode.getSecurityContext());
@@ -7,7 +7,7 @@
     try {
       app.beginTx();
       fileNode.unlockReadOnlyPropertiesOnce();
-      fileNode.setProperty(AbstractNode.uuid,newUuid);
+      fileNode.setProperty(GraphObject.id,newUuid);
       app.commitTx();
     }
   finally {
@@ -15,7 +15,8 @@
     }
   }
   fileNode.setRelativeFilePath(org.structr.web.entity.File.getDirectoryPath(uuid) + "/" + uuid);
-  java.io.File fileOnDisk=new java.io.File(Services.getFilesPath() + "/" + fileNode.getRelativeFilePath());
+  final String filesPath=Services.getInstance().getConfigurationValue(Services.FILES_PATH);
+  java.io.File fileOnDisk=new java.io.File(filesPath + "/" + fileNode.getRelativeFilePath());
   fileOnDisk.getParentFile().mkdirs();
   FileUtils.writeByteArrayToFile(fileOnDisk,data);
 }

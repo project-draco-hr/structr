@@ -10,11 +10,13 @@
   src.append("public class ").append(_className).append(" extends ").append(baseType.getSimpleName()).append(" {\n\n");
   for (  final SchemaRelationship outRel : getOutgoingRelationships(SchemaRelationship.class)) {
     src.append(outRel.getPropertySource(_className));
-    SchemaHelper.addPropertyToView("public",outRel.getPropertyName(_className),viewProperties);
+    SchemaHelper.addPropertyToView(PropertyView.Public,outRel.getPropertyName(_className),viewProperties);
+    SchemaHelper.addPropertyToView(PropertyView.Ui,outRel.getPropertyName(_className),viewProperties);
   }
   for (  final SchemaRelationship inRel : getIncomingRelationships(SchemaRelationship.class)) {
     src.append(inRel.getPropertySource(_className));
-    SchemaHelper.addPropertyToView("public",inRel.getPropertyName(_className),viewProperties);
+    SchemaHelper.addPropertyToView(PropertyView.Public,inRel.getPropertyName(_className),viewProperties);
+    SchemaHelper.addPropertyToView(PropertyView.Ui,inRel.getPropertyName(_className),viewProperties);
   }
   src.append(SchemaHelper.extractProperties(this,validators,enums,viewProperties,errorBuffer));
   for (  final String enumDefition : enums) {

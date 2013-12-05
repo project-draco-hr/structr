@@ -11,10 +11,12 @@
   SchemaHelper.formatImportStatements(src,baseType);
   src.append("public class ").append(_className).append(" extends ").append(getBaseType()).append(" {\n\n");
   src.append(SchemaHelper.extractProperties(this,validators,enums,viewProperties,errorBuffer));
-  src.append("\tpublic static final Property<String> sourceId = new SourceId(\"sourceId\");\n");
-  src.append("\tpublic static final Property<String> targetId = new SourceId(\"targetId\");\n\n");
-  SchemaHelper.addPropertyToView("public","sourceId",viewProperties);
-  SchemaHelper.addPropertyToView("public","targetId",viewProperties);
+  src.append("\tpublic static final Property<String> sourceIdProperty = new SourceId(\"sourceId\");\n");
+  src.append("\tpublic static final Property<String> targetIdProperty = new SourceId(\"targetId\");\n");
+  SchemaHelper.addPropertyToView(PropertyView.Public,"sourceId",viewProperties);
+  SchemaHelper.addPropertyToView(PropertyView.Public,"targetId",viewProperties);
+  SchemaHelper.addPropertyToView(PropertyView.Ui,"sourceId",viewProperties);
+  SchemaHelper.addPropertyToView(PropertyView.Ui,"targetId",viewProperties);
   for (  final String enumDefition : enums) {
     src.append(enumDefition);
   }
@@ -36,7 +38,7 @@
     src.append("\n\t\treturn !error;\n");
     src.append("\t}\n");
   }
-  src.append("\t@Override\n");
+  src.append("\n\t@Override\n");
   src.append("\tpublic Class<").append(_sourceNodeType).append("> getSourceType() {\n");
   src.append("\t\treturn ").append(_sourceNodeType).append(".class;\n");
   src.append("\t}\n\n");

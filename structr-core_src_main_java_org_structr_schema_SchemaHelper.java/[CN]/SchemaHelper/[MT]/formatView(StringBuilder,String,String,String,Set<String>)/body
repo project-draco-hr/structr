@@ -1,8 +1,12 @@
 {
-  src.append("\n\tpublic static final View ").append(viewName).append("View = new View(").append(_className).append(".class, ").append(view).append(",\n");
+  src.append("\n\tpublic static final View ").append(viewName).append("View = new View(").append(_className).append(".class, \"").append(view).append("\",\n");
   src.append("\t\t");
   for (final Iterator<String> it=viewProperties.iterator(); it.hasNext(); ) {
-    src.append(it.next());
+    String propertyName=it.next();
+    if (propertyName.startsWith("_")) {
+      propertyName=propertyName.substring(1) + "Property";
+    }
+    src.append(propertyName);
     if (it.hasNext()) {
       src.append(", ");
     }

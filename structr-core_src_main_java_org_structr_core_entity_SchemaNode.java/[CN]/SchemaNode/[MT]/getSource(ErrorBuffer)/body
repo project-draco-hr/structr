@@ -1,5 +1,5 @@
 {
-  final Set<String> viewProperties=new LinkedHashSet<>();
+  final Map<String,Set<String>> viewProperties=new LinkedHashMap<>();
   final Set<String> validators=new LinkedHashSet<>();
   final Set<String> enums=new LinkedHashSet<>();
   final StringBuilder src=new StringBuilder();
@@ -10,19 +10,23 @@
   src.append("public class ").append(_className).append(" extends ").append(baseType.getSimpleName()).append(" {\n\n");
   for (  final SchemaRelationship outRel : getOutgoingRelationships(SchemaRelationship.class)) {
     src.append(outRel.getPropertySource(_className));
-    viewProperties.add(outRel.getPropertyName(_className) + "Property");
+    SchemaHelper.addPropertyToView("public",outRel.getPropertyName(_className),viewProperties);
   }
   for (  final SchemaRelationship inRel : getIncomingRelationships(SchemaRelationship.class)) {
     src.append(inRel.getPropertySource(_className));
-    viewProperties.add(inRel.getPropertyName(_className) + "Property");
+    SchemaHelper.addPropertyToView("public",inRel.getPropertyName(_className),viewProperties);
   }
   src.append(SchemaHelper.extractProperties(this,validators,enums,viewProperties,errorBuffer));
   for (  final String enumDefition : enums) {
     src.append(enumDefition);
   }
-  if (!viewProperties.isEmpty()) {
-    SchemaHelper.formatView(src,_className,"default","PropertyView.Public",viewProperties);
-    SchemaHelper.formatView(src,_className,"ui","PropertyView.Ui",viewProperties);
+  for (  Entry<String,Set<String>> entry : viewProperties.entrySet()) {
+    final String viewName=entry.getKey();
+    final Set<String> view=entry.getValue();
+    if (!view.isEmpty()) {
+      dynamicViews.add(viewName);
+      SchemaHelper.formatView(src,_className,viewName,viewName,view);
+    }
   }
   if (!validators.isEmpty()) {
     src.append("\n\t@Override\n");

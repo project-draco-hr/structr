@@ -1,26 +1,30 @@
 {
+  final Map<String,Set<String>> viewProperties=new LinkedHashMap<>();
   final StringBuilder src=new StringBuilder();
   final Class baseType=AbstractRelationship.class;
   final String _className=getClassName();
   final String _sourceNodeType=getSchemaNodeSourceType();
   final String _targetNodeType=getSchemaNodeTargetType();
-  final Set<String> viewProperties=new LinkedHashSet<>();
   final Set<String> validators=new LinkedHashSet<>();
   final Set<String> enums=new LinkedHashSet<>();
   src.append("package org.structr.dynamic;\n\n");
   SchemaHelper.formatImportStatements(src,baseType);
   src.append("public class ").append(_className).append(" extends ").append(getBaseType()).append(" {\n\n");
-  src.append(SchemaHelper.extractProperties(this,null,null,null,errorBuffer));
+  src.append(SchemaHelper.extractProperties(this,validators,enums,viewProperties,errorBuffer));
   src.append("\tpublic static final Property<String> sourceId = new SourceId(\"sourceId\");\n");
   src.append("\tpublic static final Property<String> targetId = new SourceId(\"targetId\");\n\n");
-  viewProperties.add("sourceId");
-  viewProperties.add("targetId");
+  SchemaHelper.addPropertyToView("public","sourceId",viewProperties);
+  SchemaHelper.addPropertyToView("public","targetId",viewProperties);
   for (  final String enumDefition : enums) {
     src.append(enumDefition);
   }
-  if (!viewProperties.isEmpty()) {
-    SchemaHelper.formatView(src,_className,"default","PropertyView.Public",viewProperties);
-    SchemaHelper.formatView(src,_className,"ui","PropertyView.Ui",viewProperties);
+  for (  Map.Entry<String,Set<String>> entry : viewProperties.entrySet()) {
+    final String viewName=entry.getKey();
+    final Set<String> view=entry.getValue();
+    if (!view.isEmpty()) {
+      dynamicViews.add(viewName);
+      SchemaHelper.formatView(src,_className,viewName,viewName,view);
+    }
   }
   if (!validators.isEmpty()) {
     src.append("\n\t@Override\n");

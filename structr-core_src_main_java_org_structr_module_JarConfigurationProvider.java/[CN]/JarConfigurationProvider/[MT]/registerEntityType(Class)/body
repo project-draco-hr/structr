@@ -6,10 +6,12 @@
     if (AbstractNode.class.isAssignableFrom(type)) {
       nodeEntityClassCache.put(simpleName,type);
       nodeEntityPackages.add(fullName.substring(0,fullName.lastIndexOf(".")));
+      globalPropertyViewMap.remove(type.getName());
     }
     if (AbstractRelationship.class.isAssignableFrom(type)) {
       relationshipEntityClassCache.put(simpleName,type);
       relationshipPackages.add(fullName.substring(0,fullName.lastIndexOf(".")));
+      globalPropertyViewMap.remove(type.getName());
     }
     for (    Class interfaceClass : type.getInterfaces()) {
       String interfaceName=interfaceClass.getSimpleName();
@@ -48,10 +50,10 @@
       logger.log(Level.WARNING,"Unable to instantiate {0}: {1}",new Object[]{type,t.getMessage()});
     }
   }
-  Set<Method> typeMethods=exportedMethodMap.get(type);
+  Set<Method> typeMethods=exportedMethodMap.get(type.getName());
   if (typeMethods == null) {
     typeMethods=new LinkedHashSet<>();
-    exportedMethodMap.put(type,typeMethods);
+    exportedMethodMap.put(type.getName(),typeMethods);
   }
   typeMethods.addAll(getAnnotatedMethods(type,Export.class));
 }

@@ -24,6 +24,7 @@
       Class<? extends GraphObject> type=resource.getEntityClass();
       sortKey=StructrApp.getConfiguration().getPropertyKeyForDatabaseName(type,sortKeyName);
     }
+    removeLineBreaks=StringUtils.equals(request.getParameter(REMOVE_LINE_BREAK_PARAM),"1");
     Result result=resource.doGet(sortKey,sortDescending,pageSize,page,offsetId);
     result.setIsCollection(resource.isCollectionResource());
     result.setIsPrimitiveArray(resource.isPrimitiveArray());
@@ -35,6 +36,7 @@
       DecimalFormat decimalFormat=new DecimalFormat("0.000000000",DecimalFormatSymbols.getInstance(Locale.ENGLISH));
       result.setQueryTime(decimalFormat.format((queryTimeEnd - queryTimeStart) / 1000000000.0));
       Writer writer=response.getWriter();
+      writeUtf8Bom(writer);
       writeCsv(result,writer);
       response.setStatus(HttpServletResponse.SC_OK);
       writer.append("\n");

@@ -26,13 +26,16 @@
  else {
     final RelationshipInterface relationship=(RelationshipInterface)modificationEvent.getGraphObject();
     final RelationshipType relType=modificationEvent.getRelationshipType();
-    if (modificationEvent.isDeleted() && "CONTAINS".equals(relType.name())) {
+    if (!("CONTAINS".equals(relType.name()))) {
+      return null;
+    }
+    if (modificationEvent.isDeleted()) {
       final WebSocketMessage message=createMessage("REMOVE_CHILD");
       message.setNodeData("parentId",relationship.getSourceNodeId());
       message.setId(relationship.getTargetNodeId());
       return message;
     }
-    if (modificationEvent.isCreated() && "CONTAINS".equals(relType.name())) {
+    if (modificationEvent.isCreated()) {
       final WebSocketMessage message=new WebSocketMessage();
       final NodeInterface startNode=relationship.getSourceNode();
       final NodeInterface endNode=relationship.getTargetNode();

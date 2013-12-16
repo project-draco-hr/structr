@@ -5,9 +5,13 @@
   try {
     app.beginTx();
     User user=app.create(User.class,properties);
+    user.setProperty(User.password,"admin");
     app.commitTx();
   }
-  finally {
+ catch (  Throwable t) {
+    t.printStackTrace();
+  }
+ finally {
     app.finishTx();
   }
 }

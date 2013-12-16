@@ -1,9 +1,8 @@
 {
   try {
-    app.beginTx();
     createAdminUser();
     createResourceAccess("_login",UiAuthenticator.NON_AUTH_USER_POST);
-    app.commitTx();
+    app.beginTx();
     String[] args={"/bin/sh","-c","cd src/test/javascript; PATH=$PATH:./bin/`uname`/ casperjs/bin/casperjs --fail-fast test " + testName + ".js"};
     Process proc=Runtime.getRuntime().exec(args);
     logger.log(Level.INFO,IOUtils.toString(proc.getInputStream()));
@@ -13,6 +12,7 @@
     }
     int exitValue=proc.exitValue();
     logger.log(Level.INFO,"casperjs subprocess returned with {0}",exitValue);
+    app.commitTx();
     return exitValue;
   }
  catch (  Exception ex) {

@@ -9,7 +9,12 @@
 synchronized (index) {
           index.remove(dbNode,dbName);
           if (value != null && !StringUtils.isBlank(value.toString())) {
-            index.add(dbNode,dbName,value);
+            try {
+              index.add(dbNode,dbName,value);
+            }
+ catch (            NotFoundException e) {
+              logger.log(Level.WARNING,"Could not add node to layer",e.getMessage());
+            }
           }
  else           if (isIndexedWhenEmpty()) {
             value=getValueForEmptyFields();

@@ -5,23 +5,23 @@
     if (!headerWritten) {
       StringBuilder row=new StringBuilder();
       for (      PropertyKey key : obj.getPropertyKeys(propertyView)) {
-        row.append("\"").append(key.dbName()).append("\",");
+        row.append("\"").append(key.dbName()).append("\"").append(DELIMITER);
       }
-      int pos=row.lastIndexOf(",");
+      int pos=row.lastIndexOf(DELIMITER);
       if (pos >= 0) {
         row.deleteCharAt(pos);
       }
-      out.append(row).append("\n");
+      out.append(row).append("\r\n");
       out.flush();
       headerWritten=true;
     }
     StringBuilder row=new StringBuilder();
     for (    PropertyKey key : obj.getPropertyKeys(propertyView)) {
       Object value=obj.getProperty(key);
-      row.append("\"").append((value != null ? StringUtils.replace(value.toString(),"\"","\\\"") : "")).append("\",");
+      row.append("\"").append((value != null ? escapeForCsv(value) : "")).append("\"").append(DELIMITER);
     }
-    row.deleteCharAt(row.lastIndexOf(","));
-    out.append(row).append("\n");
+    row.deleteCharAt(row.lastIndexOf(DELIMITER));
+    out.append(row).append("\r\n");
     out.flush();
   }
 }

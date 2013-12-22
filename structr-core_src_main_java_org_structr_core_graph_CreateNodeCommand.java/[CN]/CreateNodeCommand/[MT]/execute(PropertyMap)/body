@@ -44,8 +44,12 @@
   }
   if (node != null) {
     node.onNodeCreation();
-    for (    Transformation<GraphObject> transformation : StructrApp.getConfiguration().getEntityCreationTransformations(node.getClass())) {
+    Set<Transformation<GraphObject>> transformations=StructrApp.getConfiguration().getEntityCreationTransformations(node.getClass());
+    for (    Transformation<GraphObject> transformation : transformations) {
       transformation.apply(securityContext,node);
+    }
+    if (transformations.isEmpty()) {
+      logger.log(Level.WARNING,"No entity creation transformation for {0}",node.getClass());
     }
   }
   return node;

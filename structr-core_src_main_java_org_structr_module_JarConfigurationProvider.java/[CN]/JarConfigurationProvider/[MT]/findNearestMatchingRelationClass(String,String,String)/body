@@ -2,11 +2,11 @@
   Map<Integer,Class> candidates=new TreeMap<>();
   Class sourceType=getNodeEntityClass(sourceTypeName);
   Class targetType=getNodeEntityClass(targetTypeName);
-  for (  final Class candidate : getRelationshipEntities().values()) {
+  for (  final Class candidate : getRelationClassCanditatesForRelType(relType)) {
     Relation rel=instantiate(candidate);
-    int distance=matchRelationClass(rel,sourceType,relType,targetType,-1);
-    if (distance >= 1000) {
-      candidates.put(distance - 1000,candidate);
+    int distance=getDistance(rel.getSourceType(),sourceType,-1) + getDistance(rel.getTargetType(),targetType,-1);
+    if (distance >= 2000) {
+      candidates.put(distance - 2000,candidate);
     }
  else {
     }

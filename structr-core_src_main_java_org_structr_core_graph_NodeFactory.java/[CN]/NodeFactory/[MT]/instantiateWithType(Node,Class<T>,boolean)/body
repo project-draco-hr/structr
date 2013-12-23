@@ -1,6 +1,7 @@
 {
   SecurityContext securityContext=factoryProfile.getSecurityContext();
-  T newNode=(T)securityContext.lookup(node);
+  long id=node.getId();
+  T newNode=(T)securityContext.lookup(id);
   if (newNode == null) {
     try {
       Constructor<T> constructor=constructors.get(nodeClass);
@@ -29,7 +30,7 @@
         logger.log(Level.SEVERE,"Unable to set type property {0} on node {1}: {2}",new Object[]{nodeClass,newNode,t.getMessage()});
       }
     }
-    securityContext.store(newNode);
+    securityContext.store(id,newNode);
   }
   if (isCreation || securityContext.isReadable(newNode,factoryProfile.includeDeletedAndHidden(),factoryProfile.publicOnly())) {
     return newNode;

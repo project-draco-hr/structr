@@ -1,12 +1,13 @@
 {
   try {
-    final List<NodeInterface> testNodes=this.createTestNodes(GenericNode.class,2);
-    AbstractRelationship rel=null;
-    assertNotNull(testNodes);
-    assertTrue(testNodes.size() == 2);
+    final TestOne testOne=createTestNode(TestOne.class);
+    final TestSix testSix=createTestNode(TestSix.class);
+    SixOneOneToOne rel=null;
+    assertNotNull(testOne);
+    assertNotNull(testSix);
     try {
       app.beginTx();
-      rel=app.create(testNodes.get(0),testNodes.get(1),SixOneOneToOne.class);
+      rel=app.create(testSix,testOne,SixOneOneToOne.class);
       app.commitTx();
     }
   finally {
@@ -14,11 +15,11 @@
     }
     assertNotNull(rel);
     GraphDatabaseService graphDb=graphDbCommand.execute();
-    GraphObject searchRes=app.get(testNodes.get(0).getUuid());
+    GraphObject searchRes=app.get(testSix.getUuid());
     assertNotNull(searchRes);
     Transaction tx=graphDb.beginTx();
     try {
-      ((AbstractNode)searchRes).getRelationships().iterator().next().getRelationship().delete();
+      testSix.getRelationships().iterator().next().getRelationship().delete();
       tx.success();
     }
   finally {

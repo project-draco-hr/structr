@@ -1,12 +1,13 @@
 {
   try {
-    final List<NodeInterface> nodes=this.createTestNodes(GenericNode.class,2);
-    RelationshipInterface rel=null;
-    assertNotNull(nodes);
-    assertTrue(nodes.size() == 2);
+    final TestOne testOne=createTestNode(TestOne.class);
+    final TestSix testSix=createTestNode(TestSix.class);
+    SixOneOneToOne rel=null;
+    assertNotNull(testOne);
+    assertNotNull(testSix);
     try {
       app.beginTx();
-      rel=app.create(nodes.get(0),nodes.get(1),SixOneOneToOne.class);
+      rel=app.create(testSix,testOne,SixOneOneToOne.class);
       app.commitTx();
     }
   finally {

@@ -17,10 +17,10 @@
     getWebSocket().send(MessageBuilder.status().code(404).message("Parent node not found").build(),true);
     return;
   }
-  final DOMNode node=getDOMNode(id);
+  final DOMElement node=(DOMElement)getDOMNode(id);
   try {
     app.beginTx();
-    DOMNode clonedNode=(DOMNode)node.cloneNode(false);
+    DOMElement clonedNode=(DOMElement)node.cloneNode(false);
     parentNode.appendChild(clonedNode);
     app.create(node,clonedNode,Sync.class);
     app.create(clonedNode,node,Sync.class);

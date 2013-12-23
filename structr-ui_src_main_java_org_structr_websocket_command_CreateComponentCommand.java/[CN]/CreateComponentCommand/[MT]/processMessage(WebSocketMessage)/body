@@ -3,10 +3,10 @@
   final App app=StructrApp.getInstance(securityContext);
   String id=webSocketData.getId();
   if (id != null) {
-    final DOMNode node=getDOMNode(id);
+    final DOMElement node=(DOMElement)getDOMNode(id);
     try {
       app.beginTx();
-      DOMNode clonedNode=(DOMNode)node.cloneNode(false);
+      DOMElement clonedNode=(DOMElement)node.cloneNode(false);
       moveChildNodes(node,clonedNode);
       ShadowDocument hiddenDoc=getOrCreateHiddenDocument();
       clonedNode.setProperty(DOMNode.ownerDocument,hiddenDoc);

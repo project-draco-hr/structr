@@ -1,13 +1,15 @@
 {
   try {
-    final TestOne testOne=createTestNode(TestOne.class);
-    final TestSix testSix=createTestNode(TestSix.class);
+    final NodeInterface testNode1=this.createTestNode(TestSix.class);
+    final NodeInterface testNode2=this.createTestNode(TestOne.class);
     SixOneOneToOne rel=null;
+    assertNotNull(testNode1);
+    assertNotNull(testNode2);
     assertNotNull(testOne);
     assertNotNull(testSix);
     try {
       app.beginTx();
-      rel=app.create(testSix,testOne,SixOneOneToOne.class);
+      rel=app.create(testNode1,testNode2,SixOneOneToOne.class);
       app.commitTx();
     }
   finally {

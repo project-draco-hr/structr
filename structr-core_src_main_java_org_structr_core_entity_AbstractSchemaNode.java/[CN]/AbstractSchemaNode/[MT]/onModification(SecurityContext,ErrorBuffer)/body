@@ -3,7 +3,7 @@
     final String signature=getResourceSignature();
     final Long flags=getProperty(accessFlags);
     if (StringUtils.isNotBlank(signature)) {
-      SchemaHelper.createGrant(signature,flags);
+      SchemaHelper.updateGrants(getProperty(grants),signature,flags);
       TransactionCommand.postProcess("reloadSchema",new ReloadSchema());
       return true;
     }

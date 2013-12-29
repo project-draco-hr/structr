@@ -1,7 +1,9 @@
 {
   Services.getInstance().getConfigurationProvider().unregisterEntityType(getClassName());
   final String signature=getResourceSignature();
-  if (StringUtils.isNotBlank(signature)) {
-    SchemaHelper.removeGrants(getResourceSignature());
+  final String inverseSignature=getInverseResourceSignature();
+  if (StringUtils.isNotBlank(signature) && StringUtils.isNotBlank(inverseSignature)) {
+    SchemaHelper.removeGrants(signature);
+    SchemaHelper.removeGrants(inverseSignature);
   }
 }

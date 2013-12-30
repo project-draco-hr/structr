@@ -1,9 +1,12 @@
 {
-  final String _sourceMultiplicity=getProperty(sourceMultiplicity);
-  final String _targetMultiplicity=getProperty(targetMultiplicity);
   final String _sourceType=getSchemaNodeSourceType();
   final String _targetType=getSchemaNodeTargetType();
   if (_sourceType.equals(relatedClassName)) {
+    final String _targetJsonName=getProperty(targetJsonName);
+    if (_targetJsonName != null) {
+      return _targetJsonName;
+    }
+    final String _targetMultiplicity=getProperty(targetMultiplicity);
     if ("1".equals(_targetMultiplicity)) {
       return CaseHelper.toLowerCamelCase(_targetType);
     }
@@ -12,6 +15,11 @@
     }
   }
  else   if (_targetType.equals(relatedClassName)) {
+    final String _sourceJsonName=getProperty(sourceJsonName);
+    if (_sourceJsonName != null) {
+      return _sourceJsonName;
+    }
+    final String _sourceMultiplicity=getProperty(sourceMultiplicity);
     if ("1".equals(_sourceMultiplicity)) {
       return CaseHelper.toLowerCamelCase(_sourceType);
     }

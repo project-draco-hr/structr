@@ -1,0 +1,25 @@
+{
+  final App app=StructrApp.getInstance();
+  try {
+    app.beginTx();
+    DynamicResourceAccess grant=app.nodeQuery(DynamicResourceAccess.class).and(DynamicResourceAccess.signature,signature).getFirst();
+    if (grant != null) {
+      app.delete(grant);
+    }
+    DynamicResourceAccess schemaGrant=app.nodeQuery(DynamicResourceAccess.class).and(DynamicResourceAccess.signature,"_schema/" + signature).getFirst();
+    if (schemaGrant != null) {
+      app.delete(schemaGrant);
+    }
+    DynamicResourceAccess viewGrant=app.nodeQuery(DynamicResourceAccess.class).and(DynamicResourceAccess.signature,signature + "/_Ui").getFirst();
+    if (viewGrant != null) {
+      app.delete(viewGrant);
+    }
+    app.commitTx();
+  }
+ catch (  Throwable t) {
+    t.printStackTrace();
+  }
+ finally {
+    app.finishTx();
+  }
+}

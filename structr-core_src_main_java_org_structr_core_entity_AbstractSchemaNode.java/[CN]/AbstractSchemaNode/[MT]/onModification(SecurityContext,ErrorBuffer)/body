@@ -1,18 +1,7 @@
 {
   if (super.onModification(securityContext,errorBuffer)) {
-    final String signature=getResourceSignature();
-    final Long flags=getProperty(accessFlags);
-    if (StringUtils.isNotBlank(signature)) {
-      SchemaHelper.updateGrants(getProperty(grants),signature,flags);
-      for (      SchemaRelationship rel : getIncomingRelationships(SchemaRelationship.class)) {
-        rel.onModification(securityContext,errorBuffer);
-      }
-      for (      SchemaRelationship rel : getOutgoingRelationships(SchemaRelationship.class)) {
-        rel.onModification(securityContext,errorBuffer);
-      }
-      TransactionCommand.postProcess("reloadSchema",new ReloadSchema());
-      return true;
-    }
+    TransactionCommand.postProcess("reloadSchema",new ReloadSchema());
+    return true;
   }
   return false;
 }

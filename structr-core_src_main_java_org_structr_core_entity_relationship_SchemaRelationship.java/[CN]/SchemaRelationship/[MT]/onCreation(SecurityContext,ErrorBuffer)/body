@@ -1,18 +1,7 @@
 {
   if (super.onCreation(securityContext,errorBuffer)) {
-    if (Services.getInstance().getConfigurationProvider().getRelationshipEntityClass(getClassName()) != null) {
-      errorBuffer.add(SchemaNode.class.getSimpleName(),new InvalidSchemaToken(getClassName(),"type_already_exists"));
-      return false;
-    }
-    final String signature=getResourceSignature();
-    final String inverseSignature=getInverseResourceSignature();
-    final Long flags=getProperty(AbstractSchemaNode.accessFlags);
-    if (StringUtils.isNotBlank(signature) && StringUtils.isNotBlank(inverseSignature)) {
-      getSourceNode().setProperty(AbstractSchemaNode.targetNodeGrants,SchemaHelper.createGrants(signature,flags));
-      getTargetNode().setProperty(AbstractSchemaNode.sourceNodeGrants,SchemaHelper.createGrants(inverseSignature,flags));
-      TransactionCommand.postProcess("reloadSchema",new ReloadSchema());
-      return true;
-    }
+    TransactionCommand.postProcess("reloadSchema",new ReloadSchema());
+    return true;
   }
   return false;
 }

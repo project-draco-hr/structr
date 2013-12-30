@@ -1,14 +1,7 @@
 {
   if (super.onModification(securityContext,errorBuffer)) {
-    final String signature=getResourceSignature();
-    final String inverseSignature=getInverseResourceSignature();
-    final Long flags=getProperty(AbstractSchemaNode.accessFlags);
-    if (StringUtils.isNotBlank(signature) && StringUtils.isNotBlank(inverseSignature)) {
-      SchemaHelper.updateGrants(getSourceNode().getProperty(AbstractSchemaNode.targetNodeGrants),signature,flags);
-      SchemaHelper.updateGrants(getTargetNode().getProperty(AbstractSchemaNode.sourceNodeGrants),inverseSignature,flags);
-      TransactionCommand.postProcess("reloadSchema",new ReloadSchema());
-      return true;
-    }
+    TransactionCommand.postProcess("reloadSchema",new ReloadSchema());
+    return true;
   }
   return false;
 }

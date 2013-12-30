@@ -1,16 +1,7 @@
 {
   if (super.onCreation(securityContext,errorBuffer)) {
-    if (Services.getInstance().getConfigurationProvider().getNodeEntityClass(getProperty(name)) != null) {
-      errorBuffer.add(SchemaNode.class.getSimpleName(),new InvalidSchemaToken(getProperty(name),"type_already_exists"));
-      return false;
-    }
-    final String signature=getResourceSignature();
-    final Long flags=getProperty(accessFlags);
-    if (StringUtils.isNotBlank(signature)) {
-      setProperty(grants,SchemaHelper.createGrants(signature,flags));
-      TransactionCommand.postProcess("reloadSchema",new ReloadSchema());
-      return true;
-    }
+    TransactionCommand.postProcess("reloadSchema",new ReloadSchema());
+    return true;
   }
   return false;
 }

@@ -1,15 +1,20 @@
 {
   final PropertyContainer propertyContainer=entity.getPropertyContainer();
   final StringBuilder src=new StringBuilder();
-  for (  final String propertyName : SchemaHelper.getProperties(propertyContainer)) {
+  for (  String propertyName : SchemaHelper.getProperties(propertyContainer)) {
     if (!propertyName.startsWith("__") && propertyContainer.hasProperty(propertyName)) {
       String rawType=propertyContainer.getProperty(propertyName).toString();
+      String dbName=null;
+      if (rawType.contains("|")) {
+        dbName=rawType.substring(0,rawType.indexOf("|"));
+        rawType=rawType.substring(rawType.indexOf("|") + 1);
+      }
       boolean notNull=false;
       if (rawType.startsWith("+")) {
         rawType=rawType.substring(1);
         notNull=true;
       }
-      PropertyParser parser=SchemaHelper.getParserForRawValue(errorBuffer,entity.getClassName(),propertyName,rawType,notNull);
+      PropertyParser parser=SchemaHelper.getParserForRawValue(errorBuffer,entity.getClassName(),propertyName,dbName,rawType,notNull);
       if (parser != null) {
         src.append(parser.getPropertySource(errorBuffer));
         validators.addAll(parser.getGlobalValidators());

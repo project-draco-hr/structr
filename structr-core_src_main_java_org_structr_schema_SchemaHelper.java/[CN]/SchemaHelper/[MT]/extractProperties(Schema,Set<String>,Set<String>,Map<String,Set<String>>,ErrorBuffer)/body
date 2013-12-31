@@ -14,7 +14,12 @@
         rawType=rawType.substring(1);
         notNull=true;
       }
-      PropertyParser parser=SchemaHelper.getParserForRawValue(errorBuffer,entity.getClassName(),propertyName,dbName,rawType,notNull);
+      String defaultValue=null;
+      if (rawType.contains(":")) {
+        defaultValue=rawType.substring(rawType.indexOf(":") + 1);
+        rawType=rawType.substring(0,rawType.indexOf(":"));
+      }
+      PropertyParser parser=SchemaHelper.getParserForRawValue(errorBuffer,entity.getClassName(),propertyName,dbName,rawType,notNull,defaultValue);
       if (parser != null) {
         src.append(parser.getPropertySource(errorBuffer));
         validators.addAll(parser.getGlobalValidators());

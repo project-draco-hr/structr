@@ -5,9 +5,11 @@
   final StringBuilder src=new StringBuilder();
   final Class baseType=AbstractNode.class;
   final String _className=getProperty(name);
+  final String _extendsClass=getProperty(extendsClass);
   src.append("package org.structr.dynamic;\n\n");
   SchemaHelper.formatImportStatements(src,baseType);
-  src.append("public class ").append(_className).append(" extends ").append(baseType.getSimpleName()).append(" {\n\n");
+  String superClass=_extendsClass != null ? _extendsClass : baseType.getSimpleName();
+  src.append("public class ").append(_className).append(" extends ").append(superClass).append(" {\n\n");
   for (  final SchemaRelationship outRel : getOutgoingRelationships(SchemaRelationship.class)) {
     src.append(outRel.getPropertySource(_className));
     SchemaHelper.addPropertyToView(PropertyView.Public,outRel.getPropertyName(_className),viewProperties);

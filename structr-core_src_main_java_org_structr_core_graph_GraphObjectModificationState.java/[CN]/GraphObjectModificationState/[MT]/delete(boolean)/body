@@ -5,7 +5,9 @@
   }
   status|=STATE_DELETED;
   if (status != statusBefore) {
-    removedProperties.put(GraphObject.id,object.getUuid());
+    for (    final PropertyKey key : object.getPropertyKeys(PropertyView.Public)) {
+      removedProperties.put(key,object.getProperty(key));
+    }
     modified=true;
   }
 }

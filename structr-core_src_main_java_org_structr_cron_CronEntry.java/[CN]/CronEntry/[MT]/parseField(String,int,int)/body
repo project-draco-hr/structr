@@ -3,7 +3,13 @@
     return new CronField(minValue,maxValue,1,true);
   }
   if (field.startsWith("*/")) {
-    throw new UnsupportedOperationException("Steps are not supported yet.");
+    int step=Integer.parseInt(field.substring(2));
+    if (step > 0 & step <= maxValue) {
+      return new CronField(minValue,maxValue,step);
+    }
+ else {
+      throw new IllegalArgumentException("Illegal step: '" + step + "'");
+    }
   }
   if (field.matches("[0-9]{1,2}")) {
     int value=Integer.parseInt(field);

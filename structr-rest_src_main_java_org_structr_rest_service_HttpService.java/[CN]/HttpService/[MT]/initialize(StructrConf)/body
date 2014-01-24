@@ -15,7 +15,18 @@
   finalConfig.setProperty("JsonRestServlet.defaultview",PropertyView.Public);
   finalConfig.setProperty("JsonRestServlet.outputdepth","3");
   Services.mergeConfiguration(finalConfig,additionalConfig);
-  String sourceJarName=getClass().getProtectionDomain().getCodeSource().getLocation().toString();
+  String mainClassName=(String)finalConfig.get(MAIN_CLASS);
+  Class mainClass=null;
+  if (mainClassName != null) {
+    logger.log(Level.INFO,"Running main class {0}",new Object[]{mainClassName});
+    try {
+      mainClass=Class.forName(mainClassName);
+    }
+ catch (    ClassNotFoundException ex) {
+      logger.log(Level.WARNING,"Did not found class for main class from config " + mainClassName,ex);
+    }
+  }
+  String sourceJarName=(mainClass != null ? mainClass : getClass()).getProtectionDomain().getCodeSource().getLocation().toString();
   final boolean isTest=Boolean.parseBoolean(finalConfig.getProperty(Services.TESTING,"false"));
   if (!isTest && StringUtils.stripEnd(sourceJarName,System.getProperty("file.separator")).endsWith("classes")) {
     String jarFile=System.getProperty("jarFile");

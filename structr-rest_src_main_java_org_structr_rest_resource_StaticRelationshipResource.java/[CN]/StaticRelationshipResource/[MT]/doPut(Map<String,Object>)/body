@@ -2,11 +2,10 @@
   final List<? extends GraphObject> results=typedIdResource.doGet(null,false,NodeFactory.DEFAULT_PAGE_SIZE,NodeFactory.DEFAULT_PAGE,null).getResults();
   final App app=StructrApp.getInstance(securityContext);
   if (results != null) {
-    final PropertyKey key=findPropertyKey(typedIdResource,typeResource);
-    if (key != null && key instanceof RelationProperty) {
+    if (propertyKey != null && propertyKey instanceof RelationProperty) {
       final GraphObject sourceEntity=typedIdResource.getEntity();
       if (sourceEntity != null) {
-        if (key.isReadOnly()) {
+        if (propertyKey.isReadOnly()) {
           logger.log(Level.INFO,"Read-only property on {1}: {0}",new Object[]{sourceEntity.getClass(),typeResource.getRawType()});
           return new RestMethodResult(HttpServletResponse.SC_FORBIDDEN);
         }
@@ -16,7 +15,7 @@
           for (          final Object obj : propertySet.values()) {
             nodes.add(app.get(obj.toString()));
           }
-          sourceEntity.setProperty(key,nodes);
+          sourceEntity.setProperty(propertyKey,nodes);
           app.commitTx();
         }
   finally {

@@ -14,7 +14,18 @@
         }
         return new RangeSearchAttribute(key,rangeStartConverted,rangeEndConverted,Occur.MUST);
       }
+      logger.log(Level.WARNING,"Unable to determine range query bounds for {0}",requestParameter);
       return null;
+    }
+ else {
+      if ("[]".equals(requestParameter)) {
+        if (key.isIndexedWhenEmpty()) {
+          return new NotBlankSearchAttribute(key);
+        }
+ else {
+          throw new FrameworkException(400,"PropertyKey " + key.jsonName() + " must be indexedWhenEmpty() to be used in not-blank search query.");
+        }
+      }
     }
   }
   if (requestParameter.contains(",") && requestParameter.contains(";")) {

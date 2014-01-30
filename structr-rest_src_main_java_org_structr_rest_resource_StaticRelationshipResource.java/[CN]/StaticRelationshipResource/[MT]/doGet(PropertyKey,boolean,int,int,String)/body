@@ -7,7 +7,9 @@
       final Class relationshipType=typeResource.entityClass;
       final Relation relation=AbstractNode.getRelationshipForType(relationshipType);
       final Class destNodeType=relation.getOtherType(typedIdResource.getEntityClass());
+      final Result partialResult=typeResource.doGet(sortKey,sortDescending,pageSize,page,offsetId);
       final List<GraphObject> list=Iterables.toList(Iterables.filter(new OtherNodeTypeRelationFilter(securityContext,sourceNode,destNodeType),source.getRelationships(relationshipType)));
+      list.retainAll(partialResult.getResults());
       applyDefaultSorting(list,sortKey,sortDescending);
       return new Result(PagingHelper.subList(list,pageSize,page,offsetId),list.size(),isCollectionResource(),isPrimitiveArray());
     }

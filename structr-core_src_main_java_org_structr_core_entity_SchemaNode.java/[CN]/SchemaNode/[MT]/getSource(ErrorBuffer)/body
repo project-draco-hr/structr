@@ -6,19 +6,18 @@
   final Class baseType=AbstractNode.class;
   final String _className=getProperty(name);
   final String _extendsClass=getProperty(extendsClass);
+  final Set<String> existingPropertyNames=new LinkedHashSet<>();
   src.append("package org.structr.dynamic;\n\n");
   SchemaHelper.formatImportStatements(src,baseType);
   String superClass=_extendsClass != null ? _extendsClass : baseType.getSimpleName();
   src.append("public class ").append(_className).append(" extends ").append(superClass).append(" {\n\n");
   for (  final SchemaRelationship outRel : getOutgoingRelationships(SchemaRelationship.class)) {
-    src.append(outRel.getPropertySource(_className));
-    SchemaHelper.addPropertyToView(PropertyView.Public,outRel.getPropertyName(_className),viewProperties);
-    SchemaHelper.addPropertyToView(PropertyView.Ui,outRel.getPropertyName(_className),viewProperties);
+    src.append(outRel.getPropertySource(_className,existingPropertyNames));
+    addPropertyNameToViews(outRel.getPropertyName(_className,existingPropertyNames),viewProperties);
   }
   for (  final SchemaRelationship inRel : getIncomingRelationships(SchemaRelationship.class)) {
-    src.append(inRel.getPropertySource(_className));
-    SchemaHelper.addPropertyToView(PropertyView.Public,inRel.getPropertyName(_className),viewProperties);
-    SchemaHelper.addPropertyToView(PropertyView.Ui,inRel.getPropertyName(_className),viewProperties);
+    src.append(inRel.getPropertySource(_className,existingPropertyNames));
+    addPropertyNameToViews(inRel.getPropertyName(_className,existingPropertyNames),viewProperties);
   }
   src.append(SchemaHelper.extractProperties(this,validators,enums,viewProperties,errorBuffer));
   for (  final String enumDefition : enums) {

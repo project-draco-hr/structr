@@ -1,0 +1,40 @@
+{
+  String propertyName="";
+  final String _sourceType=getSchemaNodeSourceType();
+  final String _targetType=getSchemaNodeTargetType();
+  if (_sourceType.equals(relatedClassName)) {
+    final String _targetJsonName=getProperty(targetJsonName);
+    if (_targetJsonName != null) {
+      propertyName=_targetJsonName;
+    }
+ else {
+      final String _targetMultiplicity=getProperty(targetMultiplicity);
+      if ("1".equals(_targetMultiplicity)) {
+        propertyName=CaseHelper.toLowerCamelCase(_targetType);
+      }
+ else {
+        propertyName=CaseHelper.plural(CaseHelper.toLowerCamelCase(_targetType));
+      }
+    }
+  }
+ else   if (_targetType.equals(relatedClassName)) {
+    final String _sourceJsonName=getProperty(sourceJsonName);
+    if (_sourceJsonName != null) {
+      propertyName=_sourceJsonName;
+    }
+ else {
+      final String _sourceMultiplicity=getProperty(sourceMultiplicity);
+      if ("1".equals(_sourceMultiplicity)) {
+        propertyName=CaseHelper.toLowerCamelCase(_sourceType);
+      }
+ else {
+        propertyName=CaseHelper.plural(CaseHelper.toLowerCamelCase(_sourceType));
+      }
+    }
+  }
+  if (existingPropertyNames.contains(propertyName)) {
+    propertyName+="X";
+  }
+  existingPropertyNames.add(propertyName);
+  return propertyName;
+}

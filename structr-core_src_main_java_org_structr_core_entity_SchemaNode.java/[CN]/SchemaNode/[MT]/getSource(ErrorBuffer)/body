@@ -13,10 +13,12 @@
   src.append("public class ").append(_className).append(" extends ").append(superClass).append(" {\n\n");
   for (  final SchemaRelationship outRel : getOutgoingRelationships(SchemaRelationship.class)) {
     src.append(outRel.getPropertySource(_className,existingPropertyNames));
+    existingPropertyNames.clear();
     addPropertyNameToViews(outRel.getPropertyName(_className,existingPropertyNames),viewProperties);
   }
   for (  final SchemaRelationship inRel : getIncomingRelationships(SchemaRelationship.class)) {
     src.append(inRel.getPropertySource(_className,existingPropertyNames));
+    existingPropertyNames.clear();
     addPropertyNameToViews(inRel.getPropertyName(_className,existingPropertyNames),viewProperties);
   }
   src.append(SchemaHelper.extractProperties(this,validators,enums,viewProperties,errorBuffer));

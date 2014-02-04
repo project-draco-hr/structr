@@ -12,7 +12,7 @@
  else {
     logger.log(Level.INFO,"##### Start fetching {0} for page {1} #####",new Object[]{address,name});
     try {
-      parsedDocument=Jsoup.parse(new URL(address),timeout);
+      parsedDocument=Jsoup.connect(address).userAgent("Mozilla").timeout(timeout).get();
     }
  catch (    IOException ioe) {
       throw new FrameworkException(500,"Error while parsing content from " + address);

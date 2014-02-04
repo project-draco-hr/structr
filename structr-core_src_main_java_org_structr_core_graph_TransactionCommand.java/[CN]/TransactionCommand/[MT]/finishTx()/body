@@ -1,26 +1,3 @@
 {
-  final TransactionReference tx=transactions.get();
-  if (tx != null) {
-    if (tx.isToplevel()) {
-      currentCommand.remove();
-      transactions.remove();
-      try {
-        tx.finish();
-      }
- catch (      Throwable t) {
-        t.printStackTrace();
-      }
-      if (modificationQueue != null && tx.isSuccessful()) {
-        modificationQueue.doOuterCallbacks(securityContext);
-        final List<ModificationEvent> modificationEvents=modificationQueue.getModificationEvents();
-        for (        StructrTransactionListener listener : listeners) {
-          listener.transactionCommited(securityContext,modificationEvents);
-        }
-        modificationQueue.clear();
-      }
-    }
- else {
-      tx.end();
-    }
-  }
+  finishTx(true);
 }

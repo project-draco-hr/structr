@@ -7,7 +7,7 @@
   final Iterator<Relationship> allRels=GlobalGraphOperations.at(graphDb).getAllRelationships().iterator();
   final App app=StructrApp.getInstance();
   final StringProperty uuidProperty=new StringProperty("uuid");
-  final int txLimit=100;
+  final int txLimit=2000;
   int actualNodeCount=0;
   int actualRelCount=0;
   int count=0;
@@ -17,7 +17,7 @@
     try {
       while (allNodes.hasNext() && (++count % txLimit) != 0) {
         final Node node=allNodes.next();
-        if (node.hasProperty("uuid")) {
+        if (node.hasProperty("uuid") && node.getProperty("uuid") instanceof String && !node.hasProperty("id")) {
           try {
             final NodeInterface nodeInterface=nodeFactory.instantiate(node);
             final String uuid=nodeInterface.getProperty(uuidProperty);
@@ -38,8 +38,9 @@
       t.printStackTrace();
     }
  finally {
-      app.finishTx();
+      app.finishTx(false);
     }
+    logger.log(Level.INFO,"Migrated {0} of {1} nodes so far.",new Object[]{actualNodeCount,count});
   }
   logger.log(Level.INFO,"Migrated {0} nodes to new ID property.",actualNodeCount);
   count=0;
@@ -48,7 +49,7 @@
     try {
       while (allRels.hasNext() && (++count % txLimit) != 0) {
         final Relationship rel=allRels.next();
-        if (rel.hasProperty("uuid")) {
+        if (rel.hasProperty("uuid") && rel.getProperty("uuid") instanceof String && !rel.hasProperty("id")) {
           try {
             final RelationshipInterface relInterface=relFactory.instantiate(rel);
             final String uuid=relInterface.getProperty(uuidProperty);
@@ -69,8 +70,9 @@
       t.printStackTrace();
     }
  finally {
-      app.finishTx();
+      app.finishTx(false);
     }
+    logger.log(Level.INFO,"Migrated {0} of {1} relationships so far.",new Object[]{actualRelCount,count});
   }
   logger.log(Level.INFO,"Migrated {0} relationships to new ID property.",actualRelCount);
 }

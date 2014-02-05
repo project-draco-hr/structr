@@ -19,17 +19,6 @@
     }
     newNode.init(factoryProfile.getSecurityContext(),node);
     newNode.onNodeInstantiation();
-    String newNodeType=newNode.getProperty(GraphObject.type);
-    if (newNodeType == null && nodeClass != null) {
-      try {
-        newNode.unlockReadOnlyPropertiesOnce();
-        newNode.setProperty(GraphObject.type,nodeClass.getSimpleName());
-      }
- catch (      Throwable t) {
-        t.printStackTrace();
-        logger.log(Level.SEVERE,"Unable to set type property {0} on node {1}: {2}",new Object[]{nodeClass,newNode,t.getMessage()});
-      }
-    }
     securityContext.store(id,newNode);
   }
   if (isCreation || securityContext.isReadable(newNode,factoryProfile.includeDeletedAndHidden(),factoryProfile.publicOnly())) {

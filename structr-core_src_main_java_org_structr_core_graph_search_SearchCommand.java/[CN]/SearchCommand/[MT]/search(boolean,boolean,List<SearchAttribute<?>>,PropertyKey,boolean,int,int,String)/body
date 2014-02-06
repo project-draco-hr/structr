@@ -103,16 +103,16 @@ synchronized (index) {
     }
   }
   if (filterResults) {
+    Set<GraphObject> intermediateResultSet=new LinkedHashSet<>(intermediateResult.getResults());
     List<GraphObject> finalResult=new LinkedList<>();
-    List<GraphObject> intermediateResultList=intermediateResult.getResults();
     int resultCount=0;
-    if (intermediateResultList.isEmpty()) {
-      intermediateResultList.addAll(mergeSources(sources));
+    if (intermediateResultSet.isEmpty()) {
+      intermediateResultSet.addAll(mergeSources(sources));
     }
  else     if (!sources.isEmpty()) {
-      intermediateResultList.retainAll(mergeSources(sources));
+      intermediateResultSet.retainAll(mergeSources(sources));
     }
-    for (    GraphObject obj : intermediateResultList) {
+    for (    GraphObject obj : intermediateResultSet) {
       boolean addToResult=true;
       for (      SearchAttribute attr : searchAttrs) {
         addToResult&=attr.includeInResult(obj);

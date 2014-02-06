@@ -30,10 +30,13 @@
           propProperties.put("dbName",property.dbName());
           propProperties.put("jsonName",property.jsonName());
           propProperties.put("className",property.getClass().getName());
-          propProperties.put("declaringClass",property.getDeclaringClass());
+          Class declaringClass=property.getDeclaringClass();
+          propProperties.put("declaringClass",declaringClass);
           propProperties.put("defaultValue",property.defaultValue());
           propProperties.put("readOnly",property.isReadOnly());
           propProperties.put("system",property.isUnvalidated());
+          propProperties.put("indexed",property.isIndexed());
+          propProperties.put("indexedWhenEmpty",property.isIndexedWhenEmpty());
           Class<? extends GraphObject> relatedType=property.relatedType();
           if (relatedType != null) {
             propProperties.put("relatedType",relatedType.getName());
@@ -50,6 +53,12 @@
           }
           if (inputConverter != null) {
             propProperties.put("inputConverter",inputConverter.getClass().getName());
+          }
+          if (declaringClass != null && (declaringClass.getName().startsWith("org.structr.dynamic"))) {
+            Relation relation=((RelationProperty)property).getRelation();
+            if (relation != null) {
+              propProperties.put("relationshipType",relation.name());
+            }
           }
           propertyConverterMap.put(property.jsonName(),propProperties);
         }

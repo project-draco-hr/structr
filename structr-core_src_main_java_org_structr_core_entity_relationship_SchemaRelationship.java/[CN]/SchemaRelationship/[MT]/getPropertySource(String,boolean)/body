@@ -7,8 +7,7 @@
   final String _sourceType=getSchemaNodeSourceType();
   final String _targetType=getSchemaNodeTargetType();
   final String _className=getClassName();
-  final String propertyName=getPropertyName(relatedClassName,existingPropertyNames);
-  if (_sourceType.equals(relatedClassName)) {
+  if (outgoing) {
     if ("1".equals(_targetMultiplicity)) {
       buf.append("\tpublic static final Property<").append(_targetType).append("> ").append(propertyName).append("Property");
       buf.append(" = new EndNode<>(\"").append(propertyName).append("\", ").append(_className).append(".class");
@@ -22,7 +21,7 @@
       buf.append(");\n");
     }
   }
- else   if (_targetType.equals(relatedClassName)) {
+ else {
     if ("1".equals(_sourceMultiplicity)) {
       buf.append("\tpublic static final Property<").append(_sourceType).append("> ").append(propertyName).append("Property");
       buf.append(" = new StartNode<>(\"").append(propertyName).append("\", ").append(_className).append(".class");

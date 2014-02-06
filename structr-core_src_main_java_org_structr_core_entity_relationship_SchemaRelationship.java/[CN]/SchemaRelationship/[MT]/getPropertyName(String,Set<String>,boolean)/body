@@ -2,7 +2,7 @@
   String propertyName="";
   final String _sourceType=getSchemaNodeSourceType();
   final String _targetType=getSchemaNodeTargetType();
-  if (_sourceType.equals(relatedClassName)) {
+  if (outgoing) {
     final String _targetJsonName=getProperty(targetJsonName);
     if (_targetJsonName != null) {
       propertyName=_targetJsonName;
@@ -17,7 +17,7 @@
       }
     }
   }
- else   if (_targetType.equals(relatedClassName)) {
+ else {
     final String _sourceJsonName=getProperty(sourceJsonName);
     if (_sourceJsonName != null) {
       propertyName=_sourceJsonName;
@@ -33,7 +33,11 @@
     }
   }
   if (existingPropertyNames.contains(propertyName)) {
-    propertyName+="X";
+    propertyName+=outgoing ? "Out" : "In";
+    int i=0;
+    while (existingPropertyNames.contains(propertyName)) {
+      propertyName+=++i;
+    }
   }
   existingPropertyNames.add(propertyName);
   return propertyName;

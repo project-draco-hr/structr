@@ -55,9 +55,11 @@
             propProperties.put("inputConverter",inputConverter.getClass().getName());
           }
           if (declaringClass != null && (declaringClass.getName().startsWith("org.structr.dynamic"))) {
-            Relation relation=((RelationProperty)property).getRelation();
-            if (relation != null) {
-              propProperties.put("relationshipType",relation.name());
+            if (property instanceof RelationProperty) {
+              Relation relation=((RelationProperty)property).getRelation();
+              if (relation != null) {
+                propProperties.put("relationshipType",relation.name());
+              }
             }
           }
           propertyConverterMap.put(property.jsonName(),propProperties);

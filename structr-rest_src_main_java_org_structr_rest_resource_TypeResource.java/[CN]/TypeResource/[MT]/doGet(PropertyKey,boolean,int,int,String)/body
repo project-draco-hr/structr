@@ -1,6 +1,6 @@
 {
   boolean inexactSearch=parseInteger(request.getParameter(JsonRestServlet.REQUEST_PARAMETER_LOOSE_SEARCH)) == 1;
-  List<SearchAttribute> searchAttributes=new LinkedList<>();
+  List<SearchAttribute> searchAttributes=null;
   boolean includeDeletedAndHidden=false;
   boolean publicOnly=false;
   PropertyKey actualSortKey=sortKey;
@@ -9,13 +9,7 @@
     if (entityClass == null) {
       throw new NotFoundException();
     }
-    final List<SearchAttribute> validAttributes=extractSearchableAttributes(securityContext,entityClass,request);
-    final DistanceSearchAttribute distanceSearch=getDistanceSearch(request,keys(validAttributes));
-    if (distanceSearch != null) {
-      searchAttributes.add(distanceSearch);
-    }
-    searchAttributes.add(Search.andTypeAndSubtypes(entityClass,!inexactSearch));
-    searchAttributes.addAll(validAttributes);
+    searchAttributes=collectSearchAttributes(inexactSearch);
     if (actualSortKey == null) {
       try {
         GraphObject templateEntity=((GraphObject)entityClass.newInstance());

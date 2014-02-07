@@ -15,16 +15,13 @@
       return new Result(PagingHelper.subList(finalResult,pageSize,page,offsetId),finalResult.size(),isCollectionResource(),isPrimitiveArray());
     }
     if (propertyKey != null) {
-      final Object value=sourceEntity.getProperty(propertyKey);
+      final Predicate<GraphObject> predicate=toPredicate(typeResource.collectSearchAttributes(sortDescending));
+      final Object value=sourceEntity.getProperty(propertyKey,predicate);
       if (value != null) {
         if (value instanceof Iterable) {
           final Set<GraphObject> propertyResults=new LinkedHashSet<>();
           for (          final GraphObject obj : ((Iterable<GraphObject>)value)) {
             propertyResults.add(obj);
-          }
-          if (typeResource.getEntityClass() != null) {
-            final Set<GraphObject> typeResourceResults=new LinkedHashSet<>(typeResource.doGet(null,sortDescending,NodeFactory.DEFAULT_PAGE_SIZE,NodeFactory.DEFAULT_PAGE,null).getResults());
-            propertyResults.retainAll(typeResourceResults);
           }
           final List<GraphObject> finalResult=new LinkedList<>(propertyResults);
           applyDefaultSorting(finalResult,sortKey,sortDescending);

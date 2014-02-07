@@ -1,35 +1,3 @@
 {
-  Object value=null;
-  final PropertyContainer propertyContainer=obj.getPropertyContainer();
-  boolean hasProperty=false;
-  if (propertyContainer != null) {
-    try {
-      hasProperty=propertyContainer.hasProperty(dbName());
-    }
- catch (    NotFoundException nfex) {
-      return null;
-    }
-catch (    IllegalStateException ise) {
-      logger.log(Level.WARNING,"Could not determine property " + dbName + " of the requested graph object",ise);
-    }
-    if (hasProperty) {
-      value=propertyContainer.getProperty(dbName());
-    }
-  }
-  if (applyConverter) {
-    PropertyConverter converter=databaseConverter(securityContext,obj);
-    if (converter != null) {
-      try {
-        value=converter.revert(value);
-      }
- catch (      Throwable t) {
-        t.printStackTrace();
-        logger.log(Level.WARNING,"Unable to convert property {0} of type {1}: {2}",new Object[]{dbName(),getClass().getSimpleName(),t});
-      }
-    }
-  }
-  if (value == null) {
-    value=defaultValue();
-  }
-  return (T)value;
+  return getProperty(securityContext,obj,applyConverter,null);
 }

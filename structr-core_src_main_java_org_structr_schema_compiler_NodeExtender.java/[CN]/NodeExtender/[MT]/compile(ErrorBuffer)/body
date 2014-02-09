@@ -1,0 +1,18 @@
+{
+  final Map<String,Class> classes=new LinkedHashMap<>();
+  final Writer errorWriter=new StringWriter();
+  if (!jfiles.isEmpty()) {
+    logger.log(Level.INFO,"Compiling {0} dynamic entities",jfiles.size());
+    compiler.getTask(errorWriter,fileManager,new Listener(errorBuffer),null,null,jfiles).call();
+    final ClassLoader loader=fileManager.getClassLoader(null);
+    for (    final String fqcn : fqcns) {
+      try {
+        classes.put(fqcn,loader.loadClass(fqcn));
+      }
+ catch (      Throwable t) {
+        logger.log(Level.WARNING,"Unable to compile dynamic entity {0}: {1}",new Object[]{fqcn,t.getMessage()});
+      }
+    }
+  }
+  return classes;
+}

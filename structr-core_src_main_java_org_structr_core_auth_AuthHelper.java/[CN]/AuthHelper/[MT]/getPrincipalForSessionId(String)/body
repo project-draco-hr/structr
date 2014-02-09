@@ -1,20 +1,3 @@
 {
-  Principal user=null;
-  List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
-  SecurityContext securityContext=SecurityContext.getSuperUserInstance();
-  attrs.add(Search.andExactProperty(securityContext,Principal.sessionId,sessionId));
-  attrs.add(Search.andExactTypeAndSubtypes(Principal.class));
-  try {
-    Result results=Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class).execute(attrs);
-    if (!results.isEmpty()) {
-      user=(Principal)results.get(0);
-      if ((user != null) && sessionId.equals(user.getProperty(Principal.sessionId))) {
-        return user;
-      }
-    }
-  }
- catch (  FrameworkException fex) {
-    logger.log(Level.WARNING,"Error while executing SearchNodeCommand",fex);
-  }
-  return user;
+  return getPrincipalForCredential(Principal.sessionId,sessionId);
 }

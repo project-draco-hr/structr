@@ -1,6 +1,6 @@
 {
-  final GraphDatabaseService graphDb=Services.getService(NodeService.class).getGraphDb();
-  final List<Node> toDelete=new LinkedList<Node>();
+  final GraphDatabaseService graphDb=StructrApp.getInstance().getService(NodeService.class).getGraphDb();
+  final List<Node> toDelete=new LinkedList<>();
   for (  final Node node : GlobalGraphOperations.at(graphDb).getAllNodes()) {
     try {
       if (node.hasProperty("bbox") && node.hasProperty("gtype") && node.hasProperty("id")&& node.hasProperty("latitude")&& node.hasProperty("longitude")) {
@@ -10,22 +10,24 @@
  catch (    Throwable t) {
     }
   }
-  Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-    @Override public Object execute() throws FrameworkException {
-      for (      Node node : toDelete) {
-        logger.log(Level.INFO,"Deleting node {0}",node);
-        try {
-          for (          Relationship rel : node.getRelationships()) {
-            rel.delete();
-          }
-          node.delete();
+  final App app=StructrApp.getInstance(securityContext);
+  try {
+    app.beginTx();
+    for (    Node node : toDelete) {
+      logger.log(Level.INFO,"Deleting node {0}",node);
+      try {
+        for (        Relationship rel : node.getRelationships()) {
+          rel.delete();
         }
- catch (        Throwable t) {
-          t.printStackTrace();
-        }
+        node.delete();
       }
-      return null;
+ catch (      Throwable t) {
+        t.printStackTrace();
+      }
     }
+    app.commitTx();
   }
-);
+  finally {
+    app.finishTx();
+  }
 }

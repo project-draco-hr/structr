@@ -1,0 +1,20 @@
+{
+  Class agentClass=null;
+  if ((name != null) && (name.length() > 0)) {
+    agentClass=agentClassCache.get(name);
+    if (agentClass == null) {
+      for (      String possiblePath : agentPackages) {
+        if (possiblePath != null) {
+          try {
+            Class nodeClass=Class.forName(possiblePath + "." + name);
+            agentClassCache.put(name,nodeClass);
+            return nodeClass;
+          }
+ catch (          ClassNotFoundException ex) {
+          }
+        }
+      }
+    }
+  }
+  return agentClass;
+}

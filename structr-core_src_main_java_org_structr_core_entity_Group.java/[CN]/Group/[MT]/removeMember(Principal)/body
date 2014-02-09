@@ -1,0 +1,13 @@
+{
+  final App app=StructrApp.getInstance(securityContext);
+  try {
+    app.beginTx();
+    List<Principal> _users=getProperty(members);
+    _users.remove(user);
+    setProperty(members,_users);
+    app.commitTx();
+  }
+  finally {
+    app.finishTx();
+  }
+}

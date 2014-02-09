@@ -20,20 +20,21 @@
     String part=parts[i];
     String lowerCasePart=part.toLowerCase();
     if (_data != null) {
-      Object value=_data.getProperty(EntityContext.getPropertyKeyForJSONName(_data.getClass(),part));
+      Object value=_data.getProperty(StructrApp.getConfiguration().getPropertyKeyForJSONName(_data.getClass(),part));
       if (value instanceof GraphObject) {
         _data=(GraphObject)value;
         continue;
       }
       if (i > 0 && "size".equals(lowerCasePart)) {
-        Object val=_data.getProperty(EntityContext.getPropertyKeyForJSONName(_data.getClass(),parts[i - 1]));
+        Object val=_data.getProperty(StructrApp.getConfiguration().getPropertyKeyForJSONName(_data.getClass(),parts[i - 1]));
         if (val instanceof List) {
           return ((List)val).size();
         }
       }
       if ("link".equals(lowerCasePart) && _data instanceof AbstractNode) {
-        for (        AbstractRelationship rel : ((AbstractNode)_data).getRelationships(org.structr.web.common.RelType.LINK,Direction.OUTGOING)) {
-          _data=rel.getEndNode();
+        ResourceLink rel=((AbstractNode)_data).getOutgoingRelationship(ResourceLink.class);
+        if (rel != null) {
+          _data=rel.getTargetNode();
           break;
         }
         continue;
@@ -68,6 +69,12 @@
       }
     }
     if (_data == null) {
+      if ("id".equals(lowerCasePart)) {
+        GraphObject detailsObject=renderContext.getDetailsDataObject();
+        if (detailsObject != null) {
+          return renderContext.getDetailsDataObject().getUuid();
+        }
+      }
       if ("this".equals(lowerCasePart)) {
         _data=renderContext.getDataObject();
         continue;
@@ -77,20 +84,20 @@
         continue;
       }
       if ("link".equals(lowerCasePart)) {
-        for (        AbstractRelationship rel : getRelationships(org.structr.web.common.RelType.LINK,Direction.OUTGOING)) {
-          _data=rel.getEndNode();
+        ResourceLink rel=getOutgoingRelationship(ResourceLink.class);
+        if (rel != null) {
+          _data=rel.getTargetNode();
           break;
         }
-        continue;
       }
       if ("parent".equals(lowerCasePart)) {
         _data=(DOMNode)getParentNode();
         continue;
       }
       if ("owner".equals(lowerCasePart)) {
-        for (        AbstractRelationship rel : getRelationships(org.structr.common.RelType.OWNS,Direction.INCOMING)) {
-          _data=rel.getStartNode();
-          break;
+        Ownership rel=getIncomingRelationship(PrincipalOwnsNode.class);
+        if (rel != null) {
+          _data=rel.getSourceNode();
         }
         continue;
       }
@@ -115,8 +122,12 @@
       }
       if ("page_count".equals(lowerCasePart)) {
         Result result=renderContext.getResult();
-        if (result != null) {
-          return result.getPageCount();
+        Integer pageCount=result.getPageCount();
+        if (pageCount != null) {
+          return pageCount;
+        }
+ else {
+          return 1;
         }
       }
       if ("page_no".equals(lowerCasePart)) {
@@ -128,7 +139,7 @@
     }
   }
   if (_data != null) {
-    PropertyKey referenceKeyProperty=EntityContext.getPropertyKeyForJSONName(_data.getClass(),referenceKey);
+    PropertyKey referenceKeyProperty=StructrApp.getConfiguration().getPropertyKeyForJSONName(_data.getClass(),referenceKey);
     Object value=_data.getProperty(referenceKeyProperty);
     PropertyConverter converter=referenceKeyProperty.inputConverter(securityContext);
     if (value != null && converter != null) {

@@ -2,31 +2,28 @@
   final GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
   final SecurityContext superUserContext=SecurityContext.getSuperUserInstance();
   final NodeFactory nodeFactory=new NodeFactory(superUserContext);
-  final SearchNodeCommand searchNode=Services.command(superUserContext,SearchNodeCommand.class);
   String type=null;
   if (graphDb != null) {
     Result<AbstractNode> nodes=null;
     if (properties.containsKey(AbstractNode.type.dbName())) {
       type=(String)properties.get(AbstractNode.type.dbName());
-      List<SearchAttribute> attrs=new LinkedList<SearchAttribute>();
-      attrs.add(Search.andExactType(EntityContext.getEntityClassForRawType(type)));
-      nodes=searchNode.execute(attrs);
+      nodes=StructrApp.getInstance(securityContext).nodeQuery(SchemaHelper.getEntityClassForRawType(type)).getResult();
       properties.remove(AbstractNode.type.dbName());
     }
  else {
       nodes=nodeFactory.instantiateAll(GlobalGraphOperations.at(graphDb).getAllNodes());
     }
-    final Class cls=Services.getService(ModuleService.class).getNodeEntityClass(type);
+    final Class cls=StructrApp.getConfiguration().getNodeEntities().get(type);
     long nodeCount=bulkGraphOperation(securityContext,nodes.getResults(),1000,"SetNodeProperties",new BulkGraphOperation<AbstractNode>(){
       @Override public void handleGraphObject(      SecurityContext securityContext,      AbstractNode node){
-        if (node.getProperty(AbstractNode.uuid) != null) {
+        if (node.getProperty(GraphObject.id) != null) {
           for (          Entry entry : properties.entrySet()) {
             String key=(String)entry.getKey();
             Object val=null;
             if (key.equals("newType")) {
               key="type";
             }
-            PropertyConverter inputConverter=EntityContext.getPropertyKeyForJSONName(cls,key).inputConverter(securityContext);
+            PropertyConverter inputConverter=StructrApp.getConfiguration().getPropertyKeyForJSONName(cls,key).inputConverter(securityContext);
             if (inputConverter != null) {
               try {
                 val=inputConverter.convert(entry.getValue());
@@ -38,7 +35,7 @@
  else {
               val=entry.getValue();
             }
-            PropertyKey propertyKey=EntityContext.getPropertyKeyForDatabaseName(node.getClass(),key);
+            PropertyKey propertyKey=StructrApp.getConfiguration().getPropertyKeyForDatabaseName(node.getClass(),key);
             if (propertyKey != null) {
               try {
                 node.unlockReadOnlyPropertiesOnce();

@@ -1,17 +1,22 @@
 {
-  URL url=null;
-  InputStream in=null;
-  try {
-    url=getFileLocation();
-    return url.openStream();
-  }
- catch (  IOException e) {
-    logger.log(Level.SEVERE,"Error while reading from {0}",new Object[]{url,e.getMessage()});
-    if (in != null) {
-      try {
-        in.close();
-      }
- catch (      IOException ignore) {
+  final String path=getRelativeFilePath();
+  if (path != null) {
+    final String filePath=FileHelper.getFilePath(path);
+    final App app=StructrApp.getInstance(securityContext);
+    FileInputStream fis=null;
+    try {
+      java.io.File fileOnDisk=new java.io.File(filePath);
+      fis=new FileInputStream(fileOnDisk);
+      return fis;
+    }
+ catch (    FileNotFoundException e) {
+      logger.log(Level.SEVERE,"File not found: {0}",new Object[]{path});
+      if (fis != null) {
+        try {
+          fis.close();
+        }
+ catch (        IOException ignore) {
+        }
       }
     }
   }

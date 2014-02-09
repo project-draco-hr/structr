@@ -1,0 +1,12 @@
+{
+  final GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
+  TransactionReference tx=transactions.get();
+  if (tx == null) {
+    this.modificationQueue=new ModificationQueue();
+    this.errorBuffer=new ErrorBuffer();
+    tx=new TransactionReference(graphDb.beginTx());
+    transactions.set(tx);
+    currentCommand.set(this);
+  }
+  tx.begin();
+}

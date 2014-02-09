@@ -1,26 +1,22 @@
 {
-  List<GraphObjectMap> resultList=new LinkedList<GraphObjectMap>();
-  ModuleService moduleService=(ModuleService)Services.getService(ModuleService.class);
-  for (  String rawType : moduleService.getCachedNodeEntityTypes()) {
-    Class type=EntityContext.getEntityClassForRawType(rawType);
+  List<GraphObjectMap> resultList=new LinkedList<>();
+  for (  String rawType : StructrApp.getConfiguration().getNodeEntities().keySet()) {
+    Class type=SchemaHelper.getEntityClassForRawType(rawType);
     GraphObjectMap schema=new GraphObjectMap();
     resultList.add(schema);
     if (type == null) {
-      if (PropertyDefinition.exists(rawType)) {
-        type=PropertyDefinition.nodeExtender.getType(rawType);
-      }
     }
     if (type != null) {
       String url="/".concat(CaseHelper.toUnderscore(rawType,true));
       schema.setProperty(new StringProperty("url"),url);
       schema.setProperty(new StringProperty("type"),rawType);
       schema.setProperty(new LongProperty("flags"),SecurityContext.getResourceFlags(rawType));
-      Set<String> propertyViews=new LinkedHashSet<String>(EntityContext.getPropertyViews());
+      Set<String> propertyViews=new LinkedHashSet<>(StructrApp.getConfiguration().getPropertyViews());
       Map<String,Map<String,Object>> views=new TreeMap();
       schema.setProperty(new StringProperty("views"),views);
       for (      String view : propertyViews) {
-        Set<PropertyKey> properties=new LinkedHashSet<PropertyKey>(EntityContext.getPropertySet(type,view));
-        Map<String,Object> propertyConverterMap=new TreeMap<String,Object>();
+        Set<PropertyKey> properties=new LinkedHashSet<>(StructrApp.getConfiguration().getPropertySet(type,view));
+        Map<String,Object> propertyConverterMap=new TreeMap<>();
         if (PropertyDefinition.exists(type.getSimpleName())) {
           Iterable<PropertyDefinition> dynamicProperties=PropertyDefinition.getPropertiesForKind(type.getSimpleName());
           if (dynamicProperties != null) {

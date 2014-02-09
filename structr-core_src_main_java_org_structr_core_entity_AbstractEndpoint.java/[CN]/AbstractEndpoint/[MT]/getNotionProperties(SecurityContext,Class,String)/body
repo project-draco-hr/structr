@@ -1,0 +1,15 @@
+{
+  final Map<String,PropertyMap> notionPropertyMap=(Map<String,PropertyMap>)securityContext.getAttribute("notionProperties");
+  if (notionPropertyMap != null) {
+    final Set<PropertyKey> keySet=Services.getInstance().getConfigurationProvider().getPropertySet(type,PropertyView.Public);
+    final PropertyMap notionProperties=notionPropertyMap.get(entityKey);
+    for (final Iterator<PropertyKey> it=notionProperties.keySet().iterator(); it.hasNext(); ) {
+      final PropertyKey key=it.next();
+      if (!keySet.contains(key)) {
+        it.remove();
+      }
+    }
+    return notionProperties;
+  }
+  return null;
+}

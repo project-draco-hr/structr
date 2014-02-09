@@ -6,7 +6,7 @@
     if (localeString != null) {
       attrs.add(Search.andExactProperty(securityContext,MailTemplate.locale,localeString));
     }
-    List<MailTemplate> templates=(List<MailTemplate>)Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class).execute(attrs).getResults();
+    List<MailTemplate> templates=(List<MailTemplate>)StructrApp.getInstance().command(SearchNodeCommand.class).execute(attrs).getResults();
     if (!templates.isEmpty()) {
       Content content=templates.get(0).getProperty(MailTemplate.text);
       return content != null ? content.getProperty(Content.content) : defaultValue;

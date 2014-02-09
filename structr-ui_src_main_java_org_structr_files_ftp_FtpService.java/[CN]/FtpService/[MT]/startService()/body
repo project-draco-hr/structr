@@ -1,3 +1,17 @@
 {
-  this.start();
+  try {
+    FtpServerFactory serverFactory=new FtpServerFactory();
+    serverFactory.setUserManager(new StructrUserManager());
+    serverFactory.setFileSystem(new StructrFileSystemFactory());
+    ListenerFactory factory=new ListenerFactory();
+    factory.setPort(port);
+    serverFactory.addListener("default",factory.createListener());
+    logger.log(Level.INFO,"Starting FTP server on port {0}",new Object[]{String.valueOf(port)});
+    server=serverFactory.createServer();
+    server.start();
+    this.isRunning=true;
+  }
+ catch (  FtpException ex) {
+    logger.log(Level.SEVERE,null,ex);
+  }
 }

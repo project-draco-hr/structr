@@ -1,13 +1,20 @@
 {
   final PropertyMap properties=new PropertyMap();
+  final App app=StructrApp.getInstance();
   properties.put(ResourceAccess.signature,signature);
   properties.put(ResourceAccess.flags,flags);
   properties.put(AbstractNode.type,ResourceAccess.class.getSimpleName());
-  ResourceAccess newResourceAccess=Services.command(SecurityContext.getSuperUserInstance(),TransactionCommand.class).execute(new StructrTransaction<ResourceAccess>(){
-    @Override public ResourceAccess execute() throws FrameworkException {
-      return (ResourceAccess)Services.command(SecurityContext.getSuperUserInstance(),CreateNodeCommand.class).execute(properties);
-    }
+  try {
+    app.beginTx();
+    ResourceAccess access=app.create(ResourceAccess.class,properties);
+    app.commitTx();
+    return access;
   }
-);
-  return newResourceAccess;
+ catch (  Throwable t) {
+    t.printStackTrace();
+  }
+ finally {
+    app.finishTx();
+  }
+  return null;
 }

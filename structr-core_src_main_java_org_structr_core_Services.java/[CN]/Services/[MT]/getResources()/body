@@ -1,3 +1,20 @@
 {
+  final Set<String> resources=new LinkedHashSet<>();
+  for (  final Object configurationValue : structrConf.values()) {
+    for (    final String value : configurationValue.toString().split("[\\s ,;]+")) {
+      try {
+        final Class candidate=Class.forName(value.toString());
+        if (!candidate.getName().startsWith("org.structr")) {
+          final String codeLocation=candidate.getProtectionDomain().getCodeSource().getLocation().toString();
+          if (codeLocation.startsWith("file:") && codeLocation.endsWith(".jar") || codeLocation.endsWith(".war")) {
+            resources.add(codeLocation.substring(5));
+          }
+        }
+      }
+ catch (      Throwable ignore) {
+      }
+    }
+  }
+  logger.log(Level.INFO,"Found {0} possible resources: {1}",new Object[]{resources.size(),resources});
   return resources;
 }

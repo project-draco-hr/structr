@@ -3,7 +3,22 @@
   this.request=request;
   this.rawType=part;
   if (rawType != null) {
-    entityClass=EntityContext.getEntityClassForRawType(rawType);
+    final App app=StructrApp.getInstance(securityContext);
+    entityClass=SchemaHelper.getEntityClassForRawType(rawType);
+    if (entityClass != null) {
+      if (AbstractRelationship.class.isAssignableFrom(entityClass)) {
+        searchCommandType=SearchRelationshipCommand.class;
+        query=app.relationshipQuery(entityClass);
+        isNode=false;
+        return true;
+      }
+ else {
+        searchCommandType=SearchNodeCommand.class;
+        query=app.nodeQuery(entityClass);
+        isNode=true;
+        return true;
+      }
+    }
   }
   return true;
 }

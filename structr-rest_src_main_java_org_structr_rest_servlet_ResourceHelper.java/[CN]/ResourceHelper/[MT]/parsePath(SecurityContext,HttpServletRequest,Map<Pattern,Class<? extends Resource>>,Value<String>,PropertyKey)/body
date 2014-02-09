@@ -1,35 +1,46 @@
 {
-  String path=request.getPathInfo();
+  final String path=request.getPathInfo();
   if (!StringUtils.isNotBlank(path)) {
     throw new NoResultsException();
   }
-  String[] pathParts=path.split("[/]+");
-  List<Resource> resourceChain=new ArrayList<Resource>(pathParts.length);
+  final String[] pathParts=path.split("[/]+");
+  final Set<String> propertyViews=Services.getInstance().getConfigurationProvider().getPropertyViews();
+  final List<Resource> resourceChain=new ArrayList<>(pathParts.length);
   for (int i=0; i < pathParts.length; i++) {
-    String part=pathParts[i].trim();
+    final String part=pathParts[i].trim();
     if (part.length() > 0) {
       boolean found=false;
-      for (      Map.Entry<Pattern,Class<? extends Resource>> entry : resourceMap.entrySet()) {
-        Pattern pattern=entry.getKey();
-        Matcher matcher=pattern.matcher(pathParts[i]);
-        if (matcher.matches()) {
-          Class<? extends Resource> type=entry.getValue();
-          Resource resource=null;
-          try {
-            resource=type.newInstance();
-          }
- catch (          Throwable t) {
-            logger.log(Level.WARNING,"Error instantiating resource class",t);
-          }
-          if (resource != null) {
-            resource.setSecurityContext(securityContext);
-            if (resource.checkAndConfigure(part,securityContext,request)) {
-              logger.log(Level.FINE,"{0} matched, adding resource of type {1} for part {2}",new Object[]{matcher.pattern(),type.getName(),part});
-              resource.configurePropertyView(propertyView);
-              resource.configureIdProperty(defaultIdProperty);
-              resourceChain.add(resource);
-              found=true;
-              break;
+      if (propertyViews.contains(part)) {
+        Resource resource=new ViewFilterResource();
+        resource.checkAndConfigure(part,securityContext,request);
+        resource.configureIdProperty(defaultIdProperty);
+        resource.configurePropertyView(propertyView);
+        resourceChain.add(resource);
+        found=true;
+      }
+ else {
+        for (        Map.Entry<Pattern,Class<? extends Resource>> entry : resourceMap.entrySet()) {
+          Pattern pattern=entry.getKey();
+          Matcher matcher=pattern.matcher(pathParts[i]);
+          if (matcher.matches()) {
+            Class<? extends Resource> type=entry.getValue();
+            Resource resource=null;
+            try {
+              resource=type.newInstance();
+            }
+ catch (            Throwable t) {
+              logger.log(Level.WARNING,"Error instantiating resource class",t);
+            }
+            if (resource != null) {
+              resource.setSecurityContext(securityContext);
+              if (resource.checkAndConfigure(part,securityContext,request)) {
+                logger.log(Level.FINE,"{0} matched, adding resource of type {1} for part {2}",new Object[]{matcher.pattern(),type.getName(),part});
+                resource.configurePropertyView(propertyView);
+                resource.configureIdProperty(defaultIdProperty);
+                resourceChain.add(resource);
+                found=true;
+                break;
+              }
             }
           }
         }

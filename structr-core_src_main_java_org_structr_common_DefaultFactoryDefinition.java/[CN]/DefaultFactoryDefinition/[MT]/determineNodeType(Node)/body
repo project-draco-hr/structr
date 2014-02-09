@@ -1,21 +1,25 @@
 {
-  String type=GraphObject.type.dbName();
+  final String type=GraphObject.type.dbName();
   if (node.hasProperty(type)) {
-    Object obj=node.getProperty(type);
+    final Object obj=node.getProperty(type);
     if (obj != null) {
-      return obj.toString();
+      Class nodeType=StructrApp.getConfiguration().getNodeEntities().get(obj.toString());
+      if (nodeType != null) {
+        return nodeType;
+      }
     }
   }
  else {
     if (externalNodeTypeName == null) {
-      externalNodeTypeName=Services.getConfigurationValue(Services.FOREIGN_TYPE);
+      externalNodeTypeName=StructrApp.getConfigurationValue(Services.FOREIGN_TYPE);
     }
     if (externalNodeTypeName != null && node.hasProperty(externalNodeTypeName)) {
       Object typeObj=node.getProperty(externalNodeTypeName);
       if (typeObj != null) {
-        String externalNodeType=typeObj.toString();
-        genericNodeExtender.getType(externalNodeType);
-        return typeObj.toString();
+        Class dynamicType=StructrApp.getConfiguration().getNodeEntityClass(typeObj.toString());
+        if (dynamicType != null) {
+          return dynamicType;
+        }
       }
     }
   }

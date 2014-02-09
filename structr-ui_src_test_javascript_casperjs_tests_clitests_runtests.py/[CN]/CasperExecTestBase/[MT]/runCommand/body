@@ -1,0 +1,11 @@
+def runCommand(self, cmd, **kwargs):
+    failing = kwargs.get('failing', False)
+    cmd_args = ([CASPER_EXEC, '--no-colors'] + cmd.split(' '))
+    try:
+        return subprocess.check_output(cmd_args).strip().decode('utf-8')
+        if failing:
+            raise AssertionError(('Command %s has not failed' % cmd))
+    except subprocess.CalledProcessError as err:
+        if failing:
+            return err.output.decode('utf-8')
+        raise IOError(('Command %s exited: %s \n %s' % (cmd, err, err.output.decode('utf-8'))))

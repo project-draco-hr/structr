@@ -1,3 +1,12 @@
 {
-  return true;
+  final T value=entity.getProperty(searchKey);
+  if (value != null) {
+    if (value instanceof Comparable && rangeStart instanceof Comparable && rangeEnd instanceof Comparable) {
+      final Comparable cv=(Comparable)value;
+      final Comparable cs=(Comparable)rangeStart;
+      final Comparable ce=(Comparable)rangeEnd;
+      return cs.compareTo(cv) <= 0 && ce.compareTo(cv) >= 0;
+    }
+  }
+  return false;
 }

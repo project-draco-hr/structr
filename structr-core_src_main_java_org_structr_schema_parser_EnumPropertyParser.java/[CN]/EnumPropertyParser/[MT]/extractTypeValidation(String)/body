@@ -1,0 +1,26 @@
+{
+  final String[] enumTypes=expression.split("[, ]+");
+  if (StringUtils.isNotBlank(expression) && enumTypes.length > 0) {
+    enumTypeName=StringUtils.capitalize(propertyName);
+    enumType=", " + enumTypeName + ".class";
+    final StringBuilder buf=new StringBuilder();
+    buf.append("\n\tpublic enum ").append(enumTypeName).append(" {\n\t\t");
+    for (int i=0; i < enumTypes.length; i++) {
+      final String element=enumTypes[i];
+      if (element.matches("[a-zA-Z_]+")) {
+        buf.append(element);
+        if (i < enumTypes.length - 1) {
+          buf.append(", ");
+        }
+      }
+ else {
+        errorBuffer.add(SchemaNode.class.getSimpleName(),new InvalidPropertySchemaToken(expression,"invalid_property_definition","Invalid enum type name, must match [a-zA-Z_]+."));
+      }
+    }
+    buf.append("\n\t};");
+    enumDefinitions.add(buf.toString());
+  }
+ else {
+    errorBuffer.add(SchemaNode.class.getSimpleName(),new InvalidPropertySchemaToken(expression,"invalid_property_definition","No enum types found, please specify a list of types, e.g. (red, green, blue)"));
+  }
+}

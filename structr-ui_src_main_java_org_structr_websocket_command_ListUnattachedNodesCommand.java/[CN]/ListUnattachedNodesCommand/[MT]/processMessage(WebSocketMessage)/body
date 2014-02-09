@@ -7,15 +7,15 @@
   final String sortKey=webSocketData.getSortKey();
   final int pageSize=webSocketData.getPageSize();
   final int page=webSocketData.getPage();
-  PropertyKey sortProperty=EntityContext.getPropertyKeyForJSONName(DOMNode.class,sortKey);
+  PropertyKey sortProperty=StructrApp.getConfiguration().getPropertyKeyForJSONName(DOMNode.class,sortKey);
   try {
-    Result result=(Result)Services.command(securityContext,SearchNodeCommand.class).execute(true,false,searchAttributes,sortProperty,"desc".equals(sortOrder));
+    Result result=(Result)StructrApp.getInstance(securityContext).command(SearchNodeCommand.class).execute(true,false,searchAttributes,sortProperty,"desc".equals(sortOrder));
     List<AbstractNode> filteredResults=new LinkedList();
     List<? extends GraphObject> resultList=result.getResults();
     for (    GraphObject obj : resultList) {
       if (obj instanceof AbstractNode) {
         AbstractNode node=(AbstractNode)obj;
-        if (!node.hasRelationship(RelType.CONTAINS,Direction.INCOMING) && node.getProperty(DOMNode.ownerDocument) == null) {
+        if (!node.hasIncomingRelationships(DOMChildren.class) && node.getProperty(DOMNode.ownerDocument) == null) {
           filteredResults.add(node);
         }
       }

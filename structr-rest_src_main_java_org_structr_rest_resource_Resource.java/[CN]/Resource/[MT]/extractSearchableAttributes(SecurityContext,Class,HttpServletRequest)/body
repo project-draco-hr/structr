@@ -1,10 +1,20 @@
 {
-  List<SearchAttribute> searchAttributes=new LinkedList<SearchAttribute>();
+  List<SearchAttribute> searchAttributes=new LinkedList<>();
   if (type != null && request != null && !request.getParameterMap().isEmpty()) {
-    boolean looseSearch=parseInteger(request.getParameter(JsonRestServlet.REQUEST_PARAMETER_LOOSE_SEARCH)) == 1;
-    for (    final PropertyKey key : EntityContext.getPropertySet(type,PropertyView.All)) {
-      if (key.isSearchable()) {
-        searchAttributes.addAll(key.extractSearchableAttribute(securityContext,request,looseSearch));
+    final boolean looseSearch=parseInteger(request.getParameter(JsonRestServlet.REQUEST_PARAMETER_LOOSE_SEARCH)) == 1;
+    final ConfigurationProvider conf=Services.getInstance().getConfigurationProvider();
+    for (    final String name : request.getParameterMap().keySet()) {
+      final PropertyKey key=conf.getPropertyKeyForJSONName(type,getFirstPartOfString(name));
+      if (key != null) {
+        if (key.isSearchable()) {
+          searchAttributes.addAll(key.extractSearchableAttribute(securityContext,request,looseSearch));
+        }
+ else         if (!JsonRestServlet.commonRequestParameters.contains(name)) {
+          throw new FrameworkException(400,"Search key " + name + " is not indexed.");
+        }
+      }
+ else       if (!JsonRestServlet.commonRequestParameters.contains(name)) {
+        throw new FrameworkException(400,"Invalid search key " + name);
       }
     }
   }

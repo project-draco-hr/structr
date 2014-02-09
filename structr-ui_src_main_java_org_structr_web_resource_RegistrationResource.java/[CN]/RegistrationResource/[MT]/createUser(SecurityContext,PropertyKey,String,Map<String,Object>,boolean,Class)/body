@@ -1,33 +1,33 @@
 {
+  final App app=StructrApp.getInstance(securityContext);
+  Principal user=null;
   try {
-    return Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction<Principal>(){
-      @Override public Principal execute() throws FrameworkException {
-        Person person=(Person)AuthHelper.getPrincipalForCredential(credentialKey,credentialValue);
-        if (person != null) {
-          person.unlockReadOnlyPropertiesOnce();
-          person.setProperty(AbstractNode.type,User.class.getSimpleName());
-          User user=new User();
-          user.init(securityContext,person.getNode());
-          person.updateInIndex();
-          user.setProperty(User.confirmationKey,confKey);
-          return user;
-        }
- else         if (autoCreate) {
-          propertySet.put(AbstractNode.type.jsonName(),userClass != null ? userClass.getSimpleName() : User.class.getSimpleName());
-          PropertyMap props=PropertyMap.inputTypeToJavaType(securityContext,propertySet);
-          props.put(credentialKey,credentialValue);
-          props.put(User.name,credentialValue);
-          props.put(User.confirmationKey,confKey);
-          return (Principal)Services.command(securityContext,CreateNodeCommand.class).execute(props);
-        }
-        logger.log(Level.WARNING,"No user created: No matching person found, and auto-creation is off");
-        return null;
-      }
+    app.beginTx();
+    user=AuthHelper.getPrincipalForCredential(credentialKey,credentialValue);
+    if (user != null) {
+      user.unlockReadOnlyPropertiesOnce();
+      user.setProperty(AbstractNode.type,User.class.getSimpleName());
+      user=new User();
+      user.init(securityContext,user.getNode());
+      user.setProperty(User.confirmationKey,confKey);
     }
-);
+ else     if (autoCreate) {
+      propertySet.remove(credentialKey.jsonName());
+      propertySet.remove(User.name.jsonName());
+      propertySet.remove(User.confirmationKey.jsonName());
+      PropertyMap props=PropertyMap.inputTypeToJavaType(securityContext,propertySet);
+      props.put(credentialKey,credentialValue);
+      props.put(User.name,credentialValue);
+      props.put(User.confirmationKey,confKey);
+      user=(Principal)StructrApp.getInstance(securityContext).create(userClass,props);
+    }
+    app.commitTx();
   }
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,null,ex);
   }
-  return null;
+ finally {
+    app.finishTx();
+  }
+  return user;
 }

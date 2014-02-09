@@ -1,17 +1,14 @@
 {
   try {
-    TestImage img=transactionCommand.execute(new StructrTransaction<TestImage>(){
-      @Override public TestImage execute() throws FrameworkException {
-        try {
-          return (TestImage)ImageHelper.createFileBase64(securityContext,base64Image,TestImage.class);
-        }
- catch (        IOException ex) {
-          logger.log(Level.SEVERE,null,ex);
-        }
-        return null;
-      }
+    TestImage img=null;
+    try {
+      app.beginTx();
+      img=(TestImage)ImageHelper.createFileBase64(securityContext,base64Image,TestImage.class);
+      app.commitTx();
     }
-);
+  finally {
+      app.finishTx();
+    }
     assertNotNull(img);
     assertTrue(img instanceof TestImage);
     Image tn=img.getProperty(TestImage.thumbnail);
@@ -20,7 +17,7 @@
     assertEquals(new Integer(48),tn.getHeight());
     assertEquals("image/" + Thumbnail.FORMAT,tn.getContentType());
   }
- catch (  FrameworkException ex) {
+ catch (  Exception ex) {
     logger.log(Level.SEVERE,ex.toString());
     fail("Unexpected exception");
   }

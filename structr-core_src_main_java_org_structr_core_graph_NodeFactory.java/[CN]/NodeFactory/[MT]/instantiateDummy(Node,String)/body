@@ -1,0 +1,20 @@
+{
+  Map<String,Class<? extends NodeInterface>> entities=StructrApp.getConfiguration().getNodeEntities();
+  Class<T> nodeClass=(Class<T>)entities.get(entityType);
+  T newNode=null;
+  if (nodeClass != null) {
+    try {
+      Constructor<T> constructor=constructors.get(nodeClass);
+      if (constructor == null) {
+        constructor=nodeClass.getConstructor();
+        constructors.put(nodeClass,constructor);
+      }
+      newNode=constructor.newInstance();
+      newNode.init(factoryProfile.getSecurityContext(),entity);
+    }
+ catch (    Throwable t) {
+      newNode=null;
+    }
+  }
+  return newNode;
+}

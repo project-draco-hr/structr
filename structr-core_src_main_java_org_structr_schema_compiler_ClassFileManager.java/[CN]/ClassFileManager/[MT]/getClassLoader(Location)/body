@@ -1,0 +1,13 @@
+{
+  return new SecureClassLoader(){
+    @Override protected Class<?> findClass(    String name) throws ClassNotFoundException {
+      final JavaClassObject obj=objects.get(name);
+      if (obj != null) {
+        byte[] b=obj.getBytes();
+        return super.defineClass(name,obj.getBytes(),0,b.length);
+      }
+      throw new ClassNotFoundException(name);
+    }
+  }
+;
+}

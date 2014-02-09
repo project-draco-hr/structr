@@ -1,5 +1,6 @@
 {
   final String elementType=StringUtils.capitalize(tag);
+  final App app=StructrApp.getInstance(securityContext);
   String c=Content.class.getSimpleName();
   if (elementType == null || c.equals(elementType)) {
     logger.log(Level.WARNING,"Blocked attempt to create a DOMElement of type {0}",c);
@@ -7,17 +8,17 @@
   }
   final Page _page=this;
   try {
-    return Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction<DOMElement>(){
-      @Override public DOMElement execute() throws FrameworkException {
-        DOMElement element=(DOMElement)Services.command(securityContext,CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.type,elementType),new NodeAttribute(DOMElement.tag,tag));
-        element.doAdopt(_page);
-        return element;
-      }
-    }
-);
+    app.beginTx();
+    DOMElement element=(DOMElement)StructrApp.getInstance(securityContext).command(CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.type,elementType),new NodeAttribute(DOMElement.tag,tag));
+    element.doAdopt(_page);
+    app.commitTx();
+    return element;
   }
  catch (  FrameworkException fex) {
     fex.printStackTrace();
+  }
+ finally {
+    app.finishTx();
   }
   return null;
 }

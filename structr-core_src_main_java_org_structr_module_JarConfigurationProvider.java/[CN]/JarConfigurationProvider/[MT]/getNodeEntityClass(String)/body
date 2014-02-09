@@ -1,0 +1,22 @@
+{
+  Class nodeEntityClass=GenericNode.class;
+  if ((name != null) && (!name.isEmpty())) {
+    nodeEntityClass=nodeEntityClassCache.get(name);
+    if (nodeEntityClass == null) {
+      for (      String possiblePath : nodeEntityPackages) {
+        if (possiblePath != null) {
+          try {
+            Class nodeClass=Class.forName(possiblePath + "." + name);
+            if (!Modifier.isAbstract(nodeClass.getModifiers())) {
+              nodeEntityClassCache.put(name,nodeClass);
+              break;
+            }
+          }
+ catch (          ClassNotFoundException ex) {
+          }
+        }
+      }
+    }
+  }
+  return nodeEntityClass;
+}

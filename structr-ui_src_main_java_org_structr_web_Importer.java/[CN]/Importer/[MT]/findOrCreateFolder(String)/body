@@ -1,10 +1,7 @@
 {
-  List<SearchAttribute> searchAttrs=new LinkedList<SearchAttribute>();
-  searchAttrs.add(Search.andExactProperty(securityContext,AbstractNode.name,name));
-  searchAttrs.add(Search.andExactType(Folder.class));
-  Result folders=searchNode.execute(searchAttrs);
-  if (!folders.isEmpty()) {
-    return (Folder)folders.get(0);
+  Folder folder=app.nodeQuery(Folder.class).andName(name).getFirst();
+  if (folder != null) {
+    return folder;
   }
-  return (Folder)createNode.execute(new NodeAttribute(AbstractNode.type,Folder.class.getSimpleName()),new NodeAttribute(AbstractNode.name,name));
+  return (Folder)app.create(Folder.class,new NodeAttribute(AbstractNode.type,Folder.class.getSimpleName()),new NodeAttribute(AbstractNode.name,name));
 }

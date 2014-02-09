@@ -1,0 +1,11 @@
+{
+  final Class<? extends ManyToMany> clazz=getClass();
+  if (sourceNode != null) {
+    final Iterable<Relation<S,?,?,?>> outgoingRels=sourceNode.getOutgoingRelationships(clazz);
+    for (    final RelationshipInterface rel : outgoingRels) {
+      if (rel.getTargetNode().equals(targetNode)) {
+        throw new FrameworkException(getClass().getSimpleName(),new DuplicateRelationshipToken("This relationship already exists"));
+      }
+    }
+  }
+}

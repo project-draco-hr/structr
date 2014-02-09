@@ -1,0 +1,34 @@
+{
+  final TransactionReference tx=transactions.get();
+  if (tx != null && tx.isToplevel()) {
+    if (doValidation && !modificationQueue.doInnerCallbacks(securityContext,errorBuffer)) {
+      if (doValidation) {
+        tx.failure();
+        throw new FrameworkException(422,errorBuffer);
+      }
+    }
+    if (doValidation && !modificationQueue.doPostProcessing(securityContext,errorBuffer)) {
+      tx.failure();
+      throw new FrameworkException(422,errorBuffer);
+    }
+    Set<String> synchronizationKeys=modificationQueue.getSynchronizationKeys();
+    try {
+      semaphore.acquire(synchronizationKeys);
+    }
+ catch (    InterruptedException iex) {
+      return;
+    }
+    if (!modificationQueue.doValidation(securityContext,errorBuffer,doValidation)) {
+      tx.failure();
+      semaphore.release(synchronizationKeys);
+      throw new FrameworkException(422,errorBuffer);
+    }
+    try {
+      tx.success();
+    }
+ catch (    Throwable t) {
+      t.printStackTrace();
+    }
+    semaphore.release(synchronizationKeys);
+  }
+}

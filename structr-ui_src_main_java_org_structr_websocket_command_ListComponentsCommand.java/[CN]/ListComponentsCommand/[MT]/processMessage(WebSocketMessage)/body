@@ -3,7 +3,7 @@
   final int pageSize=webSocketData.getPageSize();
   final int page=webSocketData.getPage();
   try {
-    Result result=(Result)Services.command(securityContext,SearchNodeCommand.class).execute(Search.andExactType(ShadowDocument.class));
+    Result result=(Result)StructrApp.getInstance(securityContext).command(SearchNodeCommand.class).execute(Search.andExactType(ShadowDocument.class));
     List<AbstractNode> filteredResults=new LinkedList();
     List<AbstractNode> resultList=result.getResults();
     if (result.isEmpty()) {
@@ -15,7 +15,7 @@
     for (    GraphObject obj : resultList) {
       if (obj instanceof DOMNode) {
         DOMNode node=(DOMNode)obj;
-        if (!doc.equals(node) && !node.hasRelationship(RelType.CONTAINS,Direction.INCOMING)) {
+        if (!doc.equals(node) && !node.hasIncomingRelationships(DOMChildren.class)) {
           filteredResults.add(node);
         }
       }

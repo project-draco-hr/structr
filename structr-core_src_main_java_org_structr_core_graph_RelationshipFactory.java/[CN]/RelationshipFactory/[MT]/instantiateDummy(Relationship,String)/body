@@ -1,0 +1,16 @@
+{
+  Map<String,Class<? extends RelationshipInterface>> entities=StructrApp.getConfiguration().getRelationshipEntities();
+  Class<T> relClass=(Class<T>)entities.get(entityType);
+  T newRel=null;
+  if (relClass != null) {
+    try {
+      newRel=relClass.newInstance();
+      newRel.init(factoryProfile.getSecurityContext(),entity);
+      newRel.onRelationshipInstantiation();
+    }
+ catch (    Throwable t) {
+      newRel=null;
+    }
+  }
+  return newRel;
+}

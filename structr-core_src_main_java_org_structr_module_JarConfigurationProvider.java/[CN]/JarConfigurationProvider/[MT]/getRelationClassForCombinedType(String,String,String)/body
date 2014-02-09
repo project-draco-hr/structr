@@ -1,0 +1,11 @@
+{
+  if (sourceTypeName == null || relType == null || targetTypeName == null) {
+    return null;
+  }
+  String combinedType=sourceTypeName.concat(DefaultFactoryDefinition.COMBINED_RELATIONSHIP_KEY_SEP).concat(relType).concat(DefaultFactoryDefinition.COMBINED_RELATIONSHIP_KEY_SEP).concat(targetTypeName);
+  Class cachedRelationClass=getRelationClassForCombinedType(combinedType);
+  if (cachedRelationClass != null) {
+    return cachedRelationClass;
+  }
+  return findNearestMatchingRelationClass(sourceTypeName,relType,targetTypeName);
+}

@@ -1,11 +1,9 @@
 {
-  List<String> names=new LinkedList<String>();
-  List<SearchAttribute> searchAttrs=new LinkedList<SearchAttribute>();
-  searchAttrs.add(Search.andName(string + SearchAttribute.WILDCARD));
+  List<String> names=new LinkedList<>();
   try {
-    Result<AbstractNode> result=Services.command(securityContext,SearchNodeCommand.class).execute(searchAttrs);
+    Result<NodeInterface> result=StructrApp.getInstance(securityContext).nodeQuery(NodeInterface.class).andName(string + SearchAttribute.WILDCARD).getResult();
     if (result != null) {
-      for (      AbstractNode node : result.getResults()) {
+      for (      NodeInterface node : result.getResults()) {
         names.add(node.getName());
       }
     }

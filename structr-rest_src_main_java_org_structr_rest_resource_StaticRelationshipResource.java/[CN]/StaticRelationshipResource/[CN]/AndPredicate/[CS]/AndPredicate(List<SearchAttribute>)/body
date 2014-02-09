@@ -1,0 +1,18 @@
+{
+  for (  final SearchAttribute attr : searchAttributes) {
+    if (attr instanceof SearchAttributeGroup) {
+      for (      final SearchAttribute groupAttr : ((SearchAttributeGroup)attr).getSearchAttributes()) {
+        if (groupAttr instanceof TypeSearchAttribute) {
+          continue;
+        }
+        predicates.add(attr);
+      }
+    }
+ else {
+      if (attr instanceof TypeSearchAttribute) {
+        continue;
+      }
+      predicates.add(attr);
+    }
+  }
+}

@@ -5,10 +5,11 @@
     final String name="abc";
     props.put(key,name);
     createTestNode(TestOne.class,props);
-    Result result=searchNodeCommand.execute(true,false,Search.andExactName(null));
+    Result result=app.nodeQuery(TestOne.class).andName(null).includeDeletedAndHidden().getResult();
     assertTrue(result.isEmpty());
   }
  catch (  FrameworkException ex) {
+    ex.printStackTrace();
     logger.log(Level.SEVERE,ex.toString());
     fail("Unexpected exception");
   }

@@ -18,7 +18,7 @@
     }
     RenderContext renderContext=RenderContext.getInstance(request,response,getEffectiveLocale(request));
     renderContext.setResourceProvider(resourceProvider);
-    edit=renderContext.getEditMode(user);
+    EditMode edit=renderContext.getEditMode(user);
     DOMNode rootElement=null;
     AbstractNode dataNode=null;
     String[] uriParts=PathHelper.getParts(path);
@@ -44,7 +44,7 @@
       org.structr.web.entity.File file=findFile(request,path);
       if (file != null) {
         logger.log(Level.FINE,"File found in {0} seconds",decimalFormat.format((System.nanoTime() - start) / 1000000000.0));
-        streamFile(securityContext,file,request,response);
+        streamFile(securityContext,file,request,response,edit);
         return;
       }
       Matcher matcher=threadLocalUUIDMatcher.get();
@@ -58,7 +58,7 @@
         dataNode=findFirstNodeByPath(request,path);
       }
  else {
-        AbstractNode n=(AbstractNode)Services.command(securityContext,GetNodeByIdCommand.class).execute(PathHelper.getName(path));
+        AbstractNode n=(AbstractNode)StructrApp.getInstance(securityContext).get(PathHelper.getName(path));
         if (n != null) {
           dataNode=n;
         }
@@ -88,9 +88,6 @@
     logger.log(Level.FINE,"Page found in {0} seconds",decimalFormat.format((System.nanoTime() - start) / 1000000000.0));
     if (EditMode.DATA.equals(edit) || dontCache) {
       setNoCacheHeaders(response);
-    }
- else {
-      lastModified=rootElement.getLastModifiedDate();
     }
     if (securityContext.isVisible(rootElement)) {
       PrintWriter out=response.getWriter();

@@ -1,0 +1,29 @@
+{
+  if (key != null) {
+    final Object value=object.getProperty(key);
+    Result<GraphObject> result=null;
+    boolean exists=false;
+    String id=null;
+    try {
+      if (object instanceof NodeInterface) {
+        result=StructrApp.getInstance().nodeQuery(((NodeInterface)object).getClass()).and(key,value).getResult();
+      }
+ else {
+        result=StructrApp.getInstance().relationshipQuery(((RelationshipInterface)object).getClass()).and(key,value).getResult();
+      }
+      exists=!result.isEmpty();
+    }
+ catch (    FrameworkException fex) {
+      fex.printStackTrace();
+    }
+    if (exists) {
+      GraphObject foundNode=result.get(0);
+      if (foundNode.getId() != object.getId()) {
+        id=((AbstractNode)result.get(0)).getUuid();
+        errorBuffer.add(object.getType(),new UniqueToken(id,key,value));
+        return true;
+      }
+    }
+  }
+  return false;
+}

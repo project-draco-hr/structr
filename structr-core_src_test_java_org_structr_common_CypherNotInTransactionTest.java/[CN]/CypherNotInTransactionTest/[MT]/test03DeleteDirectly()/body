@@ -1,14 +1,23 @@
 {
   try {
-    List<AbstractNode> testNodes=this.createTestNodes(GenericNode.class,2);
-    assertNotNull(testNodes);
-    assertTrue(testNodes.size() == 2);
-    AbstractRelationship rel=createRelationshipCommand.execute(testNodes.get(0),testNodes.get(1),TestRelType.ONE_TO_ONE);
+    final TestOne testOne=createTestNode(TestOne.class);
+    final TestSix testSix=createTestNode(TestSix.class);
+    SixOneOneToOne rel=null;
+    assertNotNull(testOne);
+    assertNotNull(testSix);
+    try {
+      app.beginTx();
+      rel=app.create(testSix,testOne,SixOneOneToOne.class);
+      app.commitTx();
+    }
+  finally {
+      app.finishTx();
+    }
     assertNotNull(rel);
     GraphDatabaseService graphDb=graphDbCommand.execute();
     Transaction tx=graphDb.beginTx();
     try {
-      testNodes.get(0).getRelationships(Direction.BOTH).iterator().next().getRelationship().delete();
+      testOne.getRelationships().iterator().next().getRelationship().delete();
       tx.success();
     }
   finally {

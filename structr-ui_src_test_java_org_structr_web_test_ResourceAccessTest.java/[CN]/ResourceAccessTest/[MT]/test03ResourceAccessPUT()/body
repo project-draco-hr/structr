@@ -4,61 +4,33 @@
     final String password="testpassword-01";
     final User testUser=createTestNodes(User.class,1).get(0);
     final Folder testFolder=createTestNodes(Folder.class,1).get(0);
-    transactionCommand.execute(new StructrTransaction<AbstractNode>(){
-      @Override public AbstractNode execute() throws FrameworkException {
-        assertNotNull(testFolder);
-        RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(401).when().put("/folder/" + testFolder.getUuid());
-        return null;
-      }
-    }
-);
+    assertNotNull(testFolder);
+    RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(401).when().put("/folder/" + testFolder.getUuid());
     final ResourceAccess folderGrant=createResourceAccess("Folder",UiAuthenticator.FORBIDDEN);
-    transactionCommand.execute(new StructrTransaction<AbstractNode>(){
-      @Override public AbstractNode execute() throws FrameworkException {
-        RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(401).when().put("/folder/" + testFolder.getUuid());
-        return null;
-      }
-    }
-);
+    RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(401).when().put("/folder/" + testFolder.getUuid());
     folderGrant.setFlag(UiAuthenticator.AUTH_USER_PUT);
-    transactionCommand.execute(new StructrTransaction<AbstractNode>(){
-      @Override public AbstractNode execute() throws FrameworkException {
-        RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(401).when().put("/folder/" + testFolder.getUuid());
-        return null;
-      }
-    }
-);
+    RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(401).when().put("/folder/" + testFolder.getUuid());
     folderGrant.setFlag(UiAuthenticator.NON_AUTH_USER_PUT);
-    transactionCommand.execute(new StructrTransaction<AbstractNode>(){
-      @Override public AbstractNode execute() throws FrameworkException {
-        RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(403).when().put("/folder/" + testFolder.getUuid());
-        testUser.setProperty(AbstractNode.name,name);
-        testUser.setProperty(User.password,password);
-        return null;
-      }
+    RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(403).when().put("/folder/" + testFolder.getUuid());
+    try {
+      app.beginTx();
+      testUser.setProperty(AbstractNode.name,name);
+      testUser.setProperty(User.password,password);
+      app.commitTx();
     }
-);
-    transactionCommand.execute(new StructrTransaction<AbstractNode>(){
-      @Override public AbstractNode execute() throws FrameworkException {
-        RestAssured.given().headers("X-User",name,"X-Password",password).contentType("application/json; charset=UTF-8").expect().statusCode(403).when().put("/folder/" + testFolder.getUuid());
-        return null;
-      }
+  finally {
+      app.finishTx();
     }
-);
-    transactionCommand.execute(new StructrTransaction<AbstractNode>(){
-      @Override public AbstractNode execute() throws FrameworkException {
-        testFolder.setProperty(AbstractNode.owner,testUser);
-        return null;
-      }
+    RestAssured.given().headers("X-User",name,"X-Password",password).contentType("application/json; charset=UTF-8").expect().statusCode(403).when().put("/folder/" + testFolder.getUuid());
+    try {
+      app.beginTx();
+      testFolder.setProperty(AbstractNode.owner,testUser);
+      app.commitTx();
     }
-);
-    transactionCommand.execute(new StructrTransaction<AbstractNode>(){
-      @Override public AbstractNode execute() throws FrameworkException {
-        RestAssured.given().headers("X-User",name,"X-Password",password).contentType("application/json; charset=UTF-8").expect().statusCode(200).when().put("/folder/" + testFolder.getUuid());
-        return null;
-      }
+  finally {
+      app.finishTx();
     }
-);
+    RestAssured.given().headers("X-User",name,"X-Password",password).contentType("application/json; charset=UTF-8").expect().statusCode(200).when().put("/folder/" + testFolder.getUuid());
   }
  catch (  FrameworkException ex) {
     ex.printStackTrace();

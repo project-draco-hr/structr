@@ -1,0 +1,39 @@
+{
+  if (possibleEntityString == null) {
+    return null;
+  }
+  if ("/".equals(possibleEntityString)) {
+    return "/";
+  }
+  StringBuilder result=new StringBuilder();
+  if (possibleEntityString.contains("/")) {
+    String[] names=StringUtils.split(possibleEntityString,"/");
+    for (    String possibleEntityName : names) {
+      String normalizedType=normalizedEntityNameCache.get(possibleEntityName);
+      if (normalizedType == null) {
+        normalizedType=StringUtils.capitalize(CaseHelper.toUpperCamelCase(possibleEntityName));
+        if (normalizedType.endsWith("ies")) {
+          normalizedType=normalizedType.substring(0,normalizedType.length() - 3).concat("y");
+        }
+ else         if (!normalizedType.endsWith("ss") && normalizedType.endsWith("s")) {
+          normalizedType=normalizedType.substring(0,normalizedType.length() - 1);
+        }
+      }
+      result.append(normalizedType).append("/");
+    }
+    return StringUtils.removeEnd(result.toString(),"/");
+  }
+ else {
+    String normalizedType=normalizedEntityNameCache.get(possibleEntityString);
+    if (normalizedType == null) {
+      normalizedType=StringUtils.capitalize(CaseHelper.toUpperCamelCase(possibleEntityString));
+      if (normalizedType.endsWith("ies")) {
+        normalizedType=normalizedType.substring(0,normalizedType.length() - 3).concat("y");
+      }
+ else       if (!normalizedType.endsWith("ss") && normalizedType.endsWith("s")) {
+        normalizedType=normalizedType.substring(0,normalizedType.length() - 1);
+      }
+    }
+    return normalizedType;
+  }
+}

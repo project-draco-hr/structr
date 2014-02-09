@@ -1,15 +1,17 @@
 {
   final PropertyMap props=new PropertyMap();
   props.put(AbstractNode.type,type.getSimpleName());
-  return (List<T>)transactionCommand.execute(new StructrTransaction<List<T>>(){
-    @Override public List<T> execute() throws FrameworkException {
-      List<T> nodes=new LinkedList<>();
-      for (int i=0; i < number; i++) {
-        props.put(AbstractNode.name,type.getSimpleName() + i);
-        nodes.add((T)createNodeCommand.execute(props));
-      }
-      return nodes;
+  try {
+    List<T> nodes=new LinkedList<>();
+    app.beginTx();
+    for (int i=0; i < number; i++) {
+      props.put(AbstractNode.name,type.getSimpleName() + i);
+      nodes.add(app.create(type,props));
     }
+    app.commitTx();
+    return nodes;
   }
-);
+  finally {
+    app.finishTx();
+  }
 }

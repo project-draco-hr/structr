@@ -1,12 +1,10 @@
 {
   final String propertyName=(String)attributes.get("name");
   final String entityTypeName=(String)attributes.get("type");
-  final SecurityContext superUserContext=SecurityContext.getSuperUserInstance();
   if (entityTypeName != null) {
-    final Class type=EntityContext.getEntityClassForRawType(entityTypeName);
+    final Class type=SchemaHelper.getEntityClassForRawType(entityTypeName);
     if (type != null) {
-      final Result<AbstractNode> result=Services.command(superUserContext,SearchNodeCommand.class).execute(true,false,Search.andExactType(type));
-      final List<AbstractNode> nodes=result.getResults();
+      final List<AbstractNode> nodes=StructrApp.getInstance(securityContext).nodeQuery(type).getAsList();
       if (type != null) {
         logger.log(Level.INFO,"Trying to fix properties of {0} {1} nodes",new Object[]{nodes.size(),type.getSimpleName()});
         long nodeCount=bulkGraphOperation(securityContext,nodes,100,"FixNodeProperties",new BulkGraphOperation<AbstractNode>(){
@@ -40,7 +38,7 @@ catch (                Throwable t) {
           }
           @Override public void handleGraphObject(          SecurityContext securityContext,          AbstractNode node){
             if (propertyName != null) {
-              PropertyKey key=EntityContext.getPropertyKeyForDatabaseName(type,propertyName);
+              PropertyKey key=StructrApp.getConfiguration().getPropertyKeyForDatabaseName(type,propertyName);
               if (key != null) {
                 if (key instanceof Property) {
                   fixProperty(node,(Property)key);

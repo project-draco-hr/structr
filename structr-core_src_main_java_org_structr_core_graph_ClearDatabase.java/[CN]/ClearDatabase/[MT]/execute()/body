@@ -2,13 +2,12 @@
   final GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
   final NodeFactory nodeFactory=new NodeFactory(securityContext);
   if (graphDb != null) {
-    final DeleteNodeCommand delNode=Services.command(securityContext,DeleteNodeCommand.class);
     final Result<AbstractNode> result=nodeFactory.instantiateAll(GlobalGraphOperations.at(graphDb).getAllNodes());
     long deletedNodes=bulkGraphOperation(securityContext,result.getResults(),1000,"ClearDatabase",new BulkGraphOperation<AbstractNode>(){
       @Override public void handleGraphObject(      SecurityContext securityContext,      AbstractNode node){
-        if (node.getProperty(AbstractNode.uuid) != null) {
+        if (node.getProperty(GraphObject.id) != null) {
           try {
-            delNode.execute(node);
+            StructrApp.getInstance(securityContext).delete(node);
           }
  catch (          FrameworkException fex) {
             logger.log(Level.WARNING,"Unable to delete node {0}: {1}",new Object[]{node.getUuid(),fex.getMessage()});

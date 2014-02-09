@@ -1,0 +1,10 @@
+{
+  GraphObject entity=idResource.getEntity(typeResource.searchCommandType);
+  String type=SchemaHelper.normalizeEntityName(typeResource.getRawType());
+  Class parentClass=SchemaHelper.getEntityClassForRawType(type);
+  Class entityClass=entity.getClass();
+  if (parentClass.isAssignableFrom(entityClass)) {
+    return entity;
+  }
+  throw new NotFoundException();
+}

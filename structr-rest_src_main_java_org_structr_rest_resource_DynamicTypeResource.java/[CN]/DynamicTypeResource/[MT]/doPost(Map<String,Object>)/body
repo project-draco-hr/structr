@@ -1,11 +1,14 @@
 {
-  StructrTransaction transaction=new StructrTransaction(){
-    @Override public Object execute() throws FrameworkException {
-      return createNode(propertySet);
-    }
+  final App app=StructrApp.getInstance(securityContext);
+  NodeInterface newNode=null;
+  try {
+    app.beginTx();
+    newNode=createNode(propertySet);
+    app.commitTx();
   }
-;
-  AbstractNode newNode=(AbstractNode)Services.command(securityContext,TransactionCommand.class).execute(transaction);
+  finally {
+    app.finishTx();
+  }
   RestMethodResult result=new RestMethodResult(HttpServletResponse.SC_CREATED);
   if (newNode != null) {
     result.addHeader("Location",buildLocationHeader(newNode));

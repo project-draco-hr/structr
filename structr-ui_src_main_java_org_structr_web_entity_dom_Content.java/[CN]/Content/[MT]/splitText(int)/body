@@ -12,19 +12,20 @@
       final Document document=getOwnerDocument();
       final Node parent=getParentNode();
       if (document != null && parent != null) {
+        final App app=StructrApp.getInstance(securityContext);
         try {
-          return Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction<Text>(){
-            @Override public Text execute() throws FrameworkException {
-              setProperty(content,firstPart);
-              Text newNode=document.createTextNode(secondPart);
-              parent.appendChild(newNode);
-              return newNode;
-            }
-          }
-);
+          app.beginTx();
+          setProperty(content,firstPart);
+          Text newNode=document.createTextNode(secondPart);
+          parent.appendChild(newNode);
+          app.commitTx();
+          return newNode;
         }
  catch (        FrameworkException fex) {
           throw new DOMException(DOMException.INVALID_STATE_ERR,fex.toString());
+        }
+ finally {
+          app.finishTx();
         }
       }
  else {

@@ -1,0 +1,22 @@
+{
+  final App app=StructrApp.getInstance();
+  try {
+    app.beginTx();
+    removeAllDynamicGrants();
+    for (    final SchemaNode schemaNode : StructrApp.getInstance().nodeQuery(SchemaNode.class).getAsList()) {
+      createDynamicGrants(schemaNode.getResourceSignature(),null);
+    }
+    for (    final SchemaRelationship schemaRelationship : StructrApp.getInstance().relationshipQuery(SchemaRelationship.class).getAsList()) {
+      createDynamicGrants(schemaRelationship.getResourceSignature(),null);
+      createDynamicGrants(schemaRelationship.getInverseResourceSignature(),null);
+    }
+    app.commitTx();
+  }
+ catch (  Throwable t) {
+    t.printStackTrace();
+  }
+ finally {
+    app.finishTx();
+  }
+  return SchemaService.reloadSchema(errorBuffer);
+}

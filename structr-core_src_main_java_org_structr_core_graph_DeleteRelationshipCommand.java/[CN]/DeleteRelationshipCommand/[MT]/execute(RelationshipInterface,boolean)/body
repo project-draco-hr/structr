@@ -1,0 +1,16 @@
+{
+  GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
+  if (graphDb != null && rel != null) {
+    if (rel.getProperty(AbstractRelationship.id) == null) {
+      logger.log(Level.WARNING,"Will not delete relationship which has no UUID: {0} --[:{1}]-->{2}",new Object[]{rel.getSourceNode(),rel.getType(),rel.getTargetNode()});
+      return null;
+    }
+    final Relationship relToDelete=rel.getRelationship();
+    final RelationshipInterface finalRel=rel;
+    TransactionCommand.relationshipDeleted(finalRel,passiveDeletion);
+    finalRel.onRelationshipDeletion();
+    finalRel.removeFromIndex();
+    relToDelete.delete();
+  }
+  return null;
+}

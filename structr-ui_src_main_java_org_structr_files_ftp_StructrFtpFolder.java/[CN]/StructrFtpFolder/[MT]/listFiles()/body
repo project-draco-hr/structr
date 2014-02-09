@@ -6,7 +6,7 @@
     List<SearchAttribute> searchAttrs=new LinkedList<>();
     searchAttrs.add(Search.orExactTypeAndSubtypes(org.structr.web.entity.Folder.class));
     try {
-      Result<Folder> results=Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class).execute(false,false,searchAttrs);
+      Result<Folder> results=StructrApp.getInstance().command(SearchNodeCommand.class).execute(false,false,searchAttrs);
       logger.log(Level.INFO,"{0} folders found",results.size());
       for (      Folder f : results.getResults()) {
         if (f.getProperty(AbstractFile.parent) != null) {
@@ -23,7 +23,7 @@
     searchAttrs=new LinkedList<>();
     searchAttrs.add(Search.orExactTypeAndSubtypes(org.structr.web.entity.File.class));
     try {
-      Result<File> results=Services.command(SecurityContext.getSuperUserInstance(),SearchNodeCommand.class).execute(false,false,searchAttrs);
+      Result<File> results=StructrApp.getInstance().command(SearchNodeCommand.class).execute(false,false,searchAttrs);
       logger.log(Level.INFO,"{0} files found",results.size());
       for (      File f : results.getResults()) {
         if (f.getProperty(AbstractFile.parent) != null) {

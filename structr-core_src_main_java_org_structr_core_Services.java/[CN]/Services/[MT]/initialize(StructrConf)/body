@@ -1,0 +1,30 @@
+{
+  this.structrConf=properties;
+  configurationClass=properties.getProperty(Services.CONFIGURATION);
+  configuredServiceNames=properties.getProperty(Services.CONFIGURED_SERVICES);
+  configuredServiceClasses.addAll(Arrays.asList(configuredServiceNames.split("[ ,]+")));
+  getConfigurationProvider();
+  logger.log(Level.INFO,"Starting services");
+  for (  final String serviceClassName : configuredServiceClasses) {
+    try {
+      Class serviceClass=getServiceClassForName(serviceClassName);
+      if (serviceClass != null) {
+        createService(serviceClass);
+      }
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"Exception while registering service {0}: {1}",new Object[]{serviceClassName,t});
+      t.printStackTrace();
+    }
+  }
+  logger.log(Level.INFO,"{0} service(s) processed",serviceCache.size());
+  registeredServiceClasses.clear();
+  if (getService(NodeService.class) != null) {
+    if ("true".equals(properties.getProperty(Services.MIGRATION_KEY))) {
+      migrateDatabase();
+    }
+    importSeedFile(properties.getProperty(Services.BASE_PATH));
+  }
+  logger.log(Level.INFO,"Initialization complete");
+  initializationDone=true;
+}

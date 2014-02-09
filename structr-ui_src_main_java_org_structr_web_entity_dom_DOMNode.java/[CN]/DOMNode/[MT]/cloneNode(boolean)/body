@@ -6,20 +6,22 @@
     final PropertyMap properties=new PropertyMap();
     for (Iterator<PropertyKey> it=getPropertyKeys(uiView.name()).iterator(); it.hasNext(); ) {
       PropertyKey key=it.next();
-      if (key.equals(GraphObject.type) || (!key.isUnvalidated() && !key.equals(GraphObject.uuid) && !key.equals(DOMNode.ownerDocument)&& !key.equals(DOMNode.pageId)&& !key.equals(DOMNode.parent)&& !key.equals(DOMNode.parentId)&& !key.equals(DOMNode.children)&& !key.equals(DOMNode.childrenIds))) {
+      if (key.equals(GraphObject.type) || (!key.isUnvalidated() && !key.equals(GraphObject.id) && !key.equals(DOMNode.ownerDocument)&& !key.equals(DOMNode.pageId)&& !key.equals(DOMNode.parent)&& !key.equals(DOMNode.parentId)&& !key.equals(DOMNode.children)&& !key.equals(DOMNode.childrenIds))) {
         properties.put(key,getProperty(key));
       }
     }
+    final App app=StructrApp.getInstance(securityContext);
     try {
-      return (DOMNode)Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction<DOMNode>(){
-        @Override public DOMNode execute() throws FrameworkException {
-          return (DOMNode)Services.command(securityContext,CreateNodeCommand.class).execute(properties);
-        }
-      }
-);
+      app.beginTx();
+      DOMNode node=app.create(getClass(),properties);
+      app.commitTx();
+      return node;
     }
  catch (    FrameworkException ex) {
       throw new DOMException(DOMException.INVALID_STATE_ERR,ex.toString());
+    }
+ finally {
+      app.finishTx();
     }
   }
 }

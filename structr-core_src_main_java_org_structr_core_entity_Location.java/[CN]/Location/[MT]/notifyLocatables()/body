@@ -1,10 +1,16 @@
 {
-  boolean allLocatablesAreValid=false;
-  for (  AbstractRelationship rel : this.getRelationships()) {
-    AbstractNode otherNode=rel.getOtherNode(this);
-    if (otherNode != null && otherNode instanceof Locatable) {
-      allLocatablesAreValid|=!((Locatable)otherNode).locationChanged();
+  try {
+    boolean allLocatablesAreValid=false;
+    for (    RelationshipInterface rel : this.getRelationships(NodeHasLocation.class)) {
+      NodeInterface otherNode=rel.getOtherNode(this);
+      if (otherNode != null && otherNode instanceof Locatable) {
+        allLocatablesAreValid|=!((Locatable)otherNode).locationChanged();
+      }
     }
+    return allLocatablesAreValid;
   }
-  return allLocatablesAreValid;
+ catch (  Throwable t) {
+    t.printStackTrace();
+  }
+  return false;
 }

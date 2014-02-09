@@ -1,15 +1,16 @@
 {
-  Services.command(securityContext,TransactionCommand.class).execute(new StructrTransaction(){
-    @Override public Object execute() throws FrameworkException {
-      try {
-        createChildNodes(parsedDocument.body(),parent,page,new URL(baseUrl));
-      }
- catch (      MalformedURLException ex) {
-        logger.log(Level.WARNING,"Could not read URL {1}, calling method without base URL",baseUrl);
-        createChildNodes(parsedDocument.body(),parent,page,null);
-      }
-      return null;
+  try {
+    app.beginTx();
+    try {
+      createChildNodes(parsedDocument.body(),parent,page,new URL(baseUrl));
     }
+ catch (    MalformedURLException ex) {
+      logger.log(Level.WARNING,"Could not read URL {1}, calling method without base URL",baseUrl);
+      createChildNodes(parsedDocument.body(),parent,page,null);
+    }
+    app.commitTx();
   }
-);
+  finally {
+    app.finishTx();
+  }
 }

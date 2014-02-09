@@ -1,62 +1,62 @@
 {
   final PropertyMap props=new PropertyMap();
   try {
-    transactionCommand.execute(new StructrTransaction(){
-      @Override public Object execute() throws FrameworkException {
-        List<Class> entityList=Collections.EMPTY_LIST;
-        try {
-          entityList=getClasses("org.structr.core.entity");
+    app.beginTx();
+    List<Class> entityList=Collections.EMPTY_LIST;
+    try {
+      entityList=getClasses("org.structr.core.entity");
+    }
+ catch (    IOException|ClassNotFoundException ex) {
+      logger.log(Level.SEVERE,null,ex);
+    }
+    assertTrue(entityList.contains(AbstractNode.class));
+    assertTrue(entityList.contains(Cache.class));
+    assertTrue(entityList.contains(GenericNode.class));
+    assertTrue(entityList.contains(Location.class));
+    assertTrue(entityList.contains(Person.class));
+    assertTrue(entityList.contains(ResourceAccess.class));
+    assertTrue(entityList.contains(PropertyAccess.class));
+    entityList.remove(TestTwo.class);
+    entityList.remove(TestNine.class);
+    entityList.remove(PropertyDefinition.class);
+    entityList.remove(SchemaNode.class);
+    for (    Class type : entityList) {
+      if (AbstractNode.class.isAssignableFrom(type)) {
+        if (type.equals(TestSeven.class)) {
+          props.put(TestSeven.name,"TestSeven-0");
         }
- catch (        ClassNotFoundException ex) {
-          logger.log(Level.SEVERE,null,ex);
+        if (type.equals(ResourceAccess.class)) {
+          props.put(ResourceAccess.signature,"/");
+          props.put(ResourceAccess.flags,6L);
         }
-catch (        IOException ex) {
-          logger.log(Level.SEVERE,null,ex);
+        if (type.equals(DynamicResourceAccess.class)) {
+          props.put(DynamicResourceAccess.signature,"/");
+          props.put(DynamicResourceAccess.flags,6L);
         }
-        assertTrue(entityList.contains(AbstractNode.class));
-        assertTrue(entityList.contains(Cache.class));
-        assertTrue(entityList.contains(GenericNode.class));
-        assertTrue(entityList.contains(Location.class));
-        assertTrue(entityList.contains(Person.class));
-        assertTrue(entityList.contains(ResourceAccess.class));
-        assertTrue(entityList.contains(PropertyAccess.class));
-        entityList.remove(TestTwo.class);
-        entityList.remove(PropertyDefinition.class);
-        for (        Class entityClass : entityList) {
-          if (AbstractNode.class.isAssignableFrom(entityClass)) {
-            String type=entityClass.getSimpleName();
-            if (type.equals(TestSeven.class.getSimpleName())) {
-              props.put(TestSeven.name,"TestSeven-0");
-            }
-            if (type.equals(ResourceAccess.class.getSimpleName())) {
-              props.put(ResourceAccess.signature,"/");
-              props.put(ResourceAccess.flags,6L);
-            }
-            if (type.equals(PropertyAccess.class.getSimpleName())) {
-              props.put(PropertyAccess.flags,6L);
-            }
-            if (type.equals(Location.class.getSimpleName())) {
-              props.put(Location.latitude,12.34);
-              props.put(Location.longitude,56.78);
-            }
-            logger.log(Level.INFO,"Creating node of type {0}",type);
-            props.put(AbstractNode.type,type);
-            AbstractNode node=(AbstractNode)createNodeCommand.execute(props);
-            assertTrue(type.equals(node.getProperty(AbstractNode.type)));
-            if (type.equals(ResourceAccess.class.getSimpleName())) {
-              props.remove(ResourceAccess.signature);
-              props.remove(ResourceAccess.flags);
-            }
-          }
+        if (type.equals(PropertyAccess.class)) {
+          props.put(PropertyAccess.flags,6L);
         }
-        return null;
+        if (type.equals(Location.class)) {
+          props.put(Location.latitude,12.34);
+          props.put(Location.longitude,56.78);
+        }
+        logger.log(Level.INFO,"Creating node of type {0}",type);
+        NodeInterface node=app.create(type,props);
+        assertTrue(type.getSimpleName().equals(node.getProperty(AbstractNode.type)));
+        if (type.equals(ResourceAccess.class)) {
+          props.remove(ResourceAccess.signature);
+          props.remove(ResourceAccess.flags);
+        }
       }
     }
-);
+    app.commitTx();
   }
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,ex.toString());
     ex.printStackTrace();
     fail("Unexpected exception");
+  }
+ finally {
+    app.finishTx();
   }
 }

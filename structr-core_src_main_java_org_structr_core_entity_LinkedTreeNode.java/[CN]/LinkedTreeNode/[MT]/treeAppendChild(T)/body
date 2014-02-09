@@ -1,0 +1,17 @@
+{
+  final App app=StructrApp.getInstance(securityContext);
+  final T lastChild=treeGetLastChild();
+  try {
+    app.beginTx();
+    PropertyMap properties=new PropertyMap();
+    properties.put(positionProperty,treeGetChildCount());
+    linkNodes(getChildLinkType(),(T)LinkedTreeNode.this,childElement,properties);
+    if (lastChild != null) {
+      LinkedTreeNode.super.listInsertAfter(lastChild,childElement);
+    }
+    app.commitTx();
+  }
+  finally {
+    app.finishTx();
+  }
+}

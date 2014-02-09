@@ -1,0 +1,39 @@
+{
+  final Map<String,ServletHolder> servlets=new LinkedHashMap<>();
+  final String servletNameList=properties.getProperty(SERVLETS,"");
+  if (servletNameList != null) {
+    for (    String servletName : servletNameList.split("[ \\t]+")) {
+      try {
+        final String servletClassName=properties.getProperty(servletName.concat(".class"));
+        if (servletClassName != null) {
+          final String servletPath=properties.getProperty(servletName.concat(".path"));
+          if (servletPath != null) {
+            final HttpServiceServlet servlet=(HttpServiceServlet)Class.forName(servletClassName).newInstance();
+            servlet.initializeFromProperties(properties,servletName,resourceProviders);
+            if (servletPath.endsWith("*")) {
+              servlets.put(servletPath,new ServletHolder(servlet));
+              restUrl=servletPath;
+            }
+ else {
+              servlets.put(servletPath + "/*",new ServletHolder(servlet));
+              restUrl=servletPath + "/*";
+            }
+          }
+ else {
+            logger.log(Level.WARNING,"Unable to register servlet {0}, missing {0}.path",servletName);
+          }
+        }
+ else {
+          logger.log(Level.WARNING,"Unable to register servlet {0}, missing {0}.class",servletName);
+        }
+      }
+ catch (      Throwable t) {
+        logger.log(Level.WARNING,"Unable to initialize servlet {0}: {1}",new Object[]{servletName,t.getMessage()});
+      }
+    }
+  }
+ else {
+    logger.log(Level.WARNING,"No servlets configured for HttpService.");
+  }
+  return servlets;
+}

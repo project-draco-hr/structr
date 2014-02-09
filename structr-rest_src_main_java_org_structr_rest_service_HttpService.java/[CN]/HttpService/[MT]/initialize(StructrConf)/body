@@ -1,0 +1,183 @@
+{
+  final StructrConf finalConfig=new StructrConf();
+  finalConfig.setProperty(APPLICATION_TITLE,"structr server");
+  finalConfig.setProperty(APPLICATION_HOST,"0.0.0.0");
+  finalConfig.setProperty(APPLICATION_HTTP_PORT,"8082");
+  finalConfig.setProperty(APPLICATION_HTTPS_ENABLED,"false");
+  finalConfig.setProperty(APPLICATION_HTTPS_PORT,"8083");
+  finalConfig.setProperty(SERVLETS,"JsonRestServlet");
+  finalConfig.setProperty("JsonRestServlet.class",JsonRestServlet.class.getName());
+  finalConfig.setProperty("JsonRestServlet.path","/structr/rest/*");
+  finalConfig.setProperty("JsonRestServlet.resourceprovider",DefaultResourceProvider.class.getName());
+  finalConfig.setProperty("JsonRestServlet.authenticator",SuperUserAuthenticator.class.getName());
+  finalConfig.setProperty("JsonRestServlet.user.class",User.class.getName());
+  finalConfig.setProperty("JsonRestServlet.user.autocreate","false");
+  finalConfig.setProperty("JsonRestServlet.defaultview",PropertyView.Public);
+  finalConfig.setProperty("JsonRestServlet.outputdepth","3");
+  Services.mergeConfiguration(finalConfig,additionalConfig);
+  String mainClassName=(String)finalConfig.get(MAIN_CLASS);
+  Class mainClass=null;
+  if (mainClassName != null) {
+    logger.log(Level.INFO,"Running main class {0}",new Object[]{mainClassName});
+    try {
+      mainClass=Class.forName(mainClassName);
+    }
+ catch (    ClassNotFoundException ex) {
+      logger.log(Level.WARNING,"Did not found class for main class from config " + mainClassName,ex);
+    }
+  }
+  String sourceJarName=(mainClass != null ? mainClass : getClass()).getProtectionDomain().getCodeSource().getLocation().toString();
+  final boolean isTest=Boolean.parseBoolean(finalConfig.getProperty(Services.TESTING,"false"));
+  if (!isTest && StringUtils.stripEnd(sourceJarName,System.getProperty("file.separator")).endsWith("classes")) {
+    String jarFile=System.getProperty("jarFile");
+    if (StringUtils.isEmpty(jarFile)) {
+      throw new IllegalArgumentException(getClass().getName() + " was started in an environment where the classloader cannot determine the JAR file containing the main class.\n" + "Please specify the path to the JAR file in the parameter -DjarFile.\n"+ "Example: -DjarFile=${project.build.directory}/${project.artifactId}-${project.version}.jar");
+    }
+    sourceJarName=jarFile;
+  }
+  applicationName=finalConfig.getProperty(APPLICATION_TITLE);
+  host=finalConfig.getProperty(APPLICATION_HOST);
+  basePath=finalConfig.getProperty(Services.BASE_PATH);
+  httpPort=HttpServiceServlet.parseInt(finalConfig.getProperty(APPLICATION_HTTP_PORT),8082);
+  maxIdleTime=HttpServiceServlet.parseInt(System.getProperty("maxIdleTime"),30000);
+  requestHeaderSize=HttpServiceServlet.parseInt(System.getProperty("requestHeaderSize"),8192);
+  String keyStorePath=finalConfig.getProperty(APPLICATION_KEYSTORE_PATH);
+  String keyStorePassword=finalConfig.getProperty(APPLICATION_KEYSTORE_PASSWORD);
+  String contextPath=System.getProperty("contextPath","/");
+  String logPrefix="structr";
+  boolean enableRewriteFilter=true;
+  boolean enableHttps=HttpServiceServlet.parseBoolean(finalConfig.getProperty(APPLICATION_HTTPS_ENABLED),false);
+  boolean enableGzipCompression=true;
+  boolean logRequests=false;
+  int httpsPort=HttpServiceServlet.parseInt(finalConfig.getProperty(APPLICATION_HTTP_PORT),8083);
+  basePath=System.getProperty("home",basePath);
+  if (basePath.isEmpty()) {
+    basePath=System.getProperty("user.dir","/tmp");
+  }
+  File baseDir=new File(basePath);
+  if (!baseDir.exists()) {
+    baseDir.mkdirs();
+  }
+  server=new Server(httpPort);
+  ContextHandlerCollection contexts=new ContextHandlerCollection();
+  contexts.addHandler(new DefaultHandler());
+  final ServletContextHandler servletContext=new ServletContextHandler(server,contextPath,true,true);
+  final List<Connector> connectors=new LinkedList<>();
+  try {
+    servletContext.setBaseResource(new ResourceCollection(Resource.newResource(basePath),JarResource.newJarResource(Resource.newResource(sourceJarName))));
+  }
+ catch (  Throwable t) {
+    logger.log(Level.WARNING,"Base resource {0} not usable: {1}",new Object[]{basePath,t.getMessage()});
+  }
+  servletContext.addServlet("org.eclipse.jetty.servlet.DefaultServlet","/");
+  servletContext.setInitParameter("org.eclipse.jetty.servlet.Default.dirAllowed","false");
+  if (enableGzipCompression) {
+    FilterHolder gzipFilter=new FilterHolder(GzipFilter.class);
+    gzipFilter.setInitParameter("mimeTypes","text/html,text/plain,text/css,text/javascript,application/json");
+    servletContext.addFilter(gzipFilter,"/*",EnumSet.of(DispatcherType.REQUEST,DispatcherType.FORWARD));
+  }
+  if (enableRewriteFilter) {
+    FilterHolder rewriteFilter=new FilterHolder(UrlRewriteFilter.class);
+    rewriteFilter.setInitParameter("confPath","urlrewrite.xml");
+    servletContext.addFilter(rewriteFilter,"/*",EnumSet.of(DispatcherType.REQUEST,DispatcherType.FORWARD));
+  }
+  contexts.addHandler(servletContext);
+  if (logRequests || "true".equals(finalConfig.getProperty("log.requests","false"))) {
+    String etcPath=basePath + "/etc";
+    File etcDir=new File(etcPath);
+    if (!etcDir.exists()) {
+      etcDir.mkdir();
+    }
+    String logbackConfFilePath=basePath + "/etc/logback-access.xml";
+    File logbackConfFile=new File(logbackConfFilePath);
+    if (!logbackConfFile.exists()) {
+      List<String> config=new LinkedList<>();
+      config.add("<configuration>");
+      config.add("  <appender name=\"FILE\" class=\"ch.qos.logback.core.rolling.RollingFileAppender\">");
+      config.add("    <rollingPolicy class=\"ch.qos.logback.core.rolling.TimeBasedRollingPolicy\">");
+      config.add("      <fileNamePattern>logs/" + logPrefix + "-%d{yyyy_MM_dd}.request.log.zip</fileNamePattern>");
+      config.add("    </rollingPolicy>");
+      config.add("    <encoder>");
+      config.add("      <charset>UTF-8</charset>");
+      config.add("      <pattern>%h %l %u %t \"%r\" %s %b %n%fullRequest%n%n%fullResponse</pattern>");
+      config.add("    </encoder>");
+      config.add("  </appender>");
+      config.add("  <appender-ref ref=\"FILE\" />");
+      config.add("</configuration>");
+      try {
+        logbackConfFile.createNewFile();
+        FileUtils.writeLines(logbackConfFile,"UTF-8",config);
+      }
+ catch (      IOException ioex) {
+        logger.log(Level.WARNING,"Unable to write logback configuration.",ioex);
+      }
+    }
+    FilterHolder loggingFilter=new FilterHolder(TeeFilter.class);
+    servletContext.addFilter(loggingFilter,"/*",EnumSet.of(DispatcherType.REQUEST,DispatcherType.FORWARD));
+    loggingFilter.setInitParameter("includes","");
+    RequestLogHandler requestLogHandler=new RequestLogHandler();
+    String logPath=basePath + "/logs";
+    File logDir=new File(logPath);
+    if (!logDir.exists()) {
+      logDir.mkdir();
+    }
+    final RequestLogImpl requestLog=new RequestLogImpl();
+    requestLogHandler.setRequestLog(requestLog);
+    final HandlerCollection handlers=new HandlerCollection();
+    handlers.setHandlers(new Handler[]{contexts,new DefaultHandler(),requestLogHandler});
+    server.setHandler(handlers);
+  }
+ else {
+    server.setHandler(contexts);
+  }
+  final List<ContextHandler> resourceHandler=collectResourceHandlers(finalConfig);
+  for (  ContextHandler contextHandler : resourceHandler) {
+    contexts.addHandler(contextHandler);
+  }
+  final Map<String,ServletHolder> servlets=collectServlets(finalConfig);
+  int position=1;
+  for (  Map.Entry<String,ServletHolder> servlet : servlets.entrySet()) {
+    ServletHolder servletHolder=servlet.getValue();
+    String path=servlet.getKey();
+    servletHolder.setInitOrder(position++);
+    logger.log(Level.INFO,"Adding servlet {0} for {1}",new Object[]{servletHolder,path});
+    servletContext.addServlet(servletHolder,path);
+  }
+  contexts.addHandler(servletContext);
+  if (enableHttps) {
+    if (httpsPort > -1 && keyStorePath != null && !keyStorePath.isEmpty() && keyStorePassword != null) {
+      SslSelectChannelConnector httpsConnector=null;
+      SslContextFactory factory=new SslContextFactory(keyStorePath);
+      factory.setKeyStorePassword(keyStorePassword);
+      httpsConnector=new SslSelectChannelConnector(factory);
+      httpsConnector.setHost(host);
+      httpsConnector.setPort(httpsPort);
+      httpsConnector.setMaxIdleTime(maxIdleTime);
+      httpsConnector.setRequestHeaderSize(requestHeaderSize);
+      connectors.add(httpsConnector);
+    }
+ else {
+      logger.log(Level.WARNING,"Unable to configure SSL, please make sure that {0}, {1} and {2} are set correctly in structr.conf.",new Object[]{APPLICATION_HTTPS_PORT,APPLICATION_KEYSTORE_PATH,APPLICATION_KEYSTORE_PASSWORD});
+    }
+  }
+  if (host != null && !host.isEmpty() && httpPort > -1) {
+    SelectChannelConnector httpConnector=new SelectChannelConnector();
+    httpConnector.setHost(host);
+    httpConnector.setPort(httpPort);
+    httpConnector.setMaxIdleTime(maxIdleTime);
+    httpConnector.setRequestHeaderSize(requestHeaderSize);
+    connectors.add(httpConnector);
+  }
+ else {
+    logger.log(Level.WARNING,"Unable to configure HTTP server port, please make sure that {0} and {1} are set correctly in structr.conf.",new Object[]{APPLICATION_HOST,APPLICATION_HTTP_PORT});
+  }
+  if (!connectors.isEmpty()) {
+    server.setConnectors(connectors.toArray(new Connector[0]));
+  }
+ else {
+    logger.log(Level.SEVERE,"No connectors configured, aborting.");
+    System.exit(0);
+  }
+  server.setGracefulShutdown(1000);
+  server.setStopAtShutdown(true);
+}

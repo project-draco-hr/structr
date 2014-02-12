@@ -3,18 +3,19 @@
   this.request=request;
   this.rawType=part;
   if (rawType != null) {
+    final boolean inexactSearch=parseInteger(request.getParameter(JsonRestServlet.REQUEST_PARAMETER_LOOSE_SEARCH)) == 1;
     final App app=StructrApp.getInstance(securityContext);
     entityClass=SchemaHelper.getEntityClassForRawType(rawType);
     if (entityClass != null) {
       if (AbstractRelationship.class.isAssignableFrom(entityClass)) {
         searchCommandType=SearchRelationshipCommand.class;
-        query=app.relationshipQuery(entityClass);
+        query=app.relationshipQuery(entityClass,!inexactSearch);
         isNode=false;
         return true;
       }
  else {
         searchCommandType=SearchNodeCommand.class;
-        query=app.nodeQuery(entityClass);
+        query=app.nodeQuery(entityClass,!inexactSearch);
         isNode=true;
         return true;
       }

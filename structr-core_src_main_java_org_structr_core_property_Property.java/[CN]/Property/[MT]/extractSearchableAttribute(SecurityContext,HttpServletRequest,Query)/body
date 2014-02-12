@@ -1,0 +1,12 @@
+{
+  String searchValue=request.getParameter(jsonName());
+  if (searchValue != null) {
+    if (!query.isExactSearch()) {
+      searchValue=removeQuotes(searchValue);
+      query.and(this,convertSearchValue(securityContext,searchValue),false);
+    }
+ else {
+      determineSearchType(securityContext,searchValue,query);
+    }
+  }
+}

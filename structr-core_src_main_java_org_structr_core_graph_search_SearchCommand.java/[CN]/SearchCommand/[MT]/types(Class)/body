@@ -1,0 +1,17 @@
+{
+  final ConfigurationProvider configuration=StructrApp.getConfiguration();
+  final Map<String,Class<? extends NodeInterface>> nodeEntities=configuration.getNodeEntities();
+  final Map<String,Class<? extends RelationshipInterface>> relEntities=configuration.getRelationshipEntities();
+  for (  Map.Entry<String,Class<? extends NodeInterface>> entity : nodeEntities.entrySet()) {
+    Class<? extends NodeInterface> entityClass=entity.getValue();
+    if (type.isAssignableFrom(entityClass)) {
+      orType(entityClass);
+    }
+  }
+  for (  Map.Entry<String,Class<? extends RelationshipInterface>> entity : relEntities.entrySet()) {
+    Class<? extends RelationshipInterface> entityClass=entity.getValue();
+    if (type.isAssignableFrom(entityClass)) {
+      orType(entityClass);
+    }
+  }
+}

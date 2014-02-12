@@ -1,7 +1,7 @@
 {
   Page hiddenDoc=getOrCreateHiddenDocument();
   SecurityContext securityContext=SecurityContext.getSuperUserInstance();
-  Result<DOMNode> result=(Result<DOMNode>)StructrApp.getInstance(securityContext).command(SearchNodeCommand.class).execute(Search.andExactTypeAndSubtypes(DOMNode.class));
+  Result<DOMNode> result=StructrApp.getInstance(securityContext).nodeQuery(DOMNode.class).getResult();
   final CreateRelationshipCommand createRel=StructrApp.getInstance(securityContext).command(CreateRelationshipCommand.class);
   for (  DOMNode node : result.getResults()) {
     if (node.hasChildNodes() && (node.hasIncomingRelationships(Sync.class) || node.hasRelationship(Sync.class)) && (!hiddenDoc.equals(node.getOwnerDocument()))) {

@@ -5,12 +5,17 @@
   if (result == null) {
     GeoCodingProvider provider=getGeoCodingProvider();
     if (provider != null) {
-      result=provider.geocode(street,house,postalCode,city,state,country,language);
-      if (result != null) {
-        geoCache.put(cacheKey,result);
-      }
+      try {
+        result=provider.geocode(street,house,postalCode,city,state,country,language);
+        if (result != null) {
+          geoCache.put(cacheKey,result);
+        }
  else {
-        geoCache.put(cacheKey,new NullResult());
+          geoCache.put(cacheKey,new NullResult());
+        }
+      }
+ catch (      IOException ioex) {
+        logger.log(Level.WARNING,"Unable to obtain geocoding result using provider {0}: {1}",new Object[]{provider.getClass().getName(),ioex.getMessage()});
       }
     }
   }

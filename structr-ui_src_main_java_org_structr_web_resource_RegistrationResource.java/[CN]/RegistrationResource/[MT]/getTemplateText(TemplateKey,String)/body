@@ -1,12 +1,10 @@
 {
   try {
-    List<SearchAttribute> attrs=new LinkedList();
-    attrs.add(Search.andExactType(MailTemplate.class));
-    attrs.add(Search.andExactName(key.name()));
+    final Query<MailTemplate> query=StructrApp.getInstance().nodeQuery(MailTemplate.class).andName(key.name());
     if (localeString != null) {
-      attrs.add(Search.andExactProperty(securityContext,MailTemplate.locale,localeString));
+      query.and(MailTemplate.locale,localeString);
     }
-    List<MailTemplate> templates=(List<MailTemplate>)StructrApp.getInstance().command(SearchNodeCommand.class).execute(attrs).getResults();
+    List<MailTemplate> templates=query.getAsList();
     if (!templates.isEmpty()) {
       Content content=templates.get(0).getProperty(MailTemplate.text);
       return content != null ? content.getProperty(Content.content) : defaultValue;

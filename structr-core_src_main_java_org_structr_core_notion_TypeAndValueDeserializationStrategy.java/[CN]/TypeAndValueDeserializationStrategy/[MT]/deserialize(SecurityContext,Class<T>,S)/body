@@ -1,6 +1,4 @@
 {
-  List<SearchAttribute> attrs=new LinkedList();
-  attrs.add(Search.andExactTypeAndSubtypes(type));
   final App app=StructrApp.getInstance(securityContext);
   Result<T> result=Result.EMPTY_RESULT;
   Map<String,Object> sourceMap=new LinkedHashMap<>();
@@ -11,8 +9,7 @@
     if (convertedSource instanceof JsonInput) {
       Object value=((JsonInput)convertedSource).getAttributes().get(propertyKey.jsonName());
       if (value != null) {
-        String stringValue=value.toString();
-        attrs.add(Search.andExactProperty(securityContext,propertyKey,stringValue));
+        result=app.nodeQuery(type).and(propertyKey,value.toString()).getResult();
       }
     }
  else     if (convertedSource instanceof GraphObject) {
@@ -22,7 +19,6 @@
       }
  else {
         PropertyKey<String> idProperty=StructrApp.getConfiguration().getPropertyKeyForDatabaseName(obj.getClass(),GraphObject.id.dbName());
-        attrs.add(Search.andExactUuid(obj.getProperty(idProperty)));
         result=new Result(app.get(obj.getProperty(idProperty)),false);
       }
     }

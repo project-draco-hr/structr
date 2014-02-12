@@ -7,12 +7,10 @@
   String targetPage=request.getParameter(TARGET_PAGE_KEY);
   String errorPage=request.getParameter(ERROR_PAGE_KEY);
   if (CONFIRM_REGISTRATION_PAGE.equals(path)) {
-    List<SearchAttribute> searchAttrs=new LinkedList();
-    searchAttrs.add(Search.andExactTypeAndSubtypes(Principal.class));
-    searchAttrs.add(Search.andExactProperty(securityContext,User.confirmationKey,key));
-    Result results=(Result)searchNodesAsSuperuser.execute(searchAttrs);
+    Result<Principal> results=StructrApp.getInstance().nodeQuery(Principal.class).and(User.confirmationKey,key).getResult();
+    ;
     if (!results.isEmpty()) {
-      final Principal user=(Principal)results.get(0);
+      final Principal user=results.get(0);
       final App app=StructrApp.getInstance(securityContext);
       try {
         app.beginTx();

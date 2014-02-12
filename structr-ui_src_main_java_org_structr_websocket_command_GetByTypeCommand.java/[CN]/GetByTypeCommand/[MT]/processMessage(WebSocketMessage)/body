@@ -1,23 +1,22 @@
 {
   final SecurityContext securityContext=getWebSocket().getSecurityContext();
-  String rawType=(String)webSocketData.getNodeData().get("type");
-  Class type=SchemaHelper.getEntityClassForRawType(rawType);
-  List<SearchAttribute> searchAttributes=new LinkedList();
+  final String rawType=(String)webSocketData.getNodeData().get("type");
+  final Class type=SchemaHelper.getEntityClassForRawType(rawType);
   if (type == null) {
     getWebSocket().send(MessageBuilder.status().code(404).message("Type " + rawType + " not found").build(),true);
     return;
-  }
-  searchAttributes.add(Search.andExactType(type));
-  if (type.equals(Image.class)) {
-    searchAttributes.add(Search.andExactProperty(securityContext,Image.isThumbnail,false));
   }
   final String sortOrder=webSocketData.getSortOrder();
   final String sortKey=webSocketData.getSortKey();
   final int pageSize=webSocketData.getPageSize();
   final int page=webSocketData.getPage();
   PropertyKey sortProperty=StructrApp.getConfiguration().getPropertyKeyForJSONName(type,sortKey);
+  final Query query=StructrApp.getInstance(securityContext).nodeQuery(type).includeDeletedAndHidden().sort(sortProperty).order("desc".equals(sortOrder));
+  if (type.equals(Image.class)) {
+    query.and(Image.isThumbnail,false);
+  }
   try {
-    Result result=(Result)StructrApp.getInstance(securityContext).command(SearchNodeCommand.class).execute(true,false,searchAttributes,sortProperty,"desc".equals(sortOrder));
+    Result result=query.getResult();
     int resultCountBeforePaging=result.size();
     webSocketData.setResult(PagingHelper.subList(result.getResults(),pageSize,page,null));
     webSocketData.setRawResultCount(resultCountBeforePaging);

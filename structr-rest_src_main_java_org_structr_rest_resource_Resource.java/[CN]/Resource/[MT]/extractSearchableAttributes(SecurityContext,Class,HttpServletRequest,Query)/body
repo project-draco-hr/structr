@@ -1,0 +1,24 @@
+{
+  if (type != null && request != null && !request.getParameterMap().isEmpty()) {
+    final ConfigurationProvider conf=Services.getInstance().getConfigurationProvider();
+    final List<PropertyKey> searchKeys=new LinkedList<>();
+    for (    final String name : request.getParameterMap().keySet()) {
+      final PropertyKey key=conf.getPropertyKeyForJSONName(type,getFirstPartOfString(name));
+      if (key != null) {
+        if (key.isSearchable()) {
+          searchKeys.add(key);
+        }
+ else         if (!JsonRestServlet.commonRequestParameters.contains(name)) {
+          throw new FrameworkException(400,"Search key " + name + " is not indexed.");
+        }
+      }
+ else       if (!JsonRestServlet.commonRequestParameters.contains(name)) {
+        throw new FrameworkException(400,"Invalid search key " + name);
+      }
+    }
+    Collections.sort(searchKeys,new PropertyKeyProcessingOrderComparator());
+    for (    final PropertyKey key : searchKeys) {
+      key.extractSearchableAttribute(securityContext,request,query);
+    }
+  }
+}

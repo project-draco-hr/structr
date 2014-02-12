@@ -3,10 +3,8 @@
   String requestedPath=getAbsolutePath();
   logger.log(Level.INFO,"Children of {0} requested",requestedPath);
   if ("/".equals(requestedPath)) {
-    List<SearchAttribute> searchAttrs=new LinkedList<>();
-    searchAttrs.add(Search.orExactTypeAndSubtypes(org.structr.web.entity.Folder.class));
     try {
-      Result<Folder> results=StructrApp.getInstance().command(SearchNodeCommand.class).execute(false,false,searchAttrs);
+      Result<Folder> results=StructrApp.getInstance().nodeQuery(Folder.class).getResult();
       logger.log(Level.INFO,"{0} folders found",results.size());
       for (      Folder f : results.getResults()) {
         if (f.getProperty(AbstractFile.parent) != null) {
@@ -20,10 +18,8 @@
  catch (    FrameworkException ex) {
       logger.log(Level.SEVERE,null,ex);
     }
-    searchAttrs=new LinkedList<>();
-    searchAttrs.add(Search.orExactTypeAndSubtypes(org.structr.web.entity.File.class));
     try {
-      Result<File> results=StructrApp.getInstance().command(SearchNodeCommand.class).execute(false,false,searchAttrs);
+      Result<File> results=StructrApp.getInstance().nodeQuery(File.class).getResult();
       logger.log(Level.INFO,"{0} files found",results.size());
       for (      File f : results.getResults()) {
         if (f.getProperty(AbstractFile.parent) != null) {

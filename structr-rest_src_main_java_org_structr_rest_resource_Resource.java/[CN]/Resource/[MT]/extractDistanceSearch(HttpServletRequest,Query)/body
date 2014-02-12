@@ -1,0 +1,30 @@
+{
+  if (request != null) {
+    final String distance=request.getParameter(SearchCommand.DISTANCE_SEARCH_KEYWORD);
+    if (!request.getParameterMap().isEmpty() && StringUtils.isNotBlank(distance)) {
+      final Double dist=Double.parseDouble(distance);
+      final String location=request.getParameter(SearchCommand.LOCATION_SEARCH_KEYWORD);
+      String street=request.getParameter(SearchCommand.STREET_SEARCH_KEYWORD);
+      String house=request.getParameter(SearchCommand.HOUSE_SEARCH_KEYWORD);
+      String postalCode=request.getParameter(SearchCommand.POSTAL_CODE_SEARCH_KEYWORD);
+      String city=request.getParameter(SearchCommand.CITY_SEARCH_KEYWORD);
+      String state=request.getParameter(SearchCommand.STATE_SEARCH_KEYWORD);
+      String country=request.getParameter(SearchCommand.COUNTRY_SEARCH_KEYWORD);
+      if (location != null) {
+        String[] parts=location.split("[,]+");
+switch (parts.length) {
+case 3:
+          country=parts[2];
+case 2:
+        city=parts[1];
+case 1:
+      street=parts[0];
+    break;
+default :
+  break;
+}
+}
+query.location(street,house,postalCode,city,state,country,dist);
+}
+}
+}

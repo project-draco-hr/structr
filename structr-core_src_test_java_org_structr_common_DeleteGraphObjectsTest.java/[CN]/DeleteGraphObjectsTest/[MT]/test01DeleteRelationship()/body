@@ -5,15 +5,11 @@
     SixOneOneToOne rel=null;
     assertNotNull(testOne);
     assertNotNull(testSix);
-    try {
-      app.beginTx();
+    try (final TransactionCommand cmd=app.beginTx()){
       rel=app.create(testSix,testOne,SixOneOneToOne.class);
       app.commitTx();
     }
-  finally {
-      app.finishTx();
-    }
-    assertNotNull(rel);
+     assertNotNull(rel);
     try {
       rel.getRelationship().delete();
       fail("Should have raised an org.neo4j.graphdb.NotInTransactionException");
@@ -21,17 +17,15 @@
  catch (    org.neo4j.graphdb.NotInTransactionException e) {
     }
     assertNotNull(rel);
-    try {
-      app.beginTx();
+    try (final TransactionCommand cmd=app.beginTx()){
       app.delete(rel);
       app.commitTx();
     }
-  finally {
-      app.finishTx();
+     try (final TransactionCommand cmd=app.beginTx()){
+      String uuid=rel.getUuid();
+      assertNull("UUID of deleted relationship should be null",uuid);
     }
-    String uuid=rel.getUuid();
-    assertNull("UUID of deleted relationship should be null",uuid);
-  }
+   }
  catch (  FrameworkException ex) {
     ex.printStackTrace();
     logger.log(Level.SEVERE,ex.toString());

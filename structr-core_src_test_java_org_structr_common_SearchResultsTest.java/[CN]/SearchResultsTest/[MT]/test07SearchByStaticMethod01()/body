@@ -5,10 +5,12 @@
     final String name="89w3hkl sdfghsdkljth";
     props.put(key,name);
     final AbstractNode node=createTestNode(TestOne.class,props);
-    Result result=app.nodeQuery(TestOne.class).andName(name).includeDeletedAndHidden().getResult();
-    assertTrue(result.size() == 1);
-    assertTrue(result.get(0).equals(node));
-  }
+    try (final TransactionCommand cmd=app.beginTx()){
+      Result result=app.nodeQuery(TestOne.class).andName(name).includeDeletedAndHidden().getResult();
+      assertTrue(result.size() == 1);
+      assertTrue(result.get(0).equals(node));
+    }
+   }
  catch (  FrameworkException ex) {
     ex.printStackTrace();
     logger.log(Level.SEVERE,ex.toString());

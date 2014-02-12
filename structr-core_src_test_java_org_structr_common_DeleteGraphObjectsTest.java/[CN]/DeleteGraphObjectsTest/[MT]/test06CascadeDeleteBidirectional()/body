@@ -1,18 +1,32 @@
 {
   try {
     AbstractRelationship rel=cascadeRel(TestOne.class,TestTwo.class,Relation.TARGET_TO_SOURCE | Relation.SOURCE_TO_TARGET);
-    final String startNodeId=rel.getSourceNode().getUuid();
-    final String endNodeId=rel.getTargetNode().getUuid();
-    deleteCascade(rel.getSourceNode());
-    assertNodeNotFound(startNodeId);
-    assertNodeNotFound(endNodeId);
-    rel=cascadeRel(TestOne.class,TestTwo.class,Relation.TARGET_TO_SOURCE | Relation.SOURCE_TO_TARGET);
-    final String startNodeId2=rel.getSourceNode().getUuid();
-    final String endNodeId2=rel.getTargetNode().getUuid();
-    deleteCascade(rel.getTargetNode());
-    assertNodeNotFound(endNodeId2);
-    assertNodeNotFound(startNodeId2);
-  }
+    NodeInterface sourceNode;
+    NodeInterface targetNode;
+    String startNodeId;
+    String endNodeId;
+    try (final TransactionCommand cmd=app.beginTx()){
+      startNodeId=rel.getSourceNode().getUuid();
+      endNodeId=rel.getTargetNode().getUuid();
+      sourceNode=rel.getSourceNode();
+    }
+     deleteCascade(sourceNode);
+    try (final TransactionCommand cmd=app.beginTx()){
+      assertNodeNotFound(startNodeId);
+      assertNodeNotFound(endNodeId);
+    }
+     rel=cascadeRel(TestOne.class,TestTwo.class,Relation.TARGET_TO_SOURCE | Relation.SOURCE_TO_TARGET);
+    try (final TransactionCommand cmd=app.beginTx()){
+      startNodeId=rel.getSourceNode().getUuid();
+      endNodeId=rel.getTargetNode().getUuid();
+      targetNode=rel.getTargetNode();
+    }
+     deleteCascade(targetNode);
+    try (final TransactionCommand cmd=app.beginTx()){
+      assertNodeNotFound(endNodeId);
+      assertNodeNotFound(startNodeId);
+    }
+   }
  catch (  FrameworkException ex) {
     ex.printStackTrace();
     logger.log(Level.SEVERE,ex.toString());

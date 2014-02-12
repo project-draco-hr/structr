@@ -1,25 +1,46 @@
 {
   SecurityContext securityContext=null;
+  Authenticator authenticator=null;
+  RestMethodResult result=null;
+  JsonInput propertySet=null;
   try {
-    Authenticator authenticator=getAuthenticator();
-    securityContext=authenticator.initializeAndExamineRequest(request,response);
-    request.setCharacterEncoding("UTF-8");
+    try (final TransactionCommand cmd=StructrApp.getInstance().beginTx()){
+      authenticator=getAuthenticator();
+      securityContext=authenticator.initializeAndExamineRequest(request,response);
+      cmd.commitTx();
+    }
+     request.setCharacterEncoding("UTF-8");
     response.setCharacterEncoding("UTF-8");
     response.setContentType("application/json; charset=UTF-8");
-    final JsonInput propertySet=gson.get().fromJson(request.getReader(),JsonInput.class);
-    if (securityContext != null) {
+    try (final TransactionCommand cmd=StructrApp.getInstance().beginTx()){
+      propertySet=gson.get().fromJson(request.getReader(),JsonInput.class);
+      cmd.commitTx();
+    }
+     if (securityContext != null) {
       List<Resource> chain=ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,defaultIdProperty);
       Resource resource=ResourceHelper.optimizeNestedResourceChain(chain,defaultIdProperty);
       String resourceSignature=resource.getResourceSignature();
       Map<String,Object> properties=convertPropertySetToMap(propertySet);
-      authenticator.checkResourceAccess(request,resourceSignature,propertyView.get(securityContext));
-      RestMethodResult result=resource.doPut(properties);
-      result.commitResponse(gson.get(),response);
-    }
+      try (final TransactionCommand cmd=StructrApp.getInstance().beginTx()){
+        authenticator.checkResourceAccess(request,resourceSignature,propertyView.get(securityContext));
+        cmd.commitTx();
+      }
+       try (final TransactionCommand cmd=StructrApp.getInstance().beginTx()){
+        result=resource.doPut(properties);
+        cmd.commitTx();
+      }
+       try (final TransactionCommand cmd=StructrApp.getInstance().beginTx()){
+        result.commitResponse(gson.get(),response);
+        cmd.commitTx();
+      }
+     }
  else {
-      RestMethodResult result=new RestMethodResult(HttpServletResponse.SC_FORBIDDEN);
-      result.commitResponse(gson.get(),response);
-    }
+      try (final TransactionCommand cmd=StructrApp.getInstance().beginTx()){
+        result=new RestMethodResult(HttpServletResponse.SC_FORBIDDEN);
+        result.commitResponse(gson.get(),response);
+        cmd.commitTx();
+      }
+     }
   }
  catch (  FrameworkException frameworkException) {
     response.setStatus(frameworkException.getStatus());

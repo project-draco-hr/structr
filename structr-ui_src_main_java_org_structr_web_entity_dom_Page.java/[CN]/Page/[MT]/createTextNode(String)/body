@@ -1,7 +1,6 @@
 {
   final App app=StructrApp.getInstance(securityContext);
-  try {
-    app.beginTx();
+  try (final TransactionCommand cmd=app.beginTx()){
     Content content=(Content)StructrApp.getInstance(securityContext).command(CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.type,Content.class.getSimpleName()),new NodeAttribute(Content.content,text));
     ((RelationProperty<DOMNode>)Page.elements).addSingleElement(securityContext,Page.this,content);
     app.commitTx();
@@ -9,9 +8,6 @@
   }
  catch (  FrameworkException fex) {
     fex.printStackTrace();
-  }
- finally {
-    app.finishTx();
   }
   return null;
 }

@@ -1,6 +1,10 @@
 {
   if (obj instanceof RelationshipInterface) {
-    return ((RelationshipInterface)obj).getRelType().name();
+    try (final TransactionCommand cmd=StructrApp.getInstance(securityContext).beginTx()){
+      return ((RelationshipInterface)obj).getRelType().name();
+    }
+ catch (    FrameworkException fex) {
+    }
   }
   return null;
 }

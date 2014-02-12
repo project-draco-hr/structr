@@ -2,44 +2,46 @@
   try {
     TestOne a=createTestNode(TestOne.class);
     TestOne b=createTestNode(TestOne.class);
-    GraphObjectComparator comp=new GraphObjectComparator(TestOne.anInt,GraphObjectComparator.ASCENDING);
-    try {
-      comp.compare(null,null);
-      fail("Should have raised an NullPointerException");
+    try (final TransactionCommand cmd=app.beginTx()){
+      GraphObjectComparator comp=new GraphObjectComparator(TestOne.anInt,GraphObjectComparator.ASCENDING);
+      try {
+        comp.compare(null,null);
+        fail("Should have raised an NullPointerException");
+      }
+ catch (      NullPointerException e) {
+      }
+      try {
+        comp.compare(a,null);
+        fail("Should have raised an NullPointerException");
+      }
+ catch (      NullPointerException e) {
+      }
+      try {
+        comp.compare(null,b);
+        fail("Should have raised an NullPointerException");
+      }
+ catch (      NullPointerException e) {
+      }
+      try {
+        comp.compare(null,b);
+        fail("Should have raised an NullPointerException");
+      }
+ catch (      NullPointerException e) {
+      }
+      assertEquals(0,comp.compare(a,b));
+      setPropertyTx(a,TestOne.anInt,0);
+      assertEquals(-1,comp.compare(a,b));
+      setPropertyTx(a,TestOne.anInt,null);
+      setPropertyTx(b,TestOne.anInt,0);
+      assertEquals(1,comp.compare(a,b));
+      setPropertyTx(a,TestOne.anInt,1);
+      setPropertyTx(b,TestOne.anInt,2);
+      assertEquals(-1,comp.compare(a,b));
+      setPropertyTx(a,TestOne.anInt,2);
+      setPropertyTx(b,TestOne.anInt,1);
+      assertEquals(1,comp.compare(a,b));
     }
- catch (    NullPointerException e) {
-    }
-    try {
-      comp.compare(a,null);
-      fail("Should have raised an NullPointerException");
-    }
- catch (    NullPointerException e) {
-    }
-    try {
-      comp.compare(null,b);
-      fail("Should have raised an NullPointerException");
-    }
- catch (    NullPointerException e) {
-    }
-    try {
-      comp.compare(null,b);
-      fail("Should have raised an NullPointerException");
-    }
- catch (    NullPointerException e) {
-    }
-    assertEquals(0,comp.compare(a,b));
-    setPropertyTx(a,TestOne.anInt,0);
-    assertEquals(-1,comp.compare(a,b));
-    setPropertyTx(a,TestOne.anInt,null);
-    setPropertyTx(b,TestOne.anInt,0);
-    assertEquals(1,comp.compare(a,b));
-    setPropertyTx(a,TestOne.anInt,1);
-    setPropertyTx(b,TestOne.anInt,2);
-    assertEquals(-1,comp.compare(a,b));
-    setPropertyTx(a,TestOne.anInt,2);
-    setPropertyTx(b,TestOne.anInt,1);
-    assertEquals(1,comp.compare(a,b));
-  }
+   }
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,ex.toString());
     fail("Unexpected exception");

@@ -7,8 +7,7 @@
     Collections.shuffle(nodes,new Random(System.nanoTime()));
     int i=offset;
     String name;
-    try {
-      app.beginTx();
+    try (final TransactionCommand cmd=app.beginTx()){
       for (      NodeInterface node : nodes) {
         name=Integer.toString(i);
         i++;
@@ -29,27 +28,26 @@
       }
       app.commitTx();
     }
-  finally {
-      app.finishTx();
+     try (final TransactionCommand cmd=app.beginTx()){
+      Result result=app.nodeQuery(type).getResult();
+      assertEquals(number,result.size());
+      PropertyKey sortKey=TestOne.aDate;
+      boolean sortDesc=true;
+      int pageSize=10;
+      int page=1;
+      result=app.nodeQuery(type).sort(sortKey).order(sortDesc).page(page).pageSize(pageSize).getResult();
+      logger.log(Level.INFO,"Raw result size: {0}, expected: {1}",new Object[]{result.getRawResultCount(),number});
+      assertTrue(result.getRawResultCount() == number);
+      logger.log(Level.INFO,"Result size: {0}, expected: {1}",new Object[]{result.size(),pageSize});
+      assertTrue(result.size() == Math.min(number,pageSize));
+      for (int j=0; j < Math.min(result.size(),pageSize); j++) {
+        String expectedName="TestOne-" + (30 - (j + 1) * 2);
+        String gotName=result.get(j).getProperty(AbstractNode.name);
+        System.out.println(j + ": " + expectedName+ ", got: "+ gotName);
+        assertEquals(expectedName,gotName);
+      }
     }
-    Result result=app.nodeQuery(type).getResult();
-    assertEquals(number,result.size());
-    PropertyKey sortKey=TestOne.aDate;
-    boolean sortDesc=true;
-    int pageSize=10;
-    int page=1;
-    result=app.nodeQuery(type).sort(sortKey).order(sortDesc).page(page).pageSize(pageSize).getResult();
-    logger.log(Level.INFO,"Raw result size: {0}, expected: {1}",new Object[]{result.getRawResultCount(),number});
-    assertTrue(result.getRawResultCount() == number);
-    logger.log(Level.INFO,"Result size: {0}, expected: {1}",new Object[]{result.size(),pageSize});
-    assertTrue(result.size() == Math.min(number,pageSize));
-    for (int j=0; j < Math.min(result.size(),pageSize); j++) {
-      String expectedName="TestOne-" + (30 - (j + 1) * 2);
-      String gotName=result.get(j).getProperty(AbstractNode.name);
-      System.out.println(j + ": " + expectedName+ ", got: "+ gotName);
-      assertEquals(expectedName,gotName);
-    }
-  }
+   }
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,ex.toString());
     fail("Unexpected exception");

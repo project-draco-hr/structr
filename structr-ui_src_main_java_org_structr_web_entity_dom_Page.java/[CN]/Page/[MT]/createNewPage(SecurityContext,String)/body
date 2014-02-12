@@ -5,13 +5,9 @@
   properties.put(AbstractNode.type,Page.class.getSimpleName());
   properties.put(Page.contentType,"text/html");
   Page newPage=null;
-  try {
-    app.beginTx();
+  try (final TransactionCommand cmd=app.beginTx()){
     newPage=app.create(Page.class,properties);
     app.commitTx();
   }
-  finally {
-    app.finishTx();
-  }
-  return newPage;
+   return newPage;
 }

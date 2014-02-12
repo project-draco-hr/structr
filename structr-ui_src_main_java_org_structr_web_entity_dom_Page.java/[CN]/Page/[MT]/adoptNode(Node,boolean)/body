@@ -2,8 +2,7 @@
   if (node instanceof DOMNode) {
     final DOMNode domNode=(DOMNode)node;
     final App app=StructrApp.getInstance(securityContext);
-    try {
-      app.beginTx();
+    try (final TransactionCommand cmd=app.beginTx()){
       Node adoptedNode=domNode.doAdopt(Page.this);
       if (domNode.hasChildNodes()) {
         Node child=domNode.getFirstChild();
@@ -23,9 +22,6 @@
     }
  catch (    FrameworkException fex) {
       throw new DOMException(DOMException.INVALID_STATE_ERR,fex.getMessage());
-    }
- finally {
-      app.finishTx();
     }
   }
   return null;

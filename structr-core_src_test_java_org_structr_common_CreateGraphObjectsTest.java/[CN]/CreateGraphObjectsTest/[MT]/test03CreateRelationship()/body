@@ -6,19 +6,17 @@
     NodeHasLocation rel=null;
     assertTrue(startNode != null);
     assertTrue(endNode != null);
-    try {
-      app.beginTx();
+    try (final TransactionCommand cmd=app.beginTx()){
       rel=app.create(startNode,endNode,NodeHasLocation.class);
       app.commitTx();
     }
-  finally {
-      app.finishTx();
+     try (final TransactionCommand cmd=app.beginTx()){
+      assertEquals(startNode.getUuid(),rel.getSourceNodeId());
+      assertEquals(endNode.getUuid(),rel.getTargetNodeId());
+      assertEquals(RelType.IS_AT.name(),rel.getType());
+      assertEquals(NodeHasLocation.class,rel.getClass());
     }
-    assertEquals(startNode.getUuid(),rel.getSourceNodeId());
-    assertEquals(endNode.getUuid(),rel.getTargetNodeId());
-    assertEquals(RelType.IS_AT.name(),rel.getType());
-    assertEquals(NodeHasLocation.class,rel.getClass());
-  }
+   }
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,ex.toString());
     fail("Unexpected exception");

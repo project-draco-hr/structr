@@ -1,3 +1,8 @@
 {
-  return structrFile.getProperty(Folder.lastModifiedDate).getTime();
+  try (final TransactionCommand cmd=StructrApp.getInstance().beginTx()){
+    return structrFile.getProperty(Folder.lastModifiedDate).getTime();
+  }
+ catch (  FrameworkException fex) {
+  }
+  return 0L;
 }

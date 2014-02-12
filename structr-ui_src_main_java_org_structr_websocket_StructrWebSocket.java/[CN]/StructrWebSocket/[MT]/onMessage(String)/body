@@ -20,8 +20,9 @@
       abstractCommand.setIdProperty(idProperty);
       webSocketData.setSessionValid(isAuthenticated());
       webSocketData.setToken(null);
-      try {
+      try (final TransactionCommand cmd=StructrApp.getInstance(securityContext).beginTx()){
         abstractCommand.processMessage(webSocketData);
+        cmd.commitTx();
       }
  catch (      Throwable t) {
         t.printStackTrace(System.out);

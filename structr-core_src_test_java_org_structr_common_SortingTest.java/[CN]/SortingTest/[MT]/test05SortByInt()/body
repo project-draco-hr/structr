@@ -6,8 +6,7 @@
     final PropertyKey key=TestOne.anInt;
     final int offset=10;
     Collections.shuffle(nodes,new Random(System.nanoTime()));
-    try {
-      app.beginTx();
+    try (final TransactionCommand cmd=app.beginTx()){
       int i=offset;
       for (      NodeInterface node : nodes) {
         node.setProperty(AbstractNode.name,Integer.toString(i));
@@ -16,27 +15,26 @@
       }
       app.commitTx();
     }
-  finally {
-      app.finishTx();
+     try (final TransactionCommand cmd=app.beginTx()){
+      Result result=app.nodeQuery(type).getResult();
+      assertEquals(number,result.size());
+      PropertyKey sortKey=key;
+      boolean sortDesc=false;
+      int pageSize=5;
+      int page=1;
+      result=app.nodeQuery(type).sort(sortKey).order(sortDesc).page(page).pageSize(pageSize).getResult();
+      logger.log(Level.INFO,"Raw result size: {0}, expected: {1}",new Object[]{result.getRawResultCount(),number});
+      assertTrue(result.getRawResultCount() == number);
+      logger.log(Level.INFO,"Result size: {0}, expected: {1}",new Object[]{result.size(),pageSize});
+      assertTrue(result.size() == Math.min(number,pageSize));
+      for (int j=0; j < pageSize; j++) {
+        int expectedNumber=offset + j;
+        int gotNumber=(Integer)result.get(j).getProperty(key);
+        System.out.println("expected: " + expectedNumber + ", got: "+ gotNumber);
+        assertEquals(expectedNumber,gotNumber);
+      }
     }
-    Result result=app.nodeQuery(type).getResult();
-    assertEquals(number,result.size());
-    PropertyKey sortKey=key;
-    boolean sortDesc=false;
-    int pageSize=5;
-    int page=1;
-    result=app.nodeQuery(type).sort(sortKey).order(sortDesc).page(page).pageSize(pageSize).getResult();
-    logger.log(Level.INFO,"Raw result size: {0}, expected: {1}",new Object[]{result.getRawResultCount(),number});
-    assertTrue(result.getRawResultCount() == number);
-    logger.log(Level.INFO,"Result size: {0}, expected: {1}",new Object[]{result.size(),pageSize});
-    assertTrue(result.size() == Math.min(number,pageSize));
-    for (int j=0; j < pageSize; j++) {
-      int expectedNumber=offset + j;
-      int gotNumber=(Integer)result.get(j).getProperty(key);
-      System.out.println("expected: " + expectedNumber + ", got: "+ gotNumber);
-      assertEquals(expectedNumber,gotNumber);
-    }
-  }
+   }
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,ex.toString());
     fail("Unexpected exception");

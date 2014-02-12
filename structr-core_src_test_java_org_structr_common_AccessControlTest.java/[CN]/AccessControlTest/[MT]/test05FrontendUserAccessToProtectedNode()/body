@@ -11,9 +11,11 @@
     props.put(AbstractNode.visibleToAuthenticatedUsers,true);
     TestOne t2=createTestNode(TestOne.class,props,user1);
     SecurityContext user2Context=SecurityContext.getInstance(user2,AccessMode.Frontend);
-    Result result=StructrApp.getInstance(user2Context).nodeQuery(type).getResult();
-    assertEquals(2,result.size());
-  }
+    try (final TransactionCommand cmd=app.beginTx()){
+      Result result=StructrApp.getInstance(user2Context).nodeQuery(type).getResult();
+      assertEquals(2,result.size());
+    }
+   }
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,ex.toString());
     fail("Unexpected exception");

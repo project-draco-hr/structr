@@ -4,16 +4,14 @@
     final TestFour testEntity=createTestNode(TestFour.class);
     assertNotNull(testEntity);
     final Long value=2857312362L;
-    try {
-      app.beginTx();
+    try (final TransactionCommand cmd=app.beginTx()){
       instance.setProperty(securityContext,testEntity,value);
       app.commitTx();
     }
-  finally {
-      app.finishTx();
+     try (final TransactionCommand cmd=app.beginTx()){
+      assertEquals(value,instance.getProperty(securityContext,testEntity,true));
     }
-    assertEquals(value,instance.getProperty(securityContext,testEntity,true));
-  }
+   }
  catch (  FrameworkException fex) {
     fail("Unable to store array");
   }

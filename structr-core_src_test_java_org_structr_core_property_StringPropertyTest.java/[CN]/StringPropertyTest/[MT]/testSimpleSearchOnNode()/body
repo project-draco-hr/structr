@@ -6,10 +6,12 @@
     final TestFour testEntity=createTestNode(TestFour.class,properties);
     assertNotNull(testEntity);
     assertEquals("test",testEntity.getProperty(key));
-    Result<TestFour> result=app.nodeQuery(TestFour.class).and(key,"test").getResult();
-    assertEquals(result.size(),1);
-    assertEquals(result.get(0),testEntity);
-  }
+    try (final TransactionCommand cmd=app.beginTx()){
+      Result<TestFour> result=app.nodeQuery(TestFour.class).and(key,"test").getResult();
+      assertEquals(result.size(),1);
+      assertEquals(result.get(0),testEntity);
+    }
+   }
  catch (  FrameworkException fex) {
     fail("Unable to store array");
   }

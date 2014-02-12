@@ -1,57 +1,41 @@
 {
   try {
     TestEight test=null;
-    try {
-      app.beginTx();
+    try (final TransactionCommand cmd=app.beginTx()){
       test=app.create(TestEight.class,new NodeAttribute(TestEight.testProperty,123));
       app.commitTx();
     }
-  finally {
-      app.finishTx();
-    }
-    assertTrue("onCreationTimestamp should be != 0",test.getOnCreationTimestamp() != 0L);
+     assertTrue("onCreationTimestamp should be != 0",test.getOnCreationTimestamp() != 0L);
     assertEquals("onModificationTimestamp should be == 0",0L,test.getOnModificationTimestamp());
     assertEquals("onDeletionTimestamp should be == 0",0L,test.getOnDeletionTimestamp());
     assertTrue("afterCreationTimestamp should be != 0",test.getAfterCreationTimestamp() != 0L);
     assertEquals("afterModificationTimestamp should be == 0",0L,test.getAfterModificationTimestamp());
     test.resetTimestamps();
-    try {
-      app.beginTx();
+    try (final TransactionCommand cmd=app.beginTx()){
       test.setProperty(TestEight.testProperty,234);
       app.commitTx();
     }
-  finally {
-      app.finishTx();
-    }
-    assertEquals("onCreationTimestamp should be == 0",0L,test.getOnCreationTimestamp());
+     assertEquals("onCreationTimestamp should be == 0",0L,test.getOnCreationTimestamp());
     assertTrue("onModificationTimestamp should be != 0",test.getOnModificationTimestamp() != 0L);
     assertEquals("onDeletionTimestamp should be == 0",0L,test.getOnDeletionTimestamp());
     assertEquals("afterCreationTimestamp should be == 0",0L,test.getAfterCreationTimestamp());
     assertTrue("afterModificationTimestamp should be != 0",test.getAfterModificationTimestamp() != 0L);
     test.resetTimestamps();
-    try {
-      app.beginTx();
+    try (final TransactionCommand cmd=app.beginTx()){
       test.setProperty(TestEight.testProperty,234);
       app.commitTx();
     }
-  finally {
-      app.finishTx();
-    }
-    assertEquals("onCreationTimestamp should be == 0",0L,test.getOnCreationTimestamp());
+     assertEquals("onCreationTimestamp should be == 0",0L,test.getOnCreationTimestamp());
     assertEquals("onModificationTimestamp should be == 0",0L,test.getOnModificationTimestamp());
     assertEquals("onDeletionTimestamp should be == 0",0L,test.getOnDeletionTimestamp());
     assertEquals("afterCreationTimestamp should be == 0",0L,test.getAfterCreationTimestamp());
     assertEquals("afterModificationTimestamp should be == 0",0L,test.getAfterModificationTimestamp());
     test.resetTimestamps();
-    try {
-      app.beginTx();
+    try (final TransactionCommand cmd=app.beginTx()){
       app.delete(test);
       app.commitTx();
     }
-  finally {
-      app.finishTx();
-    }
-    assertEquals("onCreationTimestamp should be == 0",0L,test.getOnCreationTimestamp());
+     assertEquals("onCreationTimestamp should be == 0",0L,test.getOnCreationTimestamp());
     assertEquals("onModificationTimestamp should be == 0",0L,test.getOnModificationTimestamp());
     assertTrue("onDeletionTimestamp should be != 0",test.getOnDeletionTimestamp() != 0L);
     assertEquals("afterCreationTimestamp should be == 0",0L,test.getAfterCreationTimestamp());

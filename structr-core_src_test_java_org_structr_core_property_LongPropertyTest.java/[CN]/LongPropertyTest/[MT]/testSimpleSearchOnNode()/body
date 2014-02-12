@@ -5,11 +5,13 @@
     properties.put(key,2857312362L);
     final TestFour testEntity=createTestNode(TestFour.class,properties);
     assertNotNull(testEntity);
-    assertEquals((Long)2857312362L,(Long)testEntity.getProperty(key));
-    Result<TestFour> result=app.nodeQuery(TestFour.class).and(key,2857312362L).getResult();
-    assertEquals(1,result.size());
-    assertEquals(testEntity,result.get(0));
-  }
+    try (final TransactionCommand cmd=app.beginTx()){
+      assertEquals((Long)2857312362L,(Long)testEntity.getProperty(key));
+      Result<TestFour> result=app.nodeQuery(TestFour.class).and(key,2857312362L).getResult();
+      assertEquals(1,result.size());
+      assertEquals(testEntity,result.get(0));
+    }
+   }
  catch (  FrameworkException fex) {
     fail("Unable to store array");
   }

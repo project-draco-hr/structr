@@ -4,16 +4,14 @@
     final TestFour testEntity=createTestNode(TestFour.class);
     assertNotNull(testEntity);
     final Boolean value=Boolean.TRUE;
-    try {
-      app.beginTx();
+    try (final TransactionCommand cmd=app.beginTx()){
       testEntity.setProperty(key,value);
       app.commitTx();
     }
-  finally {
-      app.finishTx();
+     try (final TransactionCommand cmd=app.beginTx()){
+      assertEquals(value,testEntity.getProperty(key));
     }
-    assertEquals(value,testEntity.getProperty(key));
-  }
+   }
  catch (  FrameworkException fex) {
     fail("Unable to store array");
   }

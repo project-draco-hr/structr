@@ -2,8 +2,7 @@
   List<NodeInterface> nodes=createTestNodes(GenericNode.class,2);
   final NodeInterface startNode=nodes.get(0);
   final NodeInterface endNode=nodes.get(1);
-  try {
-    app.beginTx();
+  try (final TransactionCommand cmd=app.beginTx()){
     List<T> rels=new LinkedList<>();
     for (int i=0; i < number; i++) {
       rels.add((T)app.create(startNode,endNode,relType));
@@ -11,7 +10,4 @@
     app.commitTx();
     return rels;
   }
-  finally {
-    app.finishTx();
-  }
-}
+ }

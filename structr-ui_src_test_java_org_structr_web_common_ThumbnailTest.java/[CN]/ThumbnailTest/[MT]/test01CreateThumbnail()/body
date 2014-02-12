@@ -1,22 +1,20 @@
 {
   try {
     TestImage img=null;
-    try {
-      app.beginTx();
+    try (final TransactionCommand cmd=app.beginTx()){
       img=(TestImage)ImageHelper.createFileBase64(securityContext,base64Image,TestImage.class);
       app.commitTx();
     }
-  finally {
-      app.finishTx();
-    }
-    assertNotNull(img);
+     assertNotNull(img);
     assertTrue(img instanceof TestImage);
-    Image tn=img.getProperty(TestImage.thumbnail);
-    assertNotNull(tn);
-    assertEquals(new Integer(200),tn.getWidth());
-    assertEquals(new Integer(48),tn.getHeight());
-    assertEquals("image/" + Thumbnail.FORMAT,tn.getContentType());
-  }
+    try (final TransactionCommand cmd=app.beginTx()){
+      Image tn=img.getProperty(TestImage.thumbnail);
+      assertNotNull(tn);
+      assertEquals(new Integer(200),tn.getWidth());
+      assertEquals(new Integer(48),tn.getHeight());
+      assertEquals("image/" + Thumbnail.FORMAT,tn.getContentType());
+    }
+   }
  catch (  Exception ex) {
     logger.log(Level.SEVERE,ex.toString());
     fail("Unexpected exception");

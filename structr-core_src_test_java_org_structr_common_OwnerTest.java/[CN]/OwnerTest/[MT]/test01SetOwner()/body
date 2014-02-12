@@ -22,10 +22,12 @@
  finally {
       superUserApp.finishTx();
     }
-    assertEquals(user1,t1.getProperty(AbstractNode.owner));
-    final App user1App=StructrApp.getInstance(SecurityContext.getInstance(user1,AccessMode.Backend));
-    assertEquals(t1,user1App.nodeQuery(type,false).getFirst());
-    try {
+    try (final TransactionCommand cmd=app.beginTx()){
+      assertEquals(user1,t1.getProperty(AbstractNode.owner));
+      final App user1App=StructrApp.getInstance(SecurityContext.getInstance(user1,AccessMode.Backend));
+      assertEquals(t1,user1App.nodeQuery(type,false).getFirst());
+    }
+     try {
       superUserApp.beginTx();
       t1.setProperty(AbstractNode.owner,user2);
       superUserApp.commitTx();
@@ -36,10 +38,12 @@
  finally {
       superUserApp.finishTx();
     }
-    final App user2App=StructrApp.getInstance(SecurityContext.getInstance(user2,AccessMode.Backend));
-    assertEquals(t1,user2App.nodeQuery(type,false).getFirst());
-    assertEquals(user2,t1.getProperty(AbstractNode.owner));
-  }
+    try (final TransactionCommand cmd=app.beginTx()){
+      final App user2App=StructrApp.getInstance(SecurityContext.getInstance(user2,AccessMode.Backend));
+      assertEquals(t1,user2App.nodeQuery(type,false).getFirst());
+      assertEquals(user2,t1.getProperty(AbstractNode.owner));
+    }
+   }
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,ex.toString());
     fail("Unexpected exception");

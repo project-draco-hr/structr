@@ -1,8 +1,7 @@
 {
   try {
     final Page doc=(Page)getDocument();
-    try {
-      app.beginTx();
+    try (final TransactionCommand cmd=app.beginTx()){
       final List<User> users=createTestNodes(User.class,3);
       assertEquals(3,users.size());
       User user1=users.get(0);
@@ -45,10 +44,7 @@
       div.appendChild(p2);
       app.commitTx();
     }
-  finally {
-      app.finishTx();
-    }
-    HttpServletRequest request=mock(HttpServletRequest.class);
+     HttpServletRequest request=mock(HttpServletRequest.class);
     RenderContext ctx=new RenderContext(request,null,EditMode.NONE,Locale.GERMAN);
     doc.render(securityContext,ctx,0);
     System.out.println(ctx.getBuffer().toString());

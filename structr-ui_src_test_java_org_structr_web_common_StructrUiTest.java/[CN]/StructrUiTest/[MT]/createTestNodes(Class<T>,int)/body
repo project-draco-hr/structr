@@ -1,9 +1,8 @@
 {
   final PropertyMap props=new PropertyMap();
   props.put(AbstractNode.type,type.getSimpleName());
-  try {
+  try (final TransactionCommand cmd=app.beginTx()){
     List<T> nodes=new LinkedList<>();
-    app.beginTx();
     for (int i=0; i < number; i++) {
       props.put(AbstractNode.name,type.getSimpleName() + i);
       nodes.add(app.create(type,props));
@@ -11,7 +10,4 @@
     app.commitTx();
     return nodes;
   }
-  finally {
-    app.finishTx();
-  }
-}
+ }

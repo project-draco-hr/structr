@@ -5,9 +5,11 @@
     Class type=TestOne.class;
     TestOne t1=createTestNode(TestOne.class,user);
     SecurityContext publicContext=SecurityContext.getInstance(null,AccessMode.Frontend);
-    Result result=StructrApp.getInstance(publicContext).nodeQuery(type).getResult();
-    assertTrue(result.isEmpty());
-  }
+    try (final TransactionCommand cmd=app.beginTx()){
+      Result result=StructrApp.getInstance(publicContext).nodeQuery(type).getResult();
+      assertTrue(result.isEmpty());
+    }
+   }
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,ex.toString());
     fail("Unexpected exception");

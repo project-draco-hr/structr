@@ -1,0 +1,146 @@
+{
+  if (page == 0 || pageSize <= 0) {
+    return Result.EMPTY_RESULT;
+  }
+  Factory<S,T> factory=getFactory(securityContext,includeDeletedAndHidden,publicOnly,pageSize,page,offsetId);
+  boolean filterResults=true;
+  boolean hasGraphSources=false;
+  boolean hasSpatialSource=false;
+  final Index<S> index;
+  if (securityContext.getUser(false) == null) {
+    and(GraphObject.visibleToPublicUsers,true);
+  }
+  List<SourceSearchAttribute> sources=new ArrayList<>();
+  boolean hasEmptySearchFields=false;
+  DistanceSearchAttribute distanceSearch=null;
+  GeoCodingResult coords=null;
+  Double dist=null;
+  for (Iterator<SearchAttribute> it=rootGroup.getSearchAttributes().iterator(); it.hasNext(); ) {
+    SearchAttribute attr=it.next();
+    if (attr instanceof DistanceSearchAttribute) {
+      distanceSearch=(DistanceSearchAttribute)attr;
+      coords=GeoHelper.geocode(distanceSearch);
+      dist=distanceSearch.getValue();
+      it.remove();
+      hasSpatialSource=true;
+    }
+    if (attr instanceof SourceSearchAttribute) {
+      sources.add((SourceSearchAttribute)attr);
+      it.remove();
+      hasGraphSources=true;
+    }
+    if (attr instanceof EmptySearchAttribute) {
+      hasEmptySearchFields=true;
+    }
+  }
+  Result intermediateResult;
+  if (distanceSearch == null && !sources.isEmpty()) {
+    intermediateResult=new Result(new ArrayList<AbstractNode>(),null,false,false);
+  }
+ else {
+    BooleanQuery query=new BooleanQuery();
+    boolean allExactMatch=true;
+    for (    SearchAttribute attr : rootGroup.getSearchAttributes()) {
+      Query queryElement=attr.getQuery();
+      if (queryElement != null) {
+        query.add(queryElement,attr.getOccur());
+      }
+      allExactMatch&=attr.isExactMatch();
+    }
+    QueryContext queryContext=new QueryContext(query);
+    IndexHits hits=null;
+    if (sortKey != null) {
+      Integer sortType=sortKey.getSortType();
+      if (sortType != null) {
+        queryContext.sort(new Sort(new SortField(sortKey.dbName(),sortType,sortDescending)));
+      }
+ else {
+        queryContext.sort(new Sort(new SortField(sortKey.dbName(),Locale.getDefault(),sortDescending)));
+      }
+    }
+    if (distanceSearch != null) {
+      if (coords != null) {
+        Map<String,Object> params=new HashMap<>();
+        params.put(LayerNodeIndex.POINT_PARAMETER,coords.toArray());
+        params.put(LayerNodeIndex.DISTANCE_IN_KM_PARAMETER,dist);
+        LayerNodeIndex spatialIndex=this.getSpatialIndex();
+        if (spatialIndex != null) {
+synchronized (spatialIndex) {
+            hits=spatialIndex.query(LayerNodeIndex.WITHIN_DISTANCE_QUERY,params);
+          }
+        }
+      }
+      intermediateResult=new NodeFactory(securityContext).instantiate(hits);
+    }
+ else     if (allExactMatch) {
+      index=getKeywordIndex();
+synchronized (index) {
+        try {
+          hits=index.query(queryContext);
+        }
+ catch (        NumberFormatException nfe) {
+          logger.log(Level.SEVERE,"Could not sort results",nfe);
+          queryContext.sort(null);
+          hits=index.query(queryContext);
+        }
+      }
+      filterResults=hasEmptySearchFields;
+      intermediateResult=factory.instantiate(hits);
+    }
+ else {
+      index=getFulltextIndex();
+synchronized (index) {
+        try {
+          hits=index.query(queryContext);
+        }
+ catch (        NumberFormatException nfe) {
+          logger.log(Level.SEVERE,"Could not sort results",nfe);
+          queryContext.sort(null);
+          hits=index.query(queryContext);
+        }
+      }
+      filterResults=hasEmptySearchFields;
+      intermediateResult=factory.instantiate(hits);
+    }
+    if (hits != null) {
+      hits.close();
+    }
+  }
+  if (filterResults) {
+    Set<GraphObject> intermediateResultSet=new LinkedHashSet<>(intermediateResult.getResults());
+    List<GraphObject> finalResult=new LinkedList<>();
+    int resultCount=0;
+    if (hasGraphSources) {
+      final Set<GraphObject> mergedSources=mergeSources(sources);
+      if (hasSpatialSource) {
+        final int mergedSourcesSize=mergedSources.size();
+        final int intermediateResultSize=intermediateResultSet.size();
+        if (mergedSourcesSize > intermediateResultSize) {
+          mergedSources.retainAll(intermediateResultSet);
+          intermediateResultSet=mergedSources;
+        }
+ else {
+          intermediateResultSet.retainAll(mergedSources);
+        }
+      }
+ else {
+        intermediateResultSet.addAll(mergedSources);
+      }
+    }
+    for (    GraphObject obj : intermediateResultSet) {
+      boolean addToResult=true;
+      for (      SearchAttribute attr : rootGroup.getSearchAttributes()) {
+        addToResult&=attr.includeInResult(obj);
+      }
+      if (addToResult) {
+        finalResult.add(obj);
+        resultCount++;
+      }
+    }
+    Collections.sort(finalResult,new GraphObjectComparator(sortKey,sortDescending));
+    return new Result(PagingHelper.subList(finalResult,pageSize,page,offsetId),resultCount,true,false);
+  }
+ else {
+    return intermediateResult;
+  }
+}

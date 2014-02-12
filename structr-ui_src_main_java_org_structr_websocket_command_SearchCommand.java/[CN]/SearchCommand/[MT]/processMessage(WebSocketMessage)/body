@@ -1,25 +1,25 @@
 {
   final SecurityContext securityContext=getWebSocket().getSecurityContext();
-  String searchString=(String)webSocketData.getNodeData().get("searchString");
-  String typeString=(String)webSocketData.getNodeData().get("type");
+  final String searchString=(String)webSocketData.getNodeData().get("searchString");
+  final String typeString=(String)webSocketData.getNodeData().get("type");
   Class type=null;
   if (typeString != null) {
     type=SchemaHelper.getEntityClassForRawType(typeString);
   }
-  List<SearchAttribute> searchAttributes=new LinkedList();
   if (searchString == null) {
     getWebSocket().send(MessageBuilder.status().code(204).message("Empty search string").build(),true);
     return;
   }
-  searchAttributes.add(Search.andName(searchString));
-  if (type != null) {
-    searchAttributes.add(Search.andExactType(type));
-  }
   final String sortOrder=webSocketData.getSortOrder();
   final String sortKey=webSocketData.getSortKey();
-  PropertyKey sortProperty=StructrApp.getConfiguration().getPropertyKeyForJSONName(AbstractNode.class,sortKey);
+  final PropertyKey sortProperty=StructrApp.getConfiguration().getPropertyKeyForJSONName(AbstractNode.class,sortKey);
+  final Query query=StructrApp.getInstance(securityContext).nodeQuery().includeDeletedAndHidden().sort(sortProperty).order("desc".equals(sortOrder));
+  query.andName(searchString);
+  if (type != null) {
+    query.andType(type);
+  }
   try {
-    Result result=(Result)StructrApp.getInstance(securityContext).command(SearchNodeCommand.class).execute(true,false,searchAttributes,sortProperty,"desc".equals(sortOrder));
+    Result result=query.getResult();
     webSocketData.setResult(result.getResults());
     getWebSocket().send(webSocketData,true);
   }

@@ -1,0 +1,19 @@
+{
+  Set<T> relatedNodes=new LinkedHashSet<>();
+  try {
+    final Object target=relation.getTarget().get(securityContext,obj,predicate);
+    if (target instanceof Iterable) {
+      Iterable<T> nodes=(Iterable<T>)target;
+      for (      final T n : nodes) {
+        relatedNodes.add(n);
+      }
+    }
+ else {
+      relatedNodes.add((T)target);
+    }
+  }
+ catch (  Throwable t) {
+    logger.log(Level.WARNING,"Unable to fetch related node: {0}",t.getMessage());
+  }
+  return relatedNodes;
+}

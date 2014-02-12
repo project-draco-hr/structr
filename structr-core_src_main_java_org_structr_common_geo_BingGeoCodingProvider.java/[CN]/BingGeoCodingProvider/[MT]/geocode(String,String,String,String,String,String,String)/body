@@ -33,7 +33,7 @@
       connection.disconnect();
       reader.close();
       if (xmlDoc != null) {
-        Map<String,String> data=new LinkedHashMap<String,String>();
+        Map<String,String> data=new LinkedHashMap<>();
         Element root=xmlDoc.getRootElement();
         try {
           data.put("lat",root.element("ResourceSets").element("ResourceSet").element("Resources").element("Location").element("Point").element("Latitude").getTextTrim());
@@ -74,10 +74,14 @@
           String address=(StringUtils.isNotBlank(street) ? street : "") + " " + (StringUtils.isNotBlank(house) ? house : "")+ " "+ (StringUtils.isNotBlank(postalCode) ? postalCode : "" + (StringUtils.isNotBlank(city) ? city : "") + " "+ (StringUtils.isNotBlank(state) ? state : "")+ " "+ (StringUtils.isNotBlank(country) ? country : "")+ " ");
           return new BingGeoCodingResult(address,data);
         }
+ else {
+          logger.log(Level.WARNING,"Geocoding result did not contain location information:\n{0}",xmlDoc.asXML());
+        }
       }
     }
- catch (    Throwable t) {
-      logger.log(Level.WARNING,"Unable to use Bing geocoding provider: {0}",t.getMessage());
+ catch (    DocumentException dex) {
+      logger.log(Level.WARNING,"Unable to use Bing geocoding provider: {0}",dex.getMessage());
+      throw new IOException(dex);
     }
   }
  else {

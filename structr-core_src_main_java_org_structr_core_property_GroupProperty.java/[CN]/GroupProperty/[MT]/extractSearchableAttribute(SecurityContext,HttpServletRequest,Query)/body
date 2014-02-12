@@ -1,0 +1,17 @@
+{
+  for (  PropertyKey propertyKey : propertyKeys.values()) {
+    if (propertyKey instanceof Property) {
+      Property key=(Property)propertyKey;
+      String searchValue=request.getParameter(key.dbName());
+      if (searchValue != null) {
+        if (!query.isExactSearch()) {
+          searchValue=removeQuotes(searchValue);
+          query.and(this,searchValue.toLowerCase(),false);
+        }
+ else {
+          key.determineSearchType(securityContext,searchValue,query);
+        }
+      }
+    }
+  }
+}

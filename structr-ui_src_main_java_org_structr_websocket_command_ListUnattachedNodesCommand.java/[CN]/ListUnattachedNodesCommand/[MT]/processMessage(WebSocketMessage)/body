@@ -1,21 +1,20 @@
 {
   final SecurityContext securityContext=getWebSocket().getSecurityContext();
-  List<SearchAttribute> searchAttributes=new LinkedList();
-  searchAttributes.add(Search.orExactTypeAndSubtypes(DOMElement.class));
-  searchAttributes.add(Search.orExactType(Content.class));
   final String sortOrder=webSocketData.getSortOrder();
   final String sortKey=webSocketData.getSortKey();
   final int pageSize=webSocketData.getPageSize();
   final int page=webSocketData.getPage();
-  PropertyKey sortProperty=StructrApp.getConfiguration().getPropertyKeyForJSONName(DOMNode.class,sortKey);
+  final PropertyKey sortProperty=StructrApp.getConfiguration().getPropertyKeyForJSONName(DOMNode.class,sortKey);
+  final Query query=StructrApp.getInstance(securityContext).nodeQuery().includeDeletedAndHidden().sort(sortProperty).order("desc".equals(sortOrder));
+  query.orTypes(DOMElement.class);
+  query.orType(Content.class);
   try {
-    Result result=(Result)StructrApp.getInstance(securityContext).command(SearchNodeCommand.class).execute(true,false,searchAttributes,sortProperty,"desc".equals(sortOrder));
     List<AbstractNode> filteredResults=new LinkedList();
-    List<? extends GraphObject> resultList=result.getResults();
+    List<? extends GraphObject> resultList=query.getAsList();
     for (    GraphObject obj : resultList) {
       if (obj instanceof AbstractNode) {
         AbstractNode node=(AbstractNode)obj;
-        if (!node.hasIncomingRelationships(DOMChildren.class) && node.getProperty(DOMNode.ownerDocument) == null) {
+        if (!node.hasIncomingRelationships(DOMChildren.class) && node.getProperty(DOMNode.ownerDocument) == null && !(node instanceof ShadowDocument)) {
           filteredResults.add(node);
         }
       }

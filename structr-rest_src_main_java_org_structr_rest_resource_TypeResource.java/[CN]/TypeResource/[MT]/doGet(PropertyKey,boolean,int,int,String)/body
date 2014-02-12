@@ -1,6 +1,4 @@
 {
-  boolean inexactSearch=parseInteger(request.getParameter(JsonRestServlet.REQUEST_PARAMETER_LOOSE_SEARCH)) == 1;
-  List<SearchAttribute> searchAttributes=null;
   boolean includeDeletedAndHidden=false;
   boolean publicOnly=false;
   PropertyKey actualSortKey=sortKey;
@@ -9,7 +7,7 @@
     if (entityClass == null) {
       throw new NotFoundException();
     }
-    searchAttributes=collectSearchAttributes(inexactSearch);
+    collectSearchAttributes(query);
     if (actualSortKey == null) {
       try {
         GraphObject templateEntity=((GraphObject)entityClass.newInstance());
@@ -26,8 +24,7 @@
         actualSortKey=AbstractNode.name;
       }
     }
-    Result results=StructrApp.getInstance(securityContext).command(searchCommandType).execute(includeDeletedAndHidden,publicOnly,searchAttributes,actualSortKey,actualSortOrder,pageSize,page,offsetId);
-    return results;
+    return query.includeDeletedAndHidden(includeDeletedAndHidden).publicOnly(publicOnly).sort(actualSortKey).order(actualSortOrder).pageSize(pageSize).page(page).offsetId(offsetId).getResult();
   }
  else {
     logger.log(Level.WARNING,"type was null");

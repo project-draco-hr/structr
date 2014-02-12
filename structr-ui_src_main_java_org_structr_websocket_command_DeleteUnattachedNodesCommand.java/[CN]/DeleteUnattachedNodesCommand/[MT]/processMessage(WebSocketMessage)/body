@@ -1,16 +1,15 @@
 {
   final SecurityContext securityContext=getWebSocket().getSecurityContext();
   final App app=StructrApp.getInstance(securityContext);
-  List<SearchAttribute> searchAttributes=new LinkedList();
-  searchAttributes.add(Search.orExactTypeAndSubtypes(DOMElement.class));
-  searchAttributes.add(Search.orExactType(Content.class));
   final String sortOrder=webSocketData.getSortOrder();
   final String sortKey=webSocketData.getSortKey();
   PropertyKey sortProperty=StructrApp.getConfiguration().getPropertyKeyForJSONName(DOMNode.class,sortKey);
+  final Query query=app.nodeQuery().sort(sortProperty).order("desc".equals(sortOrder)).includeDeletedAndHidden();
+  query.orTypes(DOMElement.class);
+  query.orType(Content.class);
   try {
-    Result result=(Result)StructrApp.getInstance(securityContext).command(SearchNodeCommand.class).execute(true,false,searchAttributes,sortProperty,"desc".equals(sortOrder));
     final List<AbstractNode> filteredResults=new LinkedList();
-    List<? extends GraphObject> resultList=result.getResults();
+    List<? extends GraphObject> resultList=query.getAsList();
     for (    GraphObject obj : resultList) {
       if (obj instanceof DOMNode) {
         DOMNode node=(DOMNode)obj;

@@ -11,11 +11,8 @@
   if (resultPages == null) {
     resultPages=new HashSet<>();
   }
-  List<SearchAttribute> searchAttributes=new LinkedList<>();
-  searchAttributes.add(new PropertySearchAttribute(Content.content,search,Occur.MUST,false));
-  searchAttributes.add(Search.andExactType(Content.class));
   try {
-    Result<Content> result=StructrApp.getInstance().command(SearchNodeCommand.class).execute(searchAttributes);
+    Result<Content> result=StructrApp.getInstance().nodeQuery(Content.class).and(Content.content,search,false).getResult();
     for (    Content content : result.getResults()) {
       resultPages.add((Page)content.getOwnerDocument());
     }

@@ -1,6 +1,8 @@
 {
   final TransactionReference tx=transactions.get();
   if (tx != null && tx.isToplevel()) {
+    final ModificationQueue modificationQueue=queues.get();
+    final ErrorBuffer errorBuffer=buffers.get();
     if (doValidation && !modificationQueue.doInnerCallbacks(securityContext,errorBuffer)) {
       if (doValidation) {
         tx.failure();

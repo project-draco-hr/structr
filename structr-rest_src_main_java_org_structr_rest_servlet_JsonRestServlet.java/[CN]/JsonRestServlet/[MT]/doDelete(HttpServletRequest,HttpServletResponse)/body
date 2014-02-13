@@ -9,18 +9,19 @@
       securityContext=authenticator.initializeAndExamineRequest(request,response);
       tx.success();
     }
-     request.setCharacterEncoding("UTF-8");
+     final App app=StructrApp.getInstance(securityContext);
+    request.setCharacterEncoding("UTF-8");
     response.setContentType("application/json; charset=utf-8");
-    try (final Tx tx=StructrApp.getInstance().tx()){
+    try (final Tx tx=app.tx()){
       resource=ResourceHelper.optimizeNestedResourceChain(ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,defaultIdProperty),defaultIdProperty);
       authenticator.checkResourceAccess(request,resource.getResourceSignature(),propertyView.get(securityContext));
       tx.success();
     }
-     try (final Tx tx=StructrApp.getInstance().tx()){
+     try (final Tx tx=app.tx()){
       result=resource.doDelete();
       tx.success();
     }
-     try (final Tx tx=StructrApp.getInstance().tx()){
+     try (final Tx tx=app.tx()){
       result.commitResponse(gson.get(),response);
       tx.success();
     }

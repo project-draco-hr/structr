@@ -10,32 +10,33 @@
       securityContext=authenticator.initializeAndExamineRequest(request,response);
       tx.success();
     }
-     request.setCharacterEncoding("UTF-8");
+     final App app=StructrApp.getInstance(securityContext);
+    request.setCharacterEncoding("UTF-8");
     response.setCharacterEncoding("UTF-8");
     response.setContentType("application/json; charset=UTF-8");
-    try (final Tx tx=StructrApp.getInstance().tx()){
+    try (final Tx tx=app.tx()){
       propertySet=gson.get().fromJson(request.getReader(),JsonInput.class);
       tx.success();
     }
      if (securityContext != null) {
       Map<String,Object> properties=convertPropertySetToMap(propertySet);
-      try (final Tx tx=StructrApp.getInstance().tx()){
+      try (final Tx tx=app.tx()){
         resource=ResourceHelper.applyViewTransformation(request,securityContext,ResourceHelper.optimizeNestedResourceChain(ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,defaultIdProperty),defaultIdProperty),propertyView);
         authenticator.checkResourceAccess(request,resource.getResourceSignature(),propertyView.get(securityContext));
         tx.success();
       }
-       try (final Tx tx=StructrApp.getInstance().tx()){
+       try (final Tx tx=app.tx()){
         result=resource.doPost(properties);
         tx.success();
       }
        propertyView.set(securityContext,defaultPropertyView);
-      try (final Tx tx=StructrApp.getInstance().tx()){
+      try (final Tx tx=app.tx()){
         result.commitResponse(gson.get(),response);
         tx.success();
       }
      }
  else {
-      try (final Tx tx=StructrApp.getInstance().tx()){
+      try (final Tx tx=app.tx()){
         result=new RestMethodResult(HttpServletResponse.SC_FORBIDDEN);
         result.commitResponse(gson.get(),response);
         tx.success();

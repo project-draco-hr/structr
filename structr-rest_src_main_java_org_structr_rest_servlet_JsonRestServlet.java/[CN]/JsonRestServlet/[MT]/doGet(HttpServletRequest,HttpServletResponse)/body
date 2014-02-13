@@ -9,11 +9,12 @@
       securityContext=authenticator.initializeAndExamineRequest(request,response);
       tx.success();
     }
-     request.setCharacterEncoding("UTF-8");
+     final App app=StructrApp.getInstance(securityContext);
+    request.setCharacterEncoding("UTF-8");
     response.setCharacterEncoding("UTF-8");
     propertyView.set(securityContext,defaultPropertyView);
     double queryTimeStart=System.nanoTime();
-    try (final Tx tx=StructrApp.getInstance().tx()){
+    try (final Tx tx=app.tx()){
       resource=ResourceHelper.applyViewTransformation(request,securityContext,ResourceHelper.optimizeNestedResourceChain(ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,defaultIdProperty),defaultIdProperty),propertyView);
       authenticator.checkResourceAccess(request,resource.getResourceSignature(),propertyView.get(securityContext));
       tx.success();
@@ -32,7 +33,7 @@
       Class<? extends GraphObject> type=resource.getEntityClass();
       sortKey=StructrApp.getConfiguration().getPropertyKeyForDatabaseName(type,sortKeyName);
     }
-    try (final Tx tx=StructrApp.getInstance().tx()){
+    try (final Tx tx=app.tx()){
       result=resource.doGet(sortKey,sortDescending,pageSize,page,offsetId);
       tx.success();
     }
@@ -47,14 +48,14 @@
     Writer writer=response.getWriter();
     String accept=request.getHeader("Accept");
     if (accept != null && accept.contains("text/html")) {
-      try (final Tx tx=StructrApp.getInstance().tx()){
+      try (final Tx tx=app.tx()){
         response.setContentType("text/html; charset=utf-8");
         htmlWriter.get().stream(writer,result,baseUrl);
         tx.success();
       }
      }
  else {
-      try (final Tx tx=StructrApp.getInstance().tx()){
+      try (final Tx tx=app.tx()){
         response.setContentType("application/json; charset=utf-8");
         jsonWriter.get().stream(writer,result,baseUrl);
         tx.success();

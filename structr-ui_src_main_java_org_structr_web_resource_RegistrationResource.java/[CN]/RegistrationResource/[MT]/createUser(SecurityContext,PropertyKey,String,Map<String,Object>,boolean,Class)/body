@@ -1,8 +1,6 @@
 {
-  final App app=StructrApp.getInstance(securityContext);
   Principal user=null;
   try {
-    app.beginTx();
     user=AuthHelper.getPrincipalForCredential(credentialKey,credentialValue);
     if (user != null) {
       user.unlockReadOnlyPropertiesOnce();
@@ -21,13 +19,9 @@
       props.put(User.confirmationKey,confKey);
       user=(Principal)StructrApp.getInstance(securityContext).create(userClass,props);
     }
-    app.commitTx();
   }
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,null,ex);
-  }
- finally {
-    app.finishTx();
   }
   return user;
 }

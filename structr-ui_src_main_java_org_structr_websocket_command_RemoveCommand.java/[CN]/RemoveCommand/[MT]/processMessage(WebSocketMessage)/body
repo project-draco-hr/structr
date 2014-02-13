@@ -4,7 +4,6 @@
   if (id != null) {
     final NodeInterface node=getNode(id);
     if (node != null) {
-      App app=StructrApp.getInstance(securityContext);
       if (node instanceof DOMNode) {
         DOMNode domNode=(DOMNode)node;
         domNode.getParentNode().removeChild(domNode);
@@ -16,25 +15,16 @@
         }
       }
  else {
+        final App app=StructrApp.getInstance(securityContext);
         try {
-          app.beginTx();
           for (          AbstractRelationship rel : node.getIncomingRelationships()) {
-            try {
-              if ("CONTAINS".equals(rel.getType())) {
-                app.delete(rel);
-              }
-            }
- catch (            FrameworkException ex) {
-              logger.log(Level.SEVERE,"Could not remove relationship " + rel,ex);
+            if ("CONTAINS".equals(rel.getType())) {
+              app.delete(rel);
             }
           }
-          app.commitTx();
         }
  catch (        Throwable t) {
           getWebSocket().send(MessageBuilder.status().code(400).message("Error in RemoveCommand: " + t.getMessage()).build(),true);
-        }
- finally {
-          app.finishTx();
         }
       }
     }

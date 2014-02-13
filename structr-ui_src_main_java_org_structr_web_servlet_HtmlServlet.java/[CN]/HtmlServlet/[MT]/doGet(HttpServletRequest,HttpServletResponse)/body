@@ -1,8 +1,14 @@
 {
   double start=System.nanoTime();
+  SecurityContext securityContext=null;
+  Authenticator authenticator=null;
   try {
-    SecurityContext securityContext=getAuthenticator().initializeAndExamineRequest(request,response);
-    securityContext.setAccessMode(AccessMode.Frontend);
+    try (final Tx tx=StructrApp.getInstance().tx()){
+      authenticator=getAuthenticator();
+      securityContext=authenticator.initializeAndExamineRequest(request,response);
+      tx.success();
+    }
+     securityContext.setAccessMode(AccessMode.Frontend);
     request.setCharacterEncoding("UTF-8");
     response.setCharacterEncoding("UTF-8");
     boolean dontCache=false;
@@ -12,8 +18,13 @@
     if (response.getStatus() == 302) {
       return;
     }
-    Principal user=securityContext.getUser(false);
-    if (user != null) {
+    final App app=StructrApp.getInstance(securityContext);
+    Principal user=null;
+    try (final Tx tx=app.tx()){
+      user=securityContext.getUser(false);
+      tx.success();
+    }
+     if (user != null) {
       dontCache=true;
     }
     RenderContext renderContext=RenderContext.getInstance(request,response,getEffectiveLocale(request));
@@ -23,101 +34,112 @@
     AbstractNode dataNode=null;
     String[] uriParts=PathHelper.getParts(path);
     if ((uriParts == null) || (uriParts.length == 0)) {
-      rootElement=findIndexPage(securityContext);
-      logger.log(Level.FINE,"No path supplied, trying to find index page");
+      try (final Tx tx=app.tx()){
+        rootElement=findIndexPage(securityContext);
+        tx.success();
+      }
+       logger.log(Level.FINE,"No path supplied, trying to find index page");
     }
  else {
       if (checkGetSessionId(request,response,path)) {
         return;
       }
-      if (checkRegistration(securityContext,request,response,path)) {
-        return;
+      try (final Tx tx=app.tx()){
+        if (checkRegistration(securityContext,request,response,path)) {
+          return;
+        }
+        tx.success();
       }
-      if (rootElement == null) {
+       if (rootElement == null) {
         rootElement=findPage(request,path);
       }
  else {
         dontCache=true;
       }
     }
-    if (rootElement == null) {
-      org.structr.web.entity.File file=findFile(request,path);
-      if (file != null) {
-        logger.log(Level.FINE,"File found in {0} seconds",decimalFormat.format((System.nanoTime() - start) / 1000000000.0));
-        streamFile(securityContext,file,request,response,edit);
+    try (final Tx tx=app.tx()){
+      if (rootElement == null) {
+        org.structr.web.entity.File file=findFile(request,path);
+        if (file != null) {
+          logger.log(Level.FINE,"File found in {0} seconds",decimalFormat.format((System.nanoTime() - start) / 1000000000.0));
+          streamFile(securityContext,file,request,response,edit);
+          return;
+        }
+        Matcher matcher=threadLocalUUIDMatcher.get();
+        boolean requestUriContainsUuids=false;
+        for (int i=0; i < uriParts.length; i++) {
+          request.setAttribute(uriParts[i],i);
+          matcher.reset(uriParts[i]);
+          requestUriContainsUuids|=matcher.matches();
+        }
+        if (!requestUriContainsUuids) {
+          dataNode=findFirstNodeByPath(request,path);
+        }
+ else {
+          AbstractNode n=(AbstractNode)StructrApp.getInstance(securityContext).get(PathHelper.getName(path));
+          if (n != null) {
+            dataNode=n;
+          }
+        }
+        if (dataNode != null) {
+          request.removeAttribute(POSSIBLE_ENTRY_POINTS);
+          rootElement=findPage(request,PathHelper.clean(StringUtils.substringBeforeLast(path,PathHelper.PATH_SEP)));
+          renderContext.setDetailsDataObject(dataNode);
+          if (rootElement == null && dataNode instanceof DOMNode) {
+            rootElement=((DOMNode)dataNode);
+          }
+        }
+      }
+      if (rootElement == null) {
+        if (response.getStatus() == HttpServletResponse.SC_UNAUTHORIZED) {
+          try {
+            HttpAuthenticator.writeUnauthorized(response);
+          }
+ catch (          IllegalStateException ise) {
+          }
+        }
+ else {
+          HttpAuthenticator.writeNotFound(response);
+        }
         return;
       }
-      Matcher matcher=threadLocalUUIDMatcher.get();
-      boolean requestUriContainsUuids=false;
-      for (int i=0; i < uriParts.length; i++) {
-        request.setAttribute(uriParts[i],i);
-        matcher.reset(uriParts[i]);
-        requestUriContainsUuids|=matcher.matches();
+      logger.log(Level.FINE,"Page found in {0} seconds",decimalFormat.format((System.nanoTime() - start) / 1000000000.0));
+      if (EditMode.DATA.equals(edit) || dontCache) {
+        setNoCacheHeaders(response);
       }
-      if (!requestUriContainsUuids) {
-        dataNode=findFirstNodeByPath(request,path);
+      if (securityContext.isVisible(rootElement)) {
+        PrintWriter out=response.getWriter();
+        double setup=System.nanoTime();
+        logger.log(Level.FINE,"Setup time: {0} seconds",decimalFormat.format((setup - start) / 1000000000.0));
+        if (!EditMode.DATA.equals(edit) && !dontCache && notModifiedSince(request,response,rootElement)) {
+          out.flush();
+          out.close();
+        }
+ else {
+          rootElement.render(securityContext,renderContext,0);
+          String content=renderContext.getBuffer().toString();
+          double end=System.nanoTime();
+          logger.log(Level.FINE,"Content for path {0} in {1} seconds",new Object[]{path,decimalFormat.format((end - setup) / 1000000000.0)});
+          String contentType=rootElement.getProperty(Page.contentType);
+          if (contentType != null && contentType.equals("text/html")) {
+            contentType=contentType.concat(";charset=UTF-8");
+            response.setContentType(contentType);
+          }
+ else {
+            response.setContentType("text/html;charset=UTF-8");
+          }
+          HttpAuthenticator.writeContent(content,response);
+        }
       }
  else {
-        AbstractNode n=(AbstractNode)StructrApp.getInstance(securityContext).get(PathHelper.getName(path));
-        if (n != null) {
-          dataNode=n;
-        }
-      }
-      if (dataNode != null) {
-        request.removeAttribute(POSSIBLE_ENTRY_POINTS);
-        rootElement=findPage(request,PathHelper.clean(StringUtils.substringBeforeLast(path,PathHelper.PATH_SEP)));
-        renderContext.setDetailsDataObject(dataNode);
-        if (rootElement == null && dataNode instanceof DOMNode) {
-          rootElement=((DOMNode)dataNode);
-        }
+        response.sendError(HttpServletResponse.SC_NOT_FOUND);
       }
     }
-    if (rootElement == null) {
-      if (response.getStatus() == HttpServletResponse.SC_UNAUTHORIZED) {
-        try {
-          HttpAuthenticator.writeUnauthorized(response);
-        }
- catch (        IllegalStateException ise) {
-        }
-      }
- else {
-        HttpAuthenticator.writeNotFound(response);
-      }
-      return;
-    }
-    logger.log(Level.FINE,"Page found in {0} seconds",decimalFormat.format((System.nanoTime() - start) / 1000000000.0));
-    if (EditMode.DATA.equals(edit) || dontCache) {
-      setNoCacheHeaders(response);
-    }
-    if (securityContext.isVisible(rootElement)) {
-      PrintWriter out=response.getWriter();
-      double setup=System.nanoTime();
-      logger.log(Level.FINE,"Setup time: {0} seconds",decimalFormat.format((setup - start) / 1000000000.0));
-      if (!EditMode.DATA.equals(edit) && !dontCache && notModifiedSince(request,response,rootElement)) {
-        out.flush();
-        out.close();
-      }
- else {
-        rootElement.render(securityContext,renderContext,0);
-        String content=renderContext.getBuffer().toString();
-        double end=System.nanoTime();
-        logger.log(Level.FINE,"Content for path {0} in {1} seconds",new Object[]{path,decimalFormat.format((end - setup) / 1000000000.0)});
-        String contentType=rootElement.getProperty(Page.contentType);
-        if (contentType != null && contentType.equals("text/html")) {
-          contentType=contentType.concat(";charset=UTF-8");
-          response.setContentType(contentType);
-        }
- else {
-          response.setContentType("text/html;charset=UTF-8");
-        }
-        HttpAuthenticator.writeContent(content,response);
-      }
-    }
- else {
-      response.sendError(HttpServletResponse.SC_NOT_FOUND);
+ catch (    FrameworkException fex) {
+      logger.log(Level.SEVERE,"Exception while processing request",fex);
     }
   }
- catch (  Throwable t) {
+ catch (  IOException|FrameworkException t) {
     t.printStackTrace();
     logger.log(Level.SEVERE,"Exception while processing request",t);
     HttpAuthenticator.writeInternalServerError(response);

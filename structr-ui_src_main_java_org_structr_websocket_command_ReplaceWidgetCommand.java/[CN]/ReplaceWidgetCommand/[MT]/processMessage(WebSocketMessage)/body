@@ -8,7 +8,6 @@
   final Page page=getPage(pageId);
   final AbstractNode origNode=getNode(id);
   try {
-    app.beginTx();
     DOMNode existingParent=null;
     if (parentId != null) {
       existingParent=(DOMNode)getNode(parentId);
@@ -26,12 +25,8 @@
       existingParent.appendChild(newWidget);
     }
     app.delete(parent);
-    app.commitTx();
   }
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,null,ex);
-  }
- finally {
-    app.finishTx();
   }
 }

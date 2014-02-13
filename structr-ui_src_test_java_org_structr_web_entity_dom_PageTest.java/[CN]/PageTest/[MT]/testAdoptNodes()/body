@@ -1,16 +1,16 @@
 {
   try {
-    Page srcPage=Page.createNewPage(securityContext,"srcPage");
-    assertTrue(srcPage != null);
-    assertTrue(srcPage instanceof Page);
-    Node html=srcPage.createElement("html");
-    Node head=srcPage.createElement("head");
-    Node body=srcPage.createElement("body");
-    Node title=srcPage.createElement("title");
-    Node h1=srcPage.createElement("h1");
-    Node div=srcPage.createElement("div");
-    Node p=srcPage.createElement("p");
     try (final Tx tx=app.tx()){
+      Page srcPage=Page.createNewPage(securityContext,"srcPage");
+      assertTrue(srcPage != null);
+      assertTrue(srcPage instanceof Page);
+      Node html=srcPage.createElement("html");
+      Node head=srcPage.createElement("head");
+      Node body=srcPage.createElement("body");
+      Node title=srcPage.createElement("title");
+      Node h1=srcPage.createElement("h1");
+      Node div=srcPage.createElement("div");
+      Node p=srcPage.createElement("p");
       srcPage.appendChild(html);
       html.appendChild(head);
       html.appendChild(body);
@@ -19,29 +19,30 @@
       body.appendChild(div);
       div.appendChild(p);
       p.appendChild(srcPage.createTextNode("First Paragraph"));
+      Page dstPage=Page.createNewPage(securityContext,"dstPage");
+      assertNotNull(dstPage);
+      dstPage.adoptNode(html);
+      assertNull(html.getParentNode());
+      assertEquals(dstPage,html.getOwnerDocument());
+      assertEquals(dstPage,head.getOwnerDocument());
+      assertEquals(dstPage,body.getOwnerDocument());
+      assertEquals(dstPage,title.getOwnerDocument());
+      assertEquals(dstPage,h1.getOwnerDocument());
+      assertEquals(dstPage,div.getOwnerDocument());
+      assertEquals(dstPage,p.getOwnerDocument());
+      assertEquals(html,head.getParentNode());
+      assertEquals(html,body.getParentNode());
+      assertEquals(head,title.getParentNode());
+      assertEquals(body,h1.getParentNode());
+      assertEquals(body,div.getParentNode());
+      assertEquals(div,p.getParentNode());
+      assertNull(srcPage.getDocumentElement());
+      assertEquals(1,srcPage.getChildNodes().getLength());
+      tx.success();
     }
  catch (    DOMException dex) {
       throw new FrameworkException(422,dex.getMessage());
     }
-    Page dstPage=Page.createNewPage(securityContext,"dstPage");
-    assertNotNull(dstPage);
-    dstPage.adoptNode(html);
-    assertNull(html.getParentNode());
-    assertEquals(dstPage,html.getOwnerDocument());
-    assertEquals(dstPage,head.getOwnerDocument());
-    assertEquals(dstPage,body.getOwnerDocument());
-    assertEquals(dstPage,title.getOwnerDocument());
-    assertEquals(dstPage,h1.getOwnerDocument());
-    assertEquals(dstPage,div.getOwnerDocument());
-    assertEquals(dstPage,p.getOwnerDocument());
-    assertEquals(html,head.getParentNode());
-    assertEquals(html,body.getParentNode());
-    assertEquals(head,title.getParentNode());
-    assertEquals(body,h1.getParentNode());
-    assertEquals(body,div.getParentNode());
-    assertEquals(div,p.getParentNode());
-    assertNull(srcPage.getDocumentElement());
-    assertEquals(1,srcPage.getChildNodes().getLength());
   }
  catch (  FrameworkException ex) {
     fail("Unexpected exception");

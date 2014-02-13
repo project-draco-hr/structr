@@ -1,28 +1,21 @@
 {
   if (node instanceof DOMNode) {
     final DOMNode domNode=(DOMNode)node;
-    final App app=StructrApp.getInstance(securityContext);
-    try (final Tx tx=app.tx()){
-      Node adoptedNode=domNode.doAdopt(Page.this);
-      if (domNode.hasChildNodes()) {
-        Node child=domNode.getFirstChild();
-        while (child != null) {
-          adoptNode(child,false);
-          child=child.getNextSibling();
-        }
+    Node adoptedNode=domNode.doAdopt(Page.this);
+    if (domNode.hasChildNodes()) {
+      Node child=domNode.getFirstChild();
+      while (child != null) {
+        adoptNode(child,false);
+        child=child.getNextSibling();
       }
-      if (removeParentFromSourceNode) {
-        Node _parent=domNode.getParentNode();
-        if (_parent != null) {
-          _parent.removeChild(domNode);
-        }
+    }
+    if (removeParentFromSourceNode) {
+      Node _parent=domNode.getParentNode();
+      if (_parent != null) {
+        _parent.removeChild(domNode);
       }
-      app.commitTx();
-      return adoptedNode;
     }
- catch (    FrameworkException fex) {
-      throw new DOMException(DOMException.INVALID_STATE_ERR,fex.getMessage());
-    }
+    return adoptedNode;
   }
   return null;
 }

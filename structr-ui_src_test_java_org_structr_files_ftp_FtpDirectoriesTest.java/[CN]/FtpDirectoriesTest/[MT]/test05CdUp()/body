@@ -1,6 +1,6 @@
 {
   FTPClient ftp=setupFTPClient();
-  try {
+  try (final Tx tx=StructrApp.getInstance(securityContext).tx()){
     assertEmptyDirectory(ftp);
     String name1="/FTPdir1";
     ftp.makeDirectory(name1);
@@ -13,8 +13,9 @@
     String newWorkingDirectory=ftp.printWorkingDirectory();
     assertEquals(name1,newWorkingDirectory);
     ftp.disconnect();
+    tx.success();
   }
- catch (  IOException ex) {
+ catch (  IOException|FrameworkException ex) {
     logger.log(Level.SEVERE,"Error",ex);
     fail("Unexpected exception: " + ex.getMessage());
   }

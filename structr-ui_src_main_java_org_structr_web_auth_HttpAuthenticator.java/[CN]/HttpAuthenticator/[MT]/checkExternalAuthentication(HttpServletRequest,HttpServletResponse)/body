@@ -36,26 +36,20 @@
           user=RegistrationResource.createUser(superUserContext,credentialKey,value,true,userClass);
         }
         if (user != null) {
-          final App app=StructrApp.getInstance();
           try {
-            app.beginTx();
             user.setProperty(Principal.sessionId,HttpAuthenticator.getSessionId(request));
-            app.commitTx();
             HtmlServlet.setNoCacheHeaders(response);
             try {
               logger.log(Level.FINE,"Response status: {0}",response.getStatus());
               response.sendRedirect(oauthServer.getReturnUri());
             }
- catch (            Exception ex) {
+ catch (            IOException ex) {
               logger.log(Level.SEVERE,"Could not redirect to {0}: {1}",new Object[]{oauthServer.getReturnUri(),ex});
             }
             return user;
           }
  catch (          FrameworkException ex) {
             logger.log(Level.SEVERE,"Could not set session id for user {0}",user.toString());
-          }
- finally {
-            app.finishTx();
           }
         }
       }
@@ -64,7 +58,7 @@
   try {
     response.sendRedirect(oauthServer.getErrorUri());
   }
- catch (  Exception ex) {
+ catch (  IOException ex) {
     logger.log(Level.SEVERE,"Could not redirect to {0}: {1}",new Object[]{oauthServer.getReturnUri(),ex});
   }
   return null;

@@ -1,5 +1,11 @@
 {
-  Document doc=getDocument();
-  Element elem=doc.createElement("div");
-  assertEquals("div",elem.getTagName());
+  try (final Tx tx=StructrApp.getInstance(securityContext).tx()){
+    Document doc=getDocument();
+    Element elem=doc.createElement("div");
+    assertEquals("div",elem.getTagName());
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fail("unexpected exception");
+  }
 }

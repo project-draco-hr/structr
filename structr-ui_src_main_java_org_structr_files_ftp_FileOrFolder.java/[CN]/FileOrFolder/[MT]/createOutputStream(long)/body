@@ -3,7 +3,6 @@
     final Folder parentFolder=(Folder)FileHelper.getFileByAbsolutePath(StringUtils.substringBeforeLast(newPath,"/"));
     final App app=StructrApp.getInstance();
     try {
-      app.beginTx();
       structrFile=FileHelper.createFile(SecurityContext.getSuperUserInstance(),new byte[0],null,File.class);
       structrFile.setProperty(AbstractNode.type,File.class.getSimpleName());
       structrFile.setProperty(AbstractNode.owner,owner.getStructrUser());
@@ -11,14 +10,10 @@
       if (parentFolder != null) {
         structrFile.setProperty(AbstractFile.parent,parentFolder);
       }
-      app.commitTx();
     }
  catch (    FrameworkException ex) {
       logger.log(Level.SEVERE,null,ex);
       return null;
-    }
- finally {
-      app.finishTx();
     }
   }
   return ((File)structrFile).getOutputStream();

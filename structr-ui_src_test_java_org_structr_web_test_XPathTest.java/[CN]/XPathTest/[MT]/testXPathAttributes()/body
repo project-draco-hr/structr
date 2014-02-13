@@ -1,6 +1,6 @@
 {
   final String pageName="page-02";
-  try {
+  try (final Tx tx=app.tx()){
     Page page=Page.createNewPage(securityContext,pageName);
     assertTrue(page != null);
     assertTrue(page instanceof Page);
@@ -34,6 +34,7 @@
     assertEquals(p2,xpath.evaluate("/html/body/div/p[@blah='wurst']",page,XPathConstants.NODE));
     assertEquals(p3,xpath.evaluate("/html/body/div/p[@index=42]",page,XPathConstants.NODE));
     assertEquals(p3,xpath.evaluate("/html/body/div/p[@index>40]",page,XPathConstants.NODE));
+    tx.success();
   }
  catch (  FrameworkException fex) {
     fex.printStackTrace();

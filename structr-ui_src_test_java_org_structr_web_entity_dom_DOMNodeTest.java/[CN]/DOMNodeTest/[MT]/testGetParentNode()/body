@@ -1,11 +1,17 @@
 {
-  Document document=getDocument();
-  assertNotNull(document);
-  Text content=document.createTextNode("Dies ist ein Test");
-  assertNotNull(content);
-  Element div=document.createElement("div");
-  assertNotNull(div);
-  div.appendChild(content);
-  Node parent=content.getParentNode();
-  assertEquals(div,parent);
+  try (final Tx tx=app.tx()){
+    Document document=getDocument();
+    assertNotNull(document);
+    Text content=document.createTextNode("Dies ist ein Test");
+    assertNotNull(content);
+    Element div=document.createElement("div");
+    assertNotNull(div);
+    div.appendChild(content);
+    Node parent=content.getParentNode();
+    assertEquals(div,parent);
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fail("unexpected exception");
+  }
 }

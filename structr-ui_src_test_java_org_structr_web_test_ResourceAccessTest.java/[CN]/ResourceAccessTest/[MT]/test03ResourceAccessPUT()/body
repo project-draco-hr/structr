@@ -1,5 +1,5 @@
 {
-  try {
+  try (final Tx tx=app.tx()){
     final String name="testuser-01";
     final String password="testpassword-01";
     final User testUser=createTestNodes(User.class,1).get(0);
@@ -12,17 +12,12 @@
     RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(401).when().put("/folder/" + testFolder.getUuid());
     folderGrant.setFlag(UiAuthenticator.NON_AUTH_USER_PUT);
     RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(403).when().put("/folder/" + testFolder.getUuid());
-    try (final Tx tx=app.tx()){
-      testUser.setProperty(AbstractNode.name,name);
-      testUser.setProperty(User.password,password);
-      app.commitTx();
-    }
-     RestAssured.given().headers("X-User",name,"X-Password",password).contentType("application/json; charset=UTF-8").expect().statusCode(403).when().put("/folder/" + testFolder.getUuid());
-    try (final Tx tx=app.tx()){
-      testFolder.setProperty(AbstractNode.owner,testUser);
-      app.commitTx();
-    }
-     RestAssured.given().headers("X-User",name,"X-Password",password).contentType("application/json; charset=UTF-8").expect().statusCode(200).when().put("/folder/" + testFolder.getUuid());
+    testUser.setProperty(AbstractNode.name,name);
+    testUser.setProperty(User.password,password);
+    RestAssured.given().headers("X-User",name,"X-Password",password).contentType("application/json; charset=UTF-8").expect().statusCode(403).when().put("/folder/" + testFolder.getUuid());
+    testFolder.setProperty(AbstractNode.owner,testUser);
+    RestAssured.given().headers("X-User",name,"X-Password",password).contentType("application/json; charset=UTF-8").expect().statusCode(200).when().put("/folder/" + testFolder.getUuid());
+    tx.success();
   }
  catch (  FrameworkException ex) {
     ex.printStackTrace();

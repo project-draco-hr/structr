@@ -4,7 +4,7 @@
   final String bodyText="Body Text";
   final String h1ClassAttr="heading";
   final String divClassAttr="main";
-  try {
+  try (final Tx tx=app.tx()){
     Page page=Page.createNewPage(securityContext,pageName);
     if (page != null) {
       DOMElement html=(DOMElement)page.createElement("html");
@@ -27,6 +27,7 @@
         assertTrue(r instanceof DOMChildren);
       }
     }
+    tx.success();
   }
  catch (  FrameworkException ex) {
     ex.printStackTrace();

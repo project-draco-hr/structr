@@ -10,8 +10,9 @@ synchronized (taskQueue) {
     if (currentTask != null) {
       lastStartTime=System.nanoTime();
       ReturnValue ret=null;
-      try {
+      try (final Tx tx=StructrApp.getInstance().tx()){
         ret=processTask(currentTask);
+        tx.success();
       }
  catch (      Throwable t) {
         logger.log(Level.SEVERE,"Processing task {0} failed. Maybe someone killed us?",currentTask.getType());

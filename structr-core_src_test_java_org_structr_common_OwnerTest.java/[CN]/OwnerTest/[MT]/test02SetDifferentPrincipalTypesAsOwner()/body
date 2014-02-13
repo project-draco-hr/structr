@@ -1,7 +1,6 @@
 {
   final App superUserApp=StructrApp.getInstance();
-  try {
-    superUserApp.beginTx();
+  try (final Tx tx=app.tx()){
     List<NodeInterface> users=createTestNodes(User.class,2);
     User user1=(User)users.get(0);
     List<NodeInterface> groups=createTestNodes(Group.class,1);
@@ -14,13 +13,10 @@
     assertNotNull(ownerRel);
     List<Relationship> incomingRels=Iterables.toList(t1.getNode().getRelationships(Direction.INCOMING,new PrincipalOwnsNode()));
     assertEquals(1,incomingRels.size());
-    superUserApp.commitTx();
+    tx.success();
   }
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,ex.toString());
     fail("Unexpected exception");
-  }
- finally {
-    superUserApp.finishTx();
   }
 }

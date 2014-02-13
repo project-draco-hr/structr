@@ -5,30 +5,26 @@
     SixOneOneToOne rel=null;
     assertNotNull(testSix);
     assertNotNull(testOne);
-    try {
-      app.beginTx();
+    try (final Tx tx=app.tx()){
       rel=app.create(testSix,testOne,SixOneOneToOne.class);
-      app.commitTx();
+      tx.success();
     }
-  finally {
-      app.finishTx();
-    }
-    assertNotNull(rel);
+     assertNotNull(rel);
     GraphDatabaseService graphDb=graphDbCommand.execute();
     ExecutionEngine engine=(ExecutionEngine)new ExecutionEngine(graphDb);
-    Transaction tx=graphDb.beginTx();
-    try {
+    try (final Tx tx=app.tx()){
       ExecutionResult result=engine.execute("start n = node(*) match (n)<-[r:ONE_TO_ONE]-() return r");
       final Iterator<Relationship> rels=result.columnAs("r");
       assertTrue(rels.hasNext());
       rels.next().delete();
       tx.success();
     }
-  finally {
-      tx.finish();
+     try (final Tx tx=app.tx()){
+      String uuid=rel.getUuid();
+      assertNull("UUID of deleted relationship should be null",uuid);
     }
-    String uuid=rel.getUuid();
-    assertNull("UUID of deleted relationship should be null",uuid);
+ catch (    IllegalStateException iex) {
+    }
   }
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,ex.toString());

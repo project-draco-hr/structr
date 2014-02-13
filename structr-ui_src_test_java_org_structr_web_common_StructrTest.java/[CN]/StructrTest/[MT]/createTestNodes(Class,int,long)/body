@@ -1,6 +1,5 @@
 {
-  try {
-    app.beginTx();
+  try (final Tx tx=app.tx()){
     List<NodeInterface> nodes=new LinkedList<>();
     for (int i=0; i < number; i++) {
       nodes.add(app.create(type));
@@ -13,7 +12,4 @@
     app.commitTx();
     return nodes;
   }
-  finally {
-    app.finishTx();
-  }
-}
+ }

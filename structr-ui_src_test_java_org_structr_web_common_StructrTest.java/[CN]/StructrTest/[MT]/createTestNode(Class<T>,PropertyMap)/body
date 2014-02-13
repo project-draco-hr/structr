@@ -1,12 +1,8 @@
 {
   props.put(AbstractNode.type,type.getSimpleName());
-  try {
-    app.beginTx();
+  try (final Tx tx=app.tx()){
     final T newNode=app.create(type,props);
     app.commitTx();
     return newNode;
   }
-  finally {
-    app.finishTx();
-  }
-}
+ }

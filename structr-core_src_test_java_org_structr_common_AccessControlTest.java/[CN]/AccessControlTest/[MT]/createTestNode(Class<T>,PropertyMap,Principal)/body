@@ -1,12 +1,8 @@
 {
   final App backendApp=StructrApp.getInstance(SecurityContext.getInstance(user,AccessMode.Backend));
-  try {
-    backendApp.beginTx();
+  try (final Tx tx=backendApp.tx()){
     final T result=backendApp.create(type,props);
-    backendApp.commitTx();
+    tx.success();
     return result;
   }
-  finally {
-    app.finishTx();
-  }
-}
+ }

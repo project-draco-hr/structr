@@ -7,29 +7,27 @@
     final int offset=10;
     final List<NodeInterface> nodes=this.createTestNodes(type,number);
     Collections.shuffle(nodes,new Random(System.nanoTime()));
-    try {
-      app.beginTx();
+    try (final Tx tx=app.tx()){
       int i=offset;
       for (      NodeInterface node : nodes) {
         String _name="TestOne-" + i;
         i++;
         node.setProperty(AbstractNode.name,_name);
       }
-      app.commitTx();
+      tx.success();
     }
-  finally {
-      app.finishTx();
-    }
-    Result result=app.nodeQuery(type).getResult();
-    assertEquals(number,result.size());
-    PropertyKey sortKey=AbstractNode.name;
-    boolean sortDesc=false;
-    for (int ps=0; ps < 10; ps++) {
-      for (int p=0; p < (number / Math.max(1,ps)) + 1; p++) {
-        testPaging(type,ps,p,number,offset,includeDeletedAndHidden,publicOnly,sortKey,sortDesc);
+     try (final Tx tx=app.tx()){
+      Result result=app.nodeQuery(type).getResult();
+      assertEquals(number,result.size());
+      PropertyKey sortKey=AbstractNode.name;
+      boolean sortDesc=false;
+      for (int ps=0; ps < 10; ps++) {
+        for (int p=0; p < (number / Math.max(1,ps)) + 1; p++) {
+          testPaging(type,ps,p,number,offset,includeDeletedAndHidden,publicOnly,sortKey,sortDesc);
+        }
       }
     }
-  }
+   }
  catch (  FrameworkException ex) {
     ex.printStackTrace();
     logger.log(Level.SEVERE,ex.toString());

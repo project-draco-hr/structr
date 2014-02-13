@@ -1,6 +1,5 @@
 {
-  try {
-    app.beginTx();
+  try (final Tx tx=app.tx()){
     List<NodeInterface> nodes=new LinkedList<>();
     for (int i=0; i < number; i++) {
       nodes.add(app.create(type));
@@ -10,14 +9,11 @@
  catch (      InterruptedException ex) {
       }
     }
-    app.commitTx();
+    tx.success();
     return nodes;
   }
  catch (  Throwable t) {
     t.printStackTrace();
-  }
- finally {
-    app.finishTx();
   }
   return null;
 }

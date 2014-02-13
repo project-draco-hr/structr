@@ -7,8 +7,7 @@
     return null;
   }
   final Page _page=this;
-  try {
-    app.beginTx();
+  try (final Tx tx=app.tx()){
     DOMElement element=(DOMElement)StructrApp.getInstance(securityContext).command(CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.type,elementType),new NodeAttribute(DOMElement.tag,tag));
     element.doAdopt(_page);
     app.commitTx();
@@ -16,9 +15,6 @@
   }
  catch (  FrameworkException fex) {
     fex.printStackTrace();
-  }
- finally {
-    app.finishTx();
   }
   return null;
 }

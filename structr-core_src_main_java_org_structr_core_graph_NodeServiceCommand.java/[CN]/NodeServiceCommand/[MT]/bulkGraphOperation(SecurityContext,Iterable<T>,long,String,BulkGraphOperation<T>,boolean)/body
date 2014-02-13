@@ -3,8 +3,7 @@
   final Iterator<T> iterator=nodes.iterator();
   long objectCount=0L;
   while (iterator.hasNext()) {
-    try {
-      app.beginTx();
+    try (final Tx tx=app.tx()){
       while (iterator.hasNext()) {
         T node=iterator.next();
         try {
@@ -17,13 +16,10 @@
           break;
         }
       }
-      app.commitTx();
+      tx.success();
     }
  catch (    Throwable t) {
       operation.handleTransactionFailure(securityContext,t);
-    }
- finally {
-      app.finishTx();
     }
     if (description != null) {
       logger.log(Level.INFO,"{0}: {1} objects processed",new Object[]{description,objectCount});

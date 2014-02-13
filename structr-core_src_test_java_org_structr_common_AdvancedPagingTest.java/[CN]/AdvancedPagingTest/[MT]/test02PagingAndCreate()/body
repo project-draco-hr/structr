@@ -7,32 +7,30 @@
     final List<NodeInterface> nodes=this.createTestNodes(type,number);
     final int offset=10;
     Collections.shuffle(nodes,new Random(System.nanoTime()));
-    try {
-      app.beginTx();
+    try (final Tx tx=app.tx()){
       int i=offset;
       for (      NodeInterface node : nodes) {
         String _name="TestOne-" + i;
         i++;
         node.setProperty(AbstractNode.name,_name);
       }
-      app.commitTx();
+      tx.success();
     }
-  finally {
-      app.finishTx();
+     try (final Tx tx=app.tx()){
+      List<NodeInterface> result=app.get(type);
+      assertTrue(result.size() == number);
+      PropertyKey sortKey=AbstractNode.name;
+      boolean sortDesc=false;
+      int pageSize=2;
+      int page=1;
+      testPaging(type,pageSize,page,number,offset,includeDeletedAndHidden,publicOnly,sortKey,sortDesc);
+      PropertyMap props=new PropertyMap();
+      props.put(sortKey,"TestOne-09");
+      this.createTestNode(type,props);
+      testPaging(type,pageSize,page + 1,number + 1,offset - 1,includeDeletedAndHidden,publicOnly,sortKey,sortDesc);
+      System.out.println("paging test finished");
     }
-    List<NodeInterface> result=app.get(type);
-    assertTrue(result.size() == number);
-    PropertyKey sortKey=AbstractNode.name;
-    boolean sortDesc=false;
-    int pageSize=2;
-    int page=1;
-    testPaging(type,pageSize,page,number,offset,includeDeletedAndHidden,publicOnly,sortKey,sortDesc);
-    PropertyMap props=new PropertyMap();
-    props.put(sortKey,"TestOne-09");
-    this.createTestNode(type,props);
-    testPaging(type,pageSize,page + 1,number + 1,offset - 1,includeDeletedAndHidden,publicOnly,sortKey,sortDesc);
-    System.out.println("paging test finished");
-  }
+   }
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,ex.toString());
     fail("Unexpected exception");

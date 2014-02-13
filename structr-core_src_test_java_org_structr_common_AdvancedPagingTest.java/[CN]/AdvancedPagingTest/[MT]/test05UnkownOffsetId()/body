@@ -5,38 +5,36 @@
     final List<NodeInterface> nodes=this.createTestNodes(type,number);
     final int offset=0;
     Collections.shuffle(nodes,new Random(System.nanoTime()));
-    try {
-      app.beginTx();
+    try (final Tx tx=app.tx()){
       int i=offset;
       for (      NodeInterface node : nodes) {
         String _name="TestOne-" + i;
         i++;
         node.setProperty(AbstractNode.name,_name);
       }
-      app.commitTx();
+      tx.success();
     }
-  finally {
-      app.finishTx();
+     try (final Tx tx=app.tx()){
+      Result result=app.nodeQuery(type).getResult();
+      assertEquals(number,result.size());
+      PropertyKey sortKey=AbstractNode.name;
+      boolean sortDesc=false;
+      int pageSize=2;
+      int page=-5;
+      result=app.nodeQuery(type).sort(sortKey).order(sortDesc).pageSize(pageSize).page(page).getResult();
+      assertEquals(2,result.size());
+      assertEquals("TestOne-0",result.get(0).getProperty(AbstractNode.name));
+      assertEquals("TestOne-1",result.get(1).getProperty(AbstractNode.name));
+      page=1;
+      try {
+        app.nodeQuery(type).sort(sortKey).order(sortDesc).pageSize(pageSize).page(page).offsetId("000000000000000000000").getResult();
+        fail("Should have failed with a FrameworkException with 'id not found' token");
+      }
+ catch (      FrameworkException fex) {
+        logger.log(Level.INFO,"Exception logged",fex);
+      }
     }
-    Result result=app.nodeQuery(type).getResult();
-    assertEquals(number,result.size());
-    PropertyKey sortKey=AbstractNode.name;
-    boolean sortDesc=false;
-    int pageSize=2;
-    int page=-5;
-    result=app.nodeQuery(type).sort(sortKey).order(sortDesc).pageSize(pageSize).page(page).getResult();
-    assertEquals(2,result.size());
-    assertEquals("TestOne-0",result.get(0).getProperty(AbstractNode.name));
-    assertEquals("TestOne-1",result.get(1).getProperty(AbstractNode.name));
-    page=1;
-    try {
-      app.nodeQuery(type).sort(sortKey).order(sortDesc).pageSize(pageSize).page(page).offsetId("000000000000000000000").getResult();
-      fail("Should have failed with a FrameworkException with 'id not found' token");
-    }
- catch (    FrameworkException fex) {
-      logger.log(Level.INFO,"Exception logged",fex);
-    }
-  }
+   }
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,ex.toString());
     fail("Unexpected exception");

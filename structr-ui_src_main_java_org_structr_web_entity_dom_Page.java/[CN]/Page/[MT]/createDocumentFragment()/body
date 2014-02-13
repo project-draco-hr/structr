@@ -1,7 +1,6 @@
 {
   final App app=StructrApp.getInstance(securityContext);
-  try {
-    app.beginTx();
+  try (final Tx tx=app.tx()){
     org.structr.web.entity.dom.DocumentFragment fragment=(org.structr.web.entity.dom.DocumentFragment)StructrApp.getInstance(securityContext).command(CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.type,org.structr.web.entity.dom.DocumentFragment.class.getSimpleName()));
     ((RelationProperty<DOMNode>)Page.elements).addSingleElement(securityContext,Page.this,fragment);
     app.commitTx();
@@ -9,9 +8,6 @@
   }
  catch (  FrameworkException fex) {
     fex.printStackTrace();
-  }
- finally {
-    app.finishTx();
   }
   return null;
 }

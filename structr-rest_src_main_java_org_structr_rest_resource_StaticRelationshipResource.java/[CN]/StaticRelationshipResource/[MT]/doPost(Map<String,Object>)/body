@@ -11,20 +11,13 @@
     }
     final Notion notion=relationProperty.getNotion();
     final PropertyKey primaryPropertyKey=notion.getPrimaryPropertyKey();
-    try {
-      app.beginTx();
-      if (primaryPropertyKey != null && propertySet.containsKey(primaryPropertyKey.jsonName()) && propertySet.size() == 1) {
-      }
- else {
-        newNode=typeResource.createNode(propertySet);
-        if (newNode != null) {
-          relationProperty.addSingleElement(securityContext,sourceNode,newNode);
-        }
-      }
-      app.commitTx();
+    if (primaryPropertyKey != null && propertySet.containsKey(primaryPropertyKey.jsonName()) && propertySet.size() == 1) {
     }
-  finally {
-      app.finishTx();
+ else {
+      newNode=typeResource.createNode(propertySet);
+      if (newNode != null) {
+        relationProperty.addSingleElement(securityContext,sourceNode,newNode);
+      }
     }
     if (newNode != null) {
       RestMethodResult result=new RestMethodResult(HttpServletResponse.SC_CREATED);

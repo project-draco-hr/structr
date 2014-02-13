@@ -2,15 +2,7 @@
   if (entityClass != null) {
     final App app=StructrApp.getInstance(securityContext);
     final PropertyMap properties=PropertyMap.inputTypeToJavaType(securityContext,entityClass,propertySet);
-    try {
-      app.beginTx();
-      final NodeInterface newNode=app.create(entityClass,properties);
-      app.commitTx();
-      return newNode;
-    }
-  finally {
-      app.finishTx();
-    }
+    return app.create(entityClass,properties);
   }
   throw new NotFoundException();
 }

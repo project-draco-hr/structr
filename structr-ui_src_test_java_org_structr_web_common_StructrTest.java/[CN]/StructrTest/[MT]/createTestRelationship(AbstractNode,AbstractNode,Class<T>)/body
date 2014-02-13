@@ -1,11 +1,7 @@
 {
-  try {
-    app.beginTx();
+  try (final Tx tx=app.tx()){
     final T rel=(T)app.create(startNode,endNode,relType);
     app.commitTx();
     return rel;
   }
-  finally {
-    app.finishTx();
-  }
-}
+ }

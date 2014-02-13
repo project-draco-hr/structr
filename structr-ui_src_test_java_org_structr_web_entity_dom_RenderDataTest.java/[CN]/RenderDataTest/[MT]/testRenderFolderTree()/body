@@ -4,8 +4,7 @@
     final List<File> files=createTestNodes(File.class,7);
     final Page doc=(Page)getDocument();
     assertEquals(7,folders.size());
-    try {
-      app.beginTx();
+    try (final Tx tx=app.tx()){
       Folder rootNode=folders.get(0);
       rootNode.setProperty(AbstractNode.name,"rootNode");
       Folder folderA=folders.get(1);
@@ -78,10 +77,7 @@
       ((DOMElement)li4).setProperty(DOMElement.dataKey,"folders");
       app.commitTx();
     }
-  finally {
-      app.finishTx();
-    }
-    RenderContext ctx=new RenderContext(null,null,EditMode.NONE,Locale.GERMAN);
+     RenderContext ctx=new RenderContext(null,null,EditMode.NONE,Locale.GERMAN);
     doc.render(securityContext,ctx,0);
     System.out.println(ctx.getBuffer().toString());
     org.jsoup.nodes.Document parsedDocument=Jsoup.parse(ctx.getBuffer().toString());

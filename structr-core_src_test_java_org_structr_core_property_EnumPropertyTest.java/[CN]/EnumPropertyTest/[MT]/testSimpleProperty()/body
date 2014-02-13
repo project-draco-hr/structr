@@ -4,8 +4,10 @@
     properties.put(TestFour.enumProperty,TestEnum.Status1);
     final TestFour testEntity=createTestNode(TestFour.class,properties);
     assertNotNull(testEntity);
-    assertEquals(TestEnum.Status1,testEntity.getProperty(TestFour.enumProperty));
-  }
+    try (final Tx tx=app.tx()){
+      assertEquals(TestEnum.Status1,testEntity.getProperty(TestFour.enumProperty));
+    }
+   }
  catch (  FrameworkException fex) {
     fail("Unable to store array");
   }

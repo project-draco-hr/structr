@@ -33,11 +33,18 @@
       Class<? extends GraphObject> type=resource.getEntityClass();
       sortKey=StructrApp.getConfiguration().getPropertyKeyForDatabaseName(type,sortKeyName);
     }
-    try (final Tx tx=app.tx()){
-      result=resource.doGet(sortKey,sortDescending,pageSize,page,offsetId);
-      tx.success();
+    boolean retry=true;
+    while (retry) {
+      try (final Tx tx=app.tx()){
+        result=resource.doGet(sortKey,sortDescending,pageSize,page,offsetId);
+        tx.success();
+        retry=false;
+      }
+ catch (      DeadlockDetectedException ddex) {
+        retry=true;
+      }
     }
-     result.setIsCollection(resource.isCollectionResource());
+    result.setIsCollection(resource.isCollectionResource());
     result.setIsPrimitiveArray(resource.isPrimitiveArray());
     PagingHelper.addPagingParameter(result,pageSize,page);
     double queryTimeEnd=System.nanoTime();

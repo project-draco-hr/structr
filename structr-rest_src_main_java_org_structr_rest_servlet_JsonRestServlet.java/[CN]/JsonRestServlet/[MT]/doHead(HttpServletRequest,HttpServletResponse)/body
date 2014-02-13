@@ -18,11 +18,17 @@
       authenticator.checkResourceAccess(request,resource.getResourceSignature(),propertyView.get(securityContext));
       tx.success();
     }
-     try (final Tx tx=app.tx()){
-      result=resource.doHead();
-      tx.success();
+     boolean retry=true;
+    while (retry) {
+      try (final Tx tx=app.tx()){
+        result=resource.doHead();
+        tx.success();
+      }
+ catch (      DeadlockDetectedException ddex) {
+        retry=true;
+      }
     }
-     try (final Tx tx=app.tx()){
+    try (final Tx tx=app.tx()){
       result.commitResponse(gson.get(),response);
       tx.success();
     }

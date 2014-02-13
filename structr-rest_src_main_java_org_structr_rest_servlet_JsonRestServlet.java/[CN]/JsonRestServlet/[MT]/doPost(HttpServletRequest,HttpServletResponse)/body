@@ -25,11 +25,18 @@
         authenticator.checkResourceAccess(request,resource.getResourceSignature(),propertyView.get(securityContext));
         tx.success();
       }
-       try (final Tx tx=app.tx()){
-        result=resource.doPost(properties);
-        tx.success();
+       boolean retry=true;
+      while (retry) {
+        try (final Tx tx=app.tx()){
+          result=resource.doPost(properties);
+          tx.success();
+          retry=false;
+        }
+ catch (        DeadlockDetectedException ddex) {
+          retry=true;
+        }
       }
-       propertyView.set(securityContext,defaultPropertyView);
+      propertyView.set(securityContext,defaultPropertyView);
       try (final Tx tx=app.tx()){
         result.commitResponse(gson.get(),response);
         tx.success();

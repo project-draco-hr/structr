@@ -14,7 +14,7 @@
     hasChanges=false;
     try (final Tx tx=app.tx(false,false)){
       final Iterator<Node> allNodes=GlobalGraphOperations.at(graphDb).getAllNodes().iterator();
-      while (allNodes.hasNext() && ((actualNodeCount + 1) % txLimit) != 0) {
+      while (allNodes.hasNext()) {
         final Node node=allNodes.next();
         if (node.hasProperty("uuid") && node.getProperty("uuid") instanceof String && !node.hasProperty("id")) {
           try {
@@ -31,6 +31,9 @@
             t.printStackTrace();
           }
         }
+        if (hasChanges && (actualNodeCount % txLimit) == 0) {
+          break;
+        }
       }
       tx.success();
     }
@@ -45,7 +48,7 @@
     hasChanges=false;
     try (final Tx tx=app.tx(false,false)){
       final Iterator<Relationship> allRels=GlobalGraphOperations.at(graphDb).getAllRelationships().iterator();
-      while (allRels.hasNext() && (actualRelCount % txLimit) != 0) {
+      while (allRels.hasNext()) {
         final Relationship rel=allRels.next();
         if (rel.hasProperty("uuid") && rel.getProperty("uuid") instanceof String && !rel.hasProperty("id")) {
           try {
@@ -61,6 +64,9 @@
  catch (          Throwable t) {
             t.printStackTrace();
           }
+        }
+        if (hasChanges && (actualRelCount % txLimit) == 0) {
+          break;
         }
       }
       tx.success();

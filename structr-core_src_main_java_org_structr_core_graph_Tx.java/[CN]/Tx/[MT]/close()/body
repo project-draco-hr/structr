@@ -1,18 +1,17 @@
 {
   final ModificationQueue modificationQueue=cmd.finishTx();
-{
-    cmd=app.command(TransactionCommand.class).beginTx();
-    if (doCallbacks && modificationQueue != null) {
-      modificationQueue.doOuterCallbacks(securityContext);
-      final List<ModificationEvent> modificationEvents=modificationQueue.getModificationEvents();
-      for (      StructrTransactionListener listener : TransactionCommand.getTransactionListeners()) {
-        listener.transactionCommited(securityContext,modificationEvents);
-      }
-      if (modificationQueue != null) {
+  if (success && guard.compareAndSet(false,true)) {
+    try (final Tx tx=begin()){
+      if (doCallbacks && modificationQueue != null) {
+        modificationQueue.doOuterCallbacks(securityContext);
+        final List<ModificationEvent> modificationEvents=modificationQueue.getModificationEvents();
+        for (        StructrTransactionListener listener : TransactionCommand.getTransactionListeners()) {
+          listener.transactionCommited(securityContext,modificationEvents);
+        }
         modificationQueue.clear();
       }
+      tx.success();
     }
-    cmd.commitTx(doValidation);
-    cmd.finishTx();
+     guard.set(false);
   }
 }

@@ -3,6 +3,7 @@
   Authenticator authenticator=null;
   RestMethodResult result=null;
   JsonInput propertySet=null;
+  Resource resource=null;
   try {
     try (final Tx tx=StructrApp.getInstance().tx()){
       authenticator=getAuthenticator();
@@ -17,12 +18,10 @@
       tx.success();
     }
      if (securityContext != null) {
-      List<Resource> chain=ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,defaultIdProperty);
-      Resource resource=ResourceHelper.optimizeNestedResourceChain(chain,defaultIdProperty);
-      String resourceSignature=resource.getResourceSignature();
       Map<String,Object> properties=convertPropertySetToMap(propertySet);
       try (final Tx tx=StructrApp.getInstance().tx()){
-        authenticator.checkResourceAccess(request,resourceSignature,propertyView.get(securityContext));
+        resource=ResourceHelper.applyViewTransformation(request,securityContext,ResourceHelper.optimizeNestedResourceChain(ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,defaultIdProperty),defaultIdProperty),propertyView);
+        authenticator.checkResourceAccess(request,resource.getResourceSignature(),propertyView.get(securityContext));
         tx.success();
       }
        try (final Tx tx=StructrApp.getInstance().tx()){

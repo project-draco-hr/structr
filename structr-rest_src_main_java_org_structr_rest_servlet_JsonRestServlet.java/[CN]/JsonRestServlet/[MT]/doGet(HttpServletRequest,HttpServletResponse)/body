@@ -2,6 +2,7 @@
   SecurityContext securityContext=null;
   Authenticator authenticator=null;
   Result result=null;
+  Resource resource=null;
   try {
     try (final Tx tx=StructrApp.getInstance().tx()){
       authenticator=getAuthenticator();
@@ -12,10 +13,9 @@
     response.setCharacterEncoding("UTF-8");
     propertyView.set(securityContext,defaultPropertyView);
     double queryTimeStart=System.nanoTime();
-    Resource resource=ResourceHelper.applyViewTransformation(request,securityContext,ResourceHelper.optimizeNestedResourceChain(ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,defaultIdProperty),defaultIdProperty),propertyView);
-    String resourceSignature=resource.getResourceSignature();
     try (final Tx tx=StructrApp.getInstance().tx()){
-      authenticator.checkResourceAccess(request,resourceSignature,propertyView.get(securityContext));
+      resource=ResourceHelper.applyViewTransformation(request,securityContext,ResourceHelper.optimizeNestedResourceChain(ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,defaultIdProperty),defaultIdProperty),propertyView);
+      authenticator.checkResourceAccess(request,resource.getResourceSignature(),propertyView.get(securityContext));
       tx.success();
     }
      String pageSizeParameter=request.getParameter(REQUEST_PARAMETER_PAGE_SIZE);

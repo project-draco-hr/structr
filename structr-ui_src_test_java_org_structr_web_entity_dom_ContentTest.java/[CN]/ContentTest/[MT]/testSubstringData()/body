@@ -1,8 +1,14 @@
 {
-  Content content=getContentNode();
-  assertNotNull(content);
-  content.setData("Dies ist ein Test");
-  assertEquals("Dies ist ein Test",content.getData());
-  String substringData=content.substringData(5,3);
-  assertEquals("ist",substringData);
+  try (final Tx tx=app.tx()){
+    Content content=getContentNode();
+    assertNotNull(content);
+    content.setData("Dies ist ein Test");
+    assertEquals("Dies ist ein Test",content.getData());
+    String substringData=content.substringData(5,3);
+    assertEquals("ist",substringData);
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fail("unexpected exception");
+  }
 }

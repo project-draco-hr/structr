@@ -2,13 +2,8 @@
   Object value=null;
   final PropertyContainer propertyContainer=obj.getPropertyContainer();
   if (propertyContainer != null) {
-    try (final TransactionCommand cmd=StructrApp.getInstance(securityContext).beginTx()){
-      if (propertyContainer.hasProperty(dbName())) {
-        value=propertyContainer.getProperty(dbName());
-      }
-    }
- catch (    NotFoundException|IllegalStateException|FrameworkException ex) {
-      logger.log(Level.WARNING,"Could not determine property " + dbName + " of the requested graph object",ex);
+    if (propertyContainer.hasProperty(dbName())) {
+      value=propertyContainer.getProperty(dbName());
     }
   }
   if (applyConverter) {

@@ -14,12 +14,16 @@
         t.printStackTrace();
       }
       if (doCallbacks && modificationQueue != null && tx.isSuccessful()) {
-        modificationQueue.doOuterCallbacks(securityContext);
-        final List<ModificationEvent> modificationEvents=modificationQueue.getModificationEvents();
-        for (        StructrTransactionListener listener : listeners) {
-          listener.transactionCommited(securityContext,modificationEvents);
+        final GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
+        try (final Transaction callbackTx=graphDb.beginTx()){
+          modificationQueue.doOuterCallbacks(securityContext);
+          final List<ModificationEvent> modificationEvents=modificationQueue.getModificationEvents();
+          for (          StructrTransactionListener listener : listeners) {
+            listener.transactionCommited(securityContext,modificationEvents);
+          }
+          callbackTx.success();
         }
-      }
+       }
       if (modificationQueue != null) {
         modificationQueue.clear();
       }

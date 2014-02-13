@@ -3,7 +3,6 @@
   final App app=StructrApp.getInstance(securityContext);
   Map<String,Object> nodeData=webSocketData.getNodeData();
   try {
-    app.beginTx();
     final PropertyMap properties=PropertyMap.inputTypeToJavaType(securityContext,nodeData);
     Class type=SchemaHelper.getEntityClassForRawType(properties.get(AbstractNode.type));
     final NodeInterface newNode=app.create(type,properties);
@@ -19,13 +18,9 @@
       fileNode.setProperty(AbstractNode.name,name);
       getWebSocket().createFileUploadHandler(fileNode);
     }
-    app.commitTx();
   }
  catch (  FrameworkException fex) {
     logger.log(Level.WARNING,"Could not create node.",fex);
     getWebSocket().send(MessageBuilder.status().code(fex.getStatus()).message(fex.getMessage()).build(),true);
-  }
- finally {
-    app.finishTx();
   }
 }

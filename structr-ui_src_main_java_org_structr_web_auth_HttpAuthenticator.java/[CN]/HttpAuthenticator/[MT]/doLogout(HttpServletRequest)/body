@@ -1,7 +1,5 @@
 {
-  final App app=StructrApp.getInstance();
   try {
-    app.beginTx();
     Principal user=getUser(request,false);
     if (user != null) {
       user.setProperty(Principal.sessionId,null);
@@ -11,12 +9,8 @@
       session.invalidate();
     }
     request.logout();
-    app.commitTx();
   }
- catch (  Exception ex) {
+ catch (  ServletException|FrameworkException ex) {
     logger.log(Level.WARNING,"Error while logging out user",ex);
-  }
- finally {
-    app.finishTx();
   }
 }

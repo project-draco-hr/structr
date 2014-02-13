@@ -1,6 +1,6 @@
 {
   FTPClient ftp=setupFTPClient();
-  try {
+  try (final Tx tx=StructrApp.getInstance(securityContext).tx()){
     FTPFile[] dirs=ftp.listDirectories();
     assertNotNull(dirs);
     assertEquals(0,dirs.length);
@@ -11,8 +11,9 @@
     String newWorkingDirectory=ftp.printWorkingDirectory();
     assertEquals(name1,newWorkingDirectory);
     ftp.disconnect();
+    tx.success();
   }
- catch (  IOException ex) {
+ catch (  IOException|FrameworkException ex) {
     logger.log(Level.SEVERE,"Error while changing FTP directories",ex);
     fail("Unexpected exception: " + ex.getMessage());
   }

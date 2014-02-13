@@ -1,30 +1,36 @@
 {
-  Page document=(Page)getDocument();
-  assertNotNull(document);
-  DOMElement div=(DOMElement)document.createElement("div");
-  assertNotNull(div);
-  Content content1=(Content)document.createTextNode("content1");
-  Content content2=(Content)document.createTextNode("content2");
-  Content content3=(Content)document.createTextNode("content3");
-  assertNotNull(content1);
-  assertNotNull(content2);
-  assertNotNull(content3);
-  div.appendChild(content1);
-  List<DOMChildren> divRels=toList(div.getOutgoingRelationships(DOMChildren.class));
-  assertEquals(1,divRels.size());
-  assertEquals(Integer.valueOf(0),divRels.get(0).getProperty(AbstractChildren.position));
-  div.appendChild(content2);
-  divRels=toList(div.getOutgoingRelationships(DOMChildren.class));
-  assertEquals(2,divRels.size());
-  assertEquals(Integer.valueOf(0),divRels.get(0).getProperty(AbstractChildren.position));
-  assertEquals(Integer.valueOf(1),divRels.get(1).getProperty(AbstractChildren.position));
-  div.appendChild(content3);
-  assertEquals(3,div.getChildNodes().getLength());
-  Element div2=document.createElement("div");
-  assertNotNull(div2);
-  div.appendChild(div2);
-  assertEquals(4,div.getChildNodes().getLength());
-  div2.appendChild(content3);
-  assertEquals(3,div.getChildNodes().getLength());
-  assertEquals(content3,div2.getChildNodes().item(0));
+  try (final Tx tx=app.tx()){
+    Page document=(Page)getDocument();
+    assertNotNull(document);
+    DOMElement div=(DOMElement)document.createElement("div");
+    assertNotNull(div);
+    Content content1=(Content)document.createTextNode("content1");
+    Content content2=(Content)document.createTextNode("content2");
+    Content content3=(Content)document.createTextNode("content3");
+    assertNotNull(content1);
+    assertNotNull(content2);
+    assertNotNull(content3);
+    div.appendChild(content1);
+    List<DOMChildren> divRels=toList(div.getOutgoingRelationships(DOMChildren.class));
+    assertEquals(1,divRels.size());
+    assertEquals(Integer.valueOf(0),divRels.get(0).getProperty(AbstractChildren.position));
+    div.appendChild(content2);
+    divRels=toList(div.getOutgoingRelationships(DOMChildren.class));
+    assertEquals(2,divRels.size());
+    assertEquals(Integer.valueOf(0),divRels.get(0).getProperty(AbstractChildren.position));
+    assertEquals(Integer.valueOf(1),divRels.get(1).getProperty(AbstractChildren.position));
+    div.appendChild(content3);
+    assertEquals(3,div.getChildNodes().getLength());
+    Element div2=document.createElement("div");
+    assertNotNull(div2);
+    div.appendChild(div2);
+    assertEquals(4,div.getChildNodes().getLength());
+    div2.appendChild(content3);
+    assertEquals(3,div.getChildNodes().getLength());
+    assertEquals(content3,div2.getChildNodes().item(0));
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fail("unexpected exception");
+  }
 }

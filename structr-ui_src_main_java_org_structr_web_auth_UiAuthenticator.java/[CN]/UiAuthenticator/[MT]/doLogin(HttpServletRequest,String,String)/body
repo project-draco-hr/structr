@@ -2,18 +2,12 @@
   Principal user=AuthHelper.getPrincipalForPassword(Person.eMail,emailOrUsername,password);
   if (user != null) {
     final String sessionIdFromRequest=request.getRequestedSessionId();
-    final App app=StructrApp.getInstance();
     if (sessionIdFromRequest != null) {
       try {
-        app.beginTx();
         user.setProperty(Principal.sessionId,sessionIdFromRequest);
-        app.commitTx();
       }
- catch (      Exception ex) {
+ catch (      FrameworkException ex) {
         logger.log(Level.SEVERE,null,ex);
-      }
- finally {
-        app.finishTx();
       }
     }
   }

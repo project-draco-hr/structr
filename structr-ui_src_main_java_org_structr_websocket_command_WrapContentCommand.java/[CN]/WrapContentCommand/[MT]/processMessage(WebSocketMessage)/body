@@ -1,5 +1,4 @@
 {
-  final App app=StructrApp.getInstance(getWebSocket().getSecurityContext());
   final Map<String,Object> nodeData=webSocketData.getNodeData();
   final String parentId=(String)nodeData.get("parentId");
   final String pageId=webSocketData.getPageId();
@@ -20,7 +19,6 @@
       nodeData.remove("tagName");
       final DOMNode parentNode=(DOMNode)contentNode.getParentNode();
       try {
-        app.beginTx();
         DOMNode elementNode=null;
         if (tagName != null && !tagName.isEmpty()) {
           elementNode=(DOMNode)document.createElement(tagName);
@@ -31,16 +29,9 @@
         if (elementNode != null) {
           elementNode.appendChild(contentNode);
         }
-        app.commitTx();
       }
  catch (      DOMException dex) {
         getWebSocket().send(MessageBuilder.status().code(422).message(dex.getMessage()).build(),true);
-      }
-catch (      FrameworkException ex) {
-        Logger.getLogger(CreateAndAppendDOMNodeCommand.class.getName()).log(Level.SEVERE,null,ex);
-      }
- finally {
-        app.finishTx();
       }
     }
  else {

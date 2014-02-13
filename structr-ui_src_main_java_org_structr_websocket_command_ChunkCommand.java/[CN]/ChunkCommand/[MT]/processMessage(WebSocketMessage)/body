@@ -1,6 +1,5 @@
 {
   final SecurityContext securityContext=getWebSocket().getSecurityContext();
-  final App app=StructrApp.getInstance(securityContext);
   try {
     int sequenceNumber=((Long)webSocketData.getNodeData().get("chunkId")).intValue();
     int chunkSize=((Long)webSocketData.getNodeData().get("chunkSize")).intValue();
@@ -25,14 +24,7 @@
     long finalSize=file.getProperty(File.size);
     logger.log(Level.FINE,"Overall size: {0}, part: {1}",new Object[]{finalSize,size});
     if (size != finalSize) {
-      try {
-        app.beginTx();
-        file.setProperty(File.checksum,FileHelper.getChecksum(file));
-        app.commitTx();
-      }
-  finally {
-        app.finishTx();
-      }
+      file.setProperty(File.checksum,FileHelper.getChecksum(file));
     }
     getWebSocket().send(MessageBuilder.status().code(200).message("{\"id\":\"" + file.getUuid() + "\", \"name\":\""+ file.getName()+ "\",\"size\":"+ size+ "}").build(),true);
   }

@@ -4,7 +4,6 @@
   final String path=targetFile instanceof StructrFtpFile ? "/" : targetFile.getAbsolutePath();
   final App app=StructrApp.getInstance();
   try {
-    app.beginTx();
     if (path.contains("/")) {
       String newParentPath=StringUtils.substringBeforeLast(path,"/");
       AbstractFile newParent=FileHelper.getFileByAbsolutePath(newParentPath);
@@ -20,14 +19,10 @@
       final String newName=path.contains("/") ? StringUtils.substringAfterLast(path,"/") : path;
       structrFile.setProperty(AbstractNode.name,newName);
     }
-    app.commitTx();
   }
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,"Could not move ftp file",ex);
     return false;
-  }
- finally {
-    app.finishTx();
   }
   return true;
 }

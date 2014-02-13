@@ -18,15 +18,10 @@
     properties.put(AbstractNode.type,Widget.class.getSimpleName());
     properties.put(AbstractNode.name,name);
     properties.put(Widget.source,source);
-    app.beginTx();
     app.create(Widget.class,properties);
-    app.commitTx();
   }
  catch (  Throwable t) {
     logger.log(Level.WARNING,t.toString());
     getWebSocket().send(MessageBuilder.status().code(422).message(t.toString()).build(),true);
-  }
- finally {
-    app.finishTx();
   }
 }

@@ -2,62 +2,53 @@
   double start=System.nanoTime();
   SecurityContext securityContext=null;
   Authenticator authenticator=null;
+  App app=null;
   try {
     try (final Tx tx=StructrApp.getInstance().tx()){
       authenticator=getAuthenticator();
       securityContext=authenticator.initializeAndExamineRequest(request,response);
       tx.success();
     }
-     securityContext.setAccessMode(AccessMode.Frontend);
-    request.setCharacterEncoding("UTF-8");
-    response.setCharacterEncoding("UTF-8");
-    boolean dontCache=false;
-    String path=PathHelper.clean(request.getPathInfo());
-    logger.log(Level.FINE,"Path info {0}",path);
-    logger.log(Level.FINE,"Request examined by security context in {0} seconds",decimalFormat.format((System.nanoTime() - start) / 1000000000.0));
-    if (response.getStatus() == 302) {
-      return;
-    }
-    final App app=StructrApp.getInstance(securityContext);
-    Principal user=null;
+     app=StructrApp.getInstance(securityContext);
     try (final Tx tx=app.tx()){
-      user=securityContext.getUser(false);
-      tx.success();
-    }
-     if (user != null) {
-      dontCache=true;
-    }
-    RenderContext renderContext=RenderContext.getInstance(request,response,getEffectiveLocale(request));
-    renderContext.setResourceProvider(resourceProvider);
-    EditMode edit=renderContext.getEditMode(user);
-    DOMNode rootElement=null;
-    AbstractNode dataNode=null;
-    String[] uriParts=PathHelper.getParts(path);
-    if ((uriParts == null) || (uriParts.length == 0)) {
-      try (final Tx tx=app.tx()){
-        rootElement=findIndexPage(securityContext);
-        tx.success();
-      }
-       logger.log(Level.FINE,"No path supplied, trying to find index page");
-    }
- else {
-      if (checkGetSessionId(request,response,path)) {
+      securityContext.setAccessMode(AccessMode.Frontend);
+      request.setCharacterEncoding("UTF-8");
+      response.setCharacterEncoding("UTF-8");
+      boolean dontCache=false;
+      String path=PathHelper.clean(request.getPathInfo());
+      logger.log(Level.FINE,"Path info {0}",path);
+      logger.log(Level.FINE,"Request examined by security context in {0} seconds",decimalFormat.format((System.nanoTime() - start) / 1000000000.0));
+      if (response.getStatus() == 302) {
         return;
       }
-      try (final Tx tx=app.tx()){
+      Principal user=securityContext.getUser(false);
+      if (user != null) {
+        dontCache=true;
+      }
+      RenderContext renderContext=RenderContext.getInstance(request,response,getEffectiveLocale(request));
+      renderContext.setResourceProvider(resourceProvider);
+      EditMode edit=renderContext.getEditMode(user);
+      DOMNode rootElement=null;
+      AbstractNode dataNode=null;
+      String[] uriParts=PathHelper.getParts(path);
+      if ((uriParts == null) || (uriParts.length == 0)) {
+        rootElement=findIndexPage(securityContext);
+        logger.log(Level.FINE,"No path supplied, trying to find index page");
+      }
+ else {
+        if (checkGetSessionId(request,response,path)) {
+          return;
+        }
         if (checkRegistration(securityContext,request,response,path)) {
           return;
         }
-        tx.success();
-      }
-       if (rootElement == null) {
-        rootElement=findPage(request,path);
-      }
+        if (rootElement == null) {
+          rootElement=findPage(request,path);
+        }
  else {
-        dontCache=true;
+          dontCache=true;
+        }
       }
-    }
-    try (final Tx tx=app.tx()){
       if (rootElement == null) {
         org.structr.web.entity.File file=findFile(request,path);
         if (file != null) {

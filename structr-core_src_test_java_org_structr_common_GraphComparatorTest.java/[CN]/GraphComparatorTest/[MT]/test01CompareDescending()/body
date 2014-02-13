@@ -27,26 +27,26 @@
     }
  catch (    NullPointerException e) {
     }
-    try (final TransactionCommand cmd=app.beginTx()){
+    try (final Tx tx=app.tx()){
       assertEquals(0,comp.compare(a,b));
     }
      setPropertyTx(a,TestOne.anInt,0);
-    try (final TransactionCommand cmd=app.beginTx()){
+    try (final Tx tx=app.tx()){
       assertEquals(1,comp.compare(a,b));
     }
      setPropertyTx(a,TestOne.anInt,null);
     setPropertyTx(b,TestOne.anInt,0);
-    try (final TransactionCommand cmd=app.beginTx()){
+    try (final Tx tx=app.tx()){
       assertEquals(-1,comp.compare(a,b));
     }
      setPropertyTx(a,TestOne.anInt,1);
     setPropertyTx(b,TestOne.anInt,2);
-    try (final TransactionCommand cmd=app.beginTx()){
+    try (final Tx tx=app.tx()){
       assertEquals(1,comp.compare(a,b));
     }
      setPropertyTx(a,TestOne.anInt,2);
     setPropertyTx(b,TestOne.anInt,1);
-    try (final TransactionCommand cmd=app.beginTx()){
+    try (final Tx tx=app.tx()){
       assertEquals(-1,comp.compare(a,b));
     }
    }

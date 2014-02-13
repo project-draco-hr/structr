@@ -7,7 +7,7 @@
     Collections.shuffle(nodes,new Random(System.nanoTime()));
     int i=offset;
     String name;
-    try (final TransactionCommand cmd=app.beginTx()){
+    try (final Tx tx=app.tx()){
       for (      NodeInterface node : nodes) {
         name=Integer.toString(i);
         i++;
@@ -26,9 +26,9 @@
  catch (        Throwable t) {
         }
       }
-      app.commitTx();
+      tx.success();
     }
-     try (final TransactionCommand cmd=app.beginTx()){
+     try (final Tx tx=app.tx()){
       Result result=app.nodeQuery(type).getResult();
       assertEquals(number,result.size());
       PropertyKey sortKey=TestOne.aDate;

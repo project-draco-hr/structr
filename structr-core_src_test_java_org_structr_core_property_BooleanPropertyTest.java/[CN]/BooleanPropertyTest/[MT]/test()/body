@@ -4,11 +4,11 @@
     final TestFour testEntity=createTestNode(TestFour.class);
     assertNotNull(testEntity);
     final Boolean value=Boolean.TRUE;
-    try (final TransactionCommand cmd=app.beginTx()){
+    try (final Tx tx=app.tx()){
       testEntity.setProperty(key,value);
-      app.commitTx();
+      tx.success();
     }
-     try (final TransactionCommand cmd=app.beginTx()){
+     try (final Tx tx=app.tx()){
       assertEquals(value,testEntity.getProperty(key));
     }
    }

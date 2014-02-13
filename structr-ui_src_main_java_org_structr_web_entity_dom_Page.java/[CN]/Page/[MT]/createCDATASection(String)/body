@@ -1,6 +1,6 @@
 {
   final App app=StructrApp.getInstance(securityContext);
-  try (final TransactionCommand cmd=app.beginTx()){
+  try (final Tx tx=app.tx()){
     Cdata content=(Cdata)StructrApp.getInstance(securityContext).command(CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.type,Cdata.class.getSimpleName()));
     ((RelationProperty<DOMNode>)Page.elements).addSingleElement(securityContext,Page.this,content);
     app.commitTx();

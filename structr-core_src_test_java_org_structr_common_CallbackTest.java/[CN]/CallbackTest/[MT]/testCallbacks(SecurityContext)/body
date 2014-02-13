@@ -2,29 +2,29 @@
   TestFive entity=null;
   Integer zero=0;
   Integer one=1;
-  try (final TransactionCommand cmd=app.beginTx()){
+  try (final Tx tx=app.tx()){
     entity=app.create(TestFive.class);
-    app.commitTx();
+    tx.success();
   }
  catch (  Throwable t) {
     t.printStackTrace();
   }
   assertNotNull("Entity should have been created",entity);
-  try (final TransactionCommand cmd=app.beginTx()){
+  try (final Tx tx=app.tx()){
     assertEquals("modifiedInBeforeCreation should have a value of 1: ",one,entity.getProperty(TestFive.modifiedInBeforeCreation));
     assertEquals("modifiedInAfterCreation should have a value of 1:  ",one,entity.getProperty(TestFive.modifiedInAfterCreation));
     assertEquals("modifiedInBeforeModification should have a value of 0: ",zero,entity.getProperty(TestFive.modifiedInBeforeModification));
     assertEquals("modifiedInAfterModification should have a value of 0:  ",zero,entity.getProperty(TestFive.modifiedInAfterModification));
   }
-   try (final TransactionCommand cmd=app.beginTx()){
+   try (final Tx tx=app.tx()){
     final TestFive finalEntity=entity;
     finalEntity.setProperty(TestFive.intProperty,123);
-    app.commitTx();
+    tx.success();
   }
  catch (  Throwable t) {
     t.printStackTrace();
   }
-  try (final TransactionCommand cmd=app.beginTx()){
+  try (final Tx tx=app.tx()){
     assertEquals("modifiedInBeforeCreation should have a value of 1: ",one,entity.getProperty(TestFive.modifiedInBeforeCreation));
     assertEquals("modifiedInAfterCreation should have a value of 1:  ",one,entity.getProperty(TestFive.modifiedInAfterCreation));
     assertEquals("modifiedInBeforeModification should have a value of 1: ",one,entity.getProperty(TestFive.modifiedInBeforeModification));

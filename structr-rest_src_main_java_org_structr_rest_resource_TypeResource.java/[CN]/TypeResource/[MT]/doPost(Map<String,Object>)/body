@@ -2,14 +2,7 @@
   if (isNode) {
     final App app=StructrApp.getInstance(securityContext);
     NodeInterface newNode=null;
-    try {
-      app.beginTx();
-      newNode=createNode(propertySet);
-      app.commitTx();
-    }
-  finally {
-      app.finishTx();
-    }
+    newNode=createNode(propertySet);
     RestMethodResult result=new RestMethodResult(HttpServletResponse.SC_CREATED);
     if (newNode != null) {
       result.addHeader("Location",buildLocationHeader(newNode));
@@ -34,14 +27,7 @@
       if (errorBuffer.hasError()) {
         throw new FrameworkException(422,errorBuffer);
       }
-      try {
-        app.beginTx();
-        newRelationship=app.create(sourceNode,targetNode,entityClass,properties);
-        app.commitTx();
-      }
-  finally {
-        app.finishTx();
-      }
+      newRelationship=app.create(sourceNode,targetNode,entityClass,properties);
       RestMethodResult result=new RestMethodResult(HttpServletResponse.SC_CREATED);
       if (newRelationship != null) {
         result.addHeader("Location",buildLocationHeader(newRelationship));

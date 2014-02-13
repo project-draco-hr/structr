@@ -2,17 +2,13 @@
   final App app=StructrApp.getInstance(securityContext);
   final AtomicLong objectCount=new AtomicLong(0L);
   while (!stopCondition.evaluate(securityContext,objectCount.get())) {
-    try {
-      app.beginTx();
+    try (final Tx tx=app.tx()){
       long loopCount=0;
       while (loopCount++ < commitCount && !stopCondition.evaluate(securityContext,objectCount.get())) {
         transaction.execute();
         objectCount.incrementAndGet();
       }
-      app.commitTx();
+      tx.success();
     }
-  finally {
-      app.finishTx();
-    }
-  }
+   }
 }

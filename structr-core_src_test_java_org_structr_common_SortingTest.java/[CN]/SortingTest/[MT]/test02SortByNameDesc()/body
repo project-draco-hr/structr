@@ -5,7 +5,7 @@
     final List<NodeInterface> nodes=this.createTestNodes(type,number);
     final int offset=10;
     Collections.shuffle(nodes,new Random(System.nanoTime()));
-    try (final TransactionCommand cmd=app.beginTx()){
+    try (final Tx tx=app.tx()){
       int i=offset;
       String name;
       for (      NodeInterface node : nodes) {
@@ -13,9 +13,9 @@
         i++;
         node.setProperty(AbstractNode.name,name);
       }
-      app.commitTx();
+      tx.success();
     }
-     try (final TransactionCommand cmd=app.beginTx()){
+     try (final Tx tx=app.tx()){
       Result result=app.nodeQuery(type).getResult();
       assertEquals(number,result.size());
       PropertyKey sortKey=AbstractNode.name;

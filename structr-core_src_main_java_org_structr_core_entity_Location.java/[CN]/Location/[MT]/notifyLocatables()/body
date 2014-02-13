@@ -1,16 +1,10 @@
 {
-  try (final TransactionCommand cmd=StructrApp.getInstance().beginTx()){
-    boolean allLocatablesAreValid=false;
-    for (    RelationshipInterface rel : this.getRelationships(NodeHasLocation.class)) {
-      NodeInterface otherNode=rel.getOtherNode(this);
-      if (otherNode != null && otherNode instanceof Locatable) {
-        allLocatablesAreValid|=!((Locatable)otherNode).locationChanged();
-      }
+  boolean allLocatablesAreValid=false;
+  for (  RelationshipInterface rel : this.getRelationships(NodeHasLocation.class)) {
+    NodeInterface otherNode=rel.getOtherNode(this);
+    if (otherNode != null && otherNode instanceof Locatable) {
+      allLocatablesAreValid|=!((Locatable)otherNode).locationChanged();
     }
-    return allLocatablesAreValid;
   }
- catch (  Throwable t) {
-    t.printStackTrace();
-  }
-  return false;
+  return allLocatablesAreValid;
 }

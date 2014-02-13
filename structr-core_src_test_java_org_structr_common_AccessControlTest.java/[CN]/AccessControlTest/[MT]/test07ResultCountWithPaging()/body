@@ -3,19 +3,19 @@
     final List<NodeInterface> persons=createTestNodes(Person.class,1);
     final Class type=TestOne.class;
     final List<NodeInterface> nodes=createTestNodes(type,10);
-    try (final TransactionCommand cmd=app.beginTx()){
+    try (final Tx tx=app.tx()){
       nodes.get(3).setProperty(AbstractNode.visibleToPublicUsers,true);
       nodes.get(5).setProperty(AbstractNode.visibleToPublicUsers,true);
       nodes.get(7).setProperty(AbstractNode.visibleToPublicUsers,true);
       nodes.get(9).setProperty(AbstractNode.visibleToPublicUsers,true);
-      app.commitTx();
+      tx.success();
     }
      SecurityContext publicContext=SecurityContext.getInstance(null,AccessMode.Frontend);
     PropertyKey sortKey=AbstractNode.name;
     boolean sortDesc=false;
     int pageSize=2;
     int page=1;
-    try (final TransactionCommand cmd=app.beginTx()){
+    try (final Tx tx=app.tx()){
       Result result=StructrApp.getInstance(publicContext).nodeQuery(type).sort(sortKey).order(sortDesc).page(page).pageSize(pageSize).getResult();
       assertEquals(2,result.size());
       assertEquals(4,(int)result.getRawResultCount());

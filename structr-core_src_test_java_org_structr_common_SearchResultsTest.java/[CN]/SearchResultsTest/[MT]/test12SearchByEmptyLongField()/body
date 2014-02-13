@@ -2,7 +2,7 @@
   try {
     PropertyMap props=new PropertyMap();
     AbstractNode node=createTestNode(TestOne.class,props);
-    try (final TransactionCommand cmd=app.beginTx()){
+    try (final Tx tx=app.tx()){
       Result result=app.nodeQuery(TestOne.class).and(TestOne.aLong,null).includeDeletedAndHidden().getResult();
       assertTrue(result.size() == 1);
       assertTrue(result.get(0).equals(node));

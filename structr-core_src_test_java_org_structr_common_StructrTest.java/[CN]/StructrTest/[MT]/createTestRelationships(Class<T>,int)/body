@@ -2,12 +2,12 @@
   List<NodeInterface> nodes=createTestNodes(GenericNode.class,2);
   final NodeInterface startNode=nodes.get(0);
   final NodeInterface endNode=nodes.get(1);
-  try (TransactionCommand cmd=app.beginTx()){
+  try (final Tx tx=app.tx()){
     List<T> rels=new LinkedList<>();
     for (int i=0; i < number; i++) {
       rels.add((T)app.create(startNode,endNode,relType));
     }
-    cmd.commitTx();
+    tx.success();
     return rels;
   }
  }

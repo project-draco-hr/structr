@@ -2,7 +2,6 @@
   List<DynamicResourceAccess> grants=new LinkedList<>();
   final App app=StructrApp.getInstance();
   try {
-    app.beginTx();
     DynamicResourceAccess grant=app.nodeQuery(DynamicResourceAccess.class).and(DynamicResourceAccess.signature,signature).getFirst();
     long flagsValue=255;
     if (flags != null) {
@@ -16,13 +15,9 @@
  else {
       grant.setProperty(DynamicResourceAccess.flags,flagsValue);
     }
-    app.commitTx();
   }
  catch (  Throwable t) {
     t.printStackTrace();
-  }
- finally {
-    app.finishTx();
   }
   return grants;
 }

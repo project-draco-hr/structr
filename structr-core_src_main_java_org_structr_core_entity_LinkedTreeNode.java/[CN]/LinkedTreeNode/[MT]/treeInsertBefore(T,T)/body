@@ -1,24 +1,17 @@
 {
   final App app=StructrApp.getInstance(securityContext);
-  try {
-    app.beginTx();
-    List<R> rels=treeGetChildRelationships();
-    int position=0;
-    for (    R rel : rels) {
-      T node=rel.getTargetNode();
-      if (node.equals(refChild)) {
-        PropertyMap properties=new PropertyMap();
-        properties.put(positionProperty,position);
-        linkNodes(getChildLinkType(),(T)LinkedTreeNode.this,newChild,properties);
-        position++;
-      }
-      rel.setProperty(positionProperty,position);
+  List<R> rels=treeGetChildRelationships();
+  int position=0;
+  for (  R rel : rels) {
+    T node=rel.getTargetNode();
+    if (node.equals(refChild)) {
+      PropertyMap properties=new PropertyMap();
+      properties.put(positionProperty,position);
+      linkNodes(getChildLinkType(),(T)LinkedTreeNode.this,newChild,properties);
       position++;
     }
-    LinkedTreeNode.super.listInsertBefore(refChild,newChild);
-    app.commitTx();
+    rel.setProperty(positionProperty,position);
+    position++;
   }
-  finally {
-    app.finishTx();
-  }
+  LinkedTreeNode.super.listInsertBefore(refChild,newChild);
 }

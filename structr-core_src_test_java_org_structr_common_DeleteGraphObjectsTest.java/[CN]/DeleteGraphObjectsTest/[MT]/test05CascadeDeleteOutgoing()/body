@@ -5,24 +5,24 @@
     NodeInterface targetNode;
     String startNodeId;
     String endNodeId;
-    try (final TransactionCommand cmd=app.beginTx()){
+    try (final Tx tx=app.tx()){
       startNodeId=rel.getSourceNode().getUuid();
       endNodeId=rel.getTargetNode().getUuid();
       sourceNode=rel.getSourceNode();
     }
      deleteCascade(sourceNode);
-    try (final TransactionCommand cmd=app.beginTx()){
+    try (final Tx tx=app.tx()){
       assertNodeNotFound(startNodeId);
       assertNodeNotFound(endNodeId);
     }
      rel=cascadeRel(TestOne.class,TestTwo.class,Relation.SOURCE_TO_TARGET);
-    try (final TransactionCommand cmd=app.beginTx()){
+    try (final Tx tx=app.tx()){
       startNodeId=rel.getSourceNode().getUuid();
       endNodeId=rel.getTargetNode().getUuid();
       targetNode=rel.getTargetNode();
     }
      deleteCascade(targetNode);
-    try (final TransactionCommand cmd=app.beginTx()){
+    try (final Tx tx=app.tx()){
       assertNodeNotFound(endNodeId);
       assertNodeExists(startNodeId);
     }

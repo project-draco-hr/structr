@@ -8,7 +8,7 @@
     TestOne t1=createTestNode(TestOne.class,props,user);
     TestOne t2=createTestNode(TestOne.class,user);
     SecurityContext publicContext=SecurityContext.getInstance(null,AccessMode.Frontend);
-    try (final TransactionCommand cmd=app.beginTx()){
+    try (final Tx tx=app.tx()){
       Result result=StructrApp.getInstance(publicContext).nodeQuery(type).getResult();
       assertEquals(1,result.size());
       assertEquals(t1.getUuid(),result.get(0).getUuid());

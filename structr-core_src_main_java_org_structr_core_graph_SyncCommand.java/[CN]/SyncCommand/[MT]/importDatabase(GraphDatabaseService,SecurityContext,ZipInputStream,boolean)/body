@@ -4,7 +4,7 @@
   final Value<Long> relCountValue=new StaticValue<>(0L);
   final String uuidPropertyName=GraphObject.id.dbName();
   double t0=System.nanoTime();
-  try {
+  try (final Tx tx=app.tx()){
     Map<String,Node> uuidMap=new LinkedHashMap<>();
     List<Relationship> rels=new LinkedList<>();
     List<Node> nodes=new LinkedList<>();
@@ -15,7 +15,6 @@
     long nodeCount=0;
     long relCount=0;
     try {
-      app.beginTx();
       reader=new BufferedReader(new InputStreamReader(zis));
       do {
         try {
@@ -86,13 +85,10 @@
       TransactionCommand.relationshipCreated(entity);
       entity.addToIndex();
     }
-    app.commitTx();
+    tx.success();
   }
  catch (  FrameworkException fex) {
     fex.printStackTrace();
-  }
- finally {
-    app.finishTx();
   }
   double t1=System.nanoTime();
   double time=((t1 - t0) / 1000000000.0);

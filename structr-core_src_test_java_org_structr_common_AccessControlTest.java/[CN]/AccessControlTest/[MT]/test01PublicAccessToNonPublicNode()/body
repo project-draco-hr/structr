@@ -5,7 +5,7 @@
     Class type=TestOne.class;
     TestOne t1=createTestNode(TestOne.class,user);
     SecurityContext publicContext=SecurityContext.getInstance(null,AccessMode.Frontend);
-    try (final TransactionCommand cmd=app.beginTx()){
+    try (final Tx tx=app.tx()){
       Result result=StructrApp.getInstance(publicContext).nodeQuery(type).getResult();
       assertTrue(result.isEmpty());
     }

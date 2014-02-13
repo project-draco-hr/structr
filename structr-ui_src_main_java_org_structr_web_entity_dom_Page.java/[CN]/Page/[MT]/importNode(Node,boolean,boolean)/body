@@ -2,7 +2,7 @@
   if (node instanceof DOMNode) {
     final DOMNode domNode=(DOMNode)node;
     final App app=StructrApp.getInstance(securityContext);
-    try (final TransactionCommand cmd=app.beginTx()){
+    try (final Tx tx=app.tx()){
       Node importedNode=domNode.doImport(Page.this);
       if (deep && domNode.hasChildNodes()) {
         Node child=domNode.getFirstChild();

@@ -1,13 +1,13 @@
 {
   try {
     TestImage img=null;
-    try (final TransactionCommand cmd=app.beginTx()){
+    try (final Tx tx=app.tx()){
       img=(TestImage)ImageHelper.createFileBase64(securityContext,base64Image,TestImage.class);
       app.commitTx();
     }
      assertNotNull(img);
     assertTrue(img instanceof TestImage);
-    try (final TransactionCommand cmd=app.beginTx()){
+    try (final Tx tx=app.tx()){
       Image tn=img.getProperty(TestImage.thumbnail);
       assertNotNull(tn);
       assertEquals(new Integer(200),tn.getWidth());

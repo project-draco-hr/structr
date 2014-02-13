@@ -3,27 +3,27 @@
   Authenticator authenticator=null;
   RestMethodResult result=null;
   try {
-    try (final TransactionCommand cmd=StructrApp.getInstance().beginTx()){
+    try (final Tx tx=StructrApp.getInstance().tx()){
       authenticator=getAuthenticator();
       securityContext=authenticator.initializeAndExamineRequest(request,response);
-      cmd.commitTx();
+      tx.success();
     }
      request.setCharacterEncoding("UTF-8");
     response.setContentType("application/json; charset=utf-8");
     List<Resource> chain=ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,defaultIdProperty);
     Resource resourceConstraint=ResourceHelper.optimizeNestedResourceChain(chain,defaultIdProperty);
     String resourceSignature=resourceConstraint.getResourceSignature();
-    try (final TransactionCommand cmd=StructrApp.getInstance().beginTx()){
+    try (final Tx tx=StructrApp.getInstance().tx()){
       authenticator.checkResourceAccess(request,resourceSignature,propertyView.get(securityContext));
-      cmd.commitTx();
+      tx.success();
     }
-     try (final TransactionCommand cmd=StructrApp.getInstance().beginTx()){
+     try (final Tx tx=StructrApp.getInstance().tx()){
       result=resourceConstraint.doDelete();
-      cmd.commitTx();
+      tx.success();
     }
-     try (final TransactionCommand cmd=StructrApp.getInstance().beginTx()){
+     try (final Tx tx=StructrApp.getInstance().tx()){
       result.commitResponse(gson.get(),response);
-      cmd.commitTx();
+      tx.success();
     }
    }
  catch (  FrameworkException frameworkException) {

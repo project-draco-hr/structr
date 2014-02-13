@@ -1,5 +1,5 @@
 {
-  try (final TransactionCommand cmd=app.beginTx()){
+  try (final Tx tx=app.tx()){
     List<Class> entityList=null;
     try {
       entityList=getClasses("org.structr.core.entity");
@@ -22,7 +22,7 @@
         assertTrue(rel.getType().equals(relType.name()));
       }
     }
-    app.commitTx();
+    tx.success();
   }
  catch (  Throwable ex) {
     ex.printStackTrace();

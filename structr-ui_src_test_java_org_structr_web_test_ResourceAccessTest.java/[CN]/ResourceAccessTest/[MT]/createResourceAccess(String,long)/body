@@ -4,7 +4,7 @@
   properties.put(ResourceAccess.signature,signature);
   properties.put(ResourceAccess.flags,flags);
   properties.put(AbstractNode.type,ResourceAccess.class.getSimpleName());
-  try (final TransactionCommand cmd=app.beginTx()){
+  try (final Tx tx=app.tx()){
     ResourceAccess access=app.create(ResourceAccess.class,properties);
     app.commitTx();
     return access;

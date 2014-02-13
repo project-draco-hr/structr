@@ -13,8 +13,7 @@
   int count=0;
   logger.log(Level.INFO,"Migration of ID properties from uuid to id requested.");
   while (allNodes.hasNext()) {
-    app.beginTx();
-    try {
+    try (final Tx tx=app.tx(false,false)){
       while (allNodes.hasNext() && (++count % txLimit) != 0) {
         final Node node=allNodes.next();
         if (node.hasProperty("uuid") && node.getProperty("uuid") instanceof String && !node.hasProperty("id")) {
@@ -32,21 +31,17 @@
           }
         }
       }
-      app.commitTx(false);
+      tx.success();
     }
  catch (    Throwable t) {
       t.printStackTrace();
-    }
- finally {
-      app.finishTx(false);
     }
     logger.log(Level.INFO,"Migrated {0} of {1} nodes so far.",new Object[]{actualNodeCount,count});
   }
   logger.log(Level.INFO,"Migrated {0} nodes to new ID property.",actualNodeCount);
   count=0;
   while (allRels.hasNext()) {
-    app.beginTx();
-    try {
+    try (final Tx tx=app.tx(false,false)){
       while (allRels.hasNext() && (++count % txLimit) != 0) {
         final Relationship rel=allRels.next();
         if (rel.hasProperty("uuid") && rel.getProperty("uuid") instanceof String && !rel.hasProperty("id")) {
@@ -64,13 +59,10 @@
           }
         }
       }
-      app.commitTx(false);
+      tx.success();
     }
  catch (    Throwable t) {
       t.printStackTrace();
-    }
- finally {
-      app.finishTx(false);
     }
     logger.log(Level.INFO,"Migrated {0} of {1} relationships so far.",new Object[]{actualRelCount,count});
   }

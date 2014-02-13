@@ -1,3 +1,23 @@
 {
-  finishTx(true);
+  final TransactionReference tx=transactions.get();
+  ModificationQueue modificationQueue=null;
+  if (tx != null) {
+    if (tx.isToplevel()) {
+      modificationQueue=queues.get();
+      queues.remove();
+      buffers.remove();
+      currentCommand.remove();
+      transactions.remove();
+      try {
+        tx.close();
+      }
+ catch (      Throwable t) {
+        t.printStackTrace();
+      }
+    }
+ else {
+      tx.end();
+    }
+  }
+  return modificationQueue;
 }

@@ -5,8 +5,7 @@
     TestOne t1=null;
     Class type=TestOne.class;
     final App superUserApp=StructrApp.getInstance();
-    try {
-      superUserApp.beginTx();
+    try (final Tx tx=app.tx()){
       List<NodeInterface> users=createTestNodes(User.class,2);
       user1=(User)users.get(0);
       user1.setProperty(AbstractNode.name,"user1");
@@ -14,31 +13,24 @@
       user2.setProperty(AbstractNode.name,"user2");
       t1=createTestNode(TestOne.class);
       t1.setProperty(AbstractNode.owner,user1);
-      superUserApp.commitTx();
+      tx.success();
     }
  catch (    FrameworkException ex) {
       logger.log(Level.SEVERE,ex.toString());
     }
- finally {
-      superUserApp.finishTx();
-    }
-    try (final TransactionCommand cmd=app.beginTx()){
+    try (final Tx tx=app.tx()){
       assertEquals(user1,t1.getProperty(AbstractNode.owner));
       final App user1App=StructrApp.getInstance(SecurityContext.getInstance(user1,AccessMode.Backend));
       assertEquals(t1,user1App.nodeQuery(type,false).getFirst());
     }
-     try {
-      superUserApp.beginTx();
+     try (final Tx tx=app.tx()){
       t1.setProperty(AbstractNode.owner,user2);
-      superUserApp.commitTx();
+      tx.success();
     }
  catch (    FrameworkException ex) {
       logger.log(Level.SEVERE,ex.toString());
     }
- finally {
-      superUserApp.finishTx();
-    }
-    try (final TransactionCommand cmd=app.beginTx()){
+    try (final Tx tx=app.tx()){
       final App user2App=StructrApp.getInstance(SecurityContext.getInstance(user2,AccessMode.Backend));
       assertEquals(t1,user2App.nodeQuery(type,false).getFirst());
       assertEquals(user2,t1.getProperty(AbstractNode.owner));

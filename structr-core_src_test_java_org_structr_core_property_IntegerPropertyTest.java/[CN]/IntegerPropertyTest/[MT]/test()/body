@@ -4,11 +4,11 @@
     final TestFour testEntity=createTestNode(TestFour.class);
     assertNotNull(testEntity);
     final Integer value=2345;
-    try (final TransactionCommand cmd=app.beginTx()){
+    try (final Tx tx=app.tx()){
       instance.setProperty(securityContext,testEntity,value);
-      app.commitTx();
+      tx.success();
     }
-     try (final TransactionCommand cmd=app.beginTx()){
+     try (final Tx tx=app.tx()){
       assertEquals(value,instance.getProperty(securityContext,testEntity,true));
     }
    }

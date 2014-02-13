@@ -13,9 +13,9 @@
  catch (    org.neo4j.graphdb.NotInTransactionException e) {
     }
     AbstractNode node=null;
-    try (final TransactionCommand cmd=app.beginTx()){
+    try (final Tx tx=app.tx()){
       node=app.create(TestOne.class);
-      app.commitTx();
+      tx.success();
     }
      assertTrue(node != null);
     assertTrue(node instanceof TestOne);

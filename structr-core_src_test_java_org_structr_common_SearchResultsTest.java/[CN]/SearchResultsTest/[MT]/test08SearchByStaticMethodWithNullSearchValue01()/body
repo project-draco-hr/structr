@@ -5,7 +5,7 @@
     final String name="abc";
     props.put(key,name);
     createTestNode(TestOne.class,props);
-    try (final TransactionCommand cmd=app.beginTx()){
+    try (final Tx tx=app.tx()){
       Result result=app.nodeQuery(TestOne.class).andName(null).includeDeletedAndHidden().getResult();
       assertTrue(result.isEmpty());
     }

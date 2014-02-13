@@ -7,11 +7,11 @@
     assertNotNull(testFour);
     final OneFourOneToOne testEntity=createTestRelationship(testOne,testFour,OneFourOneToOne.class);
     assertNotNull(testEntity);
-    try (final TransactionCommand cmd=app.beginTx()){
+    try (final Tx tx=app.tx()){
       testEntity.setProperty(key,TestEnum.Status1);
-      app.commitTx();
+      tx.success();
     }
-     try (final TransactionCommand cmd=app.beginTx()){
+     try (final Tx tx=app.tx()){
       assertEquals(TestEnum.Status1,testEntity.getProperty(key));
       Result<OneFourOneToOne> result=app.relationshipQuery(OneFourOneToOne.class).and(key,TestEnum.Status1).getResult();
       assertEquals(1,result.size());

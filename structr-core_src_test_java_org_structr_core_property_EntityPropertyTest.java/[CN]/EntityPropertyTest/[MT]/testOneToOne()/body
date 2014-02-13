@@ -4,12 +4,12 @@
     final TestSix c=createTestNode(TestSix.class);
     final TestThree b=createTestNode(TestThree.class);
     final TestThree d=createTestNode(TestThree.class);
-    try (final TransactionCommand cmd=app.beginTx()){
+    try (final Tx tx=app.tx()){
       a.setProperty(AbstractNode.name,"a");
       c.setProperty(AbstractNode.name,"c");
       b.setProperty(AbstractNode.name,"b");
       d.setProperty(AbstractNode.name,"d");
-      app.commitTx();
+      tx.success();
     }
  catch (    FrameworkException fex) {
       fex.printStackTrace();
@@ -19,30 +19,30 @@
     assertNotNull(c);
     assertNotNull(b);
     assertNotNull(d);
-    try (TransactionCommand cmd=app.beginTx()){
+    try (Tx tx=app.tx()){
       a.setProperty(TestSix.oneToOneTestThree,b);
       c.setProperty(TestSix.oneToOneTestThree,d);
-      app.commitTx();
+      tx.success();
     }
  catch (    FrameworkException fex) {
       fex.printStackTrace();
       fail("Unable to link test nodes");
     }
-    try (final TransactionCommand cmd=app.beginTx()){
+    try (final Tx tx=app.tx()){
       TestThree verifyB=a.getProperty(TestSix.oneToOneTestThree);
       TestThree verifyD=c.getProperty(TestSix.oneToOneTestThree);
       assertTrue(verifyB != null && verifyB.equals(b));
       assertTrue(verifyD != null && verifyD.equals(d));
     }
-     try (final TransactionCommand cmd=app.beginTx()){
+     try (final Tx tx=app.tx()){
       a.setProperty(TestSix.oneToOneTestThree,d);
-      app.commitTx();
+      tx.success();
     }
  catch (    FrameworkException fex) {
       fex.printStackTrace();
       fail("Unable to link test nodes");
     }
-    try (final TransactionCommand cmd=app.beginTx()){
+    try (final Tx tx=app.tx()){
       TestThree verifyD2=a.getProperty(TestSix.oneToOneTestThree);
       assertTrue(verifyD2 != null && verifyD2.equals(d));
       TestThree vrfy4=c.getProperty(TestSix.oneToOneTestThree);

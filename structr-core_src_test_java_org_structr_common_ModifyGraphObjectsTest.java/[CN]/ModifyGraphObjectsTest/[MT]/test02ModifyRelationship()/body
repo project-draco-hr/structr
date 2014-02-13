@@ -3,22 +3,22 @@
     final NodeHasLocation rel=(createTestRelationships(NodeHasLocation.class,1)).get(0);
     final PropertyKey key1=new StringProperty("jghsdkhgshdhgsdjkfgh");
     final String val1="54354354546806849870";
-    try (final TransactionCommand cmd=app.beginTx()){
+    try (final Tx tx=app.tx()){
       rel.setProperty(key1,val1);
-      app.commitTx();
+      tx.success();
     }
-     try (final TransactionCommand cmd=app.beginTx()){
+     try (final Tx tx=app.tx()){
       assertTrue("Expected relationship to have a value for key '" + key1.dbName() + "'",rel.getRelationship().hasProperty(key1.dbName()));
       assertEquals(val1,rel.getRelationship().getProperty(key1.dbName()));
       Object vrfy1=rel.getProperty(key1);
       assertEquals(val1,vrfy1);
     }
      final String val2="??ljkh??oh??8osdfho??dhi";
-    try (final TransactionCommand cmd=app.beginTx()){
+    try (final Tx tx=app.tx()){
       rel.setProperty(key1,val2);
-      app.commitTx();
+      tx.success();
     }
-     try (final TransactionCommand cmd=app.beginTx()){
+     try (final Tx tx=app.tx()){
       Object vrfy2=rel.getProperty(key1);
       assertEquals(val2,vrfy2);
     }

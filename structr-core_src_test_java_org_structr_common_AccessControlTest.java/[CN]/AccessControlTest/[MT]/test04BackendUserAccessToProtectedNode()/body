@@ -11,7 +11,7 @@
     props.put(AbstractNode.visibleToAuthenticatedUsers,true);
     TestOne t2=createTestNode(TestOne.class,props,user1);
     SecurityContext user2Context=SecurityContext.getInstance(user2,AccessMode.Backend);
-    try (final TransactionCommand cmd=app.beginTx()){
+    try (final Tx tx=app.tx()){
       Result result=StructrApp.getInstance(user2Context).nodeQuery(type).getResult();
       assertEquals(2,result.size());
     }

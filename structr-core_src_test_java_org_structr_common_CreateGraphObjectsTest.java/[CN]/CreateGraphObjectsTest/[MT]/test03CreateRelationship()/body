@@ -6,11 +6,11 @@
     NodeHasLocation rel=null;
     assertTrue(startNode != null);
     assertTrue(endNode != null);
-    try (final TransactionCommand cmd=app.beginTx()){
+    try (final Tx tx=app.tx()){
       rel=app.create(startNode,endNode,NodeHasLocation.class);
-      app.commitTx();
+      tx.success();
     }
-     try (final TransactionCommand cmd=app.beginTx()){
+     try (final Tx tx=app.tx()){
       assertEquals(startNode.getUuid(),rel.getSourceNodeId());
       assertEquals(endNode.getUuid(),rel.getTargetNodeId());
       assertEquals(RelType.IS_AT.name(),rel.getType());

@@ -2,7 +2,7 @@
   final PropertyMap properties=new PropertyMap();
   properties.put(User.name,"admin");
   properties.put(User.password,"admin");
-  try (final TransactionCommand cmd=app.beginTx()){
+  try (final Tx tx=app.tx()){
     User user=app.create(User.class,properties);
     user.setProperty(User.password,"admin");
     app.commitTx();

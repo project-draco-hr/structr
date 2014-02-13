@@ -2,7 +2,7 @@
   final GraphDatabaseService graphDb=getService(NodeService.class).getGraphDb();
   final File seedFile=new File(basePath + "/" + INITIAL_SEED_FILE);
   if (seedFile.exists()) {
-    try (final TransactionCommand tx=StructrApp.getInstance().beginTx()){
+    try (final Tx tx=StructrApp.getInstance().tx()){
       final Iterator<Node> allNodes=GlobalGraphOperations.at(graphDb).getAllNodes().iterator();
       final String idName=GraphObject.id.dbName();
       boolean hasApplicationNodes=false;
@@ -16,7 +16,7 @@
         logger.log(Level.INFO,"Found initial seed file and no application nodes, applying initial seed..");
         SyncCommand.importFromFile(graphDb,SecurityContext.getSuperUserInstance(),seedFile.getAbsoluteFile().getAbsolutePath(),false);
       }
-      tx.commitTx();
+      tx.success();
     }
  catch (    FrameworkException fex) {
       logger.log(Level.WARNING,"Unable to import initial seed file.",fex);

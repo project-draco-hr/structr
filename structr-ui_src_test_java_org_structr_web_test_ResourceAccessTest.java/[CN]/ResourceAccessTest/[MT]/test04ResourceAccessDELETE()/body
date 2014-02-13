@@ -8,23 +8,23 @@
     RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(401).when().delete("/folder/" + testFolder.getUuid());
     final ResourceAccess folderGrant=createResourceAccess("Folder",UiAuthenticator.FORBIDDEN);
     RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(401).when().delete("/folder/" + testFolder.getUuid());
-    try (final TransactionCommand cmd=app.beginTx()){
+    try (final Tx tx=app.tx()){
       folderGrant.setFlag(UiAuthenticator.AUTH_USER_DELETE);
       app.commitTx();
     }
      RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(401).when().delete("/folder/" + testFolder.getUuid());
-    try (final TransactionCommand cmd=app.beginTx()){
+    try (final Tx tx=app.tx()){
       folderGrant.setFlag(UiAuthenticator.NON_AUTH_USER_DELETE);
       app.commitTx();
     }
      RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(403).when().delete("/folder/" + testFolder.getUuid());
-    try (final TransactionCommand cmd=app.beginTx()){
+    try (final Tx tx=app.tx()){
       testUser.setProperty(AbstractNode.name,name);
       testUser.setProperty(User.password,password);
       app.commitTx();
     }
      RestAssured.given().headers("X-User",name,"X-Password",password).contentType("application/json; charset=UTF-8").expect().statusCode(403).when().delete("/folder/" + testFolder.getUuid());
-    try (final TransactionCommand cmd=app.beginTx()){
+    try (final Tx tx=app.tx()){
       testFolder.setProperty(AbstractNode.owner,testUser);
       app.commitTx();
     }

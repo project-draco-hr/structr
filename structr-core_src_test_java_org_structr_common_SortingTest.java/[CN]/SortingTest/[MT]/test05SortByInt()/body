@@ -6,16 +6,16 @@
     final PropertyKey key=TestOne.anInt;
     final int offset=10;
     Collections.shuffle(nodes,new Random(System.nanoTime()));
-    try (final TransactionCommand cmd=app.beginTx()){
+    try (final Tx tx=app.tx()){
       int i=offset;
       for (      NodeInterface node : nodes) {
         node.setProperty(AbstractNode.name,Integer.toString(i));
         node.setProperty(key,i);
         i++;
       }
-      app.commitTx();
+      tx.success();
     }
-     try (final TransactionCommand cmd=app.beginTx()){
+     try (final Tx tx=app.tx()){
       Result result=app.nodeQuery(type).getResult();
       assertEquals(number,result.size());
       PropertyKey sortKey=key;

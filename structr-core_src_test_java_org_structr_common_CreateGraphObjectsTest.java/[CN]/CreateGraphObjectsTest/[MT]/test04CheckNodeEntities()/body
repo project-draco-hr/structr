@@ -1,6 +1,6 @@
 {
   final PropertyMap props=new PropertyMap();
-  try (final TransactionCommand cmd=app.beginTx()){
+  try (final Tx tx=app.tx()){
     List<Class> entityList=Collections.EMPTY_LIST;
     try {
       entityList=getClasses("org.structr.core.entity");
@@ -48,14 +48,11 @@
         }
       }
     }
-    app.commitTx();
+    tx.success();
   }
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,ex.toString());
     ex.printStackTrace();
     fail("Unexpected exception");
-  }
- finally {
-    app.finishTx();
   }
 }

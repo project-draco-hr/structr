@@ -5,7 +5,7 @@
     properties.put(key,2857312362L);
     final TestFour testEntity=createTestNode(TestFour.class,properties);
     assertNotNull(testEntity);
-    try (final TransactionCommand cmd=app.beginTx()){
+    try (final Tx tx=app.tx()){
       assertEquals((Long)2857312362L,(Long)testEntity.getProperty(key));
       Result<TestFour> result=app.nodeQuery(TestFour.class).and(key,2857312362L).getResult();
       assertEquals(1,result.size());

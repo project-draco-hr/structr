@@ -4,15 +4,11 @@
   final TestOne startNode=nodes.get(0);
   final TestOne endNode=nodes.get(1);
   final List<T> rels=new LinkedList<>();
-  try {
-    app.beginTx();
+  try (final Tx tx=app.tx()){
     for (int i=0; i < number; i++) {
       rels.add((T)app.create(startNode,endNode,relType));
     }
-    app.commitTx();
+    tx.success();
   }
-  finally {
-    app.finishTx();
-  }
-  return rels;
+   return rels;
 }

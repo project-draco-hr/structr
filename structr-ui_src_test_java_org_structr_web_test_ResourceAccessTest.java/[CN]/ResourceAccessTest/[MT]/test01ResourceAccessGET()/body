@@ -1,5 +1,5 @@
 {
-  try {
+  try (final Tx tx=app.tx()){
     Folder testFolder=createTestNodes(Folder.class,1).get(0);
     assertNotNull(testFolder);
     RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(401).when().get("/folders");
@@ -9,6 +9,7 @@
     RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(401).when().get("/folders");
     folderGrant.setFlag(UiAuthenticator.NON_AUTH_USER_GET);
     RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(200).when().get("/folders");
+    tx.success();
   }
  catch (  FrameworkException ex) {
     ex.printStackTrace();

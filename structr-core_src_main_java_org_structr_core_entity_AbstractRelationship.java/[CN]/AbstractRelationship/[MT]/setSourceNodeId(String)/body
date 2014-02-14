@@ -3,21 +3,14 @@
     return;
   }
   final App app=StructrApp.getInstance(securityContext);
-  try {
-    app.beginTx();
-    final NodeInterface newStartNode=(NodeInterface)app.get(startNodeId);
-    final NodeInterface endNode=getTargetNode();
-    final Class relationType=getClass();
-    final PropertyMap _props=getProperties();
-    final String type=this.getClass().getSimpleName();
-    if (newStartNode == null) {
-      throw new FrameworkException(type,new IdNotFoundToken(startNodeId));
-    }
-    app.delete(this);
-    app.create(newStartNode,endNode,relationType,_props);
-    app.commitTx();
+  final NodeInterface newStartNode=(NodeInterface)app.get(startNodeId);
+  final NodeInterface endNode=getTargetNode();
+  final Class relationType=getClass();
+  final PropertyMap _props=getProperties();
+  final String type=this.getClass().getSimpleName();
+  if (newStartNode == null) {
+    throw new FrameworkException(type,new IdNotFoundToken(startNodeId));
   }
-  finally {
-    app.finishTx();
-  }
+  app.delete(this);
+  app.create(newStartNode,endNode,relationType,_props);
 }

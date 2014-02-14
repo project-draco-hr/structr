@@ -3,32 +3,18 @@
   final T previousElement=listGetPrevious(currentElement);
   final T nextElement=listGetNext(currentElement);
   if (currentElement != null) {
-    try {
-      app.beginTx();
-      if (previousElement != null) {
-        unlinkNodes(getSiblingLinkType(),previousElement,currentElement);
-      }
-      if (nextElement != null) {
-        unlinkNodes(getSiblingLinkType(),currentElement,nextElement);
-      }
-      app.commitTx();
+    if (previousElement != null) {
+      unlinkNodes(getSiblingLinkType(),previousElement,currentElement);
     }
-  finally {
-      app.finishTx();
+    if (nextElement != null) {
+      unlinkNodes(getSiblingLinkType(),currentElement,nextElement);
     }
   }
   if (previousElement != null && nextElement != null) {
     Node previousNode=previousElement.getNode();
     Node nextNode=nextElement.getNode();
     if (previousNode != null && nextNode != null) {
-      try {
-        app.beginTx();
-        linkNodes(getSiblingLinkType(),previousElement,nextElement);
-        app.commitTx();
-      }
-  finally {
-        app.finishTx();
-      }
+      linkNodes(getSiblingLinkType(),previousElement,nextElement);
     }
   }
 }

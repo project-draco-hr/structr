@@ -1,17 +1,12 @@
 {
   final App app=StructrApp.getInstance(securityContext);
   try {
-    app.beginTx();
     Cdata content=(Cdata)StructrApp.getInstance(securityContext).command(CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.type,Cdata.class.getSimpleName()));
     ((RelationProperty<DOMNode>)Page.elements).addSingleElement(securityContext,Page.this,content);
-    app.commitTx();
     return content;
   }
  catch (  FrameworkException fex) {
     fex.printStackTrace();
-  }
- finally {
-    app.finishTx();
   }
   return null;
 }

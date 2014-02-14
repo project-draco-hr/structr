@@ -12,15 +12,8 @@
     if (!results.isEmpty()) {
       final Principal user=results.get(0);
       final App app=StructrApp.getInstance(securityContext);
-      try {
-        app.beginTx();
-        user.setProperty(User.confirmationKey,null);
-        user.setProperty(Principal.sessionId,request.getSession().getId());
-        app.commitTx();
-      }
-  finally {
-        app.finishTx();
-      }
+      user.setProperty(User.confirmationKey,null);
+      user.setProperty(Principal.sessionId,request.getSession().getId());
       if (StringUtils.isNotBlank(targetPage)) {
         response.sendRedirect("/" + targetPage);
         return true;

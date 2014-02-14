@@ -1,7 +1,6 @@
 {
   try {
     final URL baseUrl=StringUtils.isNotBlank(address) ? new URL(address) : null;
-    app.beginTx();
     Page page=Page.createNewPage(securityContext,name);
     String pageId=null;
     if (page != null) {
@@ -11,14 +10,10 @@
       logger.log(Level.INFO,"##### Finished fetching {0} for page {1} #####",new Object[]{address,name});
       pageId=page.getProperty(GraphObject.id);
     }
-    app.commitTx();
     return pageId;
   }
  catch (  MalformedURLException ex) {
     logger.log(Level.SEVERE,"Could not resolve address " + address,ex);
-  }
- finally {
-    app.finishTx();
   }
   return null;
 }

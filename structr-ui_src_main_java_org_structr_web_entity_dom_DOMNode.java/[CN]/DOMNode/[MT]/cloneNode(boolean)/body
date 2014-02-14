@@ -12,16 +12,11 @@
     }
     final App app=StructrApp.getInstance(securityContext);
     try {
-      app.beginTx();
       DOMNode node=app.create(getClass(),properties);
-      app.commitTx();
       return node;
     }
  catch (    FrameworkException ex) {
       throw new DOMException(DOMException.INVALID_STATE_ERR,ex.toString());
-    }
- finally {
-      app.finishTx();
     }
   }
 }

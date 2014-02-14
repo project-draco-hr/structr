@@ -4,27 +4,22 @@
     final String type="UnknownTestType";
     final String name="GenericNode-name";
     NodeInterface node=null;
+    String uuid=null;
     props.put(AbstractNode.type,type);
     props.put(AbstractNode.name,name);
-    try {
-      app.beginTx();
+    try (final Tx tx=app.tx()){
       node=app.create(NodeInterface.class,props);
-      app.commitTx();
+      tx.success();
     }
-  finally {
-      app.finishTx();
+     assertTrue(node != null);
+    try (final Tx tx=app.tx()){
+      uuid=node.getUuid();
     }
-    assertTrue(node != null);
-    String uuid=node.getUuid();
-    try {
-      app.beginTx();
+     try (final Tx tx=app.tx()){
       app.delete(node);
-      app.commitTx();
+      tx.success();
     }
-  finally {
-      app.finishTx();
-    }
-    try {
+     try (final Tx tx=app.tx()){
       Result result=app.nodeQuery(NodeInterface.class).uuid(uuid).getResult();
       assertEquals("Node should have been deleted",0,result.size());
     }

@@ -3,14 +3,14 @@
   String userName=null;
   String password=null;
   if (auth instanceof UsernamePasswordAuthentication) {
-    UsernamePasswordAuthentication authentication=(UsernamePasswordAuthentication)auth;
-    userName=authentication.getUsername();
-    password=authentication.getPassword();
     org.structr.web.entity.User user=null;
-    try {
+    try (Tx tx=StructrApp.getInstance().tx()){
+      UsernamePasswordAuthentication authentication=(UsernamePasswordAuthentication)auth;
+      userName=authentication.getUsername();
+      password=authentication.getPassword();
       user=(org.structr.web.entity.User)AuthHelper.getPrincipalForPassword(AbstractUser.name,userName,password);
     }
- catch (    AuthenticationException ex) {
+ catch (    FrameworkException ex) {
       logger.log(Level.WARNING,"FTP authentication attempt failed with username {0} and password {1}",new Object[]{userName,password});
     }
     if (user != null) {

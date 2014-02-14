@@ -1,16 +1,8 @@
 {
-  final App app=StructrApp.getInstance(securityContext);
-  try {
-    app.beginTx();
-    List<R> childRels=treeGetChildRelationships();
-    int position=0;
-    for (    R childRel : childRels) {
-      childRel.removeProperty(positionProperty);
-      childRel.setProperty(positionProperty,position++);
-    }
-    app.commitTx();
-  }
-  finally {
-    app.finishTx();
+  List<R> childRels=treeGetChildRelationships();
+  int position=0;
+  for (  R childRel : childRels) {
+    childRel.removeProperty(positionProperty);
+    childRel.setProperty(positionProperty,position++);
   }
 }

@@ -7,14 +7,20 @@
     assertTrue(FTPReply.isPositiveCompletion(reply));
     String username="ftpuser1";
     String password="ftpuserpw1";
-    ftpUser=createFTPUser(username,password);
+    try (final Tx tx=StructrApp.getInstance(securityContext).tx()){
+      ftpUser=createFTPUser(username,password);
+      tx.success();
+    }
+ catch (    FrameworkException fex) {
+      logger.log(Level.SEVERE,"Unable to create FTP user",fex);
+    }
     boolean loginSuccess=ftp.login(username,password);
     logger.log(Level.INFO,"Try to login as " + username + "/"+ password+ ": ",loginSuccess);
     assertTrue(loginSuccess);
     reply=ftp.getReplyCode();
     assertEquals(FTPReply.USER_LOGGED_IN,reply);
   }
- catch (  IOException|FrameworkException ex) {
+ catch (  IOException ex) {
     logger.log(Level.SEVERE,"Error in FTP test",ex);
     fail("Unexpected exception: " + ex.getMessage());
   }

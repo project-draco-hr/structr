@@ -1,12 +1,17 @@
 {
-  for (  final ModificationEvent event : modificationEvents) {
-    try {
-      final WebSocketMessage message=getMessageForEvent(securityContext,event);
-      if (message != null) {
-        broadcast(message);
+  try (final Tx tx=StructrApp.getInstance(securityContext).tx()){
+    for (    final ModificationEvent event : modificationEvents) {
+      try {
+        final WebSocketMessage message=getMessageForEvent(securityContext,event);
+        if (message != null) {
+          broadcast(message);
+        }
+      }
+ catch (      FrameworkException ignore) {
       }
     }
- catch (    FrameworkException ignore) {
-    }
+  }
+ catch (  FrameworkException ex) {
+    ex.printStackTrace();
   }
 }

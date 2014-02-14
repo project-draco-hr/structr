@@ -1,8 +1,6 @@
 {
   checkWriteAccess();
-  final App app=StructrApp.getInstance(securityContext);
   try {
-    app.beginTx();
     String text=getProperty(content);
     String leftPart=text.substring(0,offset);
     String rightPart=text.substring(offset + count);
@@ -11,12 +9,8 @@
     buf.append(data);
     buf.append(rightPart);
     setProperty(content,buf.toString());
-    app.commitTx();
   }
  catch (  FrameworkException fex) {
     throw new DOMException(DOMException.INVALID_STATE_ERR,fex.toString());
-  }
- finally {
-    app.finishTx();
   }
 }

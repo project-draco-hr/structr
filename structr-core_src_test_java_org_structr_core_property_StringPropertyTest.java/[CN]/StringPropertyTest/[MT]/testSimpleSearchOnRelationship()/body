@@ -7,19 +7,17 @@
     assertNotNull(testFour);
     final OneFourOneToOne testEntity=createTestRelationship(testOne,testFour,OneFourOneToOne.class);
     assertNotNull(testEntity);
-    try {
-      app.beginTx();
+    try (final Tx tx=app.tx()){
       testEntity.setProperty(key,"test");
-      app.commitTx();
+      tx.success();
     }
-  finally {
-      app.finishTx();
+     try (final Tx tx=app.tx()){
+      assertEquals("test",testEntity.getProperty(key));
+      Result<OneFourOneToOne> result=app.relationshipQuery(OneFourOneToOne.class).and(key,"test").getResult();
+      assertEquals(result.size(),1);
+      assertEquals(result.get(0),testEntity);
     }
-    assertEquals("test",testEntity.getProperty(key));
-    Result<OneFourOneToOne> result=app.relationshipQuery(OneFourOneToOne.class).and(key,"test").getResult();
-    assertEquals(result.size(),1);
-    assertEquals(result.get(0),testEntity);
-  }
+   }
  catch (  FrameworkException fex) {
     fail("Unable to store array");
   }

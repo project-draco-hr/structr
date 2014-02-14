@@ -1,3 +1,10 @@
 {
-  return structrFile.getProperty(File.owner);
+  try (Tx tx=StructrApp.getInstance().tx()){
+    Principal owner=structrFile.getProperty(File.owner);
+    return owner;
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.SEVERE,"Error while getting owner of " + this,fex);
+  }
+  return null;
 }

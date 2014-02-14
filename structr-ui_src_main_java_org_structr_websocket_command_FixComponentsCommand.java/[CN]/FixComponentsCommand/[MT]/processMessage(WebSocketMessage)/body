@@ -1,15 +1,9 @@
 {
   final SecurityContext securityContext=getWebSocket().getSecurityContext();
-  final App app=StructrApp.getInstance(securityContext);
   try {
-    app.beginTx();
     fixLostComponents();
-    app.commitTx();
   }
- catch (  Exception ex) {
+ catch (  FrameworkException ex) {
     getWebSocket().send(MessageBuilder.status().code(422).message(ex.getMessage()).build(),true);
-  }
- finally {
-    app.finishTx();
   }
 }

@@ -1,18 +1,38 @@
 {
   SecurityContext securityContext=null;
+  Authenticator authenticator=null;
+  RestMethodResult result=null;
+  Resource resource=null;
   try {
-    Authenticator authenticator=getAuthenticator();
-    securityContext=authenticator.initializeAndExamineRequest(request,response);
+    try (final Tx tx=StructrApp.getInstance().tx()){
+      authenticator=getAuthenticator();
+      securityContext=authenticator.initializeAndExamineRequest(request,response);
+      tx.success();
+    }
+     final App app=StructrApp.getInstance(securityContext);
     request.setCharacterEncoding("UTF-8");
     response.setCharacterEncoding("UTF-8");
     response.setContentType("application/json; charset=UTF-8");
-    List<Resource> chain=ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,defaultIdProperty);
-    Resource resource=ResourceHelper.optimizeNestedResourceChain(chain,defaultIdProperty);
-    String resourceSignature=resource.getResourceSignature();
-    authenticator.checkResourceAccess(request,resourceSignature,propertyView.get(securityContext));
-    RestMethodResult result=resource.doHead();
-    result.commitResponse(gson.get(),response);
-  }
+    try (final Tx tx=app.tx()){
+      resource=ResourceHelper.applyViewTransformation(request,securityContext,ResourceHelper.optimizeNestedResourceChain(ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,defaultIdProperty),defaultIdProperty),propertyView);
+      authenticator.checkResourceAccess(request,resource.getResourceSignature(),propertyView.get(securityContext));
+      tx.success();
+    }
+     boolean retry=true;
+    while (retry) {
+      try (final Tx tx=app.tx()){
+        result=resource.doHead();
+        tx.success();
+      }
+ catch (      DeadlockDetectedException ddex) {
+        retry=true;
+      }
+    }
+    try (final Tx tx=app.tx()){
+      result.commitResponse(gson.get(),response);
+      tx.success();
+    }
+   }
  catch (  FrameworkException frameworkException) {
     response.setStatus(frameworkException.getStatus());
     gson.get().toJson(frameworkException,response.getWriter());

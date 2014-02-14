@@ -1,12 +1,8 @@
 {
-  try {
-    app.beginTx();
+  try (final Tx tx=app.tx()){
     obj.setProperty(key,value);
-    app.commitTx();
+    tx.success();
   }
  catch (  FrameworkException ex) {
-  }
- finally {
-    app.finishTx();
   }
 }

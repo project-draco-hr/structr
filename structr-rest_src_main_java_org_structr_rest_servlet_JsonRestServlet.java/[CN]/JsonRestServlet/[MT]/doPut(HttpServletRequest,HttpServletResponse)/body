@@ -1,25 +1,53 @@
 {
   SecurityContext securityContext=null;
+  Authenticator authenticator=null;
+  RestMethodResult result=null;
+  JsonInput propertySet=null;
+  Resource resource=null;
   try {
-    Authenticator authenticator=getAuthenticator();
-    securityContext=authenticator.initializeAndExamineRequest(request,response);
+    try (final Tx tx=StructrApp.getInstance().tx()){
+      authenticator=getAuthenticator();
+      securityContext=authenticator.initializeAndExamineRequest(request,response);
+      tx.success();
+    }
+     final App app=StructrApp.getInstance(securityContext);
     request.setCharacterEncoding("UTF-8");
     response.setCharacterEncoding("UTF-8");
     response.setContentType("application/json; charset=UTF-8");
-    final JsonInput propertySet=gson.get().fromJson(request.getReader(),JsonInput.class);
-    if (securityContext != null) {
-      List<Resource> chain=ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,defaultIdProperty);
-      Resource resource=ResourceHelper.optimizeNestedResourceChain(chain,defaultIdProperty);
-      String resourceSignature=resource.getResourceSignature();
+    try (final Tx tx=app.tx()){
+      propertySet=gson.get().fromJson(request.getReader(),JsonInput.class);
+      tx.success();
+    }
+     if (securityContext != null) {
       Map<String,Object> properties=convertPropertySetToMap(propertySet);
-      authenticator.checkResourceAccess(request,resourceSignature,propertyView.get(securityContext));
-      RestMethodResult result=resource.doPut(properties);
-      result.commitResponse(gson.get(),response);
-    }
+      try (final Tx tx=app.tx()){
+        resource=ResourceHelper.applyViewTransformation(request,securityContext,ResourceHelper.optimizeNestedResourceChain(ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,defaultIdProperty),defaultIdProperty),propertyView);
+        authenticator.checkResourceAccess(request,resource.getResourceSignature(),propertyView.get(securityContext));
+        tx.success();
+      }
+       boolean retry=true;
+      while (retry) {
+        try (final Tx tx=app.tx()){
+          result=resource.doPut(properties);
+          tx.success();
+          retry=false;
+        }
+ catch (        DeadlockDetectedException ddex) {
+          retry=true;
+        }
+      }
+      try (final Tx tx=app.tx()){
+        result.commitResponse(gson.get(),response);
+        tx.success();
+      }
+     }
  else {
-      RestMethodResult result=new RestMethodResult(HttpServletResponse.SC_FORBIDDEN);
-      result.commitResponse(gson.get(),response);
-    }
+      try (final Tx tx=app.tx()){
+        result=new RestMethodResult(HttpServletResponse.SC_FORBIDDEN);
+        result.commitResponse(gson.get(),response);
+        tx.success();
+      }
+     }
   }
  catch (  FrameworkException frameworkException) {
     response.setStatus(frameworkException.getStatus());

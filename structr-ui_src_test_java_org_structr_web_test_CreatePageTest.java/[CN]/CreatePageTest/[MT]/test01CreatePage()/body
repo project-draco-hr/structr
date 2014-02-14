@@ -4,7 +4,7 @@
   final String bodyText="Body Text";
   final String h1ClassAttr="heading";
   final String divClassAttr="main";
-  try {
+  try (final Tx tx=app.tx()){
     Page page=Page.createNewPage(securityContext,pageName);
     if (page != null) {
       Element html=page.createElement("html");
@@ -52,6 +52,7 @@
       assertFalse(div.isEmpty());
       assertEquals(div.first().text(),bodyText);
       assertEquals(div.first().attr("class"),divClassAttr);
+      tx.success();
     }
  catch (    IOException ioex) {
       logger.log(Level.SEVERE,ioex.toString());

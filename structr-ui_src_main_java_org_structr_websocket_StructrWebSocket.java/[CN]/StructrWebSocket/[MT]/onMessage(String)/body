@@ -1,7 +1,8 @@
 {
   logger.log(Level.FINE,"############################################################ RECEIVED \n{0}",data.substring(0,Math.min(data.length(),1000)));
   WebSocketMessage webSocketData=gson.fromJson(data,WebSocketMessage.class);
-  try {
+  final App app=StructrApp.getInstance(securityContext);
+  try (final Tx tx=app.tx()){
     this.callback=webSocketData.getCallback();
     String messageToken=webSocketData.getToken();
     String command=webSocketData.getCommand();
@@ -22,6 +23,7 @@
       webSocketData.setToken(null);
       try {
         abstractCommand.processMessage(webSocketData);
+        tx.success();
       }
  catch (      Throwable t) {
         t.printStackTrace(System.out);
@@ -33,7 +35,7 @@
       send(MessageBuilder.status().code(400).message("Unknown command").build(),true);
     }
   }
- catch (  Throwable t) {
+ catch (  FrameworkException|IllegalAccessException|InstantiationException t) {
     logger.log(Level.WARNING,"Unable to parse message.",t);
   }
 }

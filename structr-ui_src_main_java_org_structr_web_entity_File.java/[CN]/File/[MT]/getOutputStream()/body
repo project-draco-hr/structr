@@ -2,23 +2,17 @@
   final String path=getRelativeFilePath();
   if (path != null) {
     final String filePath=FileHelper.getFilePath(path);
-    final App app=StructrApp.getInstance(securityContext);
     try {
       java.io.File fileOnDisk=new java.io.File(filePath);
       FileOutputStream fos=new FileOutputStream(fileOnDisk){
         @Override public void close() throws IOException {
           super.close();
           try {
-            app.beginTx();
             setProperty(checksum,FileHelper.getChecksum(File.this));
             setProperty(size,FileHelper.getSize(File.this));
-            app.commitTx();
           }
  catch (          FrameworkException ex) {
             logger.log(Level.SEVERE,"Could not determine or save checksum and size after closing file output stream",ex);
-          }
- finally {
-            app.finishTx();
           }
         }
       }

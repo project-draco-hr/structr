@@ -1,53 +1,46 @@
 {
-  try {
+  try (final Tx tx=app.tx()){
     final Page doc=(Page)getDocument();
-    try {
-      app.beginTx();
-      final List<User> users=createTestNodes(User.class,3);
-      assertEquals(3,users.size());
-      User user1=users.get(0);
-      user1.setProperty(AbstractNode.name,"user1");
-      User user2=users.get(1);
-      user2.setProperty(AbstractNode.name,"user2");
-      User user3=users.get(2);
-      user3.setProperty(AbstractNode.name,"user3");
-      final List<File> files=createTestNodes(File.class,6);
-      assertEquals(6,files.size());
-      File nodeA=files.get(0);
-      nodeA.setProperty(AbstractNode.name,"fileA");
-      File nodeB=files.get(1);
-      nodeB.setProperty(AbstractNode.name,"fileB");
-      File nodeC=files.get(2);
-      nodeC.setProperty(AbstractNode.name,"fileC");
-      File nodeD=files.get(3);
-      nodeD.setProperty(AbstractNode.name,"fileD");
-      File nodeE=files.get(4);
-      nodeE.setProperty(AbstractNode.name,"fileE");
-      File nodeF=files.get(5);
-      nodeF.setProperty(AbstractNode.name,"fileF");
-      Element html=doc.createElement("html");
-      Element body=doc.createElement("body");
-      Element b=doc.createElement("b");
-      final Element p1=doc.createElement("p");
-      ((DOMElement)p1).setProperty(DOMElement.restQuery,"users?sort=name");
-      ((DOMElement)p1).setProperty(DOMElement.dataKey,"user");
-      p1.appendChild(doc.createTextNode("${user.name}"));
-      Element div=doc.createElement("div");
-      final Element p2=doc.createElement("p");
-      ((DOMElement)p2).setProperty(DOMElement.restQuery,"files?sort=name");
-      ((DOMElement)p2).setProperty(DOMElement.dataKey,"file");
-      p2.appendChild(doc.createTextNode("${file.name}"));
-      doc.appendChild(html);
-      html.appendChild(body);
-      body.appendChild(b);
-      body.appendChild(div);
-      b.appendChild(p1);
-      div.appendChild(p2);
-      app.commitTx();
-    }
-  finally {
-      app.finishTx();
-    }
+    final List<User> users=createTestNodes(User.class,3);
+    assertEquals(3,users.size());
+    User user1=users.get(0);
+    user1.setProperty(AbstractNode.name,"user1");
+    User user2=users.get(1);
+    user2.setProperty(AbstractNode.name,"user2");
+    User user3=users.get(2);
+    user3.setProperty(AbstractNode.name,"user3");
+    final List<File> files=createTestNodes(File.class,6);
+    assertEquals(6,files.size());
+    File nodeA=files.get(0);
+    nodeA.setProperty(AbstractNode.name,"fileA");
+    File nodeB=files.get(1);
+    nodeB.setProperty(AbstractNode.name,"fileB");
+    File nodeC=files.get(2);
+    nodeC.setProperty(AbstractNode.name,"fileC");
+    File nodeD=files.get(3);
+    nodeD.setProperty(AbstractNode.name,"fileD");
+    File nodeE=files.get(4);
+    nodeE.setProperty(AbstractNode.name,"fileE");
+    File nodeF=files.get(5);
+    nodeF.setProperty(AbstractNode.name,"fileF");
+    Element html=doc.createElement("html");
+    Element body=doc.createElement("body");
+    Element b=doc.createElement("b");
+    final Element p1=doc.createElement("p");
+    ((DOMElement)p1).setProperty(DOMElement.restQuery,"users?sort=name");
+    ((DOMElement)p1).setProperty(DOMElement.dataKey,"user");
+    p1.appendChild(doc.createTextNode("${user.name}"));
+    Element div=doc.createElement("div");
+    final Element p2=doc.createElement("p");
+    ((DOMElement)p2).setProperty(DOMElement.restQuery,"files?sort=name");
+    ((DOMElement)p2).setProperty(DOMElement.dataKey,"file");
+    p2.appendChild(doc.createTextNode("${file.name}"));
+    doc.appendChild(html);
+    html.appendChild(body);
+    body.appendChild(b);
+    body.appendChild(div);
+    b.appendChild(p1);
+    div.appendChild(p2);
     HttpServletRequest request=mock(HttpServletRequest.class);
     RenderContext ctx=new RenderContext(request,null,EditMode.NONE,Locale.GERMAN);
     doc.render(securityContext,ctx,0);
@@ -62,6 +55,7 @@
     assertEquals("fileD",parsedDocument.select("html > body > div > p").get(3).ownText());
     assertEquals("fileE",parsedDocument.select("html > body > div > p").get(4).ownText());
     assertEquals("fileF",parsedDocument.select("html > body > div > p").get(5).ownText());
+    tx.success();
   }
  catch (  FrameworkException fex) {
     fail("unexpected exception");

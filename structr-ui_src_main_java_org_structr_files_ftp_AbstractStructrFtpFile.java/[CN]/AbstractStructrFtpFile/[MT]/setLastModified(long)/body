@@ -1,15 +1,9 @@
 {
-  final App app=StructrApp.getInstance();
-  try {
-    app.beginTx();
+  try (Tx tx=StructrApp.getInstance().tx()){
     structrFile.setProperty(AbstractFile.lastModifiedDate,new Date(l));
-    app.commitTx();
   }
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,null,ex);
-  }
- finally {
-    app.finishTx();
   }
   return true;
 }

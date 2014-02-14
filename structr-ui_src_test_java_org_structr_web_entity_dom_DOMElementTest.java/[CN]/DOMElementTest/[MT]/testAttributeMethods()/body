@@ -1,18 +1,24 @@
 {
-  Document doc=getDocument();
-  Element elem=doc.createElement("div");
-  String name1="test1";
-  String name2="test2";
-  String name3="test3";
-  String value1="value1";
-  String value2="value2";
-  String value3="value3";
-  elem.setAttribute(name1,value1);
-  elem.setAttribute(name2,value2);
-  elem.setAttribute(name3,value3);
-  assertEquals(true,elem.hasAttributes());
-  assertEquals(3,elem.getAttributes().getLength());
-  assertEquals(value1,elem.getAttribute(name1));
-  assertEquals(value2,elem.getAttribute(name2));
-  assertEquals(value3,elem.getAttribute(name3));
+  try (final Tx tx=StructrApp.getInstance(securityContext).tx()){
+    Document doc=getDocument();
+    Element elem=doc.createElement("div");
+    String name1="test1";
+    String name2="test2";
+    String name3="test3";
+    String value1="value1";
+    String value2="value2";
+    String value3="value3";
+    elem.setAttribute(name1,value1);
+    elem.setAttribute(name2,value2);
+    elem.setAttribute(name3,value3);
+    assertEquals(true,elem.hasAttributes());
+    assertEquals(3,elem.getAttributes().getLength());
+    assertEquals(value1,elem.getAttribute(name1));
+    assertEquals(value2,elem.getAttribute(name2));
+    assertEquals(value3,elem.getAttribute(name3));
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fail("unexpected exception");
+  }
 }

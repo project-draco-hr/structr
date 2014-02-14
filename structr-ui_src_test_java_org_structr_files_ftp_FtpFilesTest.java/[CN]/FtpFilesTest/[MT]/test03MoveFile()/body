@@ -1,6 +1,6 @@
 {
   FTPClient ftp=setupFTPClient();
-  try {
+  try (final Tx tx=StructrApp.getInstance(securityContext).tx()){
     FTPFile[] files=ftp.listFiles();
     assertNotNull(files);
     assertEquals(0,files.length);
@@ -15,6 +15,7 @@
     assertEquals(1,fileNames.length);
     assertEquals(name1,fileNames[0]);
     ftp.disconnect();
+    tx.success();
   }
  catch (  IOException|FrameworkException ex) {
     logger.log(Level.SEVERE,"Error while moving FTP file",ex);

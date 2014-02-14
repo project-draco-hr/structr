@@ -1,16 +1,9 @@
 {
   try {
-    app.beginTx();
-    try {
-      createChildNodes(parsedDocument.body(),parent,page,new URL(baseUrl));
-    }
- catch (    MalformedURLException ex) {
-      logger.log(Level.WARNING,"Could not read URL {1}, calling method without base URL",baseUrl);
-      createChildNodes(parsedDocument.body(),parent,page,null);
-    }
-    app.commitTx();
+    createChildNodes(parsedDocument.body(),parent,page,new URL(baseUrl));
   }
-  finally {
-    app.finishTx();
+ catch (  MalformedURLException ex) {
+    logger.log(Level.WARNING,"Could not read URL {1}, calling method without base URL",baseUrl);
+    createChildNodes(parsedDocument.body(),parent,page,null);
   }
 }

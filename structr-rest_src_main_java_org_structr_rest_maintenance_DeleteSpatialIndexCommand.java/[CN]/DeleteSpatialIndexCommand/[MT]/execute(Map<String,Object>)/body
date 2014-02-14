@@ -11,8 +11,7 @@
     }
   }
   final App app=StructrApp.getInstance(securityContext);
-  try {
-    app.beginTx();
+  try (final Tx tx=app.tx()){
     for (    Node node : toDelete) {
       logger.log(Level.INFO,"Deleting node {0}",node);
       try {
@@ -25,9 +24,6 @@
         t.printStackTrace();
       }
     }
-    app.commitTx();
+    tx.success();
   }
-  finally {
-    app.finishTx();
-  }
-}
+ }

@@ -1,27 +1,34 @@
 {
-  logger.log(Level.INFO,"move()");
-  final AbstractStructrFtpFile targetFile=(AbstractStructrFtpFile)target;
-  final String path=targetFile instanceof StructrFtpFile ? "/" : targetFile.getAbsolutePath();
-  try {
-    if (path.contains("/")) {
-      String newParentPath=StringUtils.substringBeforeLast(path,"/");
-      AbstractFile newParent=FileHelper.getFileByAbsolutePath(newParentPath);
-      if (newParent != null && newParent instanceof Folder) {
-        Folder newParentFolder=(Folder)newParent;
-        structrFile.setProperty(AbstractFile.parent,newParentFolder);
-      }
+  try (Tx tx=StructrApp.getInstance().tx()){
+    logger.log(Level.INFO,"move()");
+    final AbstractStructrFtpFile targetFile=(AbstractStructrFtpFile)target;
+    final String path=targetFile instanceof StructrFtpFile ? "/" : targetFile.getAbsolutePath();
+    try {
+      if (path.contains("/")) {
+        String newParentPath=StringUtils.substringBeforeLast(path,"/");
+        AbstractFile newParent=FileHelper.getFileByAbsolutePath(newParentPath);
+        if (newParent != null && newParent instanceof Folder) {
+          Folder newParentFolder=(Folder)newParent;
+          structrFile.setProperty(AbstractFile.parent,newParentFolder);
+        }
  else {
-        structrFile.setProperty(AbstractFile.parent,null);
+          structrFile.setProperty(AbstractFile.parent,null);
+        }
+      }
+      if (!("/".equals(path))) {
+        final String newName=path.contains("/") ? StringUtils.substringAfterLast(path,"/") : path;
+        structrFile.setProperty(AbstractNode.name,newName);
       }
     }
-    if (!("/".equals(path))) {
-      final String newName=path.contains("/") ? StringUtils.substringAfterLast(path,"/") : path;
-      structrFile.setProperty(AbstractNode.name,newName);
+ catch (    FrameworkException ex) {
+      logger.log(Level.SEVERE,"Could not move ftp file",ex);
+      return false;
     }
+    tx.success();
+    return true;
   }
  catch (  FrameworkException ex) {
-    logger.log(Level.SEVERE,"Could not move ftp file",ex);
-    return false;
+    logger.log(Level.SEVERE,null,ex);
   }
-  return true;
+  return false;
 }

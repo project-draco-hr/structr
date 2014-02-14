@@ -1,5 +1,11 @@
 {
-  final StructrFtpFolder newWorkingDirectory=(StructrFtpFolder)getFile(requestedPath);
-  workingDir=newWorkingDirectory.getAbsolutePath();
-  return true;
+  try (Tx tx=StructrApp.getInstance().tx()){
+    final StructrFtpFolder newWorkingDirectory=(StructrFtpFolder)getFile(requestedPath);
+    workingDir=newWorkingDirectory.getAbsolutePath();
+    return true;
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.SEVERE,"Error in changeWorkingDirectory()",fex);
+  }
+  return false;
 }

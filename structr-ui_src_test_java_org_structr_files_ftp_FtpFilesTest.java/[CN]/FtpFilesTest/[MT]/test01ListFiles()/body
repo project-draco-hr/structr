@@ -1,17 +1,32 @@
 {
   FTPClient ftp=setupFTPClient();
-  try (final Tx tx=StructrApp.getInstance(securityContext).tx()){
+  final String name1="file1";
+  final String name2="file2";
+  try (final Tx tx=app.tx()){
     FTPFile[] files=ftp.listFiles();
     assertNotNull(files);
     assertEquals(0,files.length);
-    String name1="file1";
     createFTPFile(null,name1);
-    String[] fileNames=ftp.listNames();
+    tx.success();
+  }
+ catch (  IOException|FrameworkException ex) {
+    ex.printStackTrace();
+    fail("Unexpected exception: " + ex.getMessage());
+  }
+  String[] fileNames=null;
+  try (final Tx tx=app.tx()){
+    fileNames=ftp.listNames();
     assertNotNull(fileNames);
     assertEquals(1,fileNames.length);
     assertEquals(name1,fileNames[0]);
-    String name2="file2";
     createFTPFile(null,name2);
+    tx.success();
+  }
+ catch (  IOException|FrameworkException ex) {
+    ex.printStackTrace();
+    fail("Unexpected exception: " + ex.getMessage());
+  }
+  try (final Tx tx=app.tx()){
     fileNames=ftp.listNames();
     assertNotNull(fileNames);
     assertEquals(2,fileNames.length);
@@ -21,7 +36,7 @@
     tx.success();
   }
  catch (  IOException|FrameworkException ex) {
-    logger.log(Level.SEVERE,"Error while listing FTP files",ex);
+    ex.printStackTrace();
     fail("Unexpected exception: " + ex.getMessage());
   }
 }

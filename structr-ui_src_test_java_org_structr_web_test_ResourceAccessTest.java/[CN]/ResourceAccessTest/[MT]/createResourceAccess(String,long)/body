@@ -3,10 +3,8 @@
   final App app=StructrApp.getInstance();
   properties.put(ResourceAccess.signature,signature);
   properties.put(ResourceAccess.flags,flags);
-  properties.put(AbstractNode.type,ResourceAccess.class.getSimpleName());
-  try (final Tx tx=app.tx()){
+  try {
     ResourceAccess access=app.create(ResourceAccess.class,properties);
-    tx.success();
     return access;
   }
  catch (  Throwable t) {

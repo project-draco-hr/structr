@@ -1,16 +1,23 @@
 {
-  List<String> userNames=new ArrayList();
-  Result<Principal> result=Result.EMPTY_RESULT;
-  try {
-    result=StructrApp.getInstance(securityContext).nodeQuery(Principal.class).getResult();
-  }
- catch (  FrameworkException ex) {
-    logger.log(Level.WARNING,"Error while searching for principal",ex);
-  }
-  if (!result.isEmpty()) {
-    for (    Principal p : result.getResults()) {
-      userNames.add(p.getProperty(AbstractUser.name));
+  try (Tx tx=StructrApp.getInstance().tx()){
+    List<String> userNames=new ArrayList();
+    Result<Principal> result=Result.EMPTY_RESULT;
+    try {
+      result=StructrApp.getInstance(securityContext).nodeQuery(Principal.class).getResult();
     }
+ catch (    FrameworkException ex) {
+      logger.log(Level.WARNING,"Error while searching for principal",ex);
+    }
+    if (!result.isEmpty()) {
+      for (      Principal p : result.getResults()) {
+        userNames.add(p.getProperty(AbstractUser.name));
+      }
+    }
+    tx.success();
+    return (String[])userNames.toArray(new String[userNames.size()]);
   }
-  return (String[])userNames.toArray(new String[userNames.size()]);
+ catch (  FrameworkException fex) {
+    logger.log(Level.SEVERE,"Unable to get user by its name",fex);
+  }
+  return null;
 }

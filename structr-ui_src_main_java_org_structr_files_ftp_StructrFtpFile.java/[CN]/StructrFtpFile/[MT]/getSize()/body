@@ -1,4 +1,9 @@
 {
-  Long size=((File)structrFile).getSize();
-  return size == null ? 0L : size;
+  try (Tx tx=StructrApp.getInstance().tx()){
+    Long size=((File)structrFile).getSize();
+    return size == null ? 0L : size;
+  }
+ catch (  FrameworkException fex) {
+  }
+  return 0L;
 }

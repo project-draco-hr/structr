@@ -2,13 +2,20 @@
   final GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
   final SecurityContext superUserContext=SecurityContext.getSuperUserInstance();
   final NodeFactory nodeFactory=new NodeFactory(superUserContext);
-  String type=null;
+  final String type=(String)properties.get("type");
+  if (StringUtils.isBlank(type)) {
+    throw new FrameworkException(422,"Type must not be empty");
+  }
+  final Class cls=SchemaHelper.getEntityClassForRawType(type);
+  if (cls == null) {
+    throw new FrameworkException(422,"Invalid type " + type);
+  }
+  properties.remove("type");
   if (graphDb != null) {
     Result<AbstractNode> nodes=null;
     if (properties.containsKey(AbstractNode.type.dbName())) {
-      type=(String)properties.get(AbstractNode.type.dbName());
       try (final Tx tx=StructrApp.getInstance().tx()){
-        nodes=StructrApp.getInstance(securityContext).nodeQuery(SchemaHelper.getEntityClassForRawType(type)).getResult();
+        nodes=StructrApp.getInstance(securityContext).nodeQuery(cls).getResult();
       }
        properties.remove(AbstractNode.type.dbName());
     }
@@ -17,7 +24,6 @@
         nodes=nodeFactory.instantiateAll(GlobalGraphOperations.at(graphDb).getAllNodes());
       }
      }
-    final Class cls=StructrApp.getConfiguration().getNodeEntities().get(type);
     long nodeCount=bulkGraphOperation(securityContext,nodes.getResults(),1000,"SetNodeProperties",new BulkGraphOperation<AbstractNode>(){
       @Override public void handleGraphObject(      SecurityContext securityContext,      AbstractNode node){
         if (node.getProperty(GraphObject.id) != null) {

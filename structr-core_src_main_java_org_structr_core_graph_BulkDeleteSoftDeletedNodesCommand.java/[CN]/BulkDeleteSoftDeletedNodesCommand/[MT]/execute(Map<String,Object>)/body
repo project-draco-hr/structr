@@ -3,15 +3,18 @@
   final SecurityContext superUserContext=SecurityContext.getSuperUserInstance();
   final NodeFactory nodeFactory=new NodeFactory(superUserContext,true,false);
   if (graphDb != null) {
-    Result<AbstractNode> nodes=nodeFactory.instantiateAll(GlobalGraphOperations.at(graphDb).getAllNodes());
-    final boolean erase;
+    final List<AbstractNode> nodes=new LinkedList<>();
+    try (final Tx tx=StructrApp.getInstance().tx()){
+      nodes.addAll(nodeFactory.bulkInstantiate(GlobalGraphOperations.at(graphDb).getAllNodes()));
+    }
+     final boolean erase;
     if (properties.containsKey("erase") && properties.get("erase").equals("true")) {
       erase=true;
     }
  else {
       erase=false;
     }
-    bulkGraphOperation(securityContext,nodes.getResults(),1000,"DeleteSoftDeletedNodes",new BulkGraphOperation<AbstractNode>(){
+    bulkGraphOperation(securityContext,nodes,1000,"DeleteSoftDeletedNodes",new BulkGraphOperation<AbstractNode>(){
       @Override public void handleGraphObject(      SecurityContext securityContext,      AbstractNode node){
         if (node.isDeleted()) {
           logger.log(Level.INFO,"Found deleted node: {0}",node);

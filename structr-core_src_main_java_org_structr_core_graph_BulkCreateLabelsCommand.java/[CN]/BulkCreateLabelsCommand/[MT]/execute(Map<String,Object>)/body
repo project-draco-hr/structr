@@ -1,0 +1,47 @@
+{
+  final String entityType=(String)attributes.get("type");
+  final GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
+  final SecurityContext superUserContext=SecurityContext.getSuperUserInstance();
+  final NodeFactory nodeFactory=new NodeFactory(superUserContext);
+  Class type=null;
+  if (entityType != null) {
+    type=SchemaHelper.getEntityClassForRawType(entityType);
+  }
+  final List<AbstractNode> nodes=new LinkedList<>();
+  try (final Tx tx=StructrApp.getInstance().tx()){
+    final Result<AbstractNode> result=nodeFactory.instantiateAll(Iterables.filter(new NodeIdPredicate(),GlobalGraphOperations.at(graphDb).getAllNodes()));
+    for (    AbstractNode node : result.getResults()) {
+      if (type == null || node.getClass().equals(type)) {
+        nodes.add(node);
+      }
+    }
+  }
+   if (type == null) {
+    logger.log(Level.INFO,"Node type not set or no entity class found. Starting creation of labels for {0} nodes",nodes.size());
+  }
+ else {
+    logger.log(Level.INFO,"Starting creation of labels for {0} nodes of type {0}",new Object[]{nodes.size(),type.getSimpleName()});
+  }
+  long count=bulkGraphOperation(securityContext,nodes,1000,"CreateLabels",new BulkGraphOperation<AbstractNode>(){
+    @Override public void handleGraphObject(    SecurityContext securityContext,    AbstractNode node){
+      final String type=node.getProperty(GraphObject.type);
+      if (type != null) {
+        try {
+          node.unlockReadOnlyPropertiesOnce();
+          GraphObject.type.setProperty(securityContext,node,type);
+        }
+ catch (        FrameworkException fex) {
+        }
+      }
+      node.updateInIndex();
+    }
+    @Override public void handleThrowable(    SecurityContext securityContext,    Throwable t,    AbstractNode node){
+      logger.log(Level.WARNING,"Unable to create labels for node {0}: {1}",new Object[]{node,t.getMessage()});
+    }
+    @Override public void handleTransactionFailure(    SecurityContext securityContext,    Throwable t){
+      logger.log(Level.WARNING,"Unable to create labels for node: {0}",t.getMessage());
+    }
+  }
+);
+  logger.log(Level.INFO,"Done with creating labels on {0} nodes",count);
+}

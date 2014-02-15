@@ -5,12 +5,16 @@
     List<AbstractRelationship> rels=null;
     final String typeName="type";
     if (properties.containsKey(typeName)) {
-      rels=StructrApp.getInstance(securityContext).relationshipQuery(SchemaHelper.getEntityClassForRawType(typeName)).getAsList();
-      properties.remove(typeName);
+      try (final Tx tx=StructrApp.getInstance().tx()){
+        rels=StructrApp.getInstance(securityContext).relationshipQuery(SchemaHelper.getEntityClassForRawType(typeName)).getAsList();
+      }
+       properties.remove(typeName);
     }
  else {
-      rels=(List<AbstractRelationship>)relationshipFactory.instantiate(GlobalGraphOperations.at(graphDb).getAllRelationships());
-    }
+      try (final Tx tx=StructrApp.getInstance().tx()){
+        rels=(List<AbstractRelationship>)relationshipFactory.instantiate(GlobalGraphOperations.at(graphDb).getAllRelationships());
+      }
+     }
     long count=NodeServiceCommand.bulkGraphOperation(securityContext,rels,1000,"SetRelationshipProperties",new BulkGraphOperation<AbstractRelationship>(){
       @Override public void handleGraphObject(      SecurityContext securityContext,      AbstractRelationship rel){
         if (rel.getProperty(AbstractRelationship.id) != null) {

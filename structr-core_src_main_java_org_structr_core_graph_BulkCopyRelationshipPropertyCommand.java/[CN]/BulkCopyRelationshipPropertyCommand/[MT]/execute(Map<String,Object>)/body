@@ -7,8 +7,11 @@
     throw new IllegalArgumentException("This command requires one argument of type Map. Map must contain values for 'sourceKey' and 'destKey'.");
   }
   if (graphDb != null) {
-    List<AbstractRelationship> rels=relFactory.instantiate(GlobalGraphOperations.at(graphDb).getAllRelationships());
-    long count=bulkGraphOperation(securityContext,rels,1000,"CopyRelationshipProperties",new BulkGraphOperation<AbstractRelationship>(){
+    List<AbstractRelationship> rels=new LinkedList<>();
+    try (final Tx tx=StructrApp.getInstance().tx()){
+      rels.addAll(relFactory.instantiate(GlobalGraphOperations.at(graphDb).getAllRelationships()));
+    }
+     long count=bulkGraphOperation(securityContext,rels,1000,"CopyRelationshipProperties",new BulkGraphOperation<AbstractRelationship>(){
       @Override public void handleGraphObject(      SecurityContext securityContext,      AbstractRelationship rel){
         if (rel.getProperty(GraphObject.id) != null) {
           Class type=rel.getClass();

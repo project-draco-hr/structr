@@ -1,0 +1,40 @@
+{
+  final Integer one=Integer.valueOf(1);
+  try {
+    createTestNodes(TestOne.class,100);
+    try {
+      app.command(BulkSetNodePropertiesCommand.class).execute(toMap("type","NonExistingType"));
+      fail("Using BulkSetNodePropertiesCommand with a non-existing type should throw an exception.");
+    }
+ catch (    FrameworkException fex) {
+      assertEquals(422,fex.getStatus());
+      assertEquals("Invalid type NonExistingType",fex.getMessage());
+    }
+    try {
+      app.command(BulkSetNodePropertiesCommand.class).execute(toMap("anInt",1));
+      fail("Using BulkSetNodePropertiesCommand without a type property should throw an exception.");
+    }
+ catch (    FrameworkException fex) {
+      assertEquals(422,fex.getStatus());
+      assertEquals("Type must not be empty",fex.getMessage());
+    }
+    app.command(BulkSetNodePropertiesCommand.class).execute(toMap("type","TestOne","anInt",1,"aString","one"));
+    try (final Tx tx=app.tx()){
+      assertEquals(0,app.nodeQuery(TestTwo.class).getResult().size());
+      assertEquals(100,app.nodeQuery(TestOne.class).getResult().size());
+      for (      final TestOne test : app.nodeQuery(TestOne.class)) {
+        assertEquals(one,test.getProperty(TestOne.anInt));
+        assertEquals("one",test.getProperty(TestOne.aString));
+      }
+    }
+     app.command(BulkSetNodePropertiesCommand.class).execute(toMap("type","TestOne","newType","TestTwo"));
+    try (final Tx tx=app.tx()){
+      assertEquals(0,app.nodeQuery(TestOne.class).getResult().size());
+      assertEquals(100,app.nodeQuery(TestTwo.class).getResult().size());
+    }
+   }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+    fail("Unexpected exception.");
+  }
+}

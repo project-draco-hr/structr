@@ -12,7 +12,15 @@
  else {
     logger.log(Level.INFO,"##### Start fetching {0} for page {1} #####",new Object[]{address,name});
     try {
-      parsedDocument=Jsoup.connect(address).userAgent("Mozilla").timeout(timeout).get();
+      DefaultHttpClient client=new DefaultHttpClient();
+      HttpGet get=new HttpGet(address);
+      get.setHeader("User-Agent","Mozilla");
+      get.setHeader("Connection","close");
+      code=IOUtils.toString(client.execute(get).getEntity().getContent(),"UTF-8");
+      if (code.charAt(0) == 65279) {
+        code=code.substring(1);
+      }
+      parsedDocument=Jsoup.parse(code);
     }
  catch (    IOException ioe) {
       throw new FrameworkException(500,"Error while parsing content from " + address);

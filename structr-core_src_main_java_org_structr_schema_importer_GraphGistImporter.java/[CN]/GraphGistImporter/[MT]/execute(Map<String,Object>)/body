@@ -1,0 +1,28 @@
+{
+  final String fileName=(String)attributes.get("file");
+  final String source=(String)attributes.get("source");
+  if (fileName == null && source == null) {
+    throw new FrameworkException(422,"Please supply file or source parameter.");
+  }
+  if (fileName != null && source != null) {
+    throw new FrameworkException(422,"Please supply only file or source parameter.");
+  }
+  if (fileName != null) {
+    final StringBuilder buf=new StringBuilder();
+    try (final BufferedReader reader=new BufferedReader(new FileReader(fileName))){
+      String line=reader.readLine();
+      while (line != null) {
+        buf.append(line);
+        buf.append("\n");
+        line=reader.readLine();
+      }
+    }
+ catch (    IOException ioex) {
+      ioex.printStackTrace();
+    }
+    GraphGistImporter.importGist(buf.toString());
+  }
+ else   if (source != null) {
+    GraphGistImporter.importGist(source);
+  }
+}

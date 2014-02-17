@@ -34,7 +34,7 @@
   logger.log(Level.FINE,"Creating thumbnail for {0}",getName());
   final App app=StructrApp.getInstance(securityContext);
   try {
-    originalImage.setChecksum(newChecksum);
+    originalImage.setProperty(File.checksum,newChecksum);
     Thumbnail thumbnailData=ImageHelper.createThumbnail(originalImage,maxWidth,maxHeight,cropToFit);
     if (thumbnailData != null) {
       Integer tnWidth=thumbnailData.getWidth();
@@ -47,11 +47,11 @@
  catch (      IOException ex) {
         logger.log(Level.WARNING,"Could not create thumbnail image",ex);
       }
-      if (thumbnail != null) {
+      if (thumbnail != null && data != null) {
         Thumbnails thumbnailRelationship=app.create(originalImage,thumbnail,Thumbnails.class);
         thumbnailRelationship.setProperty(AbstractRelationship.cascadeDelete,Relation.SOURCE_TO_TARGET);
         long size=data.length;
-        thumbnail.setSize(size);
+        thumbnail.setProperty(File.size,size);
         thumbnail.setProperty(name,originalImage.getName() + "_thumb_" + tnWidth+ "x"+ tnHeight);
         thumbnail.setProperty(Image.width,tnWidth);
         thumbnail.setProperty(Image.height,tnHeight);
@@ -68,7 +68,7 @@
       }
     }
  else {
-      logger.log(Level.WARNING,"Could not create thumbnail for image {0} ({1})",new Object[]{getName(),getUuid()});
+      logger.log(Level.FINE,"Could not create thumbnail for image {0} ({1})",new Object[]{getName(),getUuid()});
     }
   }
  catch (  FrameworkException fex) {

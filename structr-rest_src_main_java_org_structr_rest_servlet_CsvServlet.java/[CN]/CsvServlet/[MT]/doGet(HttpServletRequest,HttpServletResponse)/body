@@ -1,57 +1,73 @@
 {
   SecurityContext securityContext=null;
+  Authenticator authenticator=null;
+  Result result=null;
+  Resource resource=null;
   try {
-    Authenticator authenticator=getAuthenticator();
-    securityContext=authenticator.initializeAndExamineRequest(request,response);
+    try (final Tx tx=StructrApp.getInstance().tx()){
+      authenticator=getAuthenticator();
+      securityContext=authenticator.initializeAndExamineRequest(request,response);
+      tx.success();
+    }
+     final App app=StructrApp.getInstance(securityContext);
     request.setCharacterEncoding("UTF-8");
     response.setCharacterEncoding("UTF-8");
     response.setContentType("text/csv; charset=utf-8");
     propertyView.set(securityContext,defaultPropertyView);
     double queryTimeStart=System.nanoTime();
-    Resource resource=ResourceHelper.applyViewTransformation(request,securityContext,ResourceHelper.optimizeNestedResourceChain(ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,defaultIdProperty),defaultIdProperty),propertyView);
-    String resourceSignature=resource.getResourceSignature();
-    authenticator.checkResourceAccess(request,resourceSignature,propertyView.get(securityContext));
-    String pageSizeParameter=request.getParameter(JsonRestServlet.REQUEST_PARAMETER_PAGE_SIZE);
-    String pageParameter=request.getParameter(JsonRestServlet.REQUEST_PARAMETER_PAGE_NUMBER);
-    String offsetId=request.getParameter(JsonRestServlet.REQUEST_PARAMETER_OFFSET_ID);
-    String sortOrder=request.getParameter(JsonRestServlet.REQUEST_PARAMETER_SORT_ORDER);
-    String sortKeyName=request.getParameter(JsonRestServlet.REQUEST_PARAMETER_SORT_KEY);
-    boolean sortDescending=(sortOrder != null && "desc".equals(sortOrder.toLowerCase()));
-    int pageSize=parseInt(pageSizeParameter,NodeFactory.DEFAULT_PAGE_SIZE);
-    int page=parseInt(pageParameter,NodeFactory.DEFAULT_PAGE);
-    PropertyKey sortKey=null;
-    if (sortKeyName != null) {
-      Class<? extends GraphObject> type=resource.getEntityClass();
-      sortKey=StructrApp.getConfiguration().getPropertyKeyForDatabaseName(type,sortKeyName);
+    try (final Tx tx=app.tx()){
+      resource=ResourceHelper.optimizeNestedResourceChain(ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,defaultIdProperty),defaultIdProperty);
+      authenticator.checkResourceAccess(request,resource.getResourceSignature(),propertyView.get(securityContext));
+      tx.success();
     }
-    removeLineBreaks=StringUtils.equals(request.getParameter(REMOVE_LINE_BREAK_PARAM),"1");
-    Result result=resource.doGet(sortKey,sortDescending,pageSize,page,offsetId);
-    result.setIsCollection(resource.isCollectionResource());
-    result.setIsPrimitiveArray(resource.isPrimitiveArray());
-    PagingHelper.addPagingParameter(result,pageSize,page);
-    double queryTimeEnd=System.nanoTime();
-    if (result != null) {
-      result.setPropertyView(propertyView.get(securityContext));
-      resource.postProcessResultSet(result);
-      DecimalFormat decimalFormat=new DecimalFormat("0.000000000",DecimalFormatSymbols.getInstance(Locale.ENGLISH));
-      result.setQueryTime(decimalFormat.format((queryTimeEnd - queryTimeStart) / 1000000000.0));
-      Writer writer=response.getWriter();
-      writeUtf8Bom(writer);
-      writeCsv(result,writer);
-      response.setStatus(HttpServletResponse.SC_OK);
-      writer.append("\n");
-      writer.flush();
-      writer.close();
-    }
+     try (final Tx tx=app.tx()){
+      String resourceSignature=resource.getResourceSignature();
+      authenticator.checkResourceAccess(request,resourceSignature,propertyView.get(securityContext));
+      String pageSizeParameter=request.getParameter(JsonRestServlet.REQUEST_PARAMETER_PAGE_SIZE);
+      String pageParameter=request.getParameter(JsonRestServlet.REQUEST_PARAMETER_PAGE_NUMBER);
+      String offsetId=request.getParameter(JsonRestServlet.REQUEST_PARAMETER_OFFSET_ID);
+      String sortOrder=request.getParameter(JsonRestServlet.REQUEST_PARAMETER_SORT_ORDER);
+      String sortKeyName=request.getParameter(JsonRestServlet.REQUEST_PARAMETER_SORT_KEY);
+      boolean sortDescending=(sortOrder != null && "desc".equals(sortOrder.toLowerCase()));
+      int pageSize=parseInt(pageSizeParameter,NodeFactory.DEFAULT_PAGE_SIZE);
+      int page=parseInt(pageParameter,NodeFactory.DEFAULT_PAGE);
+      PropertyKey sortKey=null;
+      if (sortKeyName != null) {
+        Class<? extends GraphObject> type=resource.getEntityClass();
+        sortKey=StructrApp.getConfiguration().getPropertyKeyForDatabaseName(type,sortKeyName);
+      }
+      removeLineBreaks=StringUtils.equals(request.getParameter(REMOVE_LINE_BREAK_PARAM),"1");
+      writeBom=StringUtils.equals(request.getParameter(WRITE_BOM),"1");
+      result=resource.doGet(sortKey,sortDescending,pageSize,page,offsetId);
+      result.setIsCollection(resource.isCollectionResource());
+      result.setIsPrimitiveArray(resource.isPrimitiveArray());
+      PagingHelper.addPagingParameter(result,pageSize,page);
+      double queryTimeEnd=System.nanoTime();
+      if (result != null) {
+        result.setPropertyView(propertyView.get(securityContext));
+        resource.postProcessResultSet(result);
+        DecimalFormat decimalFormat=new DecimalFormat("0.000000000",DecimalFormatSymbols.getInstance(Locale.ENGLISH));
+        result.setQueryTime(decimalFormat.format((queryTimeEnd - queryTimeStart) / 1000000000.0));
+        Writer writer=response.getWriter();
+        if (writeBom) {
+          writeUtf8Bom(writer);
+        }
+        writeCsv(result,writer);
+        response.setStatus(HttpServletResponse.SC_OK);
+        writer.flush();
+        writer.close();
+      }
  else {
-      logger.log(Level.WARNING,"Result was null!");
-      int code=HttpServletResponse.SC_NO_CONTENT;
-      response.setStatus(code);
-      Writer writer=response.getWriter();
-      writer.flush();
-      writer.close();
+        logger.log(Level.WARNING,"Result was null!");
+        int code=HttpServletResponse.SC_NO_CONTENT;
+        response.setStatus(code);
+        Writer writer=response.getWriter();
+        writer.flush();
+        writer.close();
+      }
+      tx.success();
     }
-  }
+   }
  catch (  FrameworkException frameworkException) {
     response.setStatus(frameworkException.getStatus());
   }

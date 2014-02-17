@@ -14,37 +14,18 @@
   if (url != null && source != null) {
     throw new FrameworkException(422,"Please supply only one of file, url or source.");
   }
-  if (fileName != null) {
-    final StringBuilder buf=new StringBuilder();
-    try (final BufferedReader reader=new BufferedReader(new FileReader(fileName))){
-      String line=reader.readLine();
-      while (line != null) {
-        buf.append(line);
-        buf.append("\n");
-        line=reader.readLine();
-      }
+  try {
+    if (fileName != null) {
+      GraphGistImporter.importGist(extractSource(new FileInputStream(fileName)));
     }
- catch (    IOException ioex) {
-      ioex.printStackTrace();
+ else     if (url != null) {
+      GraphGistImporter.importGist(extractSource(new URL(url).openStream()));
     }
-    GraphGistImporter.importGist(buf.toString());
+ else     if (source != null) {
+      GraphGistImporter.importGist(extractSource(new ByteArrayInputStream(source.getBytes())));
+    }
   }
- else   if (url != null) {
-    final StringBuilder buf=new StringBuilder();
-    try (final BufferedReader reader=new BufferedReader(new InputStreamReader(new URL(url).openStream()))){
-      String line=reader.readLine();
-      while (line != null) {
-        buf.append(line);
-        buf.append("\n");
-        line=reader.readLine();
-      }
-    }
- catch (    IOException ioex) {
-      ioex.printStackTrace();
-    }
-    GraphGistImporter.importGist(buf.toString());
-  }
- else   if (source != null) {
-    GraphGistImporter.importGist(source);
+ catch (  IOException ioex) {
+    ioex.printStackTrace();
   }
 }

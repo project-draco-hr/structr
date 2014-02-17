@@ -13,7 +13,7 @@
   if (mode == null || "nodesOnly".equals(mode)) {
     final List<AbstractNode> nodes=new LinkedList<>();
     try (final Tx tx=StructrApp.getInstance().tx()){
-      final Result<AbstractNode> result=nodeFactory.instantiateAll(Iterables.filter(new NodeIdPredicate(),GlobalGraphOperations.at(graphDb).getAllNodes()));
+      final Result<AbstractNode> result=nodeFactory.instantiateAll(Iterables.filter(new StructrAndSpatialPredicate(true,false,false),GlobalGraphOperations.at(graphDb).getAllNodes()));
       for (      AbstractNode node : result.getResults()) {
         if (type == null || node.getClass().equals(type)) {
           nodes.add(node);
@@ -44,7 +44,7 @@
     final List<AbstractRelationship> rels=new LinkedList<>();
     long count=0;
     try (final Tx tx=StructrApp.getInstance().tx()){
-      final List<AbstractRelationship> unfilteredRels=relFactory.instantiate(Iterables.filter(new RelationshipIdPredicate(),GlobalGraphOperations.at(graphDb).getAllRelationships()));
+      final List<AbstractRelationship> unfilteredRels=relFactory.instantiate(Iterables.filter(new StructrAndSpatialPredicate(true,false,false),GlobalGraphOperations.at(graphDb).getAllRelationships()));
       for (      AbstractRelationship rel : unfilteredRels) {
         if (relType == null || rel.getType().equals(relType)) {
           rels.add(rel);

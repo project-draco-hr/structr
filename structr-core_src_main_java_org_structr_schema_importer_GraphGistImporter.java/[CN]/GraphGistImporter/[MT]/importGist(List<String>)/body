@@ -3,13 +3,15 @@
   final NodeServiceCommand nodeServiceCommand=app.command(CreateNodeCommand.class);
   final GraphDatabaseService graphDb=app.command(GraphDatabaseCommand.class).execute();
   final ExecutionEngine engine=new ExecutionEngine(graphDb,new BufferingLogger());
-  final ExecutionResult result=engine.execute(source);
   final Map<String,Map<String,Class>> properties=new LinkedHashMap<>();
   final Set<RelationshipTemplate> relationships=new LinkedHashSet<>();
   final Map<String,SchemaNode> schemaNodes=new LinkedHashMap<>();
+  for (  final String source : sources) {
+    engine.execute(source);
+  }
   try (final Tx tx=app.tx()){
     TransactionCommand.postProcess("gist",app.command(BulkRebuildIndexCommand.class));
-    for (    final Node node : Iterables.filter(new PropertyContainerIdPredicate(),GlobalGraphOperations.at(graphDb).getAllNodes())) {
+    for (    final Node node : Iterables.filter(new StructrAndSpatialPredicate(false,false,true),GlobalGraphOperations.at(graphDb).getAllNodes())) {
       String primaryType=getType(node);
       if (primaryType != null && !"ReferenceNode".equals(primaryType)) {
         for (        final String key : node.getPropertyKeys()) {
@@ -27,7 +29,7 @@
         node.setProperty(GraphObject.id.dbName(),nodeServiceCommand.getNextUuid());
       }
     }
-    for (    final Relationship rel : Iterables.filter(new PropertyContainerIdPredicate(),GlobalGraphOperations.at(graphDb).getAllRelationships())) {
+    for (    final Relationship rel : Iterables.filter(new StructrAndSpatialPredicate(false,false,true),GlobalGraphOperations.at(graphDb).getAllRelationships())) {
       final Node startNode=rel.getStartNode();
       final Node endNode=rel.getEndNode();
       final String relationshipType=rel.getType().name();

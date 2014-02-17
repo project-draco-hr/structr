@@ -2,7 +2,7 @@
   final Set<String> dynamicViews=new LinkedHashSet<>();
   final NodeExtender nodeExtender=new NodeExtender();
   boolean success=true;
-  try {
+  try (final Tx tx=StructrApp.getInstance().tx()){
     for (    final SchemaNode schemaNode : StructrApp.getInstance().nodeQuery(SchemaNode.class).getAsList()) {
       nodeExtender.addClass(schemaNode.getClassName(),schemaNode.getSource(errorBuffer));
       dynamicViews.addAll(schemaNode.getViews());

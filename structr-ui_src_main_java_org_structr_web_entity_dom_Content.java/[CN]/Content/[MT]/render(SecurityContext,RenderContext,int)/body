@@ -5,7 +5,7 @@
   String id=getUuid();
   EditMode edit=renderContext.getEditMode(securityContext.getUser(false));
   boolean inBody=renderContext.inBody();
-  StringBuilder buffer=renderContext.getBuffer();
+  PrintWriter out=renderContext.getOutputWriter();
   String _contentType=getProperty(contentType);
   String _content=getPropertyWithVariableReplacement(securityContext,renderContext,Content.content);
   if (!(EditMode.RAW.equals(edit)) && (_contentType == null || ("text/plain".equals(_contentType)))) {
@@ -13,13 +13,13 @@
   }
   if (EditMode.CONTENT.equals(edit) && inBody && securityContext.isAllowed(this,Permission.write)) {
     if ("text/javascript".equals(_contentType)) {
-      buffer.append("// data-structr-type='").append(getType()).append("'\n// data-structr-id='").append(id).append("'\n");
+      out.append("// data-structr-type='").append(getType()).append("'\n// data-structr-id='").append(id).append("'\n");
     }
  else     if ("text/css".equals(_contentType)) {
-      buffer.append("/* data-structr-type='").append(getType()).append("'*/\n/* data-structr-id='").append(id).append("'*/\n");
+      out.append("/* data-structr-type='").append(getType()).append("'*/\n/* data-structr-id='").append(id).append("'*/\n");
     }
  else {
-      buffer.append("<!--data-structr-id=\"".concat(id).concat("\" data-structr-raw-value=\"").concat(getProperty(Content.content).replaceAll("\n","\\\\n")).concat("\"-->"));
+      out.append("<!--data-structr-id=\"".concat(id).concat("\" data-structr-raw-value=\"").concat(getProperty(Content.content).replaceAll("\n","\\\\n")).concat("\"-->"));
     }
   }
   if (_contentType != null) {
@@ -40,9 +40,9 @@
     if (EditMode.CONTENT.equals(edit) && _content.length() == 0) {
       _content="--- empty ---";
     }
-    buffer.append(_content);
+    out.append(_content);
   }
   if (EditMode.CONTENT.equals(edit) && inBody && !("text/javascript".equals(getProperty(contentType)))&& !("text/css".equals(getProperty(contentType)))) {
-    buffer.append("<!---->");
+    out.append("<!---->");
   }
 }

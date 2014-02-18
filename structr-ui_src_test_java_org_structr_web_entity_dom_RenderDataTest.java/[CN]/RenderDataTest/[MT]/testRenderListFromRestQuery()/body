@@ -1,6 +1,8 @@
 {
+  String name=null;
   try (final Tx tx=app.tx()){
     final Page doc=(Page)getDocument();
+    name=doc.getName();
     final List<User> users=createTestNodes(User.class,3);
     assertEquals(3,users.size());
     User user1=users.get(0);
@@ -29,23 +31,30 @@
     final Element p1=doc.createElement("p");
     ((DOMElement)p1).setProperty(DOMElement.restQuery,"users?sort=name");
     ((DOMElement)p1).setProperty(DOMElement.dataKey,"user");
-    p1.appendChild(doc.createTextNode("${user.name}"));
+    Content userNameContentNode=(Content)doc.createTextNode("${user.name}");
+    p1.appendChild(userNameContentNode);
     Element div=doc.createElement("div");
     final Element p2=doc.createElement("p");
     ((DOMElement)p2).setProperty(DOMElement.restQuery,"files?sort=name");
     ((DOMElement)p2).setProperty(DOMElement.dataKey,"file");
-    p2.appendChild(doc.createTextNode("${file.name}"));
+    Content fileNameContentNode=(Content)doc.createTextNode("${file.name}");
+    p2.appendChild(fileNameContentNode);
     doc.appendChild(html);
     html.appendChild(body);
     body.appendChild(b);
     body.appendChild(div);
     b.appendChild(p1);
     div.appendChild(p2);
-    HttpServletRequest request=mock(HttpServletRequest.class);
-    RenderContext ctx=new RenderContext(request,null,EditMode.NONE,Locale.GERMAN);
-    doc.render(securityContext,ctx,0);
-    System.out.println(ctx.getBuffer().toString());
-    org.jsoup.nodes.Document parsedDocument=Jsoup.parse(ctx.getBuffer().toString());
+    makePublic(doc,html,body,div,b,p1,p2,fileNameContentNode,userNameContentNode,nodeA,nodeB,nodeC,nodeD,nodeE,nodeF,user1,user2,user3);
+    tx.success();
+  }
+ catch (  Exception ex) {
+    ex.printStackTrace();
+    fail("Unexpected exception");
+  }
+  try (final Tx tx=app.tx()){
+    Document parsedDocument=Jsoup.connect(baseUri + name).get();
+    System.out.println(parsedDocument.outerHtml());
     assertEquals("user1",parsedDocument.select("html > body > b > p").get(0).ownText());
     assertEquals("user2",parsedDocument.select("html > body > b > p").get(1).ownText());
     assertEquals("user3",parsedDocument.select("html > body > b > p").get(2).ownText());
@@ -57,7 +66,8 @@
     assertEquals("fileF",parsedDocument.select("html > body > div > p").get(5).ownText());
     tx.success();
   }
- catch (  FrameworkException fex) {
+ catch (  Exception ex) {
+    ex.printStackTrace();
     fail("unexpected exception");
   }
 }

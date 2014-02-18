@@ -1,0 +1,23 @@
+{
+  if (container.hasProperty(idName)) {
+    final Object idObject=container.getProperty(idName);
+    if (idObject instanceof String) {
+      final String id=(String)idObject;
+      if (uuidPattern.matcher(id).matches()) {
+        if (container.hasProperty(typeName)) {
+          final Object typeObject=container.getProperty(typeName);
+          if (typeObject instanceof String) {
+            final String type=(String)typeObject;
+            if (configuration.getNodeEntityClass(type) != null) {
+              return true;
+            }
+            if (configuration.getRelationshipEntityClass(type) != null) {
+              return true;
+            }
+          }
+        }
+      }
+    }
+  }
+  return false;
+}

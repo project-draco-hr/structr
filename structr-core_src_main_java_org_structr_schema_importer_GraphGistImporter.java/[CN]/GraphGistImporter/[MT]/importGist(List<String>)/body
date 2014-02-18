@@ -1,6 +1,7 @@
 {
   final App app=StructrApp.getInstance();
   final NodeServiceCommand nodeServiceCommand=app.command(CreateNodeCommand.class);
+  final ConfigurationProvider configuration=Services.getInstance().getConfigurationProvider();
   final GraphDatabaseService graphDb=app.command(GraphDatabaseCommand.class).execute();
   final ExecutionEngine engine=new ExecutionEngine(graphDb,new BufferingLogger());
   final Map<String,Map<String,Class>> properties=new LinkedHashMap<>();
@@ -18,19 +19,16 @@
     TransactionCommand.postProcess("reloadschema",new ReloadSchema());
     TransactionCommand.postProcess("gist",app.command(BulkRebuildIndexCommand.class));
     for (    final Node node : Iterables.filter(new StructrAndSpatialPredicate(false,false,true),GlobalGraphOperations.at(graphDb).getAllNodes())) {
-      String primaryType=getType(node);
-      if (primaryType != null && !"ReferenceNode".equals(primaryType)) {
-        for (        final String key : node.getPropertyKeys()) {
-          final Object value=node.getProperty(key);
-          if (value != null) {
-            Map<String,Class> propertyTypes=properties.get(primaryType);
-            if (propertyTypes == null) {
-              propertyTypes=new LinkedHashMap<>();
-              properties.put(primaryType,propertyTypes);
-            }
-            propertyTypes.put(key,value.getClass());
-          }
+      final Map<String,Class> propertyTypes=new TreeMap<>();
+      for (      final String key : node.getPropertyKeys()) {
+        final Object value=node.getProperty(key);
+        if (value != null) {
+          propertyTypes.put(key,value.getClass());
         }
+      }
+      final String primaryType=getType(node,propertyTypes);
+      if (primaryType != null && !"ReferenceNode".equals(primaryType)) {
+        properties.put(primaryType,propertyTypes);
         node.setProperty(GraphObject.id.dbName(),nodeServiceCommand.getNextUuid());
         node.setProperty(GraphObject.type.dbName(),primaryType);
       }
@@ -38,27 +36,39 @@
     for (    final Relationship rel : Iterables.filter(new StructrAndSpatialPredicate(false,false,true),GlobalGraphOperations.at(graphDb).getAllRelationships())) {
       final Node startNode=rel.getStartNode();
       final Node endNode=rel.getEndNode();
-      final String relationshipType=rel.getType().name();
-      final String startNodeType=getType(startNode);
-      final String endNodeType=getType(endNode);
-      final Set<String> typeSet=properties.keySet();
-      if (typeSet.contains(startNodeType) && typeSet.contains(endNodeType)) {
-        relationships.add(new RelationshipTemplate(startNodeType,endNodeType,relationshipType));
+      if (startNode.hasProperty("type") && endNode.hasProperty("type")) {
+        final String relationshipType=rel.getType().name();
+        final String startNodeType=(String)startNode.getProperty("type");
+        final String endNodeType=(String)endNode.getProperty("type");
+        final Set<String> typeSet=properties.keySet();
+        if (typeSet.contains(startNodeType) && typeSet.contains(endNodeType)) {
+          relationships.add(new RelationshipTemplate(startNodeType,endNodeType,relationshipType));
+        }
+        if (startNodeType != null && endNodeType != null) {
+          final String combinedType=startNodeType.concat(relationshipType).concat(endNodeType);
+          rel.setProperty(GraphObject.type.dbName(),combinedType);
+        }
+        rel.setProperty(GraphObject.id.dbName(),nodeServiceCommand.getNextUuid());
       }
-      if (startNodeType != null && endNodeType != null) {
-        final String combinedType=startNodeType.concat(relationshipType).concat(endNodeType);
-        rel.setProperty(GraphObject.type.dbName(),combinedType);
-      }
-      rel.setProperty(GraphObject.id.dbName(),nodeServiceCommand.getNextUuid());
     }
     for (    final Entry<String,Map<String,Class>> typeEntry : properties.entrySet()) {
       final String type=typeEntry.getKey();
       final Map<String,Class> props=typeEntry.getValue();
       final PropertyMap propertyMap=new PropertyMap();
       for (      final Entry<String,Class> propertyEntry : props.entrySet()) {
-        propertyMap.put(new StringProperty("_".concat(propertyEntry.getKey())),propertyEntry.getValue().getSimpleName());
+        final String propertyName=propertyEntry.getKey();
+        final Class propertyType=propertyEntry.getValue();
+        String propertyTypeName=propertyType.getSimpleName();
+        if (propertyType.isArray()) {
+          propertyTypeName=propertyTypeName.substring(0,propertyTypeName.length() - 2).concat("Array");
+        }
+        propertyMap.put(new StringProperty("_".concat(propertyName)),propertyTypeName);
       }
       propertyMap.put(AbstractNode.name,type);
+      final Class existingType=configuration.getNodeEntityClass(type);
+      if (existingType != null) {
+        propertyMap.put(SchemaNode.extendsClass,existingType.getName());
+      }
       schemaNodes.put(type,app.create(SchemaNode.class,propertyMap));
     }
     for (    final RelationshipTemplate template : relationships) {

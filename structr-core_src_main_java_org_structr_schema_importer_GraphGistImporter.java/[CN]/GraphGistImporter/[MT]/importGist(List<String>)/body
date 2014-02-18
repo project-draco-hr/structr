@@ -7,9 +7,15 @@
   final Set<RelationshipTemplate> relationships=new LinkedHashSet<>();
   final Map<String,SchemaNode> schemaNodes=new LinkedHashMap<>();
   for (  final String source : sources) {
-    engine.execute(source);
+    try {
+      engine.execute(source);
+    }
+ catch (    Throwable t) {
+      t.printStackTrace();
+    }
   }
   try (final Tx tx=app.tx()){
+    TransactionCommand.postProcess("reloadschema",new ReloadSchema());
     TransactionCommand.postProcess("gist",app.command(BulkRebuildIndexCommand.class));
     for (    final Node node : Iterables.filter(new StructrAndSpatialPredicate(false,false,true),GlobalGraphOperations.at(graphDb).getAllNodes())) {
       String primaryType=getType(node);
@@ -25,8 +31,8 @@
             propertyTypes.put(key,value.getClass());
           }
         }
-        node.setProperty(GraphObject.type.dbName(),primaryType);
         node.setProperty(GraphObject.id.dbName(),nodeServiceCommand.getNextUuid());
+        node.setProperty(GraphObject.type.dbName(),primaryType);
       }
     }
     for (    final Relationship rel : Iterables.filter(new StructrAndSpatialPredicate(false,false,true),GlobalGraphOperations.at(graphDb).getAllRelationships())) {
@@ -38,6 +44,10 @@
       final Set<String> typeSet=properties.keySet();
       if (typeSet.contains(startNodeType) && typeSet.contains(endNodeType)) {
         relationships.add(new RelationshipTemplate(startNodeType,endNodeType,relationshipType));
+      }
+      if (startNodeType != null && endNodeType != null) {
+        final String combinedType=startNodeType.concat(relationshipType).concat(endNodeType);
+        rel.setProperty(GraphObject.type.dbName(),combinedType);
       }
       rel.setProperty(GraphObject.id.dbName(),nodeServiceCommand.getNextUuid());
     }

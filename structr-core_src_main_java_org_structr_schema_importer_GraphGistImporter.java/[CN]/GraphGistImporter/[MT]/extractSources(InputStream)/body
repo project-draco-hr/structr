@@ -1,0 +1,36 @@
+{
+  final List<String> sources=new LinkedList<>();
+  final StringBuilder buf=new StringBuilder();
+  try (final BufferedReader reader=new BufferedReader(new InputStreamReader(source))){
+    String line=reader.readLine();
+    boolean beforeCypher=false;
+    boolean inCypher=false;
+    while (line != null) {
+      final String trimmedLine=line.trim().replaceAll("[\\s]+","");
+      if (inCypher && "----".equals(trimmedLine)) {
+        inCypher=false;
+        beforeCypher=false;
+        if (buf.toString().toUpperCase().contains("CREATE")) {
+          sources.add(buf.toString());
+          buf.setLength(0);
+        }
+      }
+      if (inCypher) {
+        buf.append(line);
+        buf.append("\n");
+      }
+      if ("[source,cypher]".equals(trimmedLine)) {
+        beforeCypher=true;
+      }
+      if (beforeCypher && "----".equals(trimmedLine)) {
+        inCypher=true;
+        beforeCypher=false;
+      }
+      line=reader.readLine();
+    }
+  }
+ catch (  IOException ioex) {
+    ioex.printStackTrace();
+  }
+  return sources;
+}

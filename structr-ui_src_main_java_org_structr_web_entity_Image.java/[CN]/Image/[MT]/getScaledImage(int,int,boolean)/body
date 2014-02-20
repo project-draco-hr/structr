@@ -42,7 +42,8 @@
       byte[] data=null;
       try {
         data=thumbnailData.getBytes();
-        thumbnail=ImageHelper.createImage(securityContext,data,"image/" + Thumbnail.FORMAT,Image.class,true);
+        final String thumbnailName=originalImage.getName() + "_thumb_" + tnWidth+ "x"+ tnHeight;
+        thumbnail=ImageHelper.createImage(securityContext,data,"image/" + Thumbnail.FORMAT,Image.class,thumbnailName,true);
       }
  catch (      IOException ex) {
         logger.log(Level.WARNING,"Could not create thumbnail image",ex);
@@ -52,7 +53,6 @@
         thumbnailRelationship.setProperty(AbstractRelationship.cascadeDelete,Relation.SOURCE_TO_TARGET);
         long size=data.length;
         thumbnail.setProperty(File.size,size);
-        thumbnail.setProperty(name,originalImage.getName() + "_thumb_" + tnWidth+ "x"+ tnHeight);
         thumbnail.setProperty(Image.width,tnWidth);
         thumbnail.setProperty(Image.height,tnHeight);
         thumbnail.setProperty(AbstractNode.hidden,originalImage.getProperty(AbstractNode.hidden));

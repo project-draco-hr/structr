@@ -1,0 +1,24 @@
+{
+  final Set<String> supportedByArchiveStreamFactory=new HashSet<>(Arrays.asList(new String[]{ArchiveStreamFactory.AR,ArchiveStreamFactory.ARJ,ArchiveStreamFactory.CPIO,ArchiveStreamFactory.DUMP,ArchiveStreamFactory.JAR,ArchiveStreamFactory.TAR,ArchiveStreamFactory.ZIP}));
+  final SecurityContext securityContext=getWebSocket().getSecurityContext();
+  try {
+    final String id=(String)webSocketData.getId();
+    final App app=StructrApp.getInstance(securityContext);
+    final File file=app.get(File.class,id);
+    if (file == null) {
+      getWebSocket().send(MessageBuilder.status().code(400).message("File not found: ".concat(id)).build(),true);
+      return;
+    }
+    final String fileExtension=StringUtils.substringAfterLast(file.getName(),".");
+    if (supportedByArchiveStreamFactory.contains(fileExtension)) {
+      unarchive(securityContext,file);
+    }
+ else {
+      getWebSocket().send(MessageBuilder.status().code(400).message("Unsupported archive format: ".concat(fileExtension)).build(),true);
+    }
+  }
+ catch (  Throwable t) {
+    String msg=t.toString();
+    getWebSocket().send(MessageBuilder.status().code(400).message("Could not unarchive file: ".concat((msg != null) ? msg : "")).build(),true);
+  }
+}

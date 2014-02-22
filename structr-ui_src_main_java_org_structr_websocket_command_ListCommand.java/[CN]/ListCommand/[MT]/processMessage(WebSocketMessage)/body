@@ -1,6 +1,8 @@
 {
   final SecurityContext securityContext=getWebSocket().getSecurityContext();
-  String rawType=(String)webSocketData.getNodeData().get("type");
+  final Map<String,Object> properties=webSocketData.getNodeData();
+  final String rawType=(String)properties.get("type");
+  final boolean rootOnly=Boolean.TRUE.equals((Boolean)properties.get("rootOnly"));
   Class type=SchemaHelper.getEntityClassForRawType(rawType);
   if (type == null) {
     getWebSocket().send(MessageBuilder.status().code(404).message("Type " + rawType + " not found").build(),true);
@@ -22,13 +24,15 @@
       if (obj instanceof AbstractNode) {
         AbstractNode node=(AbstractNode)obj;
         boolean hasParent=false;
-        for (        AbstractRelationship rel : node.getIncomingRelationships()) {
-          if ("CONTAINS".equals(rel.getType())) {
-            hasParent=true;
-            break;
+        if (rootOnly) {
+          for (          AbstractRelationship rel : node.getIncomingRelationships()) {
+            if ("CONTAINS".equals(rel.getType())) {
+              hasParent=true;
+              break;
+            }
           }
         }
-        if (!hasParent) {
+        if (!rootOnly || !hasParent) {
           filteredResults.add(node);
         }
       }

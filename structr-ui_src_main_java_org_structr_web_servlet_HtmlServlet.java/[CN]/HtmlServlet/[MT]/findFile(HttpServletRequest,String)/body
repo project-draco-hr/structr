@@ -1,13 +1,13 @@
 {
-  List<AbstractNode> entryPoints=findPossibleEntryPoints(request,PathHelper.getName(path));
+  List<Linkable> entryPoints=findPossibleEntryPoints(request,PathHelper.getName(path));
   if (entryPoints.isEmpty()) {
     entryPoints=findPossibleEntryPoints(request,PathHelper.getName(PathHelper.replaceWhitespaceByPlus(path)));
   }
   if (entryPoints.isEmpty()) {
     entryPoints=findPossibleEntryPoints(request,PathHelper.getName(PathHelper.replaceWhitespaceByPercentTwenty(path)));
   }
-  for (  AbstractNode node : entryPoints) {
-    if (node instanceof org.structr.web.entity.File) {
+  for (  Linkable node : entryPoints) {
+    if (node instanceof org.structr.web.entity.File && (path.equals(node.getPath()) || node.getUuid().equals(PathHelper.clean(path)))) {
       return (org.structr.web.entity.File)node;
     }
   }

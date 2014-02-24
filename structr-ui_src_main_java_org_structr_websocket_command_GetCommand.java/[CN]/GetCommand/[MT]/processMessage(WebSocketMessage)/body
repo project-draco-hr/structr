@@ -1,13 +1,7 @@
 {
   AbstractNode node=getNode(webSocketData.getId());
-  String view=webSocketData.getView();
   if (node != null) {
-    if (view == null) {
-      view=PropertyView.All;
-    }
-    for (    PropertyKey key : node.getPropertyKeys(view)) {
-      webSocketData.setNodeData(key.jsonName(),node.getProperty(key));
-    }
+    webSocketData.setResult(Arrays.asList(node));
     getWebSocket().send(webSocketData,true);
   }
  else {

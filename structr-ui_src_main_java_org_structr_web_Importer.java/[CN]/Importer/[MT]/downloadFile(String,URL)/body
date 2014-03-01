@@ -5,19 +5,37 @@
   final String filePath=FileHelper.getFilePath(relativeFilePath);
   final java.io.File fileOnDisk=new java.io.File(filePath);
   fileOnDisk.getParentFile().mkdirs();
-  URL downloadUrl=null;
-  long size=0;
-  long checksum=0;
+  URL downloadUrl;
+  long size;
+  long checksum;
   try {
     downloadUrl=new URL(baseUrl,downloadAddress);
-    logger.log(Level.INFO,"Starting download from {0}",downloadUrl);
     FileUtils.copyURLToFile(downloadUrl,fileOnDisk);
+    logger.log(Level.INFO,"Starting download from {0}",downloadUrl);
+  }
+ catch (  IOException ioe) {
+    logger.log(Level.WARNING,"Unable to download from " + downloadAddress,ioe);
+    try {
+      downloadUrl=new URL(new URL(address.concat("/")),downloadAddress);
+      FileUtils.copyURLToFile(downloadUrl,fileOnDisk);
+    }
+ catch (    MalformedURLException ex) {
+      logger.log(Level.SEVERE,"Could not resolve address " + address.concat("/"),ex);
+      return null;
+    }
+catch (    IOException ex) {
+      logger.log(Level.WARNING,"Unable to download from " + address.concat("/"),ex);
+      return null;
+    }
+    logger.log(Level.INFO,"Starting download from alternative URL {0}",downloadUrl);
+  }
+  try {
     size=fileOnDisk.length();
     checksum=FileUtils.checksumCRC32(fileOnDisk);
   }
  catch (  IOException ioe) {
-    logger.log(Level.WARNING,"Unable to download from " + downloadAddress,ioe);
-    return;
+    logger.log(Level.WARNING,"Unable to calc checksum of " + fileOnDisk,ioe);
+    return null;
   }
   contentType=FileHelper.getContentMimeType(fileOnDisk);
   downloadAddress=StringUtils.substringBefore(downloadAddress,"?");
@@ -29,7 +47,7 @@
   }
   final String ct=contentType;
   try {
-    if (!(fileExists(fileName,FileUtils.checksumCRC32(fileOnDisk)))) {
+    if (!(fileExists(fileName,checksum))) {
       File fileNode;
       if (ImageHelper.isImageType(fileName)) {
         fileNode=createImageNode(uuid,fileName,ct,size,checksum);
@@ -46,12 +64,14 @@
           processCssFileNode(fileNode,downloadUrl);
         }
       }
+      return fileNode;
     }
  else {
       fileOnDisk.delete();
     }
   }
- catch (  Exception fex) {
+ catch (  FrameworkException|IOException fex) {
     logger.log(Level.WARNING,"Could not create file node.",fex);
   }
+  return null;
 }

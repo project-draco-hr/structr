@@ -4,6 +4,7 @@
   for (  Node node : children) {
     String tag=node.nodeName();
     String type=CaseHelper.toUpperCamelCase(tag);
+    String comment=null;
     String content=null;
     String id=null;
     StringBuilder classString=new StringBuilder();
@@ -23,13 +24,14 @@
         res=downloadFile(downloadAddress,baseUrl);
       }
     }
-    if (type.equals("#data") || type.equals("#comment")) {
+    if (type.equals("#comment")) {
       type="Content";
       tag="";
-      content=((DataNode)node).getWholeData().trim();
-      if (StringUtils.isBlank(content)) {
+      comment=((Comment)node).getData();
+      if (StringUtils.isBlank(comment)) {
         continue;
       }
+      commentSource.append(comment).append("\n");
     }
     if (type.equals("#text")) {
       tag="";
@@ -40,7 +42,12 @@
     }
     org.structr.web.entity.dom.DOMNode newNode;
     if (StringUtils.isBlank(tag)) {
-      newNode=(Content)page.createTextNode(content);
+      if (!StringUtils.isBlank(comment)) {
+        newNode=(DOMNode)page.createComment(comment);
+      }
+ else {
+        newNode=(Content)page.createTextNode(content);
+      }
     }
  else {
       newNode=(org.structr.web.entity.dom.DOMElement)page.createElement(tag);

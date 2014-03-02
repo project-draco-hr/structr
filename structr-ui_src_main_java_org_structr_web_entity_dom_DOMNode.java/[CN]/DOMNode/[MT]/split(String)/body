@@ -2,6 +2,7 @@
   ArrayList<String> tokens=new ArrayList<>(20);
   boolean inDoubleQuotes=false;
   boolean inSingleQuotes=false;
+  boolean ignoreNext=false;
   int len=source.length();
   int level=0;
   StringBuilder currentToken=new StringBuilder(len);
@@ -10,12 +11,19 @@
     if ((level != 0) || (c != ',')) {
       currentToken.append(c);
     }
+    if (ignoreNext) {
+      ignoreNext=false;
+      continue;
+    }
 switch (c) {
-case '(':
-      level++;
+case '\\':
+      ignoreNext=true;
     break;
+case '(':
+  level++;
+break;
 case ')':
-  level--;
+level--;
 break;
 case '"':
 if (inDoubleQuotes) {

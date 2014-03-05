@@ -3,21 +3,22 @@
   if (sourceEntity != null) {
     if (propertyKey == null) {
       if (sourceEntity instanceof NodeInterface) {
+        final NodeInterface source=(NodeInterface)sourceEntity;
+        final Node sourceNode=source.getNode();
+        final Class relationshipType=typeResource.entityClass;
+        final Relation relation=AbstractNode.getRelationshipForType(relationshipType);
+        final Class destNodeType=relation.getOtherType(typedIdResource.getEntityClass());
+        final Set<GraphObject> set=new LinkedHashSet<>();
+        typeResource.collectSearchAttributes(typeResource.query);
+        final Predicate predicate=Predicates.and(typeResource.query.toPredicate(),new OtherNodeTypeRelationFilter(securityContext,sourceNode,destNodeType));
         if (!typeResource.isNode) {
-          final NodeInterface source=(NodeInterface)sourceEntity;
-          final Node sourceNode=source.getNode();
-          final Class relationshipType=typeResource.entityClass;
-          final Relation relation=AbstractNode.getRelationshipForType(relationshipType);
-          final Class destNodeType=relation.getOtherType(typedIdResource.getEntityClass());
-          final Set partialResult=new LinkedHashSet<>(typeResource.doGet(sortKey,sortDescending,NodeFactory.DEFAULT_PAGE_SIZE,NodeFactory.DEFAULT_PAGE,null).getResults());
-          final Set<GraphObject> set=Iterables.toSet(Iterables.filter(new OtherNodeTypeRelationFilter(securityContext,sourceNode,destNodeType),source.getRelationships(relationshipType)));
-          set.retainAll(partialResult);
-          final List<GraphObject> finalResult=new LinkedList<>(set);
-          applyDefaultSorting(finalResult,sortKey,sortDescending);
-          return new Result(PagingHelper.subList(finalResult,pageSize,page,offsetId),finalResult.size(),isCollectionResource(),isPrimitiveArray());
+          set.addAll(Iterables.toSet(Iterables.filter(predicate,source.getRelationships(relationshipType))));
         }
  else {
         }
+        final List<GraphObject> finalResult=new LinkedList<>(set);
+        applyDefaultSorting(finalResult,sortKey,sortDescending);
+        return new Result(PagingHelper.subList(finalResult,pageSize,page,offsetId),finalResult.size(),isCollectionResource(),isPrimitiveArray());
       }
     }
  else {

@@ -1,8 +1,8 @@
 {
   double start=System.nanoTime();
-  SecurityContext securityContext=null;
-  Authenticator authenticator=null;
-  App app=null;
+  SecurityContext securityContext;
+  Authenticator authenticator;
+  App app;
   try {
     try (final Tx tx=StructrApp.getInstance().tx()){
       authenticator=config.getAuthenticator();
@@ -99,14 +99,21 @@
         setNoCacheHeaders(response);
       }
       if (securityContext.isVisible(rootElement)) {
-        PrintWriter out=response.getWriter();
         double setup=System.nanoTime();
         logger.log(Level.FINE,"Setup time: {0} seconds",decimalFormat.format((setup - start) / 1000000000.0));
         if (!EditMode.DATA.equals(edit) && !dontCache && notModifiedSince(request,response,rootElement)) {
+          ServletOutputStream out=response.getOutputStream();
           out.flush();
           out.close();
         }
  else {
+          response.setCharacterEncoding("UTF-8");
+          rootElement.render(securityContext,renderContext,0);
+          String content=renderContext.getBuffer().toString();
+          AsyncContext async=request.startAsync();
+          ServletOutputStream out=response.getOutputStream();
+          WriteListener wl=new StructrWriteListener(IOUtils.toInputStream(content,"UTF-8"),async,out);
+          out.setWriteListener(wl);
           String contentType=rootElement.getProperty(Page.contentType);
           if (contentType != null && contentType.equals("text/html")) {
             contentType=contentType.concat(";charset=UTF-8");
@@ -115,18 +122,9 @@
  else {
             response.setContentType("text/html;charset=UTF-8");
           }
-          response.setCharacterEncoding("UTF-8");
-          rootElement.render(securityContext,renderContext,0);
           response.setStatus(HttpServletResponse.SC_OK);
           double end=System.nanoTime();
           logger.log(Level.FINE,"Content for path {0} in {1} seconds",new Object[]{path,decimalFormat.format((end - setup) / 1000000000.0)});
-          try {
-            out.flush();
-            out.close();
-          }
- catch (          IllegalStateException ise) {
-            logger.log(Level.WARNING,"Could not write to output stream",ise.getMessage());
-          }
         }
       }
  else {

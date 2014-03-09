@@ -1,0 +1,13 @@
+{
+  while (out.isReady()) {
+    int len=content.read(buffer);
+    if (len < 0) {
+      content.close();
+      async.complete();
+      out.flush();
+      out.close();
+      return;
+    }
+    out.write(buffer,0,len);
+  }
+}

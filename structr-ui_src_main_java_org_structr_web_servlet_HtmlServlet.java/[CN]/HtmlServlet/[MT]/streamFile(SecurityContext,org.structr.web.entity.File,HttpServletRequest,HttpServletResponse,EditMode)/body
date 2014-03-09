@@ -3,7 +3,7 @@
     response.sendError(HttpServletResponse.SC_NOT_FOUND);
     return;
   }
-  OutputStream out=response.getOutputStream();
+  ServletOutputStream out=response.getOutputStream();
   if (!EditMode.DATA.equals(edit) && notModifiedSince(request,response,file)) {
     out.flush();
     out.close();
@@ -11,30 +11,14 @@
  else {
     InputStream in=file.getInputStream();
     String contentType=file.getContentType();
+    AsyncContext async=request.startAsync();
+    out.setWriteListener(new StructrWriteListener(in,async,out));
     if (contentType != null) {
       response.setContentType(contentType);
     }
  else {
       response.setContentType("application/octet-stream");
     }
-    try {
-      IOUtils.copy(in,out);
-    }
- catch (    Throwable t) {
-    }
- finally {
-      if (out != null) {
-        try {
-          out.flush();
-          out.close();
-        }
- catch (        Throwable t) {
-        }
-      }
-      if (in != null) {
-        in.close();
-      }
-      response.setStatus(HttpServletResponse.SC_OK);
-    }
+    response.setStatus(HttpServletResponse.SC_OK);
   }
 }

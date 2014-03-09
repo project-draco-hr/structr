@@ -6,9 +6,9 @@
  catch (  Throwable t) {
     logger.log(Level.WARNING,"Unable to parse value for {0}: {1}",new Object[]{Services.JSON_INDENTATION,t.getMessage()});
   }
-  resourceMap.putAll(resourceProvider.getResources());
+  resourceMap.putAll(config.getResourceProvider().getResources());
   this.propertyView=new ThreadLocalPropertyView();
-  this.gson=new ThreadLocalGson(outputNestingDepth);
-  this.jsonWriter=new ThreadLocalJsonWriter(propertyView,indentJson,outputNestingDepth);
-  this.htmlWriter=new ThreadLocalHtmlWriter(propertyView,indentJson,outputNestingDepth);
+  this.gson=new ThreadLocalGson(config.getOutputNestingDepth());
+  this.jsonWriter=new ThreadLocalJsonWriter(propertyView,indentJson,config.getOutputNestingDepth());
+  this.htmlWriter=new ThreadLocalHtmlWriter(propertyView,indentJson,config.getOutputNestingDepth());
 }

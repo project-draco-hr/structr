@@ -38,18 +38,18 @@
   applicationName=finalConfig.getProperty(APPLICATION_TITLE);
   host=finalConfig.getProperty(APPLICATION_HOST);
   basePath=finalConfig.getProperty(Services.BASE_PATH);
-  httpPort=HttpServiceServlet.parseInt(finalConfig.getProperty(APPLICATION_HTTP_PORT),8082);
-  maxIdleTime=HttpServiceServlet.parseInt(System.getProperty("maxIdleTime"),30000);
-  requestHeaderSize=HttpServiceServlet.parseInt(System.getProperty("requestHeaderSize"),8192);
+  httpPort=parseInt(finalConfig.getProperty(APPLICATION_HTTP_PORT),8082);
+  maxIdleTime=parseInt(System.getProperty("maxIdleTime"),30000);
+  requestHeaderSize=parseInt(System.getProperty("requestHeaderSize"),8192);
   String keyStorePath=finalConfig.getProperty(APPLICATION_KEYSTORE_PATH);
   String keyStorePassword=finalConfig.getProperty(APPLICATION_KEYSTORE_PASSWORD);
   String contextPath=System.getProperty("contextPath","/");
   String logPrefix="structr";
   boolean enableRewriteFilter=true;
-  boolean enableHttps=HttpServiceServlet.parseBoolean(finalConfig.getProperty(APPLICATION_HTTPS_ENABLED),false);
+  boolean enableHttps=parseBoolean(finalConfig.getProperty(APPLICATION_HTTPS_ENABLED),false);
   boolean enableGzipCompression=true;
   boolean logRequests=false;
-  int httpsPort=HttpServiceServlet.parseInt(finalConfig.getProperty(APPLICATION_HTTP_PORT),8083);
+  int httpsPort=parseInt(finalConfig.getProperty(APPLICATION_HTTP_PORT),8083);
   basePath=System.getProperty("home",basePath);
   if (basePath.isEmpty()) {
     basePath=System.getProperty("user.dir","/tmp");
@@ -144,32 +144,37 @@
     servletContext.addServlet(servletHolder,path);
   }
   contexts.addHandler(servletContext);
-  if (enableHttps) {
-    if (httpsPort > -1 && keyStorePath != null && !keyStorePath.isEmpty() && keyStorePassword != null) {
-      SslSelectChannelConnector httpsConnector=null;
-      SslContextFactory factory=new SslContextFactory(keyStorePath);
-      factory.setKeyStorePassword(keyStorePassword);
-      httpsConnector=new SslSelectChannelConnector(factory);
-      httpsConnector.setHost(host);
-      httpsConnector.setPort(httpsPort);
-      httpsConnector.setMaxIdleTime(maxIdleTime);
-      httpsConnector.setRequestHeaderSize(requestHeaderSize);
-      connectors.add(httpsConnector);
-    }
- else {
-      logger.log(Level.WARNING,"Unable to configure SSL, please make sure that {0}, {1} and {2} are set correctly in structr.conf.",new Object[]{APPLICATION_HTTPS_PORT,APPLICATION_KEYSTORE_PATH,APPLICATION_KEYSTORE_PASSWORD});
-    }
-  }
   if (host != null && !host.isEmpty() && httpPort > -1) {
-    SelectChannelConnector httpConnector=new SelectChannelConnector();
+    httpConfig=new HttpConfiguration();
+    httpConfig.setSecureScheme("https");
+    httpConfig.setSecurePort(httpsPort);
+    httpConfig.setOutputBufferSize(32768);
+    httpConfig.setRequestHeaderSize(requestHeaderSize);
+    ServerConnector httpConnector=new ServerConnector(server,new HttpConnectionFactory(httpConfig));
     httpConnector.setHost(host);
     httpConnector.setPort(httpPort);
-    httpConnector.setMaxIdleTime(maxIdleTime);
-    httpConnector.setRequestHeaderSize(requestHeaderSize);
     connectors.add(httpConnector);
   }
  else {
     logger.log(Level.WARNING,"Unable to configure HTTP server port, please make sure that {0} and {1} are set correctly in structr.conf.",new Object[]{APPLICATION_HOST,APPLICATION_HTTP_PORT});
+  }
+  if (enableHttps) {
+    if (httpsPort > -1 && keyStorePath != null && !keyStorePath.isEmpty() && keyStorePassword != null) {
+      httpsConfig=new HttpConfiguration(httpConfig);
+      httpsConfig.addCustomizer(new SecureRequestCustomizer());
+      SslContextFactory sslContextFactory=new SslContextFactory();
+      sslContextFactory.setKeyStorePath(keyStorePath);
+      sslContextFactory.setKeyStorePassword(keyStorePassword);
+      ServerConnector https=new ServerConnector(server,new SslConnectionFactory(sslContextFactory,"http/1.1"),new HttpConnectionFactory(httpsConfig));
+      https.setPort(httpsPort);
+      https.setIdleTimeout(500000);
+      https.setHost(host);
+      https.setPort(httpsPort);
+      connectors.add(https);
+    }
+ else {
+      logger.log(Level.WARNING,"Unable to configure SSL, please make sure that {0}, {1} and {2} are set correctly in structr.conf.",new Object[]{APPLICATION_HTTPS_PORT,APPLICATION_KEYSTORE_PATH,APPLICATION_KEYSTORE_PASSWORD});
+    }
   }
   if (!connectors.isEmpty()) {
     server.setConnectors(connectors.toArray(new Connector[0]));
@@ -178,6 +183,6 @@
     logger.log(Level.SEVERE,"No connectors configured, aborting.");
     System.exit(0);
   }
-  server.setGracefulShutdown(1000);
+  server.setStopTimeout(1000);
   server.setStopAtShutdown(true);
 }

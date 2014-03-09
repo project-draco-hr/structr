@@ -1,0 +1,9 @@
+{
+  final Gson gson=new GsonBuilder().setPrettyPrinting().registerTypeAdapter(WebSocketMessage.class,new WebSocketDataGSONAdapter(config.getDefaultIdProperty(),config.getOutputNestingDepth())).create();
+  final SynchronizationController syncController=new SynchronizationController(gson);
+  TransactionCommand.registerTransactionListener(syncController);
+  factory.setCreator(new StructrWebSocketCreator(syncController,gson,config.getDefaultIdProperty(),config.getAuthenticator()));
+  factory.register(StructrWebSocket.class);
+  factory.getExtensionFactory().unregister("x-webkit-deflate-frame");
+  factory.getExtensionFactory().unregister("permessage-deflate");
+}

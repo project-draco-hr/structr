@@ -5,7 +5,7 @@
   App app=null;
   try {
     try (final Tx tx=StructrApp.getInstance().tx()){
-      authenticator=getAuthenticator();
+      authenticator=config.getAuthenticator();
       securityContext=authenticator.initializeAndExamineRequest(request,response);
       tx.success();
     }
@@ -26,7 +26,7 @@
         dontCache=true;
       }
       RenderContext renderContext=RenderContext.getInstance(request,response,getEffectiveLocale(request));
-      renderContext.setResourceProvider(resourceProvider);
+      renderContext.setResourceProvider(config.getResourceProvider());
       EditMode edit=renderContext.getEditMode(user);
       DOMNode rootElement=null;
       AbstractNode dataNode=null;

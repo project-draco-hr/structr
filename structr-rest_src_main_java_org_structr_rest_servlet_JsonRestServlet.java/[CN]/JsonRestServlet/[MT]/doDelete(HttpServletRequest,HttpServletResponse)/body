@@ -5,7 +5,7 @@
   Resource resource=null;
   try {
     try (final Tx tx=StructrApp.getInstance().tx()){
-      authenticator=getAuthenticator();
+      authenticator=config.getAuthenticator();
       securityContext=authenticator.initializeAndExamineRequest(request,response);
       tx.success();
     }
@@ -13,7 +13,7 @@
     request.setCharacterEncoding("UTF-8");
     response.setContentType("application/json; charset=utf-8");
     try (final Tx tx=app.tx()){
-      resource=ResourceHelper.optimizeNestedResourceChain(ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,defaultIdProperty),defaultIdProperty);
+      resource=ResourceHelper.optimizeNestedResourceChain(ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,config.getDefaultIdProperty()),config.getDefaultIdProperty());
       authenticator.checkResourceAccess(request,resource.getResourceSignature(),propertyView.get(securityContext));
       tx.success();
     }

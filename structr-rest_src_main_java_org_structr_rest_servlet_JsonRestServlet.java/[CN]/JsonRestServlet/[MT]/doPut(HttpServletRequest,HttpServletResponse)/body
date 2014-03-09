@@ -6,7 +6,7 @@
   Resource resource=null;
   try {
     try (final Tx tx=StructrApp.getInstance().tx()){
-      authenticator=getAuthenticator();
+      authenticator=config.getAuthenticator();
       securityContext=authenticator.initializeAndExamineRequest(request,response);
       tx.success();
     }
@@ -21,7 +21,7 @@
      if (securityContext != null) {
       Map<String,Object> properties=convertPropertySetToMap(propertySet);
       try (final Tx tx=app.tx()){
-        resource=ResourceHelper.applyViewTransformation(request,securityContext,ResourceHelper.optimizeNestedResourceChain(ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,defaultIdProperty),defaultIdProperty),propertyView);
+        resource=ResourceHelper.applyViewTransformation(request,securityContext,ResourceHelper.optimizeNestedResourceChain(ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,config.getDefaultIdProperty()),config.getDefaultIdProperty()),propertyView);
         authenticator.checkResourceAccess(request,resource.getResourceSignature(),propertyView.get(securityContext));
         tx.success();
       }

@@ -5,17 +5,17 @@
   Resource resource=null;
   try {
     try (final Tx tx=StructrApp.getInstance().tx()){
-      authenticator=getAuthenticator();
+      authenticator=config.getAuthenticator();
       securityContext=authenticator.initializeAndExamineRequest(request,response);
       tx.success();
     }
      final App app=StructrApp.getInstance(securityContext);
     request.setCharacterEncoding("UTF-8");
     response.setCharacterEncoding("UTF-8");
-    propertyView.set(securityContext,defaultPropertyView);
+    propertyView.set(securityContext,config.getDefaultPropertyView());
     double queryTimeStart=System.nanoTime();
     try (final Tx tx=app.tx()){
-      resource=ResourceHelper.applyViewTransformation(request,securityContext,ResourceHelper.optimizeNestedResourceChain(ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,defaultIdProperty),defaultIdProperty),propertyView);
+      resource=ResourceHelper.applyViewTransformation(request,securityContext,ResourceHelper.optimizeNestedResourceChain(ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,config.getDefaultIdProperty()),config.getDefaultIdProperty()),propertyView);
       authenticator.checkResourceAccess(request,resource.getResourceSignature(),propertyView.get(securityContext));
       tx.success();
     }
@@ -25,8 +25,8 @@
     String sortOrder=request.getParameter(REQUEST_PARAMETER_SORT_ORDER);
     String sortKeyName=request.getParameter(REQUEST_PARAMETER_SORT_KEY);
     boolean sortDescending=(sortOrder != null && "desc".equals(sortOrder.toLowerCase()));
-    int pageSize=parseInt(pageSizeParameter,NodeFactory.DEFAULT_PAGE_SIZE);
-    int page=parseInt(pageParameter,NodeFactory.DEFAULT_PAGE);
+    int pageSize=HttpService.parseInt(pageSizeParameter,NodeFactory.DEFAULT_PAGE_SIZE);
+    int page=HttpService.parseInt(pageParameter,NodeFactory.DEFAULT_PAGE);
     String baseUrl=request.getRequestURI();
     PropertyKey sortKey=null;
     if (sortKeyName != null) {

@@ -4,17 +4,17 @@
     message.setToken(null);
   }
   message.setCallback(callback);
-  try {
-    if (isAuthenticated() || "STATUS".equals(message.getCommand())) {
-      String msg=gson.toJson(message,WebSocketMessage.class);
-      logger.log(Level.FINE,"############################################################ SENDING \n{0}",msg);
-      connection.sendMessage(msg);
+  if (isAuthenticated() || "STATUS".equals(message.getCommand())) {
+    String msg=gson.toJson(message,WebSocketMessage.class);
+    logger.log(Level.FINE,"############################################################ SENDING \n{0}",msg);
+    try {
+      session.getRemote().sendString(msg);
     }
- else {
-      logger.log(Level.WARNING,"NOT sending message to unauthenticated client.");
+ catch (    IOException ex) {
+      logger.log(Level.SEVERE,null,ex);
     }
   }
- catch (  IOException t) {
-    logger.log(Level.WARNING,"Error sending message to client.",t);
+ else {
+    logger.log(Level.WARNING,"NOT sending message to unauthenticated client.");
   }
 }

@@ -5,10 +5,10 @@
     channel.write(ByteBuffer.wrap(data));
     if (this.size == null) {
       this.size=channel.size();
-      updateSize(this.size);
     }
-    if (channel.position() == this.size) {
+    if (sequenceNumber + 1 == chunks) {
       finish();
+      updateSize(this.size);
     }
   }
 }

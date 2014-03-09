@@ -4,10 +4,11 @@
     if (channel != null && channel.isOpen()) {
       channel.force(true);
       channel.close();
+      this.privateFileChannel=null;
       file.increaseVersion();
     }
   }
- catch (  Throwable t) {
-    logger.log(Level.WARNING,"Unable to finish file upload",t);
+ catch (  IOException|FrameworkException e) {
+    logger.log(Level.WARNING,"Unable to finish file upload",e);
   }
 }

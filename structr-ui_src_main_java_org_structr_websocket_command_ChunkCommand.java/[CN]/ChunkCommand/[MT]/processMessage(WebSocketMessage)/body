@@ -20,20 +20,21 @@
       getWebSocket().send(MessageBuilder.status().message("No write permission").code(400).build(),true);
       return;
     }
-    getWebSocket().handleFileChunk(uuid,sequenceNumber,chunkSize,data);
+    getWebSocket().handleFileChunk(uuid,sequenceNumber,chunkSize,data,chunks);
     if (sequenceNumber + 1 == chunks) {
       final long checksum=FileHelper.getChecksum(file);
       final long size=FileHelper.getSize(file);
       file.setProperty(File.checksum,checksum);
       file.setProperty(File.size,size);
       file.increaseVersion();
+      getWebSocket().removeFileUploadHandler(uuid);
       logger.log(Level.FINE,"File upload finished. Checksum: {0}, size: {1}",new Object[]{checksum,size});
     }
     final long currentSize=(long)(sequenceNumber * chunkSize) + data.length;
     getWebSocket().send(MessageBuilder.status().code(200).message("{\"id\":\"" + file.getUuid() + "\", \"name\":\""+ file.getName()+ "\",\"size\":"+ currentSize+ "}").build(),true);
   }
- catch (  Throwable t) {
-    String msg=t.toString();
+ catch (  IOException|FrameworkException ex) {
+    String msg=ex.toString();
     getWebSocket().send(MessageBuilder.status().code(400).message("Could not process chunk data: ".concat((msg != null) ? msg : "")).build(),true);
   }
 }

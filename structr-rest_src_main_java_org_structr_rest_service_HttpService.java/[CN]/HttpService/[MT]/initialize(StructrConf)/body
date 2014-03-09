@@ -76,6 +76,11 @@
     rewriteFilter.setInitParameter("confPath","urlrewrite.xml");
     servletContext.addFilter(rewriteFilter,"/*",EnumSet.of(DispatcherType.REQUEST,DispatcherType.FORWARD));
   }
+  if (enableGzipCompression) {
+    FilterHolder gzipFilter=new FilterHolder(AsyncGzipFilter.class);
+    gzipFilter.setInitParameter("mimeTypes","text/html,text/plain,text/css,text/javascript,application/json");
+    servletContext.addFilter(gzipFilter,"/*",EnumSet.of(DispatcherType.REQUEST,DispatcherType.FORWARD));
+  }
   contexts.addHandler(servletContext);
   if (logRequests || "true".equals(finalConfig.getProperty("log.requests","false"))) {
     String etcPath=basePath + "/etc";
@@ -143,6 +148,7 @@
     httpConfig=new HttpConfiguration();
     httpConfig.setSecureScheme("https");
     httpConfig.setSecurePort(httpsPort);
+    httpConfig.setOutputBufferSize(64 * 1024);
     httpConfig.setRequestHeaderSize(requestHeaderSize);
     ServerConnector httpConnector=new ServerConnector(server,new HttpConnectionFactory(httpConfig));
     httpConnector.setHost(host);

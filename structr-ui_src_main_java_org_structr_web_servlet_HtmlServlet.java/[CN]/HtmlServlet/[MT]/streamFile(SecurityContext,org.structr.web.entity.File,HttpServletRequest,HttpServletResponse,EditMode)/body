@@ -11,8 +11,6 @@
  else {
     InputStream in=file.getInputStream();
     String contentType=file.getContentType();
-    AsyncContext async=request.startAsync();
-    out.setWriteListener(new StructrWriteListener(in,async,out));
     if (contentType != null) {
       response.setContentType(contentType);
     }
@@ -20,5 +18,7 @@
       response.setContentType("application/octet-stream");
     }
     response.setStatus(HttpServletResponse.SC_OK);
+    AsyncContext async=request.startAsync();
+    out.setWriteListener(new StructrWriteListener(in,async,out));
   }
 }

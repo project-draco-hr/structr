@@ -118,10 +118,10 @@
           }
           AsyncContext async=request.startAsync();
           ServletOutputStream out=response.getOutputStream();
-          FifoBuffer buffer=renderContext.getBuffer();
+          AsyncBuffer buffer=renderContext.getBuffer();
           buffer.prepare(async,out);
-          out.setWriteListener(buffer);
           rootElement.render(securityContext,renderContext,0);
+          buffer.finish();
           response.setStatus(HttpServletResponse.SC_OK);
           double end=System.nanoTime();
           logger.log(Level.FINE,"Content for path {0} in {1} seconds",new Object[]{path,decimalFormat.format((end - setup) / 1000000000.0)});

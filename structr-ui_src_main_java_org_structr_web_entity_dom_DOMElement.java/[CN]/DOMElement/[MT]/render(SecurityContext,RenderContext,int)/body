@@ -1,5 +1,5 @@
 {
-  StringBuilder out=renderContext.getBuffer();
+  FifoBuffer out=renderContext.getBuffer();
   double start=System.nanoTime();
   if (isDeleted() || isHidden() || !displayForLocale(renderContext)|| !displayForConditions(securityContext,renderContext)) {
     return;
@@ -117,4 +117,8 @@
   }
   double end=System.nanoTime();
   logger.log(Level.FINE,"Render node {0} in {1} seconds",new java.lang.Object[]{getUuid(),decimalFormat.format((end - start) / 1000000000.0)});
+  if (flush()) {
+    logger.log(Level.FINE,"Flushing response: {0} ",getTagName());
+    out.flush();
+  }
 }

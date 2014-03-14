@@ -9,10 +9,8 @@
       Result result=new Result(this.content,this.content.size(),this.content.size() > 1 || serializeSingleObjectAsCollection,false);
       gson.toJson(result,writer);
     }
-    writer.flush();
-    writer.close();
   }
- catch (  Throwable t) {
+ catch (  JsonIOException|IOException t) {
     logger.log(Level.WARNING,"Unable to commit HttpServletResponse",t);
   }
 }

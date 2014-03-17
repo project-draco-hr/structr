@@ -1,0 +1,18 @@
+{
+  String pageId=webSocketData.getId();
+  Map<String,Object> nodeData=webSocketData.getNodeData();
+  String newSource=(String)nodeData.get("source");
+  Page page=getPage(pageId);
+  if (page != null) {
+    try {
+      logger.log(Level.INFO,newSource);
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,t.toString());
+      getWebSocket().send(MessageBuilder.status().code(422).message(t.toString()).build(),true);
+    }
+  }
+ else {
+    getWebSocket().send(MessageBuilder.status().code(422).message("Cannot save page").build(),true);
+  }
+}

@@ -1,0 +1,16 @@
+{
+  for (  final Label label : node.getLabels()) {
+    types.add(label.name());
+  }
+  if (node.hasProperty("type")) {
+    final String type=node.getProperty("type").toString();
+    types.add(type.replaceAll("[\\W]+",""));
+  }
+  if (types.isEmpty() && !properties.keySet().isEmpty()) {
+    final StringBuilder buf=new StringBuilder("NodeWith");
+    for (    final String key : properties.keySet()) {
+      buf.append(StringUtils.capitalize(key));
+    }
+    types.add(buf.toString());
+  }
+}

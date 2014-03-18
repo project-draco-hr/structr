@@ -1,0 +1,109 @@
+{
+  final App app=StructrApp.getInstance();
+  final GraphDatabaseService graphDb=app.command(GraphDatabaseCommand.class).execute();
+  final NodeServiceCommand nodeServiceCommand=app.command(CreateNodeCommand.class);
+  final ConfigurationProvider configuration=Services.getInstance().getConfigurationProvider();
+  final Set<NodeInfo> nodeTypes=new LinkedHashSet<>();
+  final Map<Long,TypeInfo> nodeTypeInfoMap=new LinkedHashMap<>();
+  final Set<RelationshipInfo> relationships=new LinkedHashSet<>();
+  final Map<String,SchemaNode> schemaNodes=new LinkedHashMap<>();
+  final Map<NodeInfo,List<Node>> nodeMap=new LinkedHashMap<>();
+  final Map<String,List<TypeInfo>> typeInfoTypeMap=new LinkedHashMap<>();
+  final List<TypeInfo> reducedTypeInfos=new LinkedList<>();
+  final List<TypeInfo> typeInfos=new LinkedList<>();
+  try (final Tx tx=app.tx()){
+    TransactionCommand.postProcess("reloadschema",new ReloadSchema());
+    TransactionCommand.postProcess("gist",app.command(BulkRebuildIndexCommand.class));
+    for (    final Node node : Iterables.filter(new StructrAndSpatialPredicate(false,false,true),GlobalGraphOperations.at(graphDb).getAllNodes())) {
+      final NodeInfo nodeInfo=new NodeInfo(node);
+      nodeTypes.add(nodeInfo);
+      List<Node> nodes=nodeMap.get(nodeInfo);
+      if (nodes == null) {
+        nodes=new LinkedList<>();
+        nodeMap.put(nodeInfo,nodes);
+      }
+      nodes.add(node);
+    }
+    identifyCommonBaseClasses(nodeTypes,nodeMap,typeInfos);
+    collectTypeInfos(typeInfos,typeInfoTypeMap);
+    reduceTypeInfos(typeInfoTypeMap,reducedTypeInfos);
+    intersectPropertySets(reducedTypeInfos);
+    final Map<String,TypeInfo> reducedTypeInfoMap=new LinkedHashMap<>();
+    for (    final TypeInfo info : reducedTypeInfos) {
+      final String type=info.getPrimaryType();
+      reducedTypeInfoMap.put(type,info);
+      for (      final Node node : info.getNodes()) {
+        node.setProperty(GraphObject.id.dbName(),nodeServiceCommand.getNextUuid());
+        node.setProperty(GraphObject.type.dbName(),type);
+        nodeTypeInfoMap.put(node.getId(),info);
+      }
+    }
+    for (    final Relationship rel : Iterables.filter(new StructrAndSpatialPredicate(false,false,true),GlobalGraphOperations.at(graphDb).getAllRelationships())) {
+      final Node startNode=rel.getStartNode();
+      final Node endNode=rel.getEndNode();
+      if (startNode.hasProperty("type") && endNode.hasProperty("type")) {
+        final TypeInfo startTypeInfo=nodeTypeInfoMap.get(startNode.getId());
+        final TypeInfo endTypeInfo=nodeTypeInfoMap.get(endNode.getId());
+        final String relationshipType=rel.getType().name();
+        final String startNodeType=startTypeInfo.getPrimaryType();
+        final String endNodeType=endTypeInfo.getPrimaryType();
+        relationships.add(new RelationshipInfo(startNodeType,endNodeType,relationshipType));
+        if (startNodeType != null && endNodeType != null) {
+          final String combinedType=startNodeType.concat(relationshipType).concat(endNodeType);
+          rel.setProperty(GraphObject.type.dbName(),combinedType);
+        }
+        rel.setProperty(GraphObject.id.dbName(),nodeServiceCommand.getNextUuid());
+      }
+    }
+    final Map<String,List<RelationshipInfo>> relTypeInfoMap=new LinkedHashMap<>();
+    for (    final RelationshipInfo relInfo : relationships) {
+      final String relType=relInfo.getRelType();
+      List<RelationshipInfo> infos=relTypeInfoMap.get(relType);
+      if (infos == null) {
+        infos=new LinkedList<>();
+        relTypeInfoMap.put(relType,infos);
+      }
+      infos.add(relInfo);
+    }
+    final List<RelationshipInfo> reducedRelationshipInfos=new LinkedList<>();
+    for (    final List<RelationshipInfo> infos : relTypeInfoMap.values()) {
+      reducedRelationshipInfos.addAll(reduceNodeTypes(infos,reducedTypeInfoMap));
+    }
+    for (    final TypeInfo typeInfo : reducedTypeInfos) {
+      final String type=typeInfo.getPrimaryType();
+      if (!"ReferenceNode".equals(type)) {
+        final Map<String,Class> props=typeInfo.getPropertySet();
+        final PropertyMap propertyMap=new PropertyMap();
+        for (        final Map.Entry<String,Class> propertyEntry : props.entrySet()) {
+          final String propertyName=propertyEntry.getKey();
+          final Class propertyType=propertyEntry.getValue();
+          String propertyTypeName=propertyType.getSimpleName();
+          if (propertyType.isArray()) {
+            propertyTypeName=propertyTypeName.substring(0,propertyTypeName.length() - 2).concat("Array");
+          }
+          propertyMap.put(new StringProperty("_".concat(propertyName)),propertyTypeName);
+        }
+        propertyMap.put(AbstractNode.name,type);
+        final Class existingType=configuration.getNodeEntityClass(type);
+        if (existingType != null) {
+          propertyMap.put(SchemaNode.extendsClass,existingType.getName());
+        }
+ else         if (!typeInfo.getOtherTypes().isEmpty()) {
+          propertyMap.put(SchemaNode.extendsClass,typeInfo.getSuperclass(reducedTypeInfoMap));
+        }
+        schemaNodes.put(type,app.create(SchemaNode.class,propertyMap));
+      }
+    }
+    for (    final RelationshipInfo template : reducedRelationshipInfos) {
+      final SchemaNode startNode=schemaNodes.get(template.getStartNodeType());
+      final SchemaNode endNode=schemaNodes.get(template.getEndNodeType());
+      final String relationshipType=template.getRelType();
+      final PropertyMap propertyMap=new PropertyMap();
+      propertyMap.put(SchemaRelationship.sourceId,startNode.getUuid());
+      propertyMap.put(SchemaRelationship.targetId,endNode.getUuid());
+      propertyMap.put(SchemaRelationship.relationshipType,relationshipType);
+      app.create(startNode,endNode,SchemaRelationship.class,propertyMap);
+    }
+    tx.success();
+  }
+ }

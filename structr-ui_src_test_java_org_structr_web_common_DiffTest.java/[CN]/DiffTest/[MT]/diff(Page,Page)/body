@@ -1,0 +1,51 @@
+{
+  final Map<String,DOMNode> nodesFromSourcePage=collectNodes(sourcePage);
+  final Map<String,DOMNode> nodesFromModifiedPage=collectNodes(modifiedPage);
+  final List<InvertibleModificationOperation> changeSet=new LinkedList<>();
+  for (  final Entry<String,DOMNode> newNodeEntry : nodesFromModifiedPage.entrySet()) {
+    final String newTreeIndex=newNodeEntry.getKey();
+    final DOMNode newNode=newNodeEntry.getValue();
+    for (    final Entry<String,DOMNode> existingNodeEntry : nodesFromSourcePage.entrySet()) {
+      final String existingTreeIndex=existingNodeEntry.getKey();
+      final DOMNode existingNode=existingNodeEntry.getValue();
+      int equalityBitmask=0;
+      if (newTreeIndex.equals(existingTreeIndex)) {
+        equalityBitmask|=1;
+      }
+      if (newNode.isSameNode(existingNode)) {
+        equalityBitmask|=2;
+      }
+      if (newNode.contentEquals(existingNode)) {
+        equalityBitmask|=4;
+      }
+      System.out.println(existingTreeIndex + " / " + newTreeIndex+ ": "+ equalityBitmask);
+switch (equalityBitmask) {
+case 7:
+        break;
+case 6:
+      changeSet.add(new MoveOperation(existingTreeIndex,newTreeIndex,existingNode));
+    break;
+case 5:
+  break;
+case 4:
+break;
+case 3:
+changeSet.add(new UpdateOperation(existingTreeIndex,existingNode,newNode));
+break;
+case 2:
+changeSet.add(new UpdateOperation(existingTreeIndex,existingNode,newNode));
+changeSet.add(new MoveOperation(existingTreeIndex,newTreeIndex,existingNode));
+break;
+case 1:
+changeSet.add(new CreateOperation(newTreeIndex,newNode));
+break;
+case 0:
+break;
+}
+}
+}
+System.out.println("Changes:");
+for (final InvertibleModificationOperation op : changeSet) {
+System.out.println(op.toString());
+}
+}

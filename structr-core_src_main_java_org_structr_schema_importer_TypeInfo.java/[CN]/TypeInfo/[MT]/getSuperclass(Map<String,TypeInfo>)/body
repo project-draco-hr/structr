@@ -1,0 +1,18 @@
+{
+  final Map<Integer,TypeInfo> hierarchyMap=new TreeMap<>();
+  for (  final TypeInfo info : typeInfos.values()) {
+    final String type=info.getPrimaryType();
+    if (otherTypes.contains(type)) {
+      hierarchyMap.put(info.getHierarchyLevel(),info);
+    }
+  }
+  int level=getHierarchyLevel() + 1;
+  TypeInfo superType=hierarchyMap.get(level);
+  while (superType == null && level < 100) {
+    superType=hierarchyMap.get(++level);
+  }
+  if (superType != null) {
+    return superType.getPrimaryType();
+  }
+  return null;
+}

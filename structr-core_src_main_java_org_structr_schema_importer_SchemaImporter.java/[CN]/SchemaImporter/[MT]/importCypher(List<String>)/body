@@ -1,0 +1,16 @@
+{
+  final App app=StructrApp.getInstance();
+  final GraphDatabaseService graphDb=app.command(GraphDatabaseCommand.class).execute();
+  final ExecutionEngine engine=new ExecutionEngine(graphDb,new BufferingLogger());
+  if (sources.isEmpty()) {
+    return;
+  }
+  for (  final String source : sources) {
+    try {
+      engine.execute(source);
+    }
+ catch (    Throwable t) {
+      t.printStackTrace();
+    }
+  }
+}

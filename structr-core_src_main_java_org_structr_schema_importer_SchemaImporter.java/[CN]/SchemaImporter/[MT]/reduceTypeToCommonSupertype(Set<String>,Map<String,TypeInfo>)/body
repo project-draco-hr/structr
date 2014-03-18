@@ -1,0 +1,33 @@
+{
+  final List<Set<String>> listOfSetsOfTypes=new LinkedList<>();
+  for (  String type : types) {
+    final Set<String> listOfTypes=new LinkedHashSet<>();
+    String currentType=type;
+    listOfSetsOfTypes.add(listOfTypes);
+    while (currentType != null) {
+      listOfTypes.add(currentType);
+      final TypeInfo typeInfo=typeInfos.get(currentType);
+      if (typeInfo != null) {
+        currentType=typeInfo.getSuperclass(typeInfos);
+      }
+ else {
+        currentType=null;
+      }
+    }
+  }
+  final Set<String> intersection=new LinkedHashSet<>();
+  boolean first=true;
+  for (  final Set<String> set : listOfSetsOfTypes) {
+    if (first) {
+      first=false;
+      intersection.addAll(set);
+    }
+ else {
+      intersection.retainAll(set);
+    }
+  }
+  if (!intersection.isEmpty()) {
+    return intersection.iterator().next();
+  }
+  return null;
+}

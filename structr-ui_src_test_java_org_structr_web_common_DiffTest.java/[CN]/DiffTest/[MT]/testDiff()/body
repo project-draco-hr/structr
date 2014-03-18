@@ -1,0 +1,26 @@
+{
+  try (final Tx tx=app.tx()){
+    final Page sourcePage=createTestPage();
+    final RenderContext ctx=new RenderContext(null,null,RenderContext.EditMode.RAW,Locale.GERMAN);
+    final TestBuffer buffer=new TestBuffer();
+    ctx.setBuffer(buffer);
+    sourcePage.render(securityContext,ctx,0);
+    final String sourceHtml=buffer.getBuffer().toString();
+    final String modifiedHtml=modifyHtml(sourceHtml);
+    System.out.println("###############################################################################################");
+    System.out.println("Original HTML:");
+    System.out.println(sourceHtml);
+    System.out.println("#############################");
+    print(sourcePage,0,0);
+    System.out.println("###############################################################################################");
+    System.out.println("Modified HTML:");
+    System.out.println(modifiedHtml);
+    final Page modifiedPage=parsePage(modifiedHtml);
+    System.out.println("#############################");
+    print(modifiedPage,0,0);
+    diff(sourcePage,modifiedPage);
+  }
+ catch (  Throwable t) {
+    t.printStackTrace();
+  }
+}

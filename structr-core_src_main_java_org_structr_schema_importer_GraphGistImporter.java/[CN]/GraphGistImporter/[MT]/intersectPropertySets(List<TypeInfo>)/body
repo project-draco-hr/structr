@@ -1,0 +1,13 @@
+{
+  for (  final TypeInfo info : reducedTypeInfos) {
+    if (info.getHierarchyLevel() > 1) {
+      final Set<String> supertypeKeySet=info.getPropertySet().keySet();
+      for (      final TypeInfo subType : reducedTypeInfos) {
+        final Set<String> subtypeKeySet=subType.getPropertySet().keySet();
+        if (subType.getHierarchyLevel() < info.getHierarchyLevel() && subType.hasSuperclass(info.getPrimaryType())) {
+          subtypeKeySet.removeAll(supertypeKeySet);
+        }
+      }
+    }
+  }
+}

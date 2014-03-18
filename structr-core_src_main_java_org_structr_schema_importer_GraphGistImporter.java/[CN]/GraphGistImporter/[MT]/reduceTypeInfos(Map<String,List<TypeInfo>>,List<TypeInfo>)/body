@@ -1,0 +1,17 @@
+{
+  for (  final Entry<String,List<TypeInfo>> entry : typeInfoTypeMap.entrySet()) {
+    final List<TypeInfo> listOfTypeInfosWithSamePrimaryType=entry.getValue();
+    TypeInfo firstTypeInfo=null;
+    for (    final TypeInfo typeInfo : listOfTypeInfosWithSamePrimaryType) {
+      if (firstTypeInfo == null) {
+        firstTypeInfo=typeInfo;
+      }
+ else {
+        firstTypeInfo.intersectPropertySets(typeInfo.getPropertySet());
+        firstTypeInfo.getNodes().addAll(typeInfo.getNodes());
+      }
+    }
+    reducedTypeInfos.add(firstTypeInfo);
+    firstTypeInfo.setHierarchyLevel(listOfTypeInfosWithSamePrimaryType.size());
+  }
+}

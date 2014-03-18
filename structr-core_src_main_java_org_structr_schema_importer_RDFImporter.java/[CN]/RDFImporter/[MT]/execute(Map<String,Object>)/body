@@ -16,17 +16,17 @@
   }
   try {
     if (fileName != null) {
-      GraphGistImporter.importCypher(extractSources(new FileInputStream(fileName)));
+      importCypher(importRDF(new FileInputStream(fileName)));
     }
  else     if (url != null) {
-      GraphGistImporter.importCypher(extractSources(new URL(url).openStream()));
+      importCypher(importRDF(new URL(url).openStream()));
     }
  else     if (source != null) {
-      GraphGistImporter.importCypher(extractSources(new ByteArrayInputStream(source.getBytes())));
+      importCypher(importRDF(new ByteArrayInputStream(source.getBytes())));
     }
   }
- catch (  IOException ioex) {
-    ioex.printStackTrace();
+ catch (  Throwable t) {
+    t.printStackTrace();
   }
   analyzeSchema();
 }

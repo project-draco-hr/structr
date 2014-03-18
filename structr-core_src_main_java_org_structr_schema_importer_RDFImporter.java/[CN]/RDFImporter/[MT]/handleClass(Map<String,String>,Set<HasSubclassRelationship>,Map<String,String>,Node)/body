@@ -1,0 +1,19 @@
+{
+  final NamedNodeMap attributes=classNode.getAttributes();
+  final String comment=getChildString(classNode,"rdfs:comment");
+  final String rawName=getString(attributes,"rdf:about");
+  final int position=rawName.indexOf("_");
+  final String name=rawName.substring(position + 1);
+  final String id=rawName.substring(0,position);
+  classes.put(id,name);
+  if (comment != null) {
+    comments.put(id,comment);
+  }
+  for (Node node=classNode.getChildNodes().item(0); node != null; node=node.getNextSibling()) {
+    final String type=node.getNodeName();
+    if ("rdfs:subClassOf".equals(type)) {
+      final String parent=handleSubclass(classes,node);
+      subclasses.add(new HasSubclassRelationship(parent,id));
+    }
+  }
+}

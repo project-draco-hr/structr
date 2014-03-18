@@ -1,0 +1,24 @@
+{
+  final NamedNodeMap attributes=propertyNode.getAttributes();
+  final String comment=getChildString(propertyNode,"rdfs:comment");
+  final String rawName=getString(attributes,"rdf:about");
+  final int position=rawName.indexOf("_");
+  final String name=rawName.substring(position + 1);
+  final String id=rawName.substring(0,position);
+  properties.put(id,name);
+  if (comment != null) {
+    comments.put(id,comment);
+  }
+  String domain=null;
+  String range=null;
+  for (Node node=propertyNode.getChildNodes().item(0); node != null; node=node.getNextSibling()) {
+    final String type=node.getNodeName();
+    if ("rdfs:domain".equals(type)) {
+      domain=handleDomain(node);
+    }
+    if ("rdfs:range".equals(type)) {
+      range=handleRange(node);
+    }
+  }
+  triples.add(new Triple(domain,id,range));
+}

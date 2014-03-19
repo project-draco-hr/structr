@@ -1,24 +1,48 @@
 {
-  final Map<String,DOMNode> nodesFromSourcePage=collectNodes(sourcePage);
-  final Map<String,DOMNode> nodesFromModifiedPage=collectNodes(modifiedPage);
   final List<InvertibleModificationOperation> changeSet=new LinkedList<>();
-  for (  final Entry<String,DOMNode> newNodeEntry : nodesFromModifiedPage.entrySet()) {
+  final Map<String,DOMNode> indexMappedExistingNodes=new LinkedHashMap<>();
+  final Map<String,DOMNode> hashMappedExistingNodes=new LinkedHashMap<>();
+  final Map<String,DOMNode> indexMappedNewNodes=new LinkedHashMap<>();
+  final Map<String,DOMNode> hashMappedNewNodes=new LinkedHashMap<>();
+  collectNodes(sourcePage,indexMappedExistingNodes,hashMappedExistingNodes);
+  collectNodes(modifiedPage,indexMappedNewNodes,hashMappedNewNodes);
+  for (final Iterator<Entry<String,DOMNode>> it=indexMappedExistingNodes.entrySet().iterator(); it.hasNext(); ) {
+    final Entry<String,DOMNode> existingNodeEntry=it.next();
+    final String treeIndex=existingNodeEntry.getKey();
+    final DOMNode existingNode=existingNodeEntry.getValue();
+    final String existingHash=existingNode.getIdHash();
+    if (!hashMappedNewNodes.containsKey(existingHash) && !(existingNode instanceof Page)) {
+      changeSet.add(new DeleteOperation(treeIndex,existingNode));
+    }
+  }
+  for (final Iterator<Entry<String,DOMNode>> it=indexMappedNewNodes.entrySet().iterator(); it.hasNext(); ) {
+    final Entry<String,DOMNode> newNodeEntry=it.next();
+    final String treeIndex=newNodeEntry.getKey();
+    final DOMNode newNode=newNodeEntry.getValue();
+    String newHash=newNode.getProperty(DOMNode.dataHashProperty);
+    if (newHash == null) {
+      newHash=newNode.getIdHash();
+    }
+    if (!hashMappedExistingNodes.containsKey(newHash) && !(newNode instanceof Page)) {
+      changeSet.add(new CreateOperation(treeIndex,null,newNode));
+    }
+  }
+  for (  final Entry<String,DOMNode> newNodeEntry : indexMappedNewNodes.entrySet()) {
     final String newTreeIndex=newNodeEntry.getKey();
     final DOMNode newNode=newNodeEntry.getValue();
-    for (    final Entry<String,DOMNode> existingNodeEntry : nodesFromSourcePage.entrySet()) {
+    for (    final Entry<String,DOMNode> existingNodeEntry : indexMappedExistingNodes.entrySet()) {
       final String existingTreeIndex=existingNodeEntry.getKey();
       final DOMNode existingNode=existingNodeEntry.getValue();
       int equalityBitmask=0;
       if (newTreeIndex.equals(existingTreeIndex)) {
         equalityBitmask|=1;
       }
-      if (newNode.isSameNode(existingNode)) {
+      if (newNode.getIdHash().equals(existingNode.getIdHash())) {
         equalityBitmask|=2;
       }
       if (newNode.contentEquals(existingNode)) {
         equalityBitmask|=4;
       }
-      System.out.println(existingTreeIndex + " / " + newTreeIndex+ ": "+ equalityBitmask);
 switch (equalityBitmask) {
 case 7:
         break;
@@ -37,15 +61,11 @@ changeSet.add(new UpdateOperation(existingTreeIndex,existingNode,newNode));
 changeSet.add(new MoveOperation(existingTreeIndex,newTreeIndex,existingNode));
 break;
 case 1:
-changeSet.add(new CreateOperation(newTreeIndex,newNode));
 break;
 case 0:
 break;
 }
 }
 }
-System.out.println("Changes:");
-for (final InvertibleModificationOperation op : changeSet) {
-System.out.println(op.toString());
-}
+return changeSet;
 }

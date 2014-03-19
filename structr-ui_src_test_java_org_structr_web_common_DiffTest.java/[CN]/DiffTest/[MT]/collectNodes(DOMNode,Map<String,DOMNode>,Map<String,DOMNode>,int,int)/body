@@ -1,0 +1,12 @@
+{
+  int position=currentPosition;
+  indexMappedNodes.put("[" + depth + ":"+ currentPosition+ "]",node);
+  String dataHash=node.getProperty(DOMNode.dataHashProperty);
+  if (dataHash == null) {
+    dataHash=node.getIdHash();
+  }
+  hashMappedNodes.put(dataHash,node);
+  for (  final DOMChildren childRel : node.getChildRelationships()) {
+    collectNodes(childRel.getTargetNode(),indexMappedNodes,hashMappedNodes,depth + 1,position++);
+  }
+}

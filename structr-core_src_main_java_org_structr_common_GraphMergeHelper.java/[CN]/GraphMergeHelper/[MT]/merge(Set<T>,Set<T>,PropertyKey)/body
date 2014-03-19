@@ -1,0 +1,27 @@
+{
+  final App app=StructrApp.getInstance();
+  try (final Tx tx=app.tx()){
+    for (    final NodeInterface origNode : origNodes) {
+      origNode.setProperty(NodeInterface.deleted,true);
+      for (      final NodeInterface newNode : newNodes) {
+        final String shadowId=(String)newNode.getProperty(shadowIdPropertyKey);
+        logger.log(Level.INFO,"New node shadow id: {0}",shadowId);
+        if (origNode.getUuid().equals(shadowId)) {
+          origNode.setProperty(NodeInterface.deleted,false);
+        }
+      }
+    }
+    for (    final NodeInterface origNode : origNodes) {
+      if (origNode.getProperty(NodeInterface.deleted)) {
+        app.delete(origNode);
+      }
+    }
+    for (    final NodeInterface newNode : newNodes) {
+      app.delete(newNode);
+    }
+    tx.success();
+  }
+ catch (  FrameworkException ex) {
+    logger.log(Level.SEVERE,null,ex);
+  }
+}

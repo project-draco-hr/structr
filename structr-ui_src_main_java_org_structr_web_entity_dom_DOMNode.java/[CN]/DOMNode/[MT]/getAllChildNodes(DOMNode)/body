@@ -1,10 +1,13 @@
 {
   Set<DOMNode> allChildNodes=new HashSet();
-  DOMNode n=(DOMNode)node.getFirstChild();
+  Node n=node.getFirstChild();
   while (n != null) {
-    allChildNodes.add(n);
-    allChildNodes.addAll(getAllChildNodes(n));
-    n=(DOMNode)n.getNextSibling();
+    if (n instanceof DOMNode) {
+      DOMNode domNode=(DOMNode)n;
+      allChildNodes.add(domNode);
+      allChildNodes.addAll(getAllChildNodes(domNode));
+    }
+    n=n.getNextSibling();
   }
   return allChildNodes;
 }

@@ -38,7 +38,9 @@
       }
       propertyView.set(securityContext,config.getDefaultPropertyView());
       try (final Tx tx=app.tx()){
-        result.commitResponse(gson.get(),response);
+        if (result != null) {
+          result.commitResponse(gson.get(),response);
+        }
         tx.success();
       }
      }

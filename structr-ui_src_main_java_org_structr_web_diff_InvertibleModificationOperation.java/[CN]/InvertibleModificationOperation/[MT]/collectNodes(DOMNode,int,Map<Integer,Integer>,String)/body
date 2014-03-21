@@ -1,0 +1,18 @@
+{
+  Integer pos=childIndexMap.get(depth);
+  if (pos == null) {
+    pos=0;
+  }
+  int position=pos;
+  childIndexMap.put(depth,++position);
+  if (treeIndex.equals("[" + depth + ":"+ position+ "]")) {
+    return new InsertPosition((DOMNode)node.getParentNode(),(DOMNode)node.getNextSibling());
+  }
+  for (  final DOMChildren childRel : node.getChildRelationships()) {
+    final InsertPosition insertPosition=collectNodes(childRel.getTargetNode(),depth + 1,childIndexMap,treeIndex);
+    if (insertPosition != null) {
+      return insertPosition;
+    }
+  }
+  return null;
+}

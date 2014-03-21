@@ -1,4 +1,5 @@
 {
+  Logger.getLogger("org.structr").setLevel(Level.OFF);
   try (final Tx tx=app.tx()){
     final Page sourcePage=createTestPage();
     final String sourceHtml=renderPage(sourcePage);
@@ -7,13 +8,11 @@
     System.out.println("Original HTML:");
     System.out.println(sourceHtml);
     System.out.println("#############################");
-    print(sourcePage,0,0);
     System.out.println("###############################################################################################");
     System.out.println("Modified HTML:");
     System.out.println(modifiedHtml);
     final Page modifiedPage=parsePage(modifiedHtml);
     System.out.println("#############################");
-    print(modifiedPage,0,0);
     final List<InvertibleModificationOperation> changeSet=diff(sourcePage,modifiedPage);
     System.out.println("Changes:");
     for (    final InvertibleModificationOperation op : changeSet) {
@@ -25,7 +24,6 @@
     System.out.println("Updated HTML:");
     System.out.println(updatedHtml);
     System.out.println("#############################");
-    print(sourcePage,0,0);
   }
  catch (  Throwable t) {
     t.printStackTrace();

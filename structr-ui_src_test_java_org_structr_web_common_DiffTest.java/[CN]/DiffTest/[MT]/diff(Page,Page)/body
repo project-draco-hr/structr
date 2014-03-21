@@ -6,25 +6,24 @@
   final Map<String,DOMNode> hashMappedNewNodes=new LinkedHashMap<>();
   collectNodes(sourcePage,indexMappedExistingNodes,hashMappedExistingNodes);
   collectNodes(modifiedPage,indexMappedNewNodes,hashMappedNewNodes);
-  for (final Iterator<Entry<String,DOMNode>> it=indexMappedExistingNodes.entrySet().iterator(); it.hasNext(); ) {
+  for (final Iterator<Entry<String,DOMNode>> it=hashMappedExistingNodes.entrySet().iterator(); it.hasNext(); ) {
     final Entry<String,DOMNode> existingNodeEntry=it.next();
-    final String treeIndex=existingNodeEntry.getKey();
     final DOMNode existingNode=existingNodeEntry.getValue();
     final String existingHash=existingNode.getIdHash();
     if (!hashMappedNewNodes.containsKey(existingHash) && !(existingNode instanceof Page)) {
-      changeSet.add(new DeleteOperation(treeIndex,existingNode));
+      changeSet.add(new DeleteOperation(existingNode));
     }
   }
   for (final Iterator<Entry<String,DOMNode>> it=indexMappedNewNodes.entrySet().iterator(); it.hasNext(); ) {
     final Entry<String,DOMNode> newNodeEntry=it.next();
-    final String treeIndex=newNodeEntry.getKey();
+    final String newTreeIndex=newNodeEntry.getKey();
     final DOMNode newNode=newNodeEntry.getValue();
     String newHash=newNode.getProperty(DOMNode.dataHashProperty);
     if (newHash == null) {
       newHash=newNode.getIdHash();
     }
     if (!hashMappedExistingNodes.containsKey(newHash) && !(newNode instanceof Page)) {
-      changeSet.add(new CreateOperation(treeIndex,null,newNode));
+      changeSet.add(new CreateOperation(newNode,newTreeIndex));
     }
   }
   for (  final Entry<String,DOMNode> newNodeEntry : indexMappedNewNodes.entrySet()) {
@@ -47,18 +46,18 @@ switch (equalityBitmask) {
 case 7:
         break;
 case 6:
-      changeSet.add(new MoveOperation(existingTreeIndex,newTreeIndex,existingNode));
+      changeSet.add(new MoveOperation(existingNode,newTreeIndex));
     break;
 case 5:
   break;
 case 4:
 break;
 case 3:
-changeSet.add(new UpdateOperation(existingTreeIndex,existingNode,newNode));
+changeSet.add(new UpdateOperation(existingNode,newNode));
 break;
 case 2:
-changeSet.add(new UpdateOperation(existingTreeIndex,existingNode,newNode));
-changeSet.add(new MoveOperation(existingTreeIndex,newTreeIndex,existingNode));
+changeSet.add(new UpdateOperation(existingNode,newNode));
+changeSet.add(new MoveOperation(existingNode,newTreeIndex));
 break;
 case 1:
 break;

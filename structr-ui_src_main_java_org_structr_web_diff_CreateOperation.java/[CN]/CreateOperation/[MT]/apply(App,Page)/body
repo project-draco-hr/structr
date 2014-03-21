@@ -1,2 +1,15 @@
 {
+  final InsertPosition insertPosition=findInsertPosition(page,newTreeIndex);
+  if (insertPosition != null) {
+    final DOMNode parent=insertPosition.getParent();
+    final DOMNode sibling=insertPosition.getSibling();
+    if (sibling != null) {
+      System.out.println("Inserting at " + parent.getIdHashOrProperty() + " before "+ sibling.getIdHashOrProperty());
+    }
+ else {
+      System.out.println("Inserting at " + parent.getIdHashOrProperty());
+    }
+    page.adoptNode(newNode);
+    parent.insertBefore(newNode,sibling);
+  }
 }

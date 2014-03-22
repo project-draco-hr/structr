@@ -6,14 +6,14 @@
   response.setHeader("Date",httpDateFormat.format(new Date()));
   Calendar cal=new GregorianCalendar();
   Integer seconds=node.getProperty(Page.cacheForSeconds);
-  if (seconds != null) {
+  if (!dontCache && seconds != null) {
     cal.add(Calendar.SECOND,seconds);
-    response.setHeader("Cache-Control","max-age=" + seconds + ", s-maxage="+ seconds+ ", must-revalidate, proxy-revalidate");
+    response.setHeader("Cache-Control","max-age=" + seconds + ", s-maxage="+ seconds+ "");
     response.setHeader("Expires",httpDateFormat.format(cal.getTime()));
   }
  else {
-    if (node.getProperty(AbstractNode.visibleToPublicUsers)) {
-      response.setHeader("Cache-Control","must-revalidate, proxy-revalidate");
+    if (!dontCache) {
+      response.setHeader("Cache-Control","no-cache, must-revalidate, proxy-revalidate");
     }
  else {
       response.setHeader("Cache-Control","private, no-cache, no-store, max-age=0, s-maxage=0, must-revalidate, proxy-revalidate");

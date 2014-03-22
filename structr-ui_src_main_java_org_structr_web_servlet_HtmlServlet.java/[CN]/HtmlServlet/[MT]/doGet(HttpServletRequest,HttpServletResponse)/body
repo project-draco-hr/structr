@@ -1,12 +1,15 @@
 {
   double start=System.nanoTime();
   SecurityContext securityContext;
-  Authenticator authenticator;
+  Authenticator auth=config.getAuthenticator();
   App app;
   try {
+    String path=request.getPathInfo();
+    if (checkRegistration(auth,request,response,path)) {
+      return;
+    }
     try (final Tx tx=StructrApp.getInstance().tx()){
-      authenticator=config.getAuthenticator();
-      securityContext=authenticator.initializeAndExamineRequest(request,response);
+      securityContext=auth.initializeAndExamineRequest(request,response);
       tx.success();
     }
      app=StructrApp.getInstance(securityContext);
@@ -15,7 +18,6 @@
       request.setCharacterEncoding("UTF-8");
       response.setCharacterEncoding("UTF-8");
       boolean dontCache=false;
-      String path=request.getPathInfo();
       logger.log(Level.FINE,"Path info {0}",path);
       logger.log(Level.FINE,"Request examined by security context in {0} seconds",decimalFormat.format((System.nanoTime() - start) / 1000000000.0));
       if (response.getStatus() == 302) {
@@ -37,9 +39,6 @@
       }
  else {
         if (checkGetSessionId(request,response,path)) {
-          return;
-        }
-        if (checkRegistration(securityContext,request,response,path)) {
           return;
         }
         if (rootElement == null) {
@@ -136,6 +135,7 @@
  else {
         notFound(response,securityContext);
       }
+      tx.success();
     }
  catch (    FrameworkException fex) {
       logger.log(Level.SEVERE,"Exception while processing request",fex);

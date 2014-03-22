@@ -12,11 +12,17 @@
     if (!results.isEmpty()) {
       final Principal user=results.get(0);
       final App app=StructrApp.getInstance(securityContext);
-      user.setProperty(User.confirmationKey,null);
-      user.setProperty(Principal.sessionId,request.getSession().getId());
-      if (StringUtils.isNotBlank(targetPage)) {
-        response.sendRedirect("/" + targetPage);
-        return true;
+      try (final Tx tx=app.tx()){
+        user.setProperty(User.confirmationKey,null);
+        user.setProperty(Principal.sessionId,request.getSession().getId());
+        tx.success();
+        if (StringUtils.isNotBlank(targetPage)) {
+          response.sendRedirect("/" + targetPage);
+          return true;
+        }
+      }
+ catch (      FrameworkException fex) {
+        logger.log(Level.WARNING,"Could not register user {0}",user);
       }
     }
  else {

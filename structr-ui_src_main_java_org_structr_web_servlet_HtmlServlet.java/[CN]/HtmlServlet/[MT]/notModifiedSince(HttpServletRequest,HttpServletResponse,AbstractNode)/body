@@ -12,7 +12,12 @@
     response.setHeader("Expires",httpDateFormat.format(cal.getTime()));
   }
  else {
-    response.setHeader("Cache-Control","must-revalidate, proxy-revalidate");
+    if (node.getProperty(AbstractNode.visibleToPublicUsers)) {
+      response.setHeader("Cache-Control","must-revalidate, proxy-revalidate");
+    }
+ else {
+      response.setHeader("Cache-Control","private, no-cache, no-store, max-age=0, s-maxage=0, must-revalidate, proxy-revalidate");
+    }
   }
   if (lastModified != null) {
     Date roundedLastModified=DateUtils.round(lastModified,Calendar.SECOND);
@@ -24,6 +29,7 @@
         if ((ifModSince != null) && (roundedLastModified.equals(ifModSince) || roundedLastModified.before(ifModSince))) {
           notModified=true;
           response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+          response.setHeader("Vary","Accept-Encoding");
         }
       }
  catch (      ParseException ex) {

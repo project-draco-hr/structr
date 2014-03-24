@@ -1,0 +1,17 @@
+{
+  final String result1=testDiff("<html><head><title>Title</title></head><body><h1>Title text</h1><div><h2>subtitle</h2></div></body></html>",new org.neo4j.helpers.Function<String,String>(){
+    @Override public String apply(    String from){
+      final StringBuilder buf=new StringBuilder(from);
+      int startPos=buf.indexOf("<h1");
+      int endPos=buf.indexOf("</h1>") + 5;
+      final String toMove=buf.substring(startPos,endPos);
+      buf.replace(startPos,endPos,"");
+      int insertPos=buf.indexOf("</h2>") + 5;
+      buf.insert(insertPos,toMove);
+      return buf.toString();
+    }
+  }
+);
+  System.out.println(result1);
+  assertEquals("<!DOCTYPE html>\n" + "<html>\n" + "  <head>\n"+ "    <title>Title</title>\n"+ "  </head>\n"+ "  <body>\n"+ "    <div>\n"+ "      <h2>subtitle</h2>\n"+ "      <h1>Title text</h1>\n"+ "    </div>\n"+ "  </body>\n"+ "</html>",result1);
+}

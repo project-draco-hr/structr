@@ -1,0 +1,15 @@
+{
+  final InsertPosition insertPosition=findInsertPosition(sourcePage,parentHash,siblingHashes,newNode);
+  if (insertPosition != null) {
+    final DOMNode parent=insertPosition.getParent();
+    final DOMNode sibling=insertPosition.getSibling();
+    if (parent != null) {
+      sourcePage.adoptNode(newNode);
+      parent.insertBefore(newNode,sibling);
+      hashMappedExistingNodes.put(newNode.getIdHashOrProperty(),newNode);
+      for (      final DOMChildren childRel : newNode.getChildRelationships()) {
+        app.delete(childRel);
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  StringBuilder buf=new StringBuilder();
+  try (final Tx tx=app.tx()){
+    final Page sourcePage=Importer.parsePageFromSource(securityContext,source,"test");
+    final String sourceHtml=renderPage(sourcePage,RenderContext.EditMode.RAW);
+    final String modifiedHtml=modifier.apply(sourceHtml);
+    final Page modifiedPage=Importer.parsePageFromSource(securityContext,modifiedHtml,"Test");
+    final List<InvertibleModificationOperation> changeSet=Importer.diffPages(sourcePage,modifiedPage);
+    for (    final InvertibleModificationOperation op : changeSet) {
+      System.out.println(op);
+      op.apply(app,sourcePage,modifiedPage);
+      System.out.println(renderPage(sourcePage,RenderContext.EditMode.NONE));
+    }
+    buf.append(renderPage(sourcePage,RenderContext.EditMode.NONE));
+  }
+ catch (  Throwable t) {
+    t.printStackTrace();
+  }
+  return buf.toString();
+}

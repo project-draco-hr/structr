@@ -1,0 +1,38 @@
+{
+  logger.log(Level.FINE,"Checking registration ...");
+  String key=request.getParameter(CONFIRM_KEY_KEY);
+  if (StringUtils.isEmpty(key)) {
+    return false;
+  }
+  String targetPage=request.getParameter(TARGET_PAGE_KEY);
+  String errorPage=request.getParameter(ERROR_PAGE_KEY);
+  if (CONFIRM_REGISTRATION_PAGE.equals(path)) {
+    final App app=StructrApp.getInstance();
+    Result<Principal> results;
+    try (final Tx tx=app.tx()){
+      results=app.nodeQuery(Principal.class).and(User.confirmationKey,key).getResult();
+      ;
+    }
+     if (!results.isEmpty()) {
+      final Principal user=results.get(0);
+      try (final Tx tx=app.tx()){
+        user.setProperty(User.confirmationKey,null);
+        if (auth.getUserAutoLogin()) {
+          user.setProperty(Principal.sessionId,request.getSession().getId());
+        }
+        tx.success();
+        if (StringUtils.isNotBlank(targetPage)) {
+          response.sendRedirect("/" + targetPage);
+          return true;
+        }
+      }
+     }
+ else {
+      if (StringUtils.isNotBlank(errorPage)) {
+        response.sendRedirect("/" + errorPage);
+        return true;
+      }
+    }
+  }
+  return false;
+}

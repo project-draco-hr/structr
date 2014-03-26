@@ -1,0 +1,9 @@
+{
+  final String result1=testDiff("<html><head><title>Title</title></head><body>Test</body></html>",new org.neo4j.helpers.Function<String,String>(){
+    @Override public String apply(    String from){
+      return from.replace("Test","<div><h1>Title text</h1></div>");
+    }
+  }
+);
+  assertEquals("<!DOCTYPE html>\n" + "<html>\n" + "  <head>\n"+ "    <title>Title</title>\n"+ "  </head>\n"+ "  <body>\n"+ "    <div>\n"+ "      <h1>Title text</h1>\n"+ "    </div>\n"+ "  </body>\n"+ "</html>",result1);
+}

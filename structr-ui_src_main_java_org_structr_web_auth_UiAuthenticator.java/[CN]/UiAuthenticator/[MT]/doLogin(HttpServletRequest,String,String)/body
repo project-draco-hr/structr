@@ -8,12 +8,8 @@
  catch (    UnsupportedOperationException uoe) {
     }
     if (sessionIdFromRequest != null) {
-      try {
-        user.setProperty(Principal.sessionId,sessionIdFromRequest);
-      }
- catch (      FrameworkException ex) {
-        logger.log(Level.SEVERE,null,ex);
-      }
+      AuthHelper.clearSession(sessionIdFromRequest);
+      user.addSessionId(sessionIdFromRequest);
     }
   }
   return user;

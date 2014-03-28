@@ -36,21 +36,18 @@
           user=RegistrationResource.createUser(superUserContext,credentialKey,value,true,userClass);
         }
         if (user != null) {
+          final String sessionId=HttpAuthenticator.getSessionId(request);
+          AuthHelper.clearSession(sessionId);
+          user.addSessionId(sessionId);
+          HtmlServlet.setNoCacheHeaders(response);
           try {
-            user.setProperty(Principal.sessionId,HttpAuthenticator.getSessionId(request));
-            HtmlServlet.setNoCacheHeaders(response);
-            try {
-              logger.log(Level.FINE,"Response status: {0}",response.getStatus());
-              response.sendRedirect(oauthServer.getReturnUri());
-            }
- catch (            IOException ex) {
-              logger.log(Level.SEVERE,"Could not redirect to {0}: {1}",new Object[]{oauthServer.getReturnUri(),ex});
-            }
-            return user;
+            logger.log(Level.FINE,"Response status: {0}",response.getStatus());
+            response.sendRedirect(oauthServer.getReturnUri());
           }
- catch (          FrameworkException ex) {
-            logger.log(Level.SEVERE,"Could not set session id for user {0}",user.toString());
+ catch (          IOException ex) {
+            logger.log(Level.SEVERE,"Could not redirect to {0}: {1}",new Object[]{oauthServer.getReturnUri(),ex});
           }
+          return user;
         }
       }
     }

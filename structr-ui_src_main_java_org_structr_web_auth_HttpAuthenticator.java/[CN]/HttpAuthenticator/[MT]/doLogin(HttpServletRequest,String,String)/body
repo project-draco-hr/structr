@@ -6,12 +6,8 @@
   if (user != null) {
     final String sessionIdFromRequest=request.getRequestedSessionId();
     final Principal principal=user;
-    try {
-      principal.setProperty(Principal.sessionId,sessionIdFromRequest);
-    }
- catch (    FrameworkException ex) {
-      logger.log(Level.SEVERE,null,ex);
-    }
+    AuthHelper.clearSession(sessionIdFromRequest);
+    principal.addSessionId(sessionIdFromRequest);
   }
   return user;
 }

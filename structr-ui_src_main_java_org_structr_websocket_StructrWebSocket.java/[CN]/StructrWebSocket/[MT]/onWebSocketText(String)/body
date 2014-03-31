@@ -4,16 +4,16 @@
     return;
   }
   logger.log(Level.FINE,"############################################################ RECEIVED \n{0}",data.substring(0,Math.min(data.length(),1000)));
-  WebSocketMessage webSocketData=gson.fromJson(data,WebSocketMessage.class);
+  final WebSocketMessage webSocketData=gson.fromJson(data,WebSocketMessage.class);
   final App app=StructrApp.getInstance(securityContext);
   try (final Tx tx=app.tx()){
     this.callback=webSocketData.getCallback();
-    String messageToken=webSocketData.getToken();
-    String command=webSocketData.getCommand();
-    Class type=commandSet.get(command);
+    final String command=webSocketData.getCommand();
+    final Class type=commandSet.get(command);
+    final String sessionIdFromMessage=webSocketData.getSessionId();
     if (type != null) {
-      if (!isAuthenticated() && (messageToken != null)) {
-        authenticateToken(messageToken);
+      if (sessionIdFromMessage != null) {
+        authenticate(sessionIdFromMessage);
       }
       if (!isAuthenticated() && !type.equals(LoginCommand.class)) {
         send(MessageBuilder.status().code(401).message("").build(),true);
@@ -24,7 +24,6 @@
       abstractCommand.setSession(session);
       abstractCommand.setIdProperty(idProperty);
       webSocketData.setSessionValid(isAuthenticated());
-      webSocketData.setToken(null);
       try {
         abstractCommand.processMessage(webSocketData);
         tx.success();

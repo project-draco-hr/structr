@@ -18,7 +18,9 @@
       try (final Tx tx=app.tx()){
         user.setProperty(User.confirmationKey,null);
         if (auth.getUserAutoLogin()) {
-          user.setProperty(Principal.sessionId,request.getSession().getId());
+          final String sessionId=request.getSession().getId();
+          AuthHelper.clearSession(sessionId);
+          user.addSessionId(sessionId);
         }
         tx.success();
         if (StringUtils.isNotBlank(targetPage)) {

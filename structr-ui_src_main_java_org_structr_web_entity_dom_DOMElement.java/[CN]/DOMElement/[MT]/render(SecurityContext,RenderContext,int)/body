@@ -1,4 +1,5 @@
 {
+  Result localResult=renderContext.getResult();
   AsyncBuffer out=renderContext.getBuffer();
   double start=System.nanoTime();
   if (isDeleted() || isHidden() || !displayForLocale(renderContext)|| !displayForConditions(securityContext,renderContext)) {
@@ -49,6 +50,10 @@
           if (StringUtils.isNotBlank(subKey)) {
             setDataRoot(renderContext,subNode,subKey);
             GraphObject currentDataNode=renderContext.getDataObject();
+            final Result newResult=renderContext.getResult();
+            if (newResult != null) {
+              localResult=newResult;
+            }
             List<GraphObject> listData=((DOMElement)subNode).checkListSources(securityContext,renderContext);
             PropertyKey propertyKey=null;
             if (subNode.getProperty(renderDetails) && detailMode) {
@@ -120,5 +125,8 @@
   if (flush()) {
     logger.log(Level.FINE,"Flushing response: {0} ",getTagName());
     out.flush();
+  }
+  if (localResult != null) {
+    renderContext.setResult(localResult);
   }
 }

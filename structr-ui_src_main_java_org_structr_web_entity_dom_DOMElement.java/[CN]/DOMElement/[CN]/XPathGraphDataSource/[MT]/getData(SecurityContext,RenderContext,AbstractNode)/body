@@ -1,10 +1,11 @@
 {
   String xpathQuery=referenceNode.getProperty(DOMElement.xpathQuery);
   if (xpathQuery != null) {
-    XPathFactory factory=XPathFactory.newInstance();
-    XPath xpath=factory.newXPath();
+    final XPathFactory factory=XPathFactory.newInstance();
+    final XPath xpath=factory.newXPath();
+    Document document=((DOMNode)referenceNode).getOwnerDocument();
     try {
-      Object result=xpath.evaluate(xpathQuery,((DOMNode)referenceNode).getOwnerDocument(),XPathConstants.NODESET);
+      Object result=xpath.evaluate(xpathQuery,document,XPathConstants.NODESET);
       List<GraphObject> results=new LinkedList<>();
       if (result instanceof NodeList) {
         NodeList nodes=(NodeList)result;

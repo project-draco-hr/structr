@@ -4,17 +4,15 @@
     final DOMNode parent=insertPosition.getParent();
     final DOMNode sibling=insertPosition.getSibling();
     final Node originalSibling=originalNode.getNextSibling();
-    if (!parent.equals(originalNode.getParentNode())) {
-      if (sibling != null && sibling.equals(originalSibling)) {
-        return;
-      }
-      if (sibling == null && originalSibling == null) {
-        return;
-      }
-      parent.insertBefore(originalNode,sibling);
-      for (      final DOMChildren childRel : newNode.getChildRelationships()) {
-        app.delete(childRel);
-      }
+    if (sibling != null && sibling.equals(originalSibling)) {
+      return;
+    }
+    if (sibling == null && originalSibling == null) {
+      return;
+    }
+    parent.insertBefore(originalNode,sibling);
+    for (    final DOMChildren childRel : newNode.getChildRelationships()) {
+      app.delete(childRel);
     }
   }
 }

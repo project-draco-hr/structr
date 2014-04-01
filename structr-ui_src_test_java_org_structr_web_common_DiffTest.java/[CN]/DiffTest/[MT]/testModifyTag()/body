@@ -1,0 +1,15 @@
+{
+  final String result1=testDiff("<html><head><title>Title</title></head><body><h1>title</h1><p>text</p></body></html>",new org.neo4j.helpers.Function<String,String>(){
+    @Override public String apply(    String from){
+      String modified=from;
+      modified=modified.replace("<h1 ","<h2 ");
+      modified=modified.replace("</h1>","</h2>");
+      modified=modified.replace("<p ","<a ");
+      modified=modified.replace("</p>","</a>");
+      return modified;
+    }
+  }
+);
+  System.out.println(result1);
+  assertEquals("<!DOCTYPE html>\n" + "<html>\n" + "  <head>\n"+ "    <title>Title</title>\n"+ "  </head>\n"+ "  <body>\n"+ "    <h2>title</h2>\n"+ "    <a>text</a>\n"+ "  </body>\n"+ "</html>",result1);
+}

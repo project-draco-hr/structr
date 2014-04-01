@@ -4,12 +4,30 @@
     final DOMNode parent=insertPosition.getParent();
     final DOMNode sibling=insertPosition.getSibling();
     final Node originalSibling=originalNode.getNextSibling();
-    if (sibling != null && sibling.equals(originalSibling)) {
-      return;
+    final Node originalParent=originalNode.getParentNode();
+    if (parent.equals(originalParent)) {
+      if (sibling != null && sibling.equals(originalSibling)) {
+        return;
+      }
+      if (sibling == null && originalSibling == null) {
+        return;
+      }
     }
-    if (sibling == null && originalSibling == null) {
-      return;
+    Node localSibling=sibling;
+    boolean found=false;
+    int count=0;
+    while (localSibling != null && count++ < 10) {
+      try {
+        parent.insertBefore(originalNode,localSibling);
+        found=true;
+        break;
+      }
+ catch (      DOMException dex) {
+      }
+      localSibling=localSibling.getParentNode();
     }
-    parent.insertBefore(originalNode,sibling);
+    if (!found) {
+      parent.appendChild(originalNode);
+    }
   }
 }

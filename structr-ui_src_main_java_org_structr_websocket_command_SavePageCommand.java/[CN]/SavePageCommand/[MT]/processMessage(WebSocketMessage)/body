@@ -8,11 +8,9 @@
   Page sourcePage=getPage(pageId);
   if (sourcePage != null) {
     try {
-      logger.log(Level.INFO,modifiedHtml);
       modifiedPage=Importer.parsePageFromSource(securityContext,modifiedHtml,"Test");
       final List<InvertibleModificationOperation> changeSet=Importer.diffPages(sourcePage,modifiedPage);
       for (      final InvertibleModificationOperation op : changeSet) {
-        System.out.println(op);
         op.apply(app,sourcePage,modifiedPage);
       }
     }

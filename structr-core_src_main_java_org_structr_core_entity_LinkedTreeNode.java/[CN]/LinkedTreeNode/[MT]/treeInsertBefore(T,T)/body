@@ -1,7 +1,11 @@
 {
   List<R> rels=treeGetChildRelationships();
+  boolean found=false;
   int position=0;
   if (rels.isEmpty()) {
+    if (refChild != null) {
+      throw new FrameworkException(404,"Referenced child is not a child of parent node.");
+    }
     treeAppendChild(newChild);
     return;
   }
@@ -11,10 +15,14 @@
       PropertyMap properties=new PropertyMap();
       properties.put(positionProperty,position);
       linkNodes(getChildLinkType(),(T)LinkedTreeNode.this,newChild,properties);
+      found=true;
       position++;
     }
     rel.setProperty(positionProperty,position);
     position++;
+  }
+  if (!found) {
+    throw new FrameworkException(404,"Referenced child is not a child of parent node.");
   }
   LinkedTreeNode.super.listInsertBefore(refChild,newChild);
 }

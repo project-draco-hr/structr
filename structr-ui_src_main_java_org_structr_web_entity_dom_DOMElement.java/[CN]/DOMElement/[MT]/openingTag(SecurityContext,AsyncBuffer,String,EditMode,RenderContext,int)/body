@@ -1,5 +1,16 @@
 {
   out.append("<").append(tag);
+  for (  PropertyKey attribute : StructrApp.getConfiguration().getPropertySet(getClass(),PropertyView.Html)) {
+    String value=getPropertyWithVariableReplacement(securityContext,renderContext,attribute);
+    if (!(EditMode.RAW.equals(editMode))) {
+      value=escapeForHtmlAttributes(value);
+    }
+    if (value != null) {
+      String key=attribute.jsonName().substring(PropertyView.Html.length());
+      out.append(" ").append(key).append("=\"").append(value).append("\"");
+    }
+  }
+  renderCustomAttributes(out,securityContext,renderContext);
 switch (editMode) {
 case CONTENT:
     if (depth == 0) {
@@ -13,17 +24,6 @@ break;
 case RAW:
 out.append(" data-hash=\"").append(getIdHash()).append("\"");
 break;
-}
-renderCustomAttributes(out,securityContext,renderContext);
-for (PropertyKey attribute : StructrApp.getConfiguration().getPropertySet(getClass(),PropertyView.Html)) {
-String value=getPropertyWithVariableReplacement(securityContext,renderContext,attribute);
-if (!(EditMode.RAW.equals(editMode))) {
-value=escapeForHtmlAttributes(value);
-}
-if (value != null) {
-String key=attribute.jsonName().substring(PropertyView.Html.length());
-out.append(" ").append(key).append("=\"").append(value).append("\"");
-}
 }
 out.append(">");
 }

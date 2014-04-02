@@ -9,9 +9,12 @@
   final Page _page=this;
   DOMElement element;
   try {
-    element=(DOMElement)app.create(SchemaHelper.getEntityClassForRawType(elementType),new NodeAttribute(DOMElement.tag,tag));
-    element.doAdopt(_page);
-    return element;
+    final Class entityClass=SchemaHelper.getEntityClassForRawType(elementType);
+    if (entityClass != null) {
+      element=(DOMElement)app.create(entityClass,new NodeAttribute(DOMElement.tag,tag));
+      element.doAdopt(_page);
+      return element;
+    }
   }
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,null,ex);

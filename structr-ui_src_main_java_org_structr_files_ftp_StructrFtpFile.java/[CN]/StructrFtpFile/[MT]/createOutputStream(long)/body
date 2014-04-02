@@ -1,3 +1,8 @@
 {
-  return ((File)structrFile).getOutputStream();
+  try (Tx tx=StructrApp.getInstance().tx()){
+    return ((File)structrFile).getOutputStream();
+  }
+ catch (  FrameworkException fex) {
+  }
+  return null;
 }

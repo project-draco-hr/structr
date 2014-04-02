@@ -30,6 +30,10 @@
         return new StructrFtpFile((File)file);
       }
     }
+    Page page=StructrApp.getInstance().nodeQuery(Page.class).andName(PathHelper.getName(requestedPath)).getFirst();
+    if (page != null) {
+      return page;
+    }
     logger.log(Level.WARNING,"No existing file found: {0}",requestedPath);
     return new FileOrFolder(requestedPath,user);
   }

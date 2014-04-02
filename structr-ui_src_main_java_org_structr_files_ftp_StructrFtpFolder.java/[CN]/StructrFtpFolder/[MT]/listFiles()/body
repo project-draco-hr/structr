@@ -1,11 +1,12 @@
 {
   List<FtpFile> ftpFiles=new ArrayList();
-  try (Tx tx=StructrApp.getInstance().tx()){
+  final App app=StructrApp.getInstance();
+  try (Tx tx=app.tx()){
     String requestedPath=getAbsolutePath();
     logger.log(Level.INFO,"Children of {0} requested",requestedPath);
     if ("/".equals(requestedPath)) {
       try {
-        Result<Folder> folders=StructrApp.getInstance().nodeQuery(Folder.class).getResult();
+        Result<Folder> folders=app.nodeQuery(Folder.class).getResult();
         logger.log(Level.INFO,"{0} folders found",folders.size());
         for (        Folder f : folders.getResults()) {
           if (f.getProperty(AbstractFile.parent) != null) {
@@ -15,7 +16,7 @@
           logger.log(Level.INFO,"Folder found: {0}",ftpFile.getAbsolutePath());
           ftpFiles.add(ftpFile);
         }
-        Result<File> files=StructrApp.getInstance().nodeQuery(File.class).getResult();
+        Result<File> files=app.nodeQuery(File.class).getResult();
         logger.log(Level.INFO,"{0} files found",files.size());
         for (        File f : files.getResults()) {
           if (f.getProperty(AbstractFile.parent) != null) {
@@ -25,6 +26,12 @@
           FtpFile ftpFile=new StructrFtpFile(f);
           logger.log(Level.FINE,"File found: {0}",ftpFile.getAbsolutePath());
           ftpFiles.add(ftpFile);
+        }
+        Result<Page> pages=app.nodeQuery(Page.class).getResult();
+        logger.log(Level.INFO,"{0} pages found",pages.size());
+        for (        Page p : pages.getResults()) {
+          logger.log(Level.FINEST,"Structr page found: {0}",p);
+          ftpFiles.add(p);
         }
         return ftpFiles;
       }

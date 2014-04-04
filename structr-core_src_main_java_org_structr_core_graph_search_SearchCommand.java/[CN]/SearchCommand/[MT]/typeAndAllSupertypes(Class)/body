@@ -1,0 +1,15 @@
+{
+  final ConfigurationProvider configuration=StructrApp.getConfiguration();
+  final Set<Class> allSupertypes=new LinkedHashSet<>();
+  Class localType=type;
+  while (localType != null && !localType.equals(Object.class)) {
+    allSupertypes.add(localType);
+    allSupertypes.addAll(configuration.getInterfacesForType(localType));
+    localType=localType.getSuperclass();
+  }
+  allSupertypes.remove(RelationshipInterface.class);
+  allSupertypes.remove(AbstractRelationship.class);
+  allSupertypes.remove(NodeInterface.class);
+  allSupertypes.remove(AbstractNode.class);
+  return allSupertypes;
+}

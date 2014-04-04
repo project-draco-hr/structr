@@ -1,0 +1,20 @@
+{
+  try {
+    Principal user=getUser(request,false);
+    if (user != null) {
+      final String sessionId=request.getRequestedSessionId();
+      if (sessionId != null) {
+        AuthHelper.clearSession(sessionId);
+        user.removeSessionId(sessionId);
+      }
+    }
+    HttpSession session=request.getSession(false);
+    if (session != null) {
+      session.invalidate();
+    }
+    request.logout();
+  }
+ catch (  ServletException|FrameworkException ex) {
+    logger.log(Level.WARNING,"Error while logging out user",ex);
+  }
+}

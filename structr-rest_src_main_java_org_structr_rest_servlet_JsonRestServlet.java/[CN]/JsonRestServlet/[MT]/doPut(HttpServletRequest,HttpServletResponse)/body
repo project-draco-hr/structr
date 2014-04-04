@@ -1,25 +1,53 @@
 {
   SecurityContext securityContext=null;
+  Authenticator authenticator=null;
+  RestMethodResult result=null;
+  JsonInput propertySet=null;
+  Resource resource=null;
   try {
-    Authenticator authenticator=getAuthenticator();
-    securityContext=authenticator.initializeAndExamineRequest(request,response);
+    try (final Tx tx=StructrApp.getInstance().tx()){
+      authenticator=config.getAuthenticator();
+      securityContext=authenticator.initializeAndExamineRequest(request,response);
+      tx.success();
+    }
+     final App app=StructrApp.getInstance(securityContext);
     request.setCharacterEncoding("UTF-8");
     response.setCharacterEncoding("UTF-8");
     response.setContentType("application/json; charset=UTF-8");
-    final JsonInput propertySet=gson.get().fromJson(request.getReader(),JsonInput.class);
-    if (securityContext != null) {
-      List<Resource> chain=ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,defaultIdProperty);
-      Resource resource=ResourceHelper.optimizeNestedResourceChain(chain,defaultIdProperty);
-      String resourceSignature=resource.getResourceSignature();
+    try (final Tx tx=app.tx()){
+      propertySet=gson.get().fromJson(request.getReader(),JsonInput.class);
+      tx.success();
+    }
+     if (securityContext != null) {
       Map<String,Object> properties=convertPropertySetToMap(propertySet);
-      authenticator.checkResourceAccess(request,resourceSignature,propertyView.get(securityContext));
-      RestMethodResult result=resource.doPut(properties);
-      result.commitResponse(gson.get(),response);
-    }
+      try (final Tx tx=app.tx()){
+        resource=ResourceHelper.applyViewTransformation(request,securityContext,ResourceHelper.optimizeNestedResourceChain(ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,config.getDefaultIdProperty()),config.getDefaultIdProperty()),propertyView);
+        authenticator.checkResourceAccess(request,resource.getResourceSignature(),propertyView.get(securityContext));
+        tx.success();
+      }
+       boolean retry=true;
+      while (retry) {
+        try (final Tx tx=app.tx()){
+          result=resource.doPut(properties);
+          tx.success();
+          retry=false;
+        }
+ catch (        DeadlockDetectedException ddex) {
+          retry=true;
+        }
+      }
+      try (final Tx tx=app.tx()){
+        result.commitResponse(gson.get(),response);
+        tx.success();
+      }
+     }
  else {
-      RestMethodResult result=new RestMethodResult(HttpServletResponse.SC_FORBIDDEN);
-      result.commitResponse(gson.get(),response);
-    }
+      try (final Tx tx=app.tx()){
+        result=new RestMethodResult(HttpServletResponse.SC_FORBIDDEN);
+        result.commitResponse(gson.get(),response);
+        tx.success();
+      }
+     }
   }
  catch (  FrameworkException frameworkException) {
     response.setStatus(frameworkException.getStatus());
@@ -30,23 +58,22 @@ catch (  JsonSyntaxException jsex) {
     logger.log(Level.WARNING,"JsonSyntaxException in PUT",jsex);
     int code=HttpServletResponse.SC_BAD_REQUEST;
     response.setStatus(code);
-    response.getWriter().append(jsonError(code,"JsonSyntaxException in PUT: " + jsex.getMessage()));
+    response.getWriter().append(RestMethodResult.jsonError(code,"JsonSyntaxException in PUT: " + jsex.getMessage()));
   }
 catch (  JsonParseException jpex) {
     logger.log(Level.WARNING,"JsonParseException in PUT",jpex);
     int code=HttpServletResponse.SC_BAD_REQUEST;
     response.setStatus(code);
-    response.getWriter().append(jsonError(code,"JsonSyntaxException in PUT: " + jpex.getMessage()));
+    response.getWriter().append(RestMethodResult.jsonError(code,"JsonSyntaxException in PUT: " + jpex.getMessage()));
   }
 catch (  Throwable t) {
     logger.log(Level.WARNING,"Exception in PUT",t);
     int code=HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
     response.setStatus(code);
-    response.getWriter().append(jsonError(code,"JsonSyntaxException in PUT: " + t.getMessage()));
+    response.getWriter().append(RestMethodResult.jsonError(code,"JsonSyntaxException in PUT: " + t.getMessage()));
   }
  finally {
     try {
-      response.getWriter().flush();
       response.getWriter().close();
     }
  catch (    Throwable t) {

@@ -1,43 +1,33 @@
 {
-  final App app=StructrApp.getInstance(securityContext);
-  try {
-    Document document=getOwnerDocument();
-    if (document != null) {
-      Node child=getFirstChild();
-      while (child != null) {
-        if (child instanceof Text) {
-          Node next=child.getNextSibling();
-          if (next != null && next instanceof Text) {
-            String text1=child.getNodeValue();
-            String text2=next.getNodeValue();
-            Text newText=document.createTextNode(text1.concat(text2));
-            removeChild(child);
-            insertBefore(newText,next);
-            removeChild(next);
-            child=newText;
-          }
- else {
-            child=next;
-          }
+  Document document=getOwnerDocument();
+  if (document != null) {
+    Node child=getFirstChild();
+    while (child != null) {
+      if (child instanceof Text) {
+        Node next=child.getNextSibling();
+        if (next != null && next instanceof Text) {
+          String text1=child.getNodeValue();
+          String text2=next.getNodeValue();
+          Text newText=document.createTextNode(text1.concat(text2));
+          removeChild(child);
+          insertBefore(newText,next);
+          removeChild(next);
+          child=newText;
         }
  else {
-          child=child.getNextSibling();
+          child=next;
         }
       }
-      if (hasChildNodes()) {
-        Node currentChild=getFirstChild();
-        while (currentChild != null) {
-          currentChild.normalize();
-          currentChild=currentChild.getNextSibling();
-        }
+ else {
+        child=child.getNextSibling();
       }
     }
-    app.commitTx();
-  }
- catch (  FrameworkException fex) {
-    throw new DOMException(DOMException.INVALID_STATE_ERR,fex.getMessage());
-  }
- finally {
-    app.finishTx();
+    if (hasChildNodes()) {
+      Node currentChild=getFirstChild();
+      while (currentChild != null) {
+        currentChild.normalize();
+        currentChild=currentChild.getNextSibling();
+      }
+    }
   }
 }

@@ -1,17 +1,38 @@
 {
   SecurityContext securityContext=null;
+  Authenticator authenticator=null;
+  RestMethodResult result=null;
+  Resource resource=null;
   try {
-    Authenticator authenticator=getAuthenticator();
-    securityContext=authenticator.initializeAndExamineRequest(request,response);
+    try (final Tx tx=StructrApp.getInstance().tx()){
+      authenticator=config.getAuthenticator();
+      securityContext=authenticator.initializeAndExamineRequest(request,response);
+      tx.success();
+    }
+     final App app=StructrApp.getInstance(securityContext);
     request.setCharacterEncoding("UTF-8");
     response.setContentType("application/json; charset=utf-8");
-    List<Resource> chain=ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,defaultIdProperty);
-    Resource resourceConstraint=ResourceHelper.optimizeNestedResourceChain(chain,defaultIdProperty);
-    String resourceSignature=resourceConstraint.getResourceSignature();
-    authenticator.checkResourceAccess(request,resourceSignature,propertyView.get(securityContext));
-    RestMethodResult result=resourceConstraint.doDelete();
-    result.commitResponse(gson.get(),response);
-  }
+    try (final Tx tx=app.tx()){
+      resource=ResourceHelper.optimizeNestedResourceChain(ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,config.getDefaultIdProperty()),config.getDefaultIdProperty());
+      authenticator.checkResourceAccess(request,resource.getResourceSignature(),propertyView.get(securityContext));
+      tx.success();
+    }
+     boolean retry=true;
+    while (retry) {
+      try (final Tx tx=app.tx()){
+        result=resource.doDelete();
+        tx.success();
+        retry=false;
+      }
+ catch (      DeadlockDetectedException ddex) {
+        retry=true;
+      }
+    }
+    try (final Tx tx=app.tx()){
+      result.commitResponse(gson.get(),response);
+      tx.success();
+    }
+   }
  catch (  FrameworkException frameworkException) {
     response.setStatus(frameworkException.getStatus());
     gson.get().toJson(frameworkException,response.getWriter());
@@ -21,26 +42,25 @@ catch (  JsonSyntaxException jsex) {
     logger.log(Level.WARNING,"JsonSyntaxException in DELETE",jsex);
     int code=HttpServletResponse.SC_BAD_REQUEST;
     response.setStatus(code);
-    response.getWriter().append(jsonError(code,"JsonSyntaxException in DELETE: " + jsex.getMessage()));
+    response.getWriter().append(RestMethodResult.jsonError(code,"JsonSyntaxException in DELETE: " + jsex.getMessage()));
   }
 catch (  JsonParseException jpex) {
     logger.log(Level.WARNING,"JsonParseException in DELETE",jpex);
     int code=HttpServletResponse.SC_BAD_REQUEST;
     response.setStatus(code);
-    response.getWriter().append(jsonError(code,"JsonSyntaxException in DELETE: " + jpex.getMessage()));
+    response.getWriter().append(RestMethodResult.jsonError(code,"JsonSyntaxException in DELETE: " + jpex.getMessage()));
   }
 catch (  Throwable t) {
     logger.log(Level.WARNING,"Exception in DELETE",t);
     int code=HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
     response.setStatus(code);
-    response.getWriter().append(jsonError(code,"JsonSyntaxException in DELETE: " + t.getMessage()));
+    response.getWriter().append(RestMethodResult.jsonError(code,"JsonSyntaxException in DELETE: " + t.getMessage()));
   }
  finally {
     try {
-      response.getWriter().flush();
       response.getWriter().close();
     }
- catch (    Throwable t) {
+ catch (    IOException t) {
       logger.log(Level.WARNING,"Unable to flush and close response: {0}",t.getMessage());
     }
     securityContext.cleanUp();

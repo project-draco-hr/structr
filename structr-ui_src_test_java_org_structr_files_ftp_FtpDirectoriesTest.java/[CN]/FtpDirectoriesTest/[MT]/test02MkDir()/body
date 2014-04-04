@@ -1,26 +1,43 @@
 {
   FTPClient ftp=setupFTPClient();
-  try {
+  FTPFile[] dirs=null;
+  final String name1="FTPdir1";
+  final String name2="FTPdir2";
+  boolean success=false;
+  try (final Tx tx=StructrApp.getInstance(securityContext).tx()){
     assertEmptyDirectory(ftp);
-    String name1="FTPdir1";
-    boolean success=ftp.makeDirectory(name1);
+    success=ftp.makeDirectory(name1);
     assertTrue(success);
-    FTPFile[] dirs=ftp.listDirectories();
+    tx.success();
+  }
+ catch (  IOException|FrameworkException ex) {
+    ex.printStackTrace();
+    fail("Unexpected exception: " + ex.getMessage());
+  }
+  try (final Tx tx=app.tx()){
+    dirs=ftp.listDirectories();
     assertNotNull(dirs);
     assertEquals(1,dirs.length);
     assertEquals(name1,dirs[0].getName());
-    String name2="FTPdir2";
     success=ftp.makeDirectory(name2);
     assertTrue(success);
+    tx.success();
+  }
+ catch (  IOException|FrameworkException ex) {
+    ex.printStackTrace();
+    fail("Unexpected exception: " + ex.getMessage());
+  }
+  try (final Tx tx=app.tx()){
     dirs=ftp.listDirectories();
     assertNotNull(dirs);
     assertEquals(2,dirs.length);
     assertEquals(name1,dirs[0].getName());
     assertEquals(name2,dirs[1].getName());
     ftp.disconnect();
+    tx.success();
   }
- catch (  IOException ex) {
-    logger.log(Level.SEVERE,"Error while making FTP directories",ex);
+ catch (  IOException|FrameworkException ex) {
+    ex.printStackTrace();
     fail("Unexpected exception: " + ex.getMessage());
   }
 }

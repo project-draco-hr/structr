@@ -1,0 +1,11 @@
+{
+  final Page errorPage=StructrApp.getInstance(securityContext).nodeQuery(Page.class).and(Page.showOnErrorCodes,"404",false).getFirst();
+  if (errorPage != null) {
+    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+    return errorPage;
+  }
+ else {
+    response.sendError(HttpServletResponse.SC_NOT_FOUND);
+  }
+  return null;
+}

@@ -1,10 +1,6 @@
 {
-  try {
-    app.beginTx();
+  try (final Tx tx=app.tx()){
     app.delete(node);
-    app.commitTx();
+    tx.success();
   }
-  finally {
-    app.finishTx();
-  }
-}
+ }

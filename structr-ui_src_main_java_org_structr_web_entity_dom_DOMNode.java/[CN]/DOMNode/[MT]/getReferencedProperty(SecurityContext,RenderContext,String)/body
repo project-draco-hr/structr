@@ -1,6 +1,5 @@
 {
   final String DEFAULT_VALUE_SEP="!";
-  String pageId=renderContext.getPageId();
   String[] parts=refKey.split("[\\.]+");
   String referenceKey=parts[parts.length - 1];
   String defaultValue=null;
@@ -72,11 +71,22 @@
       if ("id".equals(lowerCasePart)) {
         GraphObject detailsObject=renderContext.getDetailsDataObject();
         if (detailsObject != null) {
-          return renderContext.getDetailsDataObject().getUuid();
+          return detailsObject.getUuid();
+        }
+      }
+      if ("current".equals(lowerCasePart)) {
+        GraphObject detailsObject=renderContext.getDetailsDataObject();
+        if (detailsObject != null) {
+          _data=detailsObject;
+          continue;
         }
       }
       if ("this".equals(lowerCasePart)) {
         _data=renderContext.getDataObject();
+        continue;
+      }
+      if ("element".equals(lowerCasePart)) {
+        _data=this;
         continue;
       }
       if ("page".equals(lowerCasePart)) {
@@ -87,7 +97,7 @@
         ResourceLink rel=getOutgoingRelationship(ResourceLink.class);
         if (rel != null) {
           _data=rel.getTargetNode();
-          break;
+          continue;
         }
       }
       if ("parent".equals(lowerCasePart)) {

@@ -1,5 +1,6 @@
 {
-  StringBuilder buffer=renderContext.getBuffer();
+  Result localResult=renderContext.getResult();
+  AsyncBuffer out=renderContext.getBuffer();
   double start=System.nanoTime();
   if (isDeleted() || isHidden() || !displayForLocale(renderContext)|| !displayForConditions(securityContext,renderContext)) {
     return;
@@ -8,12 +9,12 @@
   boolean isVoid=isVoidElement();
   String _tag=getProperty(DOMElement.tag);
   boolean anyChildNodeCreatesNewLine=false;
-  renderStructrAppLib(buffer,securityContext,renderContext,depth);
+  renderStructrAppLib(out,securityContext,renderContext,depth);
   if (depth > 0 && !avoidWhitespace()) {
-    buffer.append(indent(depth));
+    out.append(indent(depth));
   }
   if (StringUtils.isNotBlank(_tag)) {
-    openingTag(securityContext,buffer,_tag,editMode,renderContext,depth);
+    openingTag(securityContext,out,_tag,editMode,renderContext,depth);
     try {
       if (Body.class.getSimpleName().toLowerCase().equals(this.getTagName())) {
         renderContext.setInBody(true);
@@ -49,6 +50,10 @@
           if (StringUtils.isNotBlank(subKey)) {
             setDataRoot(renderContext,subNode,subKey);
             GraphObject currentDataNode=renderContext.getDataObject();
+            final Result newResult=renderContext.getResult();
+            if (newResult != null) {
+              localResult=newResult;
+            }
             List<GraphObject> listData=((DOMElement)subNode).checkListSources(securityContext,renderContext);
             PropertyKey propertyKey=null;
             if (subNode.getProperty(renderDetails) && detailMode) {
@@ -106,15 +111,22 @@
     }
  catch (    Throwable t) {
       logger.log(Level.SEVERE,"Error while rendering node {0}: {1}",new java.lang.Object[]{getUuid(),t});
-      buffer.append("Error while rendering node ").append(getUuid()).append(": ").append(t);
+      out.append("Error while rendering node ").append(getUuid()).append(": ").append(t.getMessage());
     }
     if (StringUtils.isNotBlank(_tag) && (!isVoid)) {
       if (anyChildNodeCreatesNewLine) {
-        buffer.append(indent(depth));
+        out.append(indent(depth));
       }
-      buffer.append("</").append(_tag).append(">");
+      out.append("</").append(_tag).append(">");
     }
   }
   double end=System.nanoTime();
   logger.log(Level.FINE,"Render node {0} in {1} seconds",new java.lang.Object[]{getUuid(),decimalFormat.format((end - start) / 1000000000.0)});
+  if (flush()) {
+    logger.log(Level.FINE,"Flushing response: {0} ",getTagName());
+    out.flush();
+  }
+  if (localResult != null) {
+    renderContext.setResult(localResult);
+  }
 }

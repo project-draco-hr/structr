@@ -1,10 +1,10 @@
 {
   final SecurityContext securityContext=getWebSocket().getSecurityContext();
-  final App app=StructrApp.getInstance(securityContext);
   try {
     int sequenceNumber=((Long)webSocketData.getNodeData().get("chunkId")).intValue();
     int chunkSize=((Long)webSocketData.getNodeData().get("chunkSize")).intValue();
     Object rawData=webSocketData.getNodeData().get("chunk");
+    int chunks=((Long)webSocketData.getNodeData().get("chunks")).intValue();
     String uuid=webSocketData.getId();
     byte[] data=null;
     if (rawData != null) {
@@ -15,29 +15,26 @@
       }
     }
     final File file=(File)getNode(uuid);
-    if (!getWebSocket().getSecurityContext().isAllowed(file,Permission.write)) {
+    if (!securityContext.isAllowed(file,Permission.write)) {
       logger.log(Level.WARNING,"No write permission for {0} on {1}",new Object[]{getWebSocket().getCurrentUser().toString(),file.toString()});
       getWebSocket().send(MessageBuilder.status().message("No write permission").code(400).build(),true);
       return;
     }
-    getWebSocket().handleFileChunk(uuid,sequenceNumber,chunkSize,data);
-    final long size=(long)(sequenceNumber * chunkSize) + data.length;
-    long finalSize=file.getProperty(File.size);
-    logger.log(Level.FINE,"Overall size: {0}, part: {1}",new Object[]{finalSize,size});
-    if (size != finalSize) {
-      try {
-        app.beginTx();
-        file.setProperty(File.checksum,FileHelper.getChecksum(file));
-        app.commitTx();
-      }
-  finally {
-        app.finishTx();
-      }
+    getWebSocket().handleFileChunk(uuid,sequenceNumber,chunkSize,data,chunks);
+    if (sequenceNumber + 1 == chunks) {
+      final long checksum=FileHelper.getChecksum(file);
+      final long size=FileHelper.getSize(file);
+      file.setProperty(File.checksum,checksum);
+      file.setProperty(File.size,size);
+      file.increaseVersion();
+      getWebSocket().removeFileUploadHandler(uuid);
+      logger.log(Level.FINE,"File upload finished. Checksum: {0}, size: {1}",new Object[]{checksum,size});
     }
-    getWebSocket().send(MessageBuilder.status().code(200).message("{\"id\":\"" + file.getUuid() + "\", \"name\":\""+ file.getName()+ "\",\"size\":"+ size+ "}").build(),true);
+    final long currentSize=(long)(sequenceNumber * chunkSize) + data.length;
+    getWebSocket().send(MessageBuilder.status().code(200).message("{\"id\":\"" + file.getUuid() + "\", \"name\":\""+ file.getName()+ "\",\"size\":"+ currentSize+ "}").build(),true);
   }
- catch (  Throwable t) {
-    String msg=t.toString();
+ catch (  IOException|FrameworkException ex) {
+    String msg=ex.toString();
     getWebSocket().send(MessageBuilder.status().code(400).message("Could not process chunk data: ".concat((msg != null) ? msg : "")).build(),true);
   }
 }

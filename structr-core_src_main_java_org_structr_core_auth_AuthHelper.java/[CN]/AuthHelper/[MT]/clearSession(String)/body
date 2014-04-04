@@ -1,0 +1,14 @@
+{
+  final App app=StructrApp.getInstance();
+  final Query<Principal> query=app.nodeQuery(Principal.class).and(Principal.sessionIds,new String[]{sessionId});
+  try {
+    List<Principal> principals=query.getAsList();
+    for (    Principal p : principals) {
+      p.removeSessionId(sessionId);
+    }
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"Error while removing sessionId " + sessionId + " from all principals",fex);
+    fex.printStackTrace();
+  }
+}

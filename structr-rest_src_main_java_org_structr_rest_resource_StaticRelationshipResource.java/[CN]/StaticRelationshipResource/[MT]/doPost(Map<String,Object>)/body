@@ -11,20 +11,13 @@
     }
     final Notion notion=relationProperty.getNotion();
     final PropertyKey primaryPropertyKey=notion.getPrimaryPropertyKey();
-    try {
-      app.beginTx();
-      if (primaryPropertyKey != null && propertySet.containsKey(primaryPropertyKey.jsonName()) && propertySet.size() == 1) {
-      }
- else {
-        newNode=typeResource.createNode(propertySet);
-        if (newNode != null) {
-          relationProperty.addSingleElement(securityContext,sourceNode,newNode);
-        }
-      }
-      app.commitTx();
+    if (primaryPropertyKey != null && propertySet.containsKey(primaryPropertyKey.jsonName()) && propertySet.size() == 1) {
     }
-  finally {
-      app.finishTx();
+ else {
+      newNode=typeResource.createNode(propertySet);
+      if (newNode != null) {
+        relationProperty.addSingleElement(securityContext,sourceNode,newNode);
+      }
     }
     if (newNode != null) {
       RestMethodResult result=new RestMethodResult(HttpServletResponse.SC_CREATED);
@@ -36,44 +29,27 @@
     GraphObject entity=typedIdResource.getIdResource().getEntity();
     Class entityType=typedIdResource.getEntityClass();
     String methodName=typeResource.getRawType();
-    FrameworkException fex=null;
-    boolean success=false;
     if (entity != null && entityType != null && methodName != null) {
       for (      Method method : StructrApp.getConfiguration().getExportedMethodsForType(entityType)) {
         if (methodName.equals(method.getName())) {
           if (method.getAnnotation(Export.class) != null) {
-            if (method.getReturnType().equals(Void.TYPE)) {
-              try {
-                Object[] parameters=extractParameters(propertySet,method.getParameterTypes());
-                method.invoke(entity,parameters);
-                success=true;
-                break;
-              }
- catch (              Throwable t) {
-                if (t instanceof FrameworkException) {
-                  fex=(FrameworkException)t;
-                }
- else                 if (t.getCause() instanceof FrameworkException) {
-                  fex=(FrameworkException)t.getCause();
-                }
- else {
-                  logger.log(Level.WARNING,"Unable to call RPC method {0}: {1}",new Object[]{methodName,t.getMessage()});
-                }
-              }
+            try {
+              Object[] parameters=extractParameters(propertySet,method.getParameterTypes());
+              return (RestMethodResult)method.invoke(entity,parameters);
             }
+ catch (            IllegalAccessException|IllegalArgumentException|InvocationTargetException t) {
+              if (t instanceof FrameworkException) {
+                throw (FrameworkException)t;
+              }
+ else               if (t.getCause() instanceof FrameworkException) {
+                throw (FrameworkException)t.getCause();
+              }
  else {
-              logger.log(Level.WARNING,"Unable to call RPC method {0}: method has wrong return type (must be void).",methodName);
+                logger.log(Level.WARNING,"Unable to call RPC method {0}: {1}",new Object[]{methodName,t.getMessage()});
+              }
             }
           }
         }
-      }
-    }
-    if (success) {
-      return new RestMethodResult(HttpServletResponse.SC_OK);
-    }
- else {
-      if (fex != null) {
-        throw fex;
       }
     }
   }

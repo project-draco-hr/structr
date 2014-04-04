@@ -1,24 +1,42 @@
 {
   try {
     AbstractRelationship rel=cascadeRel(TestOne.class,TestTwo.class,Relation.CONSTRAINT_BASED);
-    final String startNodeId=rel.getSourceNode().getUuid();
-    final String endNodeId=rel.getTargetNode().getUuid();
-    deleteCascade(rel.getSourceNode());
-    assertNodeNotFound(startNodeId);
-    assertNodeNotFound(endNodeId);
-    rel=cascadeRel(TestOne.class,TestThree.class,Relation.CONSTRAINT_BASED);
-    final String startNodeId2=rel.getSourceNode().getUuid();
-    final String endNodeId2=rel.getTargetNode().getUuid();
-    deleteCascade(rel.getSourceNode());
-    assertNodeNotFound(startNodeId2);
-    assertNodeExists(endNodeId2);
-    rel=cascadeRel(TestOne.class,TestFour.class,Relation.CONSTRAINT_BASED);
-    final String startNodeId3=rel.getSourceNode().getUuid();
-    final String endNodeId3=rel.getTargetNode().getUuid();
-    deleteCascade(rel.getSourceNode());
-    assertNodeNotFound(startNodeId3);
-    assertNodeExists(endNodeId3);
-  }
+    NodeInterface sourceNode;
+    String startNodeId;
+    String endNodeId;
+    try (final Tx tx=app.tx()){
+      startNodeId=rel.getSourceNode().getUuid();
+      endNodeId=rel.getTargetNode().getUuid();
+      sourceNode=rel.getSourceNode();
+    }
+     deleteCascade(sourceNode);
+    try (final Tx tx=app.tx()){
+      assertNodeNotFound(startNodeId);
+      assertNodeNotFound(endNodeId);
+    }
+     rel=cascadeRel(TestOne.class,TestThree.class,Relation.CONSTRAINT_BASED);
+    try (final Tx tx=app.tx()){
+      startNodeId=rel.getSourceNode().getUuid();
+      endNodeId=rel.getTargetNode().getUuid();
+      sourceNode=rel.getSourceNode();
+    }
+     deleteCascade(sourceNode);
+    try (final Tx tx=app.tx()){
+      assertNodeNotFound(startNodeId);
+      assertNodeExists(endNodeId);
+    }
+     rel=cascadeRel(TestOne.class,TestFour.class,Relation.CONSTRAINT_BASED);
+    try (final Tx tx=app.tx()){
+      startNodeId=rel.getSourceNode().getUuid();
+      endNodeId=rel.getTargetNode().getUuid();
+      sourceNode=rel.getSourceNode();
+    }
+     deleteCascade(sourceNode);
+    try (final Tx tx=app.tx()){
+      assertNodeNotFound(startNodeId);
+      assertNodeExists(endNodeId);
+    }
+   }
  catch (  FrameworkException ex) {
     ex.printStackTrace();
     logger.log(Level.SEVERE,ex.toString());

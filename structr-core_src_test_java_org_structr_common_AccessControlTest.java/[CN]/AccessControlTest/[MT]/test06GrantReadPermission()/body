@@ -1,33 +1,30 @@
 {
   try {
-    List<NodeInterface> users=createTestNodes(User.class,2);
+    List<User> users=createTestNodes(User.class,2);
     User user1=(User)users.get(0);
-    final User user2=(User)users.get(1);
+    User user2=(User)users.get(1);
+    Result result=null;
     Class type=TestOne.class;
     final TestOne t1=createTestNode(TestOne.class,user1);
-    try {
-      app.beginTx();
+    try (final Tx tx=app.tx()){
       user2.grant(Permission.read,t1);
-      app.commitTx();
+      tx.success();
     }
-  finally {
-      app.finishTx();
+     SecurityContext user2Context=SecurityContext.getInstance(user2,AccessMode.Backend);
+    try (final Tx tx=app.tx()){
+      result=StructrApp.getInstance(user2Context).nodeQuery(type).getResult();
+      assertEquals(1,result.size());
+      assertEquals(t1.getUuid(),result.get(0).getUuid());
     }
-    SecurityContext user2Context=SecurityContext.getInstance(user2,AccessMode.Backend);
-    Result result=StructrApp.getInstance(user2Context).nodeQuery(type).getResult();
-    assertEquals(1,result.size());
-    assertEquals(t1.getUuid(),result.get(0).getUuid());
-    try {
-      app.beginTx();
+     try (final Tx tx=app.tx()){
       user2.revoke(Permission.read,t1);
-      app.commitTx();
+      tx.success();
     }
-  finally {
-      app.finishTx();
+     try (final Tx tx=app.tx()){
+      result=StructrApp.getInstance(user2Context).nodeQuery(type).getResult();
+      assertTrue(result.isEmpty());
     }
-    result=StructrApp.getInstance(user2Context).nodeQuery(type).getResult();
-    assertTrue(result.isEmpty());
-  }
+   }
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,ex.toString());
     fail("Unexpected exception");

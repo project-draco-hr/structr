@@ -1,4 +1,9 @@
 {
-  org.structr.web.entity.User structrUser=(org.structr.web.entity.User)AuthHelper.getPrincipalForCredential(AbstractUser.name,user.getName());
-  this.user=new StructrFtpUser(structrUser);
+  try (Tx tx=StructrApp.getInstance().tx()){
+    org.structr.web.entity.User structrUser=(org.structr.web.entity.User)AuthHelper.getPrincipalForCredential(AbstractUser.name,user.getName());
+    this.user=new StructrFtpUser(structrUser);
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.SEVERE,"Error while initializing file system view",fex);
+  }
 }

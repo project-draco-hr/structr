@@ -1,0 +1,44 @@
+{
+  if (data == null) {
+    logger.log(Level.WARNING,"Empty text message received.");
+    return;
+  }
+  logger.log(Level.FINE,"############################################################ RECEIVED \n{0}",data.substring(0,Math.min(data.length(),1000)));
+  final WebSocketMessage webSocketData=gson.fromJson(data,WebSocketMessage.class);
+  final App app=StructrApp.getInstance(securityContext);
+  try (final Tx tx=app.tx()){
+    this.callback=webSocketData.getCallback();
+    final String command=webSocketData.getCommand();
+    final Class type=commandSet.get(command);
+    final String sessionIdFromMessage=webSocketData.getSessionId();
+    if (type != null) {
+      if (sessionIdFromMessage != null) {
+        authenticate(sessionIdFromMessage);
+      }
+      if (!isAuthenticated() && !type.equals(LoginCommand.class)) {
+        send(MessageBuilder.status().code(401).message("").build(),true);
+        return;
+      }
+      AbstractCommand abstractCommand=(AbstractCommand)type.newInstance();
+      abstractCommand.setWebSocket(this);
+      abstractCommand.setSession(session);
+      abstractCommand.setIdProperty(idProperty);
+      webSocketData.setSessionValid(isAuthenticated());
+      try {
+        abstractCommand.processMessage(webSocketData);
+        tx.success();
+      }
+ catch (      FrameworkException fex) {
+        fex.printStackTrace(System.out);
+        send(MessageBuilder.status().code(400).message(fex.toString()).build(),true);
+      }
+    }
+ else {
+      logger.log(Level.WARNING,"Unknow command {0}",command);
+      send(MessageBuilder.status().code(400).message("Unknown command").build(),true);
+    }
+  }
+ catch (  FrameworkException|IllegalAccessException|InstantiationException t) {
+    logger.log(Level.WARNING,"Unable to parse message.",t);
+  }
+}

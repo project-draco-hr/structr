@@ -1,30 +1,28 @@
 {
   try {
-    final List<NodeInterface> persons=createTestNodes(Person.class,1);
+    final List<Person> persons=createTestNodes(Person.class,1);
     final Class type=TestOne.class;
     final List<NodeInterface> nodes=createTestNodes(type,10);
-    try {
-      app.beginTx();
+    try (final Tx tx=app.tx()){
       nodes.get(3).setProperty(AbstractNode.visibleToPublicUsers,true);
       nodes.get(5).setProperty(AbstractNode.visibleToPublicUsers,true);
       nodes.get(7).setProperty(AbstractNode.visibleToPublicUsers,true);
       nodes.get(9).setProperty(AbstractNode.visibleToPublicUsers,true);
-      app.commitTx();
+      tx.success();
     }
-  finally {
-      app.finishTx();
-    }
-    SecurityContext publicContext=SecurityContext.getInstance(null,AccessMode.Frontend);
+     SecurityContext publicContext=SecurityContext.getInstance(null,AccessMode.Frontend);
     PropertyKey sortKey=AbstractNode.name;
     boolean sortDesc=false;
     int pageSize=2;
     int page=1;
-    Result result=StructrApp.getInstance(publicContext).nodeQuery(type).sort(sortKey).order(sortDesc).page(page).pageSize(pageSize).getResult();
-    assertEquals(2,result.size());
-    assertEquals(4,(int)result.getRawResultCount());
-    assertEquals(nodes.get(3).getUuid(),result.get(0).getUuid());
-    assertEquals(nodes.get(5).getUuid(),result.get(1).getUuid());
-  }
+    try (final Tx tx=app.tx()){
+      Result result=StructrApp.getInstance(publicContext).nodeQuery(type).sort(sortKey).order(sortDesc).page(page).pageSize(pageSize).getResult();
+      assertEquals(2,result.size());
+      assertEquals(4,(int)result.getRawResultCount());
+      assertEquals(nodes.get(3).getUuid(),result.get(0).getUuid());
+      assertEquals(nodes.get(5).getUuid(),result.get(1).getUuid());
+    }
+   }
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,ex.toString());
     fail("Unexpected exception");

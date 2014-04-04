@@ -14,18 +14,12 @@
     obj=getRelationship(webSocketData.getId());
   }
   if (obj != null) {
-    final App app=StructrApp.getInstance(getWebSocket().getSecurityContext());
     try {
-      app.beginTx();
       setProperties(obj,PropertyMap.inputTypeToJavaType(this.getWebSocket().getSecurityContext(),obj.getClass(),webSocketData.getNodeData()),rec);
-      app.commitTx();
     }
  catch (    FrameworkException ex) {
       logger.log(Level.SEVERE,"Unable to set properties: {0}",((FrameworkException)ex).toString());
       getWebSocket().send(MessageBuilder.status().code(400).build(),true);
-    }
- finally {
-      app.finishTx();
     }
   }
  else {

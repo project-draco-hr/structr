@@ -1,0 +1,24 @@
+{
+  final boolean isStructrEntity=isStructrEntity(container);
+  if (container instanceof Node) {
+    final boolean isSpatialEntity=((Node)container).hasRelationship(RTreeRelationshipTypes.values());
+    if (isStructrEntity) {
+      return includeStructr;
+    }
+    if (isSpatialEntity) {
+      return includeSpatial;
+    }
+    return includeOther;
+  }
+ else   if (container instanceof Relationship) {
+    final boolean isSpatialEntity=spatialRelationshipTypes.contains(((Relationship)container).getType().name());
+    if (isStructrEntity) {
+      return includeStructr;
+    }
+    if (isSpatialEntity) {
+      return includeSpatial;
+    }
+    return includeOther;
+  }
+  return true;
+}

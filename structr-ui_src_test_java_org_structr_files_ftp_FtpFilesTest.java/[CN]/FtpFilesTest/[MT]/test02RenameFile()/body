@@ -1,21 +1,36 @@
 {
   FTPClient ftp=setupFTPClient();
-  try {
+  final String name2="file2";
+  final String name1="file1";
+  try (final Tx tx=StructrApp.getInstance(securityContext).tx()){
     FTPFile[] files=ftp.listFiles();
     assertNotNull(files);
     assertEquals(0,files.length);
-    String name1="file1";
     createFTPFile(null,name1);
-    String name2="file2";
+    tx.success();
+  }
+ catch (  IOException|FrameworkException ex) {
+    ex.printStackTrace();
+    fail("Unexpected exception: " + ex.getMessage());
+  }
+  try (final Tx tx=app.tx()){
     ftp.rename(name1,name2);
+    tx.success();
+  }
+ catch (  IOException|FrameworkException ex) {
+    ex.printStackTrace();
+    fail("Unexpected exception: " + ex.getMessage());
+  }
+  try (final Tx tx=app.tx()){
     String[] fileNames=ftp.listNames();
     assertNotNull(fileNames);
     assertEquals(1,fileNames.length);
     assertEquals(name2,fileNames[0]);
     ftp.disconnect();
+    tx.success();
   }
  catch (  IOException|FrameworkException ex) {
-    logger.log(Level.SEVERE,"Error while renaming FTP file",ex);
+    ex.printStackTrace();
     fail("Unexpected exception: " + ex.getMessage());
   }
 }

@@ -1,17 +1,11 @@
 {
-  final App app=StructrApp.getInstance(securityContext);
   try {
-    app.beginTx();
     HtmlProperty htmlProperty=findOrCreateAttributeKey(name);
     if (htmlProperty != null) {
       htmlProperty.setProperty(securityContext,DOMElement.this,value);
     }
-    app.commitTx();
   }
  catch (  FrameworkException fex) {
     throw new DOMException(DOMException.INVALID_STATE_ERR,fex.getMessage());
-  }
- finally {
-    app.finishTx();
   }
 }

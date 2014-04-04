@@ -1,3 +1,8 @@
 {
-  return structrUser.getProperty(org.structr.web.entity.User.homeDirectory).getProperty(Folder.name);
+  try (Tx tx=StructrApp.getInstance().tx()){
+    return structrUser.getProperty(org.structr.web.entity.User.homeDirectory).getProperty(Folder.name);
+  }
+ catch (  Exception fex) {
+  }
+  return null;
 }

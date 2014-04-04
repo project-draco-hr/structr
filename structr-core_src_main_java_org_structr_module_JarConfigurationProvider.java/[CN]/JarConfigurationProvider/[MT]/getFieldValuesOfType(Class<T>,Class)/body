@@ -1,0 +1,20 @@
+{
+  Map<Field,T> fields=new LinkedHashMap<>();
+  Set<Class<?>> allTypes=getAllTypes(entityType);
+  for (  Class<?> type : allTypes) {
+    for (    Field field : type.getDeclaredFields()) {
+      if (fieldType.isAssignableFrom(field.getType()) && Modifier.isStatic(field.getModifiers())) {
+        try {
+          field.setAccessible(true);
+          final T value=(T)field.get(null);
+          if (value != null) {
+            fields.put(field,value);
+          }
+        }
+ catch (        Throwable t) {
+        }
+      }
+    }
+  }
+  return fields;
+}

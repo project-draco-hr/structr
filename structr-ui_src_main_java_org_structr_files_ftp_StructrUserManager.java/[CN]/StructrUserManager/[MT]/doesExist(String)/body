@@ -1,3 +1,10 @@
 {
-  return (getStructrUser(string) != null);
+  try (Tx tx=StructrApp.getInstance().tx()){
+    boolean exists=(getStructrUser(string) != null);
+    return exists;
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.SEVERE,"Unable to determine if user " + string + " exists",fex);
+  }
+  return false;
 }

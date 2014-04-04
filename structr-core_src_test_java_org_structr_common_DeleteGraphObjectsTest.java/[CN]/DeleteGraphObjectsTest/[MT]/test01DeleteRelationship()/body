@@ -5,15 +5,11 @@
     SixOneOneToOne rel=null;
     assertNotNull(testOne);
     assertNotNull(testSix);
-    try {
-      app.beginTx();
+    try (final Tx tx=app.tx()){
       rel=app.create(testSix,testOne,SixOneOneToOne.class);
-      app.commitTx();
+      tx.success();
     }
-  finally {
-      app.finishTx();
-    }
-    assertNotNull(rel);
+     assertNotNull(rel);
     try {
       rel.getRelationship().delete();
       fail("Should have raised an org.neo4j.graphdb.NotInTransactionException");
@@ -21,16 +17,16 @@
  catch (    org.neo4j.graphdb.NotInTransactionException e) {
     }
     assertNotNull(rel);
-    try {
-      app.beginTx();
+    try (final Tx tx=app.tx()){
       app.delete(rel);
-      app.commitTx();
+      tx.success();
     }
-  finally {
-      app.finishTx();
+     try (final Tx tx=app.tx()){
+      String uuid=rel.getUuid();
+      fail("Deleted entity should have thrown an exception on access.");
     }
-    String uuid=rel.getUuid();
-    assertNull("UUID of deleted relationship should be null",uuid);
+ catch (    IllegalStateException iex) {
+    }
   }
  catch (  FrameworkException ex) {
     ex.printStackTrace();

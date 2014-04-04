@@ -1,20 +1,15 @@
 {
   Principal user=AuthHelper.getPrincipalForPassword(Person.eMail,emailOrUsername,password);
   if (user != null) {
-    final String sessionIdFromRequest=request.getRequestedSessionId();
-    final App app=StructrApp.getInstance();
+    String sessionIdFromRequest=null;
+    try {
+      sessionIdFromRequest=request.getRequestedSessionId();
+    }
+ catch (    UnsupportedOperationException uoe) {
+    }
     if (sessionIdFromRequest != null) {
-      try {
-        app.beginTx();
-        user.setProperty(Principal.sessionId,sessionIdFromRequest);
-        app.commitTx();
-      }
- catch (      Exception ex) {
-        logger.log(Level.SEVERE,null,ex);
-      }
- finally {
-        app.finishTx();
-      }
+      AuthHelper.clearSession(sessionIdFromRequest);
+      user.addSessionId(sessionIdFromRequest);
     }
   }
   return user;

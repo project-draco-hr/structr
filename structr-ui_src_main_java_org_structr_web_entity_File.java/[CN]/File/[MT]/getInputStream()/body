@@ -2,7 +2,6 @@
   final String path=getRelativeFilePath();
   if (path != null) {
     final String filePath=FileHelper.getFilePath(path);
-    final App app=StructrApp.getInstance(securityContext);
     FileInputStream fis=null;
     try {
       java.io.File fileOnDisk=new java.io.File(filePath);
@@ -10,7 +9,7 @@
       return fis;
     }
  catch (    FileNotFoundException e) {
-      logger.log(Level.SEVERE,"File not found: {0}",new Object[]{path});
+      logger.log(Level.FINE,"File not found: {0}",new Object[]{path});
       if (fis != null) {
         try {
           fis.close();

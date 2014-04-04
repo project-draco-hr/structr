@@ -25,6 +25,13 @@
     }
     importSeedFile(properties.getProperty(Services.BASE_PATH));
   }
+  logger.log(Level.INFO,"Registering shutdown hook.");
+  Runtime.getRuntime().addShutdownHook(new Thread(){
+    @Override public void run(){
+      shutdown();
+    }
+  }
+);
   logger.log(Level.INFO,"Initialization complete");
   initializationDone=true;
 }

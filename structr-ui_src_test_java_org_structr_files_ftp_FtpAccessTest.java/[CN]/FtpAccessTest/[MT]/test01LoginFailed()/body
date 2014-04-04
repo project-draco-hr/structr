@@ -1,5 +1,5 @@
 {
-  try {
+  try (final Tx tx=StructrApp.getInstance(securityContext).tx()){
     FTPClient ftp=new FTPClient();
     ftp.connect("127.0.0.1",ftpPort);
     logger.log(Level.INFO,"Reply from FTP server:",ftp.getReplyString());
@@ -10,7 +10,7 @@
     assertFalse(loginSuccess);
     ftp.disconnect();
   }
- catch (  IOException ex) {
+ catch (  IOException|FrameworkException ex) {
     logger.log(Level.SEVERE,"Error in FTP test",ex);
     fail("Unexpected exception: " + ex.getMessage());
   }

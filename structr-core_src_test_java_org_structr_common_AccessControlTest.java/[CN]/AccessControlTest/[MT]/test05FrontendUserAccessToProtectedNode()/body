@@ -1,6 +1,6 @@
 {
   try {
-    List<NodeInterface> users=createTestNodes(User.class,2);
+    List<User> users=createTestNodes(User.class,2);
     User user1=(User)users.get(0);
     User user2=(User)users.get(1);
     PropertyMap props=new PropertyMap();
@@ -11,9 +11,11 @@
     props.put(AbstractNode.visibleToAuthenticatedUsers,true);
     TestOne t2=createTestNode(TestOne.class,props,user1);
     SecurityContext user2Context=SecurityContext.getInstance(user2,AccessMode.Frontend);
-    Result result=StructrApp.getInstance(user2Context).nodeQuery(type).getResult();
-    assertEquals(2,result.size());
-  }
+    try (final Tx tx=app.tx()){
+      Result result=StructrApp.getInstance(user2Context).nodeQuery(type).getResult();
+      assertEquals(2,result.size());
+    }
+   }
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,ex.toString());
     fail("Unexpected exception");

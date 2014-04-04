@@ -1,3 +1,10 @@
 {
-  return (org.structr.web.entity.User)AuthHelper.getPrincipalForCredential(AbstractUser.name,userName);
+  try (Tx tx=StructrApp.getInstance().tx()){
+    final org.structr.web.entity.User user=(org.structr.web.entity.User)AuthHelper.getPrincipalForCredential(AbstractUser.name,userName);
+    return user;
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.SEVERE,"Unable to get user by its name",fex);
+  }
+  return null;
 }

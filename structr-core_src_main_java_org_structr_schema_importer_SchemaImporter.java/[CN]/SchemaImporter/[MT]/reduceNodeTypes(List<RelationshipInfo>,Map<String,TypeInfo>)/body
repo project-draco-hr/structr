@@ -1,0 +1,33 @@
+{
+  final List<RelationshipInfo> reducedList=new LinkedList<>();
+  final Set<String> startNodeTypes=new LinkedHashSet<>();
+  final Set<String> endNodeTypes=new LinkedHashSet<>();
+  String relType=null;
+  for (  final RelationshipInfo info : sourceList) {
+    startNodeTypes.add(info.getStartNodeType());
+    endNodeTypes.add(info.getEndNodeType());
+    if (relType == null) {
+      relType=info.getRelType();
+    }
+  }
+  int startTypeCount=startNodeTypes.size();
+  int endTypeCount=endNodeTypes.size();
+  String commonStartType=null;
+  String commonEndType=null;
+  if (startTypeCount == 1) {
+    commonStartType=startNodeTypes.iterator().next();
+  }
+ else {
+    commonStartType=reduceTypeToCommonSupertype(startNodeTypes,typeInfos);
+  }
+  if (endTypeCount == 1) {
+    commonEndType=endNodeTypes.iterator().next();
+  }
+ else {
+    commonEndType=reduceTypeToCommonSupertype(endNodeTypes,typeInfos);
+  }
+  if (commonStartType != null && commonEndType != null) {
+    reducedList.add(new RelationshipInfo(commonStartType,commonEndType,relType));
+  }
+  return reducedList;
+}

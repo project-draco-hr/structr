@@ -7,28 +7,33 @@
   checkSameDocument(refChild);
   checkHierarchy(newChild);
   checkHierarchy(refChild);
-  try {
-    if (newChild instanceof DocumentFragment) {
-      DocumentFragment fragment=(DocumentFragment)newChild;
-      Node currentChild=fragment.getFirstChild();
-      while (currentChild != null) {
-        Node savedNextChild=currentChild.getNextSibling();
-        fragment.removeChild(currentChild);
-        insertBefore(currentChild,refChild);
-        currentChild=savedNextChild;
-      }
-    }
- else {
-      Node _parent=newChild.getParentNode();
-      if (_parent != null) {
-        _parent.removeChild(newChild);
-      }
-      treeInsertBefore((DOMNode)newChild,(DOMNode)refChild);
-      handleNewChild(newChild);
+  if (newChild instanceof DocumentFragment) {
+    DocumentFragment fragment=(DocumentFragment)newChild;
+    Node currentChild=fragment.getFirstChild();
+    while (currentChild != null) {
+      Node savedNextChild=currentChild.getNextSibling();
+      fragment.removeChild(currentChild);
+      insertBefore(currentChild,refChild);
+      currentChild=savedNextChild;
     }
   }
- catch (  FrameworkException fex) {
-    throw new DOMException(DOMException.INVALID_STATE_ERR,fex.toString());
+ else {
+    Node _parent=newChild.getParentNode();
+    if (_parent != null) {
+      _parent.removeChild(newChild);
+    }
+    try {
+      treeInsertBefore((DOMNode)newChild,(DOMNode)refChild);
+    }
+ catch (    FrameworkException frex) {
+      if (frex.getStatus() == 404) {
+        throw new DOMException(DOMException.NOT_FOUND_ERR,frex.getMessage());
+      }
+ else {
+        throw new DOMException(DOMException.INVALID_STATE_ERR,frex.getMessage());
+      }
+    }
+    handleNewChild(newChild);
   }
   return refChild;
 }

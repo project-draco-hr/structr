@@ -1,52 +1,60 @@
 {
   List<FtpFile> ftpFiles=new ArrayList();
-  String requestedPath=getAbsolutePath();
-  logger.log(Level.INFO,"Children of {0} requested",requestedPath);
-  if ("/".equals(requestedPath)) {
-    try {
-      Result<Folder> results=StructrApp.getInstance().nodeQuery(Folder.class).getResult();
-      logger.log(Level.INFO,"{0} folders found",results.size());
-      for (      Folder f : results.getResults()) {
-        if (f.getProperty(AbstractFile.parent) != null) {
-          continue;
+  final App app=StructrApp.getInstance();
+  try (Tx tx=app.tx()){
+    String requestedPath=getAbsolutePath();
+    logger.log(Level.INFO,"Children of {0} requested",requestedPath);
+    if ("/".equals(requestedPath)) {
+      try {
+        Result<Folder> folders=app.nodeQuery(Folder.class).getResult();
+        logger.log(Level.INFO,"{0} folders found",folders.size());
+        for (        Folder f : folders.getResults()) {
+          if (f.getProperty(AbstractFile.parent) != null) {
+            continue;
+          }
+          FtpFile ftpFile=new StructrFtpFolder(f);
+          logger.log(Level.INFO,"Folder found: {0}",ftpFile.getAbsolutePath());
+          ftpFiles.add(ftpFile);
         }
-        FtpFile ftpFile=new StructrFtpFolder(f);
-        logger.log(Level.INFO,"Folder found: {0}",ftpFile.getAbsolutePath());
-        ftpFiles.add(ftpFile);
+        Result<File> files=app.nodeQuery(File.class).getResult();
+        logger.log(Level.INFO,"{0} files found",files.size());
+        for (        File f : files.getResults()) {
+          if (f.getProperty(AbstractFile.parent) != null) {
+            continue;
+          }
+          logger.log(Level.FINEST,"Structr file found: {0}",f);
+          FtpFile ftpFile=new StructrFtpFile(f);
+          logger.log(Level.FINE,"File found: {0}",ftpFile.getAbsolutePath());
+          ftpFiles.add(ftpFile);
+        }
+        Result<Page> pages=app.nodeQuery(Page.class).getResult();
+        logger.log(Level.INFO,"{0} pages found",pages.size());
+        for (        Page p : pages.getResults()) {
+          logger.log(Level.FINEST,"Structr page found: {0}",p);
+          ftpFiles.add(p);
+        }
+        return ftpFiles;
+      }
+ catch (      FrameworkException ex) {
+        logger.log(Level.SEVERE,null,ex);
       }
     }
- catch (    FrameworkException ex) {
-      logger.log(Level.SEVERE,null,ex);
+    List<Folder> folders=((Folder)structrFile).getProperty(Folder.folders);
+    for (    Folder f : folders) {
+      FtpFile ftpFile=new StructrFtpFolder(f);
+      logger.log(Level.INFO,"Subfolder found: {0}",ftpFile.getAbsolutePath());
+      ftpFiles.add(ftpFile);
     }
-    try {
-      Result<File> results=StructrApp.getInstance().nodeQuery(File.class).getResult();
-      logger.log(Level.INFO,"{0} files found",results.size());
-      for (      File f : results.getResults()) {
-        if (f.getProperty(AbstractFile.parent) != null) {
-          continue;
-        }
-        logger.log(Level.FINEST,"Structr file found: {0}",f);
-        FtpFile ftpFile=new StructrFtpFile(f);
-        logger.log(Level.FINE,"File found: {0}",ftpFile.getAbsolutePath());
-        ftpFiles.add(ftpFile);
-      }
-    }
- catch (    FrameworkException ex) {
-      logger.log(Level.SEVERE,null,ex);
+    List<File> files=((Folder)structrFile).getProperty(Folder.files);
+    for (    File f : files) {
+      FtpFile ftpFile=new StructrFtpFile(f);
+      logger.log(Level.INFO,"File found: {0}",ftpFile.getAbsolutePath());
+      ftpFiles.add(ftpFile);
     }
     return ftpFiles;
   }
-  List<Folder> folders=((Folder)structrFile).getProperty(Folder.folders);
-  for (  Folder f : folders) {
-    FtpFile ftpFile=new StructrFtpFolder(f);
-    logger.log(Level.INFO,"Subfolder found: {0}",ftpFile.getAbsolutePath());
-    ftpFiles.add(ftpFile);
+ catch (  FrameworkException fex) {
+    logger.log(Level.SEVERE,"Error in listFiles()",fex);
   }
-  List<File> files=((Folder)structrFile).getProperty(Folder.files);
-  for (  File f : files) {
-    FtpFile ftpFile=new StructrFtpFile(f);
-    logger.log(Level.INFO,"File found: {0}",ftpFile.getAbsolutePath());
-    ftpFiles.add(ftpFile);
-  }
-  return ftpFiles;
+  return null;
 }

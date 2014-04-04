@@ -1,31 +1,34 @@
 {
   try {
-    Page page=Page.createNewPage(securityContext,"srcPage");
-    assertTrue(page != null);
-    assertTrue(page instanceof Page);
-    Node html=page.createElement("html");
-    Node head=page.createElement("head");
-    Node body=page.createElement("body");
-    Node title=page.createElement("title");
-    Node h1=page.createElement("h1");
-    Node div=page.createElement("div");
-    Node p=page.createElement("p");
-    try {
-      page.appendChild(html);
-      html.appendChild(head);
-      html.appendChild(body);
-      head.appendChild(title);
-      body.appendChild(h1);
-      body.appendChild(div);
-      div.appendChild(p);
-      p.appendChild(page.createTextNode("First Paragraph"));
-      Node clone=body.cloneNode(false);
-      assertTrue(isClone(clone,body));
+    try (final Tx tx=app.tx()){
+      Page page=Page.createNewPage(securityContext,"srcPage");
+      assertTrue(page != null);
+      assertTrue(page instanceof Page);
+      Node html=page.createElement("html");
+      Node head=page.createElement("head");
+      Node body=page.createElement("body");
+      Node title=page.createElement("title");
+      Node h1=page.createElement("h1");
+      Node div=page.createElement("div");
+      Node p=page.createElement("p");
+      try {
+        page.appendChild(html);
+        html.appendChild(head);
+        html.appendChild(body);
+        head.appendChild(title);
+        body.appendChild(h1);
+        body.appendChild(div);
+        div.appendChild(p);
+        p.appendChild(page.createTextNode("First Paragraph"));
+        Node clone=body.cloneNode(false);
+        assertTrue(isClone(clone,body));
+        tx.success();
+      }
+ catch (      DOMException dex) {
+        throw new FrameworkException(422,dex.getMessage());
+      }
     }
- catch (    DOMException dex) {
-      throw new FrameworkException(422,dex.getMessage());
-    }
-  }
+   }
  catch (  FrameworkException ex) {
     fail("Unexpected exception");
   }

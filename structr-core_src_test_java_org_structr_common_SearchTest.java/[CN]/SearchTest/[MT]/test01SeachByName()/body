@@ -1,0 +1,32 @@
+{
+  try {
+    Class type=TestOne.class;
+    int number=4;
+    final List<NodeInterface> nodes=this.createTestNodes(type,number);
+    final int offset=10;
+    Collections.shuffle(nodes,new Random(System.nanoTime()));
+    try (final Tx tx=app.tx()){
+      int i=offset;
+      String name;
+      for (      NodeInterface node : nodes) {
+        name="TestOne-" + i;
+        i++;
+        node.setProperty(AbstractNode.name,name);
+      }
+      tx.success();
+    }
+     try (final Tx tx=app.tx()){
+      Result<TestOne> result=app.nodeQuery(type).getResult();
+      assertEquals(4,result.size());
+      for (      NodeInterface node : result.getResults()) {
+        System.out.println(node);
+      }
+      result=app.nodeQuery(type).andName("TestOne-12").getResult();
+      assertEquals(1,result.size());
+    }
+   }
+ catch (  FrameworkException ex) {
+    logger.log(Level.SEVERE,ex.toString());
+    fail("Unexpected exception");
+  }
+}

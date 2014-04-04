@@ -9,18 +9,11 @@
           logger.log(Level.INFO,"Read-only property on {1}: {0}",new Object[]{sourceEntity.getClass(),typeResource.getRawType()});
           return new RestMethodResult(HttpServletResponse.SC_FORBIDDEN);
         }
-        try {
-          app.beginTx();
-          final List<GraphObject> nodes=new LinkedList<>();
-          for (          final Object obj : propertySet.values()) {
-            nodes.add(app.get(obj.toString()));
-          }
-          sourceEntity.setProperty(propertyKey,nodes);
-          app.commitTx();
+        final List<GraphObject> nodes=new LinkedList<>();
+        for (        final Object obj : propertySet.values()) {
+          nodes.add(app.get(obj.toString()));
         }
-  finally {
-          app.finishTx();
-        }
+        sourceEntity.setProperty(propertyKey,nodes);
       }
     }
   }

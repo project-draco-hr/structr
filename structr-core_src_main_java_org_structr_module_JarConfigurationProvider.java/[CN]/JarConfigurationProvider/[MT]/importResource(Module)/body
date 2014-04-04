@@ -5,23 +5,22 @@
     logger.log(Level.FINE,"Instantiating class {0} ",className);
     try {
       Class clazz=Class.forName(className);
+      int modifiers=clazz.getModifiers();
       logger.log(Level.FINE,"Class {0} instantiated: {1}",new Object[]{className,clazz});
-      if (!Modifier.isAbstract(clazz.getModifiers())) {
-        if (AbstractNode.class.isAssignableFrom(clazz)) {
-          registerEntityType(clazz);
-        }
-        if (AbstractRelationship.class.isAssignableFrom(clazz)) {
-          registerEntityType(clazz);
-        }
-        if (Service.class.isAssignableFrom(clazz)) {
-          Services.getInstance().registerServiceClass(clazz);
-        }
-        if (Agent.class.isAssignableFrom(clazz)) {
-          String simpleName=clazz.getSimpleName();
-          String fullName=clazz.getName();
-          agentClassCache.put(simpleName,clazz);
-          agentPackages.add(fullName.substring(0,fullName.lastIndexOf(".")));
-        }
+      if (NodeInterface.class.isAssignableFrom(clazz)) {
+        registerEntityType(clazz);
+      }
+      if (AbstractRelationship.class.isAssignableFrom(clazz) && !(Modifier.isAbstract(modifiers))) {
+        registerEntityType(clazz);
+      }
+      if (Service.class.isAssignableFrom(clazz) && !(Modifier.isAbstract(modifiers))) {
+        Services.getInstance().registerServiceClass(clazz);
+      }
+      if (Agent.class.isAssignableFrom(clazz) && !(Modifier.isAbstract(modifiers))) {
+        String simpleName=clazz.getSimpleName();
+        String fullName=clazz.getName();
+        agentClassCache.put(simpleName,clazz);
+        agentPackages.add(fullName.substring(0,fullName.lastIndexOf(".")));
       }
     }
  catch (    Throwable t) {

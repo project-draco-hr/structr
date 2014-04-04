@@ -1,7 +1,13 @@
 {
-  AbstractFile structrWorkingDir=FileHelper.getFileByAbsolutePath(workingDir);
-  if (structrWorkingDir == null || structrWorkingDir instanceof File) {
-    return new StructrFtpFolder(null);
+  try (Tx tx=StructrApp.getInstance().tx()){
+    AbstractFile structrWorkingDir=FileHelper.getFileByAbsolutePath(workingDir);
+    if (structrWorkingDir == null || structrWorkingDir instanceof File) {
+      return new StructrFtpFolder(null);
+    }
+    return new StructrFtpFolder((Folder)structrWorkingDir);
   }
-  return new StructrFtpFolder((Folder)structrWorkingDir);
+ catch (  FrameworkException fex) {
+    logger.log(Level.SEVERE,"Error in changeWorkingDirectory()",fex);
+  }
+  return null;
 }

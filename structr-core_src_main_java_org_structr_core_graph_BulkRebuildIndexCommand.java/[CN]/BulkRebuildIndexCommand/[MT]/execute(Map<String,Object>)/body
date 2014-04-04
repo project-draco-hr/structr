@@ -11,14 +11,16 @@
     type=SchemaHelper.getEntityClassForRawType(entityType);
   }
   if (mode == null || "nodesOnly".equals(mode)) {
-    final Result<AbstractNode> result=nodeFactory.instantiateAll(Iterables.filter(new NodeIdPredicate(),GlobalGraphOperations.at(graphDb).getAllNodes()));
-    final List<AbstractNode> nodes=new ArrayList<>();
-    for (    AbstractNode node : result.getResults()) {
-      if (type == null || node.getClass().equals(type)) {
-        nodes.add(node);
+    final List<AbstractNode> nodes=new LinkedList<>();
+    try (final Tx tx=StructrApp.getInstance().tx()){
+      final Result<AbstractNode> result=nodeFactory.instantiateAll(Iterables.filter(new StructrAndSpatialPredicate(true,false,false),GlobalGraphOperations.at(graphDb).getAllNodes()));
+      for (      AbstractNode node : result.getResults()) {
+        if (type == null || node.getClass().equals(type)) {
+          nodes.add(node);
+        }
       }
     }
-    if (type == null) {
+     if (type == null) {
       logger.log(Level.INFO,"Node type not set or no entity class found. Starting (re-)indexing all nodes");
     }
  else {
@@ -39,15 +41,17 @@
     logger.log(Level.INFO,"Done with (re-)indexing {0} nodes",count);
   }
   if (mode == null || "relsOnly".equals(mode)) {
-    final List<AbstractRelationship> unfilteredRels=relFactory.instantiate(Iterables.filter(new RelationshipIdPredicate(),GlobalGraphOperations.at(graphDb).getAllRelationships()));
-    final List<AbstractRelationship> rels=new ArrayList();
+    final List<AbstractRelationship> rels=new LinkedList<>();
     long count=0;
-    for (    AbstractRelationship rel : unfilteredRels) {
-      if (relType == null || rel.getType().equals(relType)) {
-        rels.add(rel);
+    try (final Tx tx=StructrApp.getInstance().tx()){
+      final List<AbstractRelationship> unfilteredRels=relFactory.instantiate(Iterables.filter(new StructrAndSpatialPredicate(true,false,false),GlobalGraphOperations.at(graphDb).getAllRelationships()));
+      for (      AbstractRelationship rel : unfilteredRels) {
+        if (relType == null || rel.getType().equals(relType)) {
+          rels.add(rel);
+        }
       }
     }
-    if (relType == null) {
+     if (relType == null) {
       logger.log(Level.INFO,"Relationship type not set, starting (re-)indexing all relationships");
     }
  else {

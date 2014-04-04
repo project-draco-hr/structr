@@ -1,0 +1,32 @@
+{
+  final String pageId=webSocketData.getId();
+  final Map<String,Object> nodeData=webSocketData.getNodeData();
+  final String modifiedHtml=(String)nodeData.get("source");
+  final SecurityContext securityContext=getWebSocket().getSecurityContext();
+  final App app=StructrApp.getInstance(securityContext);
+  Page modifiedPage=null;
+  Page sourcePage=getPage(pageId);
+  if (sourcePage != null) {
+    try {
+      modifiedPage=Importer.parsePageFromSource(securityContext,modifiedHtml,"__SavePageCommand_Temporary_Page__");
+      final List<InvertibleModificationOperation> changeSet=Importer.diffPages(sourcePage,modifiedPage);
+      for (      final InvertibleModificationOperation op : changeSet) {
+        op.apply(app,sourcePage,modifiedPage);
+      }
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,t.toString());
+      t.printStackTrace();
+      getWebSocket().send(MessageBuilder.status().code(422).message(t.toString()).build(),true);
+    }
+    try {
+      app.delete(modifiedPage);
+    }
+ catch (    FrameworkException ex) {
+      ex.printStackTrace();
+    }
+  }
+ else {
+    getWebSocket().send(MessageBuilder.status().code(422).message("Cannot save page").build(),true);
+  }
+}

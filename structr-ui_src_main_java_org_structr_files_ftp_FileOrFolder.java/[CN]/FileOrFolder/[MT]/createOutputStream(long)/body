@@ -1,25 +1,26 @@
 {
-  if (structrFile == null) {
-    final Folder parentFolder=(Folder)FileHelper.getFileByAbsolutePath(StringUtils.substringBeforeLast(newPath,"/"));
-    final App app=StructrApp.getInstance();
-    try {
-      app.beginTx();
-      structrFile=FileHelper.createFile(SecurityContext.getSuperUserInstance(),new byte[0],null,File.class);
-      structrFile.setProperty(AbstractNode.type,File.class.getSimpleName());
-      structrFile.setProperty(AbstractNode.owner,owner.getStructrUser());
-      structrFile.setProperty(AbstractNode.name,getName());
-      if (parentFolder != null) {
-        structrFile.setProperty(AbstractFile.parent,parentFolder);
+  try (Tx tx=StructrApp.getInstance().tx()){
+    if (structrFile == null) {
+      final Folder parentFolder=(Folder)FileHelper.getFileByAbsolutePath(StringUtils.substringBeforeLast(newPath,"/"));
+      final App app=StructrApp.getInstance();
+      try {
+        structrFile=FileHelper.createFile(SecurityContext.getSuperUserInstance(),new byte[0],null,File.class);
+        structrFile.setProperty(AbstractNode.type,File.class.getSimpleName());
+        structrFile.setProperty(AbstractNode.owner,owner.getStructrUser());
+        structrFile.setProperty(AbstractNode.name,getName());
+        if (parentFolder != null) {
+          structrFile.setProperty(AbstractFile.parent,parentFolder);
+        }
       }
-      app.commitTx();
+ catch (      FrameworkException ex) {
+        logger.log(Level.SEVERE,null,ex);
+        return null;
+      }
     }
- catch (    FrameworkException ex) {
-      logger.log(Level.SEVERE,null,ex);
-      return null;
-    }
- finally {
-      app.finishTx();
-    }
+    tx.success();
+    return ((File)structrFile).getOutputStream();
   }
-  return ((File)structrFile).getOutputStream();
+ catch (  FrameworkException fex) {
+  }
+  return null;
 }

@@ -1,5 +1,4 @@
 {
-  final App app=StructrApp.getInstance(securityContext);
   try {
     final String filesPath=Services.getInstance().getConfigurationValue(Services.FILES_PATH);
     java.io.File fileOnDisk=new java.io.File(filesPath + "/" + getRelativeFilePath());
@@ -14,18 +13,14 @@
       logger.log(Level.SEVERE,"Could not create file",ex);
       return;
     }
-    app.beginTx();
     setProperty(checksum,FileHelper.getChecksum(File.this));
+    setProperty(version,0);
     long fileSize=FileHelper.getSize(File.this);
     if (fileSize > 0) {
       setProperty(size,fileSize);
     }
-    app.commitTx();
   }
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,"Could not create file",ex);
-  }
- finally {
-    app.finishTx();
   }
 }

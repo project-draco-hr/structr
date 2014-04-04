@@ -1,18 +1,38 @@
 {
   SecurityContext securityContext=null;
+  Authenticator authenticator=null;
+  RestMethodResult result=null;
+  Resource resource=null;
   try {
-    Authenticator authenticator=getAuthenticator();
-    securityContext=authenticator.initializeAndExamineRequest(request,response);
+    try (final Tx tx=StructrApp.getInstance().tx()){
+      authenticator=config.getAuthenticator();
+      securityContext=authenticator.initializeAndExamineRequest(request,response);
+      tx.success();
+    }
+     final App app=StructrApp.getInstance(securityContext);
     request.setCharacterEncoding("UTF-8");
     response.setCharacterEncoding("UTF-8");
     response.setContentType("application/json; charset=UTF-8");
-    List<Resource> chain=ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,defaultIdProperty);
-    Resource resource=ResourceHelper.optimizeNestedResourceChain(chain,defaultIdProperty);
-    String resourceSignature=resource.getResourceSignature();
-    authenticator.checkResourceAccess(request,resourceSignature,propertyView.get(securityContext));
-    RestMethodResult result=resource.doHead();
-    result.commitResponse(gson.get(),response);
-  }
+    try (final Tx tx=app.tx()){
+      resource=ResourceHelper.applyViewTransformation(request,securityContext,ResourceHelper.optimizeNestedResourceChain(ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,config.getDefaultIdProperty()),config.getDefaultIdProperty()),propertyView);
+      authenticator.checkResourceAccess(request,resource.getResourceSignature(),propertyView.get(securityContext));
+      tx.success();
+    }
+     boolean retry=true;
+    while (retry) {
+      try (final Tx tx=app.tx()){
+        result=resource.doHead();
+        tx.success();
+      }
+ catch (      DeadlockDetectedException ddex) {
+        retry=true;
+      }
+    }
+    try (final Tx tx=app.tx()){
+      result.commitResponse(gson.get(),response);
+      tx.success();
+    }
+   }
  catch (  FrameworkException frameworkException) {
     response.setStatus(frameworkException.getStatus());
     gson.get().toJson(frameworkException,response.getWriter());
@@ -22,19 +42,19 @@ catch (  JsonSyntaxException jsex) {
     logger.log(Level.WARNING,"JsonSyntaxException in HEAD",jsex);
     int code=HttpServletResponse.SC_BAD_REQUEST;
     response.setStatus(code);
-    response.getWriter().append(jsonError(code,"JsonSyntaxException in HEAD: " + jsex.getMessage()));
+    response.getWriter().append(RestMethodResult.jsonError(code,"JsonSyntaxException in HEAD: " + jsex.getMessage()));
   }
 catch (  JsonParseException jpex) {
     logger.log(Level.WARNING,"JsonParseException in HEAD",jpex);
     int code=HttpServletResponse.SC_BAD_REQUEST;
     response.setStatus(code);
-    response.getWriter().append(jsonError(code,"JsonSyntaxException in HEAD: " + jpex.getMessage()));
+    response.getWriter().append(RestMethodResult.jsonError(code,"JsonSyntaxException in HEAD: " + jpex.getMessage()));
   }
 catch (  Throwable t) {
     logger.log(Level.WARNING,"Exception in HEAD",t);
     int code=HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
     response.setStatus(code);
-    response.getWriter().append(jsonError(code,"JsonSyntaxException in HEAD: " + t.getMessage()));
+    response.getWriter().append(RestMethodResult.jsonError(code,"JsonSyntaxException in HEAD: " + t.getMessage()));
   }
  finally {
     try {

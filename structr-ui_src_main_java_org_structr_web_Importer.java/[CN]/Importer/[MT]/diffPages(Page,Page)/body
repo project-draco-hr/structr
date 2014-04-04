@@ -1,0 +1,75 @@
+{
+  final List<InvertibleModificationOperation> changeSet=new LinkedList<>();
+  final Map<String,DOMNode> indexMappedExistingNodes=new LinkedHashMap<>();
+  final Map<String,DOMNode> hashMappedExistingNodes=new LinkedHashMap<>();
+  final Map<DOMNode,Integer> depthMappedExistingNodes=new LinkedHashMap<>();
+  final Map<String,DOMNode> indexMappedNewNodes=new LinkedHashMap<>();
+  final Map<String,DOMNode> hashMappedNewNodes=new LinkedHashMap<>();
+  final Map<DOMNode,Integer> depthMappedNewNodes=new LinkedHashMap<>();
+  InvertibleModificationOperation.collectNodes(sourcePage,indexMappedExistingNodes,hashMappedExistingNodes,depthMappedExistingNodes);
+  InvertibleModificationOperation.collectNodes(modifiedPage,indexMappedNewNodes,hashMappedNewNodes,depthMappedNewNodes);
+  for (final Iterator<Map.Entry<String,DOMNode>> it=hashMappedExistingNodes.entrySet().iterator(); it.hasNext(); ) {
+    final Map.Entry<String,DOMNode> existingNodeEntry=it.next();
+    final DOMNode existingNode=existingNodeEntry.getValue();
+    final String existingHash=existingNode.getIdHash();
+    if (!hashMappedNewNodes.containsKey(existingHash) && !(existingNode instanceof Page)) {
+      changeSet.add(new DeleteOperation(hashMappedExistingNodes,existingNode));
+    }
+  }
+  for (final Iterator<Map.Entry<String,DOMNode>> it=indexMappedNewNodes.entrySet().iterator(); it.hasNext(); ) {
+    final Map.Entry<String,DOMNode> newNodeEntry=it.next();
+    final DOMNode newNode=newNodeEntry.getValue();
+    String newHash=newNode.getProperty(DOMNode.dataHashProperty);
+    if (newHash == null) {
+      newHash=newNode.getIdHash();
+    }
+    if (!hashMappedExistingNodes.containsKey(newHash) && !(newNode instanceof Page)) {
+      final DOMNode newParent=newNode.getProperty(DOMNode.parent);
+      changeSet.add(new CreateOperation(hashMappedExistingNodes,getHashOrNull(newParent),getSiblingHashes(newNode),newNode,depthMappedNewNodes.get(newNode)));
+    }
+  }
+  for (  final Map.Entry<String,DOMNode> newNodeEntry : indexMappedNewNodes.entrySet()) {
+    final String newTreeIndex=newNodeEntry.getKey();
+    final DOMNode newNode=newNodeEntry.getValue();
+    for (    final Map.Entry<String,DOMNode> existingNodeEntry : indexMappedExistingNodes.entrySet()) {
+      final String existingTreeIndex=existingNodeEntry.getKey();
+      final DOMNode existingNode=existingNodeEntry.getValue();
+      DOMNode newParent=null;
+      int equalityBitmask=0;
+      if (newTreeIndex.equals(existingTreeIndex)) {
+        equalityBitmask|=1;
+      }
+      if (newNode.getIdHashOrProperty().equals(existingNode.getIdHash())) {
+        equalityBitmask|=2;
+      }
+      if (newNode.contentEquals(existingNode)) {
+        equalityBitmask|=4;
+      }
+switch (equalityBitmask) {
+case 7:
+        break;
+case 6:
+      newParent=newNode.getProperty(DOMNode.parent);
+    changeSet.add(new MoveOperation(hashMappedExistingNodes,getHashOrNull(newParent),getSiblingHashes(newNode),newNode,existingNode));
+  break;
+case 5:
+break;
+case 4:
+break;
+case 3:
+changeSet.add(new UpdateOperation(hashMappedExistingNodes,existingNode,newNode));
+break;
+case 2:
+newParent=newNode.getProperty(DOMNode.parent);
+changeSet.add(new UpdateOperation(hashMappedExistingNodes,existingNode,newNode));
+changeSet.add(new MoveOperation(hashMappedExistingNodes,getHashOrNull(newParent),getSiblingHashes(newNode),newNode,existingNode));
+break;
+case 1:
+break;
+case 0:
+break;
+}
+}
+}
+return changeSet;
+}

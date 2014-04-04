@@ -1,0 +1,11 @@
+{
+  PropertyMap props=new PropertyMap();
+  props.put(AbstractNode.type,imageType == null ? Image.class.getSimpleName() : imageType.getSimpleName());
+  props.put(Image.isThumbnail,markAsThumbnail);
+  props.put(AbstractNode.name,name);
+  Image newImage=StructrApp.getInstance(securityContext).create(imageType,props);
+  if (imageData != null && imageData.length > 0) {
+    setFileData(newImage,imageData,contentType);
+  }
+  return newImage;
+}

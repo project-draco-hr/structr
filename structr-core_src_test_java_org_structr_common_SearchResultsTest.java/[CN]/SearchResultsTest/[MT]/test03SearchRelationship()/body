@@ -4,28 +4,23 @@
     final PropertyKey key1=new StringProperty("jghsdkhgshdhgsdjkfgh").indexed();
     final Class type=NodeHasLocation.class;
     final String val1="54354354546806849870";
-    try {
-      app.beginTx();
+    final Result<RelationshipInterface> result;
+    try (final Tx tx=app.tx()){
       rel.setProperty(key1,val1);
-      app.commitTx();
+      tx.success();
     }
-  finally {
-      app.finishTx();
+     try (final Tx tx=app.tx()){
+      assertTrue(rel.getProperty(key1).equals(val1));
+      result=app.relationshipQuery(type).and(key1,val1).getResult();
+      assertTrue(result.size() == 1);
+      assertTrue(result.get(0).equals(rel));
     }
-    assertTrue(rel.getProperty(key1).equals(val1));
-    Result<RelationshipInterface> result=app.relationshipQuery(type).and(key1,val1).getResult();
-    assertTrue(result.size() == 1);
-    assertTrue(result.get(0).equals(rel));
-    final String val2="??lllldj??oa8w4rasf";
-    try {
-      app.beginTx();
+     final String val2="??lllldj??oa8w4rasf";
+    try (final Tx tx=app.tx()){
       rel.setProperty(key1,val2);
-      app.commitTx();
+      tx.success();
     }
-  finally {
-      app.finishTx();
-    }
-    assertTrue(result.size() == 1);
+     assertTrue(result.size() == 1);
     assertTrue(result.get(0).equals(rel));
   }
  catch (  FrameworkException ex) {

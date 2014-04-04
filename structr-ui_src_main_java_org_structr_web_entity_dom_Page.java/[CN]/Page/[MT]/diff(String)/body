@@ -1,0 +1,21 @@
+{
+  final App app=StructrApp.getInstance(securityContext);
+  try (final Tx tx=app.tx()){
+    final String source=IOUtils.toString(new FileInputStream(file));
+    final List<InvertibleModificationOperation> changeSet=new LinkedList<>();
+    final Page diffPage=Importer.parsePageFromSource(securityContext,source,this.getProperty(Page.name) + "diff");
+    changeSet.addAll(Importer.diffPages(this,diffPage));
+    for (    final InvertibleModificationOperation op : changeSet) {
+      System.out.println(op);
+      op.apply(app,this,diffPage);
+    }
+    for (    final DOMNode child : diffPage.getProperty(Page.elements)) {
+      app.delete(child);
+    }
+    app.delete(diffPage);
+    tx.success();
+  }
+ catch (  Throwable t) {
+    t.printStackTrace();
+  }
+}

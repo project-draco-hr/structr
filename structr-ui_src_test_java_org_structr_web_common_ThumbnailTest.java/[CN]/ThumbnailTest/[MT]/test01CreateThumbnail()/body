@@ -1,14 +1,7 @@
 {
-  try {
-    TestImage img=null;
-    try {
-      app.beginTx();
-      img=(TestImage)ImageHelper.createFileBase64(securityContext,base64Image,TestImage.class);
-      app.commitTx();
-    }
-  finally {
-      app.finishTx();
-    }
+  try (final Tx tx=app.tx()){
+    TestImage img=(TestImage)ImageHelper.createFileBase64(securityContext,base64Image,TestImage.class);
+    img.setProperty(AbstractNode.name,"test-image.png");
     assertNotNull(img);
     assertTrue(img instanceof TestImage);
     Image tn=img.getProperty(TestImage.thumbnail);
@@ -16,6 +9,7 @@
     assertEquals(new Integer(200),tn.getWidth());
     assertEquals(new Integer(48),tn.getHeight());
     assertEquals("image/" + Thumbnail.FORMAT,tn.getContentType());
+    tx.success();
   }
  catch (  Exception ex) {
     logger.log(Level.SEVERE,ex.toString());

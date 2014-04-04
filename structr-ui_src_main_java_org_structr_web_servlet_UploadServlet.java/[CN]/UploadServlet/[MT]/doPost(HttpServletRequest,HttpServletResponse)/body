@@ -3,7 +3,7 @@
     throw new ServletException("Content type is not multipart/form-data");
   }
   try {
-    final SecurityContext securityContext=getAuthenticator().initializeAndExamineRequest(request,response);
+    final SecurityContext securityContext=getConfig().getAuthenticator().initializeAndExamineRequest(request,response);
     securityContext.setAccessMode(AccessMode.Frontend);
     request.setCharacterEncoding("UTF-8");
     response.setCharacterEncoding("UTF-8");
@@ -16,10 +16,8 @@
     final PrintWriter out=response.getWriter();
     List<FileItem> fileItemsList=uploader.parseRequest(request);
     Iterator<FileItem> fileItemsIterator=fileItemsList.iterator();
-    final App app=StructrApp.getInstance(securityContext);
     while (fileItemsIterator.hasNext()) {
       final FileItem fileItem=fileItemsIterator.next();
-      app.beginTx();
       try {
         String contentType=fileItem.getContentType();
         boolean isImage=(contentType != null && contentType.startsWith("image"));
@@ -30,19 +28,15 @@
         newFile.setProperty(AbstractNode.visibleToPublicUsers,true);
         newFile.setProperty(AbstractNode.visibleToAuthenticatedUsers,true);
         out.write(newFile.getUuid());
-        app.commitTx();
       }
  catch (      IOException ex) {
         logger.log(Level.WARNING,"Could not upload file",ex);
       }
- finally {
-        app.finishTx();
-      }
     }
   }
- catch (  Throwable t) {
+ catch (  FrameworkException|IOException|FileUploadException t) {
     t.printStackTrace();
     logger.log(Level.SEVERE,"Exception while processing request",t);
-    HttpAuthenticator.writeInternalServerError(response);
+    UiAuthenticator.writeInternalServerError(response);
   }
 }

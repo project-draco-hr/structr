@@ -1,0 +1,62 @@
+{
+  String path=PathHelper.clean(request.getPathInfo());
+  String[] uriParts=PathHelper.getParts(path);
+  logger.log(Level.FINE,"Checking external authentication ...");
+  if (uriParts == null || uriParts.length != 3 || !("oauth".equals(uriParts[0]))) {
+    logger.log(Level.FINE,"Incorrect URI parts for OAuth process, need /oauth/<name>/<action>");
+    return null;
+  }
+  String name=uriParts[1];
+  String action=uriParts[2];
+  StructrOAuthClient oauthServer=StructrOAuthClient.getServer(name);
+  if (oauthServer == null) {
+    logger.log(Level.FINE,"No OAuth2 authentication server configured for {0}",path);
+    return null;
+  }
+  if ("login".equals(action)) {
+    try {
+      response.sendRedirect(oauthServer.getEndUserAuthorizationRequestUri(request));
+      return null;
+    }
+ catch (    Exception ex) {
+      logger.log(Level.SEVERE,"Could not send redirect to authorization server",ex);
+    }
+  }
+ else   if ("auth".equals(action)) {
+    String accessToken=oauthServer.getAccessToken(request);
+    SecurityContext superUserContext=SecurityContext.getSuperUserInstance();
+    if (accessToken != null) {
+      logger.log(Level.FINE,"Got access token {0}",accessToken);
+      String value=oauthServer.getCredential(request);
+      logger.log(Level.FINE,"Got credential value: {0}",new Object[]{value});
+      if (value != null) {
+        PropertyKey credentialKey=oauthServer.getCredentialKey();
+        Principal user=AuthHelper.getPrincipalForCredential(credentialKey,value);
+        if (user == null && userAutoCreate) {
+          user=RegistrationResource.createUser(superUserContext,credentialKey,value,true,userClass);
+        }
+        if (user != null) {
+          final String sessionId=UiAuthenticator.getSessionId(request);
+          AuthHelper.clearSession(sessionId);
+          user.addSessionId(sessionId);
+          HtmlServlet.setNoCacheHeaders(response);
+          try {
+            logger.log(Level.FINE,"Response status: {0}",response.getStatus());
+            response.sendRedirect(oauthServer.getReturnUri());
+          }
+ catch (          IOException ex) {
+            logger.log(Level.SEVERE,"Could not redirect to {0}: {1}",new Object[]{oauthServer.getReturnUri(),ex});
+          }
+          return user;
+        }
+      }
+    }
+  }
+  try {
+    response.sendRedirect(oauthServer.getErrorUri());
+  }
+ catch (  IOException ex) {
+    logger.log(Level.SEVERE,"Could not redirect to {0}: {1}",new Object[]{oauthServer.getReturnUri(),ex});
+  }
+  return null;
+}

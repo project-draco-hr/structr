@@ -10,12 +10,26 @@ synchronized (taskQueue) {
     if (currentTask != null) {
       lastStartTime=System.nanoTime();
       ReturnValue ret=null;
-      try {
-        ret=processTask(currentTask);
-      }
- catch (      Throwable t) {
-        logger.log(Level.SEVERE,"Processing task {0} failed. Maybe someone killed us?",currentTask.getType());
-        t.printStackTrace();
+      if (Services.getInstance().isInitialized()) {
+        if (createEnclosingTransaction()) {
+          try (final Tx tx=StructrApp.getInstance().tx()){
+            ret=processTask(currentTask);
+            tx.success();
+          }
+ catch (          Throwable t) {
+            logger.log(Level.SEVERE,"Processing task {0} failed. Maybe someone killed us?",currentTask.getType());
+            t.printStackTrace();
+          }
+        }
+ else {
+          try {
+            ret=processTask(currentTask);
+          }
+ catch (          Throwable t) {
+            logger.log(Level.SEVERE,"Processing task {0} failed. Maybe someone killed us?",currentTask.getType());
+            t.printStackTrace();
+          }
+        }
       }
       if (ret != null) {
 switch (ret) {

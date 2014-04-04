@@ -1,9 +1,16 @@
 {
-  org.structr.web.entity.User structrUser=getStructrUser(userName);
-  if (structrUser != null) {
-    return new StructrFtpUser(structrUser);
-  }
+  try (Tx tx=StructrApp.getInstance().tx()){
+    org.structr.web.entity.User structrUser=getStructrUser(userName);
+    tx.success();
+    if (structrUser != null) {
+      return new StructrFtpUser(structrUser);
+    }
  else {
-    return null;
+      return null;
+    }
   }
+ catch (  FrameworkException fex) {
+    logger.log(Level.SEVERE,"Unable to get user by its name",fex);
+  }
+  return null;
 }

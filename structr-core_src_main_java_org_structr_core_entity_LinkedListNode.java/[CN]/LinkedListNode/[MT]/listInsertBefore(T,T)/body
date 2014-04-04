@@ -5,25 +5,11 @@
   }
   final T previousElement=listGetPrevious(currentElement);
   if (previousElement == null) {
-    try {
-      app.beginTx();
-      linkNodes(getSiblingLinkType(),newElement,currentElement);
-      app.commitTx();
-    }
-  finally {
-      app.finishTx();
-    }
+    linkNodes(getSiblingLinkType(),newElement,currentElement);
   }
  else {
-    try {
-      app.beginTx();
-      unlinkNodes(getSiblingLinkType(),previousElement,currentElement);
-      linkNodes(getSiblingLinkType(),previousElement,newElement);
-      linkNodes(getSiblingLinkType(),newElement,currentElement);
-      app.commitTx();
-    }
-  finally {
-      app.finishTx();
-    }
+    unlinkNodes(getSiblingLinkType(),previousElement,currentElement);
+    linkNodes(getSiblingLinkType(),previousElement,newElement);
+    linkNodes(getSiblingLinkType(),newElement,currentElement);
   }
 }

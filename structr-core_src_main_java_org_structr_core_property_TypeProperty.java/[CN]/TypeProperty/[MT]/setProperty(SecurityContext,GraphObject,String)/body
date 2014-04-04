@@ -1,0 +1,10 @@
+{
+  super.setProperty(securityContext,obj,value);
+  if (obj instanceof NodeInterface) {
+    final Node dbNode=((NodeInterface)obj).getNode();
+    final Class type=obj.getClass();
+    for (    final Class supertype : SearchCommand.typeAndAllSupertypes(type)) {
+      dbNode.addLabel(DynamicLabel.label(supertype.getSimpleName()));
+    }
+  }
+}

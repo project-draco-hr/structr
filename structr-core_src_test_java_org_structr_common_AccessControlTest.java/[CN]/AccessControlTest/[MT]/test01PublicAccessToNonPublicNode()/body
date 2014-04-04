@@ -1,13 +1,15 @@
 {
   try {
-    List<NodeInterface> users=createTestNodes(User.class,1);
+    List<User> users=createTestNodes(User.class,1);
     User user=(User)users.get(0);
     Class type=TestOne.class;
     TestOne t1=createTestNode(TestOne.class,user);
     SecurityContext publicContext=SecurityContext.getInstance(null,AccessMode.Frontend);
-    Result result=StructrApp.getInstance(publicContext).nodeQuery(type).getResult();
-    assertTrue(result.isEmpty());
-  }
+    try (final Tx tx=app.tx()){
+      Result result=StructrApp.getInstance(publicContext).nodeQuery(type).getResult();
+      assertTrue(result.isEmpty());
+    }
+   }
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,ex.toString());
     fail("Unexpected exception");

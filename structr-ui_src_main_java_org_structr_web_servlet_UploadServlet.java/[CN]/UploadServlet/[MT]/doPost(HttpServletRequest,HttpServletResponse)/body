@@ -2,7 +2,7 @@
   if (!ServletFileUpload.isMultipartContent(request)) {
     throw new ServletException("Content type is not multipart/form-data");
   }
-  try {
+  try (final Tx tx=StructrApp.getInstance().tx()){
     final SecurityContext securityContext=getConfig().getAuthenticator().initializeAndExamineRequest(request,response);
     securityContext.setAccessMode(AccessMode.Frontend);
     request.setCharacterEncoding("UTF-8");
@@ -33,6 +33,7 @@
         logger.log(Level.WARNING,"Could not upload file",ex);
       }
     }
+    tx.success();
   }
  catch (  FrameworkException|IOException|FileUploadException t) {
     t.printStackTrace();

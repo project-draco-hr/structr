@@ -1,10 +1,16 @@
 {
-  DiskFileItemFactory fileFactory=new DiskFileItemFactory();
-  fileFactory.setSizeThreshold(MEMORY_THRESHOLD);
-  filesDir=new File(Services.getInstance().getConfigurationValue(Services.TMP_PATH));
-  if (!filesDir.exists()) {
-    filesDir.mkdir();
+  try (final Tx tx=StructrApp.getInstance().tx()){
+    DiskFileItemFactory fileFactory=new DiskFileItemFactory();
+    fileFactory.setSizeThreshold(MEMORY_THRESHOLD);
+    filesDir=new File(Services.getInstance().getConfigurationValue(Services.TMP_PATH));
+    if (!filesDir.exists()) {
+      filesDir.mkdir();
+    }
+    fileFactory.setRepository(filesDir);
+    uploader=new ServletFileUpload(fileFactory);
+    tx.success();
   }
-  fileFactory.setRepository(filesDir);
-  uploader=new ServletFileUpload(fileFactory);
+ catch (  FrameworkException t) {
+    t.printStackTrace();
+  }
 }

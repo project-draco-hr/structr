@@ -33,7 +33,16 @@
     throw new FrameworkException(422,"Mixing of AND and OR not allowed in request parameters");
   }
   if (requestParameter.contains(";")) {
-    query.or(this,convertSearchValue(securityContext,requestParameter));
+    if (multiValueSplitAllowed()) {
+      query.and();
+      for (      final String part : requestParameter.split("[;]+")) {
+        query.or(this,convertSearchValue(securityContext,part));
+      }
+      query.parent();
+    }
+ else {
+      query.or(this,convertSearchValue(securityContext,requestParameter));
+    }
   }
  else {
     query.and(this,convertSearchValue(securityContext,requestParameter));

@@ -1,0 +1,10 @@
+{
+  String test01=createEntity("/test_sixs","{ aString: string01 }");
+  String test02=createEntity("/test_sixs","{ aString: string02 }");
+  String test03=createEntity("/test_sixs","{ aString: string03 }");
+  String test04=createEntity("/test_sixs","{ aString: string04 }");
+  String test05=createEntity("/test_sixs","{ aString: string05 }");
+  String test06=createEntity("/test_sixs","{ aString: string06 }");
+  String test07=createEntity("/test_sixs","{ aString: string07 }");
+  RestAssured.given().contentType("application/json; charset=UTF-8").filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(200)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(500)).expect().statusCode(200).body("result",hasSize(3)).body("result_count",equalTo(3)).body("result[0].id",equalTo(test02)).body("result[1].id",equalTo(test04)).body("result[2].id",equalTo(test06)).when().get(concat("/test_sixs?aString=string02;string04;string06"));
+}

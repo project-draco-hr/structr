@@ -17,20 +17,19 @@
   GraphObject _data=null;
   for (int i=0; (i < parts.length); i++) {
     String part=parts[i];
-    String lowerCasePart=part.toLowerCase();
     if (_data != null) {
       Object value=_data.getProperty(StructrApp.getConfiguration().getPropertyKeyForJSONName(_data.getClass(),part));
       if (value instanceof GraphObject) {
         _data=(GraphObject)value;
         continue;
       }
-      if (i > 0 && "size".equals(lowerCasePart)) {
+      if (i > 0 && "size".equals(part)) {
         Object val=_data.getProperty(StructrApp.getConfiguration().getPropertyKeyForJSONName(_data.getClass(),parts[i - 1]));
         if (val instanceof List) {
           return ((List)val).size();
         }
       }
-      if ("link".equals(lowerCasePart) && _data instanceof AbstractNode) {
+      if ("link".equals(part) && _data instanceof AbstractNode) {
         ResourceLink rel=((AbstractNode)_data).getOutgoingRelationship(ResourceLink.class);
         if (rel != null) {
           _data=rel.getTargetNode();
@@ -42,11 +41,11 @@
         return null;
       }
     }
-    if (this.hasDataForKey(lowerCasePart)) {
-      _data=this.getDataNode(lowerCasePart);
+    if (this.hasDataForKey(part)) {
+      _data=this.getDataNode(part);
       continue;
     }
-    if ("request".equals(lowerCasePart)) {
+    if ("request".equals(part)) {
       HttpServletRequest request=this.getRequest();
       if (request != null) {
         if (StringUtils.contains(refKey,"!")) {
@@ -57,10 +56,10 @@
         }
       }
     }
-    if ("now".equals(lowerCasePart)) {
+    if ("now".equals(part)) {
       return AbstractNode.createdDate.inputConverter(securityContext).revert(new Date());
     }
-    if ("me".equals(lowerCasePart)) {
+    if ("me".equals(part)) {
       Principal me=(Principal)securityContext.getUser(false);
       if (me != null) {
         _data=me;
@@ -68,62 +67,62 @@
       }
     }
     if (_data == null) {
-      if ("id".equals(lowerCasePart)) {
+      if ("id".equals(part)) {
         GraphObject detailsObject=this.getDetailsDataObject();
         if (detailsObject != null) {
           return detailsObject.getUuid();
         }
       }
-      if ("current".equals(lowerCasePart)) {
+      if ("current".equals(part)) {
         GraphObject detailsObject=this.getDetailsDataObject();
         if (detailsObject != null) {
           _data=detailsObject;
           continue;
         }
       }
-      if ("this".equals(lowerCasePart)) {
+      if ("this".equals(part)) {
         _data=this.getDataObject();
         continue;
       }
-      if ("element".equals(lowerCasePart)) {
+      if ("element".equals(part)) {
         _data=entity;
         continue;
       }
-      if ("page".equals(lowerCasePart)) {
+      if ("page".equals(part)) {
         _data=_page;
         continue;
       }
-      if ("link".equals(lowerCasePart)) {
+      if ("link".equals(part)) {
         ResourceLink rel=entity.getOutgoingRelationship(ResourceLink.class);
         if (rel != null) {
           _data=rel.getTargetNode();
           continue;
         }
       }
-      if ("parent".equals(lowerCasePart)) {
+      if ("parent".equals(part)) {
         _data=(DOMNode)((DOMNode)entity).getParentNode();
         continue;
       }
-      if ("owner".equals(lowerCasePart)) {
+      if ("owner".equals(part)) {
         Ownership rel=entity.getIncomingRelationship(PrincipalOwnsNode.class);
         if (rel != null) {
           _data=rel.getSourceNode();
         }
         continue;
       }
-      if ("result_count".equals(lowerCasePart) || "result_size".equals(lowerCasePart)) {
+      if ("result_count".equals(part) || "result_size".equals(part)) {
         Result result=this.getResult();
         if (result != null) {
           return result.getRawResultCount();
         }
       }
-      if ("page_size".equals(lowerCasePart)) {
+      if ("page_size".equals(part)) {
         Result result=this.getResult();
         if (result != null) {
           return result.getPageSize();
         }
       }
-      if ("page_count".equals(lowerCasePart)) {
+      if ("page_count".equals(part)) {
         Result result=this.getResult();
         Integer pageCount=result.getPageCount();
         if (pageCount != null) {
@@ -133,7 +132,7 @@
           return 1;
         }
       }
-      if ("page_no".equals(lowerCasePart)) {
+      if ("page_no".equals(part)) {
         Result result=this.getResult();
         if (result != null) {
           return result.getPage();

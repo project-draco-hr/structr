@@ -16,14 +16,13 @@
   GraphObject _data=null;
   for (int i=0; (i < parts.length); i++) {
     String part=parts[i];
-    String lowerCasePart=part.toLowerCase();
     if (_data != null) {
       Object value=_data.getProperty(StructrApp.getConfiguration().getPropertyKeyForJSONName(_data.getClass(),part));
       if (value instanceof GraphObject) {
         _data=(GraphObject)value;
         continue;
       }
-      if (i > 0 && "size".equals(lowerCasePart)) {
+      if (i > 0 && "size".equals(part)) {
         Object val=_data.getProperty(StructrApp.getConfiguration().getPropertyKeyForJSONName(_data.getClass(),parts[i - 1]));
         if (val instanceof List) {
           return ((List)val).size();
@@ -33,10 +32,10 @@
         return null;
       }
     }
-    if ("now".equals(lowerCasePart)) {
+    if ("now".equals(part)) {
       return AbstractNode.createdDate.inputConverter(securityContext).revert(new Date());
     }
-    if ("me".equals(lowerCasePart)) {
+    if ("me".equals(part)) {
       Principal me=(Principal)securityContext.getUser(false);
       if (me != null) {
         _data=me;
@@ -44,21 +43,37 @@
       }
     }
     if (_data == null) {
-      if ("id".equals(lowerCasePart)) {
+      if ("parent".equals(part)) {
+        _data=parent;
+        if (parts.length == 1) {
+          return _data;
+        }
+        continue;
+      }
+      if ("id".equals(part)) {
         return entity.getUuid();
       }
-      if ("this".equals(lowerCasePart)) {
+      if ("this".equals(part)) {
         _data=entity;
+        if (parts.length == 1) {
+          return _data;
+        }
         continue;
       }
-      if ("element".equals(lowerCasePart)) {
+      if ("element".equals(part)) {
         _data=entity;
+        if (parts.length == 1) {
+          return _data;
+        }
         continue;
       }
-      if ("owner".equals(lowerCasePart)) {
+      if ("owner".equals(part)) {
         Ownership rel=entity.getIncomingRelationship(PrincipalOwnsNode.class);
         if (rel != null) {
           _data=rel.getSourceNode();
+          if (parts.length == 1) {
+            return _data;
+          }
         }
         continue;
       }

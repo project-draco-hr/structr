@@ -11,12 +11,15 @@
       while (matcher.find()) {
         String group=matcher.group();
         String source=group.substring(2,group.length() - 1);
-        String partValue=StringUtils.remove(extractFunctions(securityContext,actionContext,source),"\\");
-        if (partValue != null) {
-          value=value.replace(group,partValue);
-        }
+        Object extractedValue=extractFunctions(securityContext,actionContext,source);
+        if (extractedValue != null) {
+          String partValue=StringUtils.remove(extractedValue.toString(),"\\");
+          if (partValue != null) {
+            value=value.replace(group,partValue);
+          }
  else {
-          value=value.equals(group) ? null : value.replace(group,"");
+            value=value.equals(group) ? null : value.replace(group,"");
+          }
         }
       }
     }

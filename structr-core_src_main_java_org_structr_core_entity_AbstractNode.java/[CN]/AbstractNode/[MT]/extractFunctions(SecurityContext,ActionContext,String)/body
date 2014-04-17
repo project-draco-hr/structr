@@ -5,19 +5,19 @@
     String functionGroup=functionMatcher.group(1);
     String parameter=functionMatcher.group(2);
     String functionName=functionGroup.substring(0,functionGroup.length());
-    Function<String,String> function=functions.get(functionName);
+    Function<Object,Object> function=functions.get(functionName);
     if (function != null) {
       if (parameter.contains(",")) {
         String[] parameters=split(parameter);
-        String[] results=new String[parameters.length];
+        Object[] results=new Object[parameters.length];
         for (int i=0; i < parameters.length; i++) {
           results[i]=extractFunctions(securityContext,actionContext,StringUtils.strip(parameters[i]));
         }
         return function.apply(this,results);
       }
  else {
-        String result=extractFunctions(securityContext,actionContext,StringUtils.strip(parameter));
-        return function.apply(this,new String[]{result});
+        Object result=extractFunctions(securityContext,actionContext,StringUtils.strip(parameter));
+        return function.apply(this,new Object[]{result});
       }
     }
   }
@@ -31,6 +31,6 @@
     return source.substring(1,source.length() - 1);
   }
  else {
-    return actionContext.convertValueForHtml(actionContext.getReferencedProperty(securityContext,this,source));
+    return actionContext.getReferencedProperty(securityContext,this,source);
   }
 }

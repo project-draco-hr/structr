@@ -1,0 +1,154 @@
+{
+  final String DEFAULT_VALUE_SEP="!";
+  final String[] parts=refKey.split("[\\.]+");
+  String referenceKey=parts[parts.length - 1];
+  String defaultValue=null;
+  if (StringUtils.contains(referenceKey,DEFAULT_VALUE_SEP)) {
+    String[] ref=StringUtils.split(referenceKey,DEFAULT_VALUE_SEP);
+    referenceKey=ref[0];
+    if (ref.length > 1) {
+      defaultValue=ref[1];
+    }
+ else {
+      defaultValue="";
+    }
+  }
+  Page _page=this.getPage();
+  GraphObject _data=null;
+  for (int i=0; (i < parts.length); i++) {
+    String part=parts[i];
+    String lowerCasePart=part.toLowerCase();
+    if (_data != null) {
+      Object value=_data.getProperty(StructrApp.getConfiguration().getPropertyKeyForJSONName(_data.getClass(),part));
+      if (value instanceof GraphObject) {
+        _data=(GraphObject)value;
+        continue;
+      }
+      if (i > 0 && "size".equals(lowerCasePart)) {
+        Object val=_data.getProperty(StructrApp.getConfiguration().getPropertyKeyForJSONName(_data.getClass(),parts[i - 1]));
+        if (val instanceof List) {
+          return ((List)val).size();
+        }
+      }
+      if ("link".equals(lowerCasePart) && _data instanceof AbstractNode) {
+        ResourceLink rel=((AbstractNode)_data).getOutgoingRelationship(ResourceLink.class);
+        if (rel != null) {
+          _data=rel.getTargetNode();
+          break;
+        }
+        continue;
+      }
+      if (value == null) {
+        return null;
+      }
+    }
+    if (this.hasDataForKey(lowerCasePart)) {
+      _data=this.getDataNode(lowerCasePart);
+      continue;
+    }
+    if ("request".equals(lowerCasePart)) {
+      HttpServletRequest request=this.getRequest();
+      if (request != null) {
+        if (StringUtils.contains(refKey,"!")) {
+          return StringUtils.defaultIfBlank(request.getParameter(referenceKey),defaultValue);
+        }
+ else {
+          return StringUtils.defaultString(request.getParameter(referenceKey));
+        }
+      }
+    }
+    if ("now".equals(lowerCasePart)) {
+      return AbstractNode.createdDate.inputConverter(securityContext).revert(new Date());
+    }
+    if ("me".equals(lowerCasePart)) {
+      Principal me=(Principal)securityContext.getUser(false);
+      if (me != null) {
+        _data=me;
+        continue;
+      }
+    }
+    if (_data == null) {
+      if ("id".equals(lowerCasePart)) {
+        GraphObject detailsObject=this.getDetailsDataObject();
+        if (detailsObject != null) {
+          return detailsObject.getUuid();
+        }
+      }
+      if ("current".equals(lowerCasePart)) {
+        GraphObject detailsObject=this.getDetailsDataObject();
+        if (detailsObject != null) {
+          _data=detailsObject;
+          continue;
+        }
+      }
+      if ("this".equals(lowerCasePart)) {
+        _data=this.getDataObject();
+        continue;
+      }
+      if ("element".equals(lowerCasePart)) {
+        _data=entity;
+        continue;
+      }
+      if ("page".equals(lowerCasePart)) {
+        _data=_page;
+        continue;
+      }
+      if ("link".equals(lowerCasePart)) {
+        ResourceLink rel=entity.getOutgoingRelationship(ResourceLink.class);
+        if (rel != null) {
+          _data=rel.getTargetNode();
+          continue;
+        }
+      }
+      if ("parent".equals(lowerCasePart)) {
+        _data=(DOMNode)((DOMNode)entity).getParentNode();
+        continue;
+      }
+      if ("owner".equals(lowerCasePart)) {
+        Ownership rel=entity.getIncomingRelationship(PrincipalOwnsNode.class);
+        if (rel != null) {
+          _data=rel.getSourceNode();
+        }
+        continue;
+      }
+      if ("result_count".equals(lowerCasePart) || "result_size".equals(lowerCasePart)) {
+        Result result=this.getResult();
+        if (result != null) {
+          return result.getRawResultCount();
+        }
+      }
+      if ("page_size".equals(lowerCasePart)) {
+        Result result=this.getResult();
+        if (result != null) {
+          return result.getPageSize();
+        }
+      }
+      if ("page_count".equals(lowerCasePart)) {
+        Result result=this.getResult();
+        Integer pageCount=result.getPageCount();
+        if (pageCount != null) {
+          return pageCount;
+        }
+ else {
+          return 1;
+        }
+      }
+      if ("page_no".equals(lowerCasePart)) {
+        Result result=this.getResult();
+        if (result != null) {
+          return result.getPage();
+        }
+      }
+    }
+  }
+  if (_data != null) {
+    PropertyKey referenceKeyProperty=StructrApp.getConfiguration().getPropertyKeyForJSONName(_data.getClass(),referenceKey);
+    Object value=_data.getProperty(referenceKeyProperty);
+    PropertyConverter converter=referenceKeyProperty.inputConverter(securityContext);
+    if (value != null && converter != null) {
+      value=converter.revert(value);
+    }
+    return value != null ? value : defaultValue;
+  }
+  return null;
+}

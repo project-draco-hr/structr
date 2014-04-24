@@ -3,6 +3,7 @@
   final String searchString=(String)webSocketData.getNodeData().get("searchString");
   final String restQuery=(String)webSocketData.getNodeData().get("restQuery");
   final String cypherQuery=(String)webSocketData.getNodeData().get("cypherQuery");
+  final String paramString=(String)webSocketData.getNodeData().get("cypherParams");
   final String typeString=(String)webSocketData.getNodeData().get("type");
   Class type=null;
   if (typeString != null) {
@@ -11,7 +12,11 @@
   if (searchString == null) {
     if (cypherQuery != null) {
       try {
-        final List<GraphObject> result=StructrApp.getInstance(securityContext).cypher(cypherQuery,null);
+        Map<String,Object> obj=null;
+        if (StringUtils.isNoneBlank(paramString)) {
+          obj=new Gson().fromJson(paramString,Map.class);
+        }
+        final List<GraphObject> result=StructrApp.getInstance(securityContext).cypher(cypherQuery,obj);
         webSocketData.setResult(result);
         getWebSocket().send(webSocketData,true);
         return;

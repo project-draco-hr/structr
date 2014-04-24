@@ -1,0 +1,22 @@
+{
+  try {
+    final GraphDatabaseService graphDb=Services.getInstance().getService(NodeService.class).getGraphDb();
+    final GlobalGraphOperations ggop=GlobalGraphOperations.at(graphDb);
+    final Iterable<Relationship> rels=ggop.getAllRelationships();
+    final Iterable<Node> nodes=ggop.getAllNodes();
+    final App app=StructrApp.getInstance();
+    final String fileName=(String)attributes.get("name");
+    if (fileName == null || fileName.isEmpty()) {
+      throw new FrameworkException(400,"Please specify name.");
+    }
+    try (final Tx tx=app.tx()){
+      final File file=FileHelper.createFile(securityContext,new byte[0],"application/zip",File.class,fileName);
+      file.setProperty(File.visibleToAuthenticatedUsers,true);
+      SyncCommand.exportToStream(file.getOutputStream(),nodes,rels,null);
+      tx.success();
+    }
+   }
+ catch (  Throwable t) {
+    throw new FrameworkException(500,t.getMessage());
+  }
+}

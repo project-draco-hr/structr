@@ -1,0 +1,62 @@
+{
+  final Date now=new Date();
+  Page page=null;
+  DOMNode html=null;
+  DOMNode head=null;
+  DOMNode body=null;
+  DOMNode title=null;
+  DOMNode h1=null;
+  DOMNode div1=null;
+  DOMNode p1=null;
+  DOMNode div2=null;
+  DOMNode p2=null;
+  DOMNode div3=null;
+  DOMNode p3=null;
+  try (final Tx tx=app.tx()){
+    page=Page.createNewPage(securityContext,"testpage");
+    assertTrue(page != null);
+    assertTrue(page instanceof Page);
+    html=(DOMNode)page.createElement("html");
+    head=(DOMNode)page.createElement("head");
+    body=(DOMNode)page.createElement("body");
+    title=(DOMNode)page.createElement("title");
+    h1=(DOMNode)page.createElement("h1");
+    div1=(DOMNode)page.createElement("div");
+    p1=(DOMNode)page.createElement("p");
+    div2=(DOMNode)page.createElement("div");
+    p2=(DOMNode)page.createElement("p");
+    div3=(DOMNode)page.createElement("div");
+    p3=(DOMNode)page.createElement("p");
+    page.appendChild(html);
+    html.appendChild(head);
+    html.appendChild(body);
+    head.appendChild(title);
+    body.appendChild(h1);
+    body.appendChild(div1);
+    div1.appendChild(p1);
+    div1.appendChild(div2);
+    div2.appendChild(p2);
+    div2.appendChild(div3);
+    div3.appendChild(p3);
+    NodeList divs=page.getElementsByTagName("p");
+    assertEquals(p1,divs.item(0));
+    assertEquals(p2,divs.item(1));
+    assertEquals(p3,divs.item(2));
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fail("Unexpected exception");
+  }
+  try (final Tx tx=app.tx()){
+    final RenderContext ctx=new RenderContext();
+    assertEquals("",p1.replaceVariables(securityContext,ctx,"${error}"));
+    assertEquals("",p1.replaceVariables(securityContext,ctx,"${this.error}"));
+    assertEquals("",p1.replaceVariables(securityContext,ctx,"${this.this.this.error}"));
+    assertEquals("",p1.replaceVariables(securityContext,ctx,"${parent.error}"));
+    assertEquals("",p1.replaceVariables(securityContext,ctx,"${this.owner}"));
+    assertEquals("",p1.replaceVariables(securityContext,ctx,"${parent.owner}"));
+  }
+ catch (  FrameworkException fex) {
+    fail("Unexpected exception");
+  }
+}

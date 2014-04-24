@@ -2,7 +2,7 @@
   SecurityContext securityContext=factoryProfile.getSecurityContext();
   long id=node.getId();
   T newNode=(T)securityContext.lookup(id);
-  if (newNode == null) {
+  if (newNode == null || !nodeClass.equals(newNode.getClass())) {
     try {
       Constructor<T> constructor=constructors.get(nodeClass);
       if (constructor == null) {

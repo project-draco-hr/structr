@@ -6,18 +6,18 @@
     String parameter=functionMatcher.group(2);
     String functionName=functionGroup.substring(0,functionGroup.length());
     final Function<Object,Object> function=functions.get(functionName);
+    final List results=new ArrayList();
     if (function != null) {
       if (parameter.contains(",")) {
-        String[] parameters=split(parameter);
-        Object[] results=new Object[parameters.length];
+        final String[] parameters=split(parameter);
         for (int i=0; i < parameters.length; i++) {
-          results[i]=extractFunctions(securityContext,actionContext,StringUtils.strip(parameters[i]));
+          addAll(results,extractFunctions(securityContext,actionContext,StringUtils.strip(parameters[i])));
         }
-        return function.apply(this,results);
+        return function.apply(this,results.toArray());
       }
  else {
-        Object result=extractFunctions(securityContext,actionContext,StringUtils.strip(parameter));
-        return function.apply(this,new Object[]{result});
+        addAll(results,extractFunctions(securityContext,actionContext,StringUtils.strip(parameter)));
+        return function.apply(this,results.toArray());
       }
     }
   }

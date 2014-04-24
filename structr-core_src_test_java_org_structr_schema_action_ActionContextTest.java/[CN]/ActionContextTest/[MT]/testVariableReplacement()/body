@@ -70,6 +70,9 @@
     assertEquals("Invalid upper() result","STRING",testOne.replaceVariables(securityContext,ctx,"${upper(this.aString)}"));
     assertEquals("Invalid join() result","onetwothree",testOne.replaceVariables(securityContext,ctx,"${join(\"one\", \"two\", \"three\")}"));
     assertEquals("Invalid join() result","oneStringthree",testOne.replaceVariables(securityContext,ctx,"${join(\"one\", this.aString, \"three\")}"));
+    assertEquals("Invalid split() result","onetwothree",testOne.replaceVariables(securityContext,ctx,"${join(split(\"one,two,three\"))}"));
+    assertEquals("Invalid split() result","onetwothree",testOne.replaceVariables(securityContext,ctx,"${join(split(\"one;two;three\"))}"));
+    assertEquals("Invalid split() result","onetwothree",testOne.replaceVariables(securityContext,ctx,"${join(split(\"one;two;three\", \";\"))}"));
     assertEquals("Invalid abbr() result","oneStringt???",testOne.replaceVariables(securityContext,ctx,"${abbr(join(\"one\", this.aString, \"three\"), 10)}"));
     assertEquals("Invalid capitalize() result","One_two_three",testOne.replaceVariables(securityContext,ctx,"${capitalize(join(\"one_\", \"two_\", \"three\"))}"));
     assertEquals("Invalid capitalize() result","One_Stringthree",testOne.replaceVariables(securityContext,ctx,"${capitalize(join(\"one_\", this.aString, \"three\"))}"));
@@ -288,6 +291,10 @@
     assertEquals("Invalid nth() result",testSixs.get(7).toString(),testOne.replaceVariables(securityContext,ctx,"${nth(this.manyToManyTestSixs,  7)}"));
     assertEquals("Invalid nth() result",testSixs.get(9).toString(),testOne.replaceVariables(securityContext,ctx,"${nth(this.manyToManyTestSixs,  9)}"));
     assertEquals("Invalid ngth() result",testSixs.get(12).toString(),testOne.replaceVariables(securityContext,ctx,"${nth(this.manyToManyTestSixs, 12)}"));
+    testOne.replaceVariables(securityContext,ctx,"${each(split(\"one,two,three\"), \"set(parent, this, 1)\")}");
+    assertEquals("Invalid each() result","1",testOne.replaceVariables(securityContext,ctx,"${get(this, \"one\"}"));
+    assertEquals("Invalid each() result","1",testOne.replaceVariables(securityContext,ctx,"${get(this, \"two\"}"));
+    assertEquals("Invalid each() result","1",testOne.replaceVariables(securityContext,ctx,"${get(this, \"three\"}"));
   }
  catch (  FrameworkException fex) {
     fail("Unexpected exception");

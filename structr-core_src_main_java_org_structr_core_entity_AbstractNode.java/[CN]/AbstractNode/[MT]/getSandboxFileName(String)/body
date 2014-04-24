@@ -1,0 +1,21 @@
+{
+  final File sandboxFile=new File(source);
+  final String fileName=sandboxFile.getName();
+  final String basePath=StructrApp.getConfigurationValue(Services.BASE_PATH);
+  if (!basePath.isEmpty()) {
+    final String defaultExchangePath=basePath.endsWith("/") ? basePath.concat("exchange") : basePath.concat("/exchange");
+    String exchangeDir=StructrApp.getConfigurationValue(Services.DATA_EXCHANGE_PATH,defaultExchangePath);
+    if (!exchangeDir.endsWith("/")) {
+      exchangeDir=exchangeDir.concat("/");
+    }
+    final File dir=new File(exchangeDir);
+    if (!dir.exists()) {
+      dir.mkdirs();
+    }
+    return exchangeDir.concat(fileName);
+  }
+ else {
+    logger.log(Level.WARNING,"Unable to determine base.path from structr.conf, no data input/output possible.");
+  }
+  return null;
+}

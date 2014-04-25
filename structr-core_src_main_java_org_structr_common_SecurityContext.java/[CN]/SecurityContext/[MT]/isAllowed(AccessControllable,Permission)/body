@@ -13,14 +13,5 @@
   if (user.equals(node) || user.equals(owner) || user.getParents().contains(owner)) {
     return true;
   }
-  boolean isAllowed=false;
-switch (accessMode) {
-case Backend:
-    isAllowed=isAllowedInBackend(node,permission);
-  break;
-case Frontend:
-isAllowed=isAllowedInFrontend(node,permission);
-break;
-}
-return isAllowed;
+  return node.isGranted(permission,user);
 }

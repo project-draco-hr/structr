@@ -425,6 +425,9 @@
     assertEquals("Invalid if(equal()) result","String",testOne.replaceVariables(securityContext,ctx,"${if(empty(this.aString), titleize(this.alwaysNull, '-'), this.aString)}"));
     assertNull("Invalid result for special null value",testOne.replaceVariables(securityContext,ctx,"${null}"));
     assertNull("Invalid result for special null value",testOne.replaceVariables(securityContext,ctx,"${if(equal(this.anInt, 15), \"selected\", null)}"));
+    assertEquals("Invalid replacement result","tile plan ",testOne.replaceVariables(securityContext,ctx,"tile plan ${plan.bannerTag}"));
+    assertEquals("Invalid replacement result","abcdefghijklmnop",testOne.replaceVariables(securityContext,ctx,"abcdefgh${blah}ijklmnop"));
+    assertEquals("Invalid replacement result","abcdefghStringijklmnop",testOne.replaceVariables(securityContext,ctx,"abcdefgh${this.aString}ijklmnop"));
   }
  catch (  FrameworkException fex) {
     fail("Unexpected exception");

@@ -1,4 +1,7 @@
 {
+  if ("null".equals(source)) {
+    return NULL_STRING;
+  }
   Matcher functionMatcher=threadLocalFunctionMatcher.get();
   functionMatcher.reset(source);
   if (functionMatcher.matches()) {
@@ -8,6 +11,9 @@
     final Function<Object,Object> function=functions.get(functionName);
     final List results=new ArrayList();
     if (function != null) {
+      if (parameter == null || parameter.isEmpty()) {
+        return function.usage();
+      }
       if (parameter.contains(",")) {
         final String[] parameters=split(parameter);
         for (int i=0; i < parameters.length; i++) {

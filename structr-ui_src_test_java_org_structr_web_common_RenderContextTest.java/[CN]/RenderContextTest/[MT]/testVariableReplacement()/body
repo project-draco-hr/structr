@@ -55,6 +55,12 @@
     assertEquals("",p1.replaceVariables(securityContext,ctx,"${parent.error}"));
     assertEquals("",p1.replaceVariables(securityContext,ctx,"${this.owner}"));
     assertEquals("",p1.replaceVariables(securityContext,ctx,"${parent.owner}"));
+    assertEquals("true",p1.replaceVariables(securityContext,ctx,"${true}"));
+    assertEquals("false",p1.replaceVariables(securityContext,ctx,"${false}"));
+    assertEquals("yes",p1.replaceVariables(securityContext,ctx,"${if(true, \"yes\", \"no\")}"));
+    assertEquals("no",p1.replaceVariables(securityContext,ctx,"${if(false, \"yes\", \"no\")}"));
+    assertNull(p1.replaceVariables(securityContext,ctx,"${if(true, null, \"no\")}"));
+    assertNull(p1.replaceVariables(securityContext,ctx,"${null}"));
   }
  catch (  FrameworkException fex) {
     fail("Unexpected exception");

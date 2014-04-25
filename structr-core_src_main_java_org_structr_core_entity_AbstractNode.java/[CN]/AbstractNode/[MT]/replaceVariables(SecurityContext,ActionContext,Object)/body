@@ -12,17 +12,15 @@
         String group=matcher.group();
         String source=group.substring(2,group.length() - 1);
         Object extractedValue=extractFunctions(securityContext,actionContext,source);
-        if (extractedValue != null) {
-          String partValue=StringUtils.remove(extractedValue.toString(),"\\");
-          if (partValue != null) {
-            value=value.replace(group,partValue);
-          }
- else {
-            value=value.equals(group) ? null : value.replace(group,"");
-          }
+        if (extractedValue == null) {
+          extractedValue="";
+        }
+        String partValue=StringUtils.remove(extractedValue.toString(),"\\");
+        if (partValue != null) {
+          value=value.replace(group,partValue);
         }
  else {
-          value="";
+          value=value.equals(group) ? null : value.replace(group,"");
         }
       }
     }

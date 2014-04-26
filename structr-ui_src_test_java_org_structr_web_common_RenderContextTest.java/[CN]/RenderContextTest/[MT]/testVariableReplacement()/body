@@ -12,6 +12,7 @@
   DOMNode p2=null;
   DOMNode div3=null;
   DOMNode p3=null;
+  DOMNode a=null;
   try (final Tx tx=app.tx()){
     page=Page.createNewPage(securityContext,"testpage");
     assertTrue(page != null);
@@ -27,6 +28,7 @@
     p2=(DOMNode)page.createElement("p");
     div3=(DOMNode)page.createElement("div");
     p3=(DOMNode)page.createElement("p");
+    a=(DOMNode)page.createElement("a");
     page.appendChild(html);
     html.appendChild(head);
     html.appendChild(body);
@@ -38,6 +40,8 @@
     div2.appendChild(p2);
     div2.appendChild(div3);
     div3.appendChild(p3);
+    p3.appendChild(a);
+    a.setProperty(LinkSource.linkable,page);
     NodeList divs=page.getElementsByTagName("p");
     assertEquals(p1,divs.item(0));
     assertEquals(p2,divs.item(1));
@@ -49,6 +53,7 @@
   }
   try (final Tx tx=app.tx()){
     final RenderContext ctx=new RenderContext();
+    ctx.setPage(page);
     assertEquals("",p1.replaceVariables(securityContext,ctx,"${error}"));
     assertEquals("",p1.replaceVariables(securityContext,ctx,"${this.error}"));
     assertEquals("",p1.replaceVariables(securityContext,ctx,"${this.this.this.error}"));
@@ -59,8 +64,12 @@
     assertEquals("false",p1.replaceVariables(securityContext,ctx,"${false}"));
     assertEquals("yes",p1.replaceVariables(securityContext,ctx,"${if(true, \"yes\", \"no\")}"));
     assertEquals("no",p1.replaceVariables(securityContext,ctx,"${if(false, \"yes\", \"no\")}"));
+    assertEquals("true",p1.replaceVariables(securityContext,ctx,"${if(true, true, false)}"));
+    assertEquals("false",p1.replaceVariables(securityContext,ctx,"${if(false, true, false)}"));
     assertNull(p1.replaceVariables(securityContext,ctx,"${if(true, null, \"no\")}"));
     assertNull(p1.replaceVariables(securityContext,ctx,"${null}"));
+    assertEquals("Invalid replacement result","/testpage?" + page.getUuid(),p1.replaceVariables(securityContext,ctx,"/${page.name}?${page.id}"));
+    assertEquals("Invalid replacement result","/testpage?" + page.getUuid(),a.replaceVariables(securityContext,ctx,"/${link.name}?${link.id}"));
   }
  catch (  FrameworkException fex) {
     fail("Unexpected exception");

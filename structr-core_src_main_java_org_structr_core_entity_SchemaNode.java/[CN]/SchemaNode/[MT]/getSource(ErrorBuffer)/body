@@ -1,5 +1,5 @@
 {
-  final Map<Actions.Type,List<ActionEntry>> actions=new EnumMap<>(Actions.Type.class);
+  final Map<Actions.Type,List<ActionEntry>> saveActions=new EnumMap<>(Actions.Type.class);
   final Map<String,Set<String>> viewProperties=new LinkedHashMap<>();
   final Set<String> existingPropertyNames=new LinkedHashSet<>();
   final Set<String> validators=new LinkedHashSet<>();
@@ -22,7 +22,7 @@
     src.append(inRel.getPropertySource(propertyName,false));
     addPropertyNameToViews(propertyName,viewProperties);
   }
-  src.append(SchemaHelper.extractProperties(this,validators,enums,viewProperties,actions,errorBuffer));
+  src.append(SchemaHelper.extractProperties(this,validators,enums,viewProperties,saveActions,errorBuffer));
   for (  final String enumDefition : enums) {
     src.append(enumDefition);
   }
@@ -34,42 +34,8 @@
       SchemaHelper.formatView(src,_className,viewName,viewName,view);
     }
   }
-  if (!validators.isEmpty()) {
-    src.append("\n\t@Override\n");
-    src.append("\tpublic boolean isValid(final ErrorBuffer errorBuffer) {\n\n");
-    src.append("\t\tboolean error = false;\n\n");
-    for (    final String validator : validators) {
-      src.append("\t\terror |= ").append(validator).append(";\n");
-    }
-    src.append("\n\t\treturn !error;\n");
-    src.append("\t}\n");
-  }
-  for (  final Entry<Actions.Type,List<ActionEntry>> entry : actions.entrySet()) {
-    final List<ActionEntry> actionList=entry.getValue();
-    final Actions.Type type=entry.getKey();
-    if (!actionList.isEmpty()) {
-      src.append("\n\t@Override\n");
-      src.append("\tpublic boolean ");
-      src.append(type.getMethod());
-      src.append("(SecurityContext securityContext, ErrorBuffer errorBuffer) throws FrameworkException {\n\n");
-      src.append("\t\tboolean error = false;\n\n");
-      for (      final ActionEntry action : actionList) {
-        if (action.runOnError()) {
-          src.append("\t\terror |= ").append(action.getSource()).append(";\n");
-        }
- else {
-          src.append("\t\tif (!error) {\n");
-          src.append("\t\t\terror |= ").append(action.getSource()).append(";\n");
-          src.append("\t\t}\n");
-        }
-      }
-      src.append("\t\terror |= !super.");
-      src.append(type.getMethod());
-      src.append("(securityContext, errorBuffer);\n");
-      src.append("\n\t\treturn !error;\n");
-      src.append("\t}\n");
-    }
-  }
+  formatValidators(src,validators);
+  formatSaveActions(src,saveActions);
   src.append("}\n");
   return src.toString();
 }

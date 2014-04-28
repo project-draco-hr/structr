@@ -43,6 +43,9 @@
     }
     if (this.hasDataForKey(part)) {
       _data=this.getDataNode(part);
+      if (parts.length == 1) {
+        return _data;
+      }
       continue;
     }
     if ("request".equals(part)) {
@@ -63,6 +66,9 @@
       Principal me=(Principal)securityContext.getUser(false);
       if (me != null) {
         _data=me;
+        if (parts.length == 1) {
+          return _data;
+        }
         continue;
       }
     }
@@ -83,36 +89,57 @@
         GraphObject detailsObject=this.getDetailsDataObject();
         if (detailsObject != null) {
           _data=detailsObject;
+          if (parts.length == 1) {
+            return _data;
+          }
           continue;
         }
       }
       if ("this".equals(part)) {
         _data=this.getDataObject();
+        if (parts.length == 1) {
+          return _data;
+        }
         continue;
       }
       if ("element".equals(part)) {
         _data=entity;
+        if (parts.length == 1) {
+          return _data;
+        }
         continue;
       }
       if ("page".equals(part)) {
         _data=_page;
+        if (parts.length == 1) {
+          return _data;
+        }
         continue;
       }
       if ("link".equals(part)) {
         ResourceLink rel=entity.getOutgoingRelationship(ResourceLink.class);
         if (rel != null) {
           _data=rel.getTargetNode();
+          if (parts.length == 1) {
+            return _data;
+          }
           continue;
         }
       }
       if ("parent".equals(part)) {
         _data=(DOMNode)((DOMNode)entity).getParentNode();
+        if (parts.length == 1) {
+          return _data;
+        }
         continue;
       }
       if ("owner".equals(part)) {
         Ownership rel=entity.getIncomingRelationship(PrincipalOwnsNode.class);
         if (rel != null) {
           _data=rel.getSourceNode();
+          if (parts.length == 1) {
+            return _data;
+          }
         }
         continue;
       }

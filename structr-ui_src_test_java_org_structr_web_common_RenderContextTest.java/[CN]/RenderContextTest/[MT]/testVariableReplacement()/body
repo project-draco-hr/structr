@@ -70,6 +70,9 @@
     assertNull(p1.replaceVariables(securityContext,ctx,"${null}"));
     assertEquals("Invalid replacement result","/testpage?" + page.getUuid(),p1.replaceVariables(securityContext,ctx,"/${page.name}?${page.id}"));
     assertEquals("Invalid replacement result","/testpage?" + page.getUuid(),a.replaceVariables(securityContext,ctx,"/${link.name}?${link.id}"));
+    assertEquals("Invalid replacement result",page.getUuid(),a.replaceVariables(securityContext,ctx,"${get(find('Page', 'name', 'testpage'), 'id')}"));
+    assertEquals("Invalid replacement result",a.getUuid(),a.replaceVariables(securityContext,ctx,"${get(find('A'), 'id')}"));
+    assertEquals("Invalid replacement result",AbstractNode.ERROR_MESSAGE_GET_ENTITY,a.replaceVariables(securityContext,ctx,"${get(find('P'), 'id')}"));
   }
  catch (  FrameworkException fex) {
     fail("Unexpected exception");

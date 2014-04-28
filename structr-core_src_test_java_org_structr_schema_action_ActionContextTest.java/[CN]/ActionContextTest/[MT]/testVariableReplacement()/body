@@ -28,6 +28,7 @@
     testOne.setProperty(TestOne.anInt,1);
     testOne.setProperty(TestOne.aString,"String");
     testOne.setProperty(TestOne.anotherString,"{\n\ttest: test,\n\tnum: 3\n}");
+    testOne.setProperty(TestOne.replaceString,"${this.name}");
     testOne.setProperty(TestOne.aLong,235242522552L);
     testOne.setProperty(TestOne.aDouble,2.234);
     testOne.setProperty(TestOne.aDate,now);
@@ -444,6 +445,7 @@
     assertEquals("Invalid replacement result","doc_sections/" + testOne.getUuid() + "/childSections?sort=pos",testOne.replaceVariables(securityContext,ctx,"doc_sections/${this.id}/childSections?sort=pos"));
     assertEquals("Invalid replacement result","A Nice Little Name For My Test Object",testOne.replaceVariables(securityContext,ctx,"${titleize(this.name, '-')}"));
     assertEquals("Invalid replacement result","STRINGtrueFALSE",testOne.replaceVariables(securityContext,ctx,"${upper(this.aString)}${lower(true)}${upper(false)}"));
+    assertEquals("Invalid replace() result","A-nice-little-name-for-my-test-object",testOne.replaceVariables(securityContext,ctx,"${replace(this.replaceString, this)}"));
   }
  catch (  FrameworkException fex) {
     fail("Unexpected exception");

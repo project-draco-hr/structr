@@ -4,7 +4,13 @@
     return ((Number)source).intValue();
   }
   if (source instanceof String && StringUtils.isNotBlank((String)source)) {
-    return Double.valueOf(source.toString()).intValue();
+    try {
+      return Double.valueOf(source.toString()).intValue();
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"Unable to convert {0} to Integer.",source);
+      throw new FrameworkException(declaringClass.getSimpleName(),new NumberToken(IntProperty.this));
+    }
   }
   return null;
 }

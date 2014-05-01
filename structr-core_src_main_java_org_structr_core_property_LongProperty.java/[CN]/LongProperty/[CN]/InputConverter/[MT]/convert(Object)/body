@@ -4,7 +4,13 @@
     return ((Number)source).longValue();
   }
   if (source instanceof String && StringUtils.isNotBlank((String)source)) {
-    return Long.parseLong(source.toString());
+    try {
+      return Long.valueOf(source.toString());
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"Unable to convert {0} to Long.",source);
+      throw new FrameworkException(declaringClass.getSimpleName(),new NumberToken(LongProperty.this));
+    }
   }
   return null;
 }

@@ -23,7 +23,7 @@
       mainClass=Class.forName(mainClassName);
     }
  catch (    ClassNotFoundException ex) {
-      logger.log(Level.WARNING,"Did not found class for main class from config " + mainClassName,ex);
+      logger.log(Level.WARNING,"Did not find class for main class from config " + mainClassName,ex);
     }
   }
   String sourceJarName=(mainClass != null ? mainClass : getClass()).getProtectionDomain().getCodeSource().getLocation().toString();
@@ -117,7 +117,7 @@
       }
     }
     FilterHolder loggingFilter=new FilterHolder(TeeFilter.class);
-    servletContext.addFilter(loggingFilter,"/*",EnumSet.of(DispatcherType.REQUEST,DispatcherType.FORWARD));
+    servletContext.addFilter(loggingFilter,"/*",EnumSet.of(DispatcherType.REQUEST,DispatcherType.ASYNC));
     loggingFilter.setInitParameter("includes","");
     RequestLogHandler requestLogHandler=new RequestLogHandler();
     String logPath=basePath + "/logs";

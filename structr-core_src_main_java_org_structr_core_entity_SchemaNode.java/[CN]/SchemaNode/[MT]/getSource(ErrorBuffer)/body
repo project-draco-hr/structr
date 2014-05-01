@@ -1,13 +1,13 @@
 {
-  final App app=StructrApp.getInstance();
+  final Map<Actions.Type,List<ActionEntry>> saveActions=new EnumMap<>(Actions.Type.class);
   final Map<String,Set<String>> viewProperties=new LinkedHashMap<>();
+  final Set<String> existingPropertyNames=new LinkedHashSet<>();
   final Set<String> validators=new LinkedHashSet<>();
   final Set<String> enums=new LinkedHashSet<>();
   final StringBuilder src=new StringBuilder();
   final Class baseType=AbstractNode.class;
   final String _className=getProperty(name);
   final String _extendsClass=getProperty(extendsClass);
-  final Set<String> existingPropertyNames=new LinkedHashSet<>();
   src.append("package org.structr.dynamic;\n\n");
   SchemaHelper.formatImportStatements(src,baseType);
   String superClass=_extendsClass != null ? _extendsClass : baseType.getSimpleName();
@@ -22,7 +22,7 @@
     src.append(inRel.getPropertySource(propertyName,false));
     addPropertyNameToViews(propertyName,viewProperties);
   }
-  src.append(SchemaHelper.extractProperties(this,validators,enums,viewProperties,errorBuffer));
+  src.append(SchemaHelper.extractProperties(this,validators,enums,viewProperties,saveActions,errorBuffer));
   for (  final String enumDefition : enums) {
     src.append(enumDefition);
   }
@@ -34,16 +34,8 @@
       SchemaHelper.formatView(src,_className,viewName,viewName,view);
     }
   }
-  if (!validators.isEmpty()) {
-    src.append("\n\t@Override\n");
-    src.append("\tpublic boolean isValid(final ErrorBuffer errorBuffer) {\n\n");
-    src.append("\t\tboolean error = false;\n\n");
-    for (    final String validator : validators) {
-      src.append("\t\terror |= ").append(validator).append(";\n");
-    }
-    src.append("\n\t\treturn !error;\n");
-    src.append("\t}\n");
-  }
+  formatValidators(src,validators);
+  formatSaveActions(src,saveActions);
   src.append("}\n");
   return src.toString();
 }

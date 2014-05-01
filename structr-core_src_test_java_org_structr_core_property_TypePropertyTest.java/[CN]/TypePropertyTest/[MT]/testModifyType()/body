@@ -1,0 +1,28 @@
+{
+  final Set<Label> labelsBefore=new LinkedHashSet<>();
+  final Set<Label> labelsAfter=new LinkedHashSet<>();
+  String id=null;
+  labelsBefore.add(DynamicLabel.label(AccessControllable.class.getSimpleName()));
+  labelsBefore.add(DynamicLabel.label(TestFour.class.getSimpleName()));
+  labelsAfter.add(DynamicLabel.label(AccessControllable.class.getSimpleName()));
+  labelsAfter.add(DynamicLabel.label(TestFive.class.getSimpleName()));
+  try (final Tx tx=app.tx()){
+    final TestFour testEntity=createTestNode(TestFour.class);
+    assertNotNull(testEntity);
+    assertTrue(labelsBefore.containsAll(Iterables.toSet(testEntity.getNode().getLabels())));
+    id=testEntity.getUuid();
+    testEntity.setProperty(GraphObject.type,TestFive.class.getSimpleName());
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fail("Unexpected exception");
+  }
+  try (final Tx tx=app.tx()){
+    final TestFive testEntity=app.get(TestFive.class,id);
+    assertNotNull(testEntity);
+    assertTrue(labelsAfter.containsAll(Iterables.toSet(testEntity.getNode().getLabels())));
+  }
+ catch (  FrameworkException fex) {
+    fail("Unexpected exception");
+  }
+}

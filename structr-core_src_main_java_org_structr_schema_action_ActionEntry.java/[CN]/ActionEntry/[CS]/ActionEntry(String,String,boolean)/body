@@ -1,0 +1,34 @@
+{
+  int positionOffset=0;
+  if (sourceName.startsWith("___onSave")) {
+    this.type=Actions.Type.Save;
+    positionOffset=9;
+  }
+ else   if (sourceName.startsWith("___onCreate")) {
+    this.type=Actions.Type.Create;
+    positionOffset=11;
+  }
+ else   if (sourceName.startsWith("___onDelete")) {
+    this.type=Actions.Type.Delete;
+    positionOffset=11;
+  }
+ else {
+    this.type=Actions.Type.Custom;
+    positionOffset=3;
+  }
+  if (type.equals(Actions.Type.Custom)) {
+    this.name=sourceName.substring(positionOffset);
+  }
+ else {
+    final String positionString=sourceName.substring(positionOffset);
+    if (!positionString.isEmpty()) {
+      try {
+        position=Integer.parseInt(positionString);
+      }
+ catch (      Throwable t) {
+      }
+    }
+  }
+  this.call=value.trim();
+  this.runOnError=runOnError;
+}

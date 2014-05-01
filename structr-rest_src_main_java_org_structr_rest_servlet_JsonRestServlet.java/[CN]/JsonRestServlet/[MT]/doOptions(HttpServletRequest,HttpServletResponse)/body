@@ -4,15 +4,15 @@
   RestMethodResult result=null;
   Resource resource=null;
   try {
+    request.setCharacterEncoding("UTF-8");
+    response.setCharacterEncoding("UTF-8");
+    response.setContentType("application/json; charset=utf-8");
     try (final Tx tx=StructrApp.getInstance().tx()){
       authenticator=config.getAuthenticator();
       securityContext=authenticator.initializeAndExamineRequest(request,response);
       tx.success();
     }
      final App app=StructrApp.getInstance(securityContext);
-    request.setCharacterEncoding("UTF-8");
-    response.setCharacterEncoding("UTF-8");
-    response.setContentType("application/json; charset=UTF-8");
     try (final Tx tx=app.tx()){
       resource=ResourceHelper.applyViewTransformation(request,securityContext,ResourceHelper.optimizeNestedResourceChain(ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,config.getDefaultIdProperty()),config.getDefaultIdProperty()),propertyView);
       authenticator.checkResourceAccess(request,resource.getResourceSignature(),propertyView.get(securityContext));
@@ -63,6 +63,8 @@ catch (  Throwable t) {
  catch (    Throwable t) {
       logger.log(Level.WARNING,"Unable to flush and close response: {0}",t.getMessage());
     }
-    securityContext.cleanUp();
+    if (securityContext != null) {
+      securityContext.cleanUp();
+    }
   }
 }

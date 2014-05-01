@@ -1,14 +1,43 @@
 {
   final SecurityContext securityContext=getWebSocket().getSecurityContext();
   final String searchString=(String)webSocketData.getNodeData().get("searchString");
+  final String restQuery=(String)webSocketData.getNodeData().get("restQuery");
+  final String cypherQuery=(String)webSocketData.getNodeData().get("cypherQuery");
+  final String paramString=(String)webSocketData.getNodeData().get("cypherParams");
   final String typeString=(String)webSocketData.getNodeData().get("type");
   Class type=null;
   if (typeString != null) {
     type=SchemaHelper.getEntityClassForRawType(typeString);
   }
   if (searchString == null) {
-    getWebSocket().send(MessageBuilder.status().code(204).message("Empty search string").build(),true);
-    return;
+    if (cypherQuery != null) {
+      try {
+        Map<String,Object> obj=null;
+        if (StringUtils.isNoneBlank(paramString)) {
+          obj=new Gson().fromJson(paramString,Map.class);
+        }
+        final List<GraphObject> result=StructrApp.getInstance(securityContext).cypher(cypherQuery,obj);
+        webSocketData.setResult(result);
+        getWebSocket().send(webSocketData,true);
+        return;
+      }
+ catch (      Exception ex) {
+        logger.log(Level.WARNING,"Exception occured",ex);
+        getWebSocket().send(MessageBuilder.status().code(400).message(ex.getMessage()).build(),true);
+      }
+    }
+    if (restQuery != null) {
+      final RestDataSource restDataSource=new RestDataSource();
+      try {
+        securityContext.setRequest(getWebSocket().getRequest());
+        webSocketData.setResult(restDataSource.getData(securityContext,null,restQuery));
+        getWebSocket().send(webSocketData,true);
+        return;
+      }
+ catch (      FrameworkException ex) {
+        Logger.getLogger(SearchCommand.class.getName()).log(Level.SEVERE,null,ex);
+      }
+    }
   }
   final String sortOrder=webSocketData.getSortOrder();
   final String sortKey=webSocketData.getSortKey();
@@ -19,7 +48,7 @@
     query.andType(type);
   }
   try {
-    Result result=query.getResult();
+    final Result result=query.getResult();
     webSocketData.setResult(result.getResults());
     getWebSocket().send(webSocketData,true);
   }

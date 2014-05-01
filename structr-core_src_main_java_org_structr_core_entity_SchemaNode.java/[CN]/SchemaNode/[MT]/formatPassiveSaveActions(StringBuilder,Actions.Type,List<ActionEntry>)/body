@@ -1,0 +1,22 @@
+{
+  src.append("\n\t@Override\n");
+  src.append("\tpublic boolean ");
+  src.append(type.getMethod());
+  src.append("(SecurityContext securityContext, ErrorBuffer errorBuffer) throws FrameworkException {\n\n");
+  src.append("\t\tboolean error = false;\n\n");
+  for (  final ActionEntry action : actionList) {
+    if (action.runOnError()) {
+      src.append("\t\terror |= ").append(action.getSource()).append(";\n");
+    }
+ else {
+      src.append("\t\tif (!error) {\n");
+      src.append("\t\t\terror |= ").append(action.getSource()).append(";\n");
+      src.append("\t\t}\n");
+    }
+  }
+  src.append("\t\terror |= !super.");
+  src.append(type.getMethod());
+  src.append("(securityContext, errorBuffer);\n");
+  src.append("\n\t\treturn !error;\n");
+  src.append("\t}\n");
+}

@@ -1,10 +1,26 @@
 {
   super.setProperty(securityContext,obj,value);
   if (obj instanceof NodeInterface) {
+    final Class type=StructrApp.getConfiguration().getNodeEntityClass(value);
+    final Set<Label> intersection=new LinkedHashSet<>();
+    final Set<Label> toRemove=new LinkedHashSet<>();
+    final Set<Label> toAdd=new LinkedHashSet<>();
     final Node dbNode=((NodeInterface)obj).getNode();
-    final Class type=obj.getClass();
+    for (    final Label label : dbNode.getLabels()) {
+      toRemove.add(label);
+    }
     for (    final Class supertype : SearchCommand.typeAndAllSupertypes(type)) {
-      dbNode.addLabel(DynamicLabel.label(supertype.getSimpleName()));
+      toAdd.add(DynamicLabel.label(supertype.getSimpleName()));
+    }
+    intersection.addAll(toAdd);
+    intersection.retainAll(toRemove);
+    toAdd.removeAll(intersection);
+    toRemove.removeAll(intersection);
+    for (    final Label remove : toRemove) {
+      dbNode.removeLabel(remove);
+    }
+    for (    final Label add : toAdd) {
+      dbNode.addLabel(add);
     }
   }
 }

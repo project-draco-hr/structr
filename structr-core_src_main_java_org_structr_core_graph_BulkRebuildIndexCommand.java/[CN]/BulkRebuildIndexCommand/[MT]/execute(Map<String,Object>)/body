@@ -28,6 +28,14 @@
     }
     long count=bulkGraphOperation(securityContext,nodes,1000,"RebuildNodeIndex",new BulkGraphOperation<AbstractNode>(){
       @Override public void handleGraphObject(      SecurityContext securityContext,      AbstractNode node){
+        try {
+          final String type=node.getProperty(NodeInterface.type);
+          node.setProperty(NodeInterface.type,null);
+          node.setProperty(NodeInterface.type,type);
+        }
+ catch (        FrameworkException ex) {
+          ex.printStackTrace();
+        }
         node.updateInIndex();
       }
       @Override public void handleThrowable(      SecurityContext securityContext,      Throwable t,      AbstractNode node){

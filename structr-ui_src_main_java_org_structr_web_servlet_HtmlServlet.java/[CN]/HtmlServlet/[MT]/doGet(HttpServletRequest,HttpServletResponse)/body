@@ -38,9 +38,6 @@
         logger.log(Level.FINE,"No path supplied, trying to find index page");
       }
  else {
-        if (checkGetSessionId(request,response,path)) {
-          return;
-        }
         if (rootElement == null) {
           rootElement=findPage(request,path);
         }
@@ -91,6 +88,9 @@
  else {
           rootElement=notFound(response,securityContext);
         }
+      }
+      if (rootElement == null) {
+        return;
       }
       logger.log(Level.FINE,"Page found in {0} seconds",decimalFormat.format((System.nanoTime() - start) / 1000000000.0));
       if (EditMode.DATA.equals(edit) || dontCache) {

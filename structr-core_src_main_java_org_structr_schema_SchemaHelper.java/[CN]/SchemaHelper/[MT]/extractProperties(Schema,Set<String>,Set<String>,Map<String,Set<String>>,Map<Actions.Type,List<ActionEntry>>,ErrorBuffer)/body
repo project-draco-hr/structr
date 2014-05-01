@@ -1,0 +1,71 @@
+{
+  final PropertyContainer propertyContainer=entity.getPropertyContainer();
+  final StringBuilder src=new StringBuilder();
+  for (  String propertyName : SchemaHelper.getProperties(propertyContainer)) {
+    if (!propertyName.startsWith("__") && propertyContainer.hasProperty(propertyName)) {
+      String rawType=propertyContainer.getProperty(propertyName).toString();
+      String dbName=null;
+      if (rawType.contains("|")) {
+        dbName=rawType.substring(0,rawType.indexOf("|"));
+        rawType=rawType.substring(rawType.indexOf("|") + 1);
+      }
+      boolean notNull=false;
+      if (rawType.startsWith("+")) {
+        rawType=rawType.substring(1);
+        notNull=true;
+      }
+      String defaultValue=null;
+      if (rawType.contains(":")) {
+        defaultValue=rawType.substring(rawType.indexOf(":") + 1);
+        rawType=rawType.substring(0,rawType.indexOf(":"));
+      }
+      PropertyParser parser=SchemaHelper.getParserForRawValue(errorBuffer,entity.getClassName(),propertyName,dbName,rawType,notNull,defaultValue);
+      if (parser != null) {
+        src.append(parser.getPropertySource(errorBuffer));
+        validators.addAll(parser.getGlobalValidators());
+        enums.addAll(parser.getEnumDefinitions());
+        addPropertyToView(PropertyView.Public,propertyName.substring(1),views);
+        addPropertyToView(PropertyView.Ui,propertyName.substring(1),views);
+      }
+    }
+  }
+  for (  final String rawViewName : getViews(propertyContainer)) {
+    if (!rawViewName.startsWith("___") && propertyContainer.hasProperty(rawViewName)) {
+      final String value=propertyContainer.getProperty(rawViewName).toString();
+      final String[] parts=value.split("[,\\s]+");
+      final String viewName=rawViewName.substring(2);
+      Set<String> view=views.get(viewName);
+      if (view == null) {
+        view=new LinkedHashSet<>();
+        views.put(viewName,view);
+      }
+ else {
+        view.clear();
+      }
+      for (int i=0; i < parts.length; i++) {
+        view.add(parts[i].trim());
+      }
+    }
+  }
+  for (  final String rawActionName : getActions(propertyContainer)) {
+    if (propertyContainer.hasProperty(rawActionName)) {
+      final String value=propertyContainer.getProperty(rawActionName).toString();
+      final String[] parts1=value.split("[;]+");
+      final int parts1Length=parts1.length;
+      for (int i=0; i < parts1Length; i++) {
+        final String[] parts2=parts1[i].split("\\&\\&");
+        final int parts2Length=parts2.length;
+        for (int j=0; j < parts2Length; j++) {
+          final ActionEntry entry=new ActionEntry(rawActionName,parts2[j],j == 0);
+          List<ActionEntry> actionList=actions.get(entry.getType());
+          if (actionList == null) {
+            actionList=new LinkedList<>();
+            actions.put(entry.getType(),actionList);
+          }
+          actionList.add(entry);
+        }
+      }
+    }
+  }
+  return src.toString();
+}

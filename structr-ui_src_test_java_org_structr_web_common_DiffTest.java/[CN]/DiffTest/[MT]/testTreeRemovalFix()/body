@@ -1,0 +1,33 @@
+{
+  final String comment="<!-- comment --->";
+  testDiff("<html><head><title>Title</title></head><body><div>" + comment + "<div>"+ comment+ "<div>test</div>"+ comment+ "<div></div></div></body></html>",new org.neo4j.helpers.Function<String,String>(){
+    @Override public String apply(    String from){
+      String modified=from;
+      modified=modified.replace(comment,"");
+      return modified;
+    }
+  }
+);
+  try (final Tx tx=app.tx()){
+    final Page page=app.nodeQuery(Page.class).andName("test").getFirst();
+    assertNotNull(page);
+    final NodeList nodes=page.getElementsByTagName("div");
+    final List<Div> divs=collectNodes(nodes,Div.class);
+    assertEquals("Wrong number of divs returned from node query",4,divs.size());
+    final Div firstDiv=divs.get(0);
+    assertEquals("Wrong number of children",1,firstDiv.getChildRelationships().size());
+    assertNull("Node should not have siblings",firstDiv.getNextSibling());
+    final Div secondDiv=divs.get(1);
+    assertEquals("Wrong number of children",2,secondDiv.getChildRelationships().size());
+    assertNull("Node should not have siblings",secondDiv.getNextSibling());
+    final Div thirdDiv=divs.get(2);
+    assertEquals("Wrong number of children",1,thirdDiv.getChildRelationships().size());
+    assertNotNull("Node should have one sibling",thirdDiv.getNextSibling());
+    final Div fourthDiv=divs.get(3);
+    assertEquals("Wrong number of children",0,fourthDiv.getChildRelationships().size());
+    assertNull("Node should not have siblings",fourthDiv.getNextSibling());
+  }
+ catch (  FrameworkException fex) {
+    fail("Unexpected exception");
+  }
+}

@@ -6,13 +6,13 @@
     final DOMElement node=(DOMElement)getDOMNode(id);
     try {
       DOMElement clonedNode=(DOMElement)node.cloneNode(false);
+      clonedNode.setProperty(DOMElement.syncedNodes,null);
       moveChildNodes(node,clonedNode);
       ShadowDocument hiddenDoc=getOrCreateHiddenDocument();
       clonedNode.setProperty(DOMNode.ownerDocument,hiddenDoc);
       for (      DOMNode child : DOMNode.getAllChildNodes(clonedNode)) {
         child.setProperty((DOMNode.ownerDocument),hiddenDoc);
       }
-      app.create(node,clonedNode,Sync.class);
       app.create(clonedNode,node,Sync.class);
     }
  catch (    FrameworkException ex) {

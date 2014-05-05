@@ -20,9 +20,9 @@
   final DOMElement node=(DOMElement)getDOMNode(id);
   try {
     DOMElement clonedNode=(DOMElement)node.cloneNode(false);
+    clonedNode.setProperty(DOMElement.syncedNodes,null);
     parentNode.appendChild(clonedNode);
     app.create(node,clonedNode,Sync.class);
-    app.create(clonedNode,node,Sync.class);
   }
  catch (  FrameworkException ex) {
     getWebSocket().send(MessageBuilder.status().code(422).message(ex.getMessage()).build(),true);

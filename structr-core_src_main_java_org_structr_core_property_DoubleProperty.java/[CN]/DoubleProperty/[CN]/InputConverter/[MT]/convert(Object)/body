@@ -4,7 +4,13 @@
     return ((Number)source).doubleValue();
   }
   if (source instanceof String && StringUtils.isNotBlank((String)source)) {
-    return Double.parseDouble(source.toString());
+    try {
+      return Double.valueOf(source.toString());
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"Unable to convert {0} to Double.",source);
+      throw new FrameworkException(declaringClass.getSimpleName(),new NumberToken(DoubleProperty.this));
+    }
   }
   return null;
 }

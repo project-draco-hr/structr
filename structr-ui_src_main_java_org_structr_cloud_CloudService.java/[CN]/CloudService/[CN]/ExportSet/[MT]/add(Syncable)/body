@@ -3,14 +3,16 @@
     if (nodes.add(data.getSyncNode())) {
       size++;
       if (data.getSyncNode() instanceof File) {
-        final File file=(File)data.getSyncNode();
         size+=(((File)data.getSyncNode()).getSize().intValue() / CloudService.CHUNK_SIZE) + 2;
       }
+      return true;
     }
   }
  else {
     if (relationships.add(data.getSyncRelationship())) {
       size++;
+      return true;
     }
   }
+  return false;
 }

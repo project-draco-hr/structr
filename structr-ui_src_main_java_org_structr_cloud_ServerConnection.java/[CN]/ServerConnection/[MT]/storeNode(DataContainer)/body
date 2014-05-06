@@ -1,0 +1,13 @@
+{
+  try {
+    final NodeDataContainer receivedNodeData=(NodeDataContainer)receivedData;
+    final PropertyMap properties=PropertyMap.databaseTypeToJavaType(SecurityContext.getSuperUserInstance(),receivedNodeData.getType(),receivedNodeData.getProperties());
+    final NodeInterface newNode=app.create(receivedNodeData.getType(),properties);
+    idMap.put(receivedNodeData.getSourceNodeId(),newNode.getUuid());
+    return newNode;
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+  }
+  return null;
+}

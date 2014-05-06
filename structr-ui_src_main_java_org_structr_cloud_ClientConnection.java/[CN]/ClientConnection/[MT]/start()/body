@@ -1,0 +1,13 @@
+{
+  if (socket.isConnected() && !socket.isClosed()) {
+    try {
+      sender=new Sender(new ObjectOutputStream(socket.getOutputStream()));
+      receiver=new Receiver(new ObjectInputStream(socket.getInputStream()));
+      receiver.start();
+      sender.start();
+    }
+ catch (    IOException ioex) {
+      ioex.printStackTrace();
+    }
+  }
+}

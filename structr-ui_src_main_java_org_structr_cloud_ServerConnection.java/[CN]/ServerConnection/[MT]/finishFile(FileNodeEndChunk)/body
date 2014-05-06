@@ -1,0 +1,25 @@
+{
+  final FileNodeDataContainer container=fileMap.get(endChunk.getContainerId());
+  if (container == null) {
+    logger.log(Level.WARNING,"Received file end chunk for ID {0} without file, this should not happen!",endChunk.getContainerId());
+  }
+ else {
+    container.flushAndCloseTemporaryFile();
+    final NodeInterface newNode=storeNode(container);
+    final String filesPath=StructrApp.getConfigurationValue(Services.FILES_PATH);
+    final String relativePath=newNode.getProperty(File.relativeFilePath);
+    String newPath=null;
+    if (filesPath.endsWith("/")) {
+      newPath=filesPath + relativePath;
+    }
+ else {
+      newPath=filesPath + "/" + relativePath;
+    }
+    try {
+      container.persistTemporaryFile(newPath);
+    }
+ catch (    Throwable t) {
+      t.printStackTrace();
+    }
+  }
+}

@@ -1,0 +1,82 @@
+{
+  final ExportContext context=new ExportContext(listener,4);
+  ClientConnection client=null;
+  ExportSet exportSet=null;
+  try (final Tx tx=StructrApp.getInstance().tx()){
+    client=new ClientConnection(new Socket(remoteHost,remoteTcpPort));
+    if (recursive) {
+      exportSet=getExportSet((Syncable)sourceNode,SyncState.all());
+      context.increaseTotal(exportSet.getTotalSize());
+    }
+    context.transmissionStarted();
+    client.start();
+    client.send(new BeginPacket());
+    context.progress();
+    final Message ack=client.waitForMessage();
+    if (!(ack instanceof AckPacket)) {
+      return;
+    }
+    client.send(new AuthenticationContainer(userName));
+    context.progress();
+    final Message authMessage=client.waitForMessage();
+    if (authMessage instanceof AuthenticationContainer) {
+      client.send(new PushNodeRequestContainer(remoteTargetNodeId));
+      context.progress();
+      client.waitForMessage();
+      if (recursive && exportSet != null) {
+        final Set<NodeInterface> nodes=exportSet.getNodes();
+        for (        final NodeInterface n : nodes) {
+          if (n instanceof File) {
+            sendFile(context,client,(File)n,CloudService.CHUNK_SIZE);
+          }
+ else {
+            client.send(new NodeDataContainer(n));
+            context.progress();
+            client.waitForMessage();
+          }
+        }
+        Set<RelationshipInterface> rels=exportSet.getRelationships();
+        for (        RelationshipInterface r : rels) {
+          if (nodes.contains(r.getSourceNode()) && nodes.contains(r.getTargetNode())) {
+            client.send(new RelationshipDataContainer(r));
+            context.progress();
+            client.waitForMessage();
+          }
+        }
+      }
+ else {
+        if (sourceNode instanceof File) {
+          sendFile(context,client,(File)sourceNode,CloudService.CHUNK_SIZE);
+        }
+ else {
+          if (sourceNode.isNode()) {
+            client.send(new NodeDataContainer(sourceNode.getSyncNode()));
+            context.progress();
+            client.waitForMessage();
+          }
+ else {
+            client.send(new RelationshipDataContainer(sourceNode.getSyncRelationship()));
+            context.progress();
+            client.waitForMessage();
+          }
+        }
+      }
+    }
+ else {
+      if (context != null) {
+        context.transmissionAborted();
+      }
+    }
+    client.send(new EndPacket());
+    context.progress();
+    client.waitForMessage();
+    client.waitForClose(2000);
+    client.shutdown();
+    if (context != null) {
+      context.transmissionFinished();
+    }
+  }
+ catch (  Throwable t) {
+    t.printStackTrace();
+  }
+}

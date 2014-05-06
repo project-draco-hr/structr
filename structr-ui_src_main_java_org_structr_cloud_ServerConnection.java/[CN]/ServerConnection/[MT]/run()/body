@@ -1,0 +1,18 @@
+{
+  while (receiver.isConnected() && sender.isConnected()) {
+    final Message request=receiver.receive();
+    if (request != null) {
+      final Message response=request.process(this);
+      if (response != null) {
+        sender.send(response);
+      }
+    }
+    try {
+      Thread.sleep(1);
+    }
+ catch (    Throwable t) {
+      t.printStackTrace();
+    }
+  }
+  shutdown();
+}

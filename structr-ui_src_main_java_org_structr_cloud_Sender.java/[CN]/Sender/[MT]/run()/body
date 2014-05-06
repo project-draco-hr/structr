@@ -1,0 +1,15 @@
+{
+  connected=true;
+  while (connected) {
+    try {
+      final Message message=outputQueue.poll();
+      if (message != null) {
+        outputStream.writeObject(message);
+        outputStream.flush();
+      }
+    }
+ catch (    IOException ioex) {
+      connected=false;
+    }
+  }
+}

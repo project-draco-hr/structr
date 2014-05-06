@@ -1,14 +1,17 @@
 {
   if (socket.isConnected() && !socket.isClosed()) {
     try {
-      receiver=new Receiver(new ObjectInputStream(socket.getInputStream()));
-      sender=new Sender(new ObjectOutputStream(socket.getOutputStream()));
+      decrypter=Cipher.getInstance("RC4");
+      encrypter=Cipher.getInstance("RC4");
+      setEncryptionKey("StructrInitialEncryptionKey");
+      sender=new Sender(socket,new ObjectOutputStream(new GZIPOutputStream(new CipherOutputStream(socket.getOutputStream(),encrypter),true)));
+      receiver=new Receiver(socket,new ObjectInputStream(new GZIPInputStream(new CipherInputStream(socket.getInputStream(),decrypter))));
       receiver.start();
       sender.start();
       super.start();
     }
- catch (    IOException ioex) {
-      ioex.printStackTrace();
+ catch (    Throwable t) {
+      t.printStackTrace();
     }
   }
 }

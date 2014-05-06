@@ -18,6 +18,8 @@
     context.progress();
     final Message authMessage=client.waitForMessage();
     if (authMessage instanceof AuthenticationContainer) {
+      final AuthenticationContainer auth=(AuthenticationContainer)authMessage;
+      client.setEncryptionKey(auth.getEncryptionKey(password));
       client.send(new PushNodeRequestContainer(remoteTargetNodeId));
       context.progress();
       client.waitForMessage();
@@ -63,7 +65,7 @@
       context.transmissionFinished();
     }
   }
- catch (  IOException ioex) {
+ catch (  IOException|InvalidKeyException ioex) {
     throw new FrameworkException(504,"Unable to connect to remote server: " + ioex.getMessage());
   }
  finally {

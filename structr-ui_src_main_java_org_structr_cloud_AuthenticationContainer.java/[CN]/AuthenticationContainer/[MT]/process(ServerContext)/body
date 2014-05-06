@@ -1,5 +1,8 @@
 {
-  if (context.authenticateUser(userName)) {
+  final Principal user=context.authenticateUser(userName);
+  if (user != null) {
+    this.encryptionKey=user.getEncryptedPassword();
+    this.salt=user.getProperty(Principal.salt);
     return this;
   }
   context.endTransaction();

@@ -1,17 +1,14 @@
 {
-  connected=true;
-  while (connected) {
+  while (isConnected()) {
     try {
       final Message message=(Message)inputStream.readObject();
       if (message != null) {
         inputQueue.add(message);
       }
     }
- catch (    ClassNotFoundException cnfex) {
-      cnfex.printStackTrace();
-    }
-catch (    IOException ioex) {
-      connected=false;
+ catch (    Throwable t) {
+      errorMessage=t;
+      finish();
     }
   }
 }

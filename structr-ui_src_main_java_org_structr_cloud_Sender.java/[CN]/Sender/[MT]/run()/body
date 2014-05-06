@@ -1,6 +1,5 @@
 {
-  connected=true;
-  while (connected) {
+  while (isConnected()) {
     try {
       final Message message=outputQueue.poll();
       if (message != null) {
@@ -9,7 +8,8 @@
       }
     }
  catch (    IOException ioex) {
-      connected=false;
+      errorMessage=ioex;
+      finish();
     }
   }
 }

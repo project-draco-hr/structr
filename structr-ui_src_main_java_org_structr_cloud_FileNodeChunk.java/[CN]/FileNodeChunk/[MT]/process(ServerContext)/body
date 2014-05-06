@@ -1,4 +1,7 @@
 {
   context.fileChunk(this);
-  return new AckPacket("FileChunk",sequenceNumber);
+  if (((sequenceNumber + 1) % CloudService.LIVE_PACKET_COUNT) == 0) {
+    return new AckPacket("FileChunk",sequenceNumber);
+  }
+  return null;
 }

@@ -10,12 +10,15 @@
       final NodeInterface targetStartNode=(NodeInterface)app.get(targetStartNodeId);
       final NodeInterface targetEndNode=(NodeInterface)app.get(targetEndNodeId);
       final Class relType=receivedRelationshipData.getType();
+      final SecurityContext securityContext=SecurityContext.getSuperUserInstance();
       if (targetStartNode != null && targetEndNode != null) {
-        final GraphObject existingCandidate=app.get(uuid);
-        if (existingCandidate != null && existingCandidate instanceof RelationshipInterface) {
+        final RelationshipInterface existingCandidate=app.relationshipQuery().and(GraphObject.id,uuid).getFirst();
+        final PropertyMap properties=PropertyMap.databaseTypeToJavaType(securityContext,relType,receivedRelationshipData.getProperties());
+        if (existingCandidate != null) {
+          ((Syncable)existingCandidate).updateFrom(properties);
+          return existingCandidate;
         }
  else {
-          final PropertyMap properties=PropertyMap.databaseTypeToJavaType(SecurityContext.getSuperUserInstance(),relType,receivedRelationshipData.getProperties());
           return app.create(targetStartNode,targetEndNode,relType,properties);
         }
       }

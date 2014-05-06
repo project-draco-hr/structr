@@ -1,7 +1,10 @@
 {
   final long abortTime=System.currentTimeMillis() + timeout;
   Message message=null;
-  while (message == null && System.currentTimeMillis() < abortTime) {
+  while (message == null) {
+    if (System.currentTimeMillis() > abortTime) {
+      throw new FrameworkException(504,"Timeout while connecting to remote server.");
+    }
     message=receiver.receive();
     try {
       Thread.sleep(1);

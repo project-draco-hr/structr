@@ -5,7 +5,9 @@
   for (  FileNodeChunk chunk : FileNodeDataContainer.getChunks(file,chunkSize)) {
     client.send(chunk);
     context.progress();
-    client.waitForMessage();
+    if (((chunk.getSequenceNumber() + 1) % LIVE_PACKET_COUNT) == 0) {
+      client.waitForMessage();
+    }
   }
   client.send(new FileNodeEndChunk(container.getSourceNodeId(),container.getFileSize()));
   context.progress();

@@ -6,7 +6,7 @@
     try (final Tx tx=app.tx()){
       final NodeInterface entity=app.nodeQuery().andName(name).getFirst();
       if (entity != null && entity instanceof Syncable) {
-        CloudService.pushNodes(new LoggingListener(),"admin","admin",(Syncable)entity,null,host,54555,true);
+        CloudService.doRemote(new PushTransmission((Syncable)entity,true,"admin","admin",host,54555),new LoggingListener());
       }
     }
    }

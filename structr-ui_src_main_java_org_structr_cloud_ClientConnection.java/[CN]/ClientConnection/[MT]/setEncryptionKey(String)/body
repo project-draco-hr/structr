@@ -1,5 +1,12 @@
 {
-  SecretKeySpec skeySpec=new SecretKeySpec(DigestUtils.sha256(key),"RC4");
-  decrypter.init(Cipher.DECRYPT_MODE,skeySpec);
-  encrypter.init(Cipher.ENCRYPT_MODE,skeySpec);
+  try {
+    final int maxKeyLen=Cipher.getMaxAllowedKeyLength(CloudService.STREAM_CIPHER);
+    SecretKeySpec skeySpec=new SecretKeySpec(CloudService.trimToSize(DigestUtils.sha256(key),maxKeyLen),CloudService.STREAM_CIPHER);
+    logger.log(Level.INFO,"Maximum allowed key size for stream encryption cipher {0}: {1}",new Object[]{CloudService.STREAM_CIPHER,maxKeyLen});
+    decrypter.init(Cipher.DECRYPT_MODE,skeySpec);
+    encrypter.init(Cipher.ENCRYPT_MODE,skeySpec);
+  }
+ catch (  Throwable t) {
+    t.printStackTrace();
+  }
 }

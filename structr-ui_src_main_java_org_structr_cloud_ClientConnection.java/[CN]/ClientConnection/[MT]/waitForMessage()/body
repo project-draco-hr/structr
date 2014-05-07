@@ -2,26 +2,28 @@
   final long abortTime=System.currentTimeMillis() + timeout;
   Message message=null;
   while (message == null) {
-    if (System.currentTimeMillis() > abortTime) {
-      final Throwable error=receiver.getErrorMessage();
-      if (error != null) {
-        if ("Unexpected end of ZLIB input stream".equals(error.getMessage())) {
-          throw new FrameworkException(504,"Wrong user name or password.");
-        }
-        if ("invalid distance too far back".equals(error.getMessage())) {
-          throw new FrameworkException(504,"Transmission failed, please try again.");
-        }
-        throw new FrameworkException(504,error.getMessage());
-      }
- else {
-        throw new FrameworkException(504,"Timeout while connecting to remote server.");
-      }
-    }
     message=receiver.receive();
-    try {
-      Thread.sleep(1);
-    }
- catch (    Throwable t) {
+    if (message == null) {
+      if (System.currentTimeMillis() > abortTime) {
+        final Throwable error=receiver.getErrorMessage();
+        if (error != null) {
+          if ("Unexpected end of ZLIB input stream".equals(error.getMessage())) {
+            throw new FrameworkException(504,"Wrong user name or password.");
+          }
+          if ("invalid distance too far back".equals(error.getMessage())) {
+            throw new FrameworkException(504,"Transmission failed, please try again.");
+          }
+          throw new FrameworkException(504,error.getMessage());
+        }
+ else {
+          throw new FrameworkException(504,"Timeout while connecting to remote server.");
+        }
+      }
+      try {
+        Thread.sleep(1);
+      }
+ catch (      Throwable t) {
+      }
     }
   }
   return message;

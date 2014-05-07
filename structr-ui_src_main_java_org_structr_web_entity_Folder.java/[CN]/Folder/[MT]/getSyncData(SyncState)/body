@@ -1,5 +1,13 @@
 {
   final List<Syncable> data=new LinkedList<>();
+  if (state.hasFlag(SyncState.Flag.Resources)) {
+    data.addAll(getProperty(folders));
+    data.addAll(getProperty(files));
+    data.addAll(getProperty(images));
+    data.addAll(Iterables.toList(getOutgoingRelationships(Folders.class)));
+    data.addAll(Iterables.toList(getOutgoingRelationships(Files.class)));
+    data.addAll(Iterables.toList(getOutgoingRelationships(Images.class)));
+  }
   data.add(getProperty(parent));
   data.add(getIncomingRelationship(Folders.class));
   return data;

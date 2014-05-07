@@ -1,0 +1,50 @@
+{
+  final String userName=transmission.getUserName();
+  final String password=transmission.getPassword();
+  final String remoteHost=transmission.getRemoteHost();
+  final int remoteTcpPort=transmission.getRemotePort();
+  final ExportContext context=new ExportContext(listener,4);
+  ClientConnection client=null;
+  T remoteResult=null;
+  try (final Tx tx=StructrApp.getInstance().tx()){
+    client=new ClientConnection(new Socket(remoteHost,remoteTcpPort));
+    context.increaseTotal(transmission.getTotalSize());
+    context.transmissionStarted();
+    client.start();
+    client.send(new BeginPacket());
+    context.progress();
+    final Message ack=client.waitForMessage();
+    if (!(ack instanceof AckPacket)) {
+      throw new FrameworkException(504,"Unable to connect to remote server: unknown response.");
+    }
+    client.send(new AuthenticationContainer(userName));
+    context.progress();
+    final Message authMessage=client.waitForMessage();
+    if (authMessage instanceof AuthenticationContainer) {
+      final AuthenticationContainer auth=(AuthenticationContainer)authMessage;
+      client.setEncryptionKey(auth.getEncryptionKey(password));
+      remoteResult=transmission.doRemote(client,context);
+    }
+ else {
+      if (context != null) {
+        context.transmissionAborted();
+      }
+    }
+    client.send(new EndPacket());
+    context.progress();
+    client.waitForClose(2000);
+    client.shutdown();
+    if (context != null) {
+      context.transmissionFinished();
+    }
+  }
+ catch (  IOException|InvalidKeyException ioex) {
+    throw new FrameworkException(504,"Unable to connect to remote server: " + ioex.getMessage());
+  }
+ finally {
+    if (client != null) {
+      client.shutdown();
+    }
+  }
+  return remoteResult;
+}

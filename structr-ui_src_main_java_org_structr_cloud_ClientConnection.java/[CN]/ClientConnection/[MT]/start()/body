@@ -1,8 +1,8 @@
 {
   if (socket.isConnected() && !socket.isClosed()) {
     try {
-      decrypter=Cipher.getInstance("RC4");
-      encrypter=Cipher.getInstance("RC4");
+      decrypter=Cipher.getInstance(CloudService.STREAM_CIPHER);
+      encrypter=Cipher.getInstance(CloudService.STREAM_CIPHER);
       setEncryptionKey("StructrInitialEncryptionKey");
       sender=new Sender(socket,new ObjectOutputStream(new GZIPOutputStream(new CipherOutputStream(socket.getOutputStream(),encrypter),true)));
       receiver=new Receiver(socket,new ObjectInputStream(new GZIPInputStream(new CipherInputStream(socket.getInputStream(),decrypter))));

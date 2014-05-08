@@ -1,0 +1,19 @@
+{
+  final List<SyncableInfo> syncables=new LinkedList<>();
+  if (state.hasFlag(SyncState.Flag.Pages)) {
+    for (    final Page page : app.nodeQuery(Page.class).getAsList()) {
+      syncables.add(new SyncableInfo(page));
+    }
+  }
+  if (state.hasFlag(SyncState.Flag.Files)) {
+    for (    final File file : app.nodeQuery(File.class).getAsList()) {
+      syncables.add(new SyncableInfo(file));
+    }
+  }
+  if (state.hasFlag(SyncState.Flag.Folders)) {
+    for (    final Folder folder : app.nodeQuery(Folder.class).getAsList()) {
+      syncables.add(new SyncableInfo(folder));
+    }
+  }
+  return syncables;
+}

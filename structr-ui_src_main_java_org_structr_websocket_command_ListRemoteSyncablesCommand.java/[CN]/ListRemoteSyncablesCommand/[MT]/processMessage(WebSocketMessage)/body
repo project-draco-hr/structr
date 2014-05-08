@@ -1,0 +1,32 @@
+{
+  final Map<String,Object> properties=webSocketData.getNodeData();
+  final String username=(String)properties.get("username");
+  final String password=(String)properties.get("password");
+  final String host=(String)properties.get("host");
+  final Long port=(Long)properties.get("port");
+  if (host != null && port != null && username != null && password != null) {
+    final App app=StructrApp.getInstance();
+    try (final Tx tx=app.tx()){
+      final List<SyncableInfo> syncables=CloudService.doRemote(new SingleTransmission<>(new ListSyncables(),username,password,host,port.intValue()),null);
+      final StructrWebSocket webSocket=getWebSocket();
+      if (syncables != null) {
+        final List<GraphObject> result=new LinkedList<>();
+        for (        final SyncableInfo info : syncables) {
+          final GraphObjectMap map=new GraphObjectMap();
+          map.put(GraphObject.id,info.getId());
+          map.put(NodeInterface.name,info.getName());
+          map.put(GraphObject.type,info.getType());
+          result.add(map);
+        }
+        webSocketData.setResult(result);
+        webSocket.send(webSocketData,true);
+      }
+    }
+ catch (    FrameworkException fex) {
+      getWebSocket().send(MessageBuilder.status().code(400).message(fex.getMessage()).build(),true);
+    }
+  }
+ else {
+    getWebSocket().send(MessageBuilder.status().code(400).message("The PULL command needs sourceId, username, password, host, port and key!").build(),true);
+  }
+}

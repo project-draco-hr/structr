@@ -1,0 +1,13 @@
+{
+  final Object value=context.getValue(key + "Nodes");
+  if (value instanceof List) {
+    final List<NodeInterface> nodes=(List<NodeInterface>)value;
+    final NodeInterface node=nodes.get(nodeIndex);
+    final File file=(File)node;
+    this.sourceNodeId=node.getUuid();
+    this.type=node.getClass();
+    collectProperties(node.getNode());
+    context.storeValue(sourceNodeId,getChunks(file,CloudService.CHUNK_SIZE).iterator());
+  }
+  return this;
+}

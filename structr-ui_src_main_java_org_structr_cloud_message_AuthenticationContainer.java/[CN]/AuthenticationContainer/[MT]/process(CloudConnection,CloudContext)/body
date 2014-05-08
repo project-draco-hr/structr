@@ -1,0 +1,17 @@
+{
+  final Principal user=context.getUser(userName);
+  if (user != null) {
+    this.encryptionKey=user.getEncryptedPassword();
+    this.salt=user.getProperty(Principal.salt);
+    try {
+      context.impersonateUser(user);
+      return this;
+    }
+ catch (    FrameworkException fex) {
+      fex.printStackTrace();
+    }
+  }
+  context.endTransaction();
+  connection.closeConnection();
+  return null;
+}

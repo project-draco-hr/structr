@@ -11,10 +11,10 @@
     context.increaseTotal(transmission.getTotalSize());
     context.transmissionStarted();
     client.start();
-    client.send(new BeginPacket());
+    client.send(new Begin());
     context.progress();
     final Message ack=client.waitForMessage();
-    if (!(ack instanceof AckPacket)) {
+    if (!(ack instanceof Ack)) {
       throw new FrameworkException(504,"Unable to connect to remote server: unknown response.");
     }
     client.send(new AuthenticationContainer(userName));
@@ -30,7 +30,7 @@
         context.transmissionAborted();
       }
     }
-    client.send(new EndPacket());
+    client.send(new End());
     context.progress();
     client.waitForClose(2000);
     client.shutdown();

@@ -4,8 +4,16 @@
   final String remoteHost=transmission.getRemoteHost();
   final int remoteTcpPort=transmission.getRemotePort();
   final ExportContext context=new ExportContext(listener,4);
+  int maxKeyLen=128;
   ClientConnection client=null;
   T remoteResult=null;
+  try {
+    maxKeyLen=Cipher.getMaxAllowedKeyLength(CloudService.STREAM_CIPHER);
+    logger.log(Level.INFO,"Maximum allowed key size for stream encryption cipher {0}: {1}",new Object[]{CloudService.STREAM_CIPHER,maxKeyLen});
+  }
+ catch (  NoSuchAlgorithmException nsaex) {
+    nsaex.printStackTrace();
+  }
   try (final Tx tx=StructrApp.getInstance().tx()){
     client=new ClientConnection(new Socket(remoteHost,remoteTcpPort));
     context.increaseTotal(transmission.getTotalSize());
@@ -17,12 +25,12 @@
     if (!(ack instanceof Ack)) {
       throw new FrameworkException(504,"Unable to connect to remote server: unknown response.");
     }
-    client.send(new AuthenticationContainer(userName));
+    client.send(new AuthenticationContainer(userName,maxKeyLen));
     context.progress();
     final Message authMessage=client.waitForMessage();
     if (authMessage instanceof AuthenticationContainer) {
       final AuthenticationContainer auth=(AuthenticationContainer)authMessage;
-      client.setEncryptionKey(auth.getEncryptionKey(password));
+      client.setEncryptionKey(auth.getEncryptionKey(password),auth.getKeyLength());
       remoteResult=transmission.doRemote(client,context);
     }
  else {

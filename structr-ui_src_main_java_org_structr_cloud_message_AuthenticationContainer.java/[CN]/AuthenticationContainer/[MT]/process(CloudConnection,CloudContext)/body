@@ -1,14 +1,15 @@
 {
   final Principal user=context.getUser(userName);
   if (user != null) {
-    this.encryptionKey=user.getEncryptedPassword();
-    this.salt=user.getProperty(Principal.salt);
     try {
+      this.keyLength=Math.min(keyLength,Cipher.getMaxAllowedKeyLength(CloudService.STREAM_CIPHER));
+      this.encryptionKey=user.getEncryptedPassword();
+      this.salt=user.getProperty(Principal.salt);
       context.impersonateUser(user);
       return this;
     }
- catch (    FrameworkException fex) {
-      fex.printStackTrace();
+ catch (    Throwable t) {
+      t.printStackTrace();
     }
   }
   context.endTransaction();

@@ -1,5 +1,5 @@
 {
-  while (isConnected()) {
+  while (connection.isConnected()) {
     try {
       final Message message=outputQueue.poll();
       if (message != null) {
@@ -8,11 +8,12 @@
         }
         outputStream.writeObject(message);
         outputStream.flush();
+        message.postProcess(connection,null);
       }
     }
- catch (    IOException ioex) {
-      errorMessage=ioex;
-      finish();
+ catch (    Throwable t) {
+      errorMessage=t;
+      connection.shutdown();
     }
   }
 }

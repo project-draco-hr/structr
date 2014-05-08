@@ -16,9 +16,9 @@
   }
   try (final Tx tx=StructrApp.getInstance().tx()){
     client=new ClientConnection(new Socket(remoteHost,remoteTcpPort));
+    client.start();
     context.increaseTotal(transmission.getTotalSize());
     context.transmissionStarted();
-    client.start();
     client.send(new Begin());
     context.progress();
     final Message ack=client.waitForMessage();
@@ -31,12 +31,14 @@
     if (authMessage instanceof AuthenticationContainer) {
       final AuthenticationContainer auth=(AuthenticationContainer)authMessage;
       client.setEncryptionKey(auth.getEncryptionKey(password),auth.getKeyLength());
+      context.progress();
       remoteResult=transmission.doRemote(client,context);
     }
  else {
       if (context != null) {
         context.transmissionAborted();
       }
+      client.shutdown();
     }
     client.send(new End());
     context.progress();

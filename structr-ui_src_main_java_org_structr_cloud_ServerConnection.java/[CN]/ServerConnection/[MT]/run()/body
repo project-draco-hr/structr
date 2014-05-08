@@ -1,15 +1,14 @@
 {
-  while (receiver.isConnected() && sender.isConnected()) {
+  while (isConnected()) {
     try {
       final Message request=receiver.receive();
       if (request != null) {
         final Message response=request.process(this,context);
         if (response != null) {
           sender.send(response);
-          response.postProcess(this,context);
         }
       }
-      Thread.sleep(1);
+      Thread.sleep(10);
     }
  catch (    Throwable t) {
       t.printStackTrace();

@@ -1,7 +1,10 @@
 {
   try {
     final App app=context.getApplicationContext();
-    final Syncable syncable=(Syncable)app.nodeQuery().and(GraphObject.id,rootNodeId).includeDeletedAndHidden().getFirst();
+    Syncable syncable=(Syncable)app.nodeQuery().and(GraphObject.id,rootNodeId).includeDeletedAndHidden().getFirst();
+    if (syncable == null) {
+      syncable=(Syncable)app.relationshipQuery().and(GraphObject.id,rootNodeId).includeDeletedAndHidden().getFirst();
+    }
     if (syncable != null) {
       final ExportSet exportSet=ExportSet.getInstance(syncable,SyncState.all(),recursive);
       numNodes=exportSet.getNodes().size();

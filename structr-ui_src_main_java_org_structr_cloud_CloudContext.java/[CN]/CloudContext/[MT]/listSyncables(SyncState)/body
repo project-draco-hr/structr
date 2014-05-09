@@ -15,5 +15,13 @@
       syncables.add(new SyncableInfo(folder));
     }
   }
+  if (state.hasFlag(SyncState.Flag.Schema)) {
+    for (    final SchemaNode schemaNode : app.nodeQuery(SchemaNode.class).getAsList()) {
+      syncables.add(new SyncableInfo(schemaNode));
+    }
+    for (    final SchemaRelationship schemaRelationship : app.relationshipQuery(SchemaRelationship.class).getAsList()) {
+      syncables.add(new SyncableInfo(schemaRelationship));
+    }
+  }
   return syncables;
 }

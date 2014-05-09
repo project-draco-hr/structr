@@ -4,8 +4,14 @@
     final String sourceStartNodeId=receivedRelationshipData.getSourceStartNodeId();
     final String sourceEndNodeId=receivedRelationshipData.getSourceEndNodeId();
     final String uuid=receivedRelationshipData.getRelationshipId();
-    final String targetStartNodeId=idMap.get(sourceStartNodeId);
-    final String targetEndNodeId=idMap.get(sourceEndNodeId);
+    String targetStartNodeId=idMap.get(sourceStartNodeId);
+    if (targetStartNodeId == null) {
+      targetStartNodeId=sourceStartNodeId;
+    }
+    String targetEndNodeId=idMap.get(sourceEndNodeId);
+    if (targetEndNodeId == null) {
+      targetEndNodeId=sourceEndNodeId;
+    }
     if (targetStartNodeId != null && targetEndNodeId != null) {
       final NodeInterface targetStartNode=(NodeInterface)app.get(targetStartNodeId);
       final NodeInterface targetEndNode=(NodeInterface)app.get(targetEndNodeId);

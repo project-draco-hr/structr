@@ -5,6 +5,8 @@
       this.id=node.getUuid();
       this.name=node.getName();
       this.type=node.getType();
+      this.lastModified=node.getLastModifiedDate();
+      this.node=true;
       if (node instanceof File) {
         this.size=((File)node).getSize();
       }
@@ -13,7 +15,8 @@
       final RelationshipInterface rel=syncable.getSyncRelationship();
       this.id=rel.getUuid();
       this.name=rel.getRelType().name();
-      this.type=rel.getType();
+      this.type=rel.getClass().getSimpleName();
+      this.node=false;
     }
   }
 }

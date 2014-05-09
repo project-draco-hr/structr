@@ -1,0 +1,26 @@
+{
+  try {
+    org.neo4j.graphdb.Node n=getNode();
+    Iterable<Relationship> incomingSyncRels=n.getRelationships(DynamicRelationshipType.withName("SYNC"),Direction.INCOMING);
+    Iterable<Relationship> outgoingSyncRels=n.getRelationships(DynamicRelationshipType.withName("SYNC"),Direction.OUTGOING);
+    if (getOwnerDocument() instanceof ShadowDocument) {
+      for (      Relationship r : incomingSyncRels) {
+        r.delete();
+      }
+    }
+ else {
+      for (      Relationship r : outgoingSyncRels) {
+        r.delete();
+      }
+      for (      Relationship r : incomingSyncRels) {
+        DOMElement possibleSharedComp=StructrApp.getInstance().get(DOMElement.class,(String)r.getStartNode().getProperty("id"));
+        if (!(possibleSharedComp.getOwnerDocument() instanceof ShadowDocument)) {
+          r.delete();
+        }
+      }
+    }
+  }
+ catch (  FrameworkException ex) {
+    Logger.getLogger(DOMElement.class.getName()).log(Level.SEVERE,null,ex);
+  }
+}

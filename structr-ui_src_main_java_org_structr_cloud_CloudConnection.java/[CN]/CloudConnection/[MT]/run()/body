@@ -1,0 +1,26 @@
+{
+  while (isConnected()) {
+    try {
+      final Message request=receiver.receive();
+      if (request != null) {
+        sender.messageReceived();
+        remoteMessageIds.add(request.getId());
+        if (wasSentFromHere(request)) {
+          request.onResponse(this,context);
+        }
+ else {
+          request.onRequest(this,context);
+        }
+        if (CloudService.DEBUG) {
+          System.out.println("        => " + request);
+        }
+      }
+      Thread.sleep(10);
+    }
+ catch (    Throwable t) {
+      t.printStackTrace();
+    }
+  }
+  shutdown();
+  logger.log(Level.INFO,"Transmission finished");
+}

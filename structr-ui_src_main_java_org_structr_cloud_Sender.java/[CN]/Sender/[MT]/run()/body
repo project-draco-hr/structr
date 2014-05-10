@@ -1,19 +1,22 @@
 {
   while (connection.isConnected()) {
-    try {
-      final Message message=outputQueue.poll();
-      if (message != null) {
-        if (CloudService.DEBUG) {
-          System.out.println("Sender: " + message);
+    if (messagesInFlight < CloudService.LIVE_PACKET_COUNT) {
+      try {
+        final Message message=outputQueue.poll();
+        if (message != null) {
+          outputStream.writeObject(message);
+          outputStream.flush();
+          messagesInFlight++;
+          message.afterSend(connection);
         }
-        outputStream.writeObject(message);
-        outputStream.flush();
-        message.postProcess(connection,null);
+      }
+ catch (      Throwable t) {
+        errorMessage=t;
+        connection.shutdown();
       }
     }
- catch (    Throwable t) {
-      errorMessage=t;
-      connection.shutdown();
+ else {
+      Thread.yield();
     }
   }
 }

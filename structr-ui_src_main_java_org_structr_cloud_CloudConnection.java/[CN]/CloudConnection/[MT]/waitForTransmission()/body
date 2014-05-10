@@ -1,8 +1,11 @@
 {
-  final long abortTime=System.currentTimeMillis() + timeout;
+  transmissionAbortTime=System.currentTimeMillis() + CloudService.DEFAULT_TIMEOUT;
   while (context.getCurrentProgress() < context.getTotalSize()) {
-    if (System.currentTimeMillis() > abortTime) {
-      throw new FrameworkException(504,"Timeout while waiting for messages.");
+    if (errorMessage != null) {
+      throw new FrameworkException(errorCode,errorMessage);
+    }
+    if (System.currentTimeMillis() > transmissionAbortTime) {
+      throw new FrameworkException(504,"Timeout while waiting for response.");
     }
     try {
       Thread.sleep(10);

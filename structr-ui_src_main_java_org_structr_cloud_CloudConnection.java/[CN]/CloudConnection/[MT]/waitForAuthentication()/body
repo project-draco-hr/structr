@@ -1,8 +1,11 @@
 {
-  final long abortTime=System.currentTimeMillis() + timeout;
+  final long abortTime=System.currentTimeMillis() + CloudService.DEFAULT_TIMEOUT;
   while (!authenticated) {
+    if (errorMessage != null) {
+      throw new FrameworkException(errorCode,errorMessage);
+    }
     if (System.currentTimeMillis() > abortTime) {
-      throw new FrameworkException(504,"Timeout while waiting for authentication.");
+      throw new FrameworkException(504,"Authentication failed.");
     }
     try {
       Thread.sleep(10);

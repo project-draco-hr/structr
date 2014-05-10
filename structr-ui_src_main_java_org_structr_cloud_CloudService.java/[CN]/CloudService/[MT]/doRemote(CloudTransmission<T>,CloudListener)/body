@@ -13,7 +13,7 @@
  catch (  NoSuchAlgorithmException nsaex) {
     nsaex.printStackTrace();
   }
-  try (final Tx tx=StructrApp.getInstance().tx()){
+  try {
     client=new CloudConnection(new Socket(remoteHost,remoteTcpPort),context);
     client.start();
     context.increaseTotal(transmission.getTotalSize());
@@ -28,7 +28,7 @@
     final End endPacket=new End();
     client.send(endPacket);
     client.waitForClose(2000);
-    client.shutdown();
+    client.close();
     if (context != null) {
       context.transmissionFinished();
     }
@@ -38,7 +38,7 @@
   }
  finally {
     if (client != null) {
-      client.shutdown();
+      client.close();
     }
   }
   return remoteResult;

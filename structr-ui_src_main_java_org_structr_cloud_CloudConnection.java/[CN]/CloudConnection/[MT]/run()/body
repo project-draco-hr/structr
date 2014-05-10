@@ -4,6 +4,7 @@
       final Message request=receiver.receive();
       if (request != null) {
         sender.messageReceived();
+        refreshTransmissionTimeout();
         remoteMessageIds.add(request.getId());
         if (wasSentFromHere(request)) {
           request.onResponse(this,context);
@@ -15,7 +16,7 @@
           System.out.println("        => " + request);
         }
       }
-      Thread.sleep(10);
+      Thread.yield();
     }
  catch (    Throwable t) {
       t.printStackTrace();

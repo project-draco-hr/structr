@@ -12,6 +12,7 @@
   final String numberString1=numberFormat1.format(2.234);
   final String numberString2=numberFormat2.format(2.234);
   final String numberString3=numberFormat3.format(2.234);
+  MailTemplate template=null;
   TestOne testOne=null;
   TestTwo testTwo=null;
   TestThree testThree=null;
@@ -23,6 +24,10 @@
     testThree=createTestNode(TestThree.class);
     testFour=createTestNode(TestFour.class);
     testSixs=createTestNodes(TestSix.class,20);
+    template=createTestNode(MailTemplate.class);
+    template.setProperty(MailTemplate.name,"TEST");
+    template.setProperty(MailTemplate.locale,"en_EN");
+    template.setProperty(MailTemplate.text,"This is a template for ${this.name}");
     assertNotNull(testOne);
     testOne.setProperty(TestOne.name,"A-nice-little-name-for-my-test-object");
     testOne.setProperty(TestOne.anInt,1);
@@ -41,6 +46,7 @@
     tx.success();
   }
  catch (  FrameworkException fex) {
+    fex.printStackTrace();
     fail("Unexpected exception");
   }
   try (final Tx tx=app.tx()){
@@ -454,6 +460,7 @@
     assertEquals("Invalid do() result","true",testOne.replaceVariables(securityContext,ctx,"${this.doResult}"));
     testOne.replaceVariables(securityContext,ctx,"${do(empty(this.name), \"set(this, \"doResult\", true)\",\"set(this, \"doResult\", false)\")}");
     assertEquals("Invalid do() result","false",testOne.replaceVariables(securityContext,ctx,"${this.doResult}"));
+    assertEquals("Invalid template() result","This is a template for A-nice-little-name-for-my-test-object",testOne.replaceVariables(securityContext,ctx,"${template(\"TEST\", \"en_EN\", this)}"));
     testOne.replaceVariables(securityContext,ctx,"${each(split(\"setTestInteger1,setTestInteger2,setTestInteger3\"), \"set(this, data, 1)\")}");
     assertEquals("Invalid each() result","1",testOne.replaceVariables(securityContext,ctx,"${get(this, \"setTestInteger1\")}"));
     assertEquals("Invalid each() result","1",testOne.replaceVariables(securityContext,ctx,"${get(this, \"setTestInteger2\")}"));

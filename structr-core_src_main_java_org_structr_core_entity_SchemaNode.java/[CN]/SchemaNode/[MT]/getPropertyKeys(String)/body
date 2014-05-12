@@ -1,9 +1,15 @@
 {
-  final Set<PropertyKey> propertyKeys=new LinkedHashSet<>(Iterables.toList(super.getPropertyKeys(propertyView)));
+  final List<PropertyKey> propertyKeys=new LinkedList<>(Iterables.toList(super.getPropertyKeys(propertyView)));
   for (  final String key : SchemaHelper.getProperties(getNode())) {
     final PropertyKey newKey=new StringProperty(key);
     newKey.setDeclaringClass(getClass());
     propertyKeys.add(newKey);
   }
-  return propertyKeys;
+  Collections.sort(propertyKeys,new Comparator<PropertyKey>(){
+    @Override public int compare(    PropertyKey o1,    PropertyKey o2){
+      return o1.jsonName().compareTo(o2.jsonName());
+    }
+  }
+);
+  return new LinkedHashSet<>(propertyKeys);
 }

@@ -1,0 +1,11 @@
+{
+  final String childDataKey=root.getProperty(DOMElement.dataKey);
+  final String dataKey=childDataKey != null ? childDataKey : parentDataKey;
+  if (isActive(root,dataKey)) {
+    resultList.add(root);
+  }
+  for (  final DOMChildren children : root.getChildRelationships()) {
+    final DOMNode child=children.getTargetNode();
+    collectActiveElements(resultList,child,dataKey);
+  }
+}

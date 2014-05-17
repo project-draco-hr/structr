@@ -11,18 +11,6 @@
   if (!StringUtils.isEmpty(node.getProperty(DOMElement.xpathQuery))) {
     return ActiveElementState.Query;
   }
-  if (!StringUtils.isEmpty(node.getProperty(DOMNode.hideConditions))) {
-    return ActiveElementState.Content;
-  }
-  if (!StringUtils.isEmpty(node.getProperty(DOMNode.showConditions))) {
-    return ActiveElementState.Content;
-  }
-  if (node.getProperty(DOMNode.hideOnIndex)) {
-    return ActiveElementState.Content;
-  }
-  if (node.getProperty(DOMNode.hideOnDetail)) {
-    return ActiveElementState.Content;
-  }
   if (node.getProperty(DOMElement._action) != null || node.getProperty(DOMElement._attributes) != null || node.getProperty(DOMElement._rawValue) != null) {
     return ActiveElementState.Button;
   }
@@ -45,6 +33,18 @@
     if (containsDataKeyReference(node.getProperty(Input._value),dataKeys)) {
       return ActiveElementState.Input;
     }
+  }
+  if (!StringUtils.isEmpty(node.getProperty(DOMNode.hideConditions))) {
+    return ActiveElementState.Content;
+  }
+  if (!StringUtils.isEmpty(node.getProperty(DOMNode.showConditions))) {
+    return ActiveElementState.Content;
+  }
+  if (node.getProperty(DOMNode.hideOnIndex)) {
+    return ActiveElementState.Content;
+  }
+  if (node.getProperty(DOMNode.hideOnDetail)) {
+    return ActiveElementState.Content;
   }
   return ActiveElementState.None;
 }

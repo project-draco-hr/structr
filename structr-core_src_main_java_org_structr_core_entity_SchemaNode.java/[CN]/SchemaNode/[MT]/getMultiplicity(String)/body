@@ -1,0 +1,15 @@
+{
+  final Set<String> existingPropertyNames=new LinkedHashSet<>();
+  final String _className=getProperty(name);
+  for (  final SchemaRelationship outRel : getOutgoingRelationships(SchemaRelationship.class)) {
+    if (propertyNameToCheck.equals(outRel.getPropertyName(_className,existingPropertyNames,true))) {
+      return outRel.getMultiplicity(true);
+    }
+  }
+  for (  final SchemaRelationship inRel : getIncomingRelationships(SchemaRelationship.class)) {
+    if (propertyNameToCheck.equals(inRel.getPropertyName(_className,existingPropertyNames,false))) {
+      return inRel.getMultiplicity(false);
+    }
+  }
+  return null;
+}

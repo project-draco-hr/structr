@@ -15,16 +15,16 @@
         notNull=true;
       }
       String defaultValue=null;
-      if (rawType.contains(":")) {
-        defaultValue=rawType.substring(rawType.indexOf(":") + 1);
-        rawType=rawType.substring(0,rawType.indexOf(":"));
+      if (rawType.contains(":") && !rawType.startsWith(Type.Cypher.name())) {
+        final int lastIndex=rawType.lastIndexOf(":");
+        defaultValue=rawType.substring(lastIndex + 1);
+        rawType=rawType.substring(0,lastIndex);
       }
       PropertyParser parser=SchemaHelper.getParserForRawValue(errorBuffer,entity.getClassName(),propertyName,dbName,rawType,notNull,defaultValue);
       if (parser != null) {
         src.append(parser.getPropertySource(entity,errorBuffer));
         validators.addAll(parser.getGlobalValidators());
         enums.addAll(parser.getEnumDefinitions());
-        addPropertyToView(PropertyView.Public,propertyName.substring(1),views);
         addPropertyToView(PropertyView.Ui,propertyName.substring(1),views);
       }
     }

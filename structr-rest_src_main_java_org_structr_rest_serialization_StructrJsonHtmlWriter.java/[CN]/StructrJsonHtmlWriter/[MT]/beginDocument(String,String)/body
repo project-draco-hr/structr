@@ -7,13 +7,21 @@
   head.inline("title").text(baseUrl);
   Tag body=doc.block("body").attr(new Onload("CollapsibleLists.apply(true);"));
   Tag top=body.block("div").id("top");
-  Tag ul1=top.block("ul");
-  for (  String view : StructrApp.getConfiguration().getPropertyViews()) {
-    ul1.block("li").inline("a").attr(new Href(restPath + "/" + currentType+ "/"+ view),new If(view.equals(propertyView),new Css("active"))).text(view);
+  final App app=StructrApp.getInstance(securityContext);
+  final Tag left=body.block("div").id("left");
+  try (final Tx tx=app.tx()){
+    for (    SchemaNode node : app.nodeQuery(SchemaNode.class).getAsList()) {
+      final String rawType=node.getName();
+      top.inline("a").attr(new Href(restPath + "/" + rawType),new If(rawType.equals(currentType),new Css("active"))).text(rawType);
+    }
   }
-  Tag left=body.block("div").id("left");
-  for (  String rawType : StructrApp.getConfiguration().getNodeEntities().keySet()) {
-    left.block("p").inline("a").attr(new Href(restPath + "/" + rawType),new If(rawType.equals(currentType),new Css("active"))).text(rawType);
+ catch (  Throwable t) {
+    t.printStackTrace();
+  }
+  for (  String view : StructrApp.getConfiguration().getPropertyViews()) {
+    if (!hiddenViews.contains(view)) {
+      left.inline("a").attr(new Href(restPath + "/" + currentType+ "/"+ view),new If(view.equals(propertyView),new Css("active"))).text(view);
+    }
   }
   currentElement=body.block("div").id("right");
   currentElement.block("h1").text(baseUrl);

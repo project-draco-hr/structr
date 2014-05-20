@@ -56,29 +56,30 @@
     resource.postProcessResultSet(result);
     DecimalFormat decimalFormat=new DecimalFormat("0.000000000",DecimalFormatSymbols.getInstance(Locale.ENGLISH));
     result.setQueryTime(decimalFormat.format((queryTimeEnd - queryTimeStart) / 1000000000.0));
-    Writer writer=response.getWriter();
     String accept=request.getHeader("Accept");
     if (accept != null && accept.contains("text/html")) {
+      final StreamingHtmlWriter htmlStreamer=new StreamingHtmlWriter(this.propertyView,indentJson,config.getOutputNestingDepth());
       try (final Tx tx=app.tx()){
         response.setContentType("text/html; charset=utf-8");
-        htmlWriter.get().stream(writer,result,baseUrl);
-        tx.success();
+        try (final Writer writer=response.getWriter()){
+          htmlStreamer.stream(securityContext,writer,result,baseUrl);
+          writer.append("\n");
+        }
+         tx.success();
       }
      }
  else {
+      final StreamingJsonWriter jsonStreamer=new StreamingJsonWriter(this.propertyView,indentJson,config.getOutputNestingDepth());
       try (final Tx tx=app.tx()){
         response.setContentType("application/json; charset=utf-8");
-        jsonWriter.get().stream(writer,result,baseUrl);
-        writer.append("\n");
-        tx.success();
+        try (final Writer writer=response.getWriter()){
+          jsonStreamer.stream(securityContext,writer,result,baseUrl);
+          writer.append("\n");
+        }
+         tx.success();
       }
      }
-    if (result.hasPartialContent()) {
-      response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
-    }
- else {
-      response.setStatus(HttpServletResponse.SC_OK);
-    }
+    response.setStatus(HttpServletResponse.SC_OK);
   }
  catch (  FrameworkException frameworkException) {
     response.setStatus(frameworkException.getStatus());

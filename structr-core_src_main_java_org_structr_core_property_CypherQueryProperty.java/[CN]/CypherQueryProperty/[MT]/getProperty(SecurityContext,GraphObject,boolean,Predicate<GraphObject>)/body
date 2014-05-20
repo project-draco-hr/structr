@@ -1,0 +1,14 @@
+{
+  if (obj instanceof AbstractNode) {
+    try {
+      final Map<String,Object> parameters=new LinkedHashMap<>();
+      parameters.put("id",obj.getUuid());
+      parameters.put("type",obj.getType());
+      return StructrApp.getInstance(securityContext).command(CypherQueryCommand.class).execute(cypherQuery,parameters);
+    }
+ catch (    Throwable t) {
+      t.printStackTrace();
+    }
+  }
+  return null;
+}

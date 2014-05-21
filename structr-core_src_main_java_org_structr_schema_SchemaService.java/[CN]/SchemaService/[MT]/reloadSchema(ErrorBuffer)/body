@@ -1,27 +1,32 @@
 {
-  final Set<String> dynamicViews=new LinkedHashSet<>();
-  final NodeExtender nodeExtender=new NodeExtender();
   boolean success=true;
-  try (final Tx tx=StructrApp.getInstance().tx()){
-    for (    final SchemaNode schemaNode : StructrApp.getInstance().nodeQuery(SchemaNode.class).getAsList()) {
-      nodeExtender.addClass(schemaNode.getClassName(),schemaNode.getSource(errorBuffer));
-      dynamicViews.addAll(schemaNode.getViews());
+  if (compiling.compareAndSet(false,true)) {
+synchronized (SchemaService.class) {
+      final Set<String> dynamicViews=new LinkedHashSet<>();
+      final NodeExtender nodeExtender=new NodeExtender();
+      try (final Tx tx=StructrApp.getInstance().tx()){
+        for (        final SchemaNode schemaNode : StructrApp.getInstance().nodeQuery(SchemaNode.class).getAsList()) {
+          nodeExtender.addClass(schemaNode.getClassName(),schemaNode.getSource(errorBuffer));
+          dynamicViews.addAll(schemaNode.getViews());
+        }
+        for (        final SchemaRelationship schemaRelationship : StructrApp.getInstance().relationshipQuery(SchemaRelationship.class).getAsList()) {
+          nodeExtender.addClass(schemaRelationship.getClassName(),schemaRelationship.getSource(errorBuffer));
+          dynamicViews.addAll(schemaRelationship.getViews());
+        }
+        for (        final Class newType : nodeExtender.compile(errorBuffer).values()) {
+          Services.getInstance().getConfigurationProvider().registerEntityType(newType);
+        }
+        success=!errorBuffer.hasError();
+        if (success) {
+          Services.getInstance().getConfigurationProvider().registerDynamicViews(dynamicViews);
+        }
+      }
+ catch (      Throwable t) {
+        logger.log(Level.SEVERE,"Unable to compile dynamic schema.",t);
+        success=false;
+      }
     }
-    for (    final SchemaRelationship schemaRelationship : StructrApp.getInstance().relationshipQuery(SchemaRelationship.class).getAsList()) {
-      nodeExtender.addClass(schemaRelationship.getClassName(),schemaRelationship.getSource(errorBuffer));
-      dynamicViews.addAll(schemaRelationship.getViews());
-    }
-    for (    final Class newType : nodeExtender.compile(errorBuffer).values()) {
-      Services.getInstance().getConfigurationProvider().registerEntityType(newType);
-    }
-    success=!errorBuffer.hasError();
-    if (success) {
-      Services.getInstance().getConfigurationProvider().registerDynamicViews(dynamicViews);
-    }
-  }
- catch (  Throwable t) {
-    logger.log(Level.SEVERE,"Unable to compile dynamic schema.",t);
-    success=false;
+    compiling.set(false);
   }
   return success;
 }

@@ -5,11 +5,7 @@
     String part=parts[i];
     if (_data != null && _data instanceof GraphObject) {
       PropertyKey referenceKeyProperty=StructrApp.getConfiguration().getPropertyKeyForJSONName(_data.getClass(),part);
-      PropertyConverter converter=referenceKeyProperty.inputConverter(securityContext);
       _data=((GraphObject)_data).getProperty(referenceKeyProperty);
-      if (_data != null && converter != null) {
-        _data=converter.revert(_data);
-      }
       if (_data == null) {
         return null;
       }

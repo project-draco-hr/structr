@@ -1,0 +1,27 @@
+{
+  final Map<String,Object> properties=webSocketData.getNodeData();
+  final String username=(String)properties.get("username");
+  final String password=(String)properties.get("password");
+  final String host=(String)properties.get("host");
+  final Long port=(Long)properties.get("port");
+  final String key=(String)properties.get("key");
+  if (host != null && port != null && username != null && password != null && key != null) {
+    final App app=StructrApp.getInstance();
+    try (final Tx tx=app.tx()){
+      final PushTransmission tms=new PushTransmission(username,password,host,port.intValue());
+      for (      final SchemaNode node : app.nodeQuery(SchemaNode.class).getAsList()) {
+        tms.getExportSet().add(node);
+      }
+      for (      final SchemaRelationship rel : app.relationshipQuery(SchemaRelationship.class).getAsList()) {
+        tms.getExportSet().add(rel);
+      }
+      CloudService.doRemote(tms,new WebsocketProgressListener(getWebSocket(),key));
+    }
+ catch (    FrameworkException fex) {
+      getWebSocket().send(MessageBuilder.status().code(400).message(fex.getMessage()).build(),true);
+    }
+  }
+ else {
+    getWebSocket().send(MessageBuilder.status().code(400).message("The PUSH_SCHEMA command needs username, password, host, port and key!").build(),true);
+  }
+}

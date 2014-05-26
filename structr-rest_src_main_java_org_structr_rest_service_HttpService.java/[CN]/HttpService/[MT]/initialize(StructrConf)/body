@@ -74,7 +74,7 @@
   if (enableRewriteFilter) {
     FilterHolder rewriteFilter=new FilterHolder(UrlRewriteFilter.class);
     rewriteFilter.setInitParameter("confPath","urlrewrite.xml");
-    servletContext.addFilter(rewriteFilter,"/*",EnumSet.of(DispatcherType.REQUEST,DispatcherType.FORWARD));
+    servletContext.addFilter(rewriteFilter,"/*",EnumSet.of(DispatcherType.REQUEST,DispatcherType.ASYNC));
   }
   if (enableGzipCompression) {
     FilterHolder gzipFilter=new FilterHolder(AsyncGzipFilter.class);
@@ -83,7 +83,7 @@
     gzipFilter.setInitParameter("minGzipSize","256");
     gzipFilter.setInitParameter("deflateCompressionLevel","9");
     gzipFilter.setInitParameter("methods","GET,POST");
-    servletContext.addFilter(gzipFilter,"/*",EnumSet.of(DispatcherType.REQUEST,DispatcherType.FORWARD));
+    servletContext.addFilter(gzipFilter,"/*",EnumSet.of(DispatcherType.REQUEST,DispatcherType.ASYNC));
   }
   contexts.addHandler(servletContext);
   if (logRequests || "true".equals(finalConfig.getProperty("log.requests","false"))) {

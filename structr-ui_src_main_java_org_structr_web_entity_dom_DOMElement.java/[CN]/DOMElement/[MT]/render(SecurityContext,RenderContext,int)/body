@@ -1,6 +1,5 @@
 {
   if (renderContext.hasTimeout(RENDER_TIMEOUT)) {
-    logger.log(Level.WARNING,"Render timeout reached, aborting.");
     return;
   }
   Result localResult=renderContext.getResult();
@@ -128,10 +127,6 @@
   }
   double end=System.nanoTime();
   logger.log(Level.FINE,"Render node {0} in {1} seconds",new java.lang.Object[]{getUuid(),decimalFormat.format((end - start) / 1000000000.0)});
-  if (flush()) {
-    logger.log(Level.FINE,"Flushing response: {0} ",getTagName());
-    out.flush();
-  }
   if (localResult != null) {
     renderContext.setResult(localResult);
   }

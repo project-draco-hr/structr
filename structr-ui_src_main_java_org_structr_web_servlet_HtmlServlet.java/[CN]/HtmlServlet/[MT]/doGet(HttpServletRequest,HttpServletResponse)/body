@@ -123,18 +123,25 @@
           response.setHeader("X-XSS-Protection","1; mode=block");
           ServletOutputStream out=response.getOutputStream();
           AsyncBuffer buffer=renderContext.getBuffer();
-          buffer.prepare(null,out);
+          boolean async=HttpService.parseBoolean(Services.getBaseConfiguration().getProperty(HttpService.ASYNC),false);
+          AsyncContext asyncContext=null;
+          if (async) {
+            asyncContext=request.startAsync();
+          }
+          buffer.prepare(asyncContext,out);
           rootElement.render(securityContext,renderContext,0);
           buffer.finish();
           response.setStatus(HttpServletResponse.SC_OK);
           double end=System.nanoTime();
           logger.log(Level.FINE,"Content for path {0} in {1} seconds",new Object[]{path,decimalFormat.format((end - setup) / 1000000000.0)});
-          try {
-            out.flush();
-            out.close();
-          }
- catch (          IllegalStateException ise) {
-            logger.log(Level.WARNING,"Could not write to output stream",ise.getMessage());
+          if (!async) {
+            try {
+              out.flush();
+              out.close();
+            }
+ catch (            IllegalStateException ise) {
+              logger.log(Level.WARNING,"Could not write to output stream",ise.getMessage());
+            }
           }
         }
       }

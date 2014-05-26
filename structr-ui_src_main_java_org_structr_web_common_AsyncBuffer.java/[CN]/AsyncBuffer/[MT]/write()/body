@@ -1,12 +1,12 @@
 {
-  while (out.isReady()) {
+  while (async == null || out.isReady()) {
     String s=queue.poll();
     if (s == null) {
       out.flush();
       return;
     }
     if (!completed) {
-      out.print(s);
+      out.write(s.getBytes("UTF-8"));
     }
   }
 }

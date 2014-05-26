@@ -5,6 +5,7 @@
   finalConfig.setProperty(APPLICATION_HTTP_PORT,"8082");
   finalConfig.setProperty(APPLICATION_HTTPS_ENABLED,"false");
   finalConfig.setProperty(APPLICATION_HTTPS_PORT,"8083");
+  finalConfig.setProperty(ASYNC,"false");
   finalConfig.setProperty(SERVLETS,"JsonRestServlet");
   finalConfig.setProperty("JsonRestServlet.class",JsonRestServlet.class.getName());
   finalConfig.setProperty("JsonRestServlet.path","/structr/rest/*");
@@ -41,6 +42,10 @@
   httpPort=parseInt(finalConfig.getProperty(APPLICATION_HTTP_PORT),8082);
   maxIdleTime=parseInt(System.getProperty("maxIdleTime"),30000);
   requestHeaderSize=parseInt(System.getProperty("requestHeaderSize"),8192);
+  async=parseBoolean(finalConfig.getProperty(ASYNC),false);
+  if (async) {
+    logger.log(Level.INFO,"Running in asynchronous mode");
+  }
   String keyStorePath=finalConfig.getProperty(APPLICATION_KEYSTORE_PATH);
   String keyStorePassword=finalConfig.getProperty(APPLICATION_KEYSTORE_PASSWORD);
   String contextPath=System.getProperty("contextPath","/");
@@ -77,7 +82,7 @@
     servletContext.addFilter(rewriteFilter,"/*",EnumSet.of(DispatcherType.REQUEST,DispatcherType.ASYNC));
   }
   if (enableGzipCompression) {
-    FilterHolder gzipFilter=new FilterHolder(AsyncGzipFilter.class);
+    FilterHolder gzipFilter=async ? new FilterHolder(AsyncGzipFilter.class) : new FilterHolder(GzipFilter.class);
     gzipFilter.setInitParameter("mimeTypes","text/html,text/plain,text/css,text/javascript,application/json");
     gzipFilter.setInitParameter("bufferSize","32768");
     gzipFilter.setInitParameter("minGzipSize","256");
@@ -117,7 +122,7 @@
       }
     }
     FilterHolder loggingFilter=new FilterHolder(TeeFilter.class);
-    servletContext.addFilter(loggingFilter,"/*",EnumSet.of(DispatcherType.REQUEST,DispatcherType.ASYNC));
+    servletContext.addFilter(loggingFilter,"/*",EnumSet.of(DispatcherType.REQUEST,async ? DispatcherType.ASYNC : DispatcherType.FORWARD));
     loggingFilter.setInitParameter("includes","");
     RequestLogHandler requestLogHandler=new RequestLogHandler();
     String logPath=basePath + "/logs";

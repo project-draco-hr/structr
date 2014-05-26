@@ -121,15 +121,21 @@
           response.setHeader("X-Content-Type-Options","nosniff");
           response.setHeader("X-Frame-Options","SAMEORIGIN");
           response.setHeader("X-XSS-Protection","1; mode=block");
-          AsyncContext async=request.startAsync();
           ServletOutputStream out=response.getOutputStream();
           AsyncBuffer buffer=renderContext.getBuffer();
-          buffer.prepare(async,out);
+          buffer.prepare(null,out);
           rootElement.render(securityContext,renderContext,0);
           buffer.finish();
           response.setStatus(HttpServletResponse.SC_OK);
           double end=System.nanoTime();
           logger.log(Level.FINE,"Content for path {0} in {1} seconds",new Object[]{path,decimalFormat.format((end - setup) / 1000000000.0)});
+          try {
+            out.flush();
+            out.close();
+          }
+ catch (          IllegalStateException ise) {
+            logger.log(Level.WARNING,"Could not write to output stream",ise.getMessage());
+          }
         }
       }
  else {

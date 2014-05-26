@@ -108,20 +108,23 @@
           out.close();
         }
  else {
+          final AsyncContext async=request.startAsync();
+          final ServletOutputStream out=async.getResponse().getOutputStream();
           final AtomicBoolean finished=new AtomicBoolean(false);
           final DOMNode rootNode=rootElement;
-          new Thread(new Runnable(){
+          async.start(new Runnable(){
             @Override public void run(){
               try (final Tx tx=app.tx()){
                 rootNode.render(securityContext,renderContext,0);
                 finished.set(true);
+                tx.success();
               }
  catch (              FrameworkException fex) {
                 fex.printStackTrace();
               }
             }
           }
-).start();
+);
           response.setCharacterEncoding("UTF-8");
           String contentType=rootElement.getProperty(Page.contentType);
           if (contentType != null && contentType.equals("text/html")) {
@@ -135,20 +138,26 @@
           response.setHeader("X-Content-Type-Options","nosniff");
           response.setHeader("X-Frame-Options","SAMEORIGIN");
           response.setHeader("X-XSS-Protection","1; mode=block");
-          final AsyncContext async=request.startAsync();
-          final ServletOutputStream out=async.getResponse().getOutputStream();
           out.setWriteListener(new WriteListener(){
             @Override public void onWritePossible() throws IOException {
               final Queue<String> queue=renderContext.getBuffer().getQueue();
               while (out.isReady()) {
                 final String s=queue.poll();
                 if (s != null) {
-                  out.print(s);
+                  out.write(s.getBytes("utf-8"));
                 }
- else                 if (finished.get()) {
-                  async.complete();
-                  response.setStatus(HttpServletResponse.SC_OK);
-                  break;
+ else {
+                  if (finished.get()) {
+                    async.complete();
+                    response.setStatus(HttpServletResponse.SC_OK);
+                    break;
+                  }
+                }
+                try {
+                  Thread.yield();
+                  System.out.println("Waiting for queue..");
+                }
+ catch (                Throwable t) {
                 }
               }
             }

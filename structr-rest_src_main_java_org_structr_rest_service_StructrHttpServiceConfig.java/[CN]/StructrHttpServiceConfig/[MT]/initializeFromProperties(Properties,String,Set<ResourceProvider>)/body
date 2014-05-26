@@ -29,20 +29,15 @@
     logger.log(Level.SEVERE,"Missing authenticator key {0}.authenticator in configuration file.",servletName);
   }
  else {
-    try {
-      authenticatorClass=loadClass(authenticatorValue);
-    }
- catch (    Throwable t) {
-      logger.log(Level.SEVERE,"Unable to instantiate authenticator {0}: {1}",new Object[]{authenticatorValue,t.getMessage()});
+    authenticatorClass=loadClass(authenticatorValue);
+    if (authenticatorClass == null) {
+      logger.log(Level.SEVERE,"Unable	 to instantiate authenticator {0}",authenticatorValue);
     }
   }
   if (userClassValue != null) {
-    try {
-      userClass=loadClass(userClassValue);
-    }
- catch (    Throwable t) {
-      t.printStackTrace();
-      logger.log(Level.SEVERE,"Unable to instantiate user class for authenticator {0}: {1}",new Object[]{userClassValue,t.getMessage()});
+    userClass=loadClass(userClassValue);
+    if (userClass == null) {
+      logger.log(Level.SEVERE,"Unable to instantiate user class for authenticator {0}",userClassValue);
     }
   }
   if (userAutoCreateValue != null) {

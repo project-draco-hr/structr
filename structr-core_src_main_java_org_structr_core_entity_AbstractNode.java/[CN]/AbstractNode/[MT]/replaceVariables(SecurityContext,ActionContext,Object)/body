@@ -11,7 +11,7 @@
       while (matcher.find()) {
         String group=matcher.group();
         String source=group.substring(2,group.length() - 1);
-        Object extractedValue=extractFunctions(securityContext,actionContext,source);
+        Object extractedValue=Functions.evaluate(securityContext,actionContext,this,source);
         if (extractedValue == null) {
           extractedValue="";
         }
@@ -31,7 +31,7 @@
  else {
     value=rawValue.toString();
   }
-  if (NULL_STRING.equals(value)) {
+  if (Functions.NULL_STRING.equals(value)) {
     return null;
   }
   return value;

@@ -1,9 +1,13 @@
 {
-  try {
-    return type.newInstance();
+  R instance=(R)instanceCache.get(type);
+  if (instance == null) {
+    try {
+      instance=type.newInstance();
+      instanceCache.put(type,instance);
+    }
+ catch (    Throwable t) {
+      t.printStackTrace();
+    }
   }
- catch (  Throwable t) {
-    t.printStackTrace();
-  }
-  return null;
+  return instance;
 }

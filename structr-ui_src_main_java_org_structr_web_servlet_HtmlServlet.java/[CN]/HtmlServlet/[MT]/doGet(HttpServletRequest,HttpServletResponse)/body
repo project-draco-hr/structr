@@ -1,8 +1,8 @@
 {
-  double start=System.nanoTime();
+  final double start=System.nanoTime();
+  final Authenticator auth=config.getAuthenticator();
   final SecurityContext securityContext;
   final App app;
-  Authenticator auth=config.getAuthenticator();
   try {
     String path=request.getPathInfo();
     if (checkRegistration(auth,request,response,path)) {
@@ -146,27 +146,28 @@
 );
             out.setWriteListener(new WriteListener(){
               @Override public void onWritePossible() throws IOException {
-                final Queue<byte[]> queue=renderContext.getBuffer().getQueue();
-                while (out.isReady()) {
-                  byte[] buffer=null;
+                try {
+                  final Queue<String> queue=renderContext.getBuffer().getQueue();
+                  while (out.isReady()) {
+                    String buffer=null;
 synchronized (queue) {
-                    buffer=queue.poll();
-                  }
-                  if (buffer != null) {
-                    out.write(buffer);
-                  }
+                      buffer=queue.poll();
+                    }
+                    if (buffer != null) {
+                      out.print(buffer);
+                    }
  else {
-                    if (finished.get()) {
-                      async.complete();
-                      response.setStatus(HttpServletResponse.SC_OK);
-                      break;
-                    }
-                    try {
-                      Thread.sleep(10);
-                    }
- catch (                    Throwable t) {
+                      if (finished.get()) {
+                        async.complete();
+                        response.setStatus(HttpServletResponse.SC_OK);
+                        break;
+                      }
+                      Thread.sleep(5);
                     }
                   }
+                }
+ catch (                Throwable t) {
+                  t.printStackTrace();
                 }
               }
               @Override public void onError(              Throwable t){

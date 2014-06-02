@@ -26,7 +26,7 @@
  else {
       logger.log(Level.INFO,"Starting (re-)indexing all nodes of type {0}",new Object[]{type.getSimpleName()});
     }
-    long count=bulkGraphOperation(securityContext,nodes,1000,"RebuildNodeIndex",new BulkGraphOperation<AbstractNode>(){
+    long count=bulkGraphOperation(securityContext,nodes,100,"RebuildNodeIndex",new BulkGraphOperation<AbstractNode>(){
       @Override public void handleGraphObject(      SecurityContext securityContext,      AbstractNode node){
         try {
           final String type=node.getProperty(NodeInterface.type);
@@ -65,7 +65,7 @@
  else {
       logger.log(Level.INFO,"Starting (re-)indexing all relationships of type {0}",new Object[]{relType});
     }
-    count=bulkGraphOperation(securityContext,rels,1000,"RebuildRelIndex",new BulkGraphOperation<AbstractRelationship>(){
+    count=bulkGraphOperation(securityContext,rels,100,"RebuildRelIndex",new BulkGraphOperation<AbstractRelationship>(){
       @Override public void handleGraphObject(      SecurityContext securityContext,      AbstractRelationship rel){
         rel.updateInIndex();
       }

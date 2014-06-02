@@ -13,7 +13,6 @@
   final List<TypeInfo> typeInfos=new LinkedList<>();
   try (final Tx tx=app.tx()){
     TransactionCommand.postProcess("reloadschema",new ReloadSchema());
-    TransactionCommand.postProcess("gist",app.command(BulkRebuildIndexCommand.class));
     for (    final Node node : Iterables.filter(new StructrAndSpatialPredicate(false,false,true),GlobalGraphOperations.at(graphDb).getAllNodes())) {
       final NodeInfo nodeInfo=new NodeInfo(node);
       nodeTypes.add(nodeInfo);
@@ -34,7 +33,7 @@
       final String type=info.getPrimaryType();
       reducedTypeInfoMap.put(type,info);
       for (      final Node node : info.getNodes()) {
-        node.setProperty(GraphObject.id.dbName(),nodeServiceCommand.getNextUuid());
+        node.setProperty(GraphObject.id.dbName(),NodeServiceCommand.getNextUuid());
         node.setProperty(GraphObject.type.dbName(),type);
         nodeTypeInfoMap.put(node.getId(),info);
       }
@@ -110,4 +109,5 @@
     }
     tx.success();
   }
- }
+   app.command(BulkRebuildIndexCommand.class).execute(Collections.EMPTY_MAP);
+}

@@ -1,5 +1,4 @@
 {
-  final double start=System.nanoTime();
   final Authenticator auth=config.getAuthenticator();
   final SecurityContext securityContext;
   final App app;
@@ -19,7 +18,6 @@
       response.setCharacterEncoding("UTF-8");
       boolean dontCache=false;
       logger.log(Level.FINE,"Path info {0}",path);
-      logger.log(Level.FINE,"Request examined by security context in {0} seconds",decimalFormat.format((System.nanoTime() - start) / 1000000000.0));
       if (response.getStatus() == 302) {
         return;
       }
@@ -48,7 +46,6 @@
       if (rootElement == null) {
         org.structr.web.entity.File file=findFile(request,path);
         if (file != null) {
-          logger.log(Level.FINE,"File found in {0} seconds",decimalFormat.format((System.nanoTime() - start) / 1000000000.0));
           streamFile(securityContext,file,request,response,edit);
           return;
         }
@@ -92,7 +89,6 @@
       if (rootElement == null) {
         return;
       }
-      logger.log(Level.FINE,"Page found in {0} seconds",decimalFormat.format((System.nanoTime() - start) / 1000000000.0));
       if (EditMode.DATA.equals(edit) || dontCache) {
         setNoCacheHeaders(response);
       }
@@ -103,8 +99,6 @@
         }
       }
       if (securityContext.isVisible(rootElement)) {
-        double setup=System.nanoTime();
-        logger.log(Level.FINE,"Setup time: {0} seconds",decimalFormat.format((setup - start) / 1000000000.0));
         if (!EditMode.DATA.equals(edit) && !dontCache && notModifiedSince(request,response,rootElement,dontCache)) {
           ServletOutputStream out=response.getOutputStream();
           out.flush();
@@ -184,8 +178,6 @@ synchronized (queue) {
             response.getOutputStream().flush();
             response.getOutputStream().close();
           }
-          double end=System.nanoTime();
-          logger.log(Level.FINE,"Content for path {0} in {1} seconds",new Object[]{path,decimalFormat.format((end - setup) / 1000000000.0)});
         }
       }
  else {

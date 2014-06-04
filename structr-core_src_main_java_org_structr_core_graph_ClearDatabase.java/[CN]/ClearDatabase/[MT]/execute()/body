@@ -2,8 +2,11 @@
   final GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
   final NodeFactory nodeFactory=new NodeFactory(securityContext);
   if (graphDb != null) {
-    final Result<AbstractNode> result=nodeFactory.instantiateAll(GlobalGraphOperations.at(graphDb).getAllNodes());
-    long deletedNodes=bulkGraphOperation(securityContext,result.getResults(),1000,"ClearDatabase",new BulkGraphOperation<AbstractNode>(){
+    final List<AbstractNode> result=new LinkedList<>();
+    try (final Tx tx=StructrApp.getInstance().tx()){
+      result.addAll(nodeFactory.bulkInstantiate(GlobalGraphOperations.at(graphDb).getAllNodes()));
+    }
+     long deletedNodes=bulkGraphOperation(securityContext,result,1000,"ClearDatabase",new BulkGraphOperation<AbstractNode>(){
       @Override public void handleGraphObject(      SecurityContext securityContext,      AbstractNode node){
         if (node.getProperty(GraphObject.id) != null) {
           try {

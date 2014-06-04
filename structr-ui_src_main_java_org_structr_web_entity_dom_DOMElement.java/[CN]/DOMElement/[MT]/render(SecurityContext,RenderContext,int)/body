@@ -2,15 +2,14 @@
   if (renderContext.hasTimeout(RENDER_TIMEOUT)) {
     return;
   }
-  Result localResult=renderContext.getResult();
-  AsyncBuffer out=renderContext.getBuffer();
-  double start=System.nanoTime();
   if (isDeleted() || isHidden() || !displayForLocale(renderContext)|| !displayForConditions(securityContext,renderContext)) {
     return;
   }
-  EditMode editMode=renderContext.getEditMode(securityContext.getUser(false));
-  boolean isVoid=isVoidElement();
-  String _tag=getProperty(DOMElement.tag);
+  final AsyncBuffer out=renderContext.getBuffer();
+  final EditMode editMode=renderContext.getEditMode(securityContext.getUser(false));
+  final boolean isVoid=isVoidElement();
+  final String _tag=getProperty(DOMElement.tag);
+  Result localResult=renderContext.getResult();
   boolean anyChildNodeCreatesNewLine=false;
   renderStructrAppLib(out,securityContext,renderContext,depth);
   if (depth > 0 && !avoidWhitespace()) {
@@ -19,7 +18,7 @@
   if (StringUtils.isNotBlank(_tag)) {
     openingTag(securityContext,out,_tag,editMode,renderContext,depth);
     try {
-      if (Body.class.getSimpleName().toLowerCase().equals(this.getTagName())) {
+      if (lowercaseBodyName.equals(this.getTagName())) {
         renderContext.setInBody(true);
       }
       List<DOMChildren> rels=getChildRelationships();
@@ -126,7 +125,6 @@
     }
   }
   double end=System.nanoTime();
-  logger.log(Level.FINE,"Render node {0} in {1} seconds",new java.lang.Object[]{getUuid(),decimalFormat.format((end - start) / 1000000000.0)});
   if (localResult != null) {
     renderContext.setResult(localResult);
   }

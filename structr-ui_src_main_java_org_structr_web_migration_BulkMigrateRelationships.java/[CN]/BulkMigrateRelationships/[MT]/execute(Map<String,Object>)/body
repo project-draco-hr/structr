@@ -2,8 +2,11 @@
   final GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
   final RelationshipFactory relFactory=new RelationshipFactory(securityContext);
   if (graphDb != null) {
-    List<AbstractRelationship> rels=relFactory.instantiate(GlobalGraphOperations.at(graphDb).getAllRelationships());
-    long count=bulkGraphOperation(securityContext,rels,1000,"MigrateRelationships",new BulkGraphOperation<AbstractRelationship>(){
+    List<AbstractRelationship> rels=new LinkedList<>();
+    try (final Tx tx=StructrApp.getInstance().tx()){
+      rels.addAll(relFactory.instantiate(GlobalGraphOperations.at(graphDb).getAllRelationships()));
+    }
+     long count=bulkGraphOperation(securityContext,rels,1000,"MigrateRelationships",new BulkGraphOperation<AbstractRelationship>(){
       @Override public void handleGraphObject(      SecurityContext securityContext,      AbstractRelationship rel){
         if (rel.getProperty(GraphObject.id) != null) {
           Class type=rel.getClass();

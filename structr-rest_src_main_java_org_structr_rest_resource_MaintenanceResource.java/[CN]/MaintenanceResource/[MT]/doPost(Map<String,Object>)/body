@@ -1,5 +1,5 @@
 {
-  if ((securityContext != null) && securityContext.isSuperUser()) {
+  if ((securityContext != null) && isSuperUser()) {
     if (this.taskOrCommand != null) {
       try {
         final App app=StructrApp.getInstance(securityContext);
@@ -9,7 +9,15 @@
         }
  else         if (MaintenanceCommand.class.isAssignableFrom(taskOrCommand)) {
           MaintenanceCommand cmd=(MaintenanceCommand)StructrApp.getInstance(securityContext).command(taskOrCommand);
-          cmd.execute(propertySet);
+          if (cmd.requiresEnclosingTransaction()) {
+            try (final Tx tx=app.tx()){
+              cmd.execute(propertySet);
+              tx.success();
+            }
+           }
+ else {
+            cmd.execute(propertySet);
+          }
         }
  else {
           return new RestMethodResult(HttpServletResponse.SC_NOT_FOUND);
@@ -28,7 +36,6 @@ catch (      IllegalAccessException iaex) {
     }
   }
  else {
-    logger.log(Level.INFO,"SecurityContext is {0}, user is {1}",new Object[]{(securityContext != null) ? "non-null" : "null",((securityContext != null) && (securityContext.getUser(true) != null)) ? securityContext.getUser(true).getProperty(AbstractNode.name) : "null"});
     throw new NotAllowedException();
   }
 }

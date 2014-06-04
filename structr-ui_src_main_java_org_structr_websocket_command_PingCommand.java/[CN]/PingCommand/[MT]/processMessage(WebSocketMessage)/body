@@ -1,4 +1,12 @@
 {
-  logger.log(Level.FINE,"PING received from session {0}",webSocketData.getSessionId());
-  getWebSocket().send(MessageBuilder.status().data("username",getWebSocket().getCurrentUser().getProperty(AbstractNode.name)).code(100).build(),true);
+  final String sessionId=webSocketData.getSessionId();
+  logger.log(Level.FINE,"PING received from session {0}",sessionId);
+  final Principal currentUser=AuthHelper.getPrincipalForSessionId(sessionId);
+  if (currentUser != null) {
+    getWebSocket().send(MessageBuilder.status().data("username",currentUser.getProperty(AbstractNode.name)).code(100).build(),true);
+  }
+ else {
+    logger.log(Level.FINE,"Invalid session id");
+    getWebSocket().send(MessageBuilder.status().code(403).build(),true);
+  }
 }

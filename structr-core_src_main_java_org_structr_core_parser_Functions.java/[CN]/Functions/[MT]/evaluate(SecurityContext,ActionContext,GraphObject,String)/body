@@ -1,0 +1,76 @@
+{
+  final String expressionWithoutNewlines=expression.replace('\n',' ');
+  final StreamTokenizer tokenizer=new StreamTokenizer(new StringReader(expressionWithoutNewlines));
+  tokenizer.eolIsSignificant(true);
+  tokenizer.wordChars('_','_');
+  tokenizer.wordChars('.','.');
+  Expression root=new RootExpression();
+  Expression current=root;
+  Expression next=null;
+  String lastToken=null;
+  int token=0;
+  int level=0;
+  while (token != StreamTokenizer.TT_EOF) {
+    token=nextToken(tokenizer);
+switch (token) {
+case StreamTokenizer.TT_EOF:
+      break;
+case StreamTokenizer.TT_EOL:
+    break;
+case StreamTokenizer.TT_NUMBER:
+  if (current == null) {
+    throw new FrameworkException(422,"Invalid expression: mismatched opening bracket before NUMBER");
+  }
+next=new ConstantExpression(tokenizer.nval);
+current.add(next);
+lastToken+="NUMBER";
+break;
+case StreamTokenizer.TT_WORD:
+if (current == null) {
+throw new FrameworkException(422,"Invalid expression: mismatched opening bracket before " + tokenizer.sval);
+}
+next=checkReservedWords(securityContext,actionContext,entity,tokenizer.sval);
+current.add(next);
+lastToken=tokenizer.sval;
+break;
+case '(':
+if (((current == null || current instanceof RootExpression) && next == null) || current == next) {
+next=new GroupExpression();
+current.add(next);
+}
+current=next;
+lastToken+="(";
+level++;
+break;
+case ')':
+if (current == null) {
+throw new FrameworkException(422,"Invalid expression: mismatched opening bracket before " + lastToken);
+}
+current=current.getParent();
+if (current == null) {
+throw new FrameworkException(422,"Invalid expression: mismatched closing bracket after " + lastToken);
+}
+lastToken+=")";
+level--;
+break;
+case ';':
+next=null;
+lastToken+=";";
+break;
+case ',':
+next=current;
+lastToken+=",";
+break;
+default :
+if (current == null) {
+throw new FrameworkException(422,"Invalid expression: mismatched opening bracket before " + tokenizer.sval);
+}
+current.add(new ConstantExpression(tokenizer.sval));
+lastToken=tokenizer.sval;
+}
+}
+if (level > 0) {
+throw new FrameworkException(422,"Invalid expression: mismatched closing bracket after " + lastToken);
+}
+return root.evaluate(actionContext,entity);
+}

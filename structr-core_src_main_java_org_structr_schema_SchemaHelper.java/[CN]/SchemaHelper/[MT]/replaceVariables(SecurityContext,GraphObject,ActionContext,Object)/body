@@ -1,0 +1,38 @@
+{
+  String value=null;
+  if (rawValue == null) {
+    return null;
+  }
+  if (rawValue instanceof String) {
+    value=(String)rawValue;
+    if (!actionContext.returnRawValue(securityContext)) {
+      Matcher matcher=threadLocalTemplateMatcher.get();
+      matcher.reset(value);
+      while (matcher.find()) {
+        String group=matcher.group();
+        String source=group.substring(2,group.length() - 1);
+        Object extractedValue=Functions.evaluate(securityContext,actionContext,entity,source);
+        if (extractedValue == null) {
+          extractedValue="";
+        }
+        String partValue=StringUtils.remove(extractedValue.toString(),"\\");
+        if (partValue != null) {
+          value=value.replace(group,partValue);
+        }
+ else {
+          value=value.equals(group) ? null : value.replace(group,"");
+        }
+      }
+    }
+  }
+ else   if (rawValue instanceof Boolean) {
+    value=Boolean.toString((Boolean)rawValue);
+  }
+ else {
+    value=rawValue.toString();
+  }
+  if (Functions.NULL_STRING.equals(value)) {
+    return null;
+  }
+  return value;
+}

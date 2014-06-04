@@ -2,9 +2,11 @@
   Result<Page> results=StructrApp.getInstance().nodeQuery(Page.class).sort(Page.position).order(false).getResult();
   Collections.sort(results.getResults(),new GraphObjectComparator(Page.position,GraphObjectComparator.ASCENDING));
   Page page=null;
-  int i=0;
-  while (page == null || (i < results.size() && !securityContext.isVisible(page))) {
-    page=results.get(i++);
+  if (!results.isEmpty()) {
+    int i=0;
+    while (page == null || (i < results.size() && !securityContext.isVisible(page))) {
+      page=results.get(i++);
+    }
   }
   return page;
 }

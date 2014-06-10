@@ -38,6 +38,9 @@
         continue;
       }
       if (value == null) {
+        if (defaultValue != null && StringUtils.contains(refKey,"!")) {
+          return numberOrString(defaultValue);
+        }
         return null;
       }
     }
@@ -49,18 +52,18 @@
       continue;
     }
     if ("request".equals(part)) {
-      HttpServletRequest request=this.getRequest();
+      final HttpServletRequest request=this.getRequest();
       if (request != null) {
         if (StringUtils.contains(refKey,"!")) {
-          return StringUtils.defaultIfBlank(request.getParameter(referenceKey),defaultValue);
+          return numberOrString(StringUtils.defaultIfBlank(request.getParameter(referenceKey),defaultValue));
         }
  else {
-          return StringUtils.defaultString(request.getParameter(referenceKey));
+          return numberOrString(StringUtils.defaultString(request.getParameter(referenceKey)));
         }
       }
     }
     if ("now".equals(part)) {
-      return AbstractNode.createdDate.inputConverter(securityContext).revert(new Date());
+      return new Date();
     }
     if ("me".equals(part)) {
       Principal me=(Principal)securityContext.getUser(false);
@@ -181,6 +184,9 @@
       value=converter.revert(value);
     }
     return value != null ? value : defaultValue;
+  }
+  if (defaultValue != null && StringUtils.contains(refKey,"!")) {
+    return numberOrString(defaultValue);
   }
   return null;
 }

@@ -471,6 +471,8 @@
     assertEquals("Invalid each() result","1",testOne.replaceVariables(securityContext,ctx,"${get(this, \"setTestInteger1\")}"));
     assertEquals("Invalid each() result","1",testOne.replaceVariables(securityContext,ctx,"${get(this, \"setTestInteger2\")}"));
     assertEquals("Invalid each() result","1",testOne.replaceVariables(securityContext,ctx,"${get(this, \"setTestInteger3\")}"));
+    testOne.replaceVariables(securityContext,ctx,"${each(this.manyToManyTestSixs, set(this, \"testString\", concat(get(this, \"testString\"), data.id)))}");
+    assertEquals("Invalid each() result","640",testOne.replaceVariables(securityContext,ctx,"${length(this.testString)}"));
     assertEquals("Invalid if(equal()) result","String",testOne.replaceVariables(securityContext,ctx,"${if(empty(this.alwaysNull), titleize(this.aString, '-'), this.alwaysNull)}"));
     assertEquals("Invalid if(equal()) result","String",testOne.replaceVariables(securityContext,ctx,"${if(empty(this.aString), titleize(this.alwaysNull, '-'), this.aString)}"));
     assertNull("Invalid result for special null value",testOne.replaceVariables(securityContext,ctx,"${null}"));
@@ -498,6 +500,15 @@
     assertEquals("Invalid replace() result","equal",testOne.replaceVariables(securityContext,ctx,"${if(equal(2, 2),\n    (\"equal\"),\n    (\"not equal\")\n)}"));
     assertEquals("Invalid replace() result","not equal",testOne.replaceVariables(securityContext,ctx,"${if(equal(2, 3),\n    (\"equal\"),\n    (\"not equal\")\n)}"));
     assertEquals("Invalid keys() / join() result","id,name,owner,type,createdBy,deleted,hidden,createdDate,lastModifiedDate,visibleToPublicUsers,visibleToAuthenticatedUsers,visibilityStartDate,visibilityEndDate",testOne.replaceVariables(securityContext,ctx,"${join(keys(this, 'ui'), ',')}"));
+    assertEquals("Invalid string default value","blah",testOne.replaceVariables(securityContext,ctx,"${this.alwaysNull!blah}"));
+    assertEquals("Invalid numeric default value","12",testOne.replaceVariables(securityContext,ctx,"${this.alwaysNull!12}"));
+    assertEquals("true",testOne.replaceVariables(securityContext,ctx,"${equal(42, this.alwaysNull!42)}"));
+    testOne.replaceVariables(securityContext,ctx,"${(set(this, \"isValid\", true), each(this.manyToManyTestSixs, set(this, \"isValid\", and(this.isValid, equal(length(data.id, 32))))))}");
+    assertEquals("Invalid multiline statement test result","true",testOne.replaceVariables(securityContext,ctx,"${this.isValid}"));
+    testOne.replaceVariables(securityContext,ctx,"${(set(this, \"isValid\", true), each(this.manyToManyTestSixs, set(this, \"isValid\", and(this.isValid, gte(now, data.createdDate)))))}");
+    assertEquals("Invalid multiline statement test result","true",testOne.replaceVariables(securityContext,ctx,"${this.isValid}"));
+    testOne.replaceVariables(securityContext,ctx,"${(set(this, \"isValid\", false), each(this.manyToManyTestSixs, set(this, \"isValid\", and(this.isValid, gte(now, data.createdDate)))))}");
+    assertEquals("Invalid multiline statement test result","false",testOne.replaceVariables(securityContext,ctx,"${this.isValid}"));
     tx.success();
   }
  catch (  FrameworkException fex) {

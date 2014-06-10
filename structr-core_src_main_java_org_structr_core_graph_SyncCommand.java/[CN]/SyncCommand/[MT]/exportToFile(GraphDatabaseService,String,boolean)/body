@@ -1,9 +1,8 @@
 {
-  try {
-    GlobalGraphOperations ggop=GlobalGraphOperations.at(graphDb);
-    Iterable<Relationship> rels=ggop.getAllRelationships();
-    Iterable<Node> nodes=ggop.getAllNodes();
-    exportToStream(new FileOutputStream(fileName),nodes,rels,null,includeFiles);
+  final App app=StructrApp.getInstance();
+  try (final Tx tx=app.tx()){
+    exportToStream(new FileOutputStream(fileName),app.nodeQuery(NodeInterface.class).getAsList(),app.relationshipQuery(RelationshipInterface.class).getAsList(),null,includeFiles);
+    tx.success();
   }
  catch (  Throwable t) {
     throw new FrameworkException(500,t.getMessage());

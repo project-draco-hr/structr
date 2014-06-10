@@ -4,7 +4,9 @@
   int nodeCount=0;
   int relCount=0;
   zos.putNextEntry(dbEntry);
-  for (  Node node : nodes) {
+  for (  NodeInterface nodeObject : nodes) {
+    final Node node=nodeObject.getNode();
+    System.out.println(node.getId() + ": " + (node.hasProperty("id") ? node.getProperty("id") : "null"));
     if (node.hasProperty(GraphObject.id.dbName())) {
       writer.print("N");
       for (      String key : node.getPropertyKeys()) {
@@ -16,7 +18,8 @@
     }
   }
   writer.flush();
-  for (  Relationship rel : relationships) {
+  for (  RelationshipInterface relObject : relationships) {
+    final Relationship rel=relObject.getRelationship();
     if (rel.hasProperty(GraphObject.id.dbName())) {
       final Node startNode=rel.getStartNode();
       final Node endNode=rel.getEndNode();

@@ -1,6 +1,6 @@
 {
   final Set<PropertyKey> properties=new LinkedHashSet<>(StructrApp.getConfiguration().getPropertySet(type,view));
-  final Map<String,Object> propertyConverterMap=new TreeMap<>();
+  final Map<String,Object> propertyConverterMap=new LinkedHashMap<>();
   if (PropertyDefinition.exists(type.getSimpleName())) {
     Iterable<PropertyDefinition> dynamicProperties=PropertyDefinition.getPropertiesForKind(type.getSimpleName());
     if (dynamicProperties != null) {
@@ -11,7 +11,7 @@
   }
   if (!properties.isEmpty()) {
     for (    PropertyKey property : properties) {
-      final Map<String,Object> propProperties=new TreeMap();
+      final Map<String,Object> propProperties=new LinkedHashMap();
       propProperties.put("dbName",property.dbName());
       propProperties.put("jsonName",property.jsonName());
       propProperties.put("className",property.getClass().getName());

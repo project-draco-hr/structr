@@ -180,7 +180,7 @@
     PropertyKey referenceKeyProperty=StructrApp.getConfiguration().getPropertyKeyForJSONName(_data.getClass(),referenceKey);
     Object value=_data.getProperty(referenceKeyProperty);
     PropertyConverter converter=referenceKeyProperty.inputConverter(securityContext);
-    if (value != null && converter != null) {
+    if (value != null && converter != null && !(referenceKeyProperty instanceof RelationProperty)) {
       value=converter.revert(value);
     }
     return value != null ? value : defaultValue;

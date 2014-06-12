@@ -1,0 +1,21 @@
+{
+  while (connection.isConnected()) {
+    if (messagesInFlight < CloudService.LIVE_PACKET_COUNT) {
+      try {
+        final Message message=outputQueue.poll();
+        if (message != null) {
+          outputStream.writeObject(message);
+          outputStream.flush();
+          messagesInFlight++;
+          message.afterSend(connection);
+        }
+      }
+ catch (      Throwable t) {
+        connection.close();
+      }
+    }
+ else {
+      Thread.yield();
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  try {
+    final App app=serverConnection.getApplicationContext();
+    Syncable syncable=(Syncable)app.nodeQuery().and(GraphObject.id,rootNodeId).includeDeletedAndHidden().getFirst();
+    if (syncable == null) {
+      syncable=(Syncable)app.relationshipQuery().and(GraphObject.id,rootNodeId).includeDeletedAndHidden().getFirst();
+    }
+    if (syncable != null) {
+      final ExportSet exportSet=ExportSet.getInstance(syncable,recursive);
+      numNodes=exportSet.getNodes().size();
+      numRels=exportSet.getRelationships().size();
+      key=UUID.randomUUID().toString();
+      serverConnection.storeValue(key + "Nodes",new ArrayList<>(exportSet.getNodes()));
+      serverConnection.storeValue(key + "Rels",new ArrayList<>(exportSet.getRelationships()));
+      serverConnection.send(this);
+      context.progress();
+    }
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+  }
+}

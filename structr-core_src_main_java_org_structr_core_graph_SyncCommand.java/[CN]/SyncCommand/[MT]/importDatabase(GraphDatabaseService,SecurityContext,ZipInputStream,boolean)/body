@@ -1,21 +1,22 @@
 {
   final App app=StructrApp.getInstance();
-  final Value<Long> nodeCountValue=new StaticValue<>(0L);
-  final Value<Long> relCountValue=new StaticValue<>(0L);
+  final RelationshipFactory relFactory=new RelationshipFactory(securityContext);
+  final NodeFactory nodeFactory=new NodeFactory(securityContext);
   final String uuidPropertyName=GraphObject.id.dbName();
   double t0=System.nanoTime();
-  try (final Tx tx=app.tx()){
-    Map<String,Node> uuidMap=new LinkedHashMap<>();
-    List<Relationship> rels=new LinkedList<>();
-    List<Node> nodes=new LinkedList<>();
-    PropertyContainer currentObject=null;
-    BufferedReader reader=null;
-    String currentKey=null;
-    boolean finished=false;
-    long nodeCount=0;
-    long relCount=0;
-    try {
-      reader=new BufferedReader(new InputStreamReader(zis));
+  Map<String,Node> uuidMap=new LinkedHashMap<>();
+  PropertyContainer currentObject=null;
+  String currentKey=null;
+  boolean finished=false;
+  long totalNodeCount=0;
+  long totalRelCount=0;
+  final BufferedReader reader=new BufferedReader(new InputStreamReader(zis));
+  do {
+    try (final Tx tx=app.tx(doValidation)){
+      final List<Relationship> rels=new LinkedList<>();
+      final List<Node> nodes=new LinkedList<>();
+      long nodeCount=0;
+      long relCount=0;
       do {
         try {
           reader.mark(4);
@@ -74,30 +75,24 @@
           finished=true;
         }
       }
+ while (!finished && (nodeCount + relCount < 200));
+      totalNodeCount+=nodeCount;
+      totalRelCount+=relCount;
+      for (      Node node : nodes) {
+        NodeInterface entity=nodeFactory.instantiate(node);
+        TransactionCommand.nodeCreated(entity);
+        entity.addToIndex();
+      }
+      for (      Relationship rel : rels) {
+        RelationshipInterface entity=relFactory.instantiate(rel);
+        TransactionCommand.relationshipCreated(entity);
+        entity.addToIndex();
+      }
+      logger.log(Level.INFO,"Imported {0} nodes and {1} rels, committing transaction..",new Object[]{totalNodeCount,totalRelCount});
+      tx.success();
+    }
+   }
  while (!finished);
-    }
- catch (    IOException ioex) {
-    }
-    logger.log(Level.INFO,"Imported {0} nodes and {1} rels, committing transaction..",new Object[]{nodeCount,relCount});
-    nodeCountValue.set(securityContext,nodeCount);
-    relCountValue.set(securityContext,relCount);
-    RelationshipFactory relFactory=new RelationshipFactory(securityContext);
-    NodeFactory nodeFactory=new NodeFactory(securityContext);
-    for (    Node node : nodes) {
-      NodeInterface entity=nodeFactory.instantiate(node);
-      TransactionCommand.nodeCreated(entity);
-      entity.addToIndex();
-    }
-    for (    Relationship rel : rels) {
-      RelationshipInterface entity=relFactory.instantiate(rel);
-      TransactionCommand.relationshipCreated(entity);
-      entity.addToIndex();
-    }
-    tx.success();
-  }
- catch (  FrameworkException fex) {
-    fex.printStackTrace();
-  }
   double t1=System.nanoTime();
   double time=((t1 - t0) / 1000000000.0);
   DecimalFormat decimalFormat=new DecimalFormat("0.000000000",DecimalFormatSymbols.getInstance(Locale.ENGLISH));

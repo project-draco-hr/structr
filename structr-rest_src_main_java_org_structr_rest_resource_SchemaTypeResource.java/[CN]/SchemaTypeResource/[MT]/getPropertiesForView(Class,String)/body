@@ -1,0 +1,54 @@
+{
+  final Set<PropertyKey> properties=new LinkedHashSet<>(StructrApp.getConfiguration().getPropertySet(type,view));
+  final Map<String,Object> propertyConverterMap=new LinkedHashMap<>();
+  if (PropertyDefinition.exists(type.getSimpleName())) {
+    Iterable<PropertyDefinition> dynamicProperties=PropertyDefinition.getPropertiesForKind(type.getSimpleName());
+    if (dynamicProperties != null) {
+      for (      PropertyDefinition property : dynamicProperties) {
+        properties.add(property);
+      }
+    }
+  }
+  if (!properties.isEmpty()) {
+    for (    PropertyKey property : properties) {
+      final Map<String,Object> propProperties=new LinkedHashMap();
+      propProperties.put("dbName",property.dbName());
+      propProperties.put("jsonName",property.jsonName());
+      propProperties.put("className",property.getClass().getName());
+      final Class declaringClass=property.getDeclaringClass();
+      propProperties.put("declaringClass",declaringClass);
+      propProperties.put("defaultValue",property.defaultValue());
+      propProperties.put("readOnly",property.isReadOnly());
+      propProperties.put("system",property.isUnvalidated());
+      propProperties.put("indexed",property.isIndexed());
+      propProperties.put("indexedWhenEmpty",property.isIndexedWhenEmpty());
+      final Class<? extends GraphObject> relatedType=property.relatedType();
+      if (relatedType != null) {
+        propProperties.put("relatedType",relatedType.getName());
+        propProperties.put("type",relatedType.getSimpleName());
+      }
+ else {
+        propProperties.put("type",property.typeName());
+      }
+      propProperties.put("isCollection",property.isCollection());
+      final PropertyConverter databaseConverter=property.databaseConverter(securityContext,null);
+      final PropertyConverter inputConverter=property.inputConverter(securityContext);
+      if (databaseConverter != null) {
+        propProperties.put("databaseConverter",databaseConverter.getClass().getName());
+      }
+      if (inputConverter != null) {
+        propProperties.put("inputConverter",inputConverter.getClass().getName());
+      }
+      if (declaringClass != null && (declaringClass.getName().startsWith("org.structr.dynamic"))) {
+        if (property instanceof RelationProperty) {
+          Relation relation=((RelationProperty)property).getRelation();
+          if (relation != null) {
+            propProperties.put("relationshipType",relation.name());
+          }
+        }
+      }
+      propertyConverterMap.put(property.jsonName(),propProperties);
+    }
+  }
+  return propertyConverterMap;
+}

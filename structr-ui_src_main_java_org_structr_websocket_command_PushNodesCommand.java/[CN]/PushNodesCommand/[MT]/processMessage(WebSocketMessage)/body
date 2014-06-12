@@ -1,0 +1,37 @@
+{
+  final Map<String,Object> properties=webSocketData.getNodeData();
+  final String sourceId=webSocketData.getId();
+  final Object recursiveSource=properties.get("recursive");
+  final String username=(String)properties.get("username");
+  final String password=(String)properties.get("password");
+  final String host=(String)properties.get("host");
+  final Long port=(Long)properties.get("port");
+  final String key=(String)properties.get("key");
+  if (sourceId != null && host != null && port != null && username != null && password != null && key != null) {
+    final App app=StructrApp.getInstance();
+    try (final Tx tx=app.tx()){
+      final GraphObject root=app.get(sourceId);
+      if (root != null) {
+        if (root instanceof Syncable) {
+          boolean recursive=false;
+          if (recursiveSource != null) {
+            recursive="true".equals(recursiveSource.toString());
+          }
+          CloudService.doRemote(new PushTransmission((Syncable)root,recursive,username,password,host,port.intValue()),new WebsocketProgressListener(getWebSocket(),key));
+        }
+ else {
+          getWebSocket().send(MessageBuilder.status().code(400).message("Entity with ID " + sourceId + " cannot be synced.").build(),true);
+        }
+      }
+ else {
+        getWebSocket().send(MessageBuilder.status().code(404).message("Entity with ID " + sourceId + " not found.").build(),true);
+      }
+    }
+ catch (    FrameworkException fex) {
+      getWebSocket().send(MessageBuilder.status().code(400).message(fex.getMessage()).build(),true);
+    }
+  }
+ else {
+    getWebSocket().send(MessageBuilder.status().code(400).message("The PUSH command needs id, username, password, host, port and key!").build(),true);
+  }
+}

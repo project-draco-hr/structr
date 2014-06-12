@@ -32,11 +32,9 @@ synchronized (clients) {
         try {
           session.getRemote().sendString(message);
         }
- catch (        org.eclipse.jetty.io.EofException eof) {
-          logger.log(Level.FINE,"EofException irgnored, may occour on SSL connections.",eof);
-        }
-catch (        IOException e) {
-          logger.log(Level.WARNING,"Error sending message to client.",e);
+ catch (        Throwable t) {
+          t.printStackTrace();
+          logger.log(Level.WARNING,"Error sending message to client.",t);
         }
       }
     }

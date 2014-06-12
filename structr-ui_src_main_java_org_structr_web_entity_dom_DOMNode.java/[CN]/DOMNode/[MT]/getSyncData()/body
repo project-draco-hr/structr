@@ -1,0 +1,16 @@
+{
+  final List<Syncable> data=new LinkedList<>();
+  data.addAll(getProperty(DOMNode.children));
+  final DOMNode sibling=getProperty(DOMNode.nextSibling);
+  if (sibling != null) {
+    data.add(sibling);
+  }
+  for (  final DOMChildren child : getOutgoingRelationships(DOMChildren.class)) {
+    data.add(child);
+  }
+  final DOMSiblings siblingRel=getOutgoingRelationship(DOMSiblings.class);
+  if (siblingRel != null) {
+    data.add(siblingRel);
+  }
+  return data;
+}

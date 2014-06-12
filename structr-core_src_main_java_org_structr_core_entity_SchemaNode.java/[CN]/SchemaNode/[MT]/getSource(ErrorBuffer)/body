@@ -34,8 +34,25 @@
       SchemaHelper.formatView(src,_className,viewName,viewName,view);
     }
   }
-  formatValidators(src,validators);
-  formatSaveActions(src,saveActions);
+  if (getProperty(defaultSortKey) != null) {
+    String order=getProperty(defaultSortOrder);
+    if (order == null || "desc".equals(order)) {
+      order="GraphObjectComparator.DESCENDING";
+    }
+ else {
+      order="GraphObjectComparator.ASCENDING";
+    }
+    src.append("\n\t@Override\n");
+    src.append("\tpublic PropertyKey getDefaultSortKey() {\n");
+    src.append("\t\treturn ").append(getProperty(defaultSortKey)).append("Property;\n");
+    src.append("\t}\n");
+    src.append("\n\t@Override\n");
+    src.append("\tpublic String getDefaultSortOrder() {\n");
+    src.append("\t\treturn ").append(order).append(";\n");
+    src.append("\t}\n");
+  }
+  SchemaHelper.formatValidators(src,validators);
+  SchemaHelper.formatSaveActions(src,saveActions);
   src.append("}\n");
   return src.toString();
 }

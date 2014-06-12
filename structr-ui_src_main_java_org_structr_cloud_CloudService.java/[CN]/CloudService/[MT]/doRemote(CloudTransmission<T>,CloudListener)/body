@@ -1,0 +1,43 @@
+{
+  final String userName=transmission.getUserName();
+  final String password=transmission.getPassword();
+  final String remoteHost=transmission.getRemoteHost();
+  final int remoteTcpPort=transmission.getRemotePort();
+  final ExportContext context=new ExportContext(listener,2);
+  CloudConnection<T> client=null;
+  int maxKeyLen=128;
+  T remoteResult=null;
+  try {
+    maxKeyLen=Cipher.getMaxAllowedKeyLength(CloudService.STREAM_CIPHER);
+  }
+ catch (  NoSuchAlgorithmException nsaex) {
+    nsaex.printStackTrace();
+  }
+  try {
+    client=new CloudConnection(new Socket(remoteHost,remoteTcpPort),context);
+    client.start();
+    context.increaseTotal(transmission.getTotalSize());
+    context.transmissionStarted();
+    client.send(new Begin());
+    context.progress();
+    client.setPassword(password);
+    client.send(new AuthenticationRequest(userName,maxKeyLen));
+    context.progress();
+    client.waitForAuthentication();
+    remoteResult=transmission.doRemote(client);
+    final End endPacket=new End();
+    client.send(endPacket);
+    client.waitForClose(2000);
+    client.close();
+    context.transmissionFinished();
+  }
+ catch (  IOException ioex) {
+    throw new FrameworkException(504,"Unable to connect to remote server: " + ioex.getMessage());
+  }
+ finally {
+    if (client != null) {
+      client.close();
+    }
+  }
+  return remoteResult;
+}

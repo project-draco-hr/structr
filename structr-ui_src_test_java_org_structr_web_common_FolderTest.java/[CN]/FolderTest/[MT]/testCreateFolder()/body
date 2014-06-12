@@ -1,0 +1,23 @@
+{
+  try (final Tx tx=app.tx()){
+    Folder test=FileHelper.createFolderPath(SecurityContext.getSuperUserInstance(),"/a/b/c");
+    tx.success();
+  }
+ catch (  FrameworkException ex) {
+    Logger.getLogger(FolderTest.class.getName()).log(Level.SEVERE,null,ex);
+  }
+  try (final Tx tx=app.tx()){
+    Folder a=(Folder)FileHelper.getFileByAbsolutePath("/a");
+    assertNotNull(a);
+    assertNull(a.getProperty(Folder.parent));
+    Folder b=(Folder)FileHelper.getFileByAbsolutePath("/a/b");
+    assertNotNull(b);
+    assertEquals(a,b.getProperty(Folder.parent));
+    Folder c=(Folder)FileHelper.getFileByAbsolutePath("/a/b/c");
+    assertNotNull(c);
+    assertEquals(b,c.getProperty(Folder.parent));
+  }
+ catch (  FrameworkException ex) {
+    Logger.getLogger(FolderTest.class.getName()).log(Level.SEVERE,null,ex);
+  }
+}

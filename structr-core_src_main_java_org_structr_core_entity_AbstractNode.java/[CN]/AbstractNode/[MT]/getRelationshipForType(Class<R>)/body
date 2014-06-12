@@ -1,9 +1,13 @@
 {
-  try {
-    return type.newInstance();
+  R instance=(R)relationshipTemplateInstanceCache.get(type);
+  if (instance == null) {
+    try {
+      instance=type.newInstance();
+      relationshipTemplateInstanceCache.put(type,instance);
+    }
+ catch (    Throwable t) {
+      t.printStackTrace();
+    }
   }
- catch (  Throwable t) {
-    t.printStackTrace();
-  }
-  return null;
+  return instance;
 }

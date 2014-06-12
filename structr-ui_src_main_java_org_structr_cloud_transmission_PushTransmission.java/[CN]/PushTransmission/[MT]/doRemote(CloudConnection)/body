@@ -1,0 +1,21 @@
+{
+  client.send(new PushNodeRequestContainer());
+  sequenceNumber=0;
+  final Set<NodeInterface> nodes=exportSet.getNodes();
+  for (  final NodeInterface n : nodes) {
+    if (n instanceof File) {
+      sendFile(client,(File)n,CloudService.CHUNK_SIZE);
+    }
+ else {
+      client.send(new NodeDataContainer(n,sequenceNumber++));
+    }
+  }
+  Set<RelationshipInterface> rels=exportSet.getRelationships();
+  for (  RelationshipInterface r : rels) {
+    if (nodes.contains(r.getSourceNode()) && nodes.contains(r.getTargetNode())) {
+      client.send(new RelationshipDataContainer(r,sequenceNumber++));
+    }
+  }
+  client.waitForTransmission();
+  return true;
+}

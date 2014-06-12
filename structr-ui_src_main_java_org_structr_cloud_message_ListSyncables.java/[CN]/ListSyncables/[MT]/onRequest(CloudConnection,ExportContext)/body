@@ -1,0 +1,14 @@
+{
+  final String[] rawTypes=StringUtils.split(type,",");
+  final Set<Class<Syncable>> types=new HashSet();
+  if (type != null) {
+    for (    final String rawType : rawTypes) {
+      Class entityClass=SchemaHelper.getEntityClassForRawType(rawType);
+      if (entityClass != null && Syncable.class.isAssignableFrom(entityClass)) {
+        types.add(entityClass);
+      }
+    }
+  }
+  this.syncables=serverConnection.listSyncables(types);
+  serverConnection.send(this);
+}

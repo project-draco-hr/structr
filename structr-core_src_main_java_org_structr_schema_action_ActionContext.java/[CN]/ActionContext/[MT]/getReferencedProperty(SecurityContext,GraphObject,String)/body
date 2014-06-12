@@ -1,0 +1,93 @@
+{
+  final String DEFAULT_VALUE_SEP="!";
+  final String[] parts=refKey.split("[\\.]+");
+  String referenceKey=parts[parts.length - 1];
+  String defaultValue=null;
+  Object _data=null;
+  if (StringUtils.contains(referenceKey,DEFAULT_VALUE_SEP)) {
+    String[] ref=StringUtils.split(referenceKey,DEFAULT_VALUE_SEP);
+    referenceKey=ref[0];
+    if (ref.length > 1) {
+      defaultValue=ref[1];
+    }
+ else {
+      defaultValue="";
+    }
+  }
+  for (int i=0; (i < parts.length); i++) {
+    String part=parts[i];
+    if (_data != null && _data instanceof GraphObject) {
+      PropertyKey referenceKeyProperty=StructrApp.getConfiguration().getPropertyKeyForJSONName(_data.getClass(),part);
+      _data=((GraphObject)_data).getProperty(referenceKeyProperty);
+      if (_data == null) {
+        if (defaultValue != null && StringUtils.contains(refKey,"!")) {
+          return numberOrString(defaultValue);
+        }
+        return null;
+      }
+    }
+    if (i > 0 && "size".equals(part) && _data instanceof List) {
+      return ((List)_data).size();
+    }
+    if ("now".equals(part)) {
+      return new Date();
+    }
+    if ("me".equals(part)) {
+      Principal me=(Principal)securityContext.getUser(false);
+      if (me != null) {
+        _data=me;
+        continue;
+      }
+    }
+    if ("true".equals(part)) {
+      return true;
+    }
+    if ("false".equals(part)) {
+      return false;
+    }
+    if (_data == null) {
+      if ("parent".equals(part)) {
+        _data=parent;
+        if (parts.length == 1) {
+          return _data;
+        }
+        continue;
+      }
+      if ("id".equals(part)) {
+        return entity.getUuid();
+      }
+      if ("this".equals(part)) {
+        _data=entity;
+        if (parts.length == 1) {
+          return _data;
+        }
+        continue;
+      }
+      if ("data".equals(part)) {
+        _data=data;
+        if (parts.length == 1) {
+          return _data;
+        }
+        continue;
+      }
+      if ("element".equals(part)) {
+        _data=entity;
+        if (parts.length == 1) {
+          return _data;
+        }
+        continue;
+      }
+      if (entity instanceof NodeInterface && "owner".equals(part)) {
+        Ownership rel=((NodeInterface)entity).getIncomingRelationship(PrincipalOwnsNode.class);
+        if (rel != null) {
+          _data=rel.getSourceNode();
+          if (parts.length == 1) {
+            return _data;
+          }
+        }
+        continue;
+      }
+    }
+  }
+  return _data;
+}

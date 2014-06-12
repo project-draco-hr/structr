@@ -8,7 +8,7 @@
     logger.log(Level.SEVERE,null,ex);
   }
   try (final Tx tx=app.tx()){
-    String[] args={"/bin/sh","-c","rm ~/.qws/share/data/Ofi\\ Labs/PhantomJS/* ; cd src/test/javascript ; PATH=$PATH:./bin/`uname`/ casperjs/bin/casperjs --local-storage-path=" + basePath + " test "+ testName+ ".js"};
+    String[] args={"/bin/sh","-c","rm ~/.qws/share/data/Ofi\\ Labs/PhantomJS/* ; cd src/test/javascript ; PATH=./bin/`uname`/:$PATH casperjs/bin/casperjs --local-storage-path=" + basePath + " test "+ testName+ ".js"};
     Process proc=Runtime.getRuntime().exec(args);
     logger.log(Level.INFO,IOUtils.toString(proc.getInputStream()));
     String warnings=IOUtils.toString(proc.getErrorStream());

@@ -56,9 +56,9 @@ catch (    IOException ex) {
         fileNode=createFileNode(uuid,fileName,ct,size,checksum);
       }
       if (fileNode != null) {
-        Folder parent=createFolderPath(path);
+        Folder parent=FileHelper.createFolderPath(securityContext,path);
         if (parent != null) {
-          app.create(parent,fileNode,Files.class);
+          fileNode.setProperty(File.parent,parent);
         }
         if (contentType.equals("text/css")) {
           processCssFileNode(fileNode,downloadUrl);

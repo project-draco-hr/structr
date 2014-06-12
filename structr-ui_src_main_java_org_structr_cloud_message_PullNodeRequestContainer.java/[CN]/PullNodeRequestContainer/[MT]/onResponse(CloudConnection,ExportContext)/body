@@ -1,0 +1,11 @@
+{
+  clientConnection.increaseTotal(numNodes + numRels);
+  for (int i=0; i < numNodes; i++) {
+    clientConnection.send(new PullNode(key,i));
+  }
+  for (int i=0; i < numRels; i++) {
+    clientConnection.send(new PullRelationship(key,i));
+  }
+  clientConnection.send(new Finish());
+  context.progress();
+}

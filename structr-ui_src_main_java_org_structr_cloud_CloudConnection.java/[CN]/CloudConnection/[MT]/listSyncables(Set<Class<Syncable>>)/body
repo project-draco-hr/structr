@@ -1,0 +1,40 @@
+{
+  final List<SyncableInfo> syncables=new LinkedList<>();
+  if (types == null || types.isEmpty()) {
+    for (    final Page page : app.nodeQuery(Page.class).getAsList()) {
+      syncables.add(new SyncableInfo(page));
+    }
+    for (    final File file : app.nodeQuery(File.class).getAsList()) {
+      syncables.add(new SyncableInfo(file));
+    }
+    for (    final Folder folder : app.nodeQuery(Folder.class).getAsList()) {
+      syncables.add(new SyncableInfo(folder));
+    }
+    for (    final SchemaNode schemaNode : app.nodeQuery(SchemaNode.class).getAsList()) {
+      syncables.add(new SyncableInfo(schemaNode));
+    }
+    for (    final SchemaRelationship schemaRelationship : app.relationshipQuery(SchemaRelationship.class).getAsList()) {
+      syncables.add(new SyncableInfo(schemaRelationship));
+    }
+  }
+  for (  final Class<Syncable> type : types) {
+    Class cls;
+    try {
+      cls=Class.forName(type.getName());
+    }
+ catch (    ClassNotFoundException ex) {
+      continue;
+    }
+    if (NodeInterface.class.isAssignableFrom(type)) {
+      for (      final NodeInterface syncable : (Iterable<NodeInterface>)app.nodeQuery(cls).getAsList()) {
+        syncables.add(new SyncableInfo((Syncable)syncable));
+      }
+    }
+ else     if (RelationshipInterface.class.isAssignableFrom(type)) {
+      for (      final RelationshipInterface syncable : (Iterable<RelationshipInterface>)app.relationshipQuery(cls).getAsList()) {
+        syncables.add(new SyncableInfo((Syncable)syncable));
+      }
+    }
+  }
+  return syncables;
+}

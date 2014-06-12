@@ -1,4 +1,7 @@
 {
-  final Query<NodeInterface> query=command(SearchNodeCommand.class);
-  return query.uuid(uuid).includeDeletedAndHidden().getFirst();
+  GraphObject entity=nodeQuery().uuid(uuid).includeDeletedAndHidden().getFirst();
+  if (entity == null) {
+    entity=relationshipQuery().uuid(uuid).getFirst();
+  }
+  return entity;
 }

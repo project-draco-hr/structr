@@ -1,0 +1,24 @@
+{
+  App app=StructrApp.getInstance(securityContext);
+  if (path == null) {
+    return null;
+  }
+  Folder folder=(Folder)FileHelper.getFileByAbsolutePath(path);
+  if (folder != null) {
+    return folder;
+  }
+  String[] parts=PathHelper.getParts(path);
+  String partialPath="";
+  for (  String part : parts) {
+    Folder parent=folder;
+    partialPath+=PathHelper.PATH_SEP + part;
+    folder=(Folder)FileHelper.getFileByAbsolutePath(partialPath);
+    if (folder == null) {
+      folder=app.create(Folder.class,part);
+    }
+    if (parent != null) {
+      folder.setProperty(Folder.parent,parent);
+    }
+  }
+  return folder;
+}

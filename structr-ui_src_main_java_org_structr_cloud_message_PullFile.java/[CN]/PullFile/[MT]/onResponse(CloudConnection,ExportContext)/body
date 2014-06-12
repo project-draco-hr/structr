@@ -1,0 +1,9 @@
+{
+  final int chunkCount=Long.valueOf(getFileSize() / CloudService.CHUNK_SIZE).intValue() + 1;
+  clientConnection.increaseTotal(chunkCount + 1);
+  clientConnection.beginFile(this);
+  for (int i=0; i < chunkCount; i++) {
+    final PullChunk pull=new PullChunk(sourceNodeId,sequenceNumber++,getFileSize());
+    clientConnection.send(pull);
+  }
+}

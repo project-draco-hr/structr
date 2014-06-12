@@ -1,0 +1,30 @@
+{
+  try {
+    SchemaNode node=null;
+    try (final Tx tx=app.tx()){
+      node=app.create(SchemaNode.class,new NodeAttribute(SchemaNode.name,"TestType"));
+      node.setProperty(new StringProperty("_test"),"Integer");
+      tx.success();
+    }
+     final Class dynamicType=StructrApp.getConfiguration().getNodeEntityClass("TestType");
+    final PropertyKey testKey=StructrApp.getConfiguration().getPropertyKeyForJSONName(dynamicType,"test");
+    try (final Tx tx=app.tx()){
+      node.setProperty(new StringProperty("_test2"),"String");
+      tx.success();
+    }
+     try (final Tx tx=app.tx()){
+      app.create(dynamicType,new NodeAttribute(testKey,10));
+      app.create(dynamicType,new NodeAttribute(testKey,11));
+      app.create(dynamicType,new NodeAttribute(testKey,12));
+      tx.success();
+    }
+     try (final Tx tx=app.tx()){
+      assertEquals("Query for dynamic node should return exactly one result: ",1,app.nodeQuery(dynamicType).and(testKey,10).getAsList().size());
+      tx.success();
+    }
+   }
+ catch (  FrameworkException ex) {
+    ex.printStackTrace();
+    fail("Unexpected exception");
+  }
+}

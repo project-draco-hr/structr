@@ -1,0 +1,50 @@
+{
+  if (!StringUtils.isEmpty(node.getProperty(DOMElement.dataKey))) {
+    return ActiveElementState.Query;
+  }
+  if (!StringUtils.isEmpty(node.getProperty(DOMElement.restQuery))) {
+    return ActiveElementState.Query;
+  }
+  if (!StringUtils.isEmpty(node.getProperty(DOMElement.cypherQuery))) {
+    return ActiveElementState.Query;
+  }
+  if (!StringUtils.isEmpty(node.getProperty(DOMElement.xpathQuery))) {
+    return ActiveElementState.Query;
+  }
+  if (node.getProperty(DOMElement._action) != null || node.getProperty(DOMElement._attributes) != null || node.getProperty(DOMElement._rawValue) != null) {
+    return ActiveElementState.Button;
+  }
+  if (node.getProperty(Content.content) != null && !dataKeys.isEmpty()) {
+    if (containsDataKeyReference(node.getProperty(Content.content),dataKeys)) {
+      return ActiveElementState.Content;
+    }
+  }
+  if (node.getProperty(DOMElement._id) != null && !dataKeys.isEmpty()) {
+    if (containsDataKeyReference(node.getProperty(DOMElement._id),dataKeys)) {
+      return ActiveElementState.Content;
+    }
+  }
+  if (node.getProperty(Link._href) != null && !dataKeys.isEmpty()) {
+    if (containsDataKeyReference(node.getProperty(Link._href),dataKeys)) {
+      return ActiveElementState.Link;
+    }
+  }
+  if (node.getProperty(Input._value) != null && !dataKeys.isEmpty()) {
+    if (containsDataKeyReference(node.getProperty(Input._value),dataKeys)) {
+      return ActiveElementState.Input;
+    }
+  }
+  if (!StringUtils.isEmpty(node.getProperty(DOMNode.hideConditions))) {
+    return ActiveElementState.Content;
+  }
+  if (!StringUtils.isEmpty(node.getProperty(DOMNode.showConditions))) {
+    return ActiveElementState.Content;
+  }
+  if (node.getProperty(DOMNode.hideOnIndex)) {
+    return ActiveElementState.Content;
+  }
+  if (node.getProperty(DOMNode.hideOnDetail)) {
+    return ActiveElementState.Content;
+  }
+  return ActiveElementState.None;
+}

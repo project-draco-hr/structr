@@ -1,0 +1,13 @@
+{
+  final String name=(String)attributes.get("name");
+  final String host=(String)attributes.get("host");
+  if (name != null && host != null) {
+    final App app=StructrApp.getInstance();
+    try (final Tx tx=app.tx()){
+      final NodeInterface entity=app.nodeQuery().andName(name).getFirst();
+      if (entity != null && entity instanceof Syncable) {
+        CloudService.doRemote(new PushTransmission((Syncable)entity,true,"admin","admin",host,54555),new LoggingListener());
+      }
+    }
+   }
+}

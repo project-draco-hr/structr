@@ -1,0 +1,16 @@
+{
+  FileNodeChunk chunk=null;
+  if (inputStream != null) {
+    try {
+      int available=inputStream.available();
+      int readSize=available < chunkSize ? available : chunkSize;
+      chunk=new FileNodeChunk(fileNode.getUuid(),fileSize,sequenceNumber,readSize);
+      inputStream.read(chunk.getBuffer(),0,readSize);
+      sequenceNumber++;
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"Exception in ChunkIterator: {0}",t);
+    }
+  }
+  return (chunk);
+}

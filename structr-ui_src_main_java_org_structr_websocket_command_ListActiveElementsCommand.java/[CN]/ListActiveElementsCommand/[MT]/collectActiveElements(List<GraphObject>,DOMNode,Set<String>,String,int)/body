@@ -1,0 +1,21 @@
+{
+  final String childDataKey=root.getProperty(DOMElement.dataKey);
+  final Set<String> dataKeys=new LinkedHashSet<>(parentDataKeys);
+  String parentId=parent;
+  int dataCentricDepth=depth;
+  if (!StringUtils.isEmpty(childDataKey)) {
+    dataKeys.add(childDataKey);
+    dataCentricDepth++;
+  }
+  final ActiveElementState state=isActive(root,dataKeys);
+  if (!state.equals(ActiveElementState.None)) {
+    resultList.add(extractActiveElement(root,dataKeys,parentId,state,depth));
+    if (state.equals(ActiveElementState.Query)) {
+      parentId=root.getUuid();
+    }
+  }
+  for (  final DOMChildren children : root.getChildRelationships()) {
+    final DOMNode child=children.getTargetNode();
+    collectActiveElements(resultList,child,dataKeys,parentId,dataCentricDepth);
+  }
+}

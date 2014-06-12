@@ -1,15 +1,12 @@
 {
-  logger.log(Level.FINE,"Looking for an index page ...");
-  Result<Page> results=StructrApp.getInstance().nodeQuery(Page.class).getResult();
-  logger.log(Level.FINE,"{0} results",results.size());
+  Result<Page> results=StructrApp.getInstance().nodeQuery(Page.class).sort(Page.position).order(false).getResult();
+  Collections.sort(results.getResults(),new GraphObjectComparator(Page.position,GraphObjectComparator.ASCENDING));
+  Page page=null;
   if (!results.isEmpty()) {
-    Collections.sort(results.getResults(),new GraphObjectComparator(Page.position,GraphObjectComparator.ASCENDING));
     int i=0;
-    Page page=null;
     while (page == null || (i < results.size() && !securityContext.isVisible(page))) {
       page=results.get(i++);
     }
-    return page;
   }
-  return null;
+  return page;
 }

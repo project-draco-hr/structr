@@ -1,0 +1,26 @@
+{
+  if (word == null) {
+    return new NullExpression();
+  }
+switch (word) {
+case "true":
+    return new ConstantExpression(true);
+case "false":
+  return new ConstantExpression(false);
+case "if":
+return new IfExpression();
+case "each":
+return new EachExpression();
+case "data":
+return new ValueExpression("data");
+case "null":
+return new ConstantExpression(NULL_STRING);
+}
+final Function<Object,Object> function=Functions.get(word);
+if (function != null) {
+return new FunctionExpression(word,function);
+}
+ else {
+return new ValueExpression(word);
+}
+}

@@ -1,0 +1,11 @@
+{
+  final ArrayList<Object> results=new ArrayList<>();
+  for (  Expression expr : expressions) {
+    final Object result=expr.evaluate(securityContext,ctx,entity);
+    results.add(result);
+  }
+  if (results.isEmpty()) {
+    return function.usage();
+  }
+  return function.apply(ctx,entity,results.toArray());
+}

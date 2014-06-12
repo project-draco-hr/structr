@@ -1,0 +1,17 @@
+{
+  final Principal user=serverConnection.getUser(userName);
+  if (user != null) {
+    try {
+      this.keyLength=Math.min(keyLength,Cipher.getMaxAllowedKeyLength(CloudService.STREAM_CIPHER));
+      this.salt=user.getProperty(Principal.salt);
+      serverConnection.impersonateUser(user);
+      serverConnection.send(new AuthenticationResponse(userName,user.getEncryptedPassword(),salt,keyLength));
+    }
+ catch (    Throwable t) {
+      t.printStackTrace();
+    }
+  }
+ else {
+    serverConnection.send(new Error(401,"Wrong username or password."));
+  }
+}

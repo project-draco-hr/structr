@@ -512,6 +512,7 @@
     assertEquals("Invalid multiline statement test result","true",testOne.replaceVariables(securityContext,ctx,"${this.isValid}"));
     testOne.replaceVariables(securityContext,ctx,"${(set(this, \"isValid\", false), each(this.manyToManyTestSixs, set(this, \"isValid\", and(this.isValid, gte(now, data.createdDate)))))}");
     assertEquals("Invalid multiline statement test result","false",testOne.replaceVariables(securityContext,ctx,"${this.isValid}"));
+    assertEquals("Invalid multilevel property expression result","false",testOne.replaceVariables(securityContext,ctx,"${empty(this.testThree.testOne.testThree)}"));
     tx.success();
   }
  catch (  FrameworkException fex) {

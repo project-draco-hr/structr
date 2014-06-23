@@ -1,0 +1,57 @@
+{
+  SchemaNode itemNode=null;
+  NodeInterface parent=null;
+  NodeInterface child1=null;
+  NodeInterface child2=null;
+  try (final Tx tx=app.tx()){
+    itemNode=app.create(SchemaNode.class,new NodeAttribute(SchemaNode.name,"Item"));
+    final PropertyMap properties=new PropertyMap();
+    properties.put(SchemaRelationship.relationshipType,"CHILD");
+    properties.put(SchemaRelationship.sourceMultiplicity,"1");
+    properties.put(SchemaRelationship.targetMultiplicity,"*");
+    properties.put(SchemaRelationship.sourceJsonName,"parentItem");
+    properties.put(SchemaRelationship.targetJsonName,"children");
+    app.create(itemNode,itemNode,SchemaRelationship.class,properties);
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+    fail("Unexpected exception");
+  }
+  final ConfigurationProvider config=StructrApp.getConfiguration();
+  final Class itemClass=config.getNodeEntityClass("Item");
+  final PropertyKey childrenProperty=config.getPropertyKeyForJSONName(itemClass,"children");
+  try (final Tx tx=app.tx()){
+    parent=app.create(itemClass);
+    child1=app.create(itemClass);
+    child2=app.create(itemClass);
+    final List<NodeInterface> children=new LinkedList<>();
+    children.add(child1);
+    children.add(child2);
+    parent.setProperty(childrenProperty,children);
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+    fail("Unexpected exception");
+  }
+  try (final Tx tx=app.tx()){
+    final Object value=parent.getProperty(childrenProperty);
+    assertTrue(value instanceof Collection);
+    final Collection coll=(Collection)value;
+    assertEquals("FUCK",2,coll.size());
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+    fail("Unexpected exception");
+  }
+  try (final Tx tx=app.tx()){
+    assertEquals(parent.toString(),child1.replaceVariables(securityContext,new ActionContext(),"${this.parentItem}"));
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+    fail("Unexpected exception");
+  }
+}

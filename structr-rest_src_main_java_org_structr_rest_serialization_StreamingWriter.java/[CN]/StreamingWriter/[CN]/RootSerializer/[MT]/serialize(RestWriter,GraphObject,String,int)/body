@@ -7,8 +7,9 @@
         keys=idNameOnly;
       }
       for (      PropertyKey key : keys) {
-        Object value=source.getProperty(key);
-        PropertyKey localKey=key;
+        final Predicate predicate=writer.getSecurityContext().getRange(key.jsonName());
+        final Object value=source.getProperty(key,predicate);
+        final PropertyKey localKey=key;
         if (value != null) {
           writer.name(localKey.jsonName());
           serializeProperty(writer,key,value,localPropertyView,depth + 1);

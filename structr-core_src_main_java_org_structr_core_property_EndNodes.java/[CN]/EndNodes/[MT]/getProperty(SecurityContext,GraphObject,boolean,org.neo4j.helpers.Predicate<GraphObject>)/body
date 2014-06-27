@@ -1,4 +1,9 @@
 {
   ManyEndpoint<T> endpoint=relation.getTarget();
-  return Iterables.toList(Iterables.filter(new NotNullPredicate(),endpoint.get(securityContext,(NodeInterface)obj,predicate)));
+  if (predicate != null) {
+    return Iterables.toList(Iterables.filter(predicate,Iterables.filter(new NotNullPredicate(),endpoint.get(securityContext,(NodeInterface)obj,null))));
+  }
+ else {
+    return Iterables.toList(Iterables.filter(new NotNullPredicate(),endpoint.get(securityContext,(NodeInterface)obj,null)));
+  }
 }

@@ -10,13 +10,10 @@
     if (i == 3) {
       offsetId=id;
     }
-    System.out.println("Object created: " + id);
   }
-  System.out.println("Offset ID: " + offsetId);
   resource="/test_twos/" + baseId + "/test_ones";
   for (int page=1; page < 5; page++) {
     String url=resource + "?sort=name&pageSize=2&page=" + page;
-    System.out.println("Testing page " + page + " with URL "+ url);
     RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(200).body("result",hasSize(2)).body("result_count",equalTo(10)).body("result[0]",isEntity(TestOne.class)).body("result[0].name ",equalTo("TestOne-" + ((2 * page) - 2))).body("result[1]",isEntity(TestOne.class)).body("result[1].name ",equalTo("TestOne-" + ((2 * page) - 1))).when().get(url);
   }
   RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(200).body("result",hasSize(2)).body("result_count",equalTo(10)).body("result[0]",isEntity(TestOne.class)).body("result[0].name ",equalTo("TestOne-3")).body("result[1]",isEntity(TestOne.class)).body("result[1].name ",equalTo("TestOne-4")).when().get(resource + "?sort=name&pageSize=2&page=1&pageStartId=" + offsetId);

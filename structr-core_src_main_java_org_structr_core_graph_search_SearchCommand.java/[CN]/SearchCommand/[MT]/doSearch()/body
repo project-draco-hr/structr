@@ -17,6 +17,19 @@
   Double dist=null;
   for (Iterator<SearchAttribute> it=rootGroup.getSearchAttributes().iterator(); it.hasNext(); ) {
     SearchAttribute attr=it.next();
+    if (attr instanceof SearchAttributeGroup) {
+      for (final Iterator<SearchAttribute> groupIterator=((SearchAttributeGroup)attr).getSearchAttributes().iterator(); groupIterator.hasNext(); ) {
+        final SearchAttribute item=groupIterator.next();
+        if (item instanceof SourceSearchAttribute) {
+          sources.add((SourceSearchAttribute)item);
+          groupIterator.remove();
+          hasGraphSources=true;
+        }
+        if (item instanceof EmptySearchAttribute) {
+          hasEmptySearchFields=true;
+        }
+      }
+    }
     if (attr instanceof DistanceSearchAttribute) {
       distanceSearch=(DistanceSearchAttribute)attr;
       coords=GeoHelper.geocode(distanceSearch);

@@ -1,0 +1,54 @@
+{
+  final String string1="This is a simple test string.";
+  final String string2="This is a simple test string with\na newline.";
+  final String string3="This is a simple\ntest\nstring\nwith\nmultiple\nnewlines.";
+  final String string4="sjdhf lkjshd\tjalksjdfas \"sjdfajsdfb'sdfjkasbdfhja\t\t\n\nskdfajkshfasd\n\n\n\n\r\t\t\r\n\r\n\r\nsfasdfas";
+  try {
+    final ByteArrayOutputStream outputStream=new ByteArrayOutputStream(1024);
+    try (final Tx tx=app.tx()){
+      final TestOne test1=createTestNode(TestOne.class);
+      final TestOne test2=createTestNode(TestOne.class);
+      final TestOne test3=createTestNode(TestOne.class);
+      final TestOne test4=createTestNode(TestOne.class);
+      test1.setProperty(TestOne.aString,string1);
+      test1.setProperty(TestOne.anInt,1);
+      test2.setProperty(TestOne.aString,string2);
+      test2.setProperty(TestOne.anInt,2);
+      test3.setProperty(TestOne.aString,string3);
+      test3.setProperty(TestOne.anInt,3);
+      test4.setProperty(TestOne.aString,string4);
+      test4.setProperty(TestOne.anInt,4);
+      SyncCommand.exportToStream(outputStream,app.nodeQuery(NodeInterface.class).getAsList(),app.relationshipQuery(RelationshipInterface.class).getAsList(),null,false);
+      tx.success();
+    }
+     try (final Tx tx=app.tx()){
+      for (      final TestOne test : app.nodeQuery(TestOne.class).getAsList()) {
+        app.delete(test);
+      }
+      tx.success();
+    }
+     try (final Tx tx=app.tx()){
+      assertEquals("Database should be empty",0,app.nodeQuery(NodeInterface.class).getResult().size());
+      tx.success();
+    }
+     try (final Tx tx=app.tx()){
+      SyncCommand.importFromStream(app.getGraphDatabaseService(),securityContext,new ByteArrayInputStream(outputStream.toByteArray()),true);
+      tx.success();
+    }
+     try (final Tx tx=app.tx()){
+      final TestOne test1=app.nodeQuery(TestOne.class).and(TestOne.anInt,1).getFirst();
+      final TestOne test2=app.nodeQuery(TestOne.class).and(TestOne.anInt,2).getFirst();
+      final TestOne test3=app.nodeQuery(TestOne.class).and(TestOne.anInt,3).getFirst();
+      final TestOne test4=app.nodeQuery(TestOne.class).and(TestOne.anInt,4).getFirst();
+      assertEquals("Strings from exported and re-imported data should be equal",string1,test1.getProperty(TestOne.aString));
+      assertEquals("Strings from exported and re-imported data should be equal",string2,test2.getProperty(TestOne.aString));
+      assertEquals("Strings from exported and re-imported data should be equal",string3,test3.getProperty(TestOne.aString));
+      assertEquals("Strings from exported and re-imported data should be equal",string4,test4.getProperty(TestOne.aString));
+      tx.success();
+    }
+   }
+ catch (  Throwable fex) {
+    fex.printStackTrace();
+    fail("Unexpected exception.");
+  }
+}

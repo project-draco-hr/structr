@@ -6,14 +6,21 @@
   }
  else {
     Matcher matcher=threadLocalTemplateMatcher.get();
-    Set<String> keys=new HashSet<>();
     matcher.reset(_source);
     while (matcher.find()) {
       String group=matcher.group();
-      String key=group.substring(1,group.length() - 1);
+      String source=group.substring(1,group.length() - 1);
+      ReplacementInfo info=new ReplacementInfo(source);
+      ArrayList<String> options=info.getOptions();
+      String key=info.getKey();
       Object value=parameters.get(key);
       if (value == null) {
-        errorBuffer.add(Widget.class.getSimpleName(),new EmptyPropertyToken(new StringProperty(key)));
+        if (!options.isEmpty()) {
+          errorBuffer.add(Widget.class.getSimpleName(),new ValueToken(new StringProperty(key),options.toArray()));
+        }
+ else {
+          errorBuffer.add(Widget.class.getSimpleName(),new EmptyPropertyToken(new StringProperty(key)));
+        }
       }
  else {
         _source=_source.replace(group,value.toString());

@@ -2,7 +2,18 @@
   AbstractNode node=getNode(webSocketData.getId());
   String key=(String)webSocketData.getNodeData().get("key");
   if (node != null) {
-    webSocketData.setNodeData(key,node.getProperty(StructrApp.getConfiguration().getPropertyKeyForJSONName(node.getClass(),key)));
+    PropertyKey propertyKey=StructrApp.getConfiguration().getPropertyKeyForJSONName(node.getClass(),key);
+    PropertyConverter converter=propertyKey.inputConverter(getWebSocket().getSecurityContext());
+    Object value=node.getProperty(propertyKey);
+    if (converter != null) {
+      try {
+        value=converter.revert(value);
+      }
+ catch (      FrameworkException ex) {
+        getWebSocket().send(MessageBuilder.status().code(400).message(ex.getMessage()).build(),true);
+      }
+    }
+    webSocketData.setNodeData(key,value);
     getWebSocket().send(webSocketData,true);
   }
  else {

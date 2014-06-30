@@ -4,9 +4,11 @@
     try (final Tx tx=begin()){
       if (doCallbacks && modificationQueue != null) {
         modificationQueue.doOuterCallbacks(securityContext);
-        final List<ModificationEvent> modificationEvents=modificationQueue.getModificationEvents();
-        for (        StructrTransactionListener listener : TransactionCommand.getTransactionListeners()) {
-          listener.transactionCommited(securityContext,modificationEvents);
+        if (doNotifications) {
+          final List<ModificationEvent> modificationEvents=modificationQueue.getModificationEvents();
+          for (          StructrTransactionListener listener : TransactionCommand.getTransactionListeners()) {
+            listener.transactionCommited(securityContext,modificationEvents);
+          }
         }
         modificationQueue.clear();
       }

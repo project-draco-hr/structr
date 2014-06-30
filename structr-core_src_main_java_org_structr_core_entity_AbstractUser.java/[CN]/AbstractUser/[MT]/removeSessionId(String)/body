@@ -1,8 +1,15 @@
 {
   try {
-    setProperty(Principal.sessionIds,(String[])ArrayUtils.removeElement(getProperty(Principal.sessionIds),sessionId));
+    final String[] ids=getProperty(Principal.sessionIds);
+    List<String> newSessionIds=new ArrayList<>();
+    for (    final String id : ids) {
+      if (!id.equals(sessionId)) {
+        newSessionIds.add(id);
+      }
+    }
+    setProperty(Principal.sessionIds,(String[])newSessionIds.toArray(new String[newSessionIds.size()]));
   }
  catch (  FrameworkException ex) {
-    logger.log(Level.SEVERE,"Could not add sessionId " + sessionId + " to array of sessionIds",ex);
+    logger.log(Level.SEVERE,"Could not remove sessionId " + sessionId + " from array of sessionIds",ex);
   }
 }

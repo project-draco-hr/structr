@@ -1,0 +1,13 @@
+{
+  final PropertyConverter inputConverter=inputConverter(securityContext);
+  if (inputConverter != null) {
+    final List<String> sources=new LinkedList<>();
+    if (requestParameter != null) {
+      for (      String part : requestParameter.split("[,;]+")) {
+        sources.add(part);
+      }
+    }
+    return (List<T>)inputConverter.convert(sources);
+  }
+  return null;
+}

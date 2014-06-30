@@ -3,12 +3,13 @@
   if (depth <= outputNestingDepth) {
     Iterable<PropertyKey> keys=source.getPropertyKeys(localPropertyView);
     if (keys != null) {
+      if (compactNestedProperties && depth > 0 && PropertyView.Ui.equals(localPropertyView)) {
+        keys=idNameOnly;
+      }
       for (      PropertyKey key : keys) {
-        Object value=source.getProperty(key);
-        PropertyKey localKey=key;
-        if (localKey.equals(idProperty)) {
-          localKey=id;
-        }
+        final Predicate predicate=writer.getSecurityContext().getRange(key.jsonName());
+        final Object value=source.getProperty(key,predicate);
+        final PropertyKey localKey=key;
         if (value != null) {
           writer.name(localKey.jsonName());
           serializeProperty(writer,key,value,localPropertyView,depth + 1);

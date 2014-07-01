@@ -1,0 +1,10 @@
+{
+  logger.log(Level.FINE,"Search for file with name: {0}",name);
+  try {
+    return StructrApp.getInstance(securityContext).nodeQuery(AbstractFile.class).andName(name).getFirst();
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"Unable to find a file for name {0}: {1}",new Object[]{name,fex.getMessage()});
+  }
+  return null;
+}

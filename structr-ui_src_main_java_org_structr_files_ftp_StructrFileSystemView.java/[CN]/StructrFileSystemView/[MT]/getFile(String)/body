@@ -21,7 +21,7 @@
       requestedPath=StringUtils.stripEnd(basePath.equals("/") ? "/".concat(requestedPath) : basePath.concat("/").concat(requestedPath),"/");
       logger.log(Level.INFO,"Base path: {0}, requestedPath: {1}",new Object[]{basePath,requestedPath});
     }
-    AbstractFile file=FileHelper.getFileByAbsolutePath(requestedPath);
+    AbstractFile file=FileHelper.getFileByAbsolutePath(SecurityContext.getSuperUserInstance(),requestedPath);
     if (file != null) {
       if (file instanceof Folder) {
         return new StructrFtpFolder((Folder)file);

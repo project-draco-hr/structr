@@ -1,0 +1,39 @@
+{
+  if (request != null) {
+    final String rangeSource=request.getHeader("Range");
+    if (rangeSource != null) {
+      final String[] rangeParts=rangeSource.split("[;]+");
+      final int rangeCount=rangeParts.length;
+      for (int i=0; i < rangeCount; i++) {
+        final String[] parts=rangeParts[i].split("[=]+");
+        if (parts.length == 2) {
+          final String identifier=parts[0].trim();
+          final String valueRange=parts[1].trim();
+          if (StringUtils.isNotBlank(identifier) && StringUtils.isNotBlank(valueRange)) {
+            if (valueRange.contains(",")) {
+              logger.log(Level.WARNING,"Unsupported Range header specification {0}, multiple ranges are not supported.",valueRange);
+            }
+ else {
+              final String[] valueParts=valueRange.split("[-]+");
+              if (valueParts.length == 2) {
+                String startString=valueParts[0].trim();
+                String endString=valueParts[1].trim();
+                if (endString.contains("/")) {
+                  endString=endString.substring(0,endString.indexOf("/"));
+                }
+                try {
+                  final int start=Integer.parseInt(startString);
+                  final int end=Integer.parseInt(endString);
+                  ranges.put(identifier,new QueryRange(start,end));
+                }
+ catch (                Throwable t) {
+                  t.printStackTrace();
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

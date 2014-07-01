@@ -1,0 +1,14 @@
+{
+  final List<String> testOneIDs=new LinkedList<>();
+  String resource="/test_twos";
+  String location=RestAssured.given().contentType("application/json; charset=UTF-8").body(" { 'name' : 'TestTwo-0', 'anInt' : 0, 'aLong' : 0, 'aDate' : '2012-09-18T00:33:12+0200' } ").expect().statusCode(201).when().post(resource).getHeader("Location");
+  String baseId=getUuidFromLocation(location);
+  resource=resource.concat("/").concat(baseId).concat("/test_ones");
+  for (int i=0; i < 20; i++) {
+    final String subLocation=RestAssured.given().contentType("application/json; charset=UTF-8").body(" { 'name' : 'TestOne-" + i + "', 'anInt' : "+ i+ ", 'aLong' : "+ i+ ", 'aDate' : '2012-09-18T0"+ i+ ":33:12+0200' } ").expect().statusCode(201).when().post(resource).getHeader("Location");
+    testOneIDs.add(getUuidFromLocation(subLocation));
+  }
+  RestAssured.given().contentType("application/json; charset=UTF-8").header("Range","test_ones=0-3").filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(200)).expect().statusCode(200).body("result",hasSize(1)).body("result_count",equalTo(1)).body("result[0]",isEntity(TestOne.class)).body("result[0].test_ones",hasSize(3)).body("result[0].test_ones[0].id",equalTo(testOneIDs.get(0))).body("result[0].test_ones[1].id",equalTo(testOneIDs.get(1))).body("result[0].test_ones[2].id",equalTo(testOneIDs.get(2))).when().get("/test_twos");
+  RestAssured.given().contentType("application/json; charset=UTF-8").header("Range","test_ones=3-6").filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(200)).expect().statusCode(200).body("result",hasSize(1)).body("result_count",equalTo(1)).body("result[0]",isEntity(TestOne.class)).body("result[0].test_ones",hasSize(3)).body("result[0].test_ones[0].id",equalTo(testOneIDs.get(3))).body("result[0].test_ones[1].id",equalTo(testOneIDs.get(4))).body("result[0].test_ones[2].id",equalTo(testOneIDs.get(5))).when().get("/test_twos");
+  RestAssured.given().contentType("application/json; charset=UTF-8").header("Range","test_ones=10-20").filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(200)).expect().statusCode(200).body("result",hasSize(1)).body("result_count",equalTo(1)).body("result[0]",isEntity(TestOne.class)).body("result[0].test_ones",hasSize(10)).body("result[0].test_ones[0].id",equalTo(testOneIDs.get(10))).body("result[0].test_ones[1].id",equalTo(testOneIDs.get(11))).body("result[0].test_ones[2].id",equalTo(testOneIDs.get(12))).body("result[0].test_ones[3].id",equalTo(testOneIDs.get(13))).body("result[0].test_ones[4].id",equalTo(testOneIDs.get(14))).body("result[0].test_ones[5].id",equalTo(testOneIDs.get(15))).body("result[0].test_ones[6].id",equalTo(testOneIDs.get(16))).body("result[0].test_ones[7].id",equalTo(testOneIDs.get(17))).body("result[0].test_ones[8].id",equalTo(testOneIDs.get(18))).body("result[0].test_ones[9].id",equalTo(testOneIDs.get(19))).when().get("/test_twos");
+}

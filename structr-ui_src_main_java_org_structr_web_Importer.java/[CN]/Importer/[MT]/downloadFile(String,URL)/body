@@ -39,9 +39,13 @@ catch (    IOException ex) {
   }
   contentType=FileHelper.getContentMimeType(fileOnDisk);
   downloadAddress=StringUtils.substringBefore(downloadAddress,"?");
-  final String fileName=(downloadAddress.indexOf("/") > -1) ? StringUtils.substringAfterLast(downloadAddress,"/") : downloadAddress;
+  final String fileName=PathHelper.getName(downloadAddress);
   String httpPrefix="http://";
-  String path=StringUtils.substringBefore(((downloadAddress.indexOf(httpPrefix) > -1) ? StringUtils.substringAfter(downloadAddress,"http://") : downloadAddress),fileName);
+  String relativePath=StringUtils.substringAfter(downloadUrl.toString(),address);
+  if (StringUtils.isBlank(relativePath)) {
+    relativePath=downloadAddress;
+  }
+  String path=StringUtils.substringBefore(((downloadAddress.contains(httpPrefix)) ? StringUtils.substringAfter(downloadAddress,"http://") : relativePath),fileName);
   if (contentType.equals("text/plain")) {
     contentType=StringUtils.defaultIfBlank(contentTypeForExtension.get(StringUtils.substringAfterLast(fileName,".")),"text/plain");
   }

@@ -1,0 +1,39 @@
+{
+  final Predicate<GraphObject> predicate=query != null ? query.toPredicate() : null;
+  final SourceSearchAttribute attr=new SourceSearchAttribute(occur);
+  final Set<GraphObject> intersectionResult=new LinkedHashSet<>();
+  boolean alreadyAdded=false;
+  if (searchValue != null && !StringUtils.isBlank(searchValue.toString())) {
+    final App app=StructrApp.getInstance(securityContext);
+    if (exactMatch) {
+      for (      NodeInterface node : searchValue) {
+switch (occur) {
+case MUST:
+          if (!alreadyAdded) {
+            intersectionResult.addAll(getRelatedNodesReverse(securityContext,node,declaringClass,predicate));
+            alreadyAdded=true;
+          }
+ else {
+            intersectionResult.retainAll(getRelatedNodesReverse(securityContext,node,declaringClass,predicate));
+          }
+        break;
+case SHOULD:
+      intersectionResult.addAll(getRelatedNodesReverse(securityContext,node,declaringClass,predicate));
+    break;
+case MUST_NOT:
+  break;
+}
+}
+}
+ else {
+for (NodeInterface node : searchValue) {
+intersectionResult.addAll(getRelatedNodesReverse(securityContext,node,declaringClass,predicate));
+}
+}
+attr.setResult(intersectionResult);
+}
+ else {
+return new EmptySearchAttribute(this,null);
+}
+return attr;
+}

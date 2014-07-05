@@ -1,0 +1,19 @@
+{
+  if (listExpression == null) {
+    return Functions.ERROR_MESSAGE_FILTER;
+  }
+  final Object listSource=listExpression.evaluate(securityContext,ctx,entity);
+  final List target=new LinkedList<>();
+  if (listSource != null && listSource instanceof List) {
+    final List source=(List)listSource;
+    for (    Object obj : source) {
+      final Object result=filterExpression.evaluate(securityContext,new ActionContext(entity,obj),entity);
+      if (result instanceof Boolean) {
+        if ((Boolean)result) {
+          target.add(obj);
+        }
+      }
+    }
+  }
+  return target;
+}

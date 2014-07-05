@@ -18,12 +18,16 @@
   TestThree testThree=null;
   TestFour testFour=null;
   List<TestSix> testSixs=null;
+  int index=0;
   try (final Tx tx=app.tx()){
     testOne=createTestNode(TestOne.class);
     testTwo=createTestNode(TestTwo.class);
     testThree=createTestNode(TestThree.class);
     testFour=createTestNode(TestFour.class);
     testSixs=createTestNodes(TestSix.class,20);
+    for (    final TestSix testSix : testSixs) {
+      testSix.setProperty(TestSix.index,index++);
+    }
     template=createTestNode(MailTemplate.class);
     template.setProperty(MailTemplate.name,"TEST");
     template.setProperty(MailTemplate.locale,"en_EN");
@@ -524,6 +528,9 @@
     testOne.replaceVariables(securityContext,ctx,"${(set(this, \"isValid\", false), each(this.manyToManyTestSixs, set(this, \"isValid\", and(this.isValid, gte(now, data.createdDate)))))}");
     assertEquals("Invalid multiline statement test result","false",testOne.replaceVariables(securityContext,ctx,"${this.isValid}"));
     assertEquals("Invalid multilevel property expression result","false",testOne.replaceVariables(securityContext,ctx,"${empty(this.testThree.testOne.testThree)}"));
+    assertEquals("Invalid filter() result","1",testOne.replaceVariables(securityContext,ctx,"${size(filter(this.manyToManyTestSixs, equal(data.index, 4)))}"));
+    assertEquals("Invalid filter() result","9",testOne.replaceVariables(securityContext,ctx,"${size(filter(this.manyToManyTestSixs, gt(data.index, 10)))}"));
+    assertEquals("Invalid filter() result","10",testOne.replaceVariables(securityContext,ctx,"${size(filter(this.manyToManyTestSixs, gte(data.index, 10)))}"));
     tx.success();
   }
  catch (  FrameworkException fex) {

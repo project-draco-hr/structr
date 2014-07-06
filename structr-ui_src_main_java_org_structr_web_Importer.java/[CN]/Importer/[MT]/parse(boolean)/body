@@ -16,7 +16,23 @@
       HttpGet get=new HttpGet(address);
       get.setHeader("User-Agent","Mozilla");
       get.setHeader("Connection","close");
-      code=IOUtils.toString(client.execute(get).getEntity().getContent(),"UTF-8");
+      client.setRedirectStrategy(new RedirectStrategy(){
+        @Override public boolean isRedirected(        HttpRequest hr,        HttpResponse hr1,        HttpContext hc) throws ProtocolException {
+          return false;
+        }
+        @Override public HttpUriRequest getRedirect(        HttpRequest hr,        HttpResponse hr1,        HttpContext hc) throws ProtocolException {
+          return new DefaultRedirectStrategy().getRedirect(hr,hr1,hc);
+        }
+      }
+);
+      HttpResponse resp=client.execute(get);
+      Header location=resp.getFirstHeader("Location");
+      if (location != null) {
+        address=location.getValue();
+        client=new DefaultHttpClient();
+        resp=client.execute(new HttpGet(address));
+      }
+      code=IOUtils.toString(resp.getEntity().getContent(),"UTF-8");
       if (code.charAt(0) == 65279) {
         code=code.substring(1);
       }

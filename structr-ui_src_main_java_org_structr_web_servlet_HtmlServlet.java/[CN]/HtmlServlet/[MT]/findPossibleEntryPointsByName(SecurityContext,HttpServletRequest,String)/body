@@ -3,10 +3,10 @@
   if (CollectionUtils.isNotEmpty(possibleEntryPoints)) {
     return possibleEntryPoints;
   }
-  if (uuid.length() > 0) {
-    logger.log(Level.FINE,"Requested id: {0}",uuid);
-    final Query query=StructrApp.getInstance().nodeQuery();
-    query.and(GraphObject.id,uuid);
+  if (name.length() > 0) {
+    logger.log(Level.FINE,"Requested name: {0}",name);
+    final Query query=StructrApp.getInstance(securityContext).nodeQuery();
+    query.and(AbstractNode.name,name);
     query.and().orType(Page.class).orTypes(File.class);
     Result results=query.getResult();
     logger.log(Level.FINE,"{0} results",results.size());

@@ -13,6 +13,7 @@
   final String numberString2=numberFormat2.format(2.234);
   final String numberString3=numberFormat3.format(2.234);
   MailTemplate template=null;
+  MailTemplate template2=null;
   TestOne testOne=null;
   TestTwo testTwo=null;
   TestThree testThree=null;
@@ -32,6 +33,10 @@
     template.setProperty(MailTemplate.name,"TEST");
     template.setProperty(MailTemplate.locale,"en_EN");
     template.setProperty(MailTemplate.text,"This is a template for ${this.name}");
+    template2=createTestNode(MailTemplate.class);
+    template2.setProperty(MailTemplate.name,"TEST2");
+    template2.setProperty(MailTemplate.locale,"en_EN");
+    template2.setProperty(MailTemplate.text,"${this.aDouble}");
     assertNotNull(testOne);
     testOne.setProperty(TestOne.name,"A-nice-little-name-for-my-test-object");
     testOne.setProperty(TestOne.anInt,1);
@@ -533,6 +538,9 @@
     assertEquals("Invalid filter() result","1",testOne.replaceVariables(securityContext,ctx,"${size(filter(this.manyToManyTestSixs, equal(data.index, 4)))}"));
     assertEquals("Invalid filter() result","9",testOne.replaceVariables(securityContext,ctx,"${size(filter(this.manyToManyTestSixs, gt(data.index, 10)))}"));
     assertEquals("Invalid filter() result","10",testOne.replaceVariables(securityContext,ctx,"${size(filter(this.manyToManyTestSixs, gte(data.index, 10)))}"));
+    final String test="${if(lte(template('TEST2', 'en_EN', this), 2), '<2', '>2')}\n" + "${if(lte(template('TEST2', 'en_EN', this), 3), '<3', '>3')}";
+    final String result=testOne.replaceVariables(securityContext,ctx,test);
+    assertEquals("Invalid multiline and template() result",">2\n<3",result);
     tx.success();
   }
  catch (  FrameworkException fex) {

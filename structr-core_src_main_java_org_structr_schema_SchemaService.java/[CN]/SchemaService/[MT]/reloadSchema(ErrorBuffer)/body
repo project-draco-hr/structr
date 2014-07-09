@@ -5,6 +5,7 @@ synchronized (SchemaService.class) {
       final Set<String> dynamicViews=new LinkedHashSet<>();
       final NodeExtender nodeExtender=new NodeExtender();
       try (final Tx tx=StructrApp.getInstance().tx()){
+        SchemaService.ensureBuiltinTypesExist();
         for (        final SchemaNode schemaNode : StructrApp.getInstance().nodeQuery(SchemaNode.class).getAsList()) {
           nodeExtender.addClass(schemaNode.getClassName(),schemaNode.getSource(errorBuffer));
           dynamicViews.addAll(schemaNode.getViews());
@@ -19,8 +20,9 @@ synchronized (SchemaService.class) {
         success=!errorBuffer.hasError();
         if (success) {
           Services.getInstance().getConfigurationProvider().registerDynamicViews(dynamicViews);
+          tx.success();
+          lastClassLoader=nodeExtender.getClassLoader();
         }
-        lastClassLoader=nodeExtender.getClassLoader();
       }
  catch (      Throwable t) {
         logger.log(Level.SEVERE,"Unable to compile dynamic schema.",t);

@@ -9,7 +9,10 @@
     try {
       Class serviceClass=getServiceClassForName(serviceClassName);
       if (serviceClass != null) {
-        createService(serviceClass);
+        final Service service=createService(serviceClass);
+        if (service != null) {
+          service.initialized();
+        }
       }
     }
  catch (    Throwable t) {
@@ -23,7 +26,6 @@
     if ("true".equals(properties.getProperty(Services.MIGRATION_KEY))) {
       migrateDatabase();
     }
-    importSeedFile(properties.getProperty(Services.BASE_PATH));
   }
   logger.log(Level.INFO,"Registering shutdown hook.");
   Runtime.getRuntime().addShutdownHook(new Thread(){

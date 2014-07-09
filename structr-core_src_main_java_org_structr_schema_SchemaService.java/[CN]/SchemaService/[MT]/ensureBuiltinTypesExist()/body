@@ -1,0 +1,31 @@
+{
+  final App app=StructrApp.getInstance();
+  for (  final Entry<String,String> entry : builtinTypeMap.entrySet()) {
+    final String type=entry.getKey();
+    final String fqcn=entry.getValue();
+    SchemaNode schemaNode=app.nodeQuery(SchemaNode.class).andName(type).getFirst();
+    if (schemaNode == null) {
+      schemaNode=app.create(SchemaNode.class,type);
+    }
+    schemaNode.setProperty(SchemaNode.extendsClass,fqcn);
+    schemaNode.unlockReadOnlyPropertiesOnce();
+    schemaNode.setProperty(SchemaNode.isBuiltinType,true);
+  }
+  for (  final Class<? extends Mixin> mixinClass : mixinClasses) {
+    try {
+      final Mixin mixin=mixinClass.newInstance();
+      final String type=mixin.getType();
+      final String superClass=mixin.getSuperclass();
+      SchemaNode schemaNode=app.nodeQuery(SchemaNode.class).andName(type).getFirst();
+      if (schemaNode == null) {
+        schemaNode=app.create(SchemaNode.class,type);
+      }
+      schemaNode.setProperty(SchemaNode.extendsClass,superClass);
+      schemaNode.unlockReadOnlyPropertiesOnce();
+      schemaNode.setProperty(SchemaNode.isBuiltinType,true);
+    }
+ catch (    Throwable t) {
+      t.printStackTrace();
+    }
+  }
+}

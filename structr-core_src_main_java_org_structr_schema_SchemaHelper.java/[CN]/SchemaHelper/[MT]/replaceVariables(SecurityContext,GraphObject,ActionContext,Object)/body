@@ -6,22 +6,32 @@
   if (rawValue instanceof String) {
     value=(String)rawValue;
     if (!actionContext.returnRawValue(securityContext)) {
-      Matcher matcher=threadLocalTemplateMatcher.get();
-      matcher.reset(value);
-      while (matcher.find()) {
-        String group=matcher.group();
-        String source=group.substring(2,group.length() - 1);
+      final Map<String,String> replacements=new LinkedHashMap<>();
+      int start=value.indexOf("${");
+      int end=value.indexOf("}",start);
+      while (start >= 0 && end >= 0) {
+        String group=value.substring(start,end + 1);
+        String source=value.substring(start + 2,end);
         Object extractedValue=Functions.evaluate(securityContext,actionContext,entity,source);
         if (extractedValue == null) {
           extractedValue="";
         }
         String partValue=StringUtils.remove(extractedValue.toString(),"\\");
         if (partValue != null) {
-          value=value.replace(group,partValue);
+          replacements.put(group,partValue);
         }
  else {
-          value=value.equals(group) ? null : value.replace(group,"");
+          if (!value.equals(group)) {
+            replacements.put(group,"");
+          }
         }
+        start=value.indexOf("${",end);
+        end=value.indexOf("}",start);
+      }
+      for (      final Entry<String,String> entry : replacements.entrySet()) {
+        final String group=entry.getKey();
+        final String replacement=entry.getValue();
+        value=value.replace(group,replacement);
       }
     }
   }

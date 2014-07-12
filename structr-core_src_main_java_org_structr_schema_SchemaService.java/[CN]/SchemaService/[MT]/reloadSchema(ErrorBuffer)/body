@@ -1,4 +1,5 @@
 {
+  final ConfigurationProvider config=StructrApp.getConfiguration();
   boolean success=true;
   if (compiling.compareAndSet(false,true)) {
 synchronized (SchemaService.class) {
@@ -8,18 +9,26 @@ synchronized (SchemaService.class) {
         SchemaService.ensureBuiltinTypesExist();
         for (        final SchemaNode schemaNode : StructrApp.getInstance().nodeQuery(SchemaNode.class).getAsList()) {
           nodeExtender.addClass(schemaNode.getClassName(),schemaNode.getSource(errorBuffer));
+          nodeExtender.addClass("_" + schemaNode.getClassName() + "Helper",schemaNode.getAuxiliarySource());
           dynamicViews.addAll(schemaNode.getViews());
         }
         for (        final SchemaRelationship schemaRelationship : StructrApp.getInstance().relationshipQuery(SchemaRelationship.class).getAsList()) {
           nodeExtender.addClass(schemaRelationship.getClassName(),schemaRelationship.getSource(errorBuffer));
+          nodeExtender.addClass("_" + schemaRelationship.getClassName() + "Helper",schemaRelationship.getAuxiliarySource());
           dynamicViews.addAll(schemaRelationship.getViews());
         }
-        for (        final Class newType : nodeExtender.compile(errorBuffer).values()) {
-          Services.getInstance().getConfigurationProvider().registerEntityType(newType);
+        Map<String,Class> newTypes=nodeExtender.compile(errorBuffer);
+        for (        final Class newType : newTypes.values()) {
+          config.registerEntityType(newType);
+          try {
+            newType.newInstance();
+          }
+ catch (          Throwable t) {
+          }
         }
         success=!errorBuffer.hasError();
         if (success) {
-          Services.getInstance().getConfigurationProvider().registerDynamicViews(dynamicViews);
+          config.registerDynamicViews(dynamicViews);
           tx.success();
           lastClassLoader=nodeExtender.getClassLoader();
         }

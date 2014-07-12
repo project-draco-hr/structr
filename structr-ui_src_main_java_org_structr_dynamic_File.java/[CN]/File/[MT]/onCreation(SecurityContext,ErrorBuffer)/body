@@ -1,0 +1,13 @@
+{
+  try {
+    final Class helper=NodeExtender.getClass("org.structr.dynamic._FileHelper");
+    final Method method=helper.getDeclaredMethod("onCreation",AbstractNode.class,SecurityContext.class,ErrorBuffer.class);
+    final Object result=method.invoke(null,this,securityContext,errorBuffer);
+    if (result instanceof Boolean) {
+      return ((Boolean)result) && super.onCreation(securityContext,errorBuffer);
+    }
+  }
+ catch (  Throwable t) {
+  }
+  return super.onCreation(securityContext,errorBuffer);
+}

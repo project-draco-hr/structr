@@ -1,0 +1,11 @@
+{
+  if (!validators.isEmpty()) {
+    src.append("\tpublic static boolean isValid(final AbstractNode obj, final ErrorBuffer errorBuffer) {\n\n");
+    src.append("\t\tboolean error = false;\n\n");
+    for (    final Validator validator : validators) {
+      src.append("\t\terror |= ").append(validator.getSource("obj",false)).append(";\n");
+    }
+    src.append("\n\t\treturn !error;\n");
+    src.append("\t}\n\n");
+  }
+}

@@ -1,0 +1,13 @@
+{
+  try {
+    final Class helper=NodeExtender.getClass("org.structr.dynamic._FileHelper");
+    final Method method=helper.getDeclaredMethod("isValid",AbstractNode.class,ErrorBuffer.class);
+    final Object result=method.invoke(null,this,errorBuffer);
+    if (result instanceof Boolean) {
+      return ((Boolean)result) && super.isValid(errorBuffer);
+    }
+  }
+ catch (  Throwable t) {
+  }
+  return super.isValid(errorBuffer);
+}

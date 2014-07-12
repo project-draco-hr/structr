@@ -22,12 +22,7 @@
         if (error) {
           return;
         }
-        final StringBuilder buf=new StringBuilder();
-        buf.append("ValidationHelper.check").append(getValueType()).append("InRangeError(this, ");
-        buf.append(className).append(".").append(propertyName).append("Property");
-        buf.append(", \"").append(expression);
-        buf.append("\", errorBuffer)");
-        globalValidators.add(buf.toString());
+        globalValidators.add(new Validator("check" + getValueType() + "inRangeError",className,propertyName));
       }
  else {
         errorBuffer.add(SchemaNode.class.getSimpleName(),new InvalidPropertySchemaToken(expression,"invalid_range_expression","Range expression must start and end with [ or ], e.g. [" + expression + "]."));

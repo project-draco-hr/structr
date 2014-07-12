@@ -9,12 +9,18 @@ synchronized (SchemaService.class) {
         SchemaService.ensureBuiltinTypesExist();
         for (        final SchemaNode schemaNode : StructrApp.getInstance().nodeQuery(SchemaNode.class).getAsList()) {
           nodeExtender.addClass(schemaNode.getClassName(),schemaNode.getSource(errorBuffer));
-          nodeExtender.addClass("_" + schemaNode.getClassName() + "Helper",schemaNode.getAuxiliarySource());
+          final String auxSource=schemaNode.getAuxiliarySource();
+          if (auxSource != null) {
+            nodeExtender.addClass("_" + schemaNode.getClassName() + "Helper",auxSource);
+          }
           dynamicViews.addAll(schemaNode.getViews());
         }
         for (        final SchemaRelationship schemaRelationship : StructrApp.getInstance().relationshipQuery(SchemaRelationship.class).getAsList()) {
           nodeExtender.addClass(schemaRelationship.getClassName(),schemaRelationship.getSource(errorBuffer));
-          nodeExtender.addClass("_" + schemaRelationship.getClassName() + "Helper",schemaRelationship.getAuxiliarySource());
+          final String auxSource=schemaRelationship.getAuxiliarySource();
+          if (auxSource != null) {
+            nodeExtender.addClass("_" + schemaRelationship.getClassName() + "Helper",auxSource);
+          }
           dynamicViews.addAll(schemaRelationship.getViews());
         }
         Map<String,Class> newTypes=nodeExtender.compile(errorBuffer);
@@ -30,7 +36,6 @@ synchronized (SchemaService.class) {
         if (success) {
           config.registerDynamicViews(dynamicViews);
           tx.success();
-          lastClassLoader=nodeExtender.getClassLoader();
         }
       }
  catch (      Throwable t) {

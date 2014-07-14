@@ -10,20 +10,22 @@
   if (cls == null) {
     throw new FrameworkException(422,"Invalid type " + type);
   }
-  properties.remove("type");
   if (graphDb != null) {
     Result<AbstractNode> nodes=null;
     if (properties.containsKey(AbstractNode.type.dbName())) {
       try (final Tx tx=StructrApp.getInstance().tx()){
         nodes=StructrApp.getInstance(securityContext).nodeQuery(cls).getResult();
+        tx.success();
       }
        properties.remove(AbstractNode.type.dbName());
     }
  else {
       try (final Tx tx=StructrApp.getInstance().tx()){
         nodes=nodeFactory.instantiateAll(GlobalGraphOperations.at(graphDb).getAllNodes());
+        tx.success();
       }
      }
+    properties.remove("type");
     long nodeCount=bulkGraphOperation(securityContext,nodes.getResults(),1000,"SetNodeProperties",new BulkGraphOperation<AbstractNode>(){
       @Override public void handleGraphObject(      SecurityContext securityContext,      AbstractNode node){
         if (node.getProperty(GraphObject.id) != null) {

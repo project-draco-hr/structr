@@ -18,7 +18,7 @@
       test3.setProperty(TestOne.anInt,3);
       test4.setProperty(TestOne.aString,string4);
       test4.setProperty(TestOne.anInt,4);
-      SyncCommand.exportToStream(outputStream,app.nodeQuery(NodeInterface.class).getAsList(),app.relationshipQuery(RelationshipInterface.class).getAsList(),null,false);
+      SyncCommand.exportToStream(outputStream,app.nodeQuery(TestOne.class).getAsList(),app.relationshipQuery(RelationshipInterface.class).getAsList(),null,false);
       tx.success();
     }
      try (final Tx tx=app.tx()){
@@ -28,7 +28,7 @@
       tx.success();
     }
      try (final Tx tx=app.tx()){
-      assertEquals("Database should be empty",0,app.nodeQuery(NodeInterface.class).getResult().size());
+      assertEquals("Database should contain not TestOne entities.",0,app.nodeQuery(TestOne.class).getResult().size());
       tx.success();
     }
      try (final Tx tx=app.tx()){

@@ -11,10 +11,12 @@
     }
      try (final Tx tx=app.tx()){
       assertEquals(0,app.nodeQuery(TestOne.class).getResult().size());
+      tx.success();
     }
      app.command(BulkRebuildIndexCommand.class).execute(new LinkedHashMap<String,Object>());
     try (final Tx tx=app.tx()){
       assertEquals(100,app.nodeQuery(TestOne.class).getResult().size());
+      tx.success();
     }
    }
  catch (  FrameworkException fex) {

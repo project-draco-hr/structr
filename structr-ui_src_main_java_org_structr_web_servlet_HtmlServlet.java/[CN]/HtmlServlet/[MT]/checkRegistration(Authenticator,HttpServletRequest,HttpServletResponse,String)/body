@@ -2,7 +2,7 @@
   logger.log(Level.FINE,"Checking registration ...");
   String key=request.getParameter(CONFIRM_KEY_KEY);
   if (StringUtils.isEmpty(key)) {
-    return false;
+    return null;
   }
   String targetPage=request.getParameter(TARGET_PAGE_KEY);
   String errorPage=request.getParameter(ERROR_PAGE_KEY);
@@ -24,17 +24,15 @@
         }
         tx.success();
         if (StringUtils.isNotBlank(targetPage)) {
-          response.sendRedirect("/" + targetPage);
-          return true;
+          return "/" + targetPage;
         }
       }
      }
  else {
       if (StringUtils.isNotBlank(errorPage)) {
-        response.sendRedirect("/" + errorPage);
-        return true;
+        return "/" + errorPage;
       }
     }
   }
-  return false;
+  return null;
 }

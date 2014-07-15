@@ -4,8 +4,9 @@
   final App app;
   try {
     String path=request.getPathInfo();
-    if (checkRegistration(auth,request,response,path)) {
-      return;
+    final String registrationResult=checkRegistration(auth,request,response,path);
+    if (registrationResult != null) {
+      path=registrationResult;
     }
     try (final Tx tx=StructrApp.getInstance().tx()){
       securityContext=auth.initializeAndExamineRequest(request,response);

@@ -2,7 +2,7 @@
   logger.log(Level.FINE,"Checking registration ...");
   String key=request.getParameter(CONFIRM_KEY_KEY);
   if (StringUtils.isEmpty(key)) {
-    return null;
+    return false;
   }
   String targetPage=request.getParameter(TARGET_PAGE_KEY);
   String errorPage=request.getParameter(ERROR_PAGE_KEY);
@@ -11,7 +11,6 @@
     Result<Principal> results;
     try (final Tx tx=app.tx()){
       results=app.nodeQuery(Principal.class).and(User.confirmationKey,key).getResult();
-      ;
     }
      if (!results.isEmpty()) {
       final Principal user=results.get(0);
@@ -21,16 +20,18 @@
           AuthHelper.doLogin(request,user);
         }
         tx.success();
-        if (StringUtils.isNotBlank(targetPage)) {
-          return "/" + targetPage;
-        }
       }
-     }
+       if (StringUtils.isNotBlank(targetPage)) {
+        response.sendRedirect("/" + targetPage);
+      }
+      return true;
+    }
  else {
       if (StringUtils.isNotBlank(errorPage)) {
-        return "/" + errorPage;
+        response.sendRedirect("/" + errorPage);
       }
+      return true;
     }
   }
-  return null;
+  return false;
 }

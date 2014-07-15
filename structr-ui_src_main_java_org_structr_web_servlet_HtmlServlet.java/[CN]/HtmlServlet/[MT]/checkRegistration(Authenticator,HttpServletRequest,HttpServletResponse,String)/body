@@ -18,9 +18,16 @@
       try (final Tx tx=app.tx()){
         user.setProperty(User.confirmationKey,null);
         if (auth.getUserAutoLogin()) {
-          final String sessionId=request.getSession().getId();
-          AuthHelper.clearSession(sessionId);
-          user.addSessionId(sessionId);
+          String sessionIdFromRequest=null;
+          try {
+            sessionIdFromRequest=request.getRequestedSessionId();
+          }
+ catch (          UnsupportedOperationException uoe) {
+          }
+          if (sessionIdFromRequest != null) {
+            AuthHelper.clearSession(sessionIdFromRequest);
+            user.addSessionId(sessionIdFromRequest);
+          }
         }
         tx.success();
         if (StringUtils.isNotBlank(targetPage)) {

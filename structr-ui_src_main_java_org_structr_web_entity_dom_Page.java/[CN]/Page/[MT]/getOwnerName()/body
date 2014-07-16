@@ -1,10 +1,14 @@
 {
+  String name="";
   try (Tx tx=StructrApp.getInstance().tx()){
     Principal owner=getOwner();
-    return owner != null ? owner.getProperty(AbstractUser.name) : "";
+    if (owner != null) {
+      name=owner.getProperty(AbstractUser.name);
+    }
+    tx.success();
   }
  catch (  FrameworkException fex) {
     logger.log(Level.SEVERE,"Error while getting owner name of " + this,fex);
   }
-  return null;
+  return name;
 }

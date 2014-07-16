@@ -1,0 +1,15 @@
+{
+  String existingSessionId=null;
+  try {
+    existingSessionId=request.getRequestedSessionId();
+  }
+ catch (  UnsupportedOperationException uoe) {
+  }
+  if (existingSessionId == null) {
+    HttpSession session=request.getSession(true);
+    if (session != null) {
+      return session.getId();
+    }
+  }
+  return existingSessionId;
+}

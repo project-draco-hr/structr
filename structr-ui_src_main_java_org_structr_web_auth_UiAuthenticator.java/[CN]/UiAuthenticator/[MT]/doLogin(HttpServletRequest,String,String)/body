@@ -1,16 +1,7 @@
 {
   Principal user=AuthHelper.getPrincipalForPassword(Person.eMail,emailOrUsername,password);
   if (user != null) {
-    String sessionIdFromRequest=null;
-    try {
-      sessionIdFromRequest=request.getRequestedSessionId();
-    }
- catch (    UnsupportedOperationException uoe) {
-    }
-    if (sessionIdFromRequest != null) {
-      AuthHelper.clearSession(sessionIdFromRequest);
-      user.addSessionId(sessionIdFromRequest);
-    }
+    AuthHelper.doLogin(request,user);
   }
   return user;
 }

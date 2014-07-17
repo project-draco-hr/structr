@@ -1,5 +1,10 @@
 {
-  final Gson gson=new GsonBuilder().setPrettyPrinting().registerTypeAdapter(WebSocketMessage.class,new WebSocketDataGSONAdapter(config.getDefaultIdProperty(),config.getOutputNestingDepth())).create();
+  final GsonBuilder gsonBuilder=new GsonBuilder().setPrettyPrinting().registerTypeAdapter(WebSocketMessage.class,new WebSocketDataGSONAdapter(config.getDefaultIdProperty(),config.getOutputNestingDepth()));
+  final boolean lenient=Boolean.parseBoolean(StructrApp.getConfigurationValue("json.lenient","false"));
+  if (lenient) {
+    gsonBuilder.serializeSpecialFloatingPointValues();
+  }
+  final Gson gson=gsonBuilder.create();
   final SynchronizationController syncController=new SynchronizationController(gson);
   TransactionCommand.registerTransactionListener(syncController);
   factory.getPolicy().setIdleTimeout(61000);

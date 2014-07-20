@@ -1,0 +1,14 @@
+{
+  final String[] parts=StringUtils.split(value,separator);
+  final int len=parts.length;
+  for (int i=0; i < len; i++) {
+    final PropertyKey key=keys.get(i);
+    final PropertyConverter inputConverter=key.inputConverter(securityContext);
+    if (inputConverter != null) {
+      key.setProperty(securityContext,obj,inputConverter.convert(parts[i]));
+    }
+ else {
+      key.setProperty(securityContext,obj,parts[i]);
+    }
+  }
+}

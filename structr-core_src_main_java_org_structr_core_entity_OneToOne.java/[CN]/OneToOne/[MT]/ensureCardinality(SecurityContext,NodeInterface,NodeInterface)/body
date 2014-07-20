@@ -5,13 +5,13 @@
   final Class<T> targetType=getTargetType();
   if (sourceNode != null) {
     final Relation<S,?,?,?> outgoingRel=sourceNode.getOutgoingRelationship(clazz);
-    if (outgoingRel != null && targetType.isAssignableFrom(outgoingRel.getTargetType())) {
+    if (outgoingRel != null && targetType.isInstance(outgoingRel.getTargetNode())) {
       app.delete(outgoingRel);
     }
   }
   if (targetNode != null) {
     final Relation<?,T,?,?> incomingRel=targetNode.getIncomingRelationship(clazz);
-    if (incomingRel != null && sourceType.isAssignableFrom(incomingRel.getSourceType())) {
+    if (incomingRel != null && sourceType.isInstance(incomingRel.getSourceNode())) {
       app.delete(incomingRel);
     }
   }

@@ -3,7 +3,7 @@
   logger.log(Level.FINE,"PING received from session {0}",sessionId);
   final Principal currentUser=AuthHelper.getPrincipalForSessionId(sessionId);
   if (currentUser != null) {
-    getWebSocket().send(MessageBuilder.status().data("username",currentUser.getProperty(AbstractNode.name)).code(100).build(),true);
+    getWebSocket().send(MessageBuilder.status().data("username",currentUser.getProperty(AbstractNode.name)).data("isAdmin",currentUser.getProperty(Principal.isAdmin)).code(100).build(),true);
   }
  else {
     logger.log(Level.FINE,"Invalid session id");

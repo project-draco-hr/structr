@@ -2,7 +2,7 @@
   if (!ServletFileUpload.isMultipartContent(request)) {
     throw new ServletException("Content type is not multipart/form-data");
   }
-  try (final Tx tx=StructrApp.getInstance().tx()){
+  try (final Tx tx=StructrApp.getInstance().tx(false,false,false)){
     final SecurityContext securityContext=getConfig().getAuthenticator().initializeAndExamineRequest(request,response);
     securityContext.setAccessMode(AccessMode.Frontend);
     request.setCharacterEncoding("UTF-8");

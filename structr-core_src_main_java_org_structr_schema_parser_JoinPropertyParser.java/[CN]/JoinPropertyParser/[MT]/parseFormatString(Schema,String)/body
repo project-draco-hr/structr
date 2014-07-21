@@ -1,0 +1,40 @@
+{
+  final StreamTokenizer tokenizer=new StreamTokenizer(new StringReader(expression));
+  final StringBuilder buf=new StringBuilder();
+  tokenizer.wordChars('_','_');
+  String token=null;
+  int type=0;
+  try {
+    do {
+      token=null;
+      type=tokenizer.nextToken();
+switch (type) {
+case StreamTokenizer.TT_NUMBER:
+        token=String.valueOf(tokenizer.nval);
+      break;
+case StreamTokenizer.TT_WORD:
+    token=tokenizer.sval;
+  break;
+case StreamTokenizer.TT_EOF:
+case StreamTokenizer.TT_EOL:
+break;
+case '\'':
+case '\"':
+token="\"" + tokenizer.sval + "\"";
+break;
+}
+if (token != null) {
+if (token.startsWith("_")) {
+token=token.substring(1) + "Property";
+}
+buf.append(", ");
+buf.append(token);
+}
+}
+ while (type != StreamTokenizer.TT_EOF);
+}
+ catch (IOException ex) {
+ex.printStackTrace();
+}
+parameters=buf.toString();
+}

@@ -1,0 +1,30 @@
+{
+  final ArrayList<Object> arguments=new ArrayList<>();
+  for (Iterator<PropertyKey> it=keys.iterator(); it.hasNext(); ) {
+    final PropertyKey key=it.next();
+    final PropertyConverter inputConverter=key.inputConverter(securityContext);
+    if (inputConverter != null) {
+      try {
+        final Object value=inputConverter.revert(key.getProperty(securityContext,obj,applyConverter,predicate));
+        if (value != null) {
+          arguments.add(value);
+        }
+      }
+ catch (      FrameworkException fex) {
+        fex.printStackTrace();
+      }
+    }
+ else {
+      final Object value=key.getProperty(securityContext,obj,applyConverter,predicate);
+      if (value != null) {
+        arguments.add(value);
+      }
+    }
+  }
+  try {
+    return MessageFormat.format(format,arguments.toArray());
+  }
+ catch (  Throwable t) {
+  }
+  return null;
+}

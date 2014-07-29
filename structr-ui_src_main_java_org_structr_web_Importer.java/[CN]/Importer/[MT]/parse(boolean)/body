@@ -30,7 +30,26 @@
       if (location != null) {
         address=location.getValue();
         client=new DefaultHttpClient();
-        resp=client.execute(new HttpGet(address));
+        int attempts=1;
+        boolean success=false;
+        while (!success) {
+          try {
+            resp=client.execute(new HttpGet(address));
+            success=true;
+          }
+ catch (          IllegalStateException ise) {
+            logger.log(Level.INFO,"Unable to establish connection to {0}, trying again after {1} sec...",new Object[]{address,attempts * 10});
+            attempts++;
+            if (attempts > 6) {
+              throw new FrameworkException(500,"Error while parsing content from " + address + ", couldn't establish connections after "+ attempts+ " attempts");
+            }
+            try {
+              Thread.sleep(attempts * 10 * 1000);
+            }
+ catch (            InterruptedException ex) {
+            }
+          }
+        }
       }
       code=IOUtils.toString(resp.getEntity().getContent(),"UTF-8");
       if (code.charAt(0) == 65279) {

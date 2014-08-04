@@ -13,7 +13,9 @@
     String msg=gson.toJson(message,WebSocketMessage.class);
     logger.log(Level.FINE,"################### Private message: {0}",message.getCommand());
     logger.log(Level.FINEST,"############################################################ SENDING \n{0}",msg);
-    getSecurityContext().clearCustomView();
+    if (securityContext != null) {
+      securityContext.clearCustomView();
+    }
     session.getRemote().sendString(msg);
   }
  catch (  Throwable t) {

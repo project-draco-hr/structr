@@ -1,13 +1,34 @@
 {
   final SecurityContext securityContext=getWebSocket().getSecurityContext();
-  AbstractNode node=getNode(webSocketData.getId());
-  if (node != null) {
+  final Boolean recursive=(Boolean)webSocketData.getNodeData().get("recursive");
+  final AbstractNode obj=getNode(webSocketData.getId());
+  if (obj != null) {
     final App app=StructrApp.getInstance(securityContext);
+    if (Boolean.TRUE.equals(recursive)) {
+      try {
+        final List<AbstractNode> filteredResults=new LinkedList();
+        if (obj instanceof DOMNode) {
+          DOMNode node=(DOMNode)obj;
+          filteredResults.addAll(DOMNode.getAllChildNodes(node));
+        }
+ else         if (obj instanceof LinkedTreeNode) {
+          LinkedTreeNode node=(LinkedTreeNode)obj;
+          filteredResults.addAll(node.getAllChildNodes());
+        }
+        for (        NodeInterface node : filteredResults) {
+          app.delete(node);
+        }
+      }
+ catch (      FrameworkException fex) {
+        logger.log(Level.WARNING,"Exception occured",fex);
+        getWebSocket().send(MessageBuilder.status().code(fex.getStatus()).message(fex.getMessage()).build(),true);
+      }
+    }
     try {
-      app.delete(node);
+      app.delete(obj);
     }
  catch (    FrameworkException fex) {
-      logger.log(Level.WARNING,"Unable to delete node",fex);
+      logger.log(Level.WARNING,"Unable to delete node(s)",fex);
     }
   }
  else {

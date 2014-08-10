@@ -1,10 +1,7 @@
 {
   final SecurityContext securityContext=getWebSocket().getSecurityContext();
   final App app=StructrApp.getInstance(securityContext);
-  final String sortOrder=webSocketData.getSortOrder();
-  final String sortKey=webSocketData.getSortKey();
-  PropertyKey sortProperty=StructrApp.getConfiguration().getPropertyKeyForJSONName(DOMNode.class,sortKey);
-  final Query query=app.nodeQuery().sort(sortProperty).order("desc".equals(sortOrder)).includeDeletedAndHidden();
+  final Query query=app.nodeQuery().includeDeletedAndHidden();
   query.orTypes(DOMElement.class);
   query.orType(Content.class);
   try {

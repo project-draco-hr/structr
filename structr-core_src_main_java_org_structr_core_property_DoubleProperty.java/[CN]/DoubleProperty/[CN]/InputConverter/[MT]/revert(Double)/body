@@ -1,3 +1,15 @@
 {
+  if (source == null) {
+    return null;
+  }
+  final boolean lenient=Boolean.parseBoolean(StructrApp.getConfigurationValue("json.lenient","false"));
+  if (!lenient) {
+    if (Double.isNaN(source)) {
+      return null;
+    }
+    if (Double.isInfinite(source)) {
+      return null;
+    }
+  }
   return source;
 }

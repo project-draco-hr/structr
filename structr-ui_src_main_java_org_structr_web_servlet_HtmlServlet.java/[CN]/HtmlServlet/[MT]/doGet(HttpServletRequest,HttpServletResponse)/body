@@ -37,14 +37,14 @@
       }
  else {
         if (rootElement == null) {
-          rootElement=findPage(request,path);
+          rootElement=findPage(securityContext,request,path);
         }
  else {
           dontCache=true;
         }
       }
       if (rootElement == null) {
-        org.structr.web.entity.File file=findFile(request,path);
+        File file=findFile(securityContext,request,path);
         if (file != null) {
           streamFile(securityContext,file,request,response,edit);
           return;
@@ -57,7 +57,7 @@
           requestUriContainsUuids|=matcher.matches();
         }
         if (!requestUriContainsUuids) {
-          dataNode=findFirstNodeByPath(request,path);
+          dataNode=findFirstNodeByPath(securityContext,request,path);
         }
  else {
           AbstractNode n=(AbstractNode)StructrApp.getInstance(securityContext).get(PathHelper.getName(path));
@@ -67,7 +67,7 @@
         }
         if (dataNode != null) {
           request.removeAttribute(POSSIBLE_ENTRY_POINTS);
-          rootElement=findPage(request,StringUtils.substringBeforeLast(path,PathHelper.PATH_SEP));
+          rootElement=findPage(securityContext,request,StringUtils.substringBeforeLast(path,PathHelper.PATH_SEP));
           renderContext.setDetailsDataObject(dataNode);
           if (rootElement == null && dataNode instanceof DOMNode) {
             rootElement=((DOMNode)dataNode);
@@ -89,7 +89,7 @@
       if (rootElement == null) {
         return;
       }
-      if (EditMode.DATA.equals(edit) || dontCache) {
+      if (EditMode.WIDGET.equals(edit) || dontCache) {
         setNoCacheHeaders(response);
       }
       if (!securityContext.isVisible(rootElement)) {
@@ -99,7 +99,7 @@
         }
       }
       if (securityContext.isVisible(rootElement)) {
-        if (!EditMode.DATA.equals(edit) && !dontCache && notModifiedSince(request,response,rootElement,dontCache)) {
+        if (!EditMode.WIDGET.equals(edit) && !dontCache && notModifiedSince(request,response,rootElement,dontCache)) {
           ServletOutputStream out=response.getOutputStream();
           out.flush();
           out.close();

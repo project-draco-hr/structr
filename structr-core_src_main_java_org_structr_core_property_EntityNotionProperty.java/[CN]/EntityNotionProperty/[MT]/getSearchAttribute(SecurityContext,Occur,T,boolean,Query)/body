@@ -6,8 +6,11 @@
   try {
     if (searchValue != null && !StringUtils.isBlank(searchValue.toString())) {
       final App app=StructrApp.getInstance(securityContext);
+      final PropertyKey key=notion.getPrimaryPropertyKey();
+      final PropertyConverter inputConverter=key.inputConverter(securityContext);
+      final Object transformedValue=inputConverter != null ? inputConverter.convert(searchValue) : searchValue;
       if (exactMatch) {
-        Result<AbstractNode> result=app.nodeQuery(entityProperty.relatedType()).and(notion.getPrimaryPropertyKey(),searchValue).getResult();
+        Result<AbstractNode> result=app.nodeQuery(entityProperty.relatedType()).and(key,transformedValue).getResult();
         for (        AbstractNode node : result.getResults()) {
 switch (occur) {
 case MUST:
@@ -28,7 +31,7 @@ case MUST_NOT:
 }
 }
  else {
-Result<AbstractNode> result=app.nodeQuery(entityProperty.relatedType(),false).and(notion.getPrimaryPropertyKey(),searchValue,false).getResult();
+Result<AbstractNode> result=app.nodeQuery(entityProperty.relatedType(),false).and(key,transformedValue,false).getResult();
 for (AbstractNode node : result.getResults()) {
 intersectionResult.addAll(entityProperty.getRelatedNodesReverse(securityContext,node,declaringClass,predicate));
 }

@@ -6,12 +6,13 @@
   final String _className=getClassName();
   final String _sourceNodeType=getSchemaNodeSourceType();
   final String _targetNodeType=getSchemaNodeTargetType();
-  final Set<String> validators=new LinkedHashSet<>();
+  final Set<String> propertyNames=new LinkedHashSet<>();
+  final Set<Validator> validators=new LinkedHashSet<>();
   final Set<String> enums=new LinkedHashSet<>();
   src.append("package org.structr.dynamic;\n\n");
   SchemaHelper.formatImportStatements(src,baseType);
   src.append("public class ").append(_className).append(" extends ").append(getBaseType()).append(" {\n\n");
-  src.append(SchemaHelper.extractProperties(this,validators,enums,viewProperties,actions,errorBuffer));
+  src.append(SchemaHelper.extractProperties(this,propertyNames,validators,enums,viewProperties,actions,errorBuffer));
   src.append("\tpublic static final Property<String> sourceIdProperty = new SourceId(\"sourceId\");\n");
   src.append("\tpublic static final Property<String> targetIdProperty = new TargetId(\"targetId\");\n");
   SchemaHelper.addPropertyToView(PropertyView.Ui,"sourceId",viewProperties);

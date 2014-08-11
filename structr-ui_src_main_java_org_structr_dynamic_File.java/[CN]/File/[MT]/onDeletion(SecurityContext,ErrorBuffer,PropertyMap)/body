@@ -1,0 +1,13 @@
+{
+  try {
+    final Class helper=NodeExtender.getClass("org.structr.dynamic._FileHelper");
+    final Method method=helper.getDeclaredMethod("onDeletion",AbstractNode.class,SecurityContext.class,ErrorBuffer.class,PropertyMap.class);
+    final Object result=method.invoke(null,this,securityContext,errorBuffer,properties);
+    if (result instanceof Boolean) {
+      return ((Boolean)result) && super.onDeletion(securityContext,errorBuffer,properties);
+    }
+  }
+ catch (  Throwable t) {
+  }
+  return super.onDeletion(securityContext,errorBuffer,properties);
+}

@@ -1,0 +1,12 @@
+{
+  final String typeName=type.getName();
+  registerProperty(type,propertyKey);
+  for (  final Class possibleSubclass : nodeEntityClassCache.values()) {
+    for (    final Class supertype : getAllTypes(possibleSubclass)) {
+      if (supertype.getName().equals(typeName)) {
+        registerProperty(possibleSubclass,propertyKey);
+        registerPropertySet(possibleSubclass,PropertyView.Ui,propertyKey);
+      }
+    }
+  }
+}

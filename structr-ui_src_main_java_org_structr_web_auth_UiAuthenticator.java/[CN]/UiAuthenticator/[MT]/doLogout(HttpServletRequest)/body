@@ -2,11 +2,7 @@
   try {
     Principal user=getUser(request,false);
     if (user != null) {
-      final String sessionId=request.getRequestedSessionId();
-      if (sessionId != null) {
-        AuthHelper.clearSession(sessionId);
-        user.removeSessionId(sessionId);
-      }
+      AuthHelper.doLogout(request,user);
     }
     HttpSession session=request.getSession(false);
     if (session != null) {

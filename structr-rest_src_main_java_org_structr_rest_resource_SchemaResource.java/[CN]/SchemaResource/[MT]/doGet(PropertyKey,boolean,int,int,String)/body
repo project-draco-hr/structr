@@ -4,50 +4,13 @@
     Class type=SchemaHelper.getEntityClassForRawType(rawType);
     GraphObjectMap schema=new GraphObjectMap();
     resultList.add(schema);
-    if (type == null) {
-    }
     if (type != null) {
       String url="/".concat(CaseHelper.toUnderscore(rawType,true));
       schema.setProperty(new StringProperty("url"),url);
-      schema.setProperty(new StringProperty("type"),rawType);
+      schema.setProperty(new StringProperty("type"),type.getSimpleName());
+      schema.setProperty(new StringProperty("className"),type.getName());
       schema.setProperty(new StringProperty("isRel"),AbstractRelationship.class.isAssignableFrom(type));
       schema.setProperty(new LongProperty("flags"),SecurityContext.getResourceFlags(rawType));
-      Set<String> propertyViews=new LinkedHashSet<>(StructrApp.getConfiguration().getPropertyViews());
-      Map<String,Map<String,Object>> views=new TreeMap();
-      schema.setProperty(new StringProperty("views"),views);
-      for (      String view : propertyViews) {
-        Set<PropertyKey> properties=new LinkedHashSet<>(StructrApp.getConfiguration().getPropertySet(type,view));
-        Map<String,Object> propertyConverterMap=new TreeMap<>();
-        if (PropertyDefinition.exists(type.getSimpleName())) {
-          Iterable<PropertyDefinition> dynamicProperties=PropertyDefinition.getPropertiesForKind(type.getSimpleName());
-          if (dynamicProperties != null) {
-            for (            PropertyDefinition property : dynamicProperties) {
-              properties.add(property);
-            }
-          }
-        }
-        if (!properties.isEmpty()) {
-          for (          PropertyKey property : properties) {
-            Map<String,Object> propProperties=new TreeMap();
-            propProperties.put("dbName",property.dbName());
-            propProperties.put("jsonName",property.jsonName());
-            propProperties.put("className",property.getClass().getName());
-            propProperties.put("defaultValue",property.defaultValue());
-            propProperties.put("readOnly",property.isReadOnly());
-            propProperties.put("system",property.isUnvalidated());
-            PropertyConverter databaseConverter=property.databaseConverter(securityContext,null);
-            PropertyConverter inputConverter=property.inputConverter(securityContext);
-            if (databaseConverter != null) {
-              propProperties.put("databaseConverter",databaseConverter.getClass().getName());
-            }
-            if (inputConverter != null) {
-              propProperties.put("inputConverter",inputConverter.getClass().getName());
-            }
-            propertyConverterMap.put(property.jsonName(),propProperties);
-          }
-          views.put(view,propertyConverterMap);
-        }
-      }
     }
   }
   return new Result(resultList,resultList.size(),false,false);

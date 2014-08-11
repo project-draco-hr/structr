@@ -1,4 +1,5 @@
 {
+  AccessControlTest.clearResourceAccess();
   final PropertyMap props=new PropertyMap();
   try (final Tx tx=app.tx()){
     List<Class> entityList=Collections.EMPTY_LIST;
@@ -9,7 +10,6 @@
       logger.log(Level.SEVERE,null,ex);
     }
     assertTrue(entityList.contains(AbstractNode.class));
-    assertTrue(entityList.contains(Cache.class));
     assertTrue(entityList.contains(GenericNode.class));
     assertTrue(entityList.contains(Location.class));
     assertTrue(entityList.contains(Person.class));
@@ -17,7 +17,6 @@
     assertTrue(entityList.contains(PropertyAccess.class));
     entityList.remove(TestTwo.class);
     entityList.remove(TestNine.class);
-    entityList.remove(PropertyDefinition.class);
     entityList.remove(MailTemplate.class);
     entityList.remove(SchemaNode.class);
     for (    Class type : entityList) {
@@ -26,11 +25,11 @@
           props.put(TestSeven.name,"TestSeven-0");
         }
         if (type.equals(ResourceAccess.class)) {
-          props.put(ResourceAccess.signature,"/");
+          props.put(ResourceAccess.signature,"/X");
           props.put(ResourceAccess.flags,6L);
         }
         if (type.equals(DynamicResourceAccess.class)) {
-          props.put(DynamicResourceAccess.signature,"/");
+          props.put(DynamicResourceAccess.signature,"/Y");
           props.put(DynamicResourceAccess.flags,6L);
         }
         if (type.equals(PropertyAccess.class)) {

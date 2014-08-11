@@ -1,0 +1,15 @@
+{
+  List<Linkable> entryPoints=findPossibleEntryPoints(securityContext,request,PathHelper.getName(path));
+  if (entryPoints.isEmpty()) {
+    entryPoints=findPossibleEntryPoints(securityContext,request,PathHelper.getName(PathHelper.replaceWhitespaceByPlus(path)));
+  }
+  if (entryPoints.isEmpty()) {
+    entryPoints=findPossibleEntryPoints(securityContext,request,PathHelper.getName(PathHelper.replaceWhitespaceByPercentTwenty(path)));
+  }
+  for (  Linkable node : entryPoints) {
+    if (node instanceof File && (path.equals(node.getPath()) || node.getUuid().equals(PathHelper.clean(path)))) {
+      return (File)node;
+    }
+  }
+  return null;
+}

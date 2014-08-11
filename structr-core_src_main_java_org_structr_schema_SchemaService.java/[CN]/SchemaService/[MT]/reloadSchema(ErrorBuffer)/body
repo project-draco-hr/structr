@@ -1,29 +1,46 @@
 {
+  final ConfigurationProvider config=StructrApp.getConfiguration();
   boolean success=true;
   if (compiling.compareAndSet(false,true)) {
 synchronized (SchemaService.class) {
       final Set<String> dynamicViews=new LinkedHashSet<>();
       final NodeExtender nodeExtender=new NodeExtender();
       try (final Tx tx=StructrApp.getInstance().tx()){
+        SchemaService.ensureBuiltinTypesExist();
         for (        final SchemaNode schemaNode : StructrApp.getInstance().nodeQuery(SchemaNode.class).getAsList()) {
           nodeExtender.addClass(schemaNode.getClassName(),schemaNode.getSource(errorBuffer));
+          final String auxSource=schemaNode.getAuxiliarySource();
+          if (auxSource != null) {
+            nodeExtender.addClass("_" + schemaNode.getClassName() + "Helper",auxSource);
+          }
           dynamicViews.addAll(schemaNode.getViews());
         }
         for (        final SchemaRelationship schemaRelationship : StructrApp.getInstance().relationshipQuery(SchemaRelationship.class).getAsList()) {
           nodeExtender.addClass(schemaRelationship.getClassName(),schemaRelationship.getSource(errorBuffer));
+          final String auxSource=schemaRelationship.getAuxiliarySource();
+          if (auxSource != null) {
+            nodeExtender.addClass("_" + schemaRelationship.getClassName() + "Helper",auxSource);
+          }
           dynamicViews.addAll(schemaRelationship.getViews());
         }
-        for (        final Class newType : nodeExtender.compile(errorBuffer).values()) {
-          Services.getInstance().getConfigurationProvider().registerEntityType(newType);
+        Map<String,Class> newTypes=nodeExtender.compile(errorBuffer);
+        for (        final Class newType : newTypes.values()) {
+          config.registerEntityType(newType);
+          try {
+            newType.newInstance();
+          }
+ catch (          Throwable t) {
+          }
         }
         success=!errorBuffer.hasError();
         if (success) {
-          Services.getInstance().getConfigurationProvider().registerDynamicViews(dynamicViews);
+          config.registerDynamicViews(dynamicViews);
+          tx.success();
         }
-        lastClassLoader=nodeExtender.getClassLoader();
       }
  catch (      Throwable t) {
         logger.log(Level.SEVERE,"Unable to compile dynamic schema.",t);
+        t.printStackTrace();
         success=false;
       }
     }

@@ -5,7 +5,7 @@
   for (  String key : props) {
     if (key.startsWith("data-")) {
       String value=getPropertyWithVariableReplacement(securityContext,renderContext,new GenericProperty(key));
-      if (!(EditMode.RAW.equals(editMode))) {
+      if (!(EditMode.RAW.equals(editMode) || EditMode.WIDGET.equals(editMode))) {
         value=escapeForHtmlAttributes(value);
       }
       if (StringUtils.isNotBlank(value)) {
@@ -13,7 +13,7 @@
       }
     }
   }
-  if (EditMode.RAW.equals(editMode)) {
+  if (EditMode.RAW.equals(editMode) || EditMode.WIDGET.equals(editMode)) {
     Property[] rawProps=new Property[]{dataKey,restQuery,cypherQuery,xpathQuery,hideOnIndex,hideOnDetail,showForLocales,hideForLocales,showConditions,hideConditions};
     for (    Property p : rawProps) {
       if (p instanceof BooleanProperty) {

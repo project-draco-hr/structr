@@ -181,7 +181,12 @@
     Object value=_data.getProperty(referenceKeyProperty);
     PropertyConverter converter=referenceKeyProperty.inputConverter(securityContext);
     if (value != null && converter != null && !(referenceKeyProperty instanceof RelationProperty)) {
-      value=converter.revert(value);
+      try {
+        value=converter.revert(value);
+      }
+ catch (      Throwable t) {
+        logger.log(Level.WARNING,"Unable to convert property {0} of node {1}: {2}",new Object[]{referenceKeyProperty,_data,t.getMessage()});
+      }
     }
     return value != null ? value : defaultValue;
   }

@@ -4,16 +4,11 @@
   T newNode=null;
   if (nodeClass != null) {
     try {
-      Constructor<T> constructor=constructors.get(nodeClass);
-      if (constructor == null) {
-        constructor=nodeClass.getConstructor();
-        constructors.put(nodeClass,constructor);
-      }
-      newNode=constructor.newInstance();
-      newNode.init(factoryProfile.getSecurityContext(),entity);
+      newNode=nodeClass.newInstance();
+      newNode.init(factoryProfile.getSecurityContext(),entity,nodeClass);
     }
- catch (    Throwable t) {
-      newNode=null;
+ catch (    InstantiationException|IllegalAccessException itex) {
+      itex.printStackTrace();
     }
   }
   return newNode;

@@ -1,0 +1,22 @@
+{
+  final MessageFormat formatter=new MessageFormat(format,Locale.GERMAN);
+  Object[] values=null;
+  int len=0;
+  try {
+    values=formatter.parse(value);
+    len=values.length;
+  }
+ catch (  ParseException pex) {
+    throw new FrameworkException(422,pex.getMessage());
+  }
+  for (int i=0; i < len; i++) {
+    final PropertyKey key=keys.get(i);
+    final PropertyConverter inputConverter=key.inputConverter(securityContext);
+    if (inputConverter != null) {
+      key.setProperty(securityContext,obj,inputConverter.convert(values[i]));
+    }
+ else {
+      key.setProperty(securityContext,obj,values[i]);
+    }
+  }
+}

@@ -3,20 +3,23 @@
   try {
     user=AuthHelper.getPrincipalForCredential(credentialKey,credentialValue);
     if (user != null) {
+      user=new NodeFactory<Principal>(securityContext).instantiate(user.getNode());
       user.unlockReadOnlyPropertiesOnce();
       user.setProperty(AbstractNode.type,User.class.getSimpleName());
-      user=new User();
-      user.init(securityContext,user.getNode());
       user.setProperty(User.confirmationKey,confKey);
     }
  else     if (autoCreate) {
       propertySet.remove(credentialKey.jsonName());
       propertySet.remove(User.name.jsonName());
       propertySet.remove(User.confirmationKey.jsonName());
-      PropertyMap props=PropertyMap.inputTypeToJavaType(securityContext,propertySet);
+      PropertyMap props=PropertyMap.inputTypeToJavaType(securityContext,Principal.class,propertySet);
       props.put(credentialKey,credentialValue);
       props.put(User.name,credentialValue);
       props.put(User.confirmationKey,confKey);
+      props.remove(Principal.isAdmin);
+      props.remove(Principal.ownedNodes);
+      props.remove(Principal.salt);
+      props.remove(Principal.sessionIds);
       user=(Principal)StructrApp.getInstance(securityContext).create(userClass,props);
     }
   }

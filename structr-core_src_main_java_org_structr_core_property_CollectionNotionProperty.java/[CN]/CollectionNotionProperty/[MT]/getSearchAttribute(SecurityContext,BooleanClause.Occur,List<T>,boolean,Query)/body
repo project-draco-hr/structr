@@ -5,8 +5,19 @@
   boolean alreadyAdded=false;
   try {
     if (searchValues != null && !searchValues.isEmpty()) {
+      final PropertyKey key=notion.getPrimaryPropertyKey();
+      final PropertyConverter inputConverter=key.inputConverter(securityContext);
+      final List<Object> transformedValues=new LinkedList<>();
       boolean allBlank=true;
       for (      T searchValue : searchValues) {
+        if (inputConverter != null) {
+          transformedValues.add(inputConverter.convert(searchValue));
+        }
+ else {
+          transformedValues.add(searchValue);
+        }
+      }
+      for (      Object searchValue : transformedValues) {
         if (StringUtils.isBlank(searchValue.toString())) {
           continue;
         }

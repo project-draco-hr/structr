@@ -1,12 +1,16 @@
 {
   final SecurityContext securityContext=getWebSocket().getSecurityContext();
-  final Map<String,Object> properties=webSocketData.getNodeData();
-  final String rawType=(String)properties.get("type");
-  final boolean rootOnly=Boolean.TRUE.equals((Boolean)properties.get("rootOnly"));
+  final Map<String,Object> nodeData=webSocketData.getNodeData();
+  final String rawType=(String)nodeData.get("type");
+  final String properties=(String)webSocketData.getNodeData().get("properties");
+  final boolean rootOnly=Boolean.TRUE.equals((Boolean)nodeData.get("rootOnly"));
   Class type=SchemaHelper.getEntityClassForRawType(rawType);
   if (type == null) {
     getWebSocket().send(MessageBuilder.status().code(404).message("Type " + rawType + " not found").build(),true);
     return;
+  }
+  if (properties != null) {
+    securityContext.setCustomView(StringUtils.split(properties,","));
   }
   final String sortOrder=webSocketData.getSortOrder();
   final String sortKey=webSocketData.getSortKey();

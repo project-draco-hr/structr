@@ -36,9 +36,7 @@
           user=RegistrationResource.createUser(superUserContext,credentialKey,value,true,userClass);
         }
         if (user != null) {
-          final String sessionId=UiAuthenticator.getSessionId(request);
-          AuthHelper.clearSession(sessionId);
-          user.addSessionId(sessionId);
+          AuthHelper.doLogin(request,user);
           HtmlServlet.setNoCacheHeaders(response);
           try {
             logger.log(Level.FINE,"Response status: {0}",response.getStatus());

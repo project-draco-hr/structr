@@ -2,40 +2,49 @@
   webSocketData.setSessionValid(true);
   String message;
   String pagePath=(String)webSocketData.getNodeData().get("pagePath");
-synchronized (clients) {
-    for (    StructrWebSocket socket : clients) {
-      String clientPagePath=socket.getPagePath();
-      if (clientPagePath != null && !clientPagePath.equals(URIUtil.encodePath(pagePath))) {
-        continue;
-      }
-      Session session=socket.getSession();
-      webSocketData.setCallback(socket.getCallback());
-      if ((session != null)) {
-        List<? extends GraphObject> result=webSocketData.getResult();
-        if ((result != null) && (result.size() > 0) && (webSocketData.getCommand().equals("UPDATE") || webSocketData.getCommand().equals("ADD") || webSocketData.getCommand().equals("CREATE"))) {
-          WebSocketMessage clientData=webSocketData.copy();
-          SecurityContext securityContext=socket.getSecurityContext();
-          if (securityContext == null) {
-            try {
-              securityContext=SecurityContext.getInstance(null,AccessMode.Frontend);
-            }
- catch (            FrameworkException ex) {
-              continue;
-            }
+  List<StructrWebSocket> clientsToRemove=new LinkedList<>();
+  for (  StructrWebSocket socket : clients) {
+    String clientPagePath=socket.getPagePath();
+    if (clientPagePath != null && !clientPagePath.equals(URIUtil.encodePath(pagePath))) {
+      continue;
+    }
+    Session session=socket.getSession();
+    webSocketData.setCallback(socket.getCallback());
+    if ((session != null)) {
+      List<? extends GraphObject> result=webSocketData.getResult();
+      if ((result != null) && (result.size() > 0) && (webSocketData.getCommand().equals("UPDATE") || webSocketData.getCommand().equals("ADD") || webSocketData.getCommand().equals("CREATE"))) {
+        WebSocketMessage clientData=webSocketData.copy();
+        SecurityContext securityContext=socket.getSecurityContext();
+        if (securityContext == null) {
+          try {
+            securityContext=SecurityContext.getInstance(null,AccessMode.Frontend);
           }
-          clientData.setResult(filter(securityContext,result));
-          message=gson.toJson(clientData,WebSocketMessage.class);
+ catch (          FrameworkException ex) {
+            continue;
+          }
         }
+        clientData.setResult(filter(securityContext,result));
+        message=gson.toJson(clientData,WebSocketMessage.class);
+      }
  else {
-          message=gson.toJson(webSocketData,WebSocketMessage.class);
+        message=gson.toJson(webSocketData,WebSocketMessage.class);
+      }
+      try {
+        session.getRemote().sendString(message);
+      }
+ catch (      Throwable t) {
+        if (t instanceof WebSocketException) {
+          WebSocketException wse=(WebSocketException)t;
+          if ("RemoteEndpoint unavailable, current state [CLOSED], expecting [OPEN or CONNECTED]".equals(wse.getMessage())) {
+            clientsToRemove.add(socket);
+          }
         }
-        try {
-          session.getRemote().sendString(message);
-        }
- catch (        Throwable t) {
-          logger.log(Level.WARNING,"Error sending message to client.",t);
-        }
+        logger.log(Level.FINE,"Error sending message to client.",t);
       }
     }
+  }
+  for (  StructrWebSocket s : clientsToRemove) {
+    unregisterClient(s);
+    logger.log(Level.WARNING,"Client removed from broadcast list: {0}",s);
   }
 }

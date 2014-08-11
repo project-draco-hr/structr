@@ -1,0 +1,33 @@
+{
+  final String path=getRelativeFilePath();
+  if (path != null) {
+    final String filePath=FileHelper.getFilePath(path);
+    try {
+      final java.io.File fileOnDisk=new java.io.File(filePath);
+      FileOutputStream fos=new FileOutputStream(fileOnDisk){
+        @Override public void close() throws IOException {
+          try (Tx tx=StructrApp.getInstance().tx()){
+            super.close();
+            final String _contentType=FileHelper.getContentMimeType(fileOnDisk);
+            setProperty(checksum,FileHelper.getChecksum(FileBase.this));
+            setProperty(size,FileHelper.getSize(FileBase.this));
+            setProperty(contentType,_contentType);
+            if (StringUtils.startsWith(_contentType,"image") || ImageHelper.isImageType(getProperty(name))) {
+              setProperty(NodeInterface.type,Image.class.getSimpleName());
+            }
+            tx.success();
+          }
+ catch (          FrameworkException ex) {
+            logger.log(Level.SEVERE,"Could not determine or save checksum and size after closing file output stream",ex);
+          }
+        }
+      }
+;
+      return fos;
+    }
+ catch (    FileNotFoundException e) {
+      logger.log(Level.SEVERE,"File not found: {0}",new Object[]{path});
+    }
+  }
+  return null;
+}

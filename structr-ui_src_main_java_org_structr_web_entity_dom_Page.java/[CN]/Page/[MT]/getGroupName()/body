@@ -1,15 +1,17 @@
 {
+  String name="";
   try (Tx tx=StructrApp.getInstance().tx()){
     Principal owner=getOwner();
     if (owner != null) {
       List<Principal> parents=owner.getParents();
       if (!parents.isEmpty()) {
-        return parents.get(0).getProperty(AbstractNode.name);
+        name=parents.get(0).getProperty(AbstractNode.name);
       }
     }
+    tx.success();
   }
  catch (  FrameworkException fex) {
     logger.log(Level.SEVERE,"Error while getting group name of " + this,fex);
   }
-  return "";
+  return name;
 }

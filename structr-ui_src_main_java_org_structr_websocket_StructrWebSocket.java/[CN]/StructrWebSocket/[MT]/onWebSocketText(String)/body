@@ -31,11 +31,13 @@
  catch (      FrameworkException fex) {
         fex.printStackTrace(System.out);
         send(MessageBuilder.status().code(400).message(fex.toString()).build(),true);
+        return;
       }
     }
  else {
       logger.log(Level.WARNING,"Unknow command {0}",command);
       send(MessageBuilder.status().code(400).message("Unknown command").build(),true);
+      return;
     }
   }
  catch (  FrameworkException|IllegalAccessException|InstantiationException t) {

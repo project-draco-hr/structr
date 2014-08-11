@@ -1,0 +1,15 @@
+{
+  List<Linkable> possibleEntryPoints=(List<Linkable>)request.getAttribute(POSSIBLE_ENTRY_POINTS);
+  if (CollectionUtils.isNotEmpty(possibleEntryPoints)) {
+    return possibleEntryPoints;
+  }
+  if (name.length() > 0) {
+    logger.log(Level.FINE,"Requested name {0}",name);
+    possibleEntryPoints=findPossibleEntryPointsByName(securityContext,request,name);
+    if (possibleEntryPoints.isEmpty()) {
+      possibleEntryPoints=findPossibleEntryPointsByUuid(securityContext,request,name);
+    }
+    return possibleEntryPoints;
+  }
+  return Collections.EMPTY_LIST;
+}

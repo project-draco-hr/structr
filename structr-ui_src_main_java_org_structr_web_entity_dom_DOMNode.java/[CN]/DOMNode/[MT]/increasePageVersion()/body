@@ -1,5 +1,20 @@
 {
-  Page page=(Page)getOwnerDocument();
+  Page page;
+  if (this instanceof Page) {
+    page=(Page)this;
+  }
+ else {
+    page=(Page)getOwnerDocument();
+  }
+  if (page == null) {
+    final List<Node> ancestors=getAncestors();
+    if (!ancestors.isEmpty()) {
+      final DOMNode rootNode=(DOMNode)ancestors.get(ancestors.size() - 1);
+      if (rootNode instanceof Page) {
+        page=(Page)rootNode;
+      }
+    }
+  }
   if (page != null) {
     page.unlockReadOnlyPropertiesOnce();
     page.increaseVersion();

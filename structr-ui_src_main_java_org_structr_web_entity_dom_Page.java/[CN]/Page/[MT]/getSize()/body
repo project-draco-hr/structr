@@ -1,9 +1,11 @@
 {
+  long size=0L;
   try (Tx tx=StructrApp.getInstance().tx()){
-    return getContent(RenderContext.EditMode.RAW).length();
+    size=getContent(RenderContext.EditMode.RAW).length();
+    tx.success();
   }
  catch (  FrameworkException fex) {
     logger.log(Level.SEVERE,"Error while last modified date of " + this,fex);
   }
-  return 0L;
+  return size;
 }

@@ -1,0 +1,10 @@
+{
+  AbstractFile existingFile=getFileByUuid(securityContext,uuid);
+  if (existingFile != null) {
+    existingFile.unlockReadOnlyPropertiesOnce();
+    existingFile.setProperty(AbstractNode.type,fileType == null ? org.structr.dynamic.File.class.getSimpleName() : fileType.getSimpleName());
+    existingFile=getFileByUuid(securityContext,uuid);
+    return (T)(fileType != null ? fileType.cast(existingFile) : (org.structr.dynamic.File)existingFile);
+  }
+  return null;
+}

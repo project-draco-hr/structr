@@ -1,26 +1,17 @@
 {
   SecurityContext securityContext=factoryProfile.getSecurityContext();
-  long id=node.getId();
-  T newNode=(T)securityContext.lookup(id);
-  if (newNode == null || !nodeClass.equals(newNode.getClass())) {
-    try {
-      Constructor<T> constructor=constructors.get(nodeClass);
-      if (constructor == null) {
-        constructor=nodeClass.getConstructor();
-        constructors.put(nodeClass,constructor);
-      }
-      newNode=constructor.newInstance();
-    }
- catch (    Throwable t) {
-      newNode=null;
-    }
-    if (newNode == null) {
-      newNode=(T)factoryDefinition.createGenericNode();
-    }
-    newNode.init(factoryProfile.getSecurityContext(),node);
-    newNode.onNodeInstantiation();
-    securityContext.store(id,newNode);
+  T newNode=null;
+  try {
+    newNode=nodeClass.newInstance();
   }
+ catch (  InstantiationException|IllegalAccessException itex) {
+    newNode=null;
+  }
+  if (newNode == null) {
+    newNode=(T)factoryDefinition.createGenericNode();
+  }
+  newNode.init(factoryProfile.getSecurityContext(),node,nodeClass);
+  newNode.onNodeInstantiation();
   if (isCreation || securityContext.isReadable(newNode,factoryProfile.includeDeletedAndHidden(),factoryProfile.publicOnly())) {
     return newNode;
   }

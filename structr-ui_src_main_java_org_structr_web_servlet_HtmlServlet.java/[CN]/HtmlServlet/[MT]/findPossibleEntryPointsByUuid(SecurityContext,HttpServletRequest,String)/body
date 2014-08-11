@@ -1,0 +1,17 @@
+{
+  List<Linkable> possibleEntryPoints=(List<Linkable>)request.getAttribute(POSSIBLE_ENTRY_POINTS);
+  if (CollectionUtils.isNotEmpty(possibleEntryPoints)) {
+    return possibleEntryPoints;
+  }
+  if (uuid.length() > 0) {
+    logger.log(Level.FINE,"Requested id: {0}",uuid);
+    final Query query=StructrApp.getInstance(securityContext).nodeQuery();
+    query.and(GraphObject.id,uuid);
+    query.and().orType(Page.class).orTypes(File.class);
+    Result results=query.getResult();
+    logger.log(Level.FINE,"{0} results",results.size());
+    request.setAttribute(POSSIBLE_ENTRY_POINTS,results.getResults());
+    return (List<Linkable>)results.getResults();
+  }
+  return Collections.EMPTY_LIST;
+}

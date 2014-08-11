@@ -16,7 +16,42 @@
       HttpGet get=new HttpGet(address);
       get.setHeader("User-Agent","Mozilla");
       get.setHeader("Connection","close");
-      code=IOUtils.toString(client.execute(get).getEntity().getContent(),"UTF-8");
+      client.setRedirectStrategy(new RedirectStrategy(){
+        @Override public boolean isRedirected(        HttpRequest hr,        HttpResponse hr1,        HttpContext hc) throws ProtocolException {
+          return false;
+        }
+        @Override public HttpUriRequest getRedirect(        HttpRequest hr,        HttpResponse hr1,        HttpContext hc) throws ProtocolException {
+          return new DefaultRedirectStrategy().getRedirect(hr,hr1,hc);
+        }
+      }
+);
+      HttpResponse resp=client.execute(get);
+      Header location=resp.getFirstHeader("Location");
+      if (location != null) {
+        address=location.getValue();
+        client=new DefaultHttpClient();
+        int attempts=1;
+        boolean success=false;
+        while (!success) {
+          try {
+            resp=client.execute(new HttpGet(address));
+            success=true;
+          }
+ catch (          IllegalStateException ise) {
+            logger.log(Level.INFO,"Unable to establish connection to {0}, trying again after {1} sec...",new Object[]{address,attempts * 10});
+            attempts++;
+            if (attempts > 6) {
+              throw new FrameworkException(500,"Error while parsing content from " + address + ", couldn't establish connections after "+ attempts+ " attempts");
+            }
+            try {
+              Thread.sleep(attempts * 10 * 1000);
+            }
+ catch (            InterruptedException ex) {
+            }
+          }
+        }
+      }
+      code=IOUtils.toString(resp.getEntity().getContent(),"UTF-8");
       if (code.charAt(0) == 65279) {
         code=code.substring(1);
       }

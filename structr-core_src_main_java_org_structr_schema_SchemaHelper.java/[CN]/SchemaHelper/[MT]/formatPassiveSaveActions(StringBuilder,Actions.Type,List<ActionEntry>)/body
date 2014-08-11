@@ -3,20 +3,23 @@
   src.append("\tpublic boolean ");
   src.append(type.getMethod());
   src.append("(SecurityContext securityContext, ErrorBuffer errorBuffer) throws FrameworkException {\n\n");
-  src.append("\t\tboolean error = false;\n\n");
-  for (  final ActionEntry action : actionList) {
-    if (action.runOnError()) {
-      src.append("\t\terror |= ").append(action.getSource()).append(";\n");
-    }
- else {
-      src.append("\t\tif (!error) {\n");
-      src.append("\t\t\terror |= ").append(action.getSource()).append(";\n");
-      src.append("\t\t}\n");
-    }
-  }
-  src.append("\t\terror |= !super.");
+  src.append("\t\tboolean error = !super.");
   src.append(type.getMethod());
-  src.append("(securityContext, errorBuffer);\n");
+  src.append("(securityContext, errorBuffer);\n\n");
+  if (!actionList.isEmpty()) {
+    src.append("\t\tif (!error) {\n");
+    for (    final ActionEntry action : actionList) {
+      if (action.runOnError()) {
+        src.append("\t\t\terror |= ").append(action.getSource("this")).append(";\n");
+      }
+ else {
+        src.append("\t\tif (!error) {\n");
+        src.append("\t\t\terror |= ").append(action.getSource("this")).append(";\n");
+        src.append("\t\t}\n");
+      }
+    }
+    src.append("\t\t}\n");
+  }
   src.append("\n\t\treturn !error;\n");
   src.append("\t}\n");
 }

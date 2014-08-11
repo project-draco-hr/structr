@@ -1,9 +1,11 @@
 {
+  String name=null;
   try (Tx tx=StructrApp.getInstance().tx()){
-    return getProperty(name);
+    name=getProperty(AbstractNode.name);
+    tx.success();
   }
  catch (  FrameworkException fex) {
     logger.log(Level.SEVERE,"Error in getName() of page",fex);
   }
-  return null;
+  return name;
 }

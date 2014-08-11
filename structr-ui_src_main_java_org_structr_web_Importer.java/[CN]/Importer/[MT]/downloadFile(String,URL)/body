@@ -1,7 +1,7 @@
 {
   final String uuid=UUID.randomUUID().toString().replaceAll("[\\-]+","");
   String contentType;
-  final String relativeFilePath=org.structr.web.entity.File.getDirectoryPath(uuid) + "/" + uuid;
+  final String relativeFilePath=File.getDirectoryPath(uuid) + "/" + uuid;
   final String filePath=FileHelper.getFilePath(relativeFilePath);
   final java.io.File fileOnDisk=new java.io.File(filePath);
   fileOnDisk.getParentFile().mkdirs();
@@ -18,6 +18,7 @@
     try {
       downloadUrl=new URL(new URL(address.concat("/")),downloadAddress);
       FileUtils.copyURLToFile(downloadUrl,fileOnDisk);
+      address=address.concat("/");
     }
  catch (    MalformedURLException ex) {
       logger.log(Level.SEVERE,"Could not resolve address " + address.concat("/"),ex);
@@ -41,11 +42,13 @@ catch (    IOException ex) {
   downloadAddress=StringUtils.substringBefore(downloadAddress,"?");
   final String fileName=PathHelper.getName(downloadAddress);
   String httpPrefix="http://";
-  String relativePath=StringUtils.substringAfter(downloadUrl.toString(),address);
+  logger.log(Level.INFO,"Download URL: {0}, address: {1}, cleaned address: {2}",new Object[]{downloadUrl,address,StringUtils.substringBeforeLast(address,"/")});
+  String relativePath=StringUtils.substringAfter(downloadUrl.toString(),StringUtils.substringBeforeLast(address,"/"));
   if (StringUtils.isBlank(relativePath)) {
     relativePath=downloadAddress;
   }
   String path=StringUtils.substringBefore(((downloadAddress.contains(httpPrefix)) ? StringUtils.substringAfter(downloadAddress,"http://") : relativePath),fileName);
+  logger.log(Level.INFO,"Relative path: {0}, final path: {1}",new Object[]{relativePath,path});
   if (contentType.equals("text/plain")) {
     contentType=StringUtils.defaultIfBlank(contentTypeForExtension.get(StringUtils.substringAfterLast(fileName,".")),"text/plain");
   }

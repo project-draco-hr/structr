@@ -513,6 +513,10 @@
     assertEquals("Invalid replacement result","doc_sections/" + testOne.getUuid() + "/childSections?sort=pos",testOne.replaceVariables(securityContext,ctx,"doc_sections/${this.id}/childSections?sort=pos"));
     assertEquals("Invalid replacement result","A Nice Little Name For My Test Object",testOne.replaceVariables(securityContext,ctx,"${titleize(this.name, '-')}"));
     assertEquals("Invalid replacement result","STRINGtrueFALSE",testOne.replaceVariables(securityContext,ctx,"${upper(this.aString)}${lower(true)}${upper(false)}"));
+    assertEquals("Invalid store() result","",testOne.replaceVariables(securityContext,ctx,"${store('tmp', this.name)}"));
+    assertEquals("Invalid stored value","A-nice-little-name-for-my-test-object",ctx.retrieve("tmp"));
+    assertEquals("Invalid retrieve() result","A-nice-little-name-for-my-test-object",testOne.replaceVariables(securityContext,ctx,"${retrieve('tmp')}"));
+    assertEquals("Invalid retrieve() result","",testOne.replaceVariables(securityContext,new ActionContext(),"${retrieve('tmp')}"));
     assertEquals("Invalid replace() result","A-nice-little-name-for-my-test-object",testOne.replaceVariables(securityContext,ctx,"${replace(this.replaceString, this)}"));
     try {
       Actions.execute(securityContext,testTwo,"${error(\"base\", \"test1\")}");

@@ -1,12 +1,18 @@
 {
   JsonObject object=new JsonObject();
-  for (  Entry<String,Object> entry : ((Map<String,Object>)source).entrySet()) {
-    String key=entry.getKey();
-    Object value=entry.getValue();
-    if (idProperty.jsonName().equals(key)) {
-      key="id";
+  if (depth > outputNestingDepth) {
+    final Object value=((Map<String,Object>)source).get("id");
+    object.add("id",toPrimitive(value));
+  }
+ else {
+    for (    Entry<String,Object> entry : ((Map<String,Object>)source).entrySet()) {
+      String key=entry.getKey();
+      Object value=entry.getValue();
+      if (idProperty.jsonName().equals(key)) {
+        key="id";
+      }
+      object.add(key,serializeRoot(value,localPropertyView,depth));
     }
-    object.add(key,serializeRoot(value,localPropertyView,depth));
   }
   return object;
 }

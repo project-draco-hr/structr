@@ -11,12 +11,12 @@ principal.revoke(permission,obj);
 break;
 }
 sum++;
-if (count++ == 100) {
+if (++count == 100) {
 logger.log(Level.INFO,"Committing transaction after {0} objects..",sum);
 count=0;
 tx.success();
 tx.close();
-tx=app.tx();
+tx=app.tx(true,true,false);
 }
 if (rec && obj instanceof LinkedTreeNode) {
 for (final Object t : ((LinkedTreeNode)obj).treeGetChildren()) {

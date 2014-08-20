@@ -1,33 +1,51 @@
 {
-  logger.log(Level.INFO,"Unarchiving file {0}",new Object[]{file});
-  final InputStream is=file.getInputStream();
-  if (is == null) {
-    getWebSocket().send(MessageBuilder.status().code(400).message("Could not get input stream from file ".concat(file.getName())).build(),true);
-    return;
-  }
-  ArchiveInputStream in=new ArchiveStreamFactory().createArchiveInputStream(new BufferedInputStream(is));
-  ArchiveEntry entry=in.getNextEntry();
   final App app=StructrApp.getInstance(securityContext);
-  while (entry != null) {
-    final String entryPath="/" + PathHelper.clean(entry.getName());
-    logger.log(Level.INFO,"Entry path: {0}",entryPath);
-    AbstractFile f=FileHelper.getFileByAbsolutePath(securityContext,entryPath);
-    if (f == null) {
-      Folder parentFolder=createOrGetParentFolder(securityContext,entryPath);
-      final String name=PathHelper.getName(entry.getName());
-      if (StringUtils.isNotEmpty(name) && !(FileHelper.getFolderPath(parentFolder).equals(entryPath))) {
-        AbstractFile fileOrFolder=null;
-        if (entry.isDirectory()) {
-          fileOrFolder=app.create(Folder.class,name);
-        }
- else {
-          fileOrFolder=ImageHelper.isImageType(name) ? ImageHelper.createImage(securityContext,in,null,Image.class,name,false) : FileHelper.createFile(securityContext,in,null,File.class,name);
-        }
-        fileOrFolder.setProperty(AbstractFile.parent,parentFolder);
-        logger.log(Level.INFO,"Created {0} {1} with path {2}",new Object[]{fileOrFolder.getType(),fileOrFolder,FileHelper.getFolderPath(fileOrFolder)});
-      }
+  final InputStream is;
+  try (final Tx tx=app.tx()){
+    final String fileName=file.getName();
+    logger.log(Level.INFO,"Unarchiving file {0}",fileName);
+    is=file.getInputStream();
+    tx.success();
+    if (is == null) {
+      getWebSocket().send(MessageBuilder.status().code(400).message("Could not get input stream from file ".concat(fileName)).build(),true);
+      return;
     }
-    entry=in.getNextEntry();
   }
+   final ArchiveInputStream in=new ArchiveStreamFactory().createArchiveInputStream(new BufferedInputStream(is));
+  ArchiveEntry entry=in.getNextEntry();
+  int overallCount=0;
+  while (entry != null) {
+    try (final Tx tx=app.tx()){
+      int count=0;
+      while (entry != null && count++ < 50) {
+        final String entryPath="/" + PathHelper.clean(entry.getName());
+        logger.log(Level.INFO,"Entry path: {0}",entryPath);
+        AbstractFile f=FileHelper.getFileByAbsolutePath(securityContext,entryPath);
+        if (f == null) {
+          Folder parentFolder=createOrGetParentFolder(securityContext,entryPath);
+          final String name=PathHelper.getName(entry.getName());
+          if (StringUtils.isNotEmpty(name) && !(FileHelper.getFolderPath(parentFolder).equals(entryPath))) {
+            AbstractFile fileOrFolder=null;
+            if (entry.isDirectory()) {
+              fileOrFolder=app.create(Folder.class,name);
+            }
+ else {
+              fileOrFolder=ImageHelper.isImageType(name) ? ImageHelper.createImage(securityContext,in,null,Image.class,name,false) : FileHelper.createFile(securityContext,in,null,File.class,name);
+            }
+            fileOrFolder.setProperty(AbstractFile.parent,parentFolder);
+            logger.log(Level.INFO,"Created {0} {1} with path {2}",new Object[]{fileOrFolder.getType(),fileOrFolder,FileHelper.getFolderPath(fileOrFolder)});
+            if (fileOrFolder instanceof Image) {
+              fileOrFolder.getProperty(Image.tnMid);
+              fileOrFolder.getProperty(Image.tnSmall);
+            }
+          }
+        }
+        entry=in.getNextEntry();
+        overallCount++;
+      }
+      logger.log(Level.INFO,"Committing transaction after {0} files..",overallCount);
+      tx.success();
+    }
+   }
   in.close();
 }

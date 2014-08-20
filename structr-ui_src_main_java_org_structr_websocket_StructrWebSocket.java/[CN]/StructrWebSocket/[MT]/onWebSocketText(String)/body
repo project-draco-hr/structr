@@ -6,12 +6,12 @@
   logger.log(Level.FINE,"############################################################ RECEIVED \n{0}",data.substring(0,Math.min(data.length(),1000)));
   final WebSocketMessage webSocketData=gson.fromJson(data,WebSocketMessage.class);
   final App app=StructrApp.getInstance(securityContext);
-  try (final Tx tx=app.tx()){
-    this.callback=webSocketData.getCallback();
-    final String command=webSocketData.getCommand();
-    final Class type=commandSet.get(command);
-    final String sessionIdFromMessage=webSocketData.getSessionId();
-    if (type != null) {
+  this.callback=webSocketData.getCallback();
+  final String command=webSocketData.getCommand();
+  final Class type=commandSet.get(command);
+  final String sessionIdFromMessage=webSocketData.getSessionId();
+  if (type != null) {
+    try (final Tx tx=app.tx()){
       if (sessionIdFromMessage != null) {
         authenticate(sessionIdFromMessage);
       }
@@ -19,28 +19,40 @@
         send(MessageBuilder.status().code(401).message("").build(),true);
         return;
       }
+      tx.success();
+    }
+ catch (    FrameworkException t) {
+      logger.log(Level.WARNING,"Unable to parse message.",t);
+    }
+    try {
       AbstractCommand abstractCommand=(AbstractCommand)type.newInstance();
       abstractCommand.setWebSocket(this);
       abstractCommand.setSession(session);
       abstractCommand.setIdProperty(idProperty);
-      webSocketData.setSessionValid(isAuthenticated());
-      try {
-        abstractCommand.processMessage(webSocketData);
-        tx.success();
-      }
- catch (      FrameworkException fex) {
-        fex.printStackTrace(System.out);
-        send(MessageBuilder.status().code(400).message(fex.toString()).build(),true);
-        return;
+      if (abstractCommand.requiresEnclosingTransaction()) {
+        try (final Tx tx=app.tx()){
+          webSocketData.setSessionValid(isAuthenticated());
+          abstractCommand.processMessage(webSocketData);
+          tx.success();
+        }
+       }
+ else {
+        try (final Tx tx=app.tx()){
+          webSocketData.setSessionValid(isAuthenticated());
+          tx.success();
+        }
+         abstractCommand.processMessage(webSocketData);
       }
     }
- else {
-      logger.log(Level.WARNING,"Unknow command {0}",command);
-      send(MessageBuilder.status().code(400).message("Unknown command").build(),true);
+ catch (    FrameworkException|InstantiationException|IllegalAccessException t) {
+      t.printStackTrace(System.out);
+      send(MessageBuilder.status().code(400).message(t.toString()).build(),true);
       return;
     }
   }
- catch (  FrameworkException|IllegalAccessException|InstantiationException t) {
-    logger.log(Level.WARNING,"Unable to parse message.",t);
+ else {
+    logger.log(Level.WARNING,"Unknow command {0}",command);
+    send(MessageBuilder.status().code(400).message("Unknown command").build(),true);
+    return;
   }
 }

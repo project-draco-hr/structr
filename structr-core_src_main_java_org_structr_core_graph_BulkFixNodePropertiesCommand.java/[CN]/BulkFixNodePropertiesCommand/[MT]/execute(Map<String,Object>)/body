@@ -7,6 +7,7 @@
       final List<AbstractNode> nodes=new LinkedList<>();
       try (final Tx tx=StructrApp.getInstance().tx()){
         nodes.addAll(StructrApp.getInstance(securityContext).nodeQuery(type).getAsList());
+        tx.success();
       }
        if (type != null) {
         logger.log(Level.INFO,"Trying to fix properties of {0} {1} nodes",new Object[]{nodes.size(),type.getSimpleName()});

@@ -4,18 +4,21 @@
   try {
     final String id=(String)webSocketData.getId();
     final App app=StructrApp.getInstance(securityContext);
-    final File file=app.get(File.class,id);
-    if (file == null) {
-      getWebSocket().send(MessageBuilder.status().code(400).message("File not found: ".concat(id)).build(),true);
-      return;
+    final File file;
+    try (final Tx tx=app.tx()){
+      file=app.get(File.class,id);
+      if (file == null) {
+        getWebSocket().send(MessageBuilder.status().code(400).message("File not found: ".concat(id)).build(),true);
+        return;
+      }
+      final String fileExtension=StringUtils.substringAfterLast(file.getName(),".");
+      if (!supportedByArchiveStreamFactory.contains(fileExtension)) {
+        getWebSocket().send(MessageBuilder.status().code(400).message("Unsupported archive format: ".concat(fileExtension)).build(),true);
+        return;
+      }
+      tx.success();
     }
-    final String fileExtension=StringUtils.substringAfterLast(file.getName(),".");
-    if (supportedByArchiveStreamFactory.contains(fileExtension)) {
-      unarchive(securityContext,file);
-    }
- else {
-      getWebSocket().send(MessageBuilder.status().code(400).message("Unsupported archive format: ".concat(fileExtension)).build(),true);
-    }
+     unarchive(securityContext,file);
   }
  catch (  Throwable t) {
     String msg=t.toString();

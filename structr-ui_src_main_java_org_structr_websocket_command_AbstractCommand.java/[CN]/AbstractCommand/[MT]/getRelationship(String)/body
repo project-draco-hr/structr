@@ -4,8 +4,10 @@
   }
   final SecurityContext securityContext=getWebSocket().getSecurityContext();
   final App app=StructrApp.getInstance(securityContext);
-  try {
-    return (AbstractRelationship)app.get(id);
+  try (final Tx tx=app.tx()){
+    final AbstractRelationship rel=(AbstractRelationship)app.get(id);
+    tx.success();
+    return rel;
   }
  catch (  FrameworkException fex) {
     logger.log(Level.WARNING,"Unable to get relationship",fex);

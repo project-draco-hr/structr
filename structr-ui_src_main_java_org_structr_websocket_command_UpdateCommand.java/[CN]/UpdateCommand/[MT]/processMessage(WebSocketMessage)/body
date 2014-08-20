@@ -1,13 +1,21 @@
 {
+  final App app=StructrApp.getInstance(getWebSocket().getSecurityContext());
+  final Boolean recValue=(Boolean)webSocketData.getNodeData().get("recursive");
+  final boolean rec=recValue != null ? recValue : false;
   GraphObject obj=getNode(webSocketData.getId());
-  Boolean recValue=(Boolean)webSocketData.getNodeData().get("recursive");
-  boolean rec=recValue != null ? recValue : false;
   webSocketData.getNodeData().remove("recursive");
   if (obj != null) {
-    if (!getWebSocket().getSecurityContext().isAllowed(((AbstractNode)obj),Permission.write)) {
-      getWebSocket().send(MessageBuilder.status().message("No write permission").code(400).build(),true);
-      logger.log(Level.WARNING,"No write permission for {0} on {1}",new Object[]{getWebSocket().getCurrentUser().toString(),obj.toString()});
-      return;
+    try (final Tx tx=app.tx()){
+      if (!getWebSocket().getSecurityContext().isAllowed(((AbstractNode)obj),Permission.write)) {
+        getWebSocket().send(MessageBuilder.status().message("No write permission").code(400).build(),true);
+        logger.log(Level.WARNING,"No write permission for {0} on {1}",new Object[]{getWebSocket().getCurrentUser().toString(),obj.toString()});
+        tx.success();
+        return;
+      }
+      tx.success();
+    }
+ catch (    FrameworkException fex) {
+      fex.printStackTrace();
     }
   }
   if (obj == null) {
@@ -15,7 +23,11 @@
   }
   if (obj != null) {
     try {
-      setProperties(obj,PropertyMap.inputTypeToJavaType(this.getWebSocket().getSecurityContext(),obj.getClass(),webSocketData.getNodeData()),rec);
+      setProperties(app,obj,PropertyMap.inputTypeToJavaType(this.getWebSocket().getSecurityContext(),obj.getClass(),webSocketData.getNodeData()),rec);
+      logger.log(Level.INFO,"Committing transaction after {0} objects..",count);
+      tx.success();
+      tx.close();
+      tx=null;
     }
  catch (    FrameworkException ex) {
       logger.log(Level.SEVERE,"Unable to set properties: {0}",((FrameworkException)ex).toString());

@@ -1,0 +1,25 @@
+{
+  if (tx == null) {
+    tx=app.tx();
+  }
+switch (action) {
+case "grant":
+    principal.grant(permission,obj);
+  break;
+case "revoke":
+principal.revoke(permission,obj);
+break;
+}
+if (count++ > 1000) {
+logger.log(Level.INFO,"Committing transaction after {0} objects..",count);
+count=0;
+tx.success();
+tx.close();
+tx=app.tx();
+}
+if (rec && obj instanceof LinkedTreeNode) {
+for (final Object t : ((LinkedTreeNode)obj).treeGetChildren()) {
+setPermission(app,(AbstractNode)t,principal,action,permission,rec);
+}
+}
+}

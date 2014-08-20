@@ -15,13 +15,25 @@
   }
   webSocketData.getNodeData().remove("recursive");
   if (obj != null) {
-    if (!getWebSocket().getSecurityContext().isAllowed(((AbstractNode)obj),Permission.accessControl)) {
-      logger.log(Level.WARNING,"No access control permission for {0} on {1}",new Object[]{getWebSocket().getCurrentUser().toString(),obj.toString()});
-      getWebSocket().send(MessageBuilder.status().message("No access control permission").code(400).build(),true);
-      return;
+    final App app=StructrApp.getInstance(getWebSocket().getSecurityContext());
+    try (final Tx tx=app.tx()){
+      if (!getWebSocket().getSecurityContext().isAllowed(((AbstractNode)obj),Permission.accessControl)) {
+        logger.log(Level.WARNING,"No access control permission for {0} on {1}",new Object[]{getWebSocket().getCurrentUser().toString(),obj.toString()});
+        getWebSocket().send(MessageBuilder.status().message("No access control permission").code(400).build(),true);
+        tx.success();
+        return;
+      }
+      tx.success();
+    }
+ catch (    FrameworkException ex) {
+      ex.printStackTrace();
     }
     try {
-      setPermission(obj,principal,action,permission,rec);
+      setPermission(app,obj,principal,action,Permission.valueOf(permission),rec);
+      logger.log(Level.INFO,"Committing transaction after {0} objects..",count);
+      tx.success();
+      tx.close();
+      tx=null;
       webSocketData.setResult(Arrays.asList(principal));
       getWebSocket().send(webSocketData,true);
     }

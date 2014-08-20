@@ -1,8 +1,10 @@
 {
   final SecurityContext securityContext=getWebSocket().getSecurityContext();
   final App app=StructrApp.getInstance(securityContext);
-  try {
-    return (AbstractNode)app.get(id);
+  try (final Tx tx=app.tx()){
+    final AbstractNode node=(AbstractNode)app.get(id);
+    tx.success();
+    return node;
   }
  catch (  FrameworkException fex) {
     logger.log(Level.WARNING,"Unable to get node",fex);

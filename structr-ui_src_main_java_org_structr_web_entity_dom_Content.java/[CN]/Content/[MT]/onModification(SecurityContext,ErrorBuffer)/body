@@ -1,7 +1,14 @@
 {
-  for (  Sync rel : getOutgoingRelationships(Sync.class)) {
+  for (  final Sync rel : getOutgoingRelationships(Sync.class)) {
     Content syncedNode=(Content)rel.getTargetNode();
     syncedNode.setProperty(content,getProperty(content));
+  }
+  final Sync rel=getIncomingRelationship(Sync.class);
+  if (rel != null) {
+    final Content otherNode=(Content)rel.getSourceNode();
+    if (otherNode != null) {
+      otherNode.setProperty(content,getProperty(content));
+    }
   }
   try {
     increasePageVersion();

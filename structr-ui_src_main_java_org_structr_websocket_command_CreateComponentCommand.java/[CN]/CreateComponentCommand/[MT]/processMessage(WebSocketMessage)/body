@@ -4,7 +4,9 @@
     final DOMNode node=(DOMNode)getDOMNode(id);
     try {
       DOMNode clonedNode=(DOMNode)node.cloneNode(false);
-      moveChildNodes(node,clonedNode);
+      if (!(clonedNode instanceof Template)) {
+        moveChildNodes(node,clonedNode);
+      }
       ShadowDocument hiddenDoc=getOrCreateHiddenDocument();
       clonedNode.setProperty(DOMNode.ownerDocument,hiddenDoc);
       for (      DOMNode child : DOMNode.getAllChildNodes(clonedNode)) {

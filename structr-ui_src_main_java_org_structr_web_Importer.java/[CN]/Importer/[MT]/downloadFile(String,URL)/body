@@ -30,17 +30,17 @@ catch (    IOException ex) {
     }
     logger.log(Level.INFO,"Starting download from alternative URL {0}",downloadUrl);
   }
+  downloadAddress=StringUtils.substringBefore(downloadAddress,"?");
+  final String fileName=PathHelper.getName(downloadAddress);
   try {
+    contentType=FileHelper.getContentMimeType(fileOnDisk,fileName);
     size=fileOnDisk.length();
     checksum=FileUtils.checksumCRC32(fileOnDisk);
   }
  catch (  IOException ioe) {
-    logger.log(Level.WARNING,"Unable to calc checksum of " + fileOnDisk,ioe);
+    logger.log(Level.WARNING,"Unable to determine MIME type, size or checksum of " + fileOnDisk,ioe);
     return null;
   }
-  contentType=FileHelper.getContentMimeType(fileOnDisk);
-  downloadAddress=StringUtils.substringBefore(downloadAddress,"?");
-  final String fileName=PathHelper.getName(downloadAddress);
   String httpPrefix="http://";
   logger.log(Level.INFO,"Download URL: {0}, address: {1}, cleaned address: {2}",new Object[]{downloadUrl,address,StringUtils.substringBeforeLast(address,"/")});
   String relativePath=StringUtils.substringAfter(downloadUrl.toString(),StringUtils.substringBeforeLast(address,"/"));

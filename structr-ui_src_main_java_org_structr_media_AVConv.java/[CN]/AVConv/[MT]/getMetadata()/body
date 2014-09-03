@@ -1,0 +1,12 @@
+{
+  try {
+    final ExecutorService service=Executors.newSingleThreadExecutor();
+    final Map<String,String> result=service.submit(new GetMetadataProcess(securityContext,inputVideo)).get();
+    service.shutdown();
+    return result;
+  }
+ catch (  InterruptedException|ExecutionException ex) {
+    ex.printStackTrace();
+  }
+  return null;
+}

@@ -1,0 +1,22 @@
+{
+  if (metadata.isEmpty()) {
+    return null;
+  }
+  final StringBuilder commandLine=new StringBuilder("avconv -y -i ");
+  final String diskFilePath=inputVideo.getDiskFilePath(securityContext);
+  commandLine.append(diskFilePath);
+  for (  final Entry<String,String> meta : metadata.entrySet()) {
+    commandLine.append(" -metadata ");
+    commandLine.append(meta.getKey());
+    commandLine.append("=\"");
+    commandLine.append(meta.getValue());
+    commandLine.append("\"");
+  }
+  commandLine.append(" -codec copy ");
+  commandLine.append(diskFilePath);
+  if (!fileExtension.isEmpty()) {
+    commandLine.append(".");
+    commandLine.append(fileExtension);
+  }
+  return commandLine;
+}

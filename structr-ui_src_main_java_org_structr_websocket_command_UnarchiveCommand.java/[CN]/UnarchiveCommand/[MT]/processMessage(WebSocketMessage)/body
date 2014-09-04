@@ -1,9 +1,9 @@
 {
   final Set<String> supportedByArchiveStreamFactory=new HashSet<>(Arrays.asList(new String[]{ArchiveStreamFactory.AR,ArchiveStreamFactory.ARJ,ArchiveStreamFactory.CPIO,ArchiveStreamFactory.DUMP,ArchiveStreamFactory.JAR,ArchiveStreamFactory.TAR,ArchiveStreamFactory.ZIP}));
   final SecurityContext securityContext=getWebSocket().getSecurityContext();
+  final App app=StructrApp.getInstance(securityContext);
   try {
     final String id=(String)webSocketData.getId();
-    final App app=StructrApp.getInstance(securityContext);
     final File file;
     try (final Tx tx=app.tx()){
       file=app.get(File.class,id);
@@ -21,7 +21,13 @@
      unarchive(securityContext,file);
   }
  catch (  Throwable t) {
+    t.printStackTrace();
     String msg=t.toString();
-    getWebSocket().send(MessageBuilder.status().code(400).message("Could not unarchive file: ".concat((msg != null) ? msg : "")).build(),true);
+    try (final Tx tx=app.tx()){
+      getWebSocket().send(MessageBuilder.status().code(400).message("Could not unarchive file: ".concat((msg != null) ? msg : "")).build(),true);
+      tx.success();
+    }
+ catch (    FrameworkException ignore) {
+    }
   }
 }

@@ -20,11 +20,11 @@
       while (entry != null && count++ < 50) {
         final String entryPath="/" + PathHelper.clean(entry.getName());
         logger.log(Level.INFO,"Entry path: {0}",entryPath);
-        AbstractFile f=FileHelper.getFileByAbsolutePath(securityContext,entryPath);
+        final AbstractFile f=FileHelper.getFileByAbsolutePath(securityContext,entryPath);
         if (f == null) {
-          Folder parentFolder=createOrGetParentFolder(securityContext,entryPath);
+          final Folder parentFolder=createOrGetParentFolder(securityContext,entryPath);
           final String name=PathHelper.getName(entry.getName());
-          if (StringUtils.isNotEmpty(name) && !(FileHelper.getFolderPath(parentFolder).equals(entryPath))) {
+          if (StringUtils.isNotEmpty(name) && (parentFolder == null || !(FileHelper.getFolderPath(parentFolder).equals(entryPath)))) {
             AbstractFile fileOrFolder=null;
             if (entry.isDirectory()) {
               fileOrFolder=app.create(Folder.class,name);
@@ -32,7 +32,9 @@
  else {
               fileOrFolder=ImageHelper.isImageType(name) ? ImageHelper.createImage(securityContext,in,null,Image.class,name,false) : FileHelper.createFile(securityContext,in,null,File.class,name);
             }
-            fileOrFolder.setProperty(AbstractFile.parent,parentFolder);
+            if (parentFolder != null) {
+              fileOrFolder.setProperty(AbstractFile.parent,parentFolder);
+            }
             logger.log(Level.INFO,"Created {0} {1} with path {2}",new Object[]{fileOrFolder.getType(),fileOrFolder,FileHelper.getFolderPath(fileOrFolder)});
             if (fileOrFolder instanceof Image) {
               fileOrFolder.getProperty(Image.tnMid);

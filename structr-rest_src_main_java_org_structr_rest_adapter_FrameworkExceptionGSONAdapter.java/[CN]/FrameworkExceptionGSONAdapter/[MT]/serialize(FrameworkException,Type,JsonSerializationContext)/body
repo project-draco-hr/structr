@@ -1,33 +1,3 @@
 {
-  JsonObject container=new JsonObject();
-  JsonObject error=new JsonObject();
-  container.add("code",new JsonPrimitive(src.getStatus()));
-  if (src.getMessage() != null) {
-    container.add("message",new JsonPrimitive(src.getMessage()));
-  }
-  ErrorBuffer errorBuffer=src.getErrorBuffer();
-  if (errorBuffer != null) {
-    Map<String,Map<String,Set<ErrorToken>>> tokens=errorBuffer.getErrorTokens();
-    if (!tokens.isEmpty()) {
-      for (      Entry<String,Map<String,Set<ErrorToken>>> tokensEntry : tokens.entrySet()) {
-        Map<String,Set<ErrorToken>> map=tokensEntry.getValue();
-        JsonObject typeEntry=new JsonObject();
-        String type=tokensEntry.getKey();
-        error.add(type,typeEntry);
-        for (        Entry<String,Set<ErrorToken>> mapEntry : map.entrySet()) {
-          Set<ErrorToken> list=mapEntry.getValue();
-          String key=mapEntry.getKey();
-          if (!list.isEmpty()) {
-            JsonArray array=new JsonArray();
-            for (            ErrorToken token : list) {
-              array.add(token.getContent());
-            }
-            typeEntry.add(key,array);
-          }
-        }
-      }
-      container.add("errors",error);
-    }
-  }
-  return container;
+  return src.toJSON();
 }

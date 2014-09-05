@@ -1,6 +1,6 @@
 {
   final String[] parts=PathHelper.getParts(path);
-  if (parts == null) {
+  if (parts == null || parts.length == 1) {
     return null;
   }
   final App app=StructrApp.getInstance(securityContext);
@@ -13,7 +13,7 @@
   }
   if (folder == null) {
     folder=app.create(Folder.class,parts[0]);
-    logger.log(Level.INFO,"Created root folder {0}",new Object[]{folder});
+    logger.log(Level.INFO,"Created root folder {0}",new Object[]{parts[0]});
     for (int i=1; i < parts.length - 1; i++) {
       Folder childFolder=app.create(Folder.class,parts[i]);
       childFolder.setProperty(Folder.parent,folder);

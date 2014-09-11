@@ -7,7 +7,7 @@
     return;
   }
   if (parentId == null) {
-    getWebSocket().send(MessageBuilder.status().code(422).message("Cannot clone compoinent node without parentId").build(),true);
+    getWebSocket().send(MessageBuilder.status().code(422).message("Cannot clone component node without parentId").build(),true);
     return;
   }
   final DOMNode parentNode=(DOMNode)getNode(parentId);
@@ -20,6 +20,7 @@
     DOMNode clonedNode=(DOMNode)node.cloneNode(false);
     parentNode.appendChild(clonedNode);
     clonedNode.setProperty(DOMNode.sharedComponent,node);
+    clonedNode.setProperty(DOMNode.ownerDocument,(parentNode instanceof Page ? (Page)parentNode : parentNode.getProperty(DOMNode.ownerDocument)));
   }
  catch (  FrameworkException ex) {
     getWebSocket().send(MessageBuilder.status().code(422).message(ex.getMessage()).build(),true);

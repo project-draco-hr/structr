@@ -1,0 +1,20 @@
+{
+  while (node != null) {
+    if (node instanceof Template) {
+      final Template template=(Template)node;
+      Document doc=template.getOwnerDocument();
+      if (doc != null && doc.equals(page)) {
+        return template;
+      }
+      final List<DOMNode> syncedNodes=template.getProperty(DOMNode.syncedNodes);
+      for (      final DOMNode syncedNode : syncedNodes) {
+        doc=syncedNode.getOwnerDocument();
+        if (doc != null && doc.equals(page)) {
+          return (Template)syncedNode;
+        }
+      }
+    }
+    node=(DOMNode)node.getParentNode();
+  }
+  return null;
+}

@@ -3,8 +3,17 @@
     if (node instanceof Template) {
       final Template template=(Template)node;
       Document doc=template.getOwnerDocument();
+      if (doc == null) {
+        doc=getClosestPage(node);
+      }
       if (doc != null && doc.equals(page)) {
-        return template;
+        try {
+          template.setProperty(DOMNode.ownerDocument,(Page)doc);
+          return template;
+        }
+ catch (        FrameworkException ex) {
+          ex.printStackTrace();
+        }
       }
       final List<DOMNode> syncedNodes=template.getProperty(DOMNode.syncedNodes);
       for (      final DOMNode syncedNode : syncedNodes) {

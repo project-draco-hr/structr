@@ -112,6 +112,13 @@
         }
         continue;
       }
+      if ("template".equals(part)) {
+        _data=getClosestTemplate((DOMNode)entity,_page);
+        if (parts.length == 1) {
+          return _data;
+        }
+        continue;
+      }
       if ("page".equals(part)) {
         _data=_page;
         if (parts.length == 1) {
@@ -133,6 +140,12 @@
         _data=(DOMNode)((DOMNode)entity).getParentNode();
         if (parts.length == 1) {
           return _data;
+        }
+        continue;
+      }
+      if ("children".equals(part)) {
+        if (parts.length == 1) {
+          return getClosestTemplate((DOMNode)entity,_page).getChildNodes();
         }
         continue;
       }

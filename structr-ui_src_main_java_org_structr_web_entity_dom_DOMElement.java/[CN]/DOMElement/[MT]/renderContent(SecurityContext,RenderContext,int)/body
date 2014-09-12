@@ -1,0 +1,55 @@
+{
+  if (renderContext.hasTimeout(RENDER_TIMEOUT)) {
+    return;
+  }
+  if (isDeleted() || isHidden() || !displayForLocale(renderContext)|| !displayForConditions(securityContext,renderContext)) {
+    return;
+  }
+  final AsyncBuffer out=renderContext.getBuffer();
+  final EditMode editMode=renderContext.getEditMode(securityContext.getUser(false));
+  final boolean isVoid=isVoidElement();
+  final String _tag=getProperty(DOMElement.tag);
+  Result localResult=renderContext.getResult();
+  boolean anyChildNodeCreatesNewLine=false;
+  renderStructrAppLib(out,securityContext,renderContext,depth);
+  if (depth > 0 && !avoidWhitespace()) {
+    out.append(indent(depth));
+  }
+  if (StringUtils.isNotBlank(_tag)) {
+    openingTag(securityContext,out,_tag,editMode,renderContext,depth);
+    try {
+      if (lowercaseBodyName.equals(this.getTagName())) {
+        renderContext.setInBody(true);
+      }
+      List<DOMChildren> rels=getChildRelationships();
+      if (rels.isEmpty()) {
+        migrateSyncRels();
+        DOMElement _syncedNode=(DOMElement)getProperty(sharedComponent);
+        if (_syncedNode != null) {
+          rels.addAll(_syncedNode.getChildRelationships());
+        }
+      }
+      for (      final AbstractRelationship rel : rels) {
+        final DOMNode subNode=(DOMNode)rel.getTargetNode();
+        if (subNode instanceof DOMElement) {
+          anyChildNodeCreatesNewLine=(anyChildNodeCreatesNewLine || !(subNode.avoidWhitespace()));
+        }
+        subNode.render(securityContext,renderContext,depth + 1);
+      }
+    }
+ catch (    Throwable t) {
+      logger.log(Level.SEVERE,"Error while rendering node {0}: {1}",new java.lang.Object[]{getUuid(),t});
+      out.append("Error while rendering node ").append(getUuid()).append(": ").append(t.getMessage());
+      t.printStackTrace();
+    }
+    if (StringUtils.isNotBlank(_tag) && (!isVoid)) {
+      if (anyChildNodeCreatesNewLine) {
+        out.append(indent(depth));
+      }
+      out.append("</").append(_tag).append(">");
+    }
+  }
+  if (localResult != null) {
+    renderContext.setResult(localResult);
+  }
+}

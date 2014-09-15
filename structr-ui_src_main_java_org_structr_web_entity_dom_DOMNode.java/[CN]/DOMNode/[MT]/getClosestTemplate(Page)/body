@@ -1,12 +1,13 @@
 {
+  DOMNode node=this;
   while (node != null) {
     if (node instanceof Template) {
       final Template template=(Template)node;
       Document doc=template.getOwnerDocument();
       if (doc == null) {
-        doc=getClosestPage(node);
+        doc=node.getClosestPage();
       }
-      if (doc != null && doc.equals(page)) {
+      if (doc != null && (page == null || doc.equals(page))) {
         try {
           template.setProperty(DOMNode.ownerDocument,(Page)doc);
           return template;
@@ -15,10 +16,10 @@
           ex.printStackTrace();
         }
       }
-      final List<DOMNode> syncedNodes=template.getProperty(DOMNode.syncedNodes);
-      for (      final DOMNode syncedNode : syncedNodes) {
+      final List<DOMNode> _syncedNodes=template.getProperty(DOMNode.syncedNodes);
+      for (      final DOMNode syncedNode : _syncedNodes) {
         doc=syncedNode.getOwnerDocument();
-        if (doc != null && doc.equals(page)) {
+        if (doc != null && (page == null || doc.equals(page))) {
           return (Template)syncedNode;
         }
       }

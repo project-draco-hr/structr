@@ -23,12 +23,22 @@
         if (tagName != null && "comment".equals(tagName)) {
           newNode=(DOMNode)document.createComment("#comment");
         }
+ else         if (tagName != null && "template".equals(tagName)) {
+          newNode=(DOMNode)document.createTextNode("#template");
+          try {
+            newNode.setProperty(NodeInterface.type,Template.class.getSimpleName());
+          }
+ catch (          FrameworkException fex) {
+            logger.log(Level.WARNING,"Unable to set type of node {1} to Template: {3}",new Object[]{newNode.getUuid(),fex.getMessage()});
+          }
+        }
  else         if (tagName != null && !tagName.isEmpty()) {
           newNode=(DOMNode)document.createElement(tagName);
         }
  else {
           newNode=(DOMNode)document.createTextNode("#text");
         }
+        newNode=getDOMNode(newNode.getUuid());
         if (newNode != null) {
           parentNode.appendChild(newNode);
           for (          Entry entry : nodeData.entrySet()) {

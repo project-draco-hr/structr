@@ -1,5 +1,11 @@
 {
-  final boolean isAuthenticated=isAuthenticated();
+  boolean isAuthenticated=false;
+  try (final Tx tx=StructrApp.getInstance(securityContext).tx()){
+    isAuthenticated=isAuthenticated();
+  }
+ catch (  FrameworkException t) {
+    t.printStackTrace();
+  }
   message.setSessionValid(isAuthenticated);
   if (clearSessionId) {
     message.setSessionId(null);

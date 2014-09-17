@@ -112,6 +112,13 @@
         }
         continue;
       }
+      if ("template".equals(part)) {
+        _data=((DOMNode)entity).getClosestTemplate(_page);
+        if (parts.length == 1) {
+          return _data;
+        }
+        continue;
+      }
       if ("page".equals(part)) {
         _data=_page;
         if (parts.length == 1) {
@@ -133,6 +140,15 @@
         _data=(DOMNode)((DOMNode)entity).getParentNode();
         if (parts.length == 1) {
           return _data;
+        }
+        continue;
+      }
+      if ("children".equals(part)) {
+        if (parts.length == 1) {
+          final Template template=((DOMNode)entity).getClosestTemplate(_page);
+          if (template != null) {
+            return template.getChildNodes();
+          }
         }
         continue;
       }
@@ -173,6 +189,15 @@
         if (result != null) {
           return result.getPage();
         }
+      }
+      if ("host".equals(part)) {
+        return securityContext.getRequest().getServerName();
+      }
+      if ("port".equals(part)) {
+        return securityContext.getRequest().getServerPort();
+      }
+      if ("path_info".equals(part)) {
+        return securityContext.getRequest().getPathInfo();
       }
     }
   }

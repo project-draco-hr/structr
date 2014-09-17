@@ -57,13 +57,10 @@
           requestUriContainsUuids|=matcher.matches();
         }
         if (!requestUriContainsUuids) {
-          dataNode=findFirstNodeByPath(securityContext,request,path);
+          dataNode=findFirstNodeByName(securityContext,request,path);
         }
  else {
-          AbstractNode n=(AbstractNode)StructrApp.getInstance(securityContext).get(PathHelper.getName(path));
-          if (n != null) {
-            dataNode=n;
-          }
+          dataNode=findNodeByUuid(securityContext,PathHelper.getName(path));
         }
         if (dataNode != null) {
           request.removeAttribute(POSSIBLE_ENTRY_POINTS);
@@ -131,8 +128,16 @@
                   finished.set(true);
                   tx.success();
                 }
- catch (                FrameworkException fex) {
-                  fex.printStackTrace();
+ catch (                Throwable t) {
+                  t.printStackTrace();
+                  final String errorMsg=t.getMessage();
+                  try {
+                    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,errorMsg);
+                    finished.set(true);
+                  }
+ catch (                  IOException ex) {
+                    ex.printStackTrace();
+                  }
                 }
               }
             }

@@ -1,8 +1,19 @@
 {
   for (  Sync rel : getOutgoingRelationships(Sync.class)) {
-    DOMElement syncedNode=rel.getTargetNode();
+    DOMElement syncedNode=(DOMElement)rel.getTargetNode();
     for (    Property htmlProp : syncedNode.getHtmlAttributes()) {
       syncedNode.setProperty(htmlProp,getProperty(htmlProp));
+    }
+    syncedNode.setProperty(name,getProperty(name));
+  }
+  final Sync rel=getIncomingRelationship(Sync.class);
+  if (rel != null) {
+    final DOMElement otherNode=(DOMElement)rel.getSourceNode();
+    if (otherNode != null) {
+      for (      Property htmlProp : otherNode.getHtmlAttributes()) {
+        otherNode.setProperty(htmlProp,getProperty(htmlProp));
+      }
+      otherNode.setProperty(name,getProperty(name));
     }
   }
   try {

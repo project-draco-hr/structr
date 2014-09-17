@@ -1,7 +1,12 @@
 {
   renderContext.setPage(this);
-  renderContext.getBuffer().append("<!DOCTYPE html>\n");
   DOMNode subNode=(DOMNode)this.getFirstChild().getNextSibling();
+  if (subNode == null) {
+    subNode=(DOMNode)super.getFirstChild();
+  }
+ else {
+    renderContext.getBuffer().append("<!DOCTYPE html>\n");
+  }
   while (subNode != null) {
     if (subNode.isNotDeleted() && securityContext.isVisible(subNode)) {
       subNode.render(securityContext,renderContext,depth);

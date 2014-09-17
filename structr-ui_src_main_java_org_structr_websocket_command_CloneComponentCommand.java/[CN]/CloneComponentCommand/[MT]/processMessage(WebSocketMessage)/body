@@ -1,5 +1,4 @@
 {
-  final SecurityContext securityContext=getWebSocket().getSecurityContext();
   String id=webSocketData.getId();
   Map<String,Object> nodeData=webSocketData.getNodeData();
   String parentId=(String)nodeData.get("parentId");
@@ -8,7 +7,7 @@
     return;
   }
   if (parentId == null) {
-    getWebSocket().send(MessageBuilder.status().code(422).message("Cannot clone compoinent node without parentId").build(),true);
+    getWebSocket().send(MessageBuilder.status().code(422).message("Cannot clone component node without parentId").build(),true);
     return;
   }
   final DOMNode parentNode=(DOMNode)getNode(parentId);
@@ -16,11 +15,12 @@
     getWebSocket().send(MessageBuilder.status().code(404).message("Parent node not found").build(),true);
     return;
   }
-  final DOMElement node=(DOMElement)getDOMNode(id);
+  final DOMNode node=getDOMNode(id);
   try {
-    DOMElement clonedNode=(DOMElement)node.cloneNode(false);
+    DOMNode clonedNode=(DOMNode)node.cloneNode(false);
     parentNode.appendChild(clonedNode);
-    clonedNode.setProperty(DOMElement.sharedComponent,node);
+    clonedNode.setProperty(DOMNode.sharedComponent,node);
+    clonedNode.setProperty(DOMNode.ownerDocument,(parentNode instanceof Page ? (Page)parentNode : parentNode.getProperty(DOMNode.ownerDocument)));
   }
  catch (  FrameworkException ex) {
     getWebSocket().send(MessageBuilder.status().code(422).message(ex.getMessage()).build(),true);

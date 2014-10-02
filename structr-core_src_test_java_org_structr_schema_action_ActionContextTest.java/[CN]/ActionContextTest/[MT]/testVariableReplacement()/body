@@ -518,6 +518,9 @@
     assertEquals("Invalid stored value","A-nice-little-name-for-my-test-object",ctx.retrieve("tmp"));
     assertEquals("Invalid retrieve() result","A-nice-little-name-for-my-test-object",testOne.replaceVariables(securityContext,ctx,"${retrieve('tmp')}"));
     assertEquals("Invalid retrieve() result","",testOne.replaceVariables(securityContext,new ActionContext(),"${retrieve('tmp')}"));
+    assertEquals("Invalid store() result","",testOne.replaceVariables(securityContext,ctx,"${store('tmp', 10)}"));
+    assertEquals("Invalid retrieve() result in filter expression","9",testOne.replaceVariables(securityContext,ctx,"${size(filter(this.manyToManyTestSixs, gt(data.index, 10)))}"));
+    assertEquals("Invalid retrieve() result in filter expression","9",testOne.replaceVariables(securityContext,ctx,"${size(filter(this.manyToManyTestSixs, gt(data.index, retrieve('tmp'))))}"));
     assertEquals("Invalid replace() result","A-nice-little-name-for-my-test-object",testOne.replaceVariables(securityContext,ctx,"${replace(this.replaceString, this)}"));
     try {
       Actions.execute(securityContext,testTwo,"${error(\"base\", \"test1\")}");

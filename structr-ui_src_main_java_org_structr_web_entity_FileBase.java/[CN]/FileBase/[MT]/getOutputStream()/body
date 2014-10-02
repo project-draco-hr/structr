@@ -5,7 +5,11 @@
     try {
       final java.io.File fileOnDisk=new java.io.File(filePath);
       FileOutputStream fos=new FileOutputStream(fileOnDisk){
+        private boolean closed=false;
         @Override public void close() throws IOException {
+          if (closed) {
+            return;
+          }
           try (Tx tx=StructrApp.getInstance().tx()){
             super.close();
             final String _contentType=FileHelper.getContentMimeType(FileBase.this);
@@ -15,11 +19,13 @@
             if (StringUtils.startsWith(_contentType,"image") || ImageHelper.isImageType(getProperty(name))) {
               setProperty(NodeInterface.type,Image.class.getSimpleName());
             }
+            increaseVersion();
             tx.success();
           }
  catch (          FrameworkException ex) {
             logger.log(Level.SEVERE,"Could not determine or save checksum and size after closing file output stream",ex);
           }
+          closed=true;
         }
       }
 ;

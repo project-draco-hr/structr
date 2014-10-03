@@ -1,0 +1,46 @@
+{
+  FTPClient ftp=setupFTPClient();
+  final String name1="file1";
+  final String name2="file2";
+  try (final Tx tx=app.tx()){
+    FTPFile[] files=ftp.listFiles();
+    assertNotNull(files);
+    assertEquals(0,files.length);
+    ftp.setFileType(FTP.ASCII_FILE_TYPE);
+    ftp.setAutodetectUTF8(true);
+    InputStream in=IOUtils.toInputStream("Test Content");
+    ftp.storeFile(name1,in);
+    in.close();
+    tx.success();
+  }
+ catch (  IOException|FrameworkException ex) {
+    ex.printStackTrace();
+    fail("Unexpected exception: " + ex.getMessage());
+  }
+  String[] fileNames=null;
+  try (final Tx tx=app.tx()){
+    fileNames=ftp.listNames();
+    assertNotNull(fileNames);
+    assertEquals(1,fileNames.length);
+    assertEquals(name1,fileNames[0]);
+    createFTPFile(null,name2);
+    tx.success();
+  }
+ catch (  IOException|FrameworkException ex) {
+    ex.printStackTrace();
+    fail("Unexpected exception: " + ex.getMessage());
+  }
+  try (final Tx tx=app.tx()){
+    fileNames=ftp.listNames();
+    assertNotNull(fileNames);
+    assertEquals(2,fileNames.length);
+    assertEquals(name1,fileNames[0]);
+    assertEquals(name2,fileNames[1]);
+    ftp.disconnect();
+    tx.success();
+  }
+ catch (  IOException|FrameworkException ex) {
+    ex.printStackTrace();
+    fail("Unexpected exception: " + ex.getMessage());
+  }
+}

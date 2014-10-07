@@ -1,0 +1,13 @@
+{
+  try (final Tx tx=StructrApp.getInstance(securityContext).tx()){
+    final String path=getRelativeFilePath();
+    tx.success();
+    if (path != null) {
+      return new java.io.File(FileHelper.getFilePath(path)).getAbsolutePath();
+    }
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+  }
+  return null;
+}

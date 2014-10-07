@@ -21,7 +21,8 @@
       try {
         String contentType=fileItem.getContentType();
         boolean isImage=(contentType != null && contentType.startsWith("image"));
-        Class type=isImage ? Image.class : org.structr.dynamic.File.class;
+        boolean isVideo=(contentType != null && contentType.startsWith("video"));
+        Class type=isImage ? Image.class : isVideo ? VideoFile.class : org.structr.dynamic.File.class;
         String name=fileItem.getName().replaceAll("\\\\","/");
         org.structr.dynamic.File newFile=FileHelper.createFile(securityContext,IOUtils.toByteArray(fileItem.getInputStream()),contentType,type);
         newFile.setProperty(AbstractNode.name,PathHelper.getName(name));

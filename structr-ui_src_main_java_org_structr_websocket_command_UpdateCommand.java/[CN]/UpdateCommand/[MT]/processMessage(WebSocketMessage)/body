@@ -14,24 +14,29 @@
       }
       tx.success();
     }
- catch (    FrameworkException fex) {
-      fex.printStackTrace();
-    }
-  }
+   }
   if (obj == null) {
     obj=getRelationship(webSocketData.getId());
   }
   if (obj != null) {
-    try {
-      setProperties(app,obj,PropertyMap.inputTypeToJavaType(this.getWebSocket().getSecurityContext(),obj.getClass(),webSocketData.getNodeData()),rec);
+    final Set<GraphObject> entities=new LinkedHashSet<>();
+    try (final Tx tx=app.tx()){
+      collectEntities(entities,obj,null,rec);
       tx.success();
-      tx.close();
-      tx=null;
     }
- catch (    FrameworkException ex) {
-      logger.log(Level.SEVERE,"Unable to set properties: {0}",((FrameworkException)ex).toString());
-      getWebSocket().send(MessageBuilder.status().code(400).build(),true);
-    }
+     final PropertyMap properties=PropertyMap.inputTypeToJavaType(this.getWebSocket().getSecurityContext(),obj.getClass(),webSocketData.getNodeData());
+    final Iterator<GraphObject> iterator=entities.iterator();
+    while (iterator.hasNext()) {
+      count=0;
+      try (final Tx tx=app.tx()){
+        while (iterator.hasNext() && count++ < 100) {
+          setProperties(app,iterator.next(),properties,true);
+          sum++;
+        }
+        logger.log(Level.INFO,"Committing transaction after {0} objects..",sum);
+        tx.success();
+      }
+     }
   }
  else {
     logger.log(Level.WARNING,"Graph object with uuid {0} not found.",webSocketData.getId());

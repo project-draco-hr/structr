@@ -1,0 +1,17 @@
+{
+  final List<DynamicResourceAccess> grants=new LinkedList<>();
+  final long initialFlagsValue=0;
+  final App app=StructrApp.getInstance();
+  try {
+    ResourceAccess grant=app.nodeQuery(ResourceAccess.class).and(ResourceAccess.signature,signature).getFirst();
+    if (grant == null) {
+      grants.add(app.create(DynamicResourceAccess.class,new NodeAttribute(DynamicResourceAccess.signature,signature),new NodeAttribute(DynamicResourceAccess.flags,initialFlagsValue)));
+      grants.add(app.create(DynamicResourceAccess.class,new NodeAttribute(DynamicResourceAccess.signature,"_schema/" + signature),new NodeAttribute(DynamicResourceAccess.flags,initialFlagsValue)));
+      grants.add(app.create(DynamicResourceAccess.class,new NodeAttribute(DynamicResourceAccess.signature,signature + "/_Ui"),new NodeAttribute(DynamicResourceAccess.flags,initialFlagsValue)));
+    }
+  }
+ catch (  Throwable t) {
+    t.printStackTrace();
+  }
+  return grants;
+}

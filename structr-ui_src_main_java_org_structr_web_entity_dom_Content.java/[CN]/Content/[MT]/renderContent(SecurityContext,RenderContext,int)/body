@@ -35,7 +35,10 @@
     }
   }
   if (((_contentType == null) || _contentType.equals("text/plain")) && (_content != null) && !_content.isEmpty()) {
-    _content=_content.replaceAll("[\\n]{1}","<br>");
+    final DOMNode _parent=getProperty(Content.parent);
+    if (_parent == null || !(_parent instanceof Textarea)) {
+      _content=_content.replaceAll("[\\n]{1}","<br>");
+    }
   }
   if (_content != null) {
     if (EditMode.CONTENT.equals(edit) && _content.length() == 0) {

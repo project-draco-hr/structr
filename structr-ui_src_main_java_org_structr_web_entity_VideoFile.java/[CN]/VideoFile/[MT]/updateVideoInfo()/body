@@ -1,0 +1,30 @@
+{
+  try (final Tx tx=StructrApp.getInstance(securityContext).tx()){
+    final Map<String,Object> info=AVConv.newInstance(securityContext,this).getVideoInfo();
+    if (info != null && info.containsKey("streams")) {
+      final List<Map<String,Object>> streams=(List<Map<String,Object>>)info.get("streams");
+      for (      final Map<String,Object> stream : streams) {
+        final String codecType=(String)stream.get("codec_type");
+        if (codecType != null) {
+          if ("video".equals(codecType)) {
+            setIfNotNull(videoCodecName,stream.get("codec_long_name"));
+            setIfNotNull(videoCodec,stream.get("codec_name"));
+            setIfNotNull(pixelFormat,stream.get("pix_fmt"));
+            setIfNotNull(width,toInt(stream.get("width")));
+            setIfNotNull(height,toInt(stream.get("height")));
+            setIfNotNull(duration,toDouble(stream.get("duration")));
+          }
+ else           if ("audio".equals(codecType)) {
+            setIfNotNull(audioCodecName,stream.get("codec_long_name"));
+            setIfNotNull(audioCodec,stream.get("codec_name"));
+            setIfNotNull(sampleRate,toInt(stream.get("sampleRate")));
+          }
+        }
+      }
+    }
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+  }
+}

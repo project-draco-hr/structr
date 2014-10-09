@@ -1,0 +1,42 @@
+{
+  final HttpServletRequest request=securityContext.getRequest();
+  if (request != null) {
+    final String filesPath=Services.getInstance().getConfigurationValue(Services.FILES_PATH);
+    final String subjectId=(String)propertySet.get(subjectProperty.jsonName());
+    final String objectId=(String)propertySet.get(objectProperty.jsonName());
+    final String action=(String)propertySet.get(actionProperty.jsonName());
+    final String message=(String)propertySet.get(messageProperty.jsonName());
+    if (subjectId != null && objectId != null && action != null) {
+      try {
+        final StringBuilder data=new StringBuilder();
+        data.append(System.currentTimeMillis());
+        data.append(",");
+        data.append(action);
+        data.append(",");
+        data.append(message);
+        data.append("\n");
+        final Path actualPath=write(filesPath + SUBJECTS,mergeIds(subjectId,objectId),data.toString());
+        link(filesPath + OBJECTS,mergeIds(objectId,subjectId),actualPath);
+        return new RestMethodResult(200);
+      }
+ catch (      IOException ioex) {
+        ioex.printStackTrace();
+        throw new FrameworkException(500,ioex.getMessage());
+      }
+    }
+ else {
+      final ErrorBuffer errorBuffer=new ErrorBuffer();
+      if (StringUtils.isEmpty(subjectId)) {
+        errorBuffer.add("LogFile",new EmptyPropertyToken(subjectProperty));
+      }
+      if (StringUtils.isEmpty(objectId)) {
+        errorBuffer.add("LogFile",new EmptyPropertyToken(objectProperty));
+      }
+      if (StringUtils.isEmpty(action)) {
+        errorBuffer.add("LogFile",new EmptyPropertyToken(actionProperty));
+      }
+      throw new FrameworkException(422,errorBuffer);
+    }
+  }
+  throw new FrameworkException(500,"No request object present, aborting.");
+}

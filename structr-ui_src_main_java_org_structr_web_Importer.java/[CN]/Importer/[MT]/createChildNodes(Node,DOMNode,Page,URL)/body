@@ -111,12 +111,13 @@
           }
  else {
             String value=nodeAttr.getValue();
+            boolean isAnchor=StringUtils.isNotBlank(value) && value.startsWith("#");
             boolean isLocal=StringUtils.isNotBlank(value) && !value.startsWith("http");
             boolean isActive=StringUtils.isNotBlank(value) && (value.startsWith("${") || value.startsWith("/${"));
             if ("link".equals(tag) && "href".equals(key) && isLocal&& !isActive) {
               newNode.setProperty(new StringProperty(PropertyView.Html.concat(key)),"${link.path}?${link.version}");
             }
- else             if (("href".equals(key) || "src".equals(key)) && isLocal && !isActive) {
+ else             if (("href".equals(key) || "src".equals(key)) && isLocal && !isActive&& !isAnchor) {
               newNode.setProperty(new StringProperty(PropertyView.Html.concat(key)),"${link.path}");
             }
  else {

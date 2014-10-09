@@ -1,0 +1,17 @@
+{
+  if (exitCode == 0) {
+    try (final Tx tx=StructrApp.getInstance(securityContext).tx()){
+      final java.io.File diskFile=new java.io.File(outputFileName + "." + fileExtension);
+      final java.io.File dstFile=new java.io.File(outputFileName);
+      if (diskFile.exists()) {
+        Files.move(diskFile.toPath(),dstFile.toPath(),StandardCopyOption.REPLACE_EXISTING);
+        FileHelper.updateMetadata(inputVideo);
+      }
+      tx.success();
+    }
+ catch (    FrameworkException|IOException fex) {
+      fex.printStackTrace();
+    }
+  }
+  return null;
+}

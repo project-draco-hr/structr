@@ -1,50 +1,18 @@
 {
-  JsonInput wrapper=new JsonInput();
+  IJsonInput jsonInput=null;
+  JsonInput wrapper=null;
   if (json.isJsonObject()) {
-    JsonObject obj=json.getAsJsonObject();
-    for (    Entry<String,JsonElement> entry : obj.entrySet()) {
-      String key=entry.getKey();
-      JsonElement elem=entry.getValue();
-      if ((idProperty != null) && "id".equals(key)) {
-        key=idProperty.jsonName();
-      }
-      if (elem.isJsonNull()) {
-        wrapper.add(key,null);
-      }
- else       if (elem.isJsonObject()) {
-        wrapper.add(key,deserialize(elem,typeOfT,context));
-      }
- else       if (elem.isJsonArray()) {
-        JsonArray array=elem.getAsJsonArray();
-        List list=new LinkedList();
-        for (        JsonElement element : array) {
-          if (element.isJsonPrimitive()) {
-            list.add(fromPrimitive((element.getAsJsonPrimitive())));
-          }
- else           if (element.isJsonObject()) {
-            list.add(deserialize(element,typeOfT,context));
-          }
-        }
-        wrapper.add(key,list);
-      }
- else       if (elem.isJsonPrimitive()) {
-        wrapper.add(key,fromPrimitive(elem.getAsJsonPrimitive()));
-      }
-    }
+    jsonInput=new JsonSingleInput();
+    wrapper=deserialize(json,context);
+    jsonInput.add(wrapper);
   }
  else   if (json.isJsonArray()) {
+    jsonInput=new JsonSingleInput();
     JsonArray array=json.getAsJsonArray();
     for (    JsonElement elem : array) {
-      if (elem.isJsonPrimitive()) {
-        wrapper.add(elem.toString(),fromPrimitive(elem.getAsJsonPrimitive()));
-      }
- else       if (elem.isJsonObject()) {
-        wrapper.add(elem.toString(),deserialize(elem,typeOfT,context));
-      }
- else       if (elem.isJsonArray()) {
-        wrapper.add(elem.toString(),deserialize(elem,typeOfT,context));
-      }
+      wrapper=deserialize(elem,context);
+      jsonInput.add(wrapper);
     }
   }
-  return wrapper;
+  return jsonInput;
 }

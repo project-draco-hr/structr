@@ -1,0 +1,31 @@
+{
+  final List<String> parts=new LinkedList<>();
+  element.traverse(new NodeVisitor(){
+    @Override public void head(    Node node,    int depth){
+      if (node instanceof Element) {
+        final Element element=(Element)node;
+        final Set<String> classes=element.classNames();
+        removeEmpty(classes);
+        if (classes.isEmpty()) {
+          parts.add(element.ownText());
+        }
+      }
+    }
+    @Override public void tail(    Node node,    int depth){
+    }
+  }
+);
+  if (parts.isEmpty()) {
+    final String ownText=element.ownText();
+    if (StringUtils.isNotBlank(ownText)) {
+      parts.add(element.ownText());
+    }
+  }
+  if (parts.isEmpty()) {
+    return null;
+  }
+  if (parts.size() == 1) {
+    return parts.get(0);
+  }
+  return parts;
+}

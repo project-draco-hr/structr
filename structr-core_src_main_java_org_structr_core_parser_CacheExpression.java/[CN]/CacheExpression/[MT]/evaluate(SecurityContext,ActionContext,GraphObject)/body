@@ -16,11 +16,15 @@
   if (valueExpression == null) {
     return "Error: cache(): value expression may not be empty.";
   }
+  final long timeout=((Number)timeoutValue).longValue();
   final Services services=Services.getInstance();
   CachedValue cachedValue=(CachedValue)services.getAttribute(key);
   if (cachedValue == null) {
-    cachedValue=new CachedValue(((Number)timeoutValue).longValue());
+    cachedValue=new CachedValue(timeout);
     services.setAttribute(key,cachedValue);
+  }
+ else {
+    cachedValue.setTimeoutSeconds(timeout);
   }
   if (cachedValue.isExpired()) {
     cachedValue.refresh(valueExpression.evaluate(securityContext,ctx,entity));

@@ -1,6 +1,6 @@
 {
   final String xpathQuery=referenceNode.getProperty(DOMNode.xpathQuery);
-  if (xpathQuery == null || xpathQuery.isEmpty()) {
+  if (StringUtils.isBlank(xpathQuery)) {
     return null;
   }
   final Document document=((DOMNode)referenceNode).getOwnerDocument();
@@ -25,6 +25,7 @@
     return results;
   }
  catch (  Throwable t) {
+    t.printStackTrace();
     logger.log(Level.WARNING,"Unable to execute xpath query: {0}",t.getMessage());
   }
   return Collections.EMPTY_LIST;

@@ -1,4 +1,5 @@
 {
+  visitedTypes.add(source.getClass());
   writer.beginObject(source);
   if (depth <= outputNestingDepth) {
     Iterable<PropertyKey> keys=source.getPropertyKeys(localPropertyView);
@@ -9,10 +10,16 @@
       for (      PropertyKey key : keys) {
         final Predicate predicate=writer.getSecurityContext().getRange(key.jsonName());
         final Object value=source.getProperty(key,predicate);
+        final Class relatedType=key.relatedType();
         final PropertyKey localKey=key;
         if (value != null) {
-          writer.name(localKey.jsonName());
-          serializeProperty(writer,key,value,localPropertyView,depth + 1);
+          if (relatedType != null && visitedTypes.contains(key.relatedType())) {
+            continue;
+          }
+ else {
+            writer.name(localKey.jsonName());
+            serializeProperty(writer,key,value,localPropertyView,depth + 1);
+          }
         }
  else {
           writer.name(localKey.jsonName()).nullValue();
@@ -21,4 +28,5 @@
     }
   }
   writer.endObject(source);
+  visitedTypes.remove(source.getClass());
 }

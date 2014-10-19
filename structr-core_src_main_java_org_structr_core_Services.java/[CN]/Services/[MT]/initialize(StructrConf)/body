@@ -6,18 +6,18 @@
   getConfigurationProvider();
   logger.log(Level.INFO,"Starting services");
   for (  final String serviceClassName : configuredServiceClasses) {
-    try {
-      Class serviceClass=getServiceClassForName(serviceClassName);
-      if (serviceClass != null) {
+    Class serviceClass=getServiceClassForName(serviceClassName);
+    if (serviceClass != null) {
+      try {
         final Service service=createService(serviceClass);
         if (service != null) {
           service.initialized();
         }
       }
-    }
- catch (    Throwable t) {
-      logger.log(Level.WARNING,"Exception while registering service {0}: {1}",new Object[]{serviceClassName,t});
-      t.printStackTrace();
+ catch (      Throwable t) {
+        logger.log(Level.WARNING,"Exception while registering service {0}: {1}",new Object[]{serviceClassName,t});
+        t.printStackTrace();
+      }
     }
   }
   logger.log(Level.INFO,"{0} service(s) processed",serviceCache.size());

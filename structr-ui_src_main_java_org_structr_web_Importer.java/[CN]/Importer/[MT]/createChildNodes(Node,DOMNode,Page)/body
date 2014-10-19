@@ -1,0 +1,133 @@
+{
+  Linkable res=null;
+  final List<Node> children=startNode.childNodes();
+  for (  Node node : children) {
+    String tag=node.nodeName();
+    if (tag != null) {
+      tag=tag.replaceAll("[^a-zA-Z0-9#]+","");
+    }
+    String type=CaseHelper.toUpperCamelCase(tag);
+    String comment=null;
+    String content=null;
+    String id=null;
+    StringBuilder classString=new StringBuilder();
+    if (ArrayUtils.contains(ignoreElementNames,type)) {
+      continue;
+    }
+    if (node instanceof Element) {
+      Element el=((Element)node);
+      Set<String> classes=el.classNames();
+      for (      String cls : classes) {
+        classString.append(cls).append(" ");
+      }
+      id=el.id();
+      String downloadAddressAttr=(ArrayUtils.contains(srcElements,tag) ? "src" : ArrayUtils.contains(hrefElements,tag) ? "href" : null);
+      if (downloadAddressAttr != null && StringUtils.isNotBlank(node.attr(downloadAddressAttr))) {
+        String downloadAddress=node.attr(downloadAddressAttr);
+        res=downloadFile(downloadAddress);
+      }
+    }
+    if (type.equals("#comment")) {
+      tag="";
+      comment=((Comment)node).getData();
+      if (StringUtils.isBlank(comment)) {
+        continue;
+      }
+      commentSource.append(comment).append("\n");
+    }
+ else     if (type.equals("#data")) {
+      tag="";
+      content=((DataNode)node).getWholeData();
+      if (StringUtils.isBlank(content)) {
+        continue;
+      }
+    }
+ else     if (type.equals("#text")) {
+      tag="";
+      content=((TextNode)node).text();
+      if (!("p".equals(startNode.nodeName().toLowerCase())) && StringUtils.isWhitespace(content)) {
+        continue;
+      }
+    }
+    org.structr.web.entity.dom.DOMNode newNode;
+    if (StringUtils.isBlank(tag)) {
+      if (!StringUtils.isBlank(comment)) {
+        newNode=(DOMNode)page.createComment(comment);
+        newNode.setProperty(org.structr.web.entity.dom.Comment.contentType,"text/html");
+      }
+ else {
+        newNode=(Content)page.createTextNode(content);
+      }
+    }
+ else {
+      newNode=(org.structr.web.entity.dom.DOMElement)page.createElement(tag);
+    }
+    if (newNode != null) {
+      newNode.setProperty(AbstractNode.visibleToPublicUsers,publicVisible);
+      newNode.setProperty(AbstractNode.visibleToAuthenticatedUsers,authVisible);
+      if (res != null) {
+        newNode.setProperty(LinkSource.linkable,res);
+      }
+      if (StringUtils.isNotBlank(id)) {
+        newNode.setProperty(DOMElement._id,id);
+      }
+      if (StringUtils.isNotBlank(classString.toString())) {
+        newNode.setProperty(DOMElement._class,StringUtils.trim(classString.toString()));
+      }
+      for (      Attribute nodeAttr : node.attributes()) {
+        String key=nodeAttr.getKey();
+        if (!key.equals("text")) {
+          if (key.startsWith("data-")) {
+            String value=nodeAttr.getValue();
+            if (!key.startsWith(DATA_META_PREFIX)) {
+              if (value != null) {
+                if (value.equalsIgnoreCase("true")) {
+                  newNode.setProperty(new BooleanProperty(key),true);
+                }
+ else                 if (value.equalsIgnoreCase("false")) {
+                  newNode.setProperty(new BooleanProperty(key),false);
+                }
+ else {
+                  newNode.setProperty(new StringProperty(key),nodeAttr.getValue());
+                }
+              }
+            }
+ else {
+              int l=DATA_META_PREFIX.length();
+              String upperCaseKey=WordUtils.capitalize(key.substring(l),new char[]{'-'}).replaceAll("-","");
+              String camelCaseKey=key.substring(l,l + 1).concat(upperCaseKey.substring(1));
+              if (value != null) {
+                if (value.equalsIgnoreCase("true")) {
+                  newNode.setProperty(new BooleanProperty(camelCaseKey),true);
+                }
+ else                 if (value.equalsIgnoreCase("false")) {
+                  newNode.setProperty(new BooleanProperty(camelCaseKey),false);
+                }
+ else {
+                  newNode.setProperty(new StringProperty(camelCaseKey),nodeAttr.getValue());
+                }
+              }
+            }
+          }
+ else {
+            String value=nodeAttr.getValue();
+            boolean isAnchor=StringUtils.isNotBlank(value) && value.startsWith("#");
+            boolean isLocal=StringUtils.isNotBlank(value) && !value.startsWith("http");
+            boolean isActive=StringUtils.isNotBlank(value) && (value.startsWith("${") || value.startsWith("/${"));
+            if ("link".equals(tag) && "href".equals(key) && isLocal&& !isActive) {
+              newNode.setProperty(new StringProperty(PropertyView.Html.concat(key)),"${link.path}?${link.version}");
+            }
+ else             if (("href".equals(key) || "src".equals(key)) && isLocal && !isActive&& !isAnchor) {
+              newNode.setProperty(new StringProperty(PropertyView.Html.concat(key)),"${link.path}");
+            }
+ else {
+              newNode.setProperty(new StringProperty(PropertyView.Html.concat(nodeAttr.getKey())),value);
+            }
+          }
+        }
+      }
+      parent.appendChild(newNode);
+      createChildNodes(node,newNode,page);
+    }
+  }
+}

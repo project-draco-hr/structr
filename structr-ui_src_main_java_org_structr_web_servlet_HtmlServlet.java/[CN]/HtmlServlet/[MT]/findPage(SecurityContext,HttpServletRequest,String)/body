@@ -5,6 +5,22 @@
   }
   for (  Linkable node : entryPoints) {
     if (node instanceof Page) {
+      final Page page=(Page)node;
+      final Site site=page.getProperty(Page.site);
+      if (site != null) {
+        final String serverName=request.getServerName();
+        final int serverPort=request.getServerPort();
+        if (StringUtils.isNotBlank(serverName) && !serverName.equals(site.getProperty(Site.hostname))) {
+          continue;
+        }
+        Integer sitePort=site.getProperty(Site.port);
+        if (sitePort == null) {
+          sitePort=80;
+        }
+        if (serverPort != sitePort) {
+          continue;
+        }
+      }
       return (Page)node;
     }
   }

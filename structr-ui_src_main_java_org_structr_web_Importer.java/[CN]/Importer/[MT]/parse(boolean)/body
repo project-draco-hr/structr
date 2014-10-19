@@ -12,9 +12,9 @@
  else {
     logger.log(Level.INFO,"##### Start fetching {0} for page {1} #####",new Object[]{address,name});
     try {
-      URL url=new URL(address);
+      originalUrl=new URL(address);
       DefaultHttpClient client=new DefaultHttpClient();
-      HttpGet get=new HttpGet(url.toString());
+      HttpGet get=new HttpGet(originalUrl.toString());
       get.setHeader("User-Agent","Mozilla");
       get.setHeader("Connection","close");
       client.setRedirectStrategy(new RedirectStrategy(){
@@ -28,9 +28,11 @@
 );
       HttpResponse resp=client.execute(get);
       Header location=resp.getFirstHeader("Location");
+      logger.log(Level.INFO,"Location: {0}",new Object[]{location});
       if (location != null) {
-        address=location.getValue();
-        final String newLocation=new URL(url,address).toString();
+        final String newLocation=new URL(originalUrl,location.getValue()).toString();
+        address=newLocation;
+        logger.log(Level.INFO,"New location: {0}",new Object[]{newLocation});
         client=new DefaultHttpClient();
         int attempts=1;
         boolean success=false;

@@ -58,14 +58,16 @@
       try (final Tx tx=app.tx()){
         if (!results.isEmpty()) {
           final RestMethodResult result=results.get(0);
-          if (results.size() > 1) {
+          if (results.size() > 1 || jsonPostLocationInBody) {
             final GraphObjectMap tmpResult=new GraphObjectMap();
             final List<String> idList=new LinkedList<>();
             tmpResult.put(new StringProperty("locations"),idList);
             for (            final RestMethodResult r : results) {
               idList.add(r.getHeaders().get("Location"));
             }
-            result.addHeader("Location",null);
+            if (results.size() > 1) {
+              result.addHeader("Location",null);
+            }
             result.addContent(tmpResult);
           }
           result.commitResponse(gson.get(),response);

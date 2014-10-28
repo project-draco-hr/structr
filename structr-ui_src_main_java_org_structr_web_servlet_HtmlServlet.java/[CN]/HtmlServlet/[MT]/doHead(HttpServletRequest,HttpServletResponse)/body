@@ -1,0 +1,134 @@
+{
+  final Authenticator auth=config.getAuthenticator();
+  final SecurityContext securityContext;
+  final App app;
+  try {
+    String path=request.getPathInfo();
+    try (final Tx tx=StructrApp.getInstance().tx()){
+      securityContext=auth.initializeAndExamineRequest(request,response);
+      tx.success();
+    }
+     app=StructrApp.getInstance(securityContext);
+    try (final Tx tx=app.tx()){
+      securityContext.setAccessMode(AccessMode.Frontend);
+      request.setCharacterEncoding("UTF-8");
+      response.setCharacterEncoding("UTF-8");
+      response.setContentLength(0);
+      boolean dontCache=false;
+      logger.log(Level.FINE,"Path info {0}",path);
+      if (response.getStatus() == 302) {
+        return;
+      }
+      final Principal user=securityContext.getUser(false);
+      if (user != null) {
+        dontCache=true;
+      }
+      final RenderContext renderContext=RenderContext.getInstance(request,response,getEffectiveLocale(request));
+      renderContext.setResourceProvider(config.getResourceProvider());
+      final EditMode edit=renderContext.getEditMode(user);
+      DOMNode rootElement=null;
+      AbstractNode dataNode=null;
+      String[] uriParts=PathHelper.getParts(path);
+      if ((uriParts == null) || (uriParts.length == 0)) {
+        rootElement=findIndexPage(securityContext);
+        logger.log(Level.FINE,"No path supplied, trying to find index page");
+      }
+ else {
+        if (rootElement == null) {
+          rootElement=findPage(securityContext,request,path);
+        }
+ else {
+          dontCache=true;
+        }
+      }
+      if (rootElement == null) {
+        File file=findFile(securityContext,request,path);
+        if (file != null) {
+          return;
+        }
+        Matcher matcher=threadLocalUUIDMatcher.get();
+        boolean requestUriContainsUuids=false;
+        for (int i=0; i < uriParts.length; i++) {
+          request.setAttribute(uriParts[i],i);
+          matcher.reset(uriParts[i]);
+          requestUriContainsUuids|=matcher.matches();
+        }
+        if (!requestUriContainsUuids) {
+          dataNode=findFirstNodeByName(securityContext,request,path);
+        }
+ else {
+          dataNode=findNodeByUuid(securityContext,PathHelper.getName(path));
+        }
+        if (dataNode != null && !(dataNode instanceof Linkable)) {
+          request.removeAttribute(POSSIBLE_ENTRY_POINTS);
+          rootElement=findPage(securityContext,request,StringUtils.substringBeforeLast(path,PathHelper.PATH_SEP));
+          renderContext.setDetailsDataObject(dataNode);
+          if (rootElement == null && dataNode instanceof DOMNode) {
+            rootElement=((DOMNode)dataNode);
+          }
+        }
+      }
+      if (rootElement == null) {
+        if (response.getStatus() == HttpServletResponse.SC_UNAUTHORIZED) {
+          try {
+            UiAuthenticator.writeUnauthorized(response);
+          }
+ catch (          IllegalStateException ise) {
+          }
+        }
+ else {
+          rootElement=notFound(response,securityContext);
+        }
+      }
+      if (rootElement == null) {
+        response.setContentLength(0);
+        response.getOutputStream().close();
+        return;
+      }
+      if (EditMode.WIDGET.equals(edit) || dontCache) {
+        setNoCacheHeaders(response);
+      }
+      if (!securityContext.isVisible(rootElement)) {
+        rootElement=notFound(response,securityContext);
+        if (rootElement == null) {
+          return;
+        }
+      }
+      if (securityContext.isVisible(rootElement)) {
+        if (!EditMode.WIDGET.equals(edit) && !dontCache && notModifiedSince(request,response,rootElement,dontCache)) {
+          response.getOutputStream().close();
+        }
+ else {
+          response.setCharacterEncoding("UTF-8");
+          String contentType=rootElement.getProperty(Page.contentType);
+          if (contentType != null && contentType.equals("text/html")) {
+            contentType=contentType.concat(";charset=UTF-8");
+            response.setContentType(contentType);
+          }
+ else {
+            response.setContentType("text/html;charset=UTF-8");
+          }
+          response.setHeader("Strict-Transport-Security","max-age=60");
+          response.setHeader("X-Content-Type-Options","nosniff");
+          response.setHeader("X-Frame-Options","SAMEORIGIN");
+          response.setHeader("X-XSS-Protection","1; mode=block");
+          response.getOutputStream().close();
+        }
+      }
+ else {
+        notFound(response,securityContext);
+        response.getOutputStream().close();
+      }
+      tx.success();
+    }
+ catch (    Throwable fex) {
+      fex.printStackTrace();
+      logger.log(Level.SEVERE,"Exception while processing request",fex);
+    }
+  }
+ catch (  FrameworkException t) {
+    t.printStackTrace();
+    logger.log(Level.SEVERE,"Exception while processing request",t);
+    UiAuthenticator.writeInternalServerError(response);
+  }
+}

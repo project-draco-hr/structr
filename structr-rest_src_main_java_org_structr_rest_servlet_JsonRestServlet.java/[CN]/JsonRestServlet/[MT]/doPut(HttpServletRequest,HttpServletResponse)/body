@@ -1,8 +1,8 @@
 {
-  final List<RestMethodResult> results=new LinkedList<>();
   SecurityContext securityContext=null;
   Authenticator authenticator=null;
-  IJsonInput jsonInput=null;
+  RestMethodResult result=null;
+  JsonInput propertySet=null;
   Resource resource=null;
   try {
     request.setCharacterEncoding("UTF-8");
@@ -14,15 +14,12 @@
       tx.success();
     }
      final App app=StructrApp.getInstance(securityContext);
-    String input=IOUtils.toString(request.getReader());
-    if (StringUtils.isBlank(input)) {
-      input="{}";
-    }
     try (final Tx tx=app.tx()){
-      jsonInput=gson.get().fromJson(input,IJsonInput.class);
+      propertySet=gson.get().fromJson(request.getReader(),JsonInput.class);
       tx.success();
     }
      if (securityContext != null) {
+      Map<String,Object> properties=convertPropertySetToMap(propertySet);
       try (final Tx tx=app.tx()){
         resource=ResourceHelper.applyViewTransformation(request,securityContext,ResourceHelper.optimizeNestedResourceChain(ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,config.getDefaultIdProperty()),config.getDefaultIdProperty()),propertyView);
         authenticator.checkResourceAccess(request,resource.getResourceSignature(),propertyView.get(securityContext));
@@ -31,9 +28,7 @@
        boolean retry=true;
       while (retry) {
         try (final Tx tx=app.tx()){
-          for (          JsonInput propertySet : jsonInput.getJsonInputs()) {
-            results.add(resource.doPut(convertPropertySetToMap(propertySet)));
-          }
+          result=resource.doPut(properties);
           tx.success();
           retry=false;
         }
@@ -42,26 +37,14 @@
         }
       }
       try (final Tx tx=app.tx()){
-        if (!results.isEmpty()) {
-          final RestMethodResult result=results.get(0);
-          if (results.size() > 1) {
-            final GraphObjectMap tmpResult=new GraphObjectMap();
-            final List<String> idList=new LinkedList<>();
-            tmpResult.put(new StringProperty("locations"),idList);
-            for (            final RestMethodResult r : results) {
-              idList.add(r.getHeaders().get("Location"));
-            }
-            result.addHeader("Location",null);
-            result.addContent(tmpResult);
-          }
-          result.commitResponse(gson.get(),response);
-        }
+        result.commitResponse(gson.get(),response);
         tx.success();
       }
      }
  else {
       try (final Tx tx=app.tx()){
-        new RestMethodResult(HttpServletResponse.SC_FORBIDDEN).commitResponse(gson.get(),response);
+        result=new RestMethodResult(HttpServletResponse.SC_FORBIDDEN);
+        result.commitResponse(gson.get(),response);
         tx.success();
       }
      }

@@ -1,20 +1,3 @@
 {
-  for (  Entry<String,String> header : headers.entrySet()) {
-    response.setHeader(header.getKey(),header.getValue());
-  }
-  response.setStatus(responseCode);
-  try {
-    Writer writer=response.getWriter();
-    if (content != null) {
-      Result result=new Result(this.content,this.content.size(),this.content.size() > 1 || serializeSingleObjectAsCollection,false);
-      gson.toJson(result,writer);
-    }
-    if (StringUtils.isNotEmpty(message)) {
-      writer.append(jsonMessage(responseCode,message));
-    }
-    writer.append("\n");
-  }
- catch (  JsonIOException|IOException t) {
-    logger.log(Level.WARNING,"Unable to commit HttpServletResponse",t);
-  }
+  commitResponse(gson,response,false);
 }

@@ -62,14 +62,19 @@
           if (resultCount > 1 || (jsonPostLocationInBody && resultCount > 0)) {
             final GraphObjectMap tmpResult=new GraphObjectMap();
             final List<String> idList=new LinkedList<>();
-            tmpResult.put(new StringProperty("locations"),idList);
             for (            final RestMethodResult r : results) {
-              idList.add(r.getHeaders().get("Location"));
+              final String value=r.getHeaders().get("Location");
+              if (!StringUtils.isBlank(value)) {
+                idList.add(value);
+              }
             }
             if (resultCount > 1) {
               result.addHeader("Location",null);
             }
-            result.addContent(tmpResult);
+            if (!idList.isEmpty()) {
+              tmpResult.put(new StringProperty("locations"),idList);
+              result.addContent(tmpResult);
+            }
           }
           result.commitResponse(gson.get(),response);
         }

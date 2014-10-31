@@ -1,0 +1,51 @@
+{
+  try (final Tx tx=StructrApp.getInstance().tx(false,false,false)){
+    final String uuid=PathHelper.getName(request.getPathInfo());
+    if (uuid == null) {
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+      response.getOutputStream().write("URL path doesn't end with UUID.\n".getBytes("UTF-8"));
+      return;
+    }
+    Matcher matcher=threadLocalUUIDMatcher.get();
+    matcher.reset(uuid);
+    if (!matcher.matches()) {
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+      response.getOutputStream().write("URL path doesn't end with UUID.\n".getBytes("UTF-8"));
+      return;
+    }
+    final SecurityContext securityContext=getConfig().getAuthenticator().initializeAndExamineRequest(request,response);
+    securityContext.setAccessMode(AccessMode.Frontend);
+    request.setCharacterEncoding("UTF-8");
+    response.setCharacterEncoding("UTF-8");
+    if (response.getStatus() == 302) {
+      return;
+    }
+    uploader.setFileSizeMax(MAX_FILE_SIZE);
+    uploader.setSizeMax(MAX_REQUEST_SIZE);
+    List<FileItem> fileItemsList=uploader.parseRequest(request);
+    Iterator<FileItem> fileItemsIterator=fileItemsList.iterator();
+    while (fileItemsIterator.hasNext()) {
+      final FileItem fileItem=fileItemsIterator.next();
+      try {
+        final GraphObject node=StructrApp.getInstance().get(uuid);
+        if (node == null) {
+          response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+          response.getOutputStream().write("File not found.\n".getBytes("UTF-8"));
+        }
+        if (node instanceof org.structr.web.entity.AbstractFile) {
+          final org.structr.dynamic.File file=(org.structr.dynamic.File)node;
+          FileHelper.writeToFile(file,fileItem.getInputStream());
+        }
+      }
+ catch (      IOException ex) {
+        logger.log(Level.WARNING,"Could not write to file",ex);
+      }
+    }
+    tx.success();
+  }
+ catch (  FrameworkException|IOException|FileUploadException t) {
+    t.printStackTrace();
+    logger.log(Level.SEVERE,"Exception while processing request",t);
+    UiAuthenticator.writeInternalServerError(response);
+  }
+}

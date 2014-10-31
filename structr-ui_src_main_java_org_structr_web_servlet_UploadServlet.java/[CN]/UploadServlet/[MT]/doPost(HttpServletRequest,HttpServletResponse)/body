@@ -1,8 +1,10 @@
 {
-  if (!ServletFileUpload.isMultipartContent(request)) {
-    throw new ServletException("Content type is not multipart/form-data");
-  }
   try (final Tx tx=StructrApp.getInstance().tx(false,false,false)){
+    if (!ServletFileUpload.isMultipartContent(request)) {
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+      response.getOutputStream().write("Request does not contain multipart content.\n".getBytes("UTF-8"));
+      return;
+    }
     final SecurityContext securityContext=getConfig().getAuthenticator().initializeAndExamineRequest(request,response);
     securityContext.setAccessMode(AccessMode.Frontend);
     request.setCharacterEncoding("UTF-8");
@@ -19,12 +21,12 @@
     while (fileItemsIterator.hasNext()) {
       final FileItem fileItem=fileItemsIterator.next();
       try {
-        String contentType=fileItem.getContentType();
+        final String contentType=fileItem.getContentType();
         boolean isImage=(contentType != null && contentType.startsWith("image"));
         boolean isVideo=(contentType != null && contentType.startsWith("video"));
-        Class type=isImage ? Image.class : isVideo ? VideoFile.class : org.structr.dynamic.File.class;
-        String name=fileItem.getName().replaceAll("\\\\","/");
-        org.structr.dynamic.File newFile=FileHelper.createFile(securityContext,IOUtils.toByteArray(fileItem.getInputStream()),contentType,type);
+        final Class type=isImage ? Image.class : isVideo ? VideoFile.class : org.structr.dynamic.File.class;
+        final String name=fileItem.getName().replaceAll("\\\\","/");
+        final org.structr.dynamic.File newFile=FileHelper.createFile(securityContext,IOUtils.toByteArray(fileItem.getInputStream()),contentType,type);
         newFile.setProperty(AbstractNode.name,PathHelper.getName(name));
         newFile.setProperty(AbstractNode.visibleToPublicUsers,true);
         newFile.setProperty(AbstractNode.visibleToAuthenticatedUsers,true);

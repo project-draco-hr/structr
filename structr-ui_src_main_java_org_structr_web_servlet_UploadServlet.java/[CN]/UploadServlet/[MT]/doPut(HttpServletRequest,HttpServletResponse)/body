@@ -10,7 +10,7 @@
     matcher.reset(uuid);
     if (!matcher.matches()) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-      response.getOutputStream().write("URL path doesn't end with UUID.\n".getBytes("UTF-8"));
+      response.getOutputStream().write("ERROR (400): URL path doesn't end with UUID.\n".getBytes("UTF-8"));
       return;
     }
     final SecurityContext securityContext=getConfig().getAuthenticator().initializeAndExamineRequest(request,response);
@@ -30,11 +30,18 @@
         final GraphObject node=StructrApp.getInstance().get(uuid);
         if (node == null) {
           response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-          response.getOutputStream().write("File not found.\n".getBytes("UTF-8"));
+          response.getOutputStream().write("ERROR (404): File not found.\n".getBytes("UTF-8"));
         }
         if (node instanceof org.structr.web.entity.AbstractFile) {
           final org.structr.dynamic.File file=(org.structr.dynamic.File)node;
-          FileHelper.writeToFile(file,fileItem.getInputStream());
+          if (securityContext.isAllowed(file,Permission.write)) {
+            FileHelper.writeToFile(file,fileItem.getInputStream());
+            file.increaseVersion();
+          }
+ else {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.getOutputStream().write("ERROR (403): Write access forbidden.\n".getBytes("UTF-8"));
+          }
         }
       }
  catch (      IOException ex) {

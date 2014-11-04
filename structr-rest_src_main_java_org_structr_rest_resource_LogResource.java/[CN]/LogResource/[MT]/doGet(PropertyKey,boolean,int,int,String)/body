@@ -5,8 +5,14 @@
     final String subjectId=request.getParameter(subjectProperty.jsonName());
     final String objectId=request.getParameter(objectProperty.jsonName());
     final String action=request.getParameter(actionProperty.jsonName());
+    final GraphObjectMap overviewMap=new GraphObjectMap();
+    final Map<String,Integer> actions=new LinkedHashMap<>();
     final List<Path> files=new LinkedList<>();
+    boolean overview=false;
     boolean inverse=false;
+    long beginTimestamp=0L;
+    long endTimestamp=0L;
+    int entryCount=0;
     if (StringUtils.isNotEmpty(subjectId) && StringUtils.isNotEmpty(objectId)) {
       final String fileName=mergeIds(subjectId,objectId);
       final String path=getDirectoryPath(fileName,8);
@@ -40,6 +46,13 @@
         ioex.printStackTrace();
       }
     }
+ else     if (StringUtils.isNotEmpty(action)) {
+      collectFiles(new File(filesPath + SUBJECTS).toPath(),files);
+    }
+ else {
+      collectFiles(new File(filesPath + SUBJECTS).toPath(),files);
+      overview=true;
+    }
     final List<GraphObject> entries=new LinkedList<>();
     final Predicate datePredicate=getTimestampPredicate();
     for (    final Path path : files) {
@@ -55,18 +68,37 @@
             final String part0=line.substring(0,pos0);
             final String part1=line.substring(pos0 + 1,pos1);
             final String part2=line.substring(pos1 + 1);
-            final Date date=new Date(Long.valueOf(part0));
+            final long timestamp=Long.valueOf(part0);
+            final Date date=new Date(timestamp);
             final String entryAction=part1;
             final String entryMessage=part2;
-            if (action == null || action.equals(entryAction)) {
-              final GraphObjectMap map=new GraphObjectMap();
-              map.put(subjectProperty,pathSubjectId);
-              map.put(objectProperty,pathObjectId);
-              map.put(actionProperty,entryAction);
-              map.put(timestampProperty,date);
-              map.put(messageProperty,entryMessage);
-              if (date == null || datePredicate.accept(map)) {
-                entries.add(map);
+            if (overview) {
+              Integer actionCount=actions.get(entryAction);
+              if (actionCount == null) {
+                actions.put(entryAction,1);
+              }
+ else {
+                actions.put(entryAction,actionCount + 1);
+              }
+              if (timestamp <= beginTimestamp) {
+                beginTimestamp=timestamp;
+              }
+              if (timestamp >= endTimestamp) {
+                endTimestamp=timestamp;
+              }
+              entryCount++;
+            }
+ else {
+              if (action == null || action.equals(entryAction)) {
+                final GraphObjectMap map=new GraphObjectMap();
+                map.put(subjectProperty,pathSubjectId);
+                map.put(objectProperty,pathObjectId);
+                map.put(actionProperty,entryAction);
+                map.put(timestampProperty,date);
+                map.put(messageProperty,entryMessage);
+                if (date == null || datePredicate.accept(map)) {
+                  entries.add(map);
+                }
               }
             }
           }
@@ -78,8 +110,17 @@
  catch (      IOException ioex) {
       }
     }
-    Collections.sort(entries,new GraphObjectComparator(timestampProperty,false));
-    return new Result(entries,entries.size(),true,true);
+    if (overview) {
+      overviewMap.put(actionsProperty,actions);
+      overviewMap.put(entryCountProperty,entryCount);
+      overviewMap.put(firstEntryProperty,new Date(beginTimestamp));
+      overviewMap.put(lastEntryProperty,new Date(endTimestamp));
+      return new Result(overviewMap,false);
+    }
+ else {
+      Collections.sort(entries,new GraphObjectComparator(timestampProperty,false));
+      return new Result(entries,entries.size(),true,false);
+    }
   }
   throw new FrameworkException(500,"No request object present, aborting.");
 }

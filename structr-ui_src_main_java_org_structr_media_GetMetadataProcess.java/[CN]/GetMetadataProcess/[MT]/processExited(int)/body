@@ -1,0 +1,21 @@
+{
+  if (exitCode == 0) {
+    final Map<String,String> map=new LinkedHashMap<>();
+    final Properties properties=new Properties();
+    try {
+      properties.load(new StringReader(outputStream()));
+      for (      final Entry<Object,Object> entry : properties.entrySet()) {
+        final String key=entry.getKey().toString();
+        final String value=entry.getValue().toString();
+        if (accept(key,value)) {
+          map.put(key,value);
+        }
+      }
+    }
+ catch (    IOException ioex) {
+      ioex.printStackTrace();
+    }
+    return map;
+  }
+  return null;
+}

@@ -1,8 +1,32 @@
 {
   final String xpathQuery=referenceNode.getProperty(DOMNode.xpathQuery);
-  if (xpathQuery == null || xpathQuery.isEmpty()) {
+  if (StringUtils.isBlank(xpathQuery)) {
     return null;
   }
-  document=((DOMNode)referenceNode).getOwnerDocument();
-  return getData(securityContext,renderContext,xpathQuery);
+  final Document document=((DOMNode)referenceNode).getOwnerDocument();
+  final XPathFactory factory=XPathFactory.newInstance();
+  final XPath xpath=factory.newXPath();
+  try {
+    Object result=xpath.evaluate(xpathQuery,document,XPathConstants.NODESET);
+    List<GraphObject> results=new LinkedList<>();
+    if (result instanceof NodeList) {
+      NodeList nodes=(NodeList)result;
+      int len=nodes.getLength();
+      for (int i=0; i < len; i++) {
+        Node node=nodes.item(i);
+        if (node instanceof GraphObject) {
+          results.add((GraphObject)node);
+        }
+      }
+    }
+ else     if (result instanceof GraphObject) {
+      results.add((GraphObject)result);
+    }
+    return results;
+  }
+ catch (  Throwable t) {
+    t.printStackTrace();
+    logger.log(Level.WARNING,"Unable to execute xpath query: {0}",t.getMessage());
+  }
+  return Collections.EMPTY_LIST;
 }

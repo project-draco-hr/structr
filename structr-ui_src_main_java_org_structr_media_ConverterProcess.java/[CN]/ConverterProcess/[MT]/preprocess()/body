@@ -1,0 +1,11 @@
+{
+  try (final Tx tx=StructrApp.getInstance(securityContext).tx()){
+    newFile=FileHelper.createFile(securityContext,new byte[0],null,VideoFile.class,outputFileName);
+    fileExtension=StringUtils.substringAfterLast(outputFileName,".");
+    outputFileName=newFile.getFileOnDisk().getAbsolutePath();
+    tx.success();
+  }
+ catch (  FrameworkException|IOException fex) {
+    fex.printStackTrace();
+  }
+}

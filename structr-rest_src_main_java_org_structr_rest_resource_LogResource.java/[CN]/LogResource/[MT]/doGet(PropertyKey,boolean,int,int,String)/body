@@ -1,0 +1,85 @@
+{
+  final HttpServletRequest request=securityContext.getRequest();
+  if (request != null) {
+    final String filesPath=Services.getInstance().getConfigurationValue(Services.FILES_PATH);
+    final String subjectId=request.getParameter(subjectProperty.jsonName());
+    final String objectId=request.getParameter(objectProperty.jsonName());
+    final String action=request.getParameter(actionProperty.jsonName());
+    final List<Path> files=new LinkedList<>();
+    boolean inverse=false;
+    if (StringUtils.isNotEmpty(subjectId) && StringUtils.isNotEmpty(objectId)) {
+      final String fileName=mergeIds(subjectId,objectId);
+      final String path=getDirectoryPath(fileName,8);
+      final Path filePath=new File(filesPath + SUBJECTS + path+ fileName).toPath();
+      if (Files.exists(filePath)) {
+        files.add(filePath);
+      }
+    }
+ else     if (StringUtils.isNotEmpty(subjectId) && StringUtils.isEmpty(objectId)) {
+      final String path=getDirectoryPath(subjectId,8);
+      final Path directoryPath=new File(filesPath + SUBJECTS + path).toPath();
+      try (final DirectoryStream<Path> stream=Files.newDirectoryStream(directoryPath,subjectId + "????????????????????????????????")){
+        for (        final Path p : stream) {
+          files.add(p);
+        }
+      }
+ catch (      IOException ioex) {
+        ioex.printStackTrace();
+      }
+    }
+ else     if (StringUtils.isEmpty(subjectId) && StringUtils.isNotEmpty(objectId)) {
+      inverse=true;
+      final String path=getDirectoryPath(objectId,8);
+      final Path directoryPath=new File(filesPath + OBJECTS + path).toPath();
+      try (final DirectoryStream<Path> stream=Files.newDirectoryStream(directoryPath,objectId + "????????????????????????????????")){
+        for (        final Path p : stream) {
+          files.add(p);
+        }
+      }
+ catch (      IOException ioex) {
+        ioex.printStackTrace();
+      }
+    }
+    final List<GraphObject> entries=new LinkedList<>();
+    final Predicate datePredicate=getTimestampPredicate();
+    for (    final Path path : files) {
+      try (final BufferedReader reader=Files.newBufferedReader(path,Charset.forName("utf-8"))){
+        final String fileName=path.getFileName().toString();
+        String pathSubjectId=inverse ? fileName.substring(33,64) : fileName.substring(0,32);
+        String pathObjectId=inverse ? fileName.substring(0,32) : fileName.substring(33,64);
+        String line=reader.readLine();
+        while (line != null) {
+          try {
+            final int pos0=line.indexOf(",");
+            final int pos1=line.indexOf(",",pos0 + 1);
+            final String part0=line.substring(0,pos0);
+            final String part1=line.substring(pos0 + 1,pos1);
+            final String part2=line.substring(pos1 + 1);
+            final Date date=new Date(Long.valueOf(part0));
+            final String entryAction=part1;
+            final String entryMessage=part2;
+            if (action == null || action.equals(entryAction)) {
+              final GraphObjectMap map=new GraphObjectMap();
+              map.put(subjectProperty,pathSubjectId);
+              map.put(objectProperty,pathObjectId);
+              map.put(actionProperty,entryAction);
+              map.put(timestampProperty,date);
+              map.put(messageProperty,entryMessage);
+              if (date == null || datePredicate.accept(map)) {
+                entries.add(map);
+              }
+            }
+          }
+ catch (          Throwable ignore) {
+          }
+          line=reader.readLine();
+        }
+      }
+ catch (      IOException ioex) {
+      }
+    }
+    Collections.sort(entries,new GraphObjectComparator(timestampProperty,false));
+    return new Result(entries,entries.size(),true,true);
+  }
+  throw new FrameworkException(500,"No request object present, aborting.");
+}

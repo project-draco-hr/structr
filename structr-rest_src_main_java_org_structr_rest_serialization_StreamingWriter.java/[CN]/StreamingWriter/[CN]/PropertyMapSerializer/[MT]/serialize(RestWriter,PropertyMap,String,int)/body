@@ -2,9 +2,10 @@
   writer.beginObject();
   if (depth <= outputNestingDepth) {
     for (    Map.Entry<PropertyKey,Object> entry : source.entrySet()) {
-      PropertyKey key=entry.getKey();
+      final PropertyKey key=entry.getKey();
+      final Object value=entry.getValue();
       writer.name(key.jsonName());
-      serializeProperty(writer,key,entry.getValue(),localPropertyView,depth + 1);
+      serializeProperty(writer,key,value,localPropertyView,depth + 1);
     }
   }
   writer.endObject();

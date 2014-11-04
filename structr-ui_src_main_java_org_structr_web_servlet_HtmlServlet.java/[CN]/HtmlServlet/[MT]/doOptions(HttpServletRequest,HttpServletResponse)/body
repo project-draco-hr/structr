@@ -1,0 +1,16 @@
+{
+  final Authenticator auth=config.getAuthenticator();
+  try {
+    try (final Tx tx=StructrApp.getInstance().tx()){
+      auth.initializeAndExamineRequest(request,response);
+      tx.success();
+    }
+     response.setContentLength(0);
+    response.setHeader("Allow","GET,HEAD,OPTIONS");
+  }
+ catch (  FrameworkException t) {
+    t.printStackTrace();
+    logger.log(Level.SEVERE,"Exception while processing request",t);
+    UiAuthenticator.writeInternalServerError(response);
+  }
+}

@@ -21,13 +21,13 @@
       if (response.getStatus() == 302) {
         return;
       }
-      Principal user=securityContext.getUser(false);
+      final Principal user=securityContext.getUser(false);
       if (user != null) {
         dontCache=true;
       }
       final RenderContext renderContext=RenderContext.getInstance(request,response,getEffectiveLocale(request));
       renderContext.setResourceProvider(config.getResourceProvider());
-      EditMode edit=renderContext.getEditMode(user);
+      final EditMode edit=renderContext.getEditMode(user);
       DOMNode rootElement=null;
       AbstractNode dataNode=null;
       String[] uriParts=PathHelper.getParts(path);
@@ -62,7 +62,7 @@
  else {
           dataNode=findNodeByUuid(securityContext,PathHelper.getName(path));
         }
-        if (dataNode != null) {
+        if (dataNode != null && !(dataNode instanceof Linkable)) {
           request.removeAttribute(POSSIBLE_ENTRY_POINTS);
           rootElement=findPage(securityContext,request,StringUtils.substringBeforeLast(path,PathHelper.PATH_SEP));
           renderContext.setDetailsDataObject(dataNode);

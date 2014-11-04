@@ -2,7 +2,7 @@
   SecurityContext securityContext=null;
   Authenticator authenticator=null;
   RestMethodResult result=null;
-  JsonInput propertySet=null;
+  IJsonInput jsonInput=null;
   Resource resource=null;
   try {
     request.setCharacterEncoding("UTF-8");
@@ -14,12 +14,15 @@
       tx.success();
     }
      final App app=StructrApp.getInstance(securityContext);
+    String input=IOUtils.toString(request.getReader());
+    if (StringUtils.isBlank(input)) {
+      input="{}";
+    }
     try (final Tx tx=app.tx()){
-      propertySet=gson.get().fromJson(request.getReader(),JsonInput.class);
+      jsonInput=gson.get().fromJson(input,IJsonInput.class);
       tx.success();
     }
      if (securityContext != null) {
-      Map<String,Object> properties=convertPropertySetToMap(propertySet);
       try (final Tx tx=app.tx()){
         resource=ResourceHelper.applyViewTransformation(request,securityContext,ResourceHelper.optimizeNestedResourceChain(ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,config.getDefaultIdProperty()),config.getDefaultIdProperty()),propertyView);
         authenticator.checkResourceAccess(request,resource.getResourceSignature(),propertyView.get(securityContext));
@@ -28,7 +31,7 @@
        boolean retry=true;
       while (retry) {
         try (final Tx tx=app.tx()){
-          result=resource.doPut(properties);
+          result=resource.doPut(convertPropertySetToMap(jsonInput.getJsonInputs().get(0)));
           tx.success();
           retry=false;
         }

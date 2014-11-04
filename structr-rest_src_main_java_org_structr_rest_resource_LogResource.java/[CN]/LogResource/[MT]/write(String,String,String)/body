@@ -1,0 +1,14 @@
+{
+  final String path=getDirectoryPath(fileName,8);
+  final Path directoryPath=new File(basePath + path).toPath();
+  final Path filePath=new File(basePath + path + fileName).toPath();
+  if (!Files.exists(filePath)) {
+    Files.createDirectories(directoryPath);
+  }
+  final FileOutputStream fos=new FileOutputStream(filePath.toString(),true);
+  final FileChannel channel=fos.getChannel();
+  channel.write(ByteBuffer.wrap(data.getBytes()));
+  fos.flush();
+  fos.close();
+  return filePath;
+}

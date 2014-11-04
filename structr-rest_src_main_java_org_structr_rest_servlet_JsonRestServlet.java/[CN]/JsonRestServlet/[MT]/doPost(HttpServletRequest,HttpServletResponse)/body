@@ -1,8 +1,8 @@
 {
+  final List<RestMethodResult> results=new LinkedList<>();
   SecurityContext securityContext=null;
   Authenticator authenticator=null;
-  RestMethodResult result=null;
-  JsonInput propertySet=null;
+  IJsonInput jsonInput=null;
   Resource resource=null;
   try {
     request.setCharacterEncoding("UTF-8");
@@ -14,12 +14,15 @@
       tx.success();
     }
      final App app=StructrApp.getInstance(securityContext);
+    String input=IOUtils.toString(request.getReader());
+    if (StringUtils.isBlank(input)) {
+      input="{}";
+    }
     try (final Tx tx=app.tx()){
-      propertySet=gson.get().fromJson(request.getReader(),JsonInput.class);
+      jsonInput=gson.get().fromJson(input,IJsonInput.class);
       tx.success();
     }
      if (securityContext != null) {
-      Map<String,Object> properties=convertPropertySetToMap(propertySet);
       try (final Tx tx=app.tx()){
         resource=ResourceHelper.applyViewTransformation(request,securityContext,ResourceHelper.optimizeNestedResourceChain(ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,config.getDefaultIdProperty()),config.getDefaultIdProperty()),propertyView);
         authenticator.checkResourceAccess(request,resource.getResourceSignature(),propertyView.get(securityContext));
@@ -29,7 +32,9 @@
       while (retry) {
         if (resource.createPostTransaction()) {
           try (final Tx tx=app.tx()){
-            result=resource.doPost(properties);
+            for (            JsonInput propertySet : jsonInput.getJsonInputs()) {
+              results.add(resource.doPost(convertPropertySetToMap(propertySet)));
+            }
             tx.success();
             retry=false;
           }
@@ -39,7 +44,9 @@
         }
  else {
           try {
-            result=resource.doPost(properties);
+            for (            JsonInput propertySet : jsonInput.getJsonInputs()) {
+              results.add(resource.doPost(convertPropertySetToMap(propertySet)));
+            }
             retry=false;
           }
  catch (          DeadlockDetectedException ddex) {
@@ -49,7 +56,18 @@
       }
       propertyView.set(securityContext,config.getDefaultPropertyView());
       try (final Tx tx=app.tx()){
-        if (result != null) {
+        if (!results.isEmpty()) {
+          final RestMethodResult result=results.get(0);
+          final int resultCount=results.size();
+          if (resultCount > 1) {
+            for (            final RestMethodResult r : results) {
+              final GraphObject objectCreated=r.getContent().get(0);
+              if (!result.getContent().contains(objectCreated)) {
+                result.addContent(objectCreated);
+              }
+            }
+            result.addHeader("Location",null);
+          }
           result.commitResponse(gson.get(),response);
         }
         tx.success();
@@ -57,8 +75,7 @@
      }
  else {
       try (final Tx tx=app.tx()){
-        result=new RestMethodResult(HttpServletResponse.SC_FORBIDDEN);
-        result.commitResponse(gson.get(),response);
+        new RestMethodResult(HttpServletResponse.SC_FORBIDDEN).commitResponse(gson.get(),response);
         tx.success();
       }
      }

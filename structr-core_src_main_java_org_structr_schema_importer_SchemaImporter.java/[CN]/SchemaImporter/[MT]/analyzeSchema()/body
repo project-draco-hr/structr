@@ -69,8 +69,13 @@
       infos.add(relInfo);
     }
     final List<RelationshipInfo> reducedRelationshipInfos=new LinkedList<>();
-    for (    final List<RelationshipInfo> infos : relTypeInfoMap.values()) {
-      reducedRelationshipInfos.addAll(reduceNodeTypes(infos,reducedTypeInfoMap));
+    if ("true".equals(Services.getInstance().getConfigurationValue("importer.inheritancedetection","true"))) {
+      for (      final List<RelationshipInfo> infos : relTypeInfoMap.values()) {
+        reducedRelationshipInfos.addAll(reduceNodeTypes(infos,reducedTypeInfoMap));
+      }
+    }
+ else {
+      reducedRelationshipInfos.addAll(relationships);
     }
     for (    final TypeInfo typeInfo : reducedTypeInfos) {
       final String type=typeInfo.getPrimaryType();

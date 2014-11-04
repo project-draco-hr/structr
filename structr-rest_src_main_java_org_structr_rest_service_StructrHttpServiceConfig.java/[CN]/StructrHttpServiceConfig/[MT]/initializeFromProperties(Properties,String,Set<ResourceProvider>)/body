@@ -13,7 +13,7 @@
   final String userAutoLoginValue=properties.getProperty(userAutoLoginKeyName);
   final String defaultPropertyKeyValue=properties.getProperty(defaultPropertyKeyName);
   final String outputDepthValue=properties.getProperty(nestingDepthKeyName);
-  if (resourceProviderValue == null) {
+  if (StringUtils.isBlank(resourceProviderValue)) {
     logger.log(Level.SEVERE,"Missing resource provider key {0}.resourceprovider in configuration file.",servletName);
   }
  else {
@@ -25,7 +25,7 @@
       logger.log(Level.SEVERE,"Unable to instantiate resource provider {0}: {1}",new Object[]{resourceProviderValue,t.getMessage()});
     }
   }
-  if (authenticatorValue == null) {
+  if (StringUtils.isBlank(authenticatorValue)) {
     logger.log(Level.SEVERE,"Missing authenticator key {0}.authenticator in configuration file.",servletName);
   }
  else {
@@ -34,22 +34,22 @@
       logger.log(Level.SEVERE,"Unable	 to instantiate authenticator {0}",authenticatorValue);
     }
   }
-  if (userClassValue != null) {
+  if (StringUtils.isNotBlank(userClassValue)) {
     userClass=loadClass(userClassValue);
     if (userClass == null) {
       logger.log(Level.SEVERE,"Unable to instantiate user class for authenticator {0}",userClassValue);
     }
   }
-  if (userAutoCreateValue != null) {
+  if (StringUtils.isNotBlank(userAutoCreateValue)) {
     userAutoCreate=HttpService.parseBoolean(userAutoCreateValue,false);
   }
-  if (userAutoLoginValue != null) {
+  if (StringUtils.isNotBlank(userAutoLoginValue)) {
     userAutoLogin=HttpService.parseBoolean(userAutoLoginValue,false);
   }
-  if (defaultPropertyKeyValue != null) {
+  if (StringUtils.isNotBlank(defaultPropertyKeyValue)) {
     this.defaultPropertyView=defaultPropertyKeyValue;
   }
-  if (outputDepthValue != null) {
+  if (StringUtils.isNotBlank(outputDepthValue)) {
     this.outputNestingDepth=HttpService.parseInt(outputDepthValue,3);
   }
 }

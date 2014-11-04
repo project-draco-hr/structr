@@ -1,0 +1,37 @@
+{
+  if (keyExpression == null) {
+    return "Error: cache(): key expression may not be empty.";
+  }
+  final Object keyObject=keyExpression.evaluate(securityContext,ctx,entity);
+  if (keyObject == null) {
+    return "Error: cache(): key may not be empty.";
+  }
+  final String key=keyObject.toString();
+  if (StringUtils.isBlank(key)) {
+    return "Error: cache(): key may not be empty.";
+  }
+  if (timeoutExpression == null) {
+    return "Error: cache(): timeout expression may not be empty.";
+  }
+  final Object timeoutValue=timeoutExpression.evaluate(securityContext,ctx,entity);
+  if (timeoutValue == null || !(timeoutValue instanceof Number)) {
+    return "Error: cache(): timeout must be non-empty and a number.";
+  }
+  if (valueExpression == null) {
+    return "Error: cache(): value expression may not be empty.";
+  }
+  final long timeout=((Number)timeoutValue).longValue();
+  final Services services=Services.getInstance();
+  CachedValue cachedValue=(CachedValue)services.getAttribute(key);
+  if (cachedValue == null) {
+    cachedValue=new CachedValue(timeout);
+    services.setAttribute(key,cachedValue);
+  }
+ else {
+    cachedValue.setTimeoutSeconds(timeout);
+  }
+  if (cachedValue.isExpired()) {
+    cachedValue.refresh(valueExpression.evaluate(securityContext,ctx,entity));
+  }
+  return cachedValue.getValue();
+}

@@ -1,6 +1,13 @@
 {
+  final SecurityContext securityContext=SecurityContext.getSuperUserInstance();
   final NodeDataContainer receivedNodeData=(NodeDataContainer)receivedData;
-  final PropertyMap properties=PropertyMap.databaseTypeToJavaType(SecurityContext.getSuperUserInstance(),receivedNodeData.getType(),receivedNodeData.getProperties());
+  final String typeName=receivedNodeData.getType();
+  final Class nodeType=config.getNodeEntityClass(typeName);
+  if (nodeType == null) {
+    logger.log(Level.SEVERE,"Unknown entity type {0}",typeName);
+    return null;
+  }
+  final PropertyMap properties=PropertyMap.databaseTypeToJavaType(securityContext,nodeType,receivedNodeData.getProperties());
   final String uuid=receivedNodeData.getSourceNodeId();
   NodeInterface newOrExistingNode=null;
   final NodeInterface existingCandidate=app.nodeQuery().and(GraphObject.id,uuid).includeDeletedAndHidden().getFirst();
@@ -9,7 +16,7 @@
     ((Syncable)newOrExistingNode).updateFromPropertyMap(properties);
   }
  else {
-    newOrExistingNode=app.create(receivedNodeData.getType(),properties);
+    newOrExistingNode=app.create(nodeType,properties);
   }
   idMap.put(receivedNodeData.getSourceNodeId(),newOrExistingNode.getUuid());
   return newOrExistingNode;

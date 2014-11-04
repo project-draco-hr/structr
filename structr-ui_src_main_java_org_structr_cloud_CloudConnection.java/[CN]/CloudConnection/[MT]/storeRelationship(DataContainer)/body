@@ -12,10 +12,11 @@
     targetEndNodeId=sourceEndNodeId;
   }
   if (targetStartNodeId != null && targetEndNodeId != null) {
+    final SecurityContext securityContext=SecurityContext.getSuperUserInstance();
     final NodeInterface targetStartNode=(NodeInterface)app.get(targetStartNodeId);
     final NodeInterface targetEndNode=(NodeInterface)app.get(targetEndNodeId);
-    final Class relType=receivedRelationshipData.getType();
-    final SecurityContext securityContext=SecurityContext.getSuperUserInstance();
+    final String typeName=receivedRelationshipData.getType();
+    final Class relType=config.getRelationshipEntityClass(typeName);
     if (targetStartNode != null && targetEndNode != null) {
       final RelationshipInterface existingCandidate=app.relationshipQuery().and(GraphObject.id,uuid).includeDeletedAndHidden().getFirst();
       final PropertyMap properties=PropertyMap.databaseTypeToJavaType(securityContext,relType,receivedRelationshipData.getProperties());

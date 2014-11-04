@@ -1,0 +1,23 @@
+{
+  final Set<Element> elementsToUnwrap=new LinkedHashSet<>();
+  element.traverse(new NodeVisitor(){
+    @Override public void head(    Node node,    int depth){
+      if (node instanceof Element) {
+        final Element element=(Element)node;
+        if (element.isBlock()) {
+          final Set<String> classes=element.classNames();
+          removeEmpty(classes);
+          if (classes.isEmpty()) {
+            elementsToUnwrap.add(element);
+          }
+        }
+      }
+    }
+    @Override public void tail(    Node node,    int depth){
+    }
+  }
+);
+  for (  final Element unwrap : elementsToUnwrap) {
+    unwrap.unwrap();
+  }
+}

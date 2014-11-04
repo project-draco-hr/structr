@@ -1,17 +1,27 @@
 {
   logger.log(Level.FINE,"Creating service ",serviceClass.getName());
   Service service=(Service)serviceClass.newInstance();
-  service.initialize(getCurrentConfig());
-  if (service instanceof RunnableService) {
-    RunnableService runnableService=(RunnableService)service;
-    if (runnableService.runOnStartup()) {
-      logger.log(Level.FINER,"Starting RunnableService instance ",serviceClass.getName());
-      runnableService.startService();
+  try {
+    service.initialize(getCurrentConfig());
+    if (service instanceof RunnableService) {
+      RunnableService runnableService=(RunnableService)service;
+      if (runnableService.runOnStartup()) {
+        logger.log(Level.FINER,"Starting RunnableService instance ",serviceClass.getName());
+        runnableService.startService();
+        serviceCache.put(serviceClass,service);
+      }
+    }
+ else     if (service instanceof SingletonService) {
       serviceCache.put(serviceClass,service);
     }
   }
- else   if (service instanceof SingletonService) {
-    serviceCache.put(serviceClass,service);
+ catch (  Throwable t) {
+    t.printStackTrace();
+    if (service.isVital()) {
+      logger.log(Level.SEVERE,"Vital service {0} failed to start with {1}, aborting.",new Object[]{service.getClass().getSimpleName(),t.getMessage()});
+      System.err.println("Vital service " + service.getClass().getSimpleName() + " failed to start with "+ t.getMessage()+ ", aborting.");
+      System.exit(1);
+    }
   }
   return service;
 }

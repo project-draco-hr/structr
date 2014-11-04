@@ -1,0 +1,25 @@
+{
+  try {
+    preprocess();
+    final StringBuilder commandLine=getCommandLine();
+    if (commandLine != null) {
+      cmd=commandLine.toString();
+      String[] args={"/bin/sh","-c",cmd};
+      logger.log(Level.INFO,"Executing {0}",cmd);
+      Process proc=Runtime.getRuntime().exec(args);
+      stdOut=new StreamReader(proc.getInputStream(),running);
+      stdErr=new StreamReader(proc.getErrorStream(),running);
+      stdOut.start();
+      stdErr.start();
+      exitCode=proc.waitFor();
+    }
+  }
+ catch (  IOException|InterruptedException ex) {
+    ex.printStackTrace();
+  }
+  running.set(false);
+  if (exitCode != 0) {
+    logger.log(Level.WARNING,"Process {0} exited with exit code {1}, error stream:{2}\n",new Object[]{cmd,exitCode,stdErr.getBuffer()});
+  }
+  return processExited(exitCode);
+}

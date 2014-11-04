@@ -51,6 +51,14 @@ if (validUser && resourceAccess.hasFlag(AUTH_USER_OPTIONS)) {
 return;
 }
 break;
+case HEAD:
+if (!validUser && resourceAccess.hasFlag(NON_AUTH_USER_HEAD)) {
+return;
+}
+if (validUser && resourceAccess.hasFlag(AUTH_USER_HEAD)) {
+return;
+}
+break;
 }
 }
 throw new UnauthorizedException("Forbidden");

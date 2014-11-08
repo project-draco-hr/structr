@@ -13,11 +13,11 @@
   for (long current=start; current <= endTimestamp; current+=interval) {
     final Map<Long,Integer> counts=countMap.subMap(current,true,current + interval,false);
     final String formattedDate=format.format(current);
-    int sum=0;
+    long sum=0;
     for (    final Integer count : counts.values()) {
       sum+=count;
     }
-    result.put(new IntProperty(formattedDate),sum);
+    result.put(new LongProperty(Long.toString(current)),sum);
   }
   return new Result(result,false);
 }

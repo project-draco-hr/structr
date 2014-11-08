@@ -1,0 +1,19 @@
+{
+  final long max=TimeUnit.DAYS.toMillis(365);
+  final long step=TimeUnit.SECONDS.toMillis(60);
+  try {
+    final SimpleDateFormat format=new SimpleDateFormat(dateFormat);
+    final long initial=format.parse(format.format(3600)).getTime();
+    for (long i=initial; i < max; i+=step) {
+      final long current=format.parse(format.format(i)).getTime();
+      if (initial != current) {
+        return i - initial;
+      }
+    }
+    return max;
+  }
+ catch (  ParseException pex) {
+    pex.printStackTrace();
+  }
+  return max;
+}

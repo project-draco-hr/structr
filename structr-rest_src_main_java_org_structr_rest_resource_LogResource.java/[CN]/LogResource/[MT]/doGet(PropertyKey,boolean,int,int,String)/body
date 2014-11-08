@@ -8,6 +8,7 @@
     final GraphObjectMap overviewMap=new GraphObjectMap();
     final Map<String,Integer> actions=new LinkedHashMap<>();
     final List<Path> files=new LinkedList<>();
+    final String aggregate=request.getParameter("aggregate");
     boolean overview=false;
     boolean inverse=false;
     long beginTimestamp=Long.MAX_VALUE;
@@ -118,6 +119,10 @@
       overviewMap.put(firstEntryProperty,new Date(beginTimestamp));
       overviewMap.put(lastEntryProperty,new Date(endTimestamp));
       return new Result(overviewMap,false);
+    }
+ else     if (StringUtils.isNotBlank(aggregate) && entries.size() > 1) {
+      Collections.sort(entries,new GraphObjectComparator(timestampProperty,false));
+      return aggregate(entries,aggregate);
     }
  else {
       Collections.sort(entries,new GraphObjectComparator(timestampProperty,false));

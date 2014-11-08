@@ -55,7 +55,9 @@
       overview=true;
     }
     final List<GraphObject> entries=new LinkedList<>();
-    final Predicate datePredicate=getTimestampPredicate();
+    final Query query=getTimestampQuery();
+    final Range<Long> range=getRangeFromQuery(query);
+    final Predicate datePredicate=query.toPredicate();
     for (    final Path path : files) {
       try (final BufferedReader reader=Files.newBufferedReader(path,Charset.forName("utf-8"))){
         final String fileName=path.getFileName().toString();
@@ -73,6 +75,12 @@
             final Date date=new Date(timestamp);
             final String entryAction=part1;
             final String entryMessage=part2;
+            if (timestamp <= beginTimestamp) {
+              beginTimestamp=timestamp;
+            }
+            if (timestamp >= endTimestamp) {
+              endTimestamp=timestamp;
+            }
             if (overview) {
               Integer actionCount=actions.get(entryAction);
               if (actionCount == null) {
@@ -80,12 +88,6 @@
               }
  else {
                 actions.put(entryAction,actionCount + 1);
-              }
-              if (timestamp <= beginTimestamp) {
-                beginTimestamp=timestamp;
-              }
-              if (timestamp >= endTimestamp) {
-                endTimestamp=timestamp;
               }
               entryCount++;
             }
@@ -122,7 +124,9 @@
     }
  else     if (StringUtils.isNotBlank(aggregate) && entries.size() > 1) {
       Collections.sort(entries,new GraphObjectComparator(timestampProperty,false));
-      return aggregate(entries,aggregate);
+      final long intervalStart=range != null ? range.start : beginTimestamp;
+      final long intervalEnd=range != null ? range.end : endTimestamp;
+      return aggregate(entries,aggregate,intervalStart,intervalEnd);
     }
  else {
       Collections.sort(entries,new GraphObjectComparator(timestampProperty,false));

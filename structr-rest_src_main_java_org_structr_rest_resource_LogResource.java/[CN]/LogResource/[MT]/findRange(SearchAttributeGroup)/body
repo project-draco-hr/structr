@@ -1,0 +1,14 @@
+{
+  for (  final SearchAttribute attr : group.getSearchAttributes()) {
+    if (attr instanceof RangeSearchAttribute) {
+      return (RangeSearchAttribute)attr;
+    }
+    if (attr instanceof SearchAttributeGroup) {
+      final RangeSearchAttribute result=findRange((SearchAttributeGroup)attr);
+      if (result != null) {
+        return result;
+      }
+    }
+  }
+  return null;
+}

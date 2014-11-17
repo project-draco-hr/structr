@@ -61,8 +61,8 @@
     for (    final Path path : files) {
       try (final BufferedReader reader=Files.newBufferedReader(path,Charset.forName("utf-8"))){
         final String fileName=path.getFileName().toString();
-        String pathSubjectId=inverse ? fileName.substring(33,64) : fileName.substring(0,32);
-        String pathObjectId=inverse ? fileName.substring(0,32) : fileName.substring(33,64);
+        String pathSubjectId=inverse ? fileName.substring(32,64) : fileName.substring(0,32);
+        String pathObjectId=inverse ? fileName.substring(0,32) : fileName.substring(32,64);
         String line=reader.readLine();
         while (line != null) {
           try {
@@ -123,10 +123,11 @@
       return new Result(overviewMap,false);
     }
  else     if (StringUtils.isNotBlank(aggregate)) {
+      final Map<String,Pattern> aggregationPatterns=getAggregationPatterns(request);
       Collections.sort(entries,new GraphObjectComparator(timestampProperty,false));
       final long intervalStart=range != null ? range.start : beginTimestamp;
       final long intervalEnd=range != null ? range.end : endTimestamp;
-      return aggregate(entries,aggregate,intervalStart,intervalEnd);
+      return aggregate(entries,aggregate,intervalStart,intervalEnd,aggregationPatterns);
     }
  else {
       Collections.sort(entries,new GraphObjectComparator(timestampProperty,false));

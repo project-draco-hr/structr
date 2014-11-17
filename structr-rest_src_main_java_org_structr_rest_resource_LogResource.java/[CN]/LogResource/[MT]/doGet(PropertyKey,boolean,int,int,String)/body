@@ -9,6 +9,7 @@
     final Map<String,Integer> actions=new LinkedHashMap<>();
     final List<Path> files=new LinkedList<>();
     final String aggregate=request.getParameter("aggregate");
+    final String histogram=request.getParameter("histogram");
     boolean overview=false;
     boolean inverse=false;
     long beginTimestamp=Long.MAX_VALUE;
@@ -121,6 +122,15 @@
       overviewMap.put(firstEntryProperty,new Date(beginTimestamp));
       overviewMap.put(lastEntryProperty,new Date(endTimestamp));
       return new Result(overviewMap,false);
+    }
+ else     if (StringUtils.isNotBlank(histogram)) {
+      if (StringUtils.isBlank(aggregate)) {
+        throw new FrameworkException(400,"To use the histogram function, please supply an aggregation pattern.");
+      }
+      Collections.sort(entries,new GraphObjectComparator(timestampProperty,false));
+      final long intervalStart=range != null ? range.start : beginTimestamp;
+      final long intervalEnd=range != null ? range.end : endTimestamp;
+      return histogram(entries,aggregate,intervalStart,intervalEnd,histogram);
     }
  else     if (StringUtils.isNotBlank(aggregate)) {
       final Map<String,Pattern> aggregationPatterns=getAggregationPatterns(request);

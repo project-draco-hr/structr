@@ -2,7 +2,7 @@
   final GraphObjectMap result=new GraphObjectMap();
   final long interval=findInterval(dateFormat);
   final long start=alignDateOnFormat(dateFormat,startTimestamp);
-  final TreeMap<Long,GraphObject> countMap=toAggregatedCountMap(entries,aggregationPatterns);
+  final TreeMap<Long,GraphObject> countMap=toHistogramCountMap(entries,capturePattern);
   final Set<IntProperty> countProperties=getCountProperties(countMap);
   for (long current=start; current <= endTimestamp; current+=interval) {
     final Map<Long,GraphObject> counts=countMap.subMap(current,true,current + interval,false);

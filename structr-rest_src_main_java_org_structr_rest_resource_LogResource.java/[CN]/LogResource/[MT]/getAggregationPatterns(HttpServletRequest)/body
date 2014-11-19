@@ -1,0 +1,11 @@
+{
+  final Map<String,Pattern> patterns=new LinkedHashMap<>();
+  for (  final Entry<String,String[]> entry : request.getParameterMap().entrySet()) {
+    final String key=entry.getKey();
+    final String[] value=entry.getValue();
+    if (value.length > 0 && !ReservedRequestParameters.contains(key)) {
+      patterns.put(key,Pattern.compile(value[0]));
+    }
+  }
+  return patterns;
+}

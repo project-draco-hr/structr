@@ -1,0 +1,34 @@
+{
+  final TreeMap<Long,GraphObject> countMap=new TreeMap<>();
+  for (  final GraphObject entry : entries) {
+    final String message=entry.getProperty(messageProperty);
+    final long timestamp=entry.getProperty(timestampProperty).getTime();
+    GraphObject obj=countMap.get(timestamp);
+    if (obj == null) {
+      obj=new GraphObjectMap();
+    }
+    Integer count=obj.getProperty(totalProperty);
+    if (count == null) {
+      count=1;
+    }
+ else {
+      count=count + 1;
+    }
+    obj.setProperty(totalProperty,count);
+    for (    final Entry<String,Pattern> patternEntry : aggregationPatterns.entrySet()) {
+      if (patternEntry.getValue().matcher(message).matches()) {
+        final IntProperty patternKeyProperty=new IntProperty(patternEntry.getKey());
+        Integer c=obj.getProperty(patternKeyProperty);
+        if (c == null) {
+          c=1;
+        }
+ else {
+          c=c + 1;
+        }
+        obj.setProperty(patternKeyProperty,c);
+      }
+    }
+    countMap.put(timestamp,obj);
+  }
+  return countMap;
+}

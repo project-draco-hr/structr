@@ -3,10 +3,13 @@
     currentElement=currentElement.block("li");
   }
   if ("id".equals(lastName)) {
-    currentElement.inline("a").css("id").attr(new Href(restPath + "/" + value)).text(value);
+    currentElement.inline("a").css("id").attr(new Href(restPath + "/" + value)).text("\"",value,"\"");
   }
  else {
-    currentElement.inline("span").css("string").text(value);
+    value=value.replaceAll("\\\\","\\\\\\\\");
+    value=value.replaceAll("\"","\\\\\\\"");
+    value=StringUtils.replaceEach(value,new String[]{"&","<",">"},new String[]{"&amp;","&lt;","&gt;"});
+    currentElement.inline("span").css("string").text("\"",value,"\"");
   }
   currentElement=currentElement.parent();
   hasName=false;

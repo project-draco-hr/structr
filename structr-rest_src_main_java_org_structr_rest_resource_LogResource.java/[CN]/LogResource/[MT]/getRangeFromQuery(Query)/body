@@ -1,0 +1,12 @@
+{
+  final SearchAttributeGroup rootGroup=query.getRootAttributeGroup();
+  final RangeSearchAttribute range=findRange(rootGroup);
+  if (range != null) {
+    final Object start=range.getRangeStart();
+    final Object end=range.getRangeEnd();
+    if (start instanceof Date && end instanceof Date) {
+      return new Range<>(((Date)start).getTime(),((Date)end).getTime());
+    }
+  }
+  return null;
+}

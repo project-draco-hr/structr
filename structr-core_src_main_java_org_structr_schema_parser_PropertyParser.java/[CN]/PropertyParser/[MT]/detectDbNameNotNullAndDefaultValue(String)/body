@@ -1,0 +1,21 @@
+{
+  final PropertyParameters params=new PropertyParameters(rawSource);
+  if (rawSource.contains("|")) {
+    params.dbName=rawSource.substring(0,rawSource.indexOf("|"));
+    params.source=rawSource.substring(rawSource.indexOf("|") + 1);
+  }
+  if (params.source.startsWith("+")) {
+    params.source=params.source.substring(1);
+    params.notNull=true;
+  }
+  if (StringUtils.isNotBlank(params.source)) {
+    params.format=StringUtils.substringBetween(params.source,"(",")");
+    params.source=params.source.replaceFirst("\\(.*\\)","");
+  }
+  if (params.source.contains(":")) {
+    int firstIndex=params.source.indexOf(":");
+    params.defaultValue=params.source.substring(firstIndex + 1);
+    params.source=params.source.substring(0,firstIndex);
+  }
+  return params;
+}

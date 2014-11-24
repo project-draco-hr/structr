@@ -1,0 +1,11 @@
+{
+  Process p=Runtime.getRuntime().exec(cmd,null,folder);
+  BufferedReader bri=new BufferedReader(new InputStreamReader(p.getInputStream()));
+  BufferedReader bre=new BufferedReader(new InputStreamReader(p.getErrorStream()));
+  String s1, s2=null;
+  while (null != (s1=bri.readLine()) || null != (s2=bre.readLine())) {
+    if (s1 != null)     System.out.println(s1);
+    if (s2 != null)     System.err.println(s2);
+  }
+  p.waitFor();
+}

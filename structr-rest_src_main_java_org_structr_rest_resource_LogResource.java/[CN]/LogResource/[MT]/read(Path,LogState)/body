@@ -1,0 +1,52 @@
+{
+  try (final BufferedReader reader=Files.newBufferedReader(path,Charset.forName("utf-8"))){
+    if (!state.includeFile(path.toFile())) {
+      return;
+    }
+    final String fileName=path.getFileName().toString();
+    String pathSubjectId=state.inverse() ? fileName.substring(32,64) : fileName.substring(0,32);
+    String pathObjectId=state.inverse() ? fileName.substring(0,32) : fileName.substring(32,64);
+    String line=reader.readLine();
+    while (line != null) {
+      try {
+        final int pos0=line.indexOf(",");
+        final int pos1=line.indexOf(",",pos0 + 1);
+        final String part0=line.substring(0,pos0);
+        final String part1=line.substring(pos0 + 1,pos1);
+        final String part2=line.substring(pos1 + 1);
+        final long timestamp=Long.valueOf(part0);
+        final String entryAction=part1;
+        final String entryMessage=part2;
+        if (timestamp <= state.beginTimestamp()) {
+          state.beginTimestamp(timestamp);
+        }
+        if (timestamp >= state.endTimestamp()) {
+          state.endTimestamp(timestamp);
+        }
+        if (state.overview()) {
+          state.countAction(entryAction);
+        }
+ else {
+          if (state.isRequestedActionOrNull(entryAction)) {
+            final Map<String,Object> map=new LinkedHashMap<>();
+            map.put(subjectProperty.jsonName(),pathSubjectId);
+            map.put(objectProperty.jsonName(),pathObjectId);
+            map.put(actionProperty.jsonName(),entryAction);
+            map.put(timestampProperty.jsonName(),timestamp);
+            map.put(messageProperty.jsonName(),entryMessage);
+            if (state.isInRangeOrNull(timestamp)) {
+              state.addEntry(map);
+            }
+          }
+        }
+      }
+ catch (      Throwable t) {
+        t.printStackTrace();
+      }
+      line=reader.readLine();
+    }
+  }
+ catch (  IOException ioex) {
+    ioex.printStackTrace();
+  }
+}

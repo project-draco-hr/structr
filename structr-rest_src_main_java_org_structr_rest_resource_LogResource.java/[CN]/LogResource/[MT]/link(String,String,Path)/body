@@ -1,11 +1,15 @@
 {
-  final String path=getDirectoryPath(fileName,8);
-  final Path directoryPath=new File(basePath + path).toPath();
-  final Path filePath=new File(basePath + path + fileName).toPath();
-  if (Files.notExists(filePath)) {
-    Files.createDirectories(directoryPath);
+  try {
+    final String path=getDirectoryPath(fileName,8);
+    final Path directoryPath=new File(basePath + path).toPath();
+    final Path filePath=new File(basePath + path + fileName).toPath();
+    if (Files.notExists(filePath)) {
+      Files.createDirectories(directoryPath);
+    }
+    if (Files.notExists(filePath)) {
+      Files.createLink(filePath,existing);
+    }
   }
-  if (Files.notExists(filePath)) {
-    Files.createLink(filePath,existing);
+ catch (  IOException ignore) {
   }
 }

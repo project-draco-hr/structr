@@ -26,8 +26,8 @@
     String sortOrder=request.getParameter(REQUEST_PARAMETER_SORT_ORDER);
     String sortKeyName=request.getParameter(REQUEST_PARAMETER_SORT_KEY);
     boolean sortDescending=(sortOrder != null && "desc".equals(sortOrder.toLowerCase()));
-    int pageSize=HttpService.parseInt(pageSizeParameter,NodeFactory.DEFAULT_PAGE_SIZE);
-    int page=HttpService.parseInt(pageParameter,NodeFactory.DEFAULT_PAGE);
+    int pageSize=Services.parseInt(pageSizeParameter,NodeFactory.DEFAULT_PAGE_SIZE);
+    int page=Services.parseInt(pageParameter,NodeFactory.DEFAULT_PAGE);
     String baseUrl=request.getRequestURI();
     PropertyKey sortKey=null;
     if (sortKeyName != null) {
@@ -35,7 +35,7 @@
       if (type == null) {
         type=AbstractNode.class;
       }
-      sortKey=StructrApp.getConfiguration().getPropertyKeyForDatabaseName(type,sortKeyName);
+      sortKey=StructrApp.getConfiguration().getPropertyKeyForDatabaseName(type,sortKeyName,false);
     }
     boolean retry=true;
     while (retry) {

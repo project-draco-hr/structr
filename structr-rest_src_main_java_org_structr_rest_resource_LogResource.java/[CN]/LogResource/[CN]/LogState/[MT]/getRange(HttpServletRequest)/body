@@ -1,0 +1,24 @@
+{
+  final String value=request.getParameter(timestampProperty.jsonName());
+  if (value != null) {
+    if (StringUtils.startsWith(value,"[") && StringUtils.endsWith(value,"]")) {
+      Matcher matcher=RangeQueryPattern.matcher(value);
+      if (matcher.matches()) {
+        if (matcher.groupCount() == 2) {
+          final SimpleDateFormat parser=new SimpleDateFormat(ISO8601DateProperty.PATTERN);
+          String rangeStart=matcher.group(1);
+          String rangeEnd=matcher.group(2);
+          try {
+            final Date startDate=parser.parse(rangeStart);
+            final Date endDate=parser.parse(rangeEnd);
+            return new Range(startDate.getTime(),endDate.getTime());
+          }
+ catch (          ParseException pex) {
+            pex.printStackTrace();
+          }
+        }
+      }
+    }
+  }
+  return null;
+}

@@ -4,6 +4,10 @@
       return;
     }
     final String fileName=path.getFileName().toString();
+    if (fileName.length() != 64) {
+      logger.log(Level.WARNING,"Invalid log file name {0}, ignoring.",path.toAbsolutePath().getFileName());
+      return;
+    }
     String pathSubjectId=state.inverse() ? fileName.substring(32,64) : fileName.substring(0,32);
     String pathObjectId=state.inverse() ? fileName.substring(0,32) : fileName.substring(32,64);
     String line=reader.readLine();

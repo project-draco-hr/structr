@@ -2,6 +2,7 @@
   boolean isAuthenticated=false;
   try (final Tx tx=StructrApp.getInstance(securityContext).tx()){
     isAuthenticated=isAuthenticated();
+    tx.success();
   }
  catch (  FrameworkException t) {
     t.printStackTrace();
@@ -15,7 +16,7 @@
     message.setMessage("User has no backend access.");
     message.setCode(403);
   }
-  try {
+  try (final Tx tx=StructrApp.getInstance(securityContext).tx()){
     String msg=gson.toJson(message,WebSocketMessage.class);
     logger.log(Level.FINE,"################### Private message: {0}",message.getCommand());
     logger.log(Level.FINEST,"############################################################ SENDING \n{0}",msg);
@@ -23,6 +24,7 @@
       securityContext.clearCustomView();
     }
     session.getRemote().sendString(msg);
+    tx.success();
   }
  catch (  Throwable t) {
     logger.log(Level.WARNING,"Unable to send websocket message to remote client");

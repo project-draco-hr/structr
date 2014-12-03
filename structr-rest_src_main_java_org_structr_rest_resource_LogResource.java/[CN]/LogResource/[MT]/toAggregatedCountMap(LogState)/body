@@ -1,0 +1,34 @@
+{
+  final TreeMap<Long,Map<String,Object>> countMap=new TreeMap<>();
+  for (  final Map<String,Object> entry : state.entries()) {
+    final String message=(String)entry.get(messageProperty.jsonName());
+    final long timestamp=(Long)entry.get(timestampProperty.jsonName());
+    Map<String,Object> obj=countMap.get(timestamp);
+    if (obj == null) {
+      obj=new LinkedHashMap<>();
+    }
+    Integer count=(Integer)obj.get(totalProperty.jsonName());
+    if (count == null) {
+      count=1;
+    }
+ else {
+      count=count + 1;
+    }
+    obj.put(totalProperty.jsonName(),count);
+    for (    final Entry<String,Pattern> patternEntry : state.aggregationPatterns().entrySet()) {
+      if (patternEntry.getValue().matcher(message).matches()) {
+        final String key=patternEntry.getKey();
+        Integer c=(Integer)obj.get(key);
+        if (c == null) {
+          c=1;
+        }
+ else {
+          c=c + 1;
+        }
+        obj.put(key,c);
+      }
+    }
+    countMap.put(timestamp,obj);
+  }
+  return countMap;
+}

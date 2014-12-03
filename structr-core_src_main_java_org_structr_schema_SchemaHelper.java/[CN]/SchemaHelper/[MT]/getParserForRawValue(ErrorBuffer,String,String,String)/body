@@ -1,0 +1,16 @@
+{
+  final PropertyParameters params=PropertyParser.detectDbNameNotNullAndDefaultValue(source);
+  for (  final Map.Entry<Type,Class<? extends PropertyParser>> entry : parserMap.entrySet()) {
+    if (params.source.startsWith(entry.getKey().name())) {
+      try {
+        final PropertyParser parser=entry.getValue().getConstructor(ErrorBuffer.class,String.class,String.class,PropertyParameters.class).newInstance(errorBuffer,className,propertyName,params);
+        return parser;
+      }
+ catch (      Throwable t) {
+        t.printStackTrace();
+      }
+    }
+  }
+  errorBuffer.add(SchemaNode.class.getSimpleName(),new InvalidPropertySchemaToken(source,"invalid_property_definition","Unknow value type " + source + ", options are "+ Arrays.asList(Type.values())+ "."));
+  throw new FrameworkException(422,errorBuffer);
+}

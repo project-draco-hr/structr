@@ -1,0 +1,23 @@
+{
+  StringBuilder b=new StringBuilder();
+  int[] eatLength=new int[1];
+  while (s.length() > 0) {
+    char c=eatPercentage(s,eatLength);
+    if (eatLength[0] <= 0) {
+      c=eatAmpersand(s,eatLength);
+      if (eatLength[0] <= 0) {
+        c=eatBackslash(s,eatLength);
+        if (eatLength[0] <= 0) {
+          c=eatUtf8(s,eatLength);
+          if (eatLength[0] <= 0) {
+            c=s.charAt(0);
+            eatLength[0]=1;
+          }
+        }
+      }
+    }
+    b.append(c);
+    s=s.substring(eatLength[0]);
+  }
+  return (b.toString());
+}

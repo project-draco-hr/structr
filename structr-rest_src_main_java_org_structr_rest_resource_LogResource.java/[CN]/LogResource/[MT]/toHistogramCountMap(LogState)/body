@@ -1,0 +1,35 @@
+{
+  final Pattern pattern=Pattern.compile(state.histogram());
+  final Matcher matcher=pattern.matcher("");
+  final TreeMap<Long,Map<String,Object>> countMap=new TreeMap<>();
+  for (  final Map<String,Object> entry : state.entries()) {
+    final String message=(String)entry.get(messageProperty.jsonName());
+    final long timestamp=(Long)entry.get(timestampProperty.jsonName());
+    Map<String,Object> obj=countMap.get(timestamp);
+    if (obj == null) {
+      obj=new LinkedHashMap<>();
+    }
+    Integer count=(Integer)obj.get(totalProperty.jsonName());
+    if (count == null) {
+      count=1;
+    }
+ else {
+      count=count + 1;
+    }
+    obj.put(totalProperty.jsonName(),count);
+    matcher.reset(message);
+    if (matcher.matches()) {
+      final String key=matcher.group(1);
+      Integer c=(Integer)obj.get(key);
+      if (c == null) {
+        c=1;
+      }
+ else {
+        c=c + 1;
+      }
+      obj.put(key,c);
+    }
+    countMap.put(timestamp,obj);
+  }
+  return countMap;
+}

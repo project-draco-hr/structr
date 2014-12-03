@@ -4,23 +4,7 @@
   for (  String propertyName : SchemaHelper.getProperties(propertyContainer)) {
     if (!propertyName.startsWith("__") && propertyContainer.hasProperty(propertyName)) {
       String rawType=propertyContainer.getProperty(propertyName).toString();
-      String dbName=null;
-      if (rawType.contains("|")) {
-        dbName=rawType.substring(0,rawType.indexOf("|"));
-        rawType=rawType.substring(rawType.indexOf("|") + 1);
-      }
-      boolean notNull=false;
-      if (rawType.startsWith("+")) {
-        rawType=rawType.substring(1);
-        notNull=true;
-      }
-      String defaultValue=null;
-      if (rawType.contains(":") && !rawType.startsWith(Type.Cypher.name())) {
-        final int lastIndex=rawType.lastIndexOf(":");
-        defaultValue=rawType.substring(lastIndex + 1);
-        rawType=rawType.substring(0,lastIndex);
-      }
-      PropertyParser parser=SchemaHelper.getParserForRawValue(errorBuffer,entity.getClassName(),propertyName,dbName,rawType,notNull,defaultValue);
+      PropertyParser parser=SchemaHelper.getParserForRawValue(errorBuffer,entity.getClassName(),propertyName,rawType);
       if (parser != null) {
         propertyNames.add(parser.getPropertyName());
         src.append(parser.getPropertySource(entity,errorBuffer));

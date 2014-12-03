@@ -11,13 +11,7 @@
     for (    String possibleEntityName : names) {
       String normalizedType=normalizedEntityNameCache.get(possibleEntityName);
       if (normalizedType == null) {
-        normalizedType=StringUtils.capitalize(CaseHelper.toUpperCamelCase(possibleEntityName));
-        if (normalizedType.endsWith("ies")) {
-          normalizedType=normalizedType.substring(0,normalizedType.length() - 3).concat("y");
-        }
- else         if (!normalizedType.endsWith("ss") && normalizedType.endsWith("s")) {
-          normalizedType=normalizedType.substring(0,normalizedType.length() - 1);
-        }
+        normalizedType=StringUtils.capitalize(CaseHelper.toUpperCamelCase(PlingStemmer.stem(possibleEntityName)));
       }
       result.append(normalizedType).append("/");
     }
@@ -26,13 +20,7 @@
  else {
     String normalizedType=normalizedEntityNameCache.get(possibleEntityString);
     if (normalizedType == null) {
-      normalizedType=StringUtils.capitalize(CaseHelper.toUpperCamelCase(possibleEntityString));
-      if (normalizedType.endsWith("ies")) {
-        normalizedType=normalizedType.substring(0,normalizedType.length() - 3).concat("y");
-      }
- else       if (!normalizedType.endsWith("ss") && normalizedType.endsWith("s")) {
-        normalizedType=normalizedType.substring(0,normalizedType.length() - 1);
-      }
+      normalizedType=StringUtils.capitalize(CaseHelper.toUpperCamelCase(PlingStemmer.stem(possibleEntityString)));
     }
     return normalizedType;
   }

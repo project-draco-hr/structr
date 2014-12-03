@@ -11,8 +11,9 @@
     rootGroup.add(new PropertySearchAttribute(GraphObject.visibleToPublicUsers,true,BooleanClause.Occur.MUST,true));
   }
   List<SourceSearchAttribute> sources=new ArrayList<>();
-  boolean hasEmptySearchFields=false;
   DistanceSearchAttribute distanceSearch=null;
+  boolean hasEmptySearchFields=false;
+  Result intermediateResult=null;
   GeoCodingResult coords=null;
   Double dist=null;
   for (Iterator<SearchAttribute> it=rootGroup.getSearchAttributes().iterator(); it.hasNext(); ) {
@@ -46,7 +47,6 @@
       hasEmptySearchFields=true;
     }
   }
-  Result intermediateResult;
   if (distanceSearch == null && !sources.isEmpty()) {
     intermediateResult=new Result(new ArrayList<AbstractNode>(),null,false,false);
   }
@@ -61,8 +61,7 @@
       allExactMatch&=attr.isExactMatch();
     }
     QueryContext queryContext=new QueryContext(query);
-    IndexHits hits=null;
-    if (sortKey != null) {
+    if (sortKey != null && !doNotSort) {
       Integer sortType=sortKey.getSortType();
       if (sortType != null) {
         queryContext.sort(new Sort(new SortField(sortKey.dbName(),sortType,sortDescending)));
@@ -79,49 +78,41 @@
         LayerNodeIndex spatialIndex=this.getSpatialIndex();
         if (spatialIndex != null) {
 synchronized (spatialIndex) {
-            hits=spatialIndex.query(LayerNodeIndex.WITHIN_DISTANCE_QUERY,params);
-          }
+            try (final IndexHits hits=spatialIndex.query(LayerNodeIndex.WITHIN_DISTANCE_QUERY,params)){
+              intermediateResult=new NodeFactory(securityContext).instantiate(hits);
+            }
+           }
         }
       }
-      intermediateResult=new NodeFactory(securityContext).instantiate(hits);
     }
  else     if (allExactMatch) {
       index=getKeywordIndex();
 synchronized (index) {
-        try {
-          hits=index.query(queryContext);
+        try (final IndexHits hits=index.query(queryContext)){
+          filterResults=hasEmptySearchFields;
+          intermediateResult=factory.instantiate(hits);
         }
  catch (        NumberFormatException nfe) {
           logger.log(Level.SEVERE,"Could not sort results",nfe);
-          queryContext.sort(null);
-          hits=index.query(queryContext);
         }
       }
-      filterResults=hasEmptySearchFields;
-      intermediateResult=factory.instantiate(hits);
     }
  else {
       index=getFulltextIndex();
 synchronized (index) {
-        try {
-          hits=index.query(queryContext);
+        try (final IndexHits hits=index.query(queryContext)){
+          filterResults=hasEmptySearchFields;
+          intermediateResult=factory.instantiate(hits);
         }
  catch (        NumberFormatException nfe) {
           logger.log(Level.SEVERE,"Could not sort results",nfe);
-          queryContext.sort(null);
-          hits=index.query(queryContext);
         }
       }
-      filterResults=hasEmptySearchFields;
-      intermediateResult=factory.instantiate(hits);
-    }
-    if (hits != null) {
-      hits.close();
     }
   }
-  if (filterResults) {
+  if (intermediateResult != null && filterResults) {
     Set<GraphObject> intermediateResultSet=new LinkedHashSet<>(intermediateResult.getResults());
-    List<GraphObject> finalResult=new LinkedList<>();
+    List<GraphObject> finalResult=new ArrayList<>();
     int resultCount=0;
     if (hasGraphSources) {
       final Set<GraphObject> mergedSources=mergeSources(sources);

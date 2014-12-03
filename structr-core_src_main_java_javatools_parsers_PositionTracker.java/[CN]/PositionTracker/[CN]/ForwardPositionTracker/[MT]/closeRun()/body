@@ -1,0 +1,11 @@
+{
+  if (positionChanges.isEmpty())   return;
+  for (  Map.Entry<Integer,Integer> change : positionChanges.entrySet()) {
+    Integer positionInOrigStream=new2OldTracker.translatePosition(change.getKey());
+    if (positionMap.containsKey(positionInOrigStream))     positionMap.put(positionInOrigStream,change.getValue() + positionMap.get(positionInOrigStream));
+ else     positionMap.put(positionInOrigStream,change.getValue());
+  }
+  positionChanges.clear();
+  new2OldTracker.closeRun();
+  return;
+}

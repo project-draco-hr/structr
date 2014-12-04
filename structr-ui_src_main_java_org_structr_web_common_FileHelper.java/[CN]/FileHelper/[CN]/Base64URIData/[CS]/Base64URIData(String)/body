@@ -1,5 +1,12 @@
 {
-  String[] parts=StringUtils.split(rawData,",");
-  data=parts[1];
-  contentType=StringUtils.substringBetween(parts[0],"data:",";base64");
+  if (rawData.contains(",")) {
+    String[] parts=StringUtils.split(rawData,",");
+    if (parts.length == 2) {
+      contentType=StringUtils.substringBetween(parts[0],"data:",";base64");
+      data=parts[1];
+    }
+  }
+ else {
+    data=rawData;
+  }
 }

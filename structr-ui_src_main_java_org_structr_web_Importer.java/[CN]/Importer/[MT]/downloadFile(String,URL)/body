@@ -9,7 +9,7 @@
   long checksum;
   URL downloadUrl;
   try {
-    downloadUrl=new URL(originalUrl,downloadAddress);
+    downloadUrl=new URL(base,downloadAddress);
     logger.log(Level.INFO,"Starting download from {0}",downloadUrl);
     FileUtils.copyURLToFile(downloadUrl,fileOnDisk);
   }
@@ -72,7 +72,7 @@ catch (    IOException ex) {
           fileNode.setProperty(File.parent,parent);
         }
         if (contentType.equals("text/css")) {
-          processCssFileNode(fileNode);
+          processCssFileNode(fileNode,downloadUrl);
         }
       }
       return fileNode;

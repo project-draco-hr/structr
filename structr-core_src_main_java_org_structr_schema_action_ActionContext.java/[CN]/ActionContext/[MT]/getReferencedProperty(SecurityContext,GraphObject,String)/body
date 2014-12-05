@@ -17,6 +17,14 @@
   for (int i=0; (i < parts.length); i++) {
     String part=parts[i];
     if (_data != null && _data instanceof GraphObject) {
+      if ("_source".equals(part) && _data instanceof RelationshipInterface) {
+        _data=((RelationshipInterface)_data).getSourceNode();
+        continue;
+      }
+      if ("_target".equals(part) && _data instanceof RelationshipInterface) {
+        _data=((RelationshipInterface)_data).getTargetNode();
+        continue;
+      }
       PropertyKey referenceKeyProperty=StructrApp.getConfiguration().getPropertyKeyForJSONName(_data.getClass(),part);
       _data=((GraphObject)_data).getProperty(referenceKeyProperty);
       if (_data == null) {

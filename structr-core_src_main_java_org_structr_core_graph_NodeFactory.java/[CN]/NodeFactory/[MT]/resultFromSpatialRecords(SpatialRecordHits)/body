@@ -8,26 +8,28 @@
   int position=0;
   int count=0;
   int offset=0;
-  for (  Node node : spatialRecordHits) {
-    Node realNode=node;
-    if (realNode != null) {
-      T n=instantiate(realNode);
-      nodes.add(n);
-      if (n != null) {
-        List<T> nodesAt=(List<T>)getNodesAt(n);
-        size+=nodesAt.size();
-        for (        T nodeAt : nodesAt) {
-          if (nodeAt != null && securityContext.isReadable(nodeAt,includeDeletedAndHidden,publicOnly)) {
-            if (++position > offset) {
-              if (++count > pageSize) {
-                return new Result(nodes,size,true,false);
+  try (final SpatialRecordHits closeable=spatialRecordHits){
+    for (    Node node : closeable) {
+      Node realNode=node;
+      if (realNode != null) {
+        T n=instantiate(realNode);
+        nodes.add(n);
+        if (n != null) {
+          List<T> nodesAt=(List<T>)getNodesAt(n);
+          size+=nodesAt.size();
+          for (          T nodeAt : nodesAt) {
+            if (nodeAt != null && securityContext.isReadable(nodeAt,includeDeletedAndHidden,publicOnly)) {
+              if (++position > offset) {
+                if (++count > pageSize) {
+                  return new Result(nodes,size,true,false);
+                }
+                nodes.add((T)nodeAt);
               }
-              nodes.add((T)nodeAt);
             }
           }
         }
       }
     }
   }
-  return new Result(nodes,size,true,false);
+   return new Result(nodes,size,true,false);
 }

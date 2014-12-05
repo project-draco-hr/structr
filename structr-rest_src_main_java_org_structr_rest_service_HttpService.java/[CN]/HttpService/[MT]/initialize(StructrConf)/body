@@ -39,10 +39,10 @@
   applicationName=finalConfig.getProperty(APPLICATION_TITLE);
   host=finalConfig.getProperty(APPLICATION_HOST);
   basePath=finalConfig.getProperty(Services.BASE_PATH);
-  httpPort=parseInt(finalConfig.getProperty(APPLICATION_HTTP_PORT),8082);
-  maxIdleTime=parseInt(System.getProperty("maxIdleTime"),30000);
-  requestHeaderSize=parseInt(System.getProperty("requestHeaderSize"),8192);
-  async=parseBoolean(finalConfig.getProperty(ASYNC),false);
+  httpPort=Services.parseInt(finalConfig.getProperty(APPLICATION_HTTP_PORT),8082);
+  maxIdleTime=Services.parseInt(System.getProperty("maxIdleTime"),30000);
+  requestHeaderSize=Services.parseInt(System.getProperty("requestHeaderSize"),8192);
+  async=Services.parseBoolean(finalConfig.getProperty(ASYNC),false);
   if (async) {
     logger.log(Level.INFO,"Running in asynchronous mode");
   }
@@ -51,10 +51,10 @@
   String contextPath=System.getProperty("contextPath","/");
   String logPrefix="structr";
   boolean enableRewriteFilter=true;
-  boolean enableHttps=parseBoolean(finalConfig.getProperty(APPLICATION_HTTPS_ENABLED),false);
+  boolean enableHttps=Services.parseBoolean(finalConfig.getProperty(APPLICATION_HTTPS_ENABLED),false);
   boolean enableGzipCompression=true;
   boolean logRequests=false;
-  int httpsPort=parseInt(finalConfig.getProperty(APPLICATION_HTTPS_PORT),8083);
+  int httpsPort=Services.parseInt(finalConfig.getProperty(APPLICATION_HTTPS_PORT),8083);
   basePath=System.getProperty("home",basePath);
   if (basePath.isEmpty()) {
     basePath=System.getProperty("user.dir","/tmp");

@@ -1,0 +1,38 @@
+{
+  n[0]=0;
+  if (!a.startsWith("&"))   return ((char)0);
+  while (n[0] < a.length() && !Character.isSpaceChar(a.charAt(n[0])) && a.charAt(n[0]) != ';')   n[0]++;
+  if (n[0] <= 1) {
+    n[0]=-1;
+    return ((char)0);
+  }
+  if (n[0] < a.length() && a.charAt(n[0]) == ';') {
+    a=a.substring(1,n[0]);
+    n[0]++;
+  }
+ else {
+    a=a.substring(1,n[0]);
+  }
+  if (a.startsWith("#x")) {
+    try {
+      return ((char)Integer.parseInt(a.substring(2),16));
+    }
+ catch (    Exception e) {
+      n[0]=-1;
+      return ((char)0);
+    }
+  }
+  if (a.startsWith("#")) {
+    try {
+      return ((char)Integer.parseInt(a.substring(1)));
+    }
+ catch (    Exception e) {
+      n[0]=-1;
+      return ((char)0);
+    }
+  }
+  if (ampersandMap.get(a) != null)   return (ampersandMap.get(a));
+ else   if (ampersandMap.get(a.toLowerCase()) != null)   return (ampersandMap.get(a.toLowerCase()));
+  n[0]=-1;
+  return ((char)0);
+}

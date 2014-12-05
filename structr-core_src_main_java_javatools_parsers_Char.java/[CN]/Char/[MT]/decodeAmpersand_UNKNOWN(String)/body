@@ -1,0 +1,74 @@
+{
+  if (s == null) {
+    return null;
+  }
+  StringBuffer sb=new StringBuffer(s.length());
+  while (s != null && s.length() != 0) {
+    int i=s.indexOf("&");
+    if (i == -1) {
+      sb.append(s);
+      s=null;
+    }
+ else {
+      boolean space=false;
+      boolean end=false;
+      sb.append(s.substring(0,i));
+      s=s.substring(i);
+      int j1=s.indexOf(";");
+      int j2=s.indexOf(" ");
+      int j=-1;
+      if (j1 == -1 || j2 == -1) {
+        if (j1 == -1 && j2 == -1) {
+          end=true;
+          j=s.length();
+        }
+ else         if (j1 == -1) {
+          j=j2;
+        }
+ else         if (j2 == -1) {
+          j=j1;
+        }
+      }
+ else       if (j1 < j2) {
+        j=j1;
+      }
+ else       if (j1 > j2) {
+        j=j2;
+        space=true;
+      }
+      String a=s.substring(1,j);
+      if (ampersandMap.get(a) != null) {
+        sb.append(ampersandMap.get(a));
+        if (space) {
+          sb.append(' ');
+        }
+      }
+ else       if (a.startsWith("#")) {
+        try {
+          sb.append(((char)Integer.parseInt(a.substring(1))));
+        }
+ catch (        Exception e) {
+          sb.append(a);
+        }
+        if (space) {
+          sb.append(' ');
+        }
+      }
+ else {
+        if (end) {
+          sb.append(s.substring(0,j));
+        }
+ else {
+          sb.append(s.substring(0,j + 1));
+        }
+      }
+      if (end) {
+        s=s.substring(j);
+      }
+ else {
+        s=s.substring(j + 1);
+      }
+    }
+  }
+  return sb.toString();
+}

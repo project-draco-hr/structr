@@ -1,0 +1,24 @@
+{
+  if (a.length() == 0) {
+    n[0]=0;
+    return ((char)0);
+  }
+  n[0]=Utf8Length(a.charAt(0));
+  if (a.length() >= n[0]) {
+switch (n[0]) {
+case 1:
+      return (a.charAt(0));
+case 2:
+    if ((a.charAt(1) & 0xC0) != 0x80)     break;
+  return ((char)(((a.charAt(0) & 0x1F) << 6) + (a.charAt(1) & 0x3F)));
+case 3:
+if ((a.charAt(1) & 0xC0) != 0x80 || (a.charAt(2) & 0xC0) != 0x80) break;
+return ((char)(((a.charAt(0) & 0x0F) << 12) + ((a.charAt(1) & 0x3F) << 6) + ((a.charAt(2) & 0x3F))));
+case 4:
+if ((a.charAt(1) & 0xC0) != 0x80 || (a.charAt(2) & 0xC0) != 0x80 || (a.charAt(3) & 0xC0) != 0x80) break;
+return ((char)(((a.charAt(0) & 0x07) << 18) + ((a.charAt(1) & 0x3F) << 12) + ((a.charAt(2) & 0x3F) << 6)+ ((a.charAt(3) & 0x3F))));
+}
+}
+n[0]=-1;
+return ((char)0);
+}

@@ -1,0 +1,34 @@
+{
+  state.sortEntries();
+  final String dateFormat=state.aggregate();
+  final long startTimestamp=state.beginTimestamp();
+  final long endTimestamp=state.endTimestamp();
+  final GraphObjectMap result=new GraphObjectMap();
+  final long interval=findInterval(dateFormat);
+  final long start=alignDateOnFormat(dateFormat,startTimestamp);
+  final TreeMap<Long,Map<String,Object>> countMap=toHistogramCountMap(state);
+  final Set<String> countProperties=getCountProperties(countMap);
+  for (long current=start; current <= endTimestamp; current+=interval) {
+    final Map<Long,Map<String,Object>> counts=countMap.subMap(current,true,current + interval,false);
+    final GraphObjectMap sum=new GraphObjectMap();
+    for (    final String key : countProperties) {
+      sum.put(new IntProperty(key),0);
+    }
+    for (    final Map<String,Object> count : counts.values()) {
+      for (      final String key : countProperties) {
+        final IntProperty prop=new IntProperty(key);
+        Integer sumValue=sum.get(prop);
+        if (sumValue == null) {
+          sumValue=0;
+        }
+        Integer entryValue=(Integer)count.get(key);
+        if (entryValue == null) {
+          entryValue=0;
+        }
+        sum.put(prop,sumValue + entryValue);
+      }
+    }
+    result.put(new GenericProperty(Long.toString(current)),sum);
+  }
+  return new Result(result,false);
+}

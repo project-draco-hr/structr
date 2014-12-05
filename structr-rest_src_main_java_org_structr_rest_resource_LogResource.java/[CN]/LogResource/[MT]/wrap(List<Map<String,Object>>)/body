@@ -1,0 +1,17 @@
+{
+  final List<GraphObjectMap> result=new LinkedList<>();
+  for (  final Map<String,Object> entry : entries) {
+    final GraphObjectMap map=new GraphObjectMap();
+    for (    final Entry<String,Object> e : entry.entrySet()) {
+      final String key=e.getKey();
+      if (timestampProperty.jsonName().equals(key)) {
+        map.put(timestampProperty,new Date((Long)e.getValue()));
+      }
+ else {
+        map.put(new GenericProperty(key),e.getValue());
+      }
+    }
+    result.add(map);
+  }
+  return result;
+}

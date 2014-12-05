@@ -1,0 +1,71 @@
+{
+  if (!a.startsWith("\\")) {
+    n[0]=0;
+    return ((char)0);
+  }
+  if (a.startsWith("\\u")) {
+    try {
+      n[0]=6;
+      return ((char)Integer.parseInt(a.substring(2,6),16));
+    }
+ catch (    Exception e) {
+      n[0]=-1;
+      return ((char)0);
+    }
+  }
+  if (a.startsWith("\\uu")) {
+    try {
+      n[0]=7;
+      return ((char)Integer.parseInt(a.substring(3,7),16));
+    }
+ catch (    Exception e) {
+      n[0]=-1;
+      return ((char)0);
+    }
+  }
+  if (a.startsWith("\\b")) {
+    n[0]=2;
+    return ((char)8);
+  }
+  if (a.startsWith("\\t")) {
+    n[0]=2;
+    return ((char)9);
+  }
+  if (a.startsWith("\\n")) {
+    n[0]=2;
+    return ((char)10);
+  }
+  if (a.startsWith("\\f")) {
+    n[0]=2;
+    return ((char)12);
+  }
+  if (a.startsWith("\\r")) {
+    n[0]=2;
+    return ((char)13);
+  }
+  if (a.startsWith("\\\\")) {
+    n[0]=2;
+    return ('\\');
+  }
+  if (a.startsWith("\\\"")) {
+    n[0]=2;
+    return ('"');
+  }
+  if (a.startsWith("\\'")) {
+    n[0]=2;
+    return ('\'');
+  }
+  n[0]=1;
+  while (n[0] < a.length() && a.charAt(n[0]) >= '0' && a.charAt(n[0]) <= '8')   n[0]++;
+  if (n[0] == 1) {
+    n[0]=0;
+    return ((char)0);
+  }
+  try {
+    return ((char)Integer.parseInt(a.substring(1,n[0]),8));
+  }
+ catch (  Exception e) {
+  }
+  n[0]=-1;
+  return ((char)0);
+}

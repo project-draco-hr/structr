@@ -4,23 +4,14 @@
     final String filesPath=Services.getInstance().getConfigurationValue(Services.FILES_PATH);
     final String subjectId=request.getParameter(subjectProperty.jsonName());
     final String objectId=request.getParameter(objectProperty.jsonName());
-    final String action=request.getParameter(actionProperty.jsonName());
     final GraphObjectMap overviewMap=new GraphObjectMap();
-    final Map<String,Integer> actions=new LinkedHashMap<>();
-    final List<Path> files=new LinkedList<>();
-    final String aggregate=request.getParameter("aggregate");
-    final String histogram=request.getParameter("histogram");
-    boolean overview=false;
-    boolean inverse=false;
-    long beginTimestamp=Long.MAX_VALUE;
-    long endTimestamp=0L;
-    int entryCount=0;
+    final LogState logState=new LogState(request);
     if (StringUtils.isNotEmpty(subjectId) && StringUtils.isNotEmpty(objectId)) {
       final String fileName=mergeIds(subjectId,objectId);
       final String path=getDirectoryPath(fileName,8);
       final Path filePath=new File(filesPath + SUBJECTS + path+ fileName).toPath();
       if (Files.exists(filePath)) {
-        files.add(filePath);
+        read(filePath,logState);
       }
     }
  else     if (StringUtils.isNotEmpty(subjectId) && StringUtils.isEmpty(objectId)) {
@@ -28,7 +19,7 @@
       final Path directoryPath=new File(filesPath + SUBJECTS + path).toPath();
       try (final DirectoryStream<Path> stream=Files.newDirectoryStream(directoryPath,subjectId + "????????????????????????????????")){
         for (        final Path p : stream) {
-          files.add(p);
+          read(p,logState);
         }
       }
  catch (      IOException ioex) {
@@ -36,112 +27,41 @@
       }
     }
  else     if (StringUtils.isEmpty(subjectId) && StringUtils.isNotEmpty(objectId)) {
-      inverse=true;
+      logState.inverse(true);
       final String path=getDirectoryPath(objectId,8);
       final Path directoryPath=new File(filesPath + OBJECTS + path).toPath();
       try (final DirectoryStream<Path> stream=Files.newDirectoryStream(directoryPath,objectId + "????????????????????????????????")){
         for (        final Path p : stream) {
-          files.add(p);
+          read(p,logState);
         }
       }
  catch (      IOException ioex) {
         ioex.printStackTrace();
       }
     }
- else     if (StringUtils.isNotEmpty(action)) {
-      collectFiles(new File(filesPath + SUBJECTS).toPath(),files);
+ else     if (logState.doActionQuery()) {
+      collectFiles(new File(filesPath + SUBJECTS).toPath(),logState);
     }
  else {
-      collectFiles(new File(filesPath + SUBJECTS).toPath(),files);
-      overview=true;
+      logState.overview(true);
+      collectFiles(new File(filesPath + SUBJECTS).toPath(),logState);
     }
-    final List<GraphObject> entries=new LinkedList<>();
-    final Query query=getTimestampQuery();
-    final Range<Long> range=getRangeFromQuery(query);
-    final Predicate datePredicate=query.toPredicate();
-    for (    final Path path : files) {
-      try (final BufferedReader reader=Files.newBufferedReader(path,Charset.forName("utf-8"))){
-        final String fileName=path.getFileName().toString();
-        String pathSubjectId=inverse ? fileName.substring(32,64) : fileName.substring(0,32);
-        String pathObjectId=inverse ? fileName.substring(0,32) : fileName.substring(32,64);
-        String line=reader.readLine();
-        while (line != null) {
-          try {
-            final int pos0=line.indexOf(",");
-            final int pos1=line.indexOf(",",pos0 + 1);
-            final String part0=line.substring(0,pos0);
-            final String part1=line.substring(pos0 + 1,pos1);
-            final String part2=line.substring(pos1 + 1);
-            final long timestamp=Long.valueOf(part0);
-            final Date date=new Date(timestamp);
-            final String entryAction=part1;
-            final String entryMessage=part2;
-            if (timestamp <= beginTimestamp) {
-              beginTimestamp=timestamp;
-            }
-            if (timestamp >= endTimestamp) {
-              endTimestamp=timestamp;
-            }
-            if (overview) {
-              Integer actionCount=actions.get(entryAction);
-              if (actionCount == null) {
-                actions.put(entryAction,1);
-              }
- else {
-                actions.put(entryAction,actionCount + 1);
-              }
-              entryCount++;
-            }
- else {
-              if (action == null || action.equals(entryAction)) {
-                final GraphObjectMap map=new GraphObjectMap();
-                map.put(subjectProperty,pathSubjectId);
-                map.put(objectProperty,pathObjectId);
-                map.put(actionProperty,entryAction);
-                map.put(timestampProperty,date);
-                map.put(messageProperty,entryMessage);
-                if (date == null || datePredicate.accept(map)) {
-                  entries.add(map);
-                }
-              }
-            }
-          }
- catch (          Throwable t) {
-            t.printStackTrace();
-          }
-          line=reader.readLine();
-        }
-      }
- catch (      IOException ioex) {
-        ioex.printStackTrace();
-      }
-    }
-    if (overview) {
-      overviewMap.put(actionsProperty,actions);
-      overviewMap.put(entryCountProperty,entryCount);
-      overviewMap.put(firstEntryProperty,new Date(beginTimestamp));
-      overviewMap.put(lastEntryProperty,new Date(endTimestamp));
+    if (logState.overview()) {
+      overviewMap.put(actionsProperty,logState.actions());
+      overviewMap.put(entryCountProperty,logState.actionCount());
+      overviewMap.put(firstEntryProperty,new Date(logState.beginTimestamp()));
+      overviewMap.put(lastEntryProperty,new Date(logState.endTimestamp()));
       return new Result(overviewMap,false);
     }
- else     if (StringUtils.isNotBlank(histogram)) {
-      if (StringUtils.isBlank(aggregate)) {
-        throw new FrameworkException(400,"To use the histogram function, please supply an aggregation pattern.");
-      }
-      Collections.sort(entries,new GraphObjectComparator(timestampProperty,false));
-      final long intervalStart=range != null ? range.start : beginTimestamp;
-      final long intervalEnd=range != null ? range.end : endTimestamp;
-      return histogram(entries,aggregate,intervalStart,intervalEnd,histogram);
+ else     if (logState.doHistogram()) {
+      return histogram(logState);
     }
- else     if (StringUtils.isNotBlank(aggregate)) {
-      final Map<String,Pattern> aggregationPatterns=getAggregationPatterns(request);
-      Collections.sort(entries,new GraphObjectComparator(timestampProperty,false));
-      final long intervalStart=range != null ? range.start : beginTimestamp;
-      final long intervalEnd=range != null ? range.end : endTimestamp;
-      return aggregate(entries,aggregate,intervalStart,intervalEnd,aggregationPatterns);
+ else     if (logState.doAggregate()) {
+      return aggregate(logState);
     }
  else {
-      Collections.sort(entries,new GraphObjectComparator(timestampProperty,false));
-      return new Result(entries,entries.size(),true,false);
+      logState.sortEntries();
+      return new Result(wrap(logState.entries()),logState.size(),true,false);
     }
   }
   throw new FrameworkException(500,"No request object present, aborting.");

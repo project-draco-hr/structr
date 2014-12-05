@@ -2,7 +2,7 @@
   final int length=range.length();
   final String leftBound=range.substring(0,1);
   final String rightBound=range.substring(length - 1,length);
-  final String[] parts=range.substring(1,length - 1).split("[,]+");
+  final String[] parts=range.substring(1,length - 1).split(",+");
   final String type=node.getType();
   if (parts.length == 2) {
     final String leftPart=parts[0].trim();
@@ -13,16 +13,16 @@
     if (value != null) {
       boolean inRange=true;
       if ("[".equals(leftBound)) {
-        inRange&=value.intValue() >= left;
+        inRange&=(value >= left);
       }
  else {
-        inRange&=value.intValue() > left;
+        inRange&=(value > left);
       }
       if ("]".equals(rightBound)) {
-        inRange&=value.intValue() <= right;
+        inRange&=(value <= right);
       }
  else {
-        inRange&=value.intValue() < right;
+        inRange&=(value < right);
       }
       if (!inRange) {
         errorBuffer.add(type,new RangeToken(key,range));

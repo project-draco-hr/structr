@@ -1,11 +1,13 @@
 {
   if (input != null) {
-    if (factoryProfile.getOffsetId() != null) {
-      return resultWithOffsetId(input);
-    }
+    try (final IndexHits<S> closeable=input){
+      if (factoryProfile.getOffsetId() != null) {
+        return resultWithOffsetId(closeable);
+      }
  else {
-      return resultWithoutOffsetId(input);
+        return resultWithoutOffsetId(closeable);
+      }
     }
-  }
+   }
   return Result.EMPTY_RESULT;
 }

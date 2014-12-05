@@ -1,7 +1,10 @@
 {
   String sessionIdFromRequest=request.getRequestedSessionId();
   if (sessionIdFromRequest == null) {
-    request.getSession(true);
+    final HttpSession session=request.getSession(true);
+    if (session != null) {
+      session.setMaxInactiveInterval(Services.getGlobalSessionTimeout());
+    }
     return null;
   }
   Principal user=AuthHelper.getPrincipalForSessionId(sessionIdFromRequest);

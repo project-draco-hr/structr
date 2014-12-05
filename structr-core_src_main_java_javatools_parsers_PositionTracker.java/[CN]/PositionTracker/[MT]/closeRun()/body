@@ -1,0 +1,20 @@
+{
+  if (positionChanges.isEmpty())   return;
+  SortedMap<Integer,Integer> temp=positionChanges;
+  while (!positionMap.isEmpty()) {
+    Integer key=positionMap.firstKey();
+    Collection<Integer> modifiers=old2NewMap.headMap(key + 1).values();
+    Integer newposition=key;
+    for (Iterator<Integer> it=modifiers.iterator(); it.hasNext(); newposition+=it.next()) {
+    }
+    Integer value=positionMap.get(key);
+    if (positionChanges.containsKey(newposition))     value+=positionChanges.get(newposition);
+    positionChanges.put(newposition,value);
+    positionMap.remove(key);
+  }
+  positionChanges=positionMap;
+  positionMap=temp;
+  old2NewMap.clear();
+  accumulatedModifier=0;
+  return;
+}

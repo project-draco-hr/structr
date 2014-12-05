@@ -29,12 +29,12 @@
       String sortOrder=request.getParameter(JsonRestServlet.REQUEST_PARAMETER_SORT_ORDER);
       String sortKeyName=request.getParameter(JsonRestServlet.REQUEST_PARAMETER_SORT_KEY);
       boolean sortDescending=(sortOrder != null && "desc".equals(sortOrder.toLowerCase()));
-      int pageSize=HttpService.parseInt(pageSizeParameter,NodeFactory.DEFAULT_PAGE_SIZE);
-      int page=HttpService.parseInt(pageParameter,NodeFactory.DEFAULT_PAGE);
+      int pageSize=Services.parseInt(pageSizeParameter,NodeFactory.DEFAULT_PAGE_SIZE);
+      int page=Services.parseInt(pageParameter,NodeFactory.DEFAULT_PAGE);
       PropertyKey sortKey=null;
       if (sortKeyName != null) {
         Class<? extends GraphObject> type=resource.getEntityClass();
-        sortKey=StructrApp.getConfiguration().getPropertyKeyForDatabaseName(type,sortKeyName);
+        sortKey=StructrApp.getConfiguration().getPropertyKeyForDatabaseName(type,sortKeyName,false);
       }
       removeLineBreaks=StringUtils.equals(request.getParameter(REMOVE_LINE_BREAK_PARAM),"1");
       writeBom=StringUtils.equals(request.getParameter(WRITE_BOM),"1");

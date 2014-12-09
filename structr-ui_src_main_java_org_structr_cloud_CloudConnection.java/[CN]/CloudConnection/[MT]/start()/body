@@ -4,8 +4,8 @@
       decrypter=Cipher.getInstance(CloudService.STREAM_CIPHER);
       encrypter=Cipher.getInstance(CloudService.STREAM_CIPHER);
       setEncryptionKey("StructrInitialEncryptionKey",128);
-      sender=new Sender(this,new ObjectOutputStream(new GZIPOutputStream(new CipherOutputStream(new BufferedOutputStream(socket.getOutputStream()),encrypter),true)));
-      receiver=new Receiver(this,new ObjectInputStream(new GZIPInputStream(new CipherInputStream(new BufferedInputStream(socket.getInputStream()),decrypter))));
+      sender=new Sender(this,new BufferedWriter(new OutputStreamWriter(new CipherOutputStream(new BufferedOutputStream(socket.getOutputStream()),encrypter))));
+      receiver=new Receiver(this,new BufferedReader(new InputStreamReader(new CipherInputStream(new BufferedInputStream(socket.getInputStream()),decrypter))));
       receiver.start();
       sender.start();
       super.start();

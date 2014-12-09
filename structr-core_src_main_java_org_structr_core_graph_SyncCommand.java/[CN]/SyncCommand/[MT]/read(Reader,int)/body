@@ -1,7 +1,11 @@
 {
   char[] buf=new char[len];
-  if (reader.read(buf,0,len) == len) {
+  final int read=reader.read(buf,0,len);
+  if (read == len) {
     return new String(buf,0,len);
+  }
+ else {
+    logger.log(Level.WARNING,"Unable to read string fully, expected {0}, got {1}: {2}",new Object[]{len,read,new String(buf)});
   }
   throw new EOFException();
 }

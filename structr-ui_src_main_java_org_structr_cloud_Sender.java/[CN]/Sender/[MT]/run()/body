@@ -4,13 +4,14 @@
       try {
         final Message message=outputQueue.poll();
         if (message != null) {
-          outputStream.writeObject(message);
-          outputStream.flush();
+          message.serialize(writer);
+          writer.flush();
           messagesInFlight++;
           message.afterSend(connection);
         }
       }
  catch (      Throwable t) {
+        t.printStackTrace();
         connection.close();
       }
     }

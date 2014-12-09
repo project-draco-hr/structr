@@ -17,28 +17,46 @@
     if (response.getStatus() == 302) {
       return;
     }
+    final String pathInfo=request.getPathInfo();
+    String type=null;
+    if (StringUtils.isNotBlank(pathInfo)) {
+      type=SchemaHelper.normalizeEntityName(StringUtils.stripStart(pathInfo.trim(),"/"));
+    }
     uploader.setFileSizeMax(MAX_FILE_SIZE);
     uploader.setSizeMax(MAX_REQUEST_SIZE);
     response.setContentType("text/html");
     final PrintWriter out=response.getWriter();
     List<FileItem> fileItemsList=uploader.parseRequest(request);
     Iterator<FileItem> fileItemsIterator=fileItemsList.iterator();
+    final Map<String,Object> params=new HashMap<>();
     while (fileItemsIterator.hasNext()) {
-      final FileItem fileItem=fileItemsIterator.next();
-      try {
-        final String contentType=fileItem.getContentType();
-        boolean isImage=(contentType != null && contentType.startsWith("image"));
-        boolean isVideo=(contentType != null && contentType.startsWith("video"));
-        final Class type=isImage ? Image.class : isVideo ? VideoFile.class : org.structr.dynamic.File.class;
-        final String name=fileItem.getName().replaceAll("\\\\","/");
-        final org.structr.dynamic.File newFile=FileHelper.createFile(securityContext,IOUtils.toByteArray(fileItem.getInputStream()),contentType,type);
-        newFile.setProperty(AbstractNode.name,PathHelper.getName(name));
-        newFile.setProperty(AbstractNode.visibleToPublicUsers,true);
-        newFile.setProperty(AbstractNode.visibleToAuthenticatedUsers,true);
-        out.write(newFile.getUuid());
+      final FileItem item=fileItemsIterator.next();
+      if (item.isFormField()) {
+        params.put(item.getFieldName(),item.getString());
       }
- catch (      IOException ex) {
-        logger.log(Level.WARNING,"Could not upload file",ex);
+ else {
+        try {
+          final String contentType=item.getContentType();
+          boolean isImage=(contentType != null && contentType.startsWith("image"));
+          boolean isVideo=(contentType != null && contentType.startsWith("video"));
+          if (params.containsKey(NodeInterface.type.jsonName())) {
+            type=(String)params.get(NodeInterface.type.jsonName());
+          }
+          final Class cls=type != null ? SchemaHelper.getEntityClassForRawType(type) : (isImage ? Image.class : (isVideo ? VideoFile.class : org.structr.dynamic.File.class));
+          final String name=item.getName().replaceAll("\\\\","/");
+          final org.structr.dynamic.File newFile=FileHelper.createFile(securityContext,IOUtils.toByteArray(item.getInputStream()),contentType,cls);
+          newFile.setProperty(AbstractNode.name,PathHelper.getName(name));
+          newFile.setProperty(AbstractNode.visibleToPublicUsers,true);
+          newFile.setProperty(AbstractNode.visibleToAuthenticatedUsers,true);
+          PropertyMap additionalProperties=PropertyMap.inputTypeToJavaType(securityContext,cls,params);
+          for (          PropertyKey key : additionalProperties.keySet()) {
+            newFile.setProperty(key,additionalProperties.get(key));
+          }
+          out.write(newFile.getUuid());
+        }
+ catch (        IOException ex) {
+          logger.log(Level.WARNING,"Could not upload file",ex);
+        }
       }
     }
     tx.success();

@@ -7,11 +7,11 @@
   }
   StringBuilder result=new StringBuilder();
   if (possibleEntityString.contains("/")) {
-    String[] names=StringUtils.split(possibleEntityString,"/");
+    final String[] names=StringUtils.split(possibleEntityString,"/");
     for (    String possibleEntityName : names) {
       String normalizedType=normalizedEntityNameCache.get(possibleEntityName);
       if (normalizedType == null) {
-        normalizedType=StringUtils.capitalize(CaseHelper.toUpperCamelCase(PlingStemmer.stem(possibleEntityName)));
+        normalizedType=StringUtils.capitalize(CaseHelper.toUpperCamelCase(stem(possibleEntityName)));
       }
       result.append(normalizedType).append("/");
     }
@@ -20,7 +20,7 @@
  else {
     String normalizedType=normalizedEntityNameCache.get(possibleEntityString);
     if (normalizedType == null) {
-      normalizedType=StringUtils.capitalize(CaseHelper.toUpperCamelCase(PlingStemmer.stem(possibleEntityString)));
+      normalizedType=StringUtils.capitalize(CaseHelper.toUpperCamelCase(stem(possibleEntityString)));
     }
     return normalizedType;
   }

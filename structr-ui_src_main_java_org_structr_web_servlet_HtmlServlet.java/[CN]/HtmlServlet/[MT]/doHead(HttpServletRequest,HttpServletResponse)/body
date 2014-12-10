@@ -30,12 +30,12 @@
       AbstractNode dataNode=null;
       String[] uriParts=PathHelper.getParts(path);
       if ((uriParts == null) || (uriParts.length == 0)) {
-        rootElement=findIndexPage(securityContext);
+        rootElement=findIndexPage(securityContext,edit);
         logger.log(Level.FINE,"No path supplied, trying to find index page");
       }
  else {
         if (rootElement == null) {
-          rootElement=findPage(securityContext,request,path);
+          rootElement=findPage(securityContext,request,path,edit);
         }
  else {
           dontCache=true;
@@ -61,7 +61,7 @@
         }
         if (dataNode != null && !(dataNode instanceof Linkable)) {
           request.removeAttribute(POSSIBLE_ENTRY_POINTS);
-          rootElement=findPage(securityContext,request,StringUtils.substringBeforeLast(path,PathHelper.PATH_SEP));
+          rootElement=findPage(securityContext,request,StringUtils.substringBeforeLast(path,PathHelper.PATH_SEP),edit);
           renderContext.setDetailsDataObject(dataNode);
           if (rootElement == null && dataNode instanceof DOMNode) {
             rootElement=((DOMNode)dataNode);

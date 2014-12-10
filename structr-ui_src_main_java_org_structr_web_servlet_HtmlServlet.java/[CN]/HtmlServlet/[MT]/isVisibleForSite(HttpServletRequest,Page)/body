@@ -1,0 +1,19 @@
+{
+  final Site site=page.getProperty(Page.site);
+  if (site == null) {
+    return true;
+  }
+  final String serverName=request.getServerName();
+  final int serverPort=request.getServerPort();
+  if (StringUtils.isNotBlank(serverName) && !serverName.equals(site.getProperty(Site.hostname))) {
+    return false;
+  }
+  Integer sitePort=site.getProperty(Site.port);
+  if (sitePort == null) {
+    sitePort=80;
+  }
+  if (serverPort != sitePort) {
+    return false;
+  }
+  return true;
+}

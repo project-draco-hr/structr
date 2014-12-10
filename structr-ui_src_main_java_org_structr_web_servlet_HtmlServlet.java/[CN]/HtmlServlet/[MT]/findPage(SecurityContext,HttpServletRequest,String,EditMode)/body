@@ -1,0 +1,15 @@
+{
+  List<Linkable> entryPoints=findPossibleEntryPoints(securityContext,request,path);
+  if (entryPoints.isEmpty()) {
+    entryPoints=findPossibleEntryPointsByName(securityContext,request,PathHelper.getName(path));
+  }
+  for (  Linkable node : entryPoints) {
+    if (node instanceof Page) {
+      final Page page=(Page)node;
+      if (EditMode.CONTENT.equals(edit) || isVisibleForSite(securityContext.getRequest(),page)) {
+        return page;
+      }
+    }
+  }
+  return null;
+}

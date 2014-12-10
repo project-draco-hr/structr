@@ -1,0 +1,12 @@
+{
+  final Result<Page> result=StructrApp.getInstance(securityContext).nodeQuery(Page.class).sort(Page.position).order(false).getResult();
+  Collections.sort(result.getResults(),new GraphObjectComparator(Page.position,GraphObjectComparator.ASCENDING));
+  if (!result.isEmpty()) {
+    for (    Page page : result.getResults()) {
+      if (securityContext.isVisible(page) && (EditMode.CONTENT.equals(edit) || isVisibleForSite(securityContext.getRequest(),page))) {
+        return page;
+      }
+    }
+  }
+  return null;
+}

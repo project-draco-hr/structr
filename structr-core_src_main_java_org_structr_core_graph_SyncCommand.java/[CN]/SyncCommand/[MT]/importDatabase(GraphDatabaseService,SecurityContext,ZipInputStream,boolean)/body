@@ -1,9 +1,9 @@
 {
   final App app=StructrApp.getInstance();
+  final DataInputStream dis=new DataInputStream(new BufferedInputStream(zis));
   final RelationshipFactory relFactory=new RelationshipFactory(securityContext);
   final NodeFactory nodeFactory=new NodeFactory(securityContext);
   final String uuidPropertyName=GraphObject.id.dbName();
-  final BufferedInputStream bis=new BufferedInputStream(zis);
   double t0=System.nanoTime();
   Map<String,Node> uuidMap=new LinkedHashMap<>();
   PropertyContainer currentObject=null;
@@ -19,20 +19,20 @@
       long relCount=0;
       do {
         try {
-          bis.mark(4);
-          String objectType=read(bis,1);
-          if ("\n".equals(objectType)) {
+          dis.mark(4);
+          byte objectType=dis.readByte();
+          if (objectType == '\n') {
             continue;
           }
-          if ("N".equals(objectType)) {
+          if (objectType == 'N') {
             currentObject=graphDb.createNode();
             nodeCount++;
             nodes.add((Node)currentObject);
           }
- else           if ("R".equals(objectType)) {
-            String startId=(String)deserialize(bis);
-            String endId=(String)deserialize(bis);
-            String relTypeName=(String)deserialize(bis);
+ else           if (objectType == 'R') {
+            String startId=(String)deserialize(dis);
+            String endId=(String)deserialize(dis);
+            String relTypeName=(String)deserialize(dis);
             Node endNode=uuidMap.get(endId);
             Node startNode=uuidMap.get(startId);
             if (startNode != null && endNode != null) {
@@ -43,13 +43,13 @@
             relCount++;
           }
  else {
-            bis.reset();
+            dis.reset();
             if (currentKey == null) {
-              currentKey=(String)deserialize(bis);
+              currentKey=(String)deserialize(dis);
             }
  else {
               if (currentObject != null) {
-                Object obj=deserialize(bis);
+                Object obj=deserialize(dis);
                 if (uuidPropertyName.equals(currentKey) && currentObject instanceof Node) {
                   String uuid=(String)obj;
                   uuidMap.put(uuid,(Node)currentObject);

@@ -1,5 +1,6 @@
 {
   final ZipEntry dbEntry=new ZipEntry(STRUCTR_ZIP_DB_NAME);
+  final DataOutputStream dos=new DataOutputStream(outputStream);
   final String uuidPropertyName=GraphObject.id.dbName();
   int nodeCount=0;
   int relCount=0;
@@ -9,14 +10,14 @@
     if (node.hasProperty(GraphObject.id.dbName())) {
       outputStream.write('N');
       for (      String key : node.getPropertyKeys()) {
-        serialize(outputStream,key);
-        serialize(outputStream,node.getProperty(key));
+        serialize(dos,key);
+        serialize(dos,node.getProperty(key));
       }
-      outputStream.write('\n');
+      dos.write('\n');
       nodeCount++;
     }
   }
-  outputStream.flush();
+  dos.flush();
   for (  RelationshipInterface relObject : relationships) {
     final Relationship rel=relObject.getRelationship();
     if (rel.hasProperty(GraphObject.id.dbName())) {
@@ -26,19 +27,19 @@
         String startId=(String)startNode.getProperty(uuidPropertyName);
         String endId=(String)endNode.getProperty(uuidPropertyName);
         outputStream.write('R');
-        serialize(outputStream,startId);
-        serialize(outputStream,endId);
-        serialize(outputStream,rel.getType().name());
+        serialize(dos,startId);
+        serialize(dos,endId);
+        serialize(dos,rel.getType().name());
         for (        String key : rel.getPropertyKeys()) {
-          serialize(outputStream,key);
-          serialize(outputStream,rel.getProperty(key));
+          serialize(dos,key);
+          serialize(dos,rel.getProperty(key));
         }
-        outputStream.write('\n');
+        dos.write('\n');
         relCount++;
       }
     }
   }
-  outputStream.flush();
+  dos.flush();
   zos.closeEntry();
   logger.log(Level.INFO,"Exported {0} nodes and {1} rels",new Object[]{nodeCount,relCount});
 }

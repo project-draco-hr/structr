@@ -1,0 +1,24 @@
+{
+  final String type=(String)SyncCommand.deserialize(inputStream);
+  if (type != null) {
+    final Class clazz=typeMap.get(type);
+    if (clazz != null) {
+      try {
+        final Message msg=(Message)clazz.newInstance();
+        msg.setId((String)SyncCommand.deserialize(inputStream));
+        msg.deserializeFrom(inputStream);
+        return msg;
+      }
+ catch (      Throwable t) {
+        t.printStackTrace();
+      }
+    }
+ else {
+      logger.log(Level.WARNING,"Invalid CloudService message: unknown type {0}",type);
+    }
+  }
+ else {
+    logger.log(Level.WARNING,"Invalid CloudService message: no type found.");
+  }
+  return null;
+}

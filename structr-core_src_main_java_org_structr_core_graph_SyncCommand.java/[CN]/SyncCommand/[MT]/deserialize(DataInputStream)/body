@@ -1,0 +1,22 @@
+{
+  Object serializedObject=null;
+  final byte type=inputStream.readByte();
+  Class clazz=classMap.get(type);
+  if (clazz != null) {
+    if (clazz.isArray()) {
+      final int len=inputStream.readInt();
+      final Object[] array=(Object[])Array.newInstance(clazz.getComponentType(),len);
+      for (int i=0; i < len; i++) {
+        array[i]=deserialize(inputStream);
+      }
+      serializedObject=array;
+    }
+ else {
+      serializedObject=readObject(inputStream,type);
+    }
+  }
+ else   if (type != 127) {
+    logger.log(Level.WARNING,"Unsupported type \"{0}\" in input",type);
+  }
+  return serializedObject;
+}

@@ -1,0 +1,45 @@
+{
+  if (obj != null) {
+    Class clazz=obj.getClass();
+    String type=typeMap.get(clazz);
+    if (type != null) {
+      if (clazz.isArray()) {
+        Object[] array=(Object[])obj;
+        int len=array.length;
+        int log=Integer.toString(len).length();
+        outputStream.write(type.getBytes("utf-8"));
+        outputStream.write(Integer.toString(log).getBytes("utf-8"));
+        outputStream.write(Integer.toString(len).getBytes("utf-8"));
+        for (        Object o : (Object[])obj) {
+          serialize(outputStream,o);
+        }
+      }
+ else       if (obj instanceof String) {
+        byte[] str=((String)obj).getBytes("utf-8");
+        int len=str.length;
+        int log=Integer.toString(len).length();
+        outputStream.write(type.getBytes("utf-8"));
+        outputStream.write(Integer.toString(log).getBytes("utf-8"));
+        outputStream.write(Integer.toString(len).getBytes("utf-8"));
+        outputStream.write(str);
+      }
+ else {
+        String str=obj.toString();
+        int len=str.length();
+        int log=Integer.toString(len).length();
+        outputStream.write(type.getBytes("utf-8"));
+        outputStream.write(Integer.toString(log).getBytes("utf-8"));
+        outputStream.write(Integer.toString(len).getBytes("utf-8"));
+        outputStream.write(str.getBytes("utf-8"));
+      }
+      outputStream.write(' ');
+    }
+ else {
+      logger.log(Level.WARNING,"Unable to serialize object of type {0}, type not supported",obj.getClass());
+    }
+  }
+ else {
+    outputStream.write("000 ".getBytes("utf-8"));
+  }
+  outputStream.flush();
+}

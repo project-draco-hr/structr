@@ -3,6 +3,7 @@
   final RelationshipFactory relFactory=new RelationshipFactory(securityContext);
   final NodeFactory nodeFactory=new NodeFactory(securityContext);
   final String uuidPropertyName=GraphObject.id.dbName();
+  final BufferedInputStream bis=new BufferedInputStream(zis);
   double t0=System.nanoTime();
   Map<String,Node> uuidMap=new LinkedHashMap<>();
   PropertyContainer currentObject=null;
@@ -10,7 +11,6 @@
   boolean finished=false;
   long totalNodeCount=0;
   long totalRelCount=0;
-  final BufferedReader reader=new BufferedReader(new InputStreamReader(zis));
   do {
     try (final Tx tx=app.tx(doValidation)){
       final List<Relationship> rels=new LinkedList<>();
@@ -19,8 +19,8 @@
       long relCount=0;
       do {
         try {
-          reader.mark(4);
-          String objectType=read(reader,1);
+          bis.mark(4);
+          String objectType=read(bis,1);
           if ("\n".equals(objectType)) {
             continue;
           }
@@ -30,9 +30,9 @@
             nodes.add((Node)currentObject);
           }
  else           if ("R".equals(objectType)) {
-            String startId=(String)deserialize(reader);
-            String endId=(String)deserialize(reader);
-            String relTypeName=(String)deserialize(reader);
+            String startId=(String)deserialize(bis);
+            String endId=(String)deserialize(bis);
+            String relTypeName=(String)deserialize(bis);
             Node endNode=uuidMap.get(endId);
             Node startNode=uuidMap.get(startId);
             if (startNode != null && endNode != null) {
@@ -43,13 +43,13 @@
             relCount++;
           }
  else {
-            reader.reset();
+            bis.reset();
             if (currentKey == null) {
-              currentKey=(String)deserialize(reader);
+              currentKey=(String)deserialize(bis);
             }
  else {
               if (currentObject != null) {
-                Object obj=deserialize(reader);
+                Object obj=deserialize(bis);
                 if (uuidPropertyName.equals(currentKey) && currentObject instanceof Node) {
                   String uuid=(String)obj;
                   uuidMap.put(uuid,(Node)currentObject);

@@ -1,0 +1,11 @@
+{
+  byte[] buf=new byte[len];
+  final int read=inputStream.read(buf,0,len);
+  if (read == len) {
+    return new String(buf,0,len,"utf-8");
+  }
+ else {
+    logger.log(Level.WARNING,"Unable to read string fully, expected {0}, got {1}: {2}",new Object[]{len,read,new String(buf)});
+  }
+  throw new EOFException();
+}

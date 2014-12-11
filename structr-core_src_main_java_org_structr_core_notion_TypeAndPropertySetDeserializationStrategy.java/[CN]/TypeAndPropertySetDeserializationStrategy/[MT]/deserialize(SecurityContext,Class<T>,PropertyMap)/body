@@ -11,7 +11,13 @@
         attributesComplete&=attributes.containsKey(key);
       }
       if (attributesComplete) {
-        result=app.nodeQuery(type).and(attributes).getResult();
+        final PropertyMap searchAttributes=new PropertyMap();
+        for (        final PropertyKey key : attributes.keySet()) {
+          if (key.relatedType() == null) {
+            searchAttributes.put(key,attributes.get(key));
+          }
+        }
+        result=app.nodeQuery(type).and(searchAttributes).getResult();
       }
     }
     final int size=result.size();

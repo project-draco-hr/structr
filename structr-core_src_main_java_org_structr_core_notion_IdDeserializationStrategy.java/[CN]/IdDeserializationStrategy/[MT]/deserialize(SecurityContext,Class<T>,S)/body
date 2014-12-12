@@ -25,53 +25,26 @@ case 1:
           relatedNode=possibleResults.get(0);
         break;
 default :
-      throw new FrameworkException(type.getSimpleName(),new AmbiguousRelationToken(propertyKey));
+      throw new FrameworkException(422,concat("Unable to resolve related node of type ",type.getSimpleName(),", ambiguous result: found ",num," nodes for the given property set."));
   }
+}
+ else {
 }
 }
 if (relatedNode == null) {
 if (relationProperty != null) {
   final Relation relation=relationProperty.getRelation();
-  if (relation != null) {
-switch (relation.getCascadingDeleteFlag()) {
-case Relation.ALWAYS:
-case Relation.CONSTRAINT_BASED:
-case Relation.SOURCE_TO_TARGET:
-      return app.create(type,map);
-case Relation.TARGET_TO_SOURCE:
-    logger.log(Level.INFO,"NOT creating related node for property {0} since cascading delete flag is TARGET_TO_SOURCE.",propertyKey);
-  throw new FrameworkException(type.getSimpleName(),new IdNotFoundToken(source));
-case Relation.NONE:
-logger.log(Level.INFO,"NOT creating related node for property {0} since cascading delete flag is NONE.",propertyKey);
-throw new FrameworkException(type.getSimpleName(),new IdNotFoundToken(source));
+  if (relationProperty.doAutocreate()) {
+    return app.create(type,map);
+  }
+ else {
+    throw new FrameworkException(422,concat("Cannot create ",relation.getOtherType(type).getSimpleName(),": no matching ",type.getSimpleName()," found for the given property set"," and autoCreate has a value of ",relationProperty.getAutocreateFlagName()));
+  }
 }
-}
-}
-logger.log(Level.INFO,"NOT creating related node for property {0} since no relation property was found.",propertyKey);
-throw new FrameworkException(type.getSimpleName(),new IdNotFoundToken(source));
+throw new FrameworkException(500,concat("Unable to resolve related node of type ",type.getSimpleName(),", no relation defined."));
 }
  else {
 return relatedNode;
-}
-}
- else if (source instanceof GraphObject) {
-Thread.dumpStack();
-GraphObject obj=(GraphObject)source;
-if (propertyKey != null) {
-final Result<T> results=(Result<T>)app.nodeQuery(NodeInterface.class).and(propertyKey,obj.getProperty(propertyKey)).getResult();
-int size=results.size();
-switch (size) {
-case 0:
-throw new FrameworkException(type.getSimpleName(),new IdNotFoundToken(source));
-case 1:
-return results.get(0);
-default :
-logger.log(Level.WARNING,"Got more than one result for UUID {0}. Either this is not an UUID or we have a collision.",source.toString());
-}
-}
- else {
-PropertyKey<String> idProperty=StructrApp.getConfiguration().getPropertyKeyForDatabaseName(obj.getClass(),GraphObject.id.dbName());
-return (T)app.get(obj.getProperty(idProperty));
 }
 }
  else {

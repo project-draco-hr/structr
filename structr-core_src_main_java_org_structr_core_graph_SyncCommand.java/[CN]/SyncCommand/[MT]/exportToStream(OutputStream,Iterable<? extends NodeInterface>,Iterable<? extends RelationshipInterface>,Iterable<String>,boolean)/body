@@ -2,7 +2,6 @@
   try {
     Set<String> filesToInclude=new LinkedHashSet<>();
     ZipOutputStream zos=new ZipOutputStream(outputStream);
-    PrintWriter writer=new PrintWriter(new BufferedWriter(new OutputStreamWriter(zos)));
     if (filePaths != null) {
       for (      String file : filePaths) {
         filesToInclude.add(file);
@@ -12,9 +11,10 @@
     if (includeFiles) {
       exportDirectory(zos,new File("files"),"",filesToInclude.isEmpty() ? null : filesToInclude);
     }
-    exportDatabase(zos,writer,nodes,relationships);
+    exportDatabase(zos,new BufferedOutputStream(zos),nodes,relationships);
     zos.finish();
-    writer.close();
+    zos.flush();
+    zos.close();
   }
  catch (  Throwable t) {
     t.printStackTrace();

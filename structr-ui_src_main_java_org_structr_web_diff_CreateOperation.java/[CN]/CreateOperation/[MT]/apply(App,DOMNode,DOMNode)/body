@@ -1,11 +1,13 @@
 {
-  final InsertPosition insertPosition=findInsertPosition(sourcePage,parentHash,siblingHashes,newNode);
+  final InsertPosition insertPosition=findInsertPosition(sourceNode,parentHash,siblingHashes,newNode);
   if (insertPosition != null) {
     final DOMNode parent=insertPosition.getParent();
     final DOMNode sibling=insertPosition.getSibling();
     if (parent != null && !parent.isSynced()) {
-      sourcePage.adoptNode(newNode);
-      parent.insertBefore(newNode,sibling);
+      if (sourceNode instanceof Page && !(newNode instanceof Page)) {
+        ((Page)sourceNode).adoptNode(newNode);
+        parent.insertBefore(newNode,sibling);
+      }
       hashMappedExistingNodes.put(newNode.getIdHashOrProperty(),newNode);
       for (      final DOMChildren childRel : newNode.getChildRelationships()) {
         app.delete(childRel);

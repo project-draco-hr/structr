@@ -1,17 +1,21 @@
 {
-  final String pageId=webSocketData.getId();
+  final String nodeId=webSocketData.getId();
   final Map<String,Object> nodeData=webSocketData.getNodeData();
   final String modifiedHtml=(String)nodeData.get("source");
   final SecurityContext securityContext=getWebSocket().getSecurityContext();
   final App app=StructrApp.getInstance(securityContext);
-  Page modifiedPage=null;
-  Page sourcePage=getPage(pageId);
-  if (sourcePage != null) {
+  DOMNode modifiedNode=null;
+  DOMNode sourceNode=(DOMNode)getNode(nodeId);
+  if (sourceNode != null) {
     try {
-      modifiedPage=Importer.parsePageFromSource(securityContext,modifiedHtml,"__SavePageCommand_Temporary_Page__");
-      final List<InvertibleModificationOperation> changeSet=Importer.diffPages(sourcePage,modifiedPage);
+      modifiedNode=Importer.parseNodeFromSource(securityContext,modifiedHtml,"__SaveNodeCommand_Temporary_Page__");
+      DOMNode targetNode=modifiedNode;
+      if (!(sourceNode instanceof Page)) {
+        targetNode=(DOMNode)modifiedNode.getFirstChild().getNextSibling().getFirstChild().getNextSibling().getFirstChild();
+      }
+      final List<InvertibleModificationOperation> changeSet=Importer.diffNodes(sourceNode,targetNode);
       for (      final InvertibleModificationOperation op : changeSet) {
-        op.apply(app,sourcePage,modifiedPage);
+        op.apply(app,sourceNode,targetNode);
       }
     }
  catch (    Throwable t) {
@@ -20,7 +24,7 @@
       getWebSocket().send(MessageBuilder.status().code(422).message(t.toString()).build(),true);
     }
     try {
-      app.delete(modifiedPage);
+      app.delete(modifiedNode);
     }
  catch (    FrameworkException ex) {
       ex.printStackTrace();

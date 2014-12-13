@@ -1,4 +1,8 @@
 {
+  if (protocolVersion != CloudService.PROTOCOL_VERSION) {
+    serverConnection.send(new Error(400,"Unsupported protocol version " + protocolVersion + ", server needs "+ CloudService.PROTOCOL_VERSION));
+    return;
+  }
   final Principal user=serverConnection.getUser(userName);
   if (user != null) {
     try {
@@ -12,6 +16,6 @@
     }
   }
  else {
-    serverConnection.send(new Error(401,"Wrong username or password."));
+    serverConnection.send(new Error(401,"Authentication failed."));
   }
 }

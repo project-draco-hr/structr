@@ -1,13 +1,3 @@
 {
-  final Importer importer=new Importer(securityContext,source,null,"source",0,true,true);
-  final App localAppCtx=StructrApp.getInstance(securityContext);
-  Page page=null;
-  try (final Tx tx=localAppCtx.tx()){
-    page=localAppCtx.create(Page.class,new NodeAttribute<>(Page.name,name));
-    if (importer.parse()) {
-      importer.createChildNodesWithHtml(page,page);
-    }
-    tx.success();
-  }
-   return page;
+  return parsePageFromSource(securityContext,source,name,false);
 }

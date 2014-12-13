@@ -7,7 +7,7 @@
     if (searchValue != null && !StringUtils.isBlank(searchValue.toString())) {
       final App app=StructrApp.getInstance(securityContext);
       final PropertyKey key=notion.getPrimaryPropertyKey();
-      final PropertyConverter inputConverter=key.inputConverter(securityContext);
+      final PropertyConverter inputConverter=key != null ? key.inputConverter(securityContext) : null;
       final Object transformedValue=inputConverter != null ? inputConverter.convert(searchValue) : searchValue;
       if (exactMatch) {
         Result<AbstractNode> result=app.nodeQuery(entityProperty.relatedType()).and(key,transformedValue).getResult();

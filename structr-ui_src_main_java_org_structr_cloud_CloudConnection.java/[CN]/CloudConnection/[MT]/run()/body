@@ -3,6 +3,9 @@
     try {
       final Message request=receiver.receive();
       if (request != null) {
+        if (CloudService.DEBUG) {
+          System.out.println("        RECEIVED " + request);
+        }
         sender.messageReceived();
         refreshTransmissionTimeout();
         if (wasSentFromHere(request)) {
@@ -10,9 +13,6 @@
         }
  else {
           request.onRequest(this,context);
-        }
-        if (CloudService.DEBUG) {
-          System.out.println("        => " + request);
         }
       }
       Thread.yield();

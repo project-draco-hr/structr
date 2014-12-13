@@ -1,42 +1,55 @@
 {
   final App app=StructrApp.getInstance(securityContext);
   if (source != null) {
-    Result<T> results=Result.EMPTY_RESULT;
     if (source instanceof JsonInput) {
-      JsonInput properties=(JsonInput)source;
-      PropertyMap map=PropertyMap.inputTypeToJavaType(securityContext,type,properties.getAttributes());
+      final JsonInput properties=(JsonInput)source;
+      final PropertyMap map=PropertyMap.inputTypeToJavaType(securityContext,type,properties.getAttributes());
+      T relatedNode=null;
       if (map.containsKey(GraphObject.id)) {
-        return (T)app.get(map.get(GraphObject.id));
+        relatedNode=(T)app.get(map.get(GraphObject.id));
       }
  else {
-        throw new FrameworkException(type.getSimpleName(),new IdNotFoundToken(source));
-      }
-    }
- else     if (source instanceof GraphObject) {
-      GraphObject obj=(GraphObject)source;
-      if (propertyKey != null) {
-        results=(Result<T>)app.nodeQuery(NodeInterface.class).and(propertyKey,obj.getProperty(propertyKey)).getResult();
-      }
- else {
-        PropertyKey<String> idProperty=StructrApp.getConfiguration().getPropertyKeyForDatabaseName(obj.getClass(),GraphObject.id.dbName());
-        return (T)app.get(obj.getProperty(idProperty));
-      }
-    }
- else {
-      return (T)app.get(source.toString());
-    }
-    int size=results.size();
-switch (size) {
+        final PropertyMap uniqueKeyValues=new PropertyMap();
+        for (        final PropertyKey key : map.keySet()) {
+          if (key.isUnique()) {
+            uniqueKeyValues.put(key,map.get(key));
+          }
+        }
+        if (!uniqueKeyValues.isEmpty()) {
+          final List<T> possibleResults=app.nodeQuery(type).and(uniqueKeyValues).getAsList();
+          final int num=possibleResults.size();
+switch (num) {
 case 0:
-      throw new FrameworkException(type.getSimpleName(),new IdNotFoundToken(source));
+            break;
 case 1:
-    return results.get(0);
+          relatedNode=possibleResults.get(0);
+        break;
 default :
-  logger.log(Level.WARNING,"Got more than one result for UUID {0}. Either this is not an UUID or we have a collision.",source.toString());
+      throw new FrameworkException(422,concat("Unable to resolve related node of type ",type.getSimpleName(),", ambiguous result: found ",num," nodes for the given property set."));
+  }
+}
+ else {
 }
 }
- else if (createIfNotExisting) {
-return app.create(type);
+if (relatedNode == null) {
+if (relationProperty != null) {
+  final Relation relation=relationProperty.getRelation();
+  if (relationProperty.doAutocreate()) {
+    return app.create(type,map);
+  }
+ else {
+    throw new FrameworkException(422,concat("Cannot create ",relation.getOtherType(type).getSimpleName(),": no matching ",type.getSimpleName()," found for the given property set"," and autoCreate has a value of ",relationProperty.getAutocreateFlagName()));
+  }
+}
+throw new FrameworkException(500,concat("Unable to resolve related node of type ",type.getSimpleName(),", no relation defined."));
+}
+ else {
+return relatedNode;
+}
+}
+ else {
+return (T)app.get(source.toString());
+}
 }
 return null;
 }

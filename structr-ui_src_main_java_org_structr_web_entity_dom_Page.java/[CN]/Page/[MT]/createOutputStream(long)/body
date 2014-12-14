@@ -6,7 +6,7 @@
       final App app=StructrApp.getInstance();
       try (Tx tx=app.tx()){
         Page modifiedPage=Importer.parsePageFromSource(securityContext,source,"__FTP_Temporary_Page__");
-        final List<InvertibleModificationOperation> changeSet=Importer.diffPages(origPage,modifiedPage);
+        final List<InvertibleModificationOperation> changeSet=Importer.diffNodes(origPage,modifiedPage);
         for (        final InvertibleModificationOperation op : changeSet) {
           op.apply(app,origPage,modifiedPage);
         }

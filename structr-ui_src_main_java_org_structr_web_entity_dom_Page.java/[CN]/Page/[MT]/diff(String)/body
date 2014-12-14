@@ -4,7 +4,7 @@
     final String source=IOUtils.toString(new FileInputStream(file));
     final List<InvertibleModificationOperation> changeSet=new LinkedList<>();
     final Page diffPage=Importer.parsePageFromSource(securityContext,source,this.getProperty(Page.name) + "diff");
-    changeSet.addAll(Importer.diffPages(this,diffPage));
+    changeSet.addAll(Importer.diffNodes(this,diffPage));
     for (    final InvertibleModificationOperation op : changeSet) {
       System.out.println(op);
       op.apply(app,this,diffPage);

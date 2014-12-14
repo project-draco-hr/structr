@@ -17,21 +17,14 @@
       syncables.add(new SyncableInfo(schemaRelationship));
     }
   }
-  for (  final Class<Syncable> type : types) {
-    Class cls;
-    try {
-      cls=Class.forName(type.getName());
-    }
- catch (    ClassNotFoundException ex) {
-      continue;
-    }
+  for (  final Class type : types) {
     if (NodeInterface.class.isAssignableFrom(type)) {
-      for (      final NodeInterface syncable : (Iterable<NodeInterface>)app.nodeQuery(cls).getAsList()) {
+      for (      final NodeInterface syncable : (Iterable<NodeInterface>)app.nodeQuery(type).getAsList()) {
         syncables.add(new SyncableInfo((Syncable)syncable));
       }
     }
  else     if (RelationshipInterface.class.isAssignableFrom(type)) {
-      for (      final RelationshipInterface syncable : (Iterable<RelationshipInterface>)app.relationshipQuery(cls).getAsList()) {
+      for (      final RelationshipInterface syncable : (Iterable<RelationshipInterface>)app.relationshipQuery(type).getAsList()) {
         syncables.add(new SyncableInfo((Syncable)syncable));
       }
     }

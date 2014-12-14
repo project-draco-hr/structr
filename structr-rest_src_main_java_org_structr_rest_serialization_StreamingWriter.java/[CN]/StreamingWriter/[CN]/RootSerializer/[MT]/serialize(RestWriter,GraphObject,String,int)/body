@@ -1,5 +1,11 @@
 {
-  visitedTypes.add(source.getClass());
+  String id=null;
+  if (source != null) {
+    id=source.getUuid();
+    if (id != null) {
+      visitedObjects.add(id);
+    }
+  }
   writer.beginObject(source);
   if (depth <= outputNestingDepth) {
     Iterable<PropertyKey> keys=source.getPropertyKeys(localPropertyView);
@@ -10,10 +16,16 @@
       for (      PropertyKey key : keys) {
         final Predicate predicate=writer.getSecurityContext().getRange(key.jsonName());
         final Object value=source.getProperty(key,predicate);
-        final Class relatedType=key.relatedType();
         final PropertyKey localKey=key;
         if (value != null) {
-          if (reduceRedundancy && relatedType != null && visitedTypes.contains(key.relatedType())) {
+          boolean skip=false;
+          if (reduceRedundancy && value instanceof GraphObject) {
+            String valueId=((GraphObject)value).getUuid();
+            if (valueId != null) {
+              skip=visitedObjects.contains(valueId);
+            }
+          }
+          if (skip) {
             continue;
           }
  else {
@@ -28,5 +40,7 @@
     }
   }
   writer.endObject(source);
-  visitedTypes.remove(source.getClass());
+  if (id != null) {
+    visitedObjects.remove(id);
+  }
 }

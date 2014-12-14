@@ -1,0 +1,27 @@
+{
+  if (obj != null) {
+    Class clazz=obj.getClass();
+    Byte type=typeMap.get(clazz);
+    if (type != null) {
+      if (clazz.isArray()) {
+        Object[] array=(Object[])obj;
+        outputStream.writeByte(type);
+        outputStream.writeInt(array.length);
+        for (        Object o : (Object[])obj) {
+          serialize(outputStream,o);
+        }
+      }
+ else {
+        outputStream.writeByte(type);
+        writeObject(outputStream,type,obj);
+      }
+    }
+ else {
+      logger.log(Level.WARNING,"Unable to serialize object of type {0}, type not supported",obj.getClass());
+    }
+  }
+ else {
+    outputStream.writeByte((byte)127);
+  }
+  outputStream.flush();
+}

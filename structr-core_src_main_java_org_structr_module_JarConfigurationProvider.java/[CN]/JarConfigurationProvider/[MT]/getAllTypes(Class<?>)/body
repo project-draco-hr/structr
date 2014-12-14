@@ -1,5 +1,5 @@
 {
-  Set<Class<?>> types=new LinkedHashSet<>();
+  List<Class<?>> types=new LinkedList<>();
   Class localType=type;
   do {
     collectAllInterfaces(localType,types);
@@ -7,5 +7,6 @@
     localType=localType.getSuperclass();
   }
  while (localType != null && !localType.equals(Object.class));
-  return types;
+  Collections.reverse(types);
+  return new LinkedHashSet<>(types);
 }

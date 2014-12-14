@@ -1,0 +1,36 @@
+{
+  final String nodeId=webSocketData.getId();
+  final Map<String,Object> nodeData=webSocketData.getNodeData();
+  final String modifiedHtml=(String)nodeData.get("source");
+  final SecurityContext securityContext=getWebSocket().getSecurityContext();
+  final App app=StructrApp.getInstance(securityContext);
+  Page modifiedNode=null;
+  DOMNode sourceNode=(DOMNode)getNode(nodeId);
+  if (sourceNode != null) {
+    try {
+      modifiedNode=Importer.parsePageFromSource(securityContext,modifiedHtml,"__SaveNodeCommand_Temporary_Page__");
+      DOMNode targetNode=modifiedNode;
+      if (!(sourceNode instanceof Page)) {
+        targetNode=(DOMNode)modifiedNode.getFirstChild().getNextSibling().getFirstChild().getNextSibling().getFirstChild();
+      }
+      final List<InvertibleModificationOperation> changeSet=Importer.diffNodes(sourceNode,targetNode);
+      for (      final InvertibleModificationOperation op : changeSet) {
+        op.apply(app,sourceNode.getClosestPage(),modifiedNode);
+      }
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,t.toString());
+      t.printStackTrace();
+      getWebSocket().send(MessageBuilder.status().code(422).message(t.toString()).build(),true);
+    }
+    try {
+      app.delete(modifiedNode);
+    }
+ catch (    FrameworkException ex) {
+      ex.printStackTrace();
+    }
+  }
+ else {
+    getWebSocket().send(MessageBuilder.status().code(422).message("Cannot save page").build(),true);
+  }
+}

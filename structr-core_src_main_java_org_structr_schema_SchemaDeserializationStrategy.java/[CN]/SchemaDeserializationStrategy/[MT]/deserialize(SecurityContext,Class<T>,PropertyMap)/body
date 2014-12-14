@@ -2,6 +2,14 @@
   final App app=StructrApp.getInstance(securityContext);
   if (attributes != null) {
     Result<T> result=Result.EMPTY_RESULT;
+    final PropertyMap foreignProperties=new PropertyMap();
+    for (final Iterator<PropertyKey> it=attributes.keySet().iterator(); it.hasNext(); ) {
+      final PropertyKey key=it.next();
+      if (foreignPropertyKeys.contains(key)) {
+        foreignProperties.put(key,attributes.get(key));
+        it.remove();
+      }
+    }
     if (attributes.containsKey(GraphObject.id)) {
       result=new Result(app.get(attributes.get(GraphObject.id)),false);
     }
@@ -11,21 +19,17 @@
         attributesComplete&=attributes.containsKey(key);
       }
       if (attributesComplete) {
-        result=app.nodeQuery(type).and(attributes).getResult();
+        final PropertyMap identifyingKeyValues=new PropertyMap();
+        for (        final PropertyKey key : identifyingPropertyKeys) {
+          identifyingKeyValues.put(key,attributes.get(key));
+        }
+        result=app.nodeQuery(type).and(identifyingKeyValues).getResult();
       }
     }
     final int size=result.size();
 switch (size) {
 case 0:
       if (createIfNotExisting) {
-        final PropertyMap foreignProperties=new PropertyMap();
-        for (final Iterator<PropertyKey> it=attributes.keySet().iterator(); it.hasNext(); ) {
-          final PropertyKey key=it.next();
-          if (foreignPropertyKeys.contains(key)) {
-            foreignProperties.put(key,attributes.get(key));
-            it.remove();
-          }
-        }
         T newNode=app.create(type,attributes);
         if (newNode != null) {
           Map<String,PropertyMap> notionPropertyMap=(Map<String,PropertyMap>)securityContext.getAttribute("notionProperties");

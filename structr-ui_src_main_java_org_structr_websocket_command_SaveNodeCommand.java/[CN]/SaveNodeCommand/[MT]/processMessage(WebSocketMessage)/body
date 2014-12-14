@@ -4,18 +4,18 @@
   final String modifiedHtml=(String)nodeData.get("source");
   final SecurityContext securityContext=getWebSocket().getSecurityContext();
   final App app=StructrApp.getInstance(securityContext);
-  DOMNode modifiedNode=null;
+  Page modifiedNode=null;
   DOMNode sourceNode=(DOMNode)getNode(nodeId);
   if (sourceNode != null) {
     try {
-      modifiedNode=Importer.parseNodeFromSource(securityContext,modifiedHtml,"__SaveNodeCommand_Temporary_Page__");
+      modifiedNode=Importer.parsePageFromSource(securityContext,modifiedHtml,"__SaveNodeCommand_Temporary_Page__");
       DOMNode targetNode=modifiedNode;
       if (!(sourceNode instanceof Page)) {
         targetNode=(DOMNode)modifiedNode.getFirstChild().getNextSibling().getFirstChild().getNextSibling().getFirstChild();
       }
       final List<InvertibleModificationOperation> changeSet=Importer.diffNodes(sourceNode,targetNode);
       for (      final InvertibleModificationOperation op : changeSet) {
-        op.apply(app,sourceNode,targetNode);
+        op.apply(app,sourceNode.getClosestPage(),modifiedNode);
       }
     }
  catch (    Throwable t) {

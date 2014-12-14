@@ -3,7 +3,7 @@
   try (final Tx tx=app.tx()){
     final String source=IOUtils.toString(new FileInputStream(file));
     final List<InvertibleModificationOperation> changeSet=new LinkedList<>();
-    final Page diffPage=(Page)Importer.parseNodeFromSource(securityContext,source,this.getProperty(Page.name) + "diff");
+    final Page diffPage=Importer.parsePageFromSource(securityContext,source,this.getProperty(Page.name) + "diff");
     changeSet.addAll(Importer.diffNodes(this,diffPage));
     for (    final InvertibleModificationOperation op : changeSet) {
       System.out.println(op);

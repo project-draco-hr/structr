@@ -37,13 +37,17 @@ case 0:
             notionPropertyMap=new LinkedHashMap<>();
             securityContext.setAttribute("notionProperties",notionPropertyMap);
           }
-          notionPropertyMap.put(newNode.getUuid(),foreignProperties);
+          notionPropertyMap.put(newNode.getUuid() + "." + relationProperty.getDirectionKey(),foreignProperties);
           return newNode;
         }
       }
     break;
 case 1:
-  return getTypedResult(result,type);
+  final T typedResult=getTypedResult(result,type);
+for (final Entry<PropertyKey,Object> entry : attributes.entrySet()) {
+  typedResult.setProperty(entry.getKey(),entry.getValue());
+}
+return typedResult;
 default :
 logger.log(Level.SEVERE,"Found {0} nodes for given type and properties, property set is ambiguous!\n" + "This is often due to wrong modeling, or you should consider creating a uniquness constraint for " + type.getName(),size);
 break;

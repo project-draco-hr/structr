@@ -10,8 +10,8 @@
   final PropertyMap properties=PropertyMap.databaseTypeToJavaType(securityContext,nodeType,receivedNodeData.getProperties());
   final String uuid=receivedNodeData.getSourceNodeId();
   NodeInterface newOrExistingNode=null;
-  final NodeInterface existingCandidate=app.nodeQuery().and(GraphObject.id,uuid).includeDeletedAndHidden().getFirst();
-  if (existingCandidate != null && existingCandidate instanceof NodeInterface) {
+  final GraphObject existingCandidate=app.get(nodeType,uuid);
+  if (existingCandidate != null) {
     newOrExistingNode=(NodeInterface)existingCandidate;
     ((Syncable)newOrExistingNode).updateFromPropertyMap(properties);
   }

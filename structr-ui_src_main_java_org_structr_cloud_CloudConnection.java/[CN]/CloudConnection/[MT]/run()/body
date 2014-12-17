@@ -4,18 +4,16 @@
       final Message request=receiver.receive();
       if (request != null) {
         if (CloudService.DEBUG) {
-          System.out.println("        RECEIVED " + request);
+          System.out.println(System.currentTimeMillis() + "        RECEIVED " + request);
         }
-        sender.messageReceived();
         refreshTransmissionTimeout();
-        if (wasSentFromHere(request)) {
+        if (request.wasSentFromHere()) {
           request.onResponse(this,context);
         }
  else {
           request.onRequest(this,context);
         }
       }
-      Thread.yield();
     }
  catch (    Throwable t) {
       t.printStackTrace();

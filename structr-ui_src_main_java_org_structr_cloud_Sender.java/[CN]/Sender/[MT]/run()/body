@@ -1,22 +1,23 @@
 {
   while (connection.isConnected()) {
-    if (messagesInFlight < CloudService.LIVE_PACKET_COUNT) {
-      try {
+    try {
+      while (!outputQueue.isEmpty()) {
         final Message message=outputQueue.poll();
         if (message != null) {
           message.serialize(outputStream);
-          outputStream.flush();
-          messagesInFlight++;
           message.afterSend(connection);
         }
       }
- catch (      Throwable t) {
-        t.printStackTrace();
-        connection.close();
-      }
+      outputStream.flush();
     }
- else {
+ catch (    Throwable t) {
+      t.printStackTrace();
+      connection.close();
+    }
+    try {
       Thread.yield();
+    }
+ catch (    Throwable t) {
     }
   }
 }

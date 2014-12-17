@@ -13,10 +13,13 @@
       logger.log(Level.SEVERE,"Could not create file",ex);
       return;
     }
+    unlockReadOnlyPropertiesOnce();
     setProperty(checksum,FileHelper.getChecksum(FileBase.this));
+    unlockReadOnlyPropertiesOnce();
     setProperty(version,0);
     long fileSize=FileHelper.getSize(FileBase.this);
     if (fileSize > 0) {
+      unlockReadOnlyPropertiesOnce();
       setProperty(size,fileSize);
     }
   }

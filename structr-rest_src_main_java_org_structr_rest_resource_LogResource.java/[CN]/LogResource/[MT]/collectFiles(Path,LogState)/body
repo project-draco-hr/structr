@@ -1,15 +1,21 @@
 {
+  final Map<String,ArrayList<String>> fileLines=new LinkedHashMap<>();
+  final List<Path> paths=new LinkedList<>();
   try (final DirectoryStream<Path> stream=Files.newDirectoryStream(dir,"*")){
     for (    final Path p : stream) {
       if (Files.isDirectory(p)) {
-        collectFiles(p,state);
+        fileLines.putAll(collectFiles(p,state));
       }
  else {
-        read(p,state);
+        paths.add(p);
       }
     }
   }
  catch (  IOException ioex) {
     ioex.printStackTrace();
   }
+  for (  final Path path : paths) {
+    fileLines.putAll(toMap(path,state));
+  }
+  return fileLines;
 }

@@ -1,0 +1,21 @@
+{
+  final StringBuilder buf=new StringBuilder();
+  buf.append("{ \"name\": \"");
+  buf.append(name);
+  buf.append("\"");
+  for (  final Pair pair : properties) {
+    final boolean isString=pair.value instanceof String;
+    buf.append(", \"");
+    buf.append(pair.key);
+    buf.append("\": ");
+    if (isString) {
+      buf.append("\"");
+    }
+    buf.append(pair.value);
+    if (isString) {
+      buf.append("\"");
+    }
+  }
+  buf.append(" }");
+  return createEntity("/schema_nodes",buf.toString());
+}

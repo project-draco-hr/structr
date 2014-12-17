@@ -11,16 +11,18 @@
       final String path=getDirectoryPath(fileName,8);
       final Path filePath=new File(filesPath + SUBJECTS + path+ fileName).toPath();
       if (Files.exists(filePath)) {
-        read(filePath,logState);
+        read(toMap(filePath,logState),logState);
       }
     }
  else     if (StringUtils.isNotEmpty(subjectId) && StringUtils.isEmpty(objectId)) {
       final String path=getDirectoryPath(subjectId,8);
       final Path directoryPath=new File(filesPath + SUBJECTS + path).toPath();
       try (final DirectoryStream<Path> stream=Files.newDirectoryStream(directoryPath,subjectId + "????????????????????????????????")){
+        final Map<String,ArrayList<String>> fileLines=new LinkedHashMap<>();
         for (        final Path p : stream) {
-          read(p,logState);
+          fileLines.putAll(toMap(p,logState));
         }
+        read(fileLines,logState);
       }
  catch (      IOException ioex) {
         ioex.printStackTrace();
@@ -31,20 +33,24 @@
       final String path=getDirectoryPath(objectId,8);
       final Path directoryPath=new File(filesPath + OBJECTS + path).toPath();
       try (final DirectoryStream<Path> stream=Files.newDirectoryStream(directoryPath,objectId + "????????????????????????????????")){
+        final Map<String,ArrayList<String>> fileLines=new LinkedHashMap<>();
         for (        final Path p : stream) {
-          read(p,logState);
+          fileLines.putAll(toMap(p,logState));
         }
+        read(fileLines,logState);
       }
  catch (      IOException ioex) {
         ioex.printStackTrace();
       }
     }
  else     if (logState.doActionQuery()) {
-      collectFiles(new File(filesPath + SUBJECTS).toPath(),logState);
+      final Map<String,ArrayList<String>> fileLines=collectFiles(new File(filesPath + SUBJECTS).toPath(),logState);
+      read(fileLines,logState);
     }
  else {
       logState.overview(true);
-      collectFiles(new File(filesPath + SUBJECTS).toPath(),logState);
+      final Map<String,ArrayList<String>> fileLines=collectFiles(new File(filesPath + SUBJECTS).toPath(),logState);
+      read(fileLines,logState);
     }
     if (logState.overview()) {
       overviewMap.put(actionsProperty,logState.actions());

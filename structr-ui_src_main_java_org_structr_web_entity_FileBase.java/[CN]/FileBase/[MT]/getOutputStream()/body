@@ -13,7 +13,9 @@
           try (Tx tx=StructrApp.getInstance().tx()){
             super.close();
             final String _contentType=FileHelper.getContentMimeType(FileBase.this);
+            unlockReadOnlyPropertiesOnce();
             setProperty(checksum,FileHelper.getChecksum(FileBase.this));
+            unlockReadOnlyPropertiesOnce();
             setProperty(size,FileHelper.getSize(FileBase.this));
             setProperty(contentType,_contentType);
             if (StringUtils.startsWith(_contentType,"image") || ImageHelper.isImageType(getProperty(name))) {

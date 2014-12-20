@@ -1,0 +1,44 @@
+{
+  Object value=constants.get(key);
+  if (value == null) {
+    if (data instanceof HttpServletRequest) {
+      value=((HttpServletRequest)data).getParameter(key);
+    }
+    if (data instanceof Map) {
+      value=((Map)data).get(key);
+    }
+    if (data != null) {
+      if (data instanceof GraphObject) {
+        value=((GraphObject)data).evaluate(securityContext,key,defaultValue);
+      }
+ else {
+switch (key) {
+case "size":
+          if (data instanceof Collection) {
+            return ((Collection)data).size();
+          }
+        break;
+    }
+  }
+}
+ else {
+switch (key) {
+case "request":
+    return securityContext.getRequest();
+case "now":
+  return new Date();
+case "me":
+return securityContext.getUser(false);
+case "element":
+case "this":
+return entity;
+case "id":
+return entity.getUuid();
+}
+}
+}
+if (value == null && defaultValue != null) {
+return Functions.numberOrString(defaultValue);
+}
+return value;
+}

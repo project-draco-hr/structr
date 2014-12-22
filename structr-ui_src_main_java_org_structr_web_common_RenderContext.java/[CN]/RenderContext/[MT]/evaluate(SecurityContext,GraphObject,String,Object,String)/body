@@ -17,13 +17,22 @@ case "link":
   }
  else {
 switch (key) {
-case "current":
-      return getDetailsDataObject();
-case "template":
-    if (entity instanceof DOMNode) {
-      return ((DOMNode)entity).getClosestTemplate(getPage());
+case "id":
+      GraphObject detailsObject=this.getDetailsDataObject();
+    if (detailsObject != null) {
+      return detailsObject.getUuid();
+    }
+ else     if (defaultValue != null) {
+      return Functions.numberOrString(defaultValue);
     }
   break;
+case "current":
+return getDetailsDataObject();
+case "template":
+if (entity instanceof DOMNode) {
+return ((DOMNode)entity).getClosestTemplate(getPage());
+}
+break;
 case "page":
 return getPage();
 case "parent":

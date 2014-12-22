@@ -1,0 +1,33 @@
+{
+  NodeInterface item=null;
+  try (final Tx tx=app.tx()){
+    app.create(SchemaNode.class,new NodeAttribute(SchemaNode.name,"Item"),new NodeAttribute(new StringProperty("_testMethodCalled"),"Boolean"),new NodeAttribute(new StringProperty("___testMethod"),"set(this, 'testMethodCalled', true)"));
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+    fail("Unexpected exception");
+  }
+  final ConfigurationProvider config=StructrApp.getConfiguration();
+  final Class itemClass=config.getNodeEntityClass("Item");
+  try (final Tx tx=app.tx()){
+    item=app.create(itemClass,new NodeAttribute(SchemaNode.name,"Item"));
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+    fail("Unexpected exception");
+  }
+  try (final Tx tx=app.tx()){
+    final RenderContext renderContext=new RenderContext();
+    renderContext.putDataObject("item",item);
+    assertEquals("Invalid combined array dot syntax result: ","Item",item.replaceVariables(securityContext,renderContext,"${find('Item')[0].name}"));
+    item.replaceVariables(securityContext,renderContext,"${item.testMethod()}");
+    assertEquals("Invalid method evaluation result: ","true",item.replaceVariables(securityContext,renderContext,"${item.testMethodCalled}"));
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+    fail("Unexpected exception");
+  }
+}

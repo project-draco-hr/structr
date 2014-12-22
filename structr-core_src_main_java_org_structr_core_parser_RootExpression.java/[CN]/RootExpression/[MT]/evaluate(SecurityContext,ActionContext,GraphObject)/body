@@ -1,6 +1,10 @@
 {
   if (!expressions.isEmpty()) {
-    return expressions.get(0).evaluate(securityContext,ctx,entity);
+    Object value=expressions.get(0).evaluate(securityContext,ctx,entity);
+    for (    final Expression expression : expressions) {
+      value=expression.transform(securityContext,ctx,entity,value);
+    }
+    return value;
   }
   return null;
 }

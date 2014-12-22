@@ -1,3 +1,7 @@
 {
-  return ctx.getReferencedProperty(securityContext,entity,keyword);
+  Object value=ctx.getReferencedProperty(securityContext,entity,keyword);
+  for (  final Expression expression : expressions) {
+    value=expression.transform(securityContext,ctx,entity,value);
+  }
+  return value;
 }

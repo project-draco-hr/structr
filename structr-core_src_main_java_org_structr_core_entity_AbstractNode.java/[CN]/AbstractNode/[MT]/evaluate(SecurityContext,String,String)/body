@@ -5,6 +5,23 @@ case "owner":
 default :
   final Object value=getProperty(StructrApp.getConfiguration().getPropertyKeyForJSONName(entityType,key));
 if (value == null) {
+  for (  Method method : StructrApp.getConfiguration().getExportedMethodsForType(entityType)) {
+    if (key.equals(method.getName())) {
+      if (method.getAnnotation(Export.class) != null) {
+        try {
+          method.invoke(this);
+        }
+ catch (        IllegalAccessException|IllegalArgumentException|InvocationTargetException t) {
+          if (t instanceof FrameworkException) {
+            throw (FrameworkException)t;
+          }
+ else           if (t.getCause() instanceof FrameworkException) {
+            throw (FrameworkException)t.getCause();
+          }
+        }
+      }
+    }
+  }
   return Functions.numberOrString(defaultValue);
 }
 return value;

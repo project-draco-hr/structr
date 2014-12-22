@@ -1,5 +1,5 @@
 {
-  final Date now=new Date();
+  NodeInterface detailsDataObject=null;
   Page page=null;
   DOMNode html=null;
   DOMNode head=null;
@@ -16,6 +16,7 @@
   DOMNode div4=null;
   DOMNode p4=null;
   try (final Tx tx=app.tx()){
+    detailsDataObject=app.create(TestOne.class,"TestOne");
     page=Page.createNewPage(securityContext,"testpage");
     assertTrue(page != null);
     assertTrue(page instanceof Page);
@@ -66,6 +67,7 @@
   }
   try (final Tx tx=app.tx()){
     final RenderContext ctx=new RenderContext();
+    ctx.setDetailsDataObject(detailsDataObject);
     ctx.setPage(page);
     assertEquals("",p1.replaceVariables(securityContext,ctx,"${err}"));
     assertEquals("",p1.replaceVariables(securityContext,ctx,"${this.error}"));
@@ -79,6 +81,11 @@
     assertEquals("no",p1.replaceVariables(securityContext,ctx,"${if(false, \"yes\", \"no\")}"));
     assertEquals("true",p1.replaceVariables(securityContext,ctx,"${if(true, true, false)}"));
     assertEquals("false",p1.replaceVariables(securityContext,ctx,"${if(false, true, false)}"));
+    assertEquals("${id} should evaluate to the ID if the current details object",detailsDataObject.getUuid(),p1.replaceVariables(securityContext,ctx,"${id}"));
+    ctx.setDetailsDataObject(null);
+    assertEquals("${id} should evaluate to the ID if the current details object","abc12345",p1.replaceVariables(securityContext,ctx,"${id!abc12345}"));
+    ctx.setDetailsDataObject(detailsDataObject);
+    assertEquals("${id} should be equal to ${current.id}","true",p1.replaceVariables(securityContext,ctx,"${equal(id, current.id)}"));
     assertEquals("${element} should evaluate to the current DOM node",p1.toString(),p1.replaceVariables(securityContext,ctx,"${element}"));
     assertNull(p1.replaceVariables(securityContext,ctx,"${if(true, null, \"no\")}"));
     assertNull(p1.replaceVariables(securityContext,ctx,"${null}"));
@@ -98,6 +105,7 @@
     final SecurityContext tester2Context=SecurityContext.getInstance(tester2,AccessMode.Backend);
     assertEquals("tester1",p1.replaceVariables(tester1Context,ctx,"${me.name}"));
     assertEquals("tester2",p1.replaceVariables(tester2Context,ctx,"${me.name}"));
+    tx.success();
   }
  catch (  FrameworkException fex) {
     fail("Unexpected exception");

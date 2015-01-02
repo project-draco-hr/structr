@@ -1,13 +1,16 @@
 {
   final Properties config=Services.getInstance().getCurrentConfig();
-  final String smtpHost=config.getProperty(Services.SMTP_HOST);
-  final String smtpPort=config.getProperty(Services.SMTP_PORT);
+  final String smtpHost=config.getProperty(Services.SMTP_HOST,"localhost");
+  final String smtpPort=config.getProperty(Services.SMTP_PORT,"25");
   final String smtpUser=config.getProperty(Services.SMTP_USER);
   final String smtpPassword=config.getProperty(Services.SMTP_PASSWORD);
+  final String smtpUseTLS=config.getProperty(Services.SMTP_USE_TLS,"true");
+  final String smtpRequireTLS=config.getProperty(Services.SMTP_REQUIRE_TLS,"false");
   mail.setCharset(charset);
   mail.setHostName(smtpHost);
   mail.setSmtpPort(Integer.parseInt(smtpPort));
-  mail.setTLS(true);
+  mail.setStartTLSEnabled(Boolean.parseBoolean(smtpUseTLS));
+  mail.setStartTLSRequired(Boolean.parseBoolean(smtpRequireTLS));
   mail.setCharset(charset);
   mail.setHostName(smtpHost);
   mail.setSmtpPort(Integer.parseInt(smtpPort));

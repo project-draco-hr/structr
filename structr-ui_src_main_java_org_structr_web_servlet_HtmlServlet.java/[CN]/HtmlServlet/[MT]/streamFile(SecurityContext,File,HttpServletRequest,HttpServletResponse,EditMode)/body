@@ -3,14 +3,18 @@
     response.sendError(HttpServletResponse.SC_NOT_FOUND);
     return;
   }
-  ServletOutputStream out=response.getOutputStream();
+  final ServletOutputStream out=response.getOutputStream();
+  final String downloadAsFilename=request.getParameter(DOWNLOAD_AS_FILENAME_KEY);
+  if (downloadAsFilename != null) {
+    response.addHeader("Content-Disposition","attachment; filename=\"" + downloadAsFilename + "\"");
+  }
   if (!EditMode.WIDGET.equals(edit) && notModifiedSince(request,response,file,false)) {
     out.flush();
     out.close();
   }
  else {
-    InputStream in=file.getInputStream();
-    String contentType=file.getContentType();
+    final InputStream in=file.getInputStream();
+    final String contentType=file.getContentType();
     if (contentType != null) {
       response.setContentType(contentType);
     }

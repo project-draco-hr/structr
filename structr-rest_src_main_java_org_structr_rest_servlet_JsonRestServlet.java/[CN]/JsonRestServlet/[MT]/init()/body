@@ -5,7 +5,13 @@
  catch (  Throwable t) {
     logger.log(Level.WARNING,"Unable to parse value for {0}: {1}",new Object[]{Services.JSON_INDENTATION,t.getMessage()});
   }
-  resourceMap.putAll(config.getResourceProvider().getResources());
+  final ResourceProvider provider=config.getResourceProvider();
+  if (provider != null) {
+    resourceMap.putAll(provider.getResources());
+  }
+ else {
+    logger.log(Level.SEVERE,"Unable to initialize JsonRestServlet, no resource provider found. Please check structr.conf for a valid resource provider class.");
+  }
   this.propertyView=new ThreadLocalPropertyView();
   this.gson=new ThreadLocalGson(config.getOutputNestingDepth());
 }

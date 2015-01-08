@@ -3,27 +3,14 @@ switch (key) {
 case "owner":
     return getOwnerNode();
 default :
-  final Object value=getProperty(StructrApp.getConfiguration().getPropertyKeyForJSONName(entityType,key));
-if (value == null) {
-  for (  Method method : StructrApp.getConfiguration().getExportedMethodsForType(entityType)) {
-    if (key.equals(method.getName())) {
-      if (method.getAnnotation(Export.class) != null) {
-        try {
-          method.invoke(this);
-        }
- catch (        IllegalAccessException|IllegalArgumentException|InvocationTargetException t) {
-          if (t instanceof FrameworkException) {
-            throw (FrameworkException)t;
-          }
- else           if (t.getCause() instanceof FrameworkException) {
-            throw (FrameworkException)t.getCause();
-          }
-        }
-      }
-    }
-  }
-  return Functions.numberOrString(defaultValue);
+  Object value=getProperty(StructrApp.getConfiguration().getPropertyKeyForJSONName(entityType,key));
+if (value != null) {
+  return value;
 }
+value=invokeMethod(key,Collections.EMPTY_MAP);
+if (value != null) {
 return value;
+}
+return Functions.numberOrString(defaultValue);
 }
 }

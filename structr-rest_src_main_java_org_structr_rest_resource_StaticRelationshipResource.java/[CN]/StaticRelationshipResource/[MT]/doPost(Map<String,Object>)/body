@@ -19,21 +19,24 @@
       }
     }
     if (newNode != null) {
-      RestMethodResult result=new RestMethodResult(HttpServletResponse.SC_CREATED);
+      final RestMethodResult result=new RestMethodResult(HttpServletResponse.SC_CREATED);
       result.addHeader("Location",buildLocationHeader(newNode));
       return result;
     }
   }
  else {
-    GraphObject entity=typedIdResource.getIdResource().getEntity();
-    Class entityType=typedIdResource.getEntityClass();
-    String methodName=typeResource.getRawType();
+    final GraphObject entity=typedIdResource.getIdResource().getEntity();
+    final Class entityType=typedIdResource.getEntityClass();
+    final String methodName=typeResource.getRawType();
     if (entity != null && entityType != null && methodName != null) {
-      for (      Method method : StructrApp.getConfiguration().getExportedMethodsForType(entityType)) {
+      for (      final Method method : StructrApp.getConfiguration().getExportedMethodsForType(entityType)) {
         if (methodName.equals(method.getName())) {
           if (method.getAnnotation(Export.class) != null) {
             try {
-              Object[] parameters=extractParameters(propertySet,method.getParameterTypes());
+              if (method.getParameterTypes().length == 1 && method.getParameterTypes()[0].equals(Map.class)) {
+                return (RestMethodResult)method.invoke(entity,propertySet);
+              }
+              final Object[] parameters=extractParameters(propertySet,method.getParameterTypes());
               return (RestMethodResult)method.invoke(entity,parameters);
             }
  catch (            IllegalAccessException|IllegalArgumentException|InvocationTargetException t) {

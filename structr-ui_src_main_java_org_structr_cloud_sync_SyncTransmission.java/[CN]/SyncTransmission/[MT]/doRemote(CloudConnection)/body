@@ -1,0 +1,32 @@
+{
+  int count=0;
+  for (  final ModificationEvent event : transaction) {
+    final GraphObject graphObject=event.getGraphObject();
+    if (event.isDeleted()) {
+      final String id=event.getRemovedProperties().get(GraphObject.id);
+      if (id != null) {
+        client.send(new Delete(id));
+      }
+    }
+ else {
+      final Set<String> propertyKeys=new LinkedHashSet<>();
+      mapPropertyKeysToStrings(propertyKeys,event.getNewProperties().keySet());
+      mapPropertyKeysToStrings(propertyKeys,event.getModifiedProperties().keySet());
+      mapPropertyKeysToStrings(propertyKeys,event.getRemovedProperties().keySet());
+      if (graphObject.isNode()) {
+        if (graphObject instanceof File) {
+          sendFile(client,(File)graphObject,CloudService.CHUNK_SIZE);
+        }
+ else {
+          client.send(new NodeDataContainer(graphObject.getSyncNode(),count,propertyKeys));
+        }
+      }
+ else {
+        client.send(new RelationshipDataContainer(graphObject.getSyncRelationship(),count,propertyKeys));
+      }
+    }
+    count++;
+  }
+  client.waitForTransmission();
+  return true;
+}

@@ -1,0 +1,19 @@
+{
+  while (running) {
+    try {
+      final List<ModificationEvent> transaction=syncQueue.take();
+      if (transaction != null) {
+        try (final Tx tx=StructrApp.getInstance().tx()){
+          CloudService.doRemote(new SyncTransmission(transaction,remoteUser,remotePwd,remoteHost,remotePort),null);
+          tx.success();
+        }
+ catch (        FrameworkException fex) {
+          fex.printStackTrace();
+        }
+      }
+    }
+ catch (    Throwable t) {
+      t.printStackTrace();
+    }
+  }
+}

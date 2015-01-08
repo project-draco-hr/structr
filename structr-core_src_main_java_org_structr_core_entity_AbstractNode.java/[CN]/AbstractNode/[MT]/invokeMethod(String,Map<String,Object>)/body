@@ -1,0 +1,27 @@
+{
+  for (  final Method method : StructrApp.getConfiguration().getExportedMethodsForType(entityType)) {
+    if (methodName.equals(method.getName())) {
+      if (method.getAnnotation(Export.class) != null) {
+        try {
+          if (method.getParameterTypes().length == 1 && method.getParameterTypes()[0].equals(Map.class)) {
+            return method.invoke(this,propertySet);
+          }
+          final Object[] parameters=extractParameters(propertySet,method.getParameterTypes());
+          return method.invoke(this,parameters);
+        }
+ catch (        IllegalAccessException|IllegalArgumentException|InvocationTargetException t) {
+          if (t instanceof FrameworkException) {
+            throw (FrameworkException)t;
+          }
+ else           if (t.getCause() instanceof FrameworkException) {
+            throw (FrameworkException)t.getCause();
+          }
+ else {
+            logger.log(Level.WARNING,"Unable to invoke method {0}: {1}",new Object[]{methodName,t.getMessage()});
+          }
+        }
+      }
+    }
+  }
+  return null;
+}

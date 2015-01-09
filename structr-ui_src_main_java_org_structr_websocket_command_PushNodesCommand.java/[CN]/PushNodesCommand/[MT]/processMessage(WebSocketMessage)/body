@@ -12,16 +12,11 @@
     try (final Tx tx=app.tx()){
       final GraphObject root=app.get(sourceId);
       if (root != null) {
-        if (root instanceof Syncable) {
-          boolean recursive=false;
-          if (recursiveSource != null) {
-            recursive="true".equals(recursiveSource.toString());
-          }
-          CloudService.doRemote(new PushTransmission((Syncable)root,recursive,username,password,host,port.intValue()),new WebsocketProgressListener(getWebSocket(),key));
+        boolean recursive=false;
+        if (recursiveSource != null) {
+          recursive="true".equals(recursiveSource.toString());
         }
- else {
-          getWebSocket().send(MessageBuilder.status().code(400).message("Entity with ID " + sourceId + " cannot be synced.").build(),true);
-        }
+        CloudService.doRemote(new PushTransmission(root,recursive),username,password,host,port.intValue(),new WebsocketProgressListener(getWebSocket(),key));
       }
  else {
         getWebSocket().send(MessageBuilder.status().code(404).message("Entity with ID " + sourceId + " not found.").build(),true);

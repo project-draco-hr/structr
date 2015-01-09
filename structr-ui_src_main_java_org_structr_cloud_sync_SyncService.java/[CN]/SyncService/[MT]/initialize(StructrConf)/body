@@ -1,0 +1,55 @@
+{
+  active="true".equals(config.getProperty("sync.enabled","false"));
+  if (active) {
+    final String minimum=config.getProperty("sync.minimum","1");
+    final String retry=config.getProperty("sync.retry","60");
+    final String hosts=config.getProperty("sync.hosts");
+    final String users=config.getProperty("sync.users");
+    final String pwds=config.getProperty("sync.passwords");
+    final String ports=config.getProperty("sync.ports");
+    if (StringUtils.isEmpty(hosts)) {
+      throw new IllegalStateException("no sync hosts set but service is enabled, please set sync.hosts in structr.conf.");
+    }
+    if (StringUtils.isEmpty(users)) {
+      throw new IllegalStateException("no sync users set but service is enabled, please set sync.users in structr.conf.");
+    }
+    if (StringUtils.isEmpty(pwds)) {
+      throw new IllegalStateException("no sync passwords set but service is enabled, please set sync.passwords in structr.conf.");
+    }
+    if (StringUtils.isEmpty(ports)) {
+      throw new IllegalStateException("no sync ports set but service is enabled, please set sync.ports in structr.conf.");
+    }
+    if (StringUtils.isNotBlank(retry)) {
+      this.retryInterval=Integer.valueOf(retry);
+    }
+    logger.log(Level.INFO,"Retry interval is set to {0} seconds",retryInterval);
+    final String[] remoteHosts=hosts.split("[, ]+");
+    final String[] remoteUsers=users.split("[, ]+");
+    final String[] remotePwds=pwds.split("[, ]+");
+    final String[] remotePorts=ports.split("[, ]+");
+    String previousUser=null;
+    String previousPwd=null;
+    String previousPort=null;
+    for (int i=0; i < remoteHosts.length; i++) {
+      final String host=remoteHosts[i];
+      final String user=remoteUsers.length > i ? remoteUsers[i] : previousUser;
+      final String pwd=remotePwds.length > i ? remotePwds[i] : previousPwd;
+      final String port=remotePorts.length > i ? remotePorts[i] : previousPort;
+      previousUser=user;
+      previousPwd=pwd;
+      previousPort=port;
+      if (StringUtils.isEmpty(user)) {
+        throw new IllegalStateException("no sync user found for remote host " + host + ", please set sync.users in structr.conf.");
+      }
+      if (StringUtils.isEmpty(pwd)) {
+        throw new IllegalStateException("no sync password found for remote host " + host + ", please set sync.passwords in structr.conf.");
+      }
+      if (StringUtils.isEmpty(port)) {
+        throw new IllegalStateException("no sync port found for remote host " + host + ", please set sync.ports in structr.conf.");
+      }
+      logger.log(Level.INFO,"Adding synchronization host {0}:{1}, user {2}",new Object[]{host,port,user});
+      syncHosts.add(new SyncHostInfo(host,user,pwd,port));
+    }
+    initializeSyncHosts(minimum);
+  }
+}

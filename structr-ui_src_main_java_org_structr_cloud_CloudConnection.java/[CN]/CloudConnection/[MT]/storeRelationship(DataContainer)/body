@@ -19,12 +19,12 @@
     final Class relType=config.getRelationshipEntityClass(typeName);
     if (targetStartNode != null && targetEndNode != null) {
       final RelationshipInterface existingCandidate=app.relationshipQuery().and(GraphObject.id,uuid).includeDeletedAndHidden().getFirst();
-      final PropertyMap properties=PropertyMap.databaseTypeToJavaType(securityContext,relType,receivedRelationshipData.getProperties());
       if (existingCandidate != null) {
-        ((Syncable)existingCandidate).updateFromPropertyMap(properties);
+        existingCandidate.updateFromPropertyMap(receivedRelationshipData.getProperties());
         return existingCandidate;
       }
  else {
+        final PropertyMap properties=PropertyMap.databaseTypeToJavaType(securityContext,relType,receivedRelationshipData.getProperties());
         return app.create(targetStartNode,targetEndNode,relType,properties);
       }
     }

@@ -1,0 +1,13 @@
+{
+  if (active && running && !modificationEvents.isEmpty()) {
+    try {
+      syncQueue.put(new ArrayList<>(modificationEvents));
+synchronized (syncQueue) {
+        syncQueue.notify();
+      }
+    }
+ catch (    InterruptedException iex) {
+      iex.printStackTrace();
+    }
+  }
+}

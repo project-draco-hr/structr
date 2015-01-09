@@ -7,17 +7,15 @@
     logger.log(Level.SEVERE,"Unknown entity type {0}",typeName);
     return null;
   }
-  final PropertyMap properties=PropertyMap.databaseTypeToJavaType(securityContext,nodeType,receivedNodeData.getProperties());
   final String uuid=receivedNodeData.getSourceNodeId();
-  NodeInterface newOrExistingNode=null;
-  final GraphObject existingCandidate=app.get(nodeType,uuid);
-  if (existingCandidate != null) {
-    newOrExistingNode=(NodeInterface)existingCandidate;
-    ((Syncable)newOrExistingNode).updateFromPropertyMap(properties);
+  GraphObject newOrExistingNode=app.get(nodeType,uuid);
+  if (newOrExistingNode != null) {
+    newOrExistingNode.updateFromPropertyMap(receivedNodeData.getProperties());
   }
  else {
+    final PropertyMap properties=PropertyMap.databaseTypeToJavaType(securityContext,nodeType,receivedNodeData.getProperties());
     newOrExistingNode=app.create(nodeType,properties);
   }
   idMap.put(receivedNodeData.getSourceNodeId(),newOrExistingNode.getUuid());
-  return newOrExistingNode;
+  return (NodeInterface)newOrExistingNode;
 }

@@ -1,0 +1,8 @@
+{
+  FileNodeDataContainer container=new FileNodeDataContainer(file);
+  client.send(container);
+  for (  FileNodeChunk chunk : FileNodeDataContainer.getChunks(file,chunkSize)) {
+    client.send(chunk);
+  }
+  client.send(new FileNodeEndChunk(container.getSourceNodeId(),container.getFileSize()));
+}

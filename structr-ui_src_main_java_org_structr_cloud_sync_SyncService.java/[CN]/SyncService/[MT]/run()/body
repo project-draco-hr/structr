@@ -1,14 +1,39 @@
 {
   while (running) {
     try {
-      final List<ModificationEvent> transaction=syncQueue.take();
+synchronized (syncQueue) {
+        while (syncQueue.isEmpty()) {
+          syncQueue.wait();
+        }
+      }
+      final List<ModificationEvent> transaction=syncQueue.peek();
       if (transaction != null) {
+        final SyncListener successListener=new SyncListener(requiredSyncCount);
         try (final Tx tx=StructrApp.getInstance().tx()){
-          CloudService.doRemote(new SyncTransmission(transaction,remoteUser,remotePwd,remoteHost,remotePort),null);
+          final SyncTransmission transmission=new SyncTransmission(transaction);
+          for (          final SyncHostInfo info : syncHosts) {
+            try {
+              CloudService.doRemote(transmission,info.getUser(),info.getPwd(),info.getHost(),info.getPort(),successListener);
+            }
+ catch (            FrameworkException fex) {
+              logger.log(Level.WARNING,"Unable to synchronize with host {0}: {1}",new Object[]{info.getHost(),fex.getMessage()});
+            }
+          }
           tx.success();
         }
  catch (        FrameworkException fex) {
           fex.printStackTrace();
+        }
+        if (successListener.wasSuccessful()) {
+          syncQueue.remove(transaction);
+        }
+ else {
+          logger.log(Level.WARNING,"Unable to synchronize with required number of hosts, retrying in {0} seconds..",retryInterval);
+          try {
+            Thread.sleep(retryInterval * 1000);
+          }
+ catch (          Throwable t) {
+          }
         }
       }
     }

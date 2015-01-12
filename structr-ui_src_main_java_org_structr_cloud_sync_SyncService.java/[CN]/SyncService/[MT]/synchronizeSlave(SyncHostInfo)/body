@@ -1,0 +1,10 @@
+{
+  logger.log(Level.INFO,"Establishing initial replication.");
+  try (final Tx tx=StructrApp.getInstance().tx()){
+    CloudService.doRemote(new UpdateTransmission(),info,new LoggingListener());
+    tx.success();
+  }
+ catch (  Throwable t) {
+    t.printStackTrace();
+  }
+}

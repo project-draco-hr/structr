@@ -1,0 +1,20 @@
+{
+  if (visitedObjectIDs != null) {
+    visitedObjectIDs.add(id);
+  }
+  final Set<String> sortedKeys=new TreeSet<>();
+  int hashCode=34262;
+  for (  final String key : propertyContainer.getPropertyKeys()) {
+    if (!ignoredPropertyKeys.contains(key)) {
+      sortedKeys.add(key);
+    }
+  }
+  for (  final String key : sortedKeys) {
+    final Object value=propertyContainer.getProperty(key,null);
+    if (value != null) {
+      hashCode^=key.hashCode();
+      hashCode^=value.hashCode();
+    }
+  }
+  return hashCode;
+}

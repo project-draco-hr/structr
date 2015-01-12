@@ -28,11 +28,14 @@
       }
  catch (      NotFoundException nfex) {
         logger.log(Level.INFO,"Trying to synchronize deleted entity, ignoring");
-        client.increaseTotal(-1);
       }
     }
     count++;
   }
+  final long lastSync=System.currentTimeMillis();
+  final App app=StructrApp.getInstance();
+  app.setGlobalSetting(currentInstanceId,lastSync);
+  client.send(new ReplicationStatus(StructrApp.getInstance().getInstanceId(),lastSync));
   client.waitForTransmission();
   return true;
 }

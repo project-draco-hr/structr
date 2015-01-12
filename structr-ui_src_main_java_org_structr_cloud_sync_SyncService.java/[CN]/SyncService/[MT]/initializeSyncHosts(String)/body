@@ -1,4 +1,38 @@
 {
+  final String instanceId=StructrApp.getInstance().getInstanceId();
+  for (Iterator<SyncHostInfo> it=syncHosts.iterator(); it.hasNext(); ) {
+    final SyncHostInfo host=it.next();
+    try {
+      final SingleTransmission<ReplicationStatus> transmission=new SingleTransmission<>(new ReplicationStatus(instanceId));
+      final ReplicationStatus status=CloudService.doRemote(transmission,host,new LoggingListener());
+      if (status != null) {
+        final String slaveId=status.getSlaveId();
+        if (slaveId != null) {
+          final long syncTimestamp=status.getLastSync();
+          String lastSyncString="not synced yet";
+          if (syncTimestamp != 0L) {
+            final SimpleDateFormat df=new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+            lastSyncString="last sync was " + df.format(syncTimestamp);
+          }
+          logger.log(Level.INFO,"Determined instance ID of {0} to be {1}, {2}.",new Object[]{host,slaveId,lastSyncString});
+          host.setReplicationStatus(status);
+        }
+ else {
+          logger.log(Level.WARNING,"Host {0} has no slave ID, not usable for sync.",host.getHostName());
+          it.remove();
+        }
+      }
+ else {
+        logger.log(Level.WARNING,"Synchronization server {0} not reachable, removing from list.",host);
+        it.remove();
+      }
+    }
+ catch (    Throwable t) {
+      t.printStackTrace();
+      logger.log(Level.WARNING,"Synchronization server {0} not reachable, removing from list.",host);
+      it.remove();
+    }
+  }
   final int numSyncHosts=syncHosts.size();
   requiredSyncCount=Integer.valueOf(minimum);
   if (numSyncHosts < requiredSyncCount) {
@@ -6,14 +40,6 @@
   }
   logger.log(Level.INFO,"Synchronization to {0} host{1} required.",new Object[]{requiredSyncCount,requiredSyncCount == 1 ? "" : "s"});
   for (  final SyncHostInfo host : syncHosts) {
-    try {
-      final Ping ping=CloudService.doRemote(new SingleTransmission<>(new Ping()),host.getUser(),host.getPwd(),host.getHost(),host.getPort(),null);
-      if (ping == null) {
-        throw new IllegalStateException("synchronization server " + host.getHost() + " not available.");
-      }
-    }
- catch (    FrameworkException ex) {
-      throw new IllegalStateException("synchronization server " + host.getHost() + " not available.");
-    }
+    checkAndInitializeSyncHost(host);
   }
 }

@@ -47,9 +47,15 @@
       if (StringUtils.isEmpty(port)) {
         throw new IllegalStateException("no sync port found for remote host " + host + ", please set sync.ports in structr.conf.");
       }
-      logger.log(Level.INFO,"Adding synchronization host {0}:{1}, user {2}",new Object[]{host,port,user});
-      syncHosts.add(new SyncHostInfo(host,user,pwd,port));
+      final SyncHostInfo syncHostInfo=new SyncHostInfo(host,user,pwd,port);
+      syncHosts.add(syncHostInfo);
+      logger.log(Level.INFO,"Adding synchronization host {0}, user {2}",new Object[]{syncHostInfo,port,user});
     }
-    initializeSyncHosts(minimum);
+    try {
+      initializeSyncHosts(minimum);
+    }
+ catch (    Throwable fex) {
+      fex.printStackTrace();
+    }
   }
 }

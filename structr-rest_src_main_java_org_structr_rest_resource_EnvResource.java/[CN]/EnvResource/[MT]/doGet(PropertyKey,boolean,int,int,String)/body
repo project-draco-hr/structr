@@ -1,0 +1,24 @@
+{
+  List<GraphObjectMap> resultList=new LinkedList<>();
+  GraphObjectMap info=new GraphObjectMap();
+  final String classPath=System.getProperty("java.class.path");
+  final Pattern outerPattern=Pattern.compile("(structr-.+?(?=.jar))");
+  Matcher outerMatcher=outerPattern.matcher(classPath);
+  List<Map<String,String>> modules=new LinkedList<>();
+  while (outerMatcher.find()) {
+    final String g=outerMatcher.group();
+    final Pattern innerPattern=Pattern.compile("(structr-core|structr-rest|structr-ui)-(.*)-([0-9a-f]{0,40}).*");
+    final Matcher innerMatcher=innerPattern.matcher(g);
+    final Map<String,String> module=new HashMap<>();
+    if (innerMatcher.matches()) {
+      module.put("module",innerMatcher.group(1));
+      module.put("version",innerMatcher.group(2));
+      module.put("build",innerMatcher.group(3));
+    }
+    modules.add(module);
+  }
+  info.setProperty(new StringProperty("modules"),modules);
+  info.setProperty(new StringProperty("classPath"),classPath);
+  resultList.add(info);
+  return new Result(resultList,resultList.size(),false,false);
+}

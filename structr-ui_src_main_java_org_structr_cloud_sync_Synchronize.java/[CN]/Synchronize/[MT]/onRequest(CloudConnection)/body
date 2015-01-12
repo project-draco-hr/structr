@@ -1,0 +1,26 @@
+{
+  final GraphDatabaseService graphDb=StructrApp.getInstance().getGraphDatabaseService();
+  final GlobalGraphOperations ggo=GlobalGraphOperations.at(graphDb);
+  final String uuidPropertyName=GraphObject.id.dbName();
+  final Set<Long> visitedObjectIDs=new HashSet<>();
+  for (  final Node node : ggo.getAllNodes()) {
+    if (!visitedObjectIDs.contains(node.getId())) {
+      final String hash=contentHashCode(node,visitedObjectIDs);
+      final Object uuid=node.getProperty(uuidPropertyName,null);
+      if (uuid != null && uuid instanceof String) {
+        serverConnection.send(new Diff(uuid.toString(),hash));
+      }
+    }
+  }
+  visitedObjectIDs.clear();
+  for (  final Relationship relationship : ggo.getAllRelationships()) {
+    if (!visitedObjectIDs.contains(relationship.getId())) {
+      final String hash=contentHashCode(relationship,visitedObjectIDs);
+      final Object uuid=relationship.getProperty(uuidPropertyName,null);
+      if (uuid != null && uuid instanceof String) {
+        serverConnection.send(new Diff(uuid.toString(),hash));
+      }
+    }
+  }
+  serverConnection.send(new Finish());
+}

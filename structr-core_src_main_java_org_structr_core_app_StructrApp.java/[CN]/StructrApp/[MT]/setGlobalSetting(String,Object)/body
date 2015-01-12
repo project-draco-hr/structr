@@ -1,0 +1,10 @@
+{
+  final NodeManager mgr=((GraphDatabaseAPI)getGraphDatabaseService()).getDependencyResolver().resolveDependency(NodeManager.class);
+  final GraphProperties config=mgr.getGraphProperties();
+  try (final Tx tx=StructrApp.getInstance().tx()){
+    config.setProperty(key,value);
+    tx.success();
+  }
+ catch (  Throwable t) {
+  }
+}

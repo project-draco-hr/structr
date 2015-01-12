@@ -1,0 +1,15 @@
+{
+  final NodeManager mgr=((GraphDatabaseAPI)getGraphDatabaseService()).getDependencyResolver().resolveDependency(NodeManager.class);
+  final GraphProperties config=mgr.getGraphProperties();
+  T value=null;
+  try (final Tx tx=StructrApp.getInstance().tx()){
+    value=(T)config.getProperty(key);
+    tx.success();
+  }
+ catch (  Throwable t) {
+  }
+  if (value == null) {
+    return defaultValue;
+  }
+  return value;
+}

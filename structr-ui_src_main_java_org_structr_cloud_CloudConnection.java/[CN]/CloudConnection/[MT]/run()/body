@@ -8,11 +8,17 @@
         }
         refreshTransmissionTimeout();
         if (request.wasSentFromHere()) {
-          request.onResponse(this,context);
+          request.onResponse(this);
         }
  else {
-          request.onRequest(this,context);
+          request.onRequest(this);
         }
+      }
+      if (count > 100) {
+        this.commitTransaction();
+        this.endTransaction();
+        this.beginTransaction();
+        count=0;
       }
     }
  catch (    Throwable t) {

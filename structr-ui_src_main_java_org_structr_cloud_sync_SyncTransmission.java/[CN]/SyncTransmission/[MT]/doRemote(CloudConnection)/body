@@ -1,41 +1,42 @@
 {
   int count=0;
-  for (  final ModificationEvent event : transaction) {
-    final GraphObject graphObject=event.getGraphObject();
-    if (event.isDeleted()) {
-      final String id=event.getRemovedProperties().get(GraphObject.id);
-      if (id != null) {
-        client.send(new Delete(id));
-      }
-    }
- else {
-      try {
-        final Set<String> propertyKeys=new LinkedHashSet<>();
-        mapPropertyKeysToStrings(propertyKeys,event.getNewProperties().keySet());
-        mapPropertyKeysToStrings(propertyKeys,event.getModifiedProperties().keySet());
-        mapPropertyKeysToStrings(propertyKeys,event.getRemovedProperties().keySet());
-        if (graphObject.isNode()) {
-          if (graphObject instanceof File) {
-            sendFile(client,(File)graphObject,CloudService.CHUNK_SIZE);
-          }
- else {
-            client.send(new NodeDataContainer(graphObject.getSyncNode(),count,propertyKeys));
-          }
-        }
- else {
-          client.send(new RelationshipDataContainer(graphObject.getSyncRelationship(),count,propertyKeys));
+  try (final Tx tx=StructrApp.getInstance().tx()){
+    for (    final ModificationEvent event : transaction) {
+      final GraphObject graphObject=event.getGraphObject();
+      if (event.isDeleted()) {
+        final String id=event.getRemovedProperties().get(GraphObject.id);
+        if (id != null) {
+          client.send(new Delete(id));
         }
       }
- catch (      NotFoundException nfex) {
-        logger.log(Level.INFO,"Trying to synchronize deleted entity, ignoring");
+ else {
+        try {
+          final Set<String> propertyKeys=new LinkedHashSet<>();
+          mapPropertyKeysToStrings(propertyKeys,event.getNewProperties().keySet());
+          mapPropertyKeysToStrings(propertyKeys,event.getModifiedProperties().keySet());
+          mapPropertyKeysToStrings(propertyKeys,event.getRemovedProperties().keySet());
+          if (graphObject.isNode()) {
+            if (graphObject instanceof File) {
+              sendFile(client,(File)graphObject,CloudService.CHUNK_SIZE);
+            }
+ else {
+              client.send(new NodeDataContainer(graphObject.getSyncNode(),count,propertyKeys));
+            }
+          }
+ else {
+            client.send(new RelationshipDataContainer(graphObject.getSyncRelationship(),count,propertyKeys));
+          }
+        }
+ catch (        NotFoundException nfex) {
+          logger.log(Level.INFO,"Trying to synchronize deleted entity, ignoring");
+        }
       }
+      count++;
     }
-    count++;
+    tx.success();
   }
-  final long lastSync=System.currentTimeMillis();
-  final App app=StructrApp.getInstance();
-  app.setGlobalSetting(currentInstanceId,lastSync);
-  client.send(new ReplicationStatus(StructrApp.getInstance().getInstanceId(),lastSync));
+   final String masterId=StructrApp.getInstance().getInstanceId();
+  client.send(new ReplicationStatus(masterId,StructrApp.getInstance().getGlobalSetting(masterId + ".lastModified",0L)));
   client.waitForTransmission();
   return true;
 }

@@ -6,8 +6,8 @@
         modificationQueue.doOuterCallbacks(securityContext);
         if (doNotifications) {
           final List<ModificationEvent> modificationEvents=modificationQueue.getModificationEvents();
-          for (          StructrTransactionListener listener : TransactionCommand.getTransactionListeners()) {
-            listener.transactionCommited(securityContext,modificationEvents);
+          for (          final StructrTransactionListener listener : TransactionCommand.getTransactionListeners()) {
+            listener.afterCommit(securityContext,modificationEvents,source);
           }
         }
         modificationQueue.clear();

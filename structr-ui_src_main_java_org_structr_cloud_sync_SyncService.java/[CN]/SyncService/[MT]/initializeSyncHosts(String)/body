@@ -1,7 +1,9 @@
 {
+  final SimpleDateFormat dateFormat=new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
   final String instanceId=StructrApp.getInstance().getInstanceId();
   for (Iterator<SyncHostInfo> it=syncHosts.iterator(); it.hasNext(); ) {
     final SyncHostInfo host=it.next();
+    boolean reachable=true;
     try {
       final SingleTransmission<ReplicationStatus> transmission=new SingleTransmission<>(new ReplicationStatus(instanceId));
       final ReplicationStatus status=CloudService.doRemote(transmission,host,new LoggingListener());
@@ -11,25 +13,25 @@
           final long syncTimestamp=status.getLastSync();
           String lastSyncString="not synced yet";
           if (syncTimestamp != 0L) {
-            final SimpleDateFormat df=new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-            lastSyncString="last sync was " + df.format(syncTimestamp);
+            lastSyncString="last sync was " + dateFormat.format(syncTimestamp);
           }
           logger.log(Level.INFO,"Determined instance ID of {0} to be {1}, {2}.",new Object[]{host,slaveId,lastSyncString});
           host.setReplicationStatus(status);
         }
  else {
-          logger.log(Level.WARNING,"Host {0} has no slave ID, not usable for sync.",host.getHostName());
-          it.remove();
+          reachable=false;
         }
       }
  else {
-        logger.log(Level.WARNING,"Synchronization server {0} not reachable, removing from list.",host);
-        it.remove();
+        reachable=false;
       }
     }
  catch (    Throwable t) {
       t.printStackTrace();
-      logger.log(Level.WARNING,"Synchronization server {0} not reachable, removing from list.",host);
+      reachable=false;
+    }
+    if (!reachable) {
+      logger.log(Level.WARNING,"Synchronization slave {0} not reachable, removing from list.",host);
       it.remove();
     }
   }

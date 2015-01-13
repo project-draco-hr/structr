@@ -9,21 +9,14 @@ synchronized (syncQueue) {
       final List<ModificationEvent> transaction=syncQueue.peek();
       if (transaction != null) {
         final SyncListener successListener=new SyncListener(requiredSyncCount);
-        try (final Tx tx=StructrApp.getInstance().tx()){
-          final SyncTransmission transmission=new SyncTransmission(transaction);
-          for (          final SyncHostInfo info : syncHosts) {
-            try {
-              transmission.setCurrentInstanceId(info.getInstanceId());
-              CloudService.doRemote(transmission,info,successListener);
-            }
- catch (            FrameworkException fex) {
-              logger.log(Level.WARNING,"Unable to synchronize with host {0}: {1}",new Object[]{info,fex.getMessage()});
-            }
+        final SyncTransmission transmission=new SyncTransmission(transaction);
+        for (        final SyncHostInfo info : syncHosts) {
+          try {
+            CloudService.doRemote(transmission,info,successListener);
           }
-          tx.success();
-        }
- catch (        FrameworkException fex) {
-          fex.printStackTrace();
+ catch (          FrameworkException fex) {
+            logger.log(Level.WARNING,"Unable to synchronize with host {0}: {1}",new Object[]{info,fex.getMessage()});
+          }
         }
         if (successListener.wasSuccessful()) {
           syncQueue.remove(transaction);

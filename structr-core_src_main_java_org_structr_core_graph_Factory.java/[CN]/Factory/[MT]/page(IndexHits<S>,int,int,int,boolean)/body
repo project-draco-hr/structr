@@ -1,0 +1,45 @@
+{
+  final List<T> nodes=new LinkedList<>();
+  int position=0;
+  int count=0;
+  int overallCount=0;
+  boolean pageFull=false;
+  if (dontCheckCount) {
+    overallCount=input.size();
+    PagingIterator<S> neoResult=new PagingIterator<S>(input.iterator(),pageSize);
+    neoResult.page(offset);
+    Iterator<S> resultPage=neoResult.nextPage();
+    while (resultPage.hasNext()) {
+      T n=(T)instantiate(resultPage.next());
+      if (n != null) {
+        nodes.add(n);
+      }
+    }
+  }
+ else {
+    try (final IndexHits<S> closeable=input){
+      for (      S node : closeable) {
+        T n=instantiate(node);
+        if (n != null) {
+          overallCount++;
+          if (++position > offset) {
+            if (++count > pageSize) {
+              pageFull=true;
+              if (dontCheckCount) {
+                overallCount=overallResultCount;
+                break;
+              }
+            }
+            if (!pageFull) {
+              nodes.add(n);
+            }
+            if (pageFull && (overallCount >= RESULT_COUNT_ACCURATE_LIMIT)) {
+              return new Result(nodes,overallResultCount,true,false);
+            }
+          }
+        }
+      }
+    }
+   }
+  return new Result(nodes,overallCount,true,false);
+}

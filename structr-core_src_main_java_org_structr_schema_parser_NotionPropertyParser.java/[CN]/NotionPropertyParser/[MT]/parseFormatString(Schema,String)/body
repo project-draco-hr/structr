@@ -4,15 +4,20 @@
   if (parts.length > 0) {
     final String baseProperty=parts[0];
     final String multiplicity=entity.getMultiplicity(baseProperty);
+    boolean isBuiltinProperty=false;
     if (multiplicity != null) {
       relatedType=entity.getRelatedType(baseProperty);
 switch (multiplicity) {
+case "1X":
+        isBuiltinProperty=true;
 case "1":
-        propertyType=EntityNotionProperty.class.getSimpleName();
-      break;
+      propertyType=EntityNotionProperty.class.getSimpleName();
+    break;
+case "*X":
+  isBuiltinProperty=true;
 case "*":
-    propertyType=CollectionNotionProperty.class.getSimpleName();
-  break;
+propertyType=CollectionNotionProperty.class.getSimpleName();
+break;
 default :
 break;
 }
@@ -20,7 +25,10 @@ buf.append(", ");
 buf.append(entity.getClassName());
 buf.append(".");
 buf.append(baseProperty);
-buf.append("Property,");
+if (!isBuiltinProperty) {
+buf.append("Property");
+}
+buf.append(",");
 final boolean isBoolean=(parts.length == 3 && ("true".equals(parts[2].toLowerCase())));
 if (parts.length == 2 || isBoolean) {
 buf.append(" new PropertyNotion(");
@@ -30,7 +38,7 @@ buf.append(" new PropertySetNotion(");
 }
 for (int i=1; i < parts.length; i++) {
 String propertyName=parts[i];
-if (!"true".equals(propertyName.toLowerCase())) {
+if (!"true".equals(propertyName.toLowerCase()) && !propertyName.contains(".")) {
 buf.append(relatedType);
 buf.append(".");
 }

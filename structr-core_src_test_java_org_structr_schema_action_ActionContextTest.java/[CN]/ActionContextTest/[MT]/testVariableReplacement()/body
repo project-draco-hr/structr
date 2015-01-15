@@ -682,6 +682,8 @@
     assertEquals("Invalid string array access result with nth","four",testFour.replaceVariables(securityContext,ctx,"${nth(this.stringArrayProperty, 3)}"));
     assertEquals("Invalid string array access result with contains()","true",testFour.replaceVariables(securityContext,ctx,"${contains(this.stringArrayProperty, 'two')}"));
     assertEquals("Invalid string array access result with contains()","false",testFour.replaceVariables(securityContext,ctx,"${contains(this.stringArrayProperty, 'five')}"));
+    assertEquals("Invalid find() result for empty values",testThree.getUuid(),testOne.replaceVariables(securityContext,ctx,"${first(find('TestThree', 'oneToOneTestSix', null))}"));
+    assertEquals("Invalid find() result for empty values",testThree.getUuid(),testOne.replaceVariables(securityContext,ctx,"${first(find('TestThree', 'oneToManyTestSix', null))}"));
     Integer noOfOnes=1;
     assertEquals("Invalid number of TestOne's","" + noOfOnes,testOne.replaceVariables(securityContext,ctx,"${size(find('TestOne'))}"));
     testFour.replaceVariables(securityContext,ctx,"${create('TestOne', 'name', 'createTestOne1')}");

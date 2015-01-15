@@ -1,0 +1,51 @@
+{
+  Principal user=null;
+  try (final Tx tx=app.tx()){
+    user=app.create(TestUser.class,"tester");
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+    fail("Unexpected exception");
+  }
+  try {
+    final SecurityContext userContext=SecurityContext.getInstance(user,AccessMode.Backend);
+    final App userApp=StructrApp.getInstance(userContext);
+    final Class type=TestOne.class;
+    final int number=1000;
+    final List<NodeInterface> allNodes=this.createTestNodes(type,number);
+    final List<NodeInterface> userNodes=new LinkedList<>();
+    final int offset=0;
+    try (final Tx tx=app.tx()){
+      int i=offset;
+      for (      NodeInterface node : allNodes) {
+        String _name="TestOne-" + StringUtils.leftPad(Integer.toString(i),5,"0");
+        if (Math.random() < 0.5) {
+          node.setProperty(NodeInterface.owner,user);
+          userNodes.add(node);
+        }
+        i++;
+        node.setProperty(AbstractNode.name,_name);
+      }
+      tx.success();
+    }
+     try (final Tx tx=app.tx()){
+      final PropertyKey sortKey=AbstractNode.name;
+      final boolean sortDesc=false;
+      final int pageSize=10;
+      final int page=22;
+      final Result result=userApp.nodeQuery(type).sort(sortKey).order(sortDesc).pageSize(pageSize).page(page).getResult();
+      assertEquals("Invalid paging result count with non-superuser security context",userNodes.size(),(int)result.getRawResultCount());
+      for (int i=0; i < pageSize; i++) {
+        final NodeInterface expected=userNodes.get((pageSize * (page - 1)) + i);
+        final NodeInterface actual=(NodeInterface)result.get(i);
+        assertEquals("Invalid paging result with non-superuser security context",expected,actual);
+      }
+      tx.success();
+    }
+   }
+ catch (  FrameworkException ex) {
+    logger.log(Level.SEVERE,ex.toString());
+    fail("Unexpected exception");
+  }
+}

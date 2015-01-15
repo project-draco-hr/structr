@@ -11,5 +11,14 @@
       return inRel.getMultiplicity(false);
     }
   }
+  final PropertyKey key=StructrApp.getConfiguration().getPropertyKeyForJSONName(NodeInterface.class,propertyNameToCheck,false);
+  if (key != null) {
+    if (key instanceof StartNode || key instanceof EndNode) {
+      return "1X";
+    }
+    if (key instanceof StartNodes || key instanceof EndNodes) {
+      return "*X";
+    }
+  }
   return null;
 }

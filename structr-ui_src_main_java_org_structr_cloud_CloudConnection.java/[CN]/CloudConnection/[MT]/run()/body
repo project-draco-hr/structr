@@ -12,7 +12,12 @@
           request.onRequest(this);
         }
       }
-      if (count > 100) {
+      if (count >= 100) {
+        final String message="Committing batch..";
+        sender.send(new Ping(message));
+        if (listener != null) {
+          listener.transmissionProgress(message);
+        }
         this.commitTransaction();
         this.endTransaction();
         this.beginTransaction();

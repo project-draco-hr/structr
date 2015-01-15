@@ -1,5 +1,4 @@
 {
-  client.send(new PushNodeRequestContainer());
   sequenceNumber=0;
   final Set<NodeInterface> nodes=exportSet.getNodes();
   for (  final NodeInterface n : nodes) {
@@ -14,6 +13,9 @@
   for (  RelationshipInterface r : rels) {
     if (nodes.contains(r.getSourceNode()) && nodes.contains(r.getTargetNode())) {
       client.send(new RelationshipDataContainer(r,sequenceNumber++));
+    }
+ else {
+      System.out.println("NOT sending relationship data container " + r + " because source or target node are not in the export set.");
     }
   }
   client.send(new End());

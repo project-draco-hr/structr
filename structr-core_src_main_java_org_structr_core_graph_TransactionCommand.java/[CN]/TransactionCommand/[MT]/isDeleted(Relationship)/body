@@ -1,0 +1,10 @@
+{
+  if (!inTransaction()) {
+    throw new IllegalStateException("Not in transaction.");
+  }
+  final ModificationQueue queue=queues.get();
+  if (queue != null) {
+    return queue.isDeleted(rel);
+  }
+  return false;
+}

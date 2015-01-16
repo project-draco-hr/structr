@@ -1,12 +1,7 @@
 {
   final String type=GraphObject.type.dbName();
-  final String sourceType=relationship.getStartNode().hasProperty(type) ? relationship.getStartNode().getProperty(type).toString() : "";
-  final String targetType=relationship.getEndNode().hasProperty(type) ? relationship.getEndNode().getProperty(type).toString() : "";
-  final String relType=relationship.getType().name();
-  final Class entityType=getClassForCombinedType(sourceType,relType,targetType);
-  if (entityType != null) {
-    logger.log(Level.FINE,"Class for assembled combined {0}",entityType.getName());
-    return entityType;
+  if (TransactionCommand.isDeleted(relationship)) {
+    return null;
   }
   if (relationship.hasProperty(type)) {
     Object obj=relationship.getProperty(type);
@@ -14,10 +9,17 @@
     if (obj != null) {
       Class relationClass=StructrApp.getConfiguration().getRelationshipEntityClass(obj.toString());
       if (relationClass != null) {
-        StructrApp.getConfiguration().setRelationClassForCombinedType(sourceType,relType,targetType,relationClass);
         return relationClass;
       }
     }
+  }
+  final String sourceType=relationship.getStartNode().hasProperty(type) ? relationship.getStartNode().getProperty(type).toString() : "";
+  final String targetType=relationship.getEndNode().hasProperty(type) ? relationship.getEndNode().getProperty(type).toString() : "";
+  final String relType=relationship.getType().name();
+  final Class entityType=getClassForCombinedType(sourceType,relType,targetType);
+  if (entityType != null) {
+    logger.log(Level.FINE,"Class for assembled combined {0}",entityType.getName());
+    return entityType;
   }
   final String combinedTypeName="combinedType";
   if (relationship.hasProperty(combinedTypeName)) {

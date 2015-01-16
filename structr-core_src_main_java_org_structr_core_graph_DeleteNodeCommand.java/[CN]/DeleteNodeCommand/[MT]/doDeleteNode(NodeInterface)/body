@@ -15,25 +15,29 @@
   try {
     List<NodeInterface> nodesToCheckAfterDeletion=new LinkedList<>();
     for (    AbstractRelationship rel : node.getOutgoingRelationships()) {
-      int cascadeDelete=rel.cascadeDelete();
-      NodeInterface endNode=rel.getTargetNode();
-      if ((cascadeDelete & Relation.CONSTRAINT_BASED) == Relation.CONSTRAINT_BASED) {
-        nodesToCheckAfterDeletion.add(endNode);
-      }
-      if (!deletedNodes.contains(endNode) && ((cascadeDelete & Relation.SOURCE_TO_TARGET) == Relation.SOURCE_TO_TARGET)) {
-        endNode.removeFromIndex();
-        doDeleteNode(endNode);
+      if (rel != null) {
+        int cascadeDelete=rel.cascadeDelete();
+        NodeInterface endNode=rel.getTargetNode();
+        if ((cascadeDelete & Relation.CONSTRAINT_BASED) == Relation.CONSTRAINT_BASED) {
+          nodesToCheckAfterDeletion.add(endNode);
+        }
+        if (!deletedNodes.contains(endNode) && ((cascadeDelete & Relation.SOURCE_TO_TARGET) == Relation.SOURCE_TO_TARGET)) {
+          endNode.removeFromIndex();
+          doDeleteNode(endNode);
+        }
       }
     }
     for (    AbstractRelationship rel : node.getIncomingRelationships()) {
-      int cascadeDelete=rel.cascadeDelete();
-      NodeInterface startNode=rel.getSourceNode();
-      if ((cascadeDelete & Relation.CONSTRAINT_BASED) == Relation.CONSTRAINT_BASED) {
-        nodesToCheckAfterDeletion.add(startNode);
-      }
-      if (!deletedNodes.contains(startNode) && ((cascadeDelete & Relation.TARGET_TO_SOURCE) == Relation.TARGET_TO_SOURCE)) {
-        startNode.removeFromIndex();
-        doDeleteNode(startNode);
+      if (rel != null) {
+        int cascadeDelete=rel.cascadeDelete();
+        NodeInterface startNode=rel.getSourceNode();
+        if ((cascadeDelete & Relation.CONSTRAINT_BASED) == Relation.CONSTRAINT_BASED) {
+          nodesToCheckAfterDeletion.add(startNode);
+        }
+        if (!deletedNodes.contains(startNode) && ((cascadeDelete & Relation.TARGET_TO_SOURCE) == Relation.TARGET_TO_SOURCE)) {
+          startNode.removeFromIndex();
+          doDeleteNode(startNode);
+        }
       }
     }
     node.onNodeDeletion();

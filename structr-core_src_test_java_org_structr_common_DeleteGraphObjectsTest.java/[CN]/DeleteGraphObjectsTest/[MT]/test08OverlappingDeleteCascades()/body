@@ -1,0 +1,40 @@
+{
+  try {
+    final List<TestTen> rootNodes=new LinkedList<>();
+    final List<TestTen> allChildren=new LinkedList<>();
+    final List<TestTen> allGrandChildren=new LinkedList<>();
+    try (final Tx tx=app.tx()){
+      rootNodes.addAll(createTestNodes(TestTen.class,3));
+      for (      final TestTen node : rootNodes) {
+        final List<TestTen> children=createTestNodes(TestTen.class,3);
+        node.setProperty(TestTen.tenTenChildren,children);
+        for (        final TestTen child : children) {
+          final List<TestTen> grandChildren=createTestNodes(TestTen.class,3);
+          child.setProperty(TestTen.tenTenChildren,grandChildren);
+          allGrandChildren.addAll(grandChildren);
+        }
+        allChildren.addAll(children);
+      }
+      rootNodes.get(0).setProperty(TestTen.testChild,allGrandChildren.get(0));
+      allChildren.get(0).setProperty(TestTen.testChild,allGrandChildren.get(1));
+      tx.success();
+    }
+     try (final Tx tx=app.tx()){
+      assertEquals("Wrong number of nodes",39,app.nodeQuery(TestTen.class).getAsList().size());
+      tx.success();
+    }
+     try (final Tx tx=app.tx()){
+      app.delete(rootNodes.get(0));
+      tx.success();
+    }
+     try (final Tx tx=app.tx()){
+      assertEquals("Wrong number of nodes",26,app.nodeQuery(TestTen.class).getAsList().size());
+      tx.success();
+    }
+   }
+ catch (  FrameworkException ex) {
+    ex.printStackTrace();
+    logger.log(Level.SEVERE,ex.toString());
+    fail("Unexpected exception");
+  }
+}

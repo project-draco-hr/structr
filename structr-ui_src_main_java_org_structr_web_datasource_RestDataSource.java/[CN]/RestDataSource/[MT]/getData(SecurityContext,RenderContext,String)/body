@@ -13,7 +13,7 @@
   resourceMap.putAll(resourceProvider.getResources());
   Value<String> propertyView=new ThreadLocalPropertyView();
   propertyView.set(securityContext,PropertyView.Ui);
-  HttpServletRequest request=new HttpServletRequestWrapper(renderContext == null ? securityContext.getRequest() : renderContext.getRequest()){
+  final HttpServletRequest request=new HttpServletRequestWrapper(renderContext == null ? securityContext.getRequest() : renderContext.getRequest()){
     @Override public Enumeration<String> getParameterNames(){
       return new IteratorEnumeration(getParameterMap().keySet().iterator());
     }
@@ -43,6 +43,7 @@
     }
   }
 ;
+  final HttpServletRequest origRequest=securityContext.getRequest();
   securityContext.setRequest(request);
   Resource resource=ResourceHelper.applyViewTransformation(request,securityContext,ResourceHelper.optimizeNestedResourceChain(ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,GraphObject.id),GraphObject.id),propertyView);
   String pageSizeParameter=request.getParameter(JsonRestServlet.REQUEST_PARAMETER_PAGE_SIZE);
@@ -69,5 +70,6 @@
   if (renderContext != null) {
     renderContext.setResult(result);
   }
+  securityContext.setRequest(origRequest);
   return res != null ? res : Collections.EMPTY_LIST;
 }

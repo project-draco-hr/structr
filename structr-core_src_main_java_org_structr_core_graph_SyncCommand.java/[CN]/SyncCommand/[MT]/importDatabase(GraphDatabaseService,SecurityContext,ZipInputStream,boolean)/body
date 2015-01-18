@@ -25,7 +25,7 @@
             continue;
           }
           if (objectType == 'N') {
-            if (nodeCount + relCount > 200) {
+            if (nodeCount + relCount >= 200) {
               dis.reset();
               break;
             }
@@ -34,7 +34,7 @@
             nodes.add((Node)currentObject);
           }
  else           if (objectType == 'R') {
-            if (nodeCount + relCount > 200) {
+            if (nodeCount + relCount >= 200) {
               dis.reset();
               break;
             }
@@ -47,8 +47,11 @@
               RelationshipType relType=DynamicRelationshipType.withName(relTypeName);
               currentObject=startNode.createRelationshipTo(endNode,relType);
               rels.add((Relationship)currentObject);
+              relCount++;
             }
-            relCount++;
+ else {
+              System.out.println("NOT creating relationship of type " + relTypeName + ", start: "+ startId+ ", end: "+ endId);
+            }
           }
  else {
             dis.reset();

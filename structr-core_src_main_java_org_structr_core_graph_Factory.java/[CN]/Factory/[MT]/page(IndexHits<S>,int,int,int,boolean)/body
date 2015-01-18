@@ -6,8 +6,13 @@
   boolean pageFull=false;
   if (dontCheckCount) {
     overallCount=input.size();
-    PagingIterator<S> neoResult=new PagingIterator<S>(input.iterator(),pageSize);
-    neoResult.page(offset);
+    PagingIterator<S> neoResult=new PagingIterator<>(input.iterator(),pageSize);
+    try {
+      neoResult.page(offset);
+    }
+ catch (    NoSuchElementException nex) {
+      return new Result(nodes,overallCount,true,false);
+    }
     Iterator<S> resultPage=neoResult.nextPage();
     while (resultPage.hasNext()) {
       T n=(T)instantiate(resultPage.next());

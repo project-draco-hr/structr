@@ -1,0 +1,13 @@
+{
+  try {
+    final Class type=TestOne.class;
+    createTestNodes(type,20);
+    try (final Tx tx=app.tx()){
+      app.nodeQuery(type).pageSize(10).page(100).getAsList();
+      tx.success();
+    }
+   }
+ catch (  Throwable t) {
+    fail("Requesting a page beyond the number of existing elements should not throw an exception.");
+  }
+}

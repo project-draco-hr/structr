@@ -25,11 +25,19 @@
             continue;
           }
           if (objectType == 'N') {
+            if (nodeCount + relCount > 200) {
+              dis.reset();
+              break;
+            }
             currentObject=graphDb.createNode();
             nodeCount++;
             nodes.add((Node)currentObject);
           }
  else           if (objectType == 'R') {
+            if (nodeCount + relCount > 200) {
+              dis.reset();
+              break;
+            }
             String startId=(String)deserialize(dis);
             String endId=(String)deserialize(dis);
             String relTypeName=(String)deserialize(dis);
@@ -75,7 +83,7 @@
           finished=true;
         }
       }
- while (!finished && (nodeCount + relCount < 200));
+ while (!finished);
       totalNodeCount+=nodeCount;
       totalRelCount+=relCount;
       for (      Node node : nodes) {

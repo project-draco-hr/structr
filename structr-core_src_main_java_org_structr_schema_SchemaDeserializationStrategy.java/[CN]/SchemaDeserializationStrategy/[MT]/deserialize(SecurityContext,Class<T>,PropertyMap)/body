@@ -26,26 +26,31 @@
         result=app.nodeQuery(type).and(identifyingKeyValues).getResult();
       }
     }
+    Map<String,PropertyMap> notionPropertyMap=(Map<String,PropertyMap>)securityContext.getAttribute("notionProperties");
+    if (notionPropertyMap == null) {
+      notionPropertyMap=new HashMap<>();
+      securityContext.setAttribute("notionProperties",notionPropertyMap);
+    }
+    System.out.println("################################################################################");
     final int size=result.size();
 switch (size) {
 case 0:
       if (createIfNotExisting) {
         T newNode=app.create(type,attributes);
         if (newNode != null) {
-          Map<String,PropertyMap> notionPropertyMap=(Map<String,PropertyMap>)securityContext.getAttribute("notionProperties");
-          if (notionPropertyMap == null) {
-            notionPropertyMap=new LinkedHashMap<>();
-            securityContext.setAttribute("notionProperties",notionPropertyMap);
-          }
-          notionPropertyMap.put(newNode.getUuid() + "." + relationProperty.getDirectionKey(),foreignProperties);
+          final String storageKey=sourceNode.getUuid() + relationProperty.getRelation().getClass() + newNode.getUuid();
+          System.out.println("SET: " + storageKey + ": "+ foreignProperties);
+          notionPropertyMap.put(storageKey,foreignProperties);
           return newNode;
         }
       }
     break;
 case 1:
   final T typedResult=getTypedResult(result,type);
+System.out.println("SET: " + typedResult.getUuid() + "."+ relationProperty.getDirectionKey()+ ": "+ typedResult.getName()+ ": "+ foreignProperties);
+notionPropertyMap.put(typedResult.getUuid() + "." + relationProperty.getDirectionKey(),foreignProperties);
 for (final Entry<PropertyKey,Object> entry : attributes.entrySet()) {
-  typedResult.setProperty(entry.getKey(),entry.getValue());
+typedResult.setProperty(entry.getKey(),entry.getValue());
 }
 return typedResult;
 default :

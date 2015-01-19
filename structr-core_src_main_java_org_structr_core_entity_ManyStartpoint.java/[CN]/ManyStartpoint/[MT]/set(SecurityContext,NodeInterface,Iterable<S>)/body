@@ -5,7 +5,7 @@
   if (collection != null) {
     Iterables.addAll(toBeCreated,collection);
   }
-  final Set<S> intersection=new LinkedHashSet<>(toBeCreated);
+  final Set<S> intersection=new HashSet<>(toBeCreated);
   intersection.retainAll(toBeDeleted);
   toBeCreated.removeAll(intersection);
   toBeDeleted.removeAll(intersection);
@@ -20,8 +20,9 @@
   }
   for (  S sourceNode : toBeCreated) {
     if (sourceNode != null && targetNode != null) {
+      final String storageKey=sourceNode.getName() + relation.name() + targetNode.getName();
       relation.ensureCardinality(securityContext,sourceNode,targetNode);
-      app.create(sourceNode,targetNode,relation.getClass(),getNotionProperties(securityContext,relation.getClass(),sourceNode.getUuid() + ".in"));
+      app.create(sourceNode,targetNode,relation.getClass(),getNotionProperties(securityContext,relation.getClass(),storageKey));
     }
   }
 }

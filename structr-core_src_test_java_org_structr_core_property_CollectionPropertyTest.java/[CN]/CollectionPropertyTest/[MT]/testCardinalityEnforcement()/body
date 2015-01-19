@@ -1,0 +1,28 @@
+{
+  SchemaNode task=null;
+  SchemaNode worker=null;
+  try (final Tx tx=app.tx()){
+    task=createTestNode(SchemaNode.class,"Task");
+    worker=createTestNode(SchemaNode.class,"Worker");
+    final PropertyMap taskTaskProperties=new PropertyMap();
+    taskTaskProperties.put(SchemaRelationship.relationshipType,"SUBTASK");
+    app.create(task,task,SchemaRelationship.class,taskTaskProperties);
+    final PropertyMap workerTaskProperties=new PropertyMap();
+    workerTaskProperties.put(SchemaRelationship.relationshipType,"WORKS_ON");
+    app.create(worker,task,SchemaRelationship.class,workerTaskProperties);
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fail("Unexpected exception.");
+  }
+  try (final Tx tx=app.tx()){
+    final List<SchemaNode> relatedTos=task.getProperty(SchemaNode.relatedTo);
+    final List<SchemaNode> relatedFroms=task.getProperty(SchemaNode.relatedFrom);
+    assertEquals("Invalid cardinality result",1,relatedTos.size());
+    assertEquals("Invalid cardinality result",2,relatedFroms.size());
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fail("Unexpected exception.");
+  }
+}

@@ -1,10 +1,14 @@
 {
   return new PropertyConverter<T,S>(securityContext,null){
     @Override public T revert(    S source) throws FrameworkException {
-      return getAdapterForGetter(securityContext).adapt(source);
+      final NotionAdapter<S,T> adapter=(NotionAdapter)getAdapterForGetter(securityContext);
+      adapter.setContext(context);
+      return adapter.adapt(source);
     }
     @Override public S convert(    T source) throws FrameworkException {
-      return getAdapterForSetter(securityContext).adapt(source);
+      final NotionAdapter<T,S> adapter=(NotionAdapter)getAdapterForSetter(securityContext);
+      adapter.setContext(context);
+      return adapter.adapt(source);
     }
   }
 ;

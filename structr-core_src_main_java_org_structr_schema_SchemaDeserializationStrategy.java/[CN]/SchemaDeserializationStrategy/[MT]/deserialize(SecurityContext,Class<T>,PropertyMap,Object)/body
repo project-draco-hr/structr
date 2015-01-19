@@ -10,6 +10,7 @@
         it.remove();
       }
     }
+    final String sourceTypeName=(String)((Map)context).get("name");
     if (attributes.containsKey(GraphObject.id)) {
       result=new Result(app.get(attributes.get(GraphObject.id)),false);
     }
@@ -26,26 +27,27 @@
         result=app.nodeQuery(type).and(identifyingKeyValues).getResult();
       }
     }
+    Map<String,PropertyMap> notionPropertyMap=(Map<String,PropertyMap>)securityContext.getAttribute("notionProperties");
+    if (notionPropertyMap == null) {
+      notionPropertyMap=new HashMap<>();
+      securityContext.setAttribute("notionProperties",notionPropertyMap);
+    }
     final int size=result.size();
 switch (size) {
 case 0:
       if (createIfNotExisting) {
         T newNode=app.create(type,attributes);
         if (newNode != null) {
-          Map<String,PropertyMap> notionPropertyMap=(Map<String,PropertyMap>)securityContext.getAttribute("notionProperties");
-          if (notionPropertyMap == null) {
-            notionPropertyMap=new LinkedHashMap<>();
-            securityContext.setAttribute("notionProperties",notionPropertyMap);
-          }
-          notionPropertyMap.put(newNode.getUuid() + "." + relationProperty.getDirectionKey(),foreignProperties);
+          notionPropertyMap.put(getStorageKey(relationProperty,newNode,sourceTypeName),foreignProperties);
           return newNode;
         }
       }
     break;
 case 1:
   final T typedResult=getTypedResult(result,type);
+notionPropertyMap.put(getStorageKey(relationProperty,typedResult,sourceTypeName),foreignProperties);
 for (final Entry<PropertyKey,Object> entry : attributes.entrySet()) {
-  typedResult.setProperty(entry.getKey(),entry.getValue());
+typedResult.setProperty(entry.getKey(),entry.getValue());
 }
 return typedResult;
 default :

@@ -38,18 +38,14 @@ case 0:
       if (createIfNotExisting) {
         T newNode=app.create(type,attributes);
         if (newNode != null) {
-          final String storageKey=getStorageKey(relationProperty,newNode,sourceTypeName);
-          System.out.println("0: SET: " + storageKey + ": "+ foreignProperties);
-          notionPropertyMap.put(storageKey,foreignProperties);
+          notionPropertyMap.put(getStorageKey(relationProperty,newNode,sourceTypeName),foreignProperties);
           return newNode;
         }
       }
     break;
 case 1:
   final T typedResult=getTypedResult(result,type);
-final String storageKey=getStorageKey(relationProperty,typedResult,sourceTypeName);
-System.out.println("1: SET: " + storageKey + ": "+ foreignProperties);
-notionPropertyMap.put(storageKey,foreignProperties);
+notionPropertyMap.put(getStorageKey(relationProperty,typedResult,sourceTypeName),foreignProperties);
 for (final Entry<PropertyKey,Object> entry : attributes.entrySet()) {
 typedResult.setProperty(entry.getKey(),entry.getValue());
 }

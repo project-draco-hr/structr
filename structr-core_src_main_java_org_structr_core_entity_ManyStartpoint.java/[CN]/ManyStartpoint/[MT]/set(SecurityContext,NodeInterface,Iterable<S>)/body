@@ -1,11 +1,11 @@
 {
   final App app=StructrApp.getInstance(securityContext);
-  final Set<S> toBeDeleted=new LinkedHashSet<>(Iterables.toList(get(securityContext,targetNode,null)));
-  final Set<S> toBeCreated=new LinkedHashSet<>();
+  final Set<S> toBeDeleted=new HashSet<>(Iterables.toList(get(securityContext,targetNode,null)));
+  final Set<S> toBeCreated=new HashSet<>();
   if (collection != null) {
     Iterables.addAll(toBeCreated,collection);
   }
-  final Set<S> intersection=new LinkedHashSet<>(toBeCreated);
+  final Set<S> intersection=new HashSet<>(toBeCreated);
   intersection.retainAll(toBeDeleted);
   toBeCreated.removeAll(intersection);
   toBeDeleted.removeAll(intersection);
@@ -14,15 +14,21 @@
       final String relTypeName=rel.getRelType().name();
       final String desiredRelType=relation.name();
       if (relTypeName.equals(desiredRelType) && rel.getSourceNode().equals(sourceNode)) {
+        System.out.println("DELETING            " + rel.getSourceNode() + "-"+ rel.getRelType().name()+ "->"+ rel.getTargetNode());
+        System.out.println("                   (" + rel.getSourceNode().getName() + "-"+ rel.getRelType().name()+ "->"+ rel.getTargetNode().getName()+ ")");
+        System.out.println("to be replaced with " + sourceNode.getUuid() + "-"+ relation.name()+ "->"+ targetNode.getUuid());
+        System.out.println("                   (" + sourceNode.getName() + "-"+ relation.name()+ "->"+ targetNode.getName()+ ")");
         app.delete(rel);
       }
     }
   }
   for (  S sourceNode : toBeCreated) {
     if (sourceNode != null && targetNode != null) {
-      final String storageKey=sourceNode.getUuid() + relation.getClass() + targetNode.getUuid();
+      final String storageKey=sourceNode.getName() + relation.name() + targetNode.getName();
       relation.ensureCardinality(securityContext,sourceNode,targetNode);
       app.create(sourceNode,targetNode,relation.getClass(),getNotionProperties(securityContext,relation.getClass(),storageKey));
+      System.out.println("CREATED             " + sourceNode.getUuid() + "-"+ relation.name()+ "->"+ targetNode.getUuid());
+      System.out.println("                   (" + sourceNode.getName() + "-"+ relation.name()+ "->"+ targetNode.getName()+ ")");
     }
   }
 }

@@ -1,9 +1,8 @@
 {
-  SecurityContext securityContext=null;
-  Authenticator authenticator=null;
-  RestMethodResult result=null;
-  IJsonInput jsonInput=null;
-  Resource resource=null;
+  final SecurityContext securityContext;
+  final Authenticator authenticator;
+  final Resource resource;
+  RestMethodResult result=new RestMethodResult(HttpServletResponse.SC_BAD_REQUEST);
   try {
     request.setCharacterEncoding("UTF-8");
     response.setCharacterEncoding("UTF-8");
@@ -14,15 +13,9 @@
       tx.success();
     }
      final App app=StructrApp.getInstance(securityContext);
-    String input=IOUtils.toString(request.getReader());
-    if (StringUtils.isBlank(input)) {
-      input="{}";
-    }
-    try (final Tx tx=app.tx()){
-      jsonInput=gson.get().fromJson(input,IJsonInput.class);
-      tx.success();
-    }
-     if (securityContext != null) {
+    final String input=IOUtils.toString(request.getReader());
+    final IJsonInput jsonInput=cleanAndParseJsonString(app,input);
+    if (securityContext != null) {
       try (final Tx tx=app.tx()){
         resource=ResourceHelper.applyViewTransformation(request,securityContext,ResourceHelper.optimizeNestedResourceChain(ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,config.getDefaultIdProperty()),config.getDefaultIdProperty()),propertyView);
         authenticator.checkResourceAccess(request,resource.getResourceSignature(),propertyView.get(securityContext));
@@ -58,13 +51,13 @@
     response.getWriter().println();
   }
 catch (  JsonSyntaxException jsex) {
-    logger.log(Level.WARNING,"JsonSyntaxException in PUT",jsex);
+    logger.log(Level.WARNING,"PUT: Invalid JSON syntax",jsex.getMessage());
     int code=HttpServletResponse.SC_BAD_REQUEST;
     response.setStatus(code);
     response.getWriter().append(RestMethodResult.jsonError(code,"JsonSyntaxException in PUT: " + jsex.getMessage()));
   }
 catch (  JsonParseException jpex) {
-    logger.log(Level.WARNING,"JsonParseException in PUT",jpex);
+    logger.log(Level.WARNING,"PUT: Unable to parse JSON string",jpex.getMessage());
     int code=HttpServletResponse.SC_BAD_REQUEST;
     response.setStatus(code);
     response.getWriter().append(RestMethodResult.jsonError(code,"JsonSyntaxException in PUT: " + jpex.getMessage()));

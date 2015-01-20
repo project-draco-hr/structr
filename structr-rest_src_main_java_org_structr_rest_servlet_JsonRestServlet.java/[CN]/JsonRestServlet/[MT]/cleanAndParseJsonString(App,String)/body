@@ -1,0 +1,19 @@
+{
+  IJsonInput jsonInput;
+  try (final Tx tx=app.tx()){
+    jsonInput=gson.get().fromJson(input,IJsonInput.class);
+    tx.success();
+  }
+   if (jsonInput == null) {
+    if (StringUtils.isBlank(input)) {
+      try (final Tx tx=app.tx()){
+        jsonInput=gson.get().fromJson("{}",IJsonInput.class);
+        tx.success();
+      }
+     }
+ else {
+      jsonInput=new JsonSingleInput();
+    }
+  }
+  return jsonInput;
+}

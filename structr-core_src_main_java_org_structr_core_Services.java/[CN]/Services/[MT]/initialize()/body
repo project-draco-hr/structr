@@ -20,13 +20,10 @@
   }
   logger.log(Level.INFO,"Reading {0}..",configFileName);
   try {
-    final FileInputStream fis=new FileInputStream(configFileName);
-    structrConf.load(fis);
-    fis.close();
+    structrConf.load(new PropertiesConfiguration(configFileName));
   }
- catch (  IOException ioex) {
-    logger.log(Level.WARNING,"Unable to read configuration file {0}: {1}",new Object[]{configFileName,ioex.getMessage()});
-    System.exit(1);
+ catch (  ConfigurationException ex) {
+    logger.log(Level.SEVERE,null,ex);
   }
   mergeConfiguration(config,structrConf);
   initialize(config);

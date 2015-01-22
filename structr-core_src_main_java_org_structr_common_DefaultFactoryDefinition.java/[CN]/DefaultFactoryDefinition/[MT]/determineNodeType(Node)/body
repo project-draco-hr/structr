@@ -6,7 +6,7 @@
   if (node.hasProperty(type)) {
     final Object obj=node.getProperty(type);
     if (obj != null) {
-      Class nodeType=StructrApp.getConfiguration().getNodeEntities().get(obj.toString());
+      final Class nodeType=StructrApp.getConfiguration().getNodeEntities().get(obj.toString());
       if (nodeType != null) {
         return nodeType;
       }
@@ -19,10 +19,18 @@
     if (externalNodeTypeName != null && node.hasProperty(externalNodeTypeName)) {
       Object typeObj=node.getProperty(externalNodeTypeName);
       if (typeObj != null) {
-        Class dynamicType=StructrApp.getConfiguration().getNodeEntityClass(typeObj.toString());
+        final Class dynamicType=StructrApp.getConfiguration().getNodeEntityClass(typeObj.toString());
         if (dynamicType != null) {
           return dynamicType;
         }
+      }
+    }
+    final Iterable<Label> labels=node.getLabels();
+    if (labels != null && labels.iterator().hasNext()) {
+      final Label firstLabel=labels.iterator().next();
+      final Class dynamicType=StructrApp.getConfiguration().getNodeEntityClass(firstLabel.name());
+      if (dynamicType != null) {
+        return dynamicType;
       }
     }
   }

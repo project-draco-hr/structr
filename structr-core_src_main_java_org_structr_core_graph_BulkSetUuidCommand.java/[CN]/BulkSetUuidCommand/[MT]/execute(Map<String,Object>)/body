@@ -20,6 +20,9 @@
           }
           try {
             node.setProperty(GraphObject.id,UUID.randomUUID().toString().replaceAll("[\\-]+",""));
+            if (node.getProperty(NodeInterface.type) == null) {
+              node.setProperty(NodeInterface.type,type.getSimpleName());
+            }
           }
  catch (          FrameworkException fex) {
             logger.log(Level.WARNING,"Unable to set UUID of node {0}: {1}",new Object[]{node,fex.getMessage()});

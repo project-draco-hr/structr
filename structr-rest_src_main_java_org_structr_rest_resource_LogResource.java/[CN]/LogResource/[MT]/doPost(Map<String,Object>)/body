@@ -1,6 +1,19 @@
 {
   final HttpServletRequest request=securityContext.getRequest();
   if (request != null) {
+    final boolean initialize="true".equals(request.getParameter("initialize"));
+    final String count=request.getParameter("count");
+    final int max=count != null ? Integer.valueOf(count) : 1000;
+    if (initialize) {
+      final String filesPath=Services.getInstance().getConfigurationValue(Services.FILES_PATH);
+      try (final Context context=new Context(1000,max)){
+        collectFilesAndStore(context,new File(filesPath + SUBJECTS).toPath(),0);
+      }
+ catch (      FrameworkException fex) {
+        fex.printStackTrace();
+      }
+      return new RestMethodResult(200);
+    }
     final String filesPath=Services.getInstance().getConfigurationValue(Services.FILES_PATH);
     final String subjectId=(String)propertySet.get(subjectProperty.jsonName());
     final String objectId=(String)propertySet.get(objectProperty.jsonName());

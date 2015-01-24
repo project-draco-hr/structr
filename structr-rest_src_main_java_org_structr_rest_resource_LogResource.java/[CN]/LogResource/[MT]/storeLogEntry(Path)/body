@@ -1,0 +1,32 @@
+{
+  final App app=StructrApp.getInstance(securityContext);
+  final String fileName=path.getFileName().toString();
+  int count=0;
+  if (fileName.length() == 64) {
+    final String subjectId=fileName.substring(0,32);
+    final String objectId=fileName.substring(32,64);
+    for (    final String line : Files.readAllLines(path,Charset.forName("utf-8"))) {
+      final int pos1=line.indexOf(",",14);
+      final String part0=line.substring(0,13);
+      final String part1=line.substring(14,pos1);
+      final String part2=line.substring(pos1 + 1);
+      final long timestamp=Long.valueOf(part0);
+      final String action=part1;
+      final String message=part2;
+      final PropertyMap properties=new PropertyMap();
+      final String contentHash=LogEvent.getContentHash(action,subjectId,objectId,timestamp);
+      properties.put(LogEvent.hashProperty,contentHash);
+      properties.put(LogEvent.messageProperty,message);
+      properties.put(LogEvent.actionProperty,action);
+      properties.put(LogEvent.subject,subjectId);
+      properties.put(LogEvent.object,objectId);
+      properties.put(LogEvent.timestampProperty,new Date(timestamp));
+      app.create(LogEvent.class,properties);
+      count++;
+    }
+  }
+ else {
+    System.out.println("Skipping entry " + fileName);
+  }
+  return count;
+}

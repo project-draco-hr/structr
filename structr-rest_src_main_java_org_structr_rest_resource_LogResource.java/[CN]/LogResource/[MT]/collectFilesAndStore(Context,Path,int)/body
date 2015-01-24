@@ -14,7 +14,9 @@
         context.update(storeLogEntry(p));
         context.commit(true);
       }
-      Files.delete(p);
+      if (context.getTotal() <= context.getMax()) {
+        Files.delete(p);
+      }
     }
   }
  catch (  IOException ioex) {

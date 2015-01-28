@@ -5,28 +5,32 @@
   boolean inDoubleQuotes=false;
   boolean inTemplate=false;
   boolean hasDollar=false;
-  int level=0;
   int start=0;
   int end=0;
   for (int i=0; i < length; i++) {
     final char c=source.charAt(i);
 switch (c) {
 case '\'':
-      inSingleQuotes=!inSingleQuotes;
+      if (inTemplate) {
+        inSingleQuotes=!inSingleQuotes;
+      }
     hasDollar=false;
   break;
 case '\"':
-inDoubleQuotes=!inDoubleQuotes;
+if (inTemplate) {
+  inDoubleQuotes=!inDoubleQuotes;
+}
 hasDollar=false;
 break;
 case '$':
 hasDollar=true;
 break;
 case '{':
-if (!inSingleQuotes && !inDoubleQuotes && hasDollar) {
+if (!inTemplate && hasDollar) {
 inTemplate=true;
 start=i - 1;
 }
+hasDollar=false;
 break;
 case '}':
 if (!inSingleQuotes && !inDoubleQuotes && inTemplate) {
@@ -34,6 +38,7 @@ inTemplate=false;
 end=i + 1;
 expressions.add(source.substring(start,end));
 }
+hasDollar=true;
 break;
 default :
 hasDollar=false;

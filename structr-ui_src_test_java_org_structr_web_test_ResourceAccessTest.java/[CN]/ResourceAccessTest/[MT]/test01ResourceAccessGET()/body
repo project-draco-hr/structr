@@ -24,6 +24,7 @@
   }
   try (final Tx tx=app.tx()){
     RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(401).when().get("/folders");
+    folderGrant.setProperty(GraphObject.visibleToPublicUsers,true);
     folderGrant.setFlag(UiAuthenticator.AUTH_USER_GET);
     tx.success();
   }

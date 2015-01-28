@@ -17,7 +17,7 @@
     double queryTimeStart=System.nanoTime();
     try (final Tx tx=app.tx()){
       resource=ResourceHelper.applyViewTransformation(request,securityContext,ResourceHelper.optimizeNestedResourceChain(ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,config.getDefaultIdProperty()),config.getDefaultIdProperty()),propertyView);
-      authenticator.checkResourceAccess(request,resource.getResourceSignature(),propertyView.get(securityContext));
+      authenticator.checkResourceAccess(securityContext,request,resource.getResourceSignature(),propertyView.get(securityContext));
       tx.success();
     }
      String pageSizeParameter=request.getParameter(REQUEST_PARAMETER_PAGE_SIZE);

@@ -17,12 +17,12 @@
     double queryTimeStart=System.nanoTime();
     try (final Tx tx=app.tx()){
       resource=ResourceHelper.optimizeNestedResourceChain(ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,defaultIdProperty),defaultIdProperty);
-      authenticator.checkResourceAccess(request,resource.getResourceSignature(),propertyView.get(securityContext));
+      authenticator.checkResourceAccess(securityContext,request,resource.getResourceSignature(),propertyView.get(securityContext));
       tx.success();
     }
      try (final Tx tx=app.tx()){
       String resourceSignature=resource.getResourceSignature();
-      authenticator.checkResourceAccess(request,resourceSignature,propertyView.get(securityContext));
+      authenticator.checkResourceAccess(securityContext,request,resourceSignature,propertyView.get(securityContext));
       String pageSizeParameter=request.getParameter(JsonRestServlet.REQUEST_PARAMETER_PAGE_SIZE);
       String pageParameter=request.getParameter(JsonRestServlet.REQUEST_PARAMETER_PAGE_NUMBER);
       String offsetId=request.getParameter(JsonRestServlet.REQUEST_PARAMETER_OFFSET_ID);

@@ -38,6 +38,7 @@
   }
   try (final Tx tx=app.tx()){
     RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(401).when().delete("/folder/" + testFolder.getUuid());
+    folderGrant.setProperty(GraphObject.visibleToPublicUsers,true);
     folderGrant.setFlag(UiAuthenticator.NON_AUTH_USER_DELETE);
     tx.success();
   }

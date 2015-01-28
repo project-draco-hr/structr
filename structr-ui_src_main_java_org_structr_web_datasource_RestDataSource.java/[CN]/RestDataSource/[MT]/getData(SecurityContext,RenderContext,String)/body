@@ -62,7 +62,13 @@
     }
     sortKey=StructrApp.getConfiguration().getPropertyKeyForDatabaseName(type,sortKeyName,false);
   }
-  Result result=resource.doGet(sortKey,sortDescending,pageSize,page,offsetId);
+  Result result=Result.EMPTY_RESULT;
+  try {
+    result=resource.doGet(sortKey,sortDescending,pageSize,page,offsetId);
+  }
+ catch (  NotFoundException nfe) {
+    logger.log(Level.WARNING,"No result from internal REST query: {0}",restQuery);
+  }
   result.setIsCollection(resource.isCollectionResource());
   result.setIsPrimitiveArray(resource.isPrimitiveArray());
   PagingHelper.addPagingParameter(result,pageSize,page);

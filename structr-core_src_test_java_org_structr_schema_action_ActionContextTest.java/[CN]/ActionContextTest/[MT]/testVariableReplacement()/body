@@ -67,6 +67,14 @@
   }
   try (final Tx tx=app.tx()){
     final ActionContext ctx=new ActionContext(testOne,null);
+    assertEquals("Invalid result for quoted template expression","''",testOne.replaceVariables(securityContext,ctx,"'${err}'"));
+    assertEquals("Invalid result for quoted template expression"," '' ",testOne.replaceVariables(securityContext,ctx," '${err}' "));
+    assertEquals("Invalid result for quoted template expression","\"\"",testOne.replaceVariables(securityContext,ctx,"\"${this.error}\""));
+    assertEquals("Invalid result for quoted template expression","''''''",testOne.replaceVariables(securityContext,ctx,"'''${this.this.this.error}'''"));
+    assertEquals("Invalid result for quoted template expression","''",testOne.replaceVariables(securityContext,ctx,"'${parent.error}'"));
+    assertEquals("Invalid result for quoted template expression","''",testOne.replaceVariables(securityContext,ctx,"'${this.owner}'"));
+    assertEquals("Invalid result for quoted template expression","''",testOne.replaceVariables(securityContext,ctx,"'${this.alwaysNull}'"));
+    assertEquals("Invalid result for quoted template expression","''",testOne.replaceVariables(securityContext,ctx,"'${parent.owner}'"));
     assertEquals("Invalid expressions should yield an empty result","",testOne.replaceVariables(securityContext,ctx,"${err}"));
     assertEquals("Invalid expressions should yield an empty result","",testOne.replaceVariables(securityContext,ctx,"${this.error}"));
     assertEquals("Invalid expressions should yield an empty result","",testOne.replaceVariables(securityContext,ctx,"${this.this.this.error}"));

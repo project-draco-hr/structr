@@ -45,7 +45,17 @@
 ;
   final HttpServletRequest origRequest=securityContext.getRequest();
   securityContext.setRequest(request);
-  Resource resource=ResourceHelper.applyViewTransformation(request,securityContext,ResourceHelper.optimizeNestedResourceChain(ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,GraphObject.id),GraphObject.id),propertyView);
+  Resource resource=null;
+  try {
+    resource=ResourceHelper.applyViewTransformation(request,securityContext,ResourceHelper.optimizeNestedResourceChain(ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,GraphObject.id),GraphObject.id),propertyView);
+  }
+ catch (  IllegalPathException ipe) {
+    logger.log(Level.WARNING,"Illegal path for REST query: {0}",restQuery);
+  }
+  securityContext.setRequest(origRequest);
+  if (resource == null) {
+    return Collections.EMPTY_LIST;
+  }
   String pageSizeParameter=request.getParameter(JsonRestServlet.REQUEST_PARAMETER_PAGE_SIZE);
   String pageParameter=request.getParameter(JsonRestServlet.REQUEST_PARAMETER_PAGE_NUMBER);
   String offsetId=request.getParameter(JsonRestServlet.REQUEST_PARAMETER_OFFSET_ID);
@@ -62,7 +72,13 @@
     }
     sortKey=StructrApp.getConfiguration().getPropertyKeyForDatabaseName(type,sortKeyName,false);
   }
-  Result result=resource.doGet(sortKey,sortDescending,pageSize,page,offsetId);
+  Result result=Result.EMPTY_RESULT;
+  try {
+    result=resource.doGet(sortKey,sortDescending,pageSize,page,offsetId);
+  }
+ catch (  NotFoundException nfe) {
+    logger.log(Level.WARNING,"No result from internal REST query: {0}",restQuery);
+  }
   result.setIsCollection(resource.isCollectionResource());
   result.setIsPrimitiveArray(resource.isPrimitiveArray());
   PagingHelper.addPagingParameter(result,pageSize,page);
@@ -70,6 +86,5 @@
   if (renderContext != null) {
     renderContext.setResult(result);
   }
-  securityContext.setRequest(origRequest);
   return res != null ? res : Collections.EMPTY_LIST;
 }

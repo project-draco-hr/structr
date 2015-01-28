@@ -1,0 +1,20 @@
+{
+  if (level == 1) {
+    logger.log(Level.INFO,"Path {0}",dir);
+  }
+  try (final DirectoryStream<Path> stream=Files.newDirectoryStream(dir)){
+    for (    final Path p : stream) {
+      if (Files.isDirectory(p)) {
+        collectFilesAndStore(context,p,level + 1);
+      }
+ else {
+        context.update(storeLogEntry(p));
+        context.commit(true);
+      }
+      Files.delete(p);
+    }
+  }
+ catch (  IOException ioex) {
+    ioex.printStackTrace();
+  }
+}

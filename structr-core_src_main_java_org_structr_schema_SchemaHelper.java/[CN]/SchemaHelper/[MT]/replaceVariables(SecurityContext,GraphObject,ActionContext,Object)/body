@@ -7,26 +7,21 @@
     value=(String)rawValue;
     if (!actionContext.returnRawValue(securityContext)) {
       final Map<String,String> replacements=new LinkedHashMap<>();
-      int start=value.indexOf("${");
-      int end=value.indexOf("}",start);
-      while (start >= 0 && end >= 0) {
-        String group=value.substring(start,end + 1);
-        String source=value.substring(start + 2,end);
+      for (      final String expression : extractTemplateExpressions(value)) {
+        String source=expression.substring(2,expression.length() - 1);
         Object extractedValue=Functions.evaluate(securityContext,actionContext,entity,source);
         if (extractedValue == null) {
           extractedValue="";
         }
         String partValue=extractedValue.toString();
         if (partValue != null) {
-          replacements.put(group,partValue);
+          replacements.put(expression,partValue);
         }
  else {
-          if (!value.equals(group)) {
-            replacements.put(group,"");
+          if (!value.equals(expression)) {
+            replacements.put(expression,"");
           }
         }
-        start=value.indexOf("${",end);
-        end=value.indexOf("}",start);
       }
       for (      final Entry<String,String> entry : replacements.entrySet()) {
         final String group=entry.getKey();

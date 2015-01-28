@@ -1,28 +1,35 @@
 {
   final HttpServletRequest request=securityContext.getRequest();
   if (request != null) {
-    final String filesPath=Services.getInstance().getConfigurationValue(Services.FILES_PATH);
+    if ("true".equals(request.getParameter("initialize"))) {
+      final String filesPath=Services.getInstance().getConfigurationValue(Services.FILES_PATH);
+      try (final Context context=new Context(1000)){
+        collectFilesAndStore(context,new File(filesPath + SUBJECTS).toPath(),0);
+      }
+ catch (      FrameworkException fex) {
+        fex.printStackTrace();
+      }
+      return new RestMethodResult(200);
+    }
     final String subjectId=(String)propertySet.get(subjectProperty.jsonName());
     final String objectId=(String)propertySet.get(objectProperty.jsonName());
     final String action=(String)propertySet.get(actionProperty.jsonName());
     final String message=(String)propertySet.get(messageProperty.jsonName());
     if (subjectId != null && objectId != null && action != null) {
-      try {
-        final StringBuilder data=new StringBuilder();
-        data.append(System.currentTimeMillis());
-        data.append(",");
-        data.append(action);
-        data.append(",");
-        data.append(message);
-        data.append("\n");
-        final Path actualPath=write(filesPath + SUBJECTS,mergeIds(subjectId,objectId),data.toString());
-        link(filesPath + OBJECTS,mergeIds(objectId,subjectId),actualPath);
-        return new RestMethodResult(200);
+      final App app=StructrApp.getInstance(securityContext);
+      LogEvent event=null;
+      try (final Tx tx=app.tx()){
+        final PropertyMap properties=new PropertyMap();
+        properties.put(LogEvent.actionProperty,action);
+        properties.put(LogEvent.subjectProperty,subjectId);
+        properties.put(LogEvent.objectProperty,objectId);
+        properties.put(LogEvent.messageProperty,message);
+        event=app.create(LogEvent.class,properties);
+        tx.success();
       }
- catch (      IOException ioex) {
-        ioex.printStackTrace();
-        throw new FrameworkException(500,ioex.getMessage());
-      }
+       final RestMethodResult result=new RestMethodResult(201);
+      result.addContent(event);
+      return result;
     }
  else {
       final ErrorBuffer errorBuffer=new ErrorBuffer();

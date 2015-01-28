@@ -1,56 +1,26 @@
 {
   final HttpServletRequest request=securityContext.getRequest();
   if (request != null) {
-    final String filesPath=Services.getInstance().getConfigurationValue(Services.FILES_PATH);
     final String subjectId=request.getParameter(subjectProperty.jsonName());
     final String objectId=request.getParameter(objectProperty.jsonName());
     final GraphObjectMap overviewMap=new GraphObjectMap();
     final LogState logState=new LogState(request);
     if (StringUtils.isNotEmpty(subjectId) && StringUtils.isNotEmpty(objectId)) {
-      final String fileName=mergeIds(subjectId,objectId);
-      final String path=getDirectoryPath(fileName,8);
-      final Path filePath=new File(filesPath + SUBJECTS + path+ fileName).toPath();
-      if (Files.exists(filePath)) {
-        read(toMap(filePath,logState),logState);
-      }
+      processData(logState,StructrApp.getInstance(securityContext).nodeQuery(LogEvent.class).and(LogEvent.subjectProperty,subjectId).and(LogEvent.objectProperty,objectId).and(LogEvent.actionProperty,logState.logAction).andRange(LogEvent.timestampProperty,new Date(logState.beginTimestamp),new Date(logState.endTimestamp)).getAsList());
     }
  else     if (StringUtils.isNotEmpty(subjectId) && StringUtils.isEmpty(objectId)) {
-      final String path=getDirectoryPath(subjectId,8);
-      final Path directoryPath=new File(filesPath + SUBJECTS + path).toPath();
-      try (final DirectoryStream<Path> stream=Files.newDirectoryStream(directoryPath,subjectId + "????????????????????????????????")){
-        final Map<String,ArrayList<String>> fileLines=new LinkedHashMap<>();
-        for (        final Path p : stream) {
-          fileLines.putAll(toMap(p,logState));
-        }
-        read(fileLines,logState);
-      }
- catch (      IOException ioex) {
-        ioex.printStackTrace();
-      }
+      processData(logState,StructrApp.getInstance(securityContext).nodeQuery(LogEvent.class).and(LogEvent.subjectProperty,subjectId).and(LogEvent.actionProperty,logState.logAction).andRange(LogEvent.timestampProperty,new Date(logState.beginTimestamp),new Date(logState.endTimestamp)).getAsList());
     }
  else     if (StringUtils.isEmpty(subjectId) && StringUtils.isNotEmpty(objectId)) {
       logState.inverse(true);
-      final String path=getDirectoryPath(objectId,8);
-      final Path directoryPath=new File(filesPath + OBJECTS + path).toPath();
-      try (final DirectoryStream<Path> stream=Files.newDirectoryStream(directoryPath,objectId + "????????????????????????????????")){
-        final Map<String,ArrayList<String>> fileLines=new LinkedHashMap<>();
-        for (        final Path p : stream) {
-          fileLines.putAll(toMap(p,logState));
-        }
-        read(fileLines,logState);
-      }
- catch (      IOException ioex) {
-        ioex.printStackTrace();
-      }
+      processData(logState,StructrApp.getInstance(securityContext).nodeQuery(LogEvent.class).and(LogEvent.objectProperty,objectId).and(LogEvent.actionProperty,logState.logAction).andRange(LogEvent.timestampProperty,new Date(logState.beginTimestamp),new Date(logState.endTimestamp)).getAsList());
     }
  else     if (logState.doActionQuery()) {
-      final Map<String,ArrayList<String>> fileLines=collectFiles(new File(filesPath + SUBJECTS).toPath(),logState);
-      read(fileLines,logState);
+      processData(logState);
     }
  else {
       logState.overview(true);
-      final Map<String,ArrayList<String>> fileLines=collectFiles(new File(filesPath + SUBJECTS).toPath(),logState);
-      read(fileLines,logState);
+      processData(logState,StructrApp.getInstance(securityContext).nodeQuery(LogEvent.class).getAsList());
     }
     if (logState.overview()) {
       overviewMap.put(actionsProperty,logState.actions());

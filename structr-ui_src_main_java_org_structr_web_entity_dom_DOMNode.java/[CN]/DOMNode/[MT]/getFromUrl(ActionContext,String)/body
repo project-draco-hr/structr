@@ -1,0 +1,11 @@
+{
+  final HttpClientParams params=new HttpClientParams(HttpClientParams.getDefaultParams());
+  final HttpClient client=new HttpClient(params);
+  final GetMethod getMethod=new GetMethod(requestUrl);
+  getMethod.addRequestHeader("Connection","close");
+  for (  final Entry<String,String> header : ctx.getHeaders().entrySet()) {
+    getMethod.addRequestHeader(header.getKey(),header.getValue());
+  }
+  client.executeMethod(getMethod);
+  return getMethod.getResponseBodyAsString();
+}

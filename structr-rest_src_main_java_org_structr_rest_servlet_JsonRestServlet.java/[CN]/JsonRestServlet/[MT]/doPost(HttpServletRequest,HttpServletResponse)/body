@@ -1,9 +1,8 @@
 {
   final List<RestMethodResult> results=new LinkedList<>();
-  SecurityContext securityContext=null;
-  Authenticator authenticator=null;
-  IJsonInput jsonInput=null;
-  Resource resource=null;
+  final SecurityContext securityContext;
+  final Authenticator authenticator;
+  final Resource resource;
   try {
     request.setCharacterEncoding("UTF-8");
     response.setCharacterEncoding("UTF-8");
@@ -14,18 +13,12 @@
       tx.success();
     }
      final App app=StructrApp.getInstance(securityContext);
-    String input=IOUtils.toString(request.getReader());
-    if (StringUtils.isBlank(input)) {
-      input="{}";
-    }
-    try (final Tx tx=app.tx()){
-      jsonInput=gson.get().fromJson(input,IJsonInput.class);
-      tx.success();
-    }
-     if (securityContext != null) {
+    final String input=IOUtils.toString(request.getReader());
+    final IJsonInput jsonInput=cleanAndParseJsonString(app,input);
+    if (securityContext != null) {
       try (final Tx tx=app.tx()){
         resource=ResourceHelper.applyViewTransformation(request,securityContext,ResourceHelper.optimizeNestedResourceChain(ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,config.getDefaultIdProperty()),config.getDefaultIdProperty()),propertyView);
-        authenticator.checkResourceAccess(request,resource.getResourceSignature(),propertyView.get(securityContext));
+        authenticator.checkResourceAccess(securityContext,request,resource.getResourceSignature(),propertyView.get(securityContext));
         tx.success();
       }
        boolean retry=true;
@@ -86,19 +79,19 @@
     response.getWriter().println();
   }
 catch (  JsonSyntaxException jsex) {
-    logger.log(Level.WARNING,"JsonSyntaxException in POST",jsex);
+    logger.log(Level.WARNING,"POST: Invalid JSON syntax",jsex.getMessage());
     int code=HttpServletResponse.SC_BAD_REQUEST;
     response.setStatus(code);
     response.getWriter().append(RestMethodResult.jsonError(code,"JsonSyntaxException in POST: " + jsex.getMessage()));
   }
 catch (  JsonParseException jpex) {
-    logger.log(Level.WARNING,"JsonParseException in POST",jpex);
+    logger.log(Level.WARNING,"Unable to parse JSON string",jpex.getMessage());
     int code=HttpServletResponse.SC_BAD_REQUEST;
     response.setStatus(code);
     response.getWriter().append(RestMethodResult.jsonError(code,"JsonParseException in POST: " + jpex.getMessage()));
   }
 catch (  UnsupportedOperationException uoe) {
-    logger.log(Level.WARNING,"POST not supported",uoe);
+    logger.log(Level.WARNING,"POST not supported");
     int code=HttpServletResponse.SC_BAD_REQUEST;
     response.setStatus(code);
     response.getWriter().append(RestMethodResult.jsonError(code,"POST not supported: " + uoe.getMessage()));

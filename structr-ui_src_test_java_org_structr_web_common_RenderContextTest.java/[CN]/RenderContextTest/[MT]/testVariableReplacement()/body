@@ -18,6 +18,7 @@
   try (final Tx tx=app.tx()){
     detailsDataObject=app.create(TestOne.class,"TestOne");
     page=Page.createNewPage(securityContext,"testpage");
+    page.setProperty(Page.visibleToPublicUsers,true);
     assertTrue(page != null);
     assertTrue(page instanceof Page);
     html=(DOMNode)page.createElement("html");
@@ -60,6 +61,9 @@
     final User tester2=app.create(User.class,new NodeAttribute<>(User.name,"tester2"),new NodeAttribute<>(User.eMail,"tester2@test.com"));
     assertNotNull("User tester1 should exist.",tester1);
     assertNotNull("User tester2 should exist.",tester2);
+    final User admin=app.create(User.class,"admin");
+    admin.setProperty(User.password,"admin");
+    admin.setProperty(User.isAdmin,true);
     tx.success();
   }
  catch (  FrameworkException fex) {
@@ -105,9 +109,24 @@
     final SecurityContext tester2Context=SecurityContext.getInstance(tester2,AccessMode.Backend);
     assertEquals("tester1",p1.replaceVariables(tester1Context,ctx,"${me.name}"));
     assertEquals("tester2",p1.replaceVariables(tester2Context,ctx,"${me.name}"));
+    grant("Page/_Ui",16,false);
+    assertEquals("Invalid GET notation result",page.getName(),p1.replaceVariables(securityContext,ctx,"${from_json(GET('http://localhost:8875/structr/rest/pages/ui')).result[0].name}"));
+    grant("Folder",64,true);
+    grant("_login",64,false);
+    assertEquals("Invalid POST result","201",page.replaceVariables(securityContext,ctx,"${POST('http://localhost:8875/structr/rest/folders', '{name:Test}').status}"));
+    assertEquals("Invalid POST result","1.0",page.replaceVariables(securityContext,ctx,"${POST('http://localhost:8875/structr/rest/folders', '{name:Test}').body.result_count}"));
+    assertEquals("Invalid POST result","application/json; charset=utf-8",page.replaceVariables(securityContext,ctx,"${POST('http://localhost:8875/structr/rest/folders', '{name:Test}').headers.Content-Type}"));
+    assertEquals("Invalid POST result","422",page.replaceVariables(securityContext,ctx,"${POST('http://localhost:8875/structr/rest/folders', '{name:\"Test{{{}}{}{}{}\"}').status}"));
+    System.out.println(page.replaceVariables(securityContext,ctx,"${POST('http://localhost:8875/structr/rest/login', '{name:admin,password:admin}')}"));
+    final String sessionIdCookie=page.replaceVariables(securityContext,ctx,"${POST('http://localhost:8875/structr/rest/login', '{name:admin,password:admin}').headers.Set-Cookie}");
+    final String sessionId=HttpCookie.parse(sessionIdCookie).get(0).getValue();
+    assertEquals("Invalid authenticated GET result","admin",page.replaceVariables(securityContext,ctx,"${add_header('Cookie', 'JSESSIONID=" + sessionId + ";Path=/')}${from_json(GET('http://localhost:8875/structr/rest/users')).result[0].name}"));
+    assertEquals("Invalid authenticated GET result","tester1",page.replaceVariables(securityContext,ctx,"${add_header('Cookie', 'JSESSIONID=" + sessionId + ";Path=/')}${from_json(GET('http://localhost:8875/structr/rest/users')).result[1].name}"));
+    assertEquals("Invalid authenticated GET result","tester2",page.replaceVariables(securityContext,ctx,"${add_header('Cookie', 'JSESSIONID=" + sessionId + ";Path=/')}${from_json(GET('http://localhost:8875/structr/rest/users')).result[2].name}"));
     tx.success();
   }
  catch (  FrameworkException fex) {
+    fex.printStackTrace();
     fail("Unexpected exception");
   }
 }

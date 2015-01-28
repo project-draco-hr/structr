@@ -15,14 +15,19 @@
     if (timestamp >= state.endTimestamp()) {
       state.endTimestamp(timestamp);
     }
-    if (state.correlates(key(pathSubjectId,pathObjectId),entryMessage)) {
-      final Map<String,Object> map=new HashMap<>();
-      map.put(subjectProperty.jsonName(),pathSubjectId);
-      map.put(objectProperty.jsonName(),pathObjectId);
-      map.put(actionProperty.jsonName(),entryAction);
-      map.put(timestampProperty.jsonName(),timestamp);
-      map.put(messageProperty.jsonName(),entryMessage);
-      state.addEntry(map);
+    if (state.overview()) {
+      state.countAction(entryAction);
+    }
+ else {
+      if (state.correlates(key(pathSubjectId,pathObjectId),entryMessage)) {
+        final Map<String,Object> map=new HashMap<>();
+        map.put(subjectProperty.jsonName(),pathSubjectId);
+        map.put(objectProperty.jsonName(),pathObjectId);
+        map.put(actionProperty.jsonName(),entryAction);
+        map.put(timestampProperty.jsonName(),timestamp);
+        map.put(messageProperty.jsonName(),entryMessage);
+        state.addEntry(map);
+      }
     }
   }
 }

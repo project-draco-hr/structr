@@ -45,7 +45,17 @@
 ;
   final HttpServletRequest origRequest=securityContext.getRequest();
   securityContext.setRequest(request);
-  Resource resource=ResourceHelper.applyViewTransformation(request,securityContext,ResourceHelper.optimizeNestedResourceChain(ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,GraphObject.id),GraphObject.id),propertyView);
+  Resource resource=null;
+  try {
+    resource=ResourceHelper.applyViewTransformation(request,securityContext,ResourceHelper.optimizeNestedResourceChain(ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,GraphObject.id),GraphObject.id),propertyView);
+  }
+ catch (  IllegalPathException ipe) {
+    logger.log(Level.WARNING,"Illegal path for REST query: {0}",restQuery);
+  }
+  securityContext.setRequest(origRequest);
+  if (resource == null) {
+    return Collections.EMPTY_LIST;
+  }
   String pageSizeParameter=request.getParameter(JsonRestServlet.REQUEST_PARAMETER_PAGE_SIZE);
   String pageParameter=request.getParameter(JsonRestServlet.REQUEST_PARAMETER_PAGE_NUMBER);
   String offsetId=request.getParameter(JsonRestServlet.REQUEST_PARAMETER_OFFSET_ID);
@@ -76,6 +86,5 @@
   if (renderContext != null) {
     renderContext.setResult(result);
   }
-  securityContext.setRequest(origRequest);
   return res != null ? res : Collections.EMPTY_LIST;
 }

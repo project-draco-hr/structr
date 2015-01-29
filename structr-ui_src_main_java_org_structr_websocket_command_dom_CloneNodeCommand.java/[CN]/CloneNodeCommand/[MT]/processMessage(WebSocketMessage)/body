@@ -1,8 +1,8 @@
 {
-  final SecurityContext securityContext=getWebSocket().getSecurityContext();
-  String id=webSocketData.getId();
-  Map<String,Object> nodeData=webSocketData.getNodeData();
-  String parentId=(String)nodeData.get("parentId");
+  final String id=webSocketData.getId();
+  final Map<String,Object> nodeData=webSocketData.getNodeData();
+  final String parentId=(String)nodeData.get("parentId");
+  final boolean deep=(Boolean)nodeData.get("deep");
   if (id != null) {
     final DOMNode node=getDOMNode(id);
     if (parentId == null) {
@@ -15,7 +15,7 @@
       return;
     }
     try {
-      DOMNode clonedNode=(DOMNode)node.cloneNode(false);
+      DOMNode clonedNode=(DOMNode)node.cloneNode(deep);
       parent.appendChild(clonedNode);
       clonedNode.setProperty(DOMNode.ownerDocument,parent.getProperty(DOMNode.ownerDocument));
     }

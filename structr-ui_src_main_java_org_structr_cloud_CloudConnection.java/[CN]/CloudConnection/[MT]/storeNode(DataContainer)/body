@@ -7,6 +7,9 @@
     logger.log(Level.SEVERE,"Unknown entity type {0}",typeName);
     return null;
   }
+  if (Boolean.TRUE.equals(receivedNodeData.getProperties().get(SchemaNode.isBuiltinType.dbName()))) {
+    return null;
+  }
   final String uuid=receivedNodeData.getSourceNodeId();
   GraphObject newOrExistingNode=app.get(nodeType,uuid);
   if (newOrExistingNode != null) {

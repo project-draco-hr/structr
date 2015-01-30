@@ -1,7 +1,10 @@
 {
   if (newChild instanceof Content) {
     try {
-      ((Content)newChild).setProperty(Content.contentType,getProperty(_type));
+      final String scriptType=getProperty(_type);
+      if (StringUtils.isNotBlank(scriptType)) {
+        ((Content)newChild).setProperty(Content.contentType,scriptType);
+      }
     }
  catch (    FrameworkException fex) {
       logger.log(Level.WARNING,"Unable to set property on new child: {0}",fex.getMessage());

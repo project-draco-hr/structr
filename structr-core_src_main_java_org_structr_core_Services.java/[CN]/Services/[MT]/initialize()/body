@@ -20,7 +20,9 @@
   }
   logger.log(Level.INFO,"Reading {0}..",configFileName);
   try {
-    structrConf.load(new PropertiesConfiguration(configFileName));
+    PropertiesConfiguration.setDefaultListDelimiter('\0');
+    final PropertiesConfiguration propConf=new PropertiesConfiguration(configFileName);
+    structrConf.load(propConf);
   }
  catch (  ConfigurationException ex) {
     logger.log(Level.SEVERE,null,ex);

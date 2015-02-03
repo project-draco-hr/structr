@@ -1,0 +1,13 @@
+{
+  final Function<Object,Object> function=Functions.functions.get(name);
+  if (function != null) {
+    return new IdFunctionObject(new FunctionWrapper(function),null,0,0);
+  }
+  try {
+    return wrap(start,actionContext.evaluate(securityContext,entity,name,data,null));
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+  }
+  return null;
+}

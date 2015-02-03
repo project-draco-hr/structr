@@ -6,14 +6,14 @@
     final GraphObjectMap overviewMap=new GraphObjectMap();
     final LogState logState=new LogState(request);
     if (StringUtils.isNotEmpty(subjectId) && StringUtils.isNotEmpty(objectId)) {
-      processData(logState,StructrApp.getInstance(securityContext).nodeQuery(LogEvent.class).and(LogEvent.subjectProperty,subjectId).and(LogEvent.objectProperty,objectId).and(LogEvent.actionProperty,logState.logAction).andRange(LogEvent.timestampProperty,new Date(logState.beginTimestamp),new Date(logState.endTimestamp)).getAsList());
+      processData(logState,StructrApp.getInstance(securityContext).nodeQuery(LogEvent.class).and(LogEvent.subjectProperty,subjectId).and(LogEvent.objectProperty,objectId).and(LogEvent.actionProperty,logState.logAction).andRange(LogEvent.timestampProperty,new Date(logState.beginTimestamp()),new Date(logState.endTimestamp())).getAsList());
     }
  else     if (StringUtils.isNotEmpty(subjectId) && StringUtils.isEmpty(objectId)) {
-      processData(logState,StructrApp.getInstance(securityContext).nodeQuery(LogEvent.class).and(LogEvent.subjectProperty,subjectId).and(LogEvent.actionProperty,logState.logAction).andRange(LogEvent.timestampProperty,new Date(logState.beginTimestamp),new Date(logState.endTimestamp)).getAsList());
+      processData(logState,StructrApp.getInstance(securityContext).nodeQuery(LogEvent.class).and(LogEvent.subjectProperty,subjectId).and(LogEvent.actionProperty,logState.logAction).andRange(LogEvent.timestampProperty,new Date(logState.beginTimestamp()),new Date(logState.endTimestamp())).getAsList());
     }
  else     if (StringUtils.isEmpty(subjectId) && StringUtils.isNotEmpty(objectId)) {
       logState.inverse(true);
-      processData(logState,StructrApp.getInstance(securityContext).nodeQuery(LogEvent.class).and(LogEvent.objectProperty,objectId).and(LogEvent.actionProperty,logState.logAction).andRange(LogEvent.timestampProperty,new Date(logState.beginTimestamp),new Date(logState.endTimestamp)).getAsList());
+      processData(logState,StructrApp.getInstance(securityContext).nodeQuery(LogEvent.class).and(LogEvent.objectProperty,objectId).and(LogEvent.actionProperty,logState.logAction).andRange(LogEvent.timestampProperty,new Date(logState.beginTimestamp()),new Date(logState.endTimestamp())).getAsList());
     }
  else     if (logState.doActionQuery()) {
       processData(logState);

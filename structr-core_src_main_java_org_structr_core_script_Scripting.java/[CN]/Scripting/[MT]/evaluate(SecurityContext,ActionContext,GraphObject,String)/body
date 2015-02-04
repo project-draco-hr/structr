@@ -1,0 +1,26 @@
+{
+  final Map<String,String> replacements=new LinkedHashMap<>();
+  final Context scriptingContext=Context.enter();
+  try {
+    scriptingContext.setLanguageVersion(Context.VERSION_1_2);
+    Scriptable scope=scriptingContext.initStandardObjects();
+    final StructrScriptable scriptable=new StructrScriptable(securityContext,actionContext,entity);
+    scope.put("Structr",scope,scriptable);
+    for (    final String expression : extractScripts(value)) {
+      final Object extractedValue=Functions.evaluate(securityContext,actionContext,entity,expression.substring(2,expression.length() - 1));
+      String partValue=extractedValue != null ? extractedValue.toString() : "";
+      if (partValue != null) {
+        replacements.put(expression,partValue);
+      }
+ else {
+        if (!value.equals(expression)) {
+          replacements.put(expression,"");
+        }
+      }
+    }
+  }
+  finally {
+    Context.exit();
+  }
+  return replacements;
+}

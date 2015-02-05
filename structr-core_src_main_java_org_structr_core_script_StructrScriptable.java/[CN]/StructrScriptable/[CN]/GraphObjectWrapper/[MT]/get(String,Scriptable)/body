@@ -1,7 +1,17 @@
 {
-  final PropertyKey key=getKey(string);
+  final PropertyKey key=getKey(name);
   if (key != null) {
     return wrap(parentScope,obj.getProperty(key));
+  }
+  final Method method=StructrApp.getConfiguration().getAnnotatedMethods(obj.getClass(),Export.class).get(name);
+  if (method != null) {
+    return new NativeJavaMethod(method,name);
+  }
+  try {
+    return obj.evaluate(securityContext,name,null);
+  }
+ catch (  FrameworkException fex) {
+    exception=fex;
   }
   return null;
 }

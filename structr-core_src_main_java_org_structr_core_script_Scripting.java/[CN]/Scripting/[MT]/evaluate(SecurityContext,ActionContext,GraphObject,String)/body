@@ -7,7 +7,16 @@
     final StructrScriptable scriptable=new StructrScriptable(securityContext,actionContext,entity);
     scope.put("Structr",scope,scriptable);
     for (    final String expression : extractScripts(value)) {
-      final Object extractedValue=Functions.evaluate(securityContext,actionContext,entity,expression.substring(2,expression.length() - 1));
+      final boolean isJavascript=expression.startsWith("${{") && expression.endsWith("}}");
+      final int prefixOffset=isJavascript ? 1 : 0;
+      final String source=expression.substring(2 + prefixOffset,expression.length() - (1 + prefixOffset));
+      Object extractedValue=null;
+      if (isJavascript) {
+        extractedValue=evaluateJavascript(scriptingContext,scope,scriptable,source);
+      }
+ else {
+        extractedValue=Functions.evaluate(securityContext,actionContext,entity,source);
+      }
       String partValue=extractedValue != null ? extractedValue.toString() : "";
       if (partValue != null) {
         replacements.put(expression,partValue);

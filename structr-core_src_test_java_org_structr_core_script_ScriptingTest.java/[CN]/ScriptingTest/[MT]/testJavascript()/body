@@ -11,10 +11,10 @@
     test.setProperty(TestOne.aBoolean,true);
     test.setProperty(TestOne.anotherString,"oneTwoThree${{{");
     test.setProperty(TestOne.stringWithQuotes,"''\"\"''");
-    assertEquals("Invalid JavaScript evaluation result","test",Scripting.replaceVariables(securityContext,test,actionContext,"${ 'test' }"));
-    assertEquals("Invalid JavaScript evaluation result","1",Scripting.replaceVariables(securityContext,test,actionContext,"${ Structr.get('this').anInt; }"));
-    assertEquals("Invalid JavaScript evaluation result","2",Scripting.replaceVariables(securityContext,test,actionContext,"${ Structr.get('this').aLong; }"));
-    assertEquals("Invalid JavaScript evaluation result","3.0",Scripting.replaceVariables(securityContext,test,actionContext,"${ Structr.get('this').aDouble; }"));
+    assertEquals("Invalid JavaScript evaluation result","test",Scripting.replaceVariables(securityContext,test,actionContext,"${{ return 'test' }}"));
+    assertEquals("Invalid JavaScript evaluation result","1",Scripting.replaceVariables(securityContext,test,actionContext,"${{ return Structr.get('this').anInt; }}"));
+    assertEquals("Invalid JavaScript evaluation result","2",Scripting.replaceVariables(securityContext,test,actionContext,"${{ return Structr.get('this').aLong; }}"));
+    assertEquals("Invalid JavaScript evaluation result","3.0",Scripting.replaceVariables(securityContext,test,actionContext,"${{ return Structr.get('this').aDouble; }}"));
     tx.success();
   }
  catch (  FrameworkException fex) {

@@ -2,8 +2,14 @@
   testExtraction("${function test() { return 'blah'; } return test();}");
   testExtraction("${function test() { return '{' + \"{\"; } return test();}");
   testExtraction("${function test() {{{ return '{' + \"{\" + '}'; }}} return test();}");
-  final List<String> scripts=Scripting.extractScripts("${this.aString}${upper(true)}${lower(false)}");
-  assertEquals("Invalid script extraction result","${this.aString}",scripts.get(0));
+  final List<String> scripts=Scripting.extractScripts("${{this.aString}}${upper(true)}${lower(false)}");
+  assertEquals("Invalid script extraction result","${{this.aString}}",scripts.get(0));
   assertEquals("Invalid script extraction result","${upper(true)}",scripts.get(1));
   assertEquals("Invalid script extraction result","${lower(false)}",scripts.get(2));
+  final List<String> scripts2=Scripting.extractScripts("${{this.aString}}${{{upper(true)}}}{}{{${{{{lower(false)}}}}");
+  assertEquals("Invalid script extraction result","${{this.aString}}",scripts2.get(0));
+  assertEquals("Invalid script extraction result","${{{upper(true)}}}",scripts2.get(1));
+  assertEquals("Invalid script extraction result","${{{{lower(false)}}}}",scripts2.get(2));
+  final List<String> scripts3=Scripting.extractScripts("}}}{{$[[]{&/(&){}{{${{{{lower(false)}}}}}}}{{}{}{");
+  assertEquals("Invalid script extraction result","${{{{lower(false)}}}}",scripts3.get(0));
 }

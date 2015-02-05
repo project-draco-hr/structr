@@ -31,19 +31,19 @@ if (!inTemplate && hasDollar) {
 inTemplate=true;
 start=i - 1;
 }
- else if (!inSingleQuotes && !inDoubleQuotes) {
+ else if (inTemplate && !inSingleQuotes && !inDoubleQuotes) {
 level++;
 }
 hasDollar=false;
 break;
 case '}':
-if (!inSingleQuotes && !inDoubleQuotes && level-- == 0 && inTemplate) {
+if (!inSingleQuotes && !inDoubleQuotes && inTemplate&& level-- == 0) {
 inTemplate=false;
 end=i + 1;
 expressions.add(source.substring(start,end));
 level=0;
 }
-hasDollar=true;
+hasDollar=false;
 break;
 default :
 hasDollar=false;

@@ -1,0 +1,21 @@
+{
+  final PropertyKey key=getKey(string);
+  if (key != null) {
+    try {
+      Object value=StructrScriptable.this.unwrap(o);
+      if (value instanceof Double && key instanceof NumericalPropertyKey) {
+        value=((NumericalPropertyKey)key).convertToNumber((Double)value);
+      }
+      if (key instanceof EnumProperty) {
+        PropertyConverter inputConverter=key.inputConverter(securityContext);
+        if (inputConverter != null) {
+          value=inputConverter.convert(value);
+        }
+      }
+      obj.setProperty(key,value);
+    }
+ catch (    FrameworkException fex) {
+      fex.printStackTrace();
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  if (!initialized) {
+    final String className="org.structr.core.script.FunctionsProxy";
+    final List<JavaFileObject> jfiles=new LinkedList<>();
+    jfiles.add(new CharSequenceJavaFileObject(className,getContent()));
+    compiler.getTask(null,fileManager,null,null,null,jfiles).call();
+    final ClassLoader loader=fileManager.getClassLoader(null);
+    final Class proxyClass=loader.loadClass(PROXY_CLASS_NAME);
+    constructor=proxyClass.getConstructor(SecurityContext.class,ActionContext.class,GraphObject.class);
+    initialized=true;
+  }
+}

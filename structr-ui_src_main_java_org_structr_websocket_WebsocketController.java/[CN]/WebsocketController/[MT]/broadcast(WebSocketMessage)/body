@@ -16,12 +16,7 @@
         WebSocketMessage clientData=webSocketData.copy();
         SecurityContext securityContext=socket.getSecurityContext();
         if (securityContext == null) {
-          try {
-            securityContext=SecurityContext.getInstance(null,AccessMode.Frontend);
-          }
- catch (          FrameworkException ex) {
-            continue;
-          }
+          securityContext=SecurityContext.getInstance(null,AccessMode.Frontend);
         }
         clientData.setResult(filter(securityContext,result));
         message=gson.toJson(clientData,WebSocketMessage.class);

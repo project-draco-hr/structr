@@ -1,0 +1,94 @@
+{
+  final long currentTimeMillis=System.currentTimeMillis();
+  Class sourceType=null;
+  Class targetType=null;
+  PropertyKey targetsProperty=null;
+  EnumProperty testEnumProperty=null;
+  PropertyKey testBooleanProperty=null;
+  PropertyKey testIntegerProperty=null;
+  PropertyKey testStringProperty=null;
+  PropertyKey testDoubleProperty=null;
+  PropertyKey testDateProperty=null;
+  Class testEnumType=null;
+  try (final Tx tx=app.tx()){
+    final SchemaNode sourceNode=createTestNode(SchemaNode.class,"Source");
+    final SchemaNode targetNode=createTestNode(SchemaNode.class,"Target");
+    sourceNode.setProperty(new StringProperty("_testBoolean"),"Boolean");
+    sourceNode.setProperty(new StringProperty("_testInteger"),"Integer");
+    sourceNode.setProperty(new StringProperty("_testString"),"String");
+    sourceNode.setProperty(new StringProperty("_testDouble"),"Double");
+    sourceNode.setProperty(new StringProperty("_testEnum"),"Enum(OPEN,CLOSED,TEST)");
+    sourceNode.setProperty(new StringProperty("_testDate"),"Date");
+    sourceNode.setProperty(new StringProperty("___onCreate"),"{ var e = Structr.get('this'); e.targets = Structr.find('Target'); }");
+    sourceNode.setProperty(new StringProperty("___doTest01"),"{ var e = Structr.get('this'); e.testEnum = 'OPEN'; }");
+    sourceNode.setProperty(new StringProperty("___doTest02"),"{ var e = Structr.get('this'); e.testEnum = 'CLOSED'; }");
+    sourceNode.setProperty(new StringProperty("___doTest03"),"{ var e = Structr.get('this'); e.testEnum = 'TEST'; }");
+    sourceNode.setProperty(new StringProperty("___doTest04"),"{ var e = Structr.get('this'); e.testEnum = 'INVALID'; }");
+    sourceNode.setProperty(new StringProperty("___doTest05"),"{ var e = Structr.get('this'); e.testBoolean = true; e.testInteger = 123; e.testString = 'testing..'; e.testDouble = 1.2345; e.testDate = new Date(" + currentTimeMillis + "); }");
+    final PropertyMap properties=new PropertyMap();
+    properties.put(SchemaRelationship.sourceJsonName,"source");
+    properties.put(SchemaRelationship.targetJsonName,"targets");
+    properties.put(SchemaRelationship.sourceMultiplicity,"*");
+    properties.put(SchemaRelationship.targetMultiplicity,"*");
+    properties.put(SchemaRelationship.relationshipType,"HAS");
+    app.create(sourceNode,targetNode,SchemaRelationship.class,properties);
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+    fail("Unexpected exception.");
+  }
+  try (final Tx tx=app.tx()){
+    final ConfigurationProvider config=StructrApp.getConfiguration();
+    sourceType=config.getNodeEntityClass("Source");
+    targetType=config.getNodeEntityClass("Target");
+    targetsProperty=config.getPropertyKeyForJSONName(sourceType,"targets");
+    testEnumProperty=(EnumProperty)config.getPropertyKeyForJSONName(sourceType,"testEnum");
+    testEnumType=testEnumProperty.getEnumType();
+    testBooleanProperty=config.getPropertyKeyForJSONName(sourceType,"testBoolean");
+    testIntegerProperty=config.getPropertyKeyForJSONName(sourceType,"testInteger");
+    testStringProperty=config.getPropertyKeyForJSONName(sourceType,"testString");
+    testDoubleProperty=config.getPropertyKeyForJSONName(sourceType,"testDouble");
+    testDateProperty=config.getPropertyKeyForJSONName(sourceType,"testDate");
+    assertNotNull(sourceType);
+    assertNotNull(targetType);
+    assertNotNull(targetsProperty);
+    createTestNodes(targetType,5);
+    createTestNodes(sourceType,5);
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+    fail("Unexpected exception.");
+  }
+  try (final Tx tx=app.tx()){
+    for (    final Object obj : app.nodeQuery(sourceType).getAsList()) {
+      assertNotNull("Invalid nodeQuery result",obj);
+      final GraphObject sourceNode=(GraphObject)obj;
+      final Object targetNodesObject=sourceNode.getProperty(targetsProperty);
+      assertTrue("Invalid getProperty result for scripted association",targetNodesObject instanceof List);
+      final List list=(List)targetNodesObject;
+      assertEquals("Invalid getProperty result for scripted association",5,list.size());
+    }
+    final GraphObject sourceNode=app.nodeQuery(sourceType).getFirst();
+    sourceNode.invokeMethod("doTest01",Collections.EMPTY_MAP,true);
+    assertEquals("Invalid setProperty result for EnumProperty",testEnumType.getEnumConstants()[0],sourceNode.getProperty(testEnumProperty));
+    sourceNode.invokeMethod("doTest02",Collections.EMPTY_MAP,true);
+    assertEquals("Invalid setProperty result for EnumProperty",testEnumType.getEnumConstants()[1],sourceNode.getProperty(testEnumProperty));
+    sourceNode.invokeMethod("doTest03",Collections.EMPTY_MAP,true);
+    assertEquals("Invalid setProperty result for EnumProperty",testEnumType.getEnumConstants()[2],sourceNode.getProperty(testEnumProperty));
+    sourceNode.invokeMethod("doTest04",Collections.EMPTY_MAP,true);
+    assertEquals("Invalid setProperty result for EnumProperty",testEnumType.getEnumConstants()[2],sourceNode.getProperty(testEnumProperty));
+    sourceNode.invokeMethod("doTest05",Collections.EMPTY_MAP,true);
+    assertEquals("Invalid setProperty result for BooleanProperty",true,sourceNode.getProperty(testBooleanProperty));
+    assertEquals("Invalid setProperty result for IntegerProperty",123,sourceNode.getProperty(testIntegerProperty));
+    assertEquals("Invalid setProperty result for StringProperty","testing..",sourceNode.getProperty(testStringProperty));
+    assertEquals("Invalid setProperty result for DoubleProperty",1.2345,sourceNode.getProperty(testDoubleProperty));
+    assertEquals("Invalid setProperty result for DateProperty",new Date(currentTimeMillis),sourceNode.getProperty(testDateProperty));
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+    fail("Unexpected exception.");
+  }
+}

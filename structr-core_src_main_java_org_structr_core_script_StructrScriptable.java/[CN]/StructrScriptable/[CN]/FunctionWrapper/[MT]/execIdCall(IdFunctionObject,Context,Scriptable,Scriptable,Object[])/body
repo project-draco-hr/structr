@@ -1,6 +1,11 @@
 {
   try {
-    return wrap(externalScriptable,function.apply(actionContext,entity,parameters));
+    final Object[] unwrappedParameters=new Object[parameters.length];
+    int i=0;
+    for (    final Object param : parameters) {
+      unwrappedParameters[i++]=unwrap(param);
+    }
+    return wrap(externalScriptable,function.apply(actionContext,entity,unwrappedParameters));
   }
  catch (  FrameworkException fex) {
     exception=fex;

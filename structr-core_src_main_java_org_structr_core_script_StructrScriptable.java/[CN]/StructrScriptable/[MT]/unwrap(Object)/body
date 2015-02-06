@@ -1,0 +1,20 @@
+{
+  if (source != null) {
+    if (source instanceof Wrapper) {
+      return unwrap(((Wrapper)source).unwrap());
+    }
+ else {
+      if (source.getClass().isArray()) {
+        final List list=new ArrayList();
+        for (        final Object obj : (Object[])source) {
+          list.add(unwrap(obj));
+        }
+        return list;
+      }
+      if (source instanceof Scriptable && "Date".equals(((Scriptable)source).getClassName())) {
+        return Context.jsToJava(source,Date.class);
+      }
+    }
+  }
+  return source;
+}

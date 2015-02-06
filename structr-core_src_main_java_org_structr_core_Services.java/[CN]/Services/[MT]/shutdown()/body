@@ -1,22 +1,25 @@
 {
   initializationDone=false;
-  System.out.println("INFO: Shutting down...");
-  for (  Service service : serviceCache.values()) {
-    try {
-      if (service instanceof RunnableService) {
-        RunnableService runnableService=(RunnableService)service;
-        if (runnableService.isRunning()) {
-          runnableService.stopService();
+  if (!shutdownDone) {
+    System.out.println("INFO: Shutting down...");
+    for (    Service service : serviceCache.values()) {
+      try {
+        if (service instanceof RunnableService) {
+          RunnableService runnableService=(RunnableService)service;
+          if (runnableService.isRunning()) {
+            runnableService.stopService();
+          }
         }
+        service.shutdown();
       }
-      service.shutdown();
+ catch (      Throwable t) {
+        System.out.println("WARNING: Failed to shut down " + service.getName() + ": "+ t.getMessage());
+      }
     }
- catch (    Throwable t) {
-      System.out.println("WARNING: Failed to shut down " + service.getName() + ": "+ t.getMessage());
-    }
+    serviceCache.clear();
+    configuration.shutdown();
+    singletonInstance=null;
+    System.out.println("INFO: Shutdown complete");
+    shutdownDone=true;
   }
-  serviceCache.clear();
-  configuration.shutdown();
-  singletonInstance=null;
-  System.out.println("INFO: Shutdown complete");
 }

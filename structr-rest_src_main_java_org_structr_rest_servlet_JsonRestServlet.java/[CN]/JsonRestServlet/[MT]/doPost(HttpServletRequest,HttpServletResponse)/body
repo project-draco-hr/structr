@@ -52,16 +52,18 @@
         if (!results.isEmpty()) {
           final RestMethodResult result=results.get(0);
           final int resultCount=results.size();
-          if (resultCount > 1) {
-            for (            final RestMethodResult r : results) {
-              final GraphObject objectCreated=r.getContent().get(0);
-              if (!result.getContent().contains(objectCreated)) {
-                result.addContent(objectCreated);
+          if (result != null) {
+            if (resultCount > 1) {
+              for (              final RestMethodResult r : results) {
+                final GraphObject objectCreated=r.getContent().get(0);
+                if (!result.getContent().contains(objectCreated)) {
+                  result.addContent(objectCreated);
+                }
               }
+              result.addHeader("Location",null);
             }
-            result.addHeader("Location",null);
+            result.commitResponse(gson.get(),response);
           }
-          result.commitResponse(gson.get(),response);
         }
         tx.success();
       }

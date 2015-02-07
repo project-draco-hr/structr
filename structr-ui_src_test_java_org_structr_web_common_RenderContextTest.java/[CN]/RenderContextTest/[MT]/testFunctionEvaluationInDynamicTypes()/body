@@ -19,11 +19,11 @@
     fail("Unexpected exception");
   }
   try (final Tx tx=app.tx()){
-    final RenderContext renderContext=new RenderContext();
+    final RenderContext renderContext=new RenderContext(securityContext);
     renderContext.putDataObject("item",item);
-    assertEquals("Invalid combined array dot syntax result: ","Item",Scripting.replaceVariables(securityContext,item,renderContext,"${find('Item')[0].name}"));
-    Scripting.replaceVariables(securityContext,item,renderContext,"${item.testMethod()}");
-    assertEquals("Invalid method evaluation result: ","true",Scripting.replaceVariables(securityContext,item,renderContext,"${item.testMethodCalled}"));
+    assertEquals("Invalid combined array dot syntax result: ","Item",Scripting.replaceVariables(renderContext,item,"${find('Item')[0].name}"));
+    Scripting.replaceVariables(renderContext,item,"${item.testMethod()}");
+    assertEquals("Invalid method evaluation result: ","true",Scripting.replaceVariables(renderContext,item,"${item.testMethodCalled}"));
     tx.success();
   }
  catch (  FrameworkException fex) {

@@ -12,6 +12,10 @@
     params.format=substringBetween(params.source,"(",")");
     params.source=params.source.replaceFirst("\\(.*\\)","");
   }
+  if (StringUtils.isNotBlank(params.source)) {
+    params.contentType=substringBetween(params.source,"[","]");
+    params.source=params.source.replaceFirst("\\[.*\\]","");
+  }
   if (params.source.contains(":")) {
     int firstIndex=params.source.indexOf(":");
     params.defaultValue=params.source.substring(firstIndex + 1);

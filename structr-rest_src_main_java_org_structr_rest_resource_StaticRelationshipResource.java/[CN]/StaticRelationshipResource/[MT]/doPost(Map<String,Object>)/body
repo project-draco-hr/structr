@@ -29,7 +29,10 @@
     final Class entityType=typedIdResource.getEntityClass();
     final String methodName=typeResource.getRawType();
     if (entity != null && entityType != null && methodName != null) {
-      return (RestMethodResult)entity.invokeMethod(methodName,propertySet);
+      final Object obj=entity.invokeMethod(methodName,propertySet,true);
+      final RestMethodResult result=new RestMethodResult(200);
+      unwrapTo(obj,result);
+      return result;
     }
   }
   throw new IllegalPathException();

@@ -17,7 +17,7 @@
     final IJsonInput jsonInput=cleanAndParseJsonString(app,input);
     if (securityContext != null) {
       try (final Tx tx=app.tx()){
-        resource=ResourceHelper.applyViewTransformation(request,securityContext,ResourceHelper.optimizeNestedResourceChain(ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView,config.getDefaultIdProperty()),config.getDefaultIdProperty()),propertyView);
+        resource=ResourceHelper.applyViewTransformation(request,securityContext,ResourceHelper.optimizeNestedResourceChain(ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView)),propertyView);
         authenticator.checkResourceAccess(securityContext,request,resource.getResourceSignature(),propertyView.get(securityContext));
         tx.success();
       }
@@ -52,16 +52,18 @@
         if (!results.isEmpty()) {
           final RestMethodResult result=results.get(0);
           final int resultCount=results.size();
-          if (resultCount > 1) {
-            for (            final RestMethodResult r : results) {
-              final GraphObject objectCreated=r.getContent().get(0);
-              if (!result.getContent().contains(objectCreated)) {
-                result.addContent(objectCreated);
+          if (result != null) {
+            if (resultCount > 1) {
+              for (              final RestMethodResult r : results) {
+                final GraphObject objectCreated=r.getContent().get(0);
+                if (!result.getContent().contains(objectCreated)) {
+                  result.addContent(objectCreated);
+                }
               }
+              result.addHeader("Location",null);
             }
-            result.addHeader("Location",null);
+            result.commitResponse(gson.get(),response);
           }
-          result.commitResponse(gson.get(),response);
         }
         tx.success();
       }

@@ -1,34 +1,3 @@
 {
-  System.out.println("\n######################################################################################");
-  System.out.println("# Starting " + getClass().getSimpleName() + "#"+ getName());
-  System.out.println("######################################################################################");
-  final StructrConf config=Services.getBaseConfiguration();
-  final Date now=new Date();
-  final long timestamp=now.getTime();
-  basePath="/tmp/structr-test-" + timestamp;
-  config.setProperty(Services.CONFIGURED_SERVICES,"NodeService LogService SchemaService");
-  config.setProperty(Services.CONFIGURATION,JarConfigurationProvider.class.getName());
-  config.setProperty(Services.TMP_PATH,"/tmp/");
-  config.setProperty(Services.BASE_PATH,basePath);
-  config.setProperty(Services.DATABASE_PATH,basePath + "/db");
-  config.setProperty(Services.FILES_PATH,basePath + "/files");
-  config.setProperty(Services.LOG_DATABASE_PATH,basePath + "/logDb.dat");
-  config.setProperty(Services.TCP_PORT,"13465");
-  config.setProperty(Services.UDP_PORT,"13466");
-  config.setProperty(Services.SUPERUSER_USERNAME,"superadmin");
-  config.setProperty(Services.SUPERUSER_PASSWORD,"sehrgeheim");
-  final Services services=Services.getInstance(config);
-  securityContext=SecurityContext.getSuperUserInstance();
-  app=StructrApp.getInstance(securityContext);
-  graphDbCommand=app.command(GraphDatabaseCommand.class);
-  writeLogCommand=app.command(WriteLogCommand.class);
-  readLogCommand=app.command(ReadLogCommand.class);
-  do {
-    try {
-      Thread.sleep(100);
-    }
- catch (    Throwable t) {
-    }
-  }
- while (!services.isInitialized());
+  setUp(null);
 }

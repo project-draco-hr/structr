@@ -1,0 +1,24 @@
+{
+  try (final Tx tx=app.tx()){
+    final ActionContext actionContext=new ActionContext();
+    final TestOne test=createTestNode(TestOne.class);
+    test.setProperty(TestOne.anInt,1);
+    test.setProperty(TestOne.aLong,2L);
+    test.setProperty(TestOne.aDouble,3.0);
+    test.setProperty(TestOne.aDate,new Date());
+    test.setProperty(TestOne.anEnum,TestOne.Status.One);
+    test.setProperty(TestOne.aString,"t??st");
+    test.setProperty(TestOne.aBoolean,true);
+    test.setProperty(TestOne.anotherString,"oneTwoThree${{{");
+    test.setProperty(TestOne.stringWithQuotes,"''\"\"''");
+    assertEquals("Invalid JavaScript evaluation result","test",Scripting.replaceVariables(securityContext,test,actionContext,"${{ return 'test' }}"));
+    assertEquals("Invalid JavaScript evaluation result","1",Scripting.replaceVariables(securityContext,test,actionContext,"${{ return Structr.get('this').anInt; }}"));
+    assertEquals("Invalid JavaScript evaluation result","2",Scripting.replaceVariables(securityContext,test,actionContext,"${{ return Structr.get('this').aLong; }}"));
+    assertEquals("Invalid JavaScript evaluation result","3.0",Scripting.replaceVariables(securityContext,test,actionContext,"${{ return Structr.get('this').aDouble; }}"));
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+    fail("Unexpected exception.");
+  }
+}

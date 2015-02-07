@@ -1,0 +1,27 @@
+{
+  final Method method=StructrApp.getConfiguration().getExportedMethodsForType(entityType).get(methodName);
+  if (method != null) {
+    try {
+      if (method.getParameterTypes().length == 1 && method.getParameterTypes()[0].equals(Map.class)) {
+        return method.invoke(this,propertySet);
+      }
+      return method.invoke(this,extractParameters(propertySet,method.getParameterTypes()));
+    }
+ catch (    IllegalAccessException|IllegalArgumentException|InvocationTargetException t) {
+      if (t instanceof FrameworkException) {
+        throw (FrameworkException)t;
+      }
+ else       if (t.getCause() instanceof FrameworkException) {
+        throw (FrameworkException)t.getCause();
+      }
+ else {
+        t.printStackTrace();
+        logger.log(Level.WARNING,"Unable to invoke method {0}: {1}",new Object[]{methodName,t.getMessage()});
+      }
+    }
+  }
+  if (throwExceptionForUnknownMethods) {
+    throw new FrameworkException(400,"Method " + methodName + " not found in type "+ getType());
+  }
+  return null;
+}

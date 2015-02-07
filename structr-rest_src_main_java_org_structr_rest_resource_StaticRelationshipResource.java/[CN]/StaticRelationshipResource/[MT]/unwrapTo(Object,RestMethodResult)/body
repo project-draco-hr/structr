@@ -1,0 +1,18 @@
+{
+  if (source != null) {
+    final Object unwrapped=Context.jsToJava(source,ScriptRuntime.ObjectClass);
+    if (unwrapped.getClass().isArray()) {
+      for (      final Object element : (Object[])unwrapped) {
+        unwrapTo(element,result);
+      }
+    }
+ else     if (unwrapped instanceof Collection) {
+      for (      final Object element : (Collection)unwrapped) {
+        unwrapTo(element,result);
+      }
+    }
+ else     if (unwrapped instanceof GraphObject) {
+      result.addContent((GraphObject)unwrapped);
+    }
+  }
+}

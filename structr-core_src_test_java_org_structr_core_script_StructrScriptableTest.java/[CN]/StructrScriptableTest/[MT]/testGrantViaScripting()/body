@@ -1,0 +1,55 @@
+{
+  try (Tx tx=app.tx()){
+    final SchemaNode sourceNode=createTestNode(SchemaNode.class,"Source");
+    sourceNode.setProperty(new StringProperty("___doTest01"),"{ var e = Structr.get('this'); e.grant(Structr.find('TestUser')[0], 'read', 'write'); }");
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+    fail("Unexpected exception.");
+  }
+  final ConfigurationProvider config=StructrApp.getConfiguration();
+  final Class sourceType=config.getNodeEntityClass("Source");
+  Principal testUser=null;
+  try (final Tx tx=app.tx()){
+    app.create(sourceType);
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+    fail("Unexpected exception.");
+  }
+  try (final Tx tx=app.tx()){
+    testUser=app.create(TestUser.class,new NodeAttribute<>(Principal.name,"test"),new NodeAttribute<>(Principal.password,"test"));
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+    fail("Unexpected exception.");
+  }
+  final App userApp=StructrApp.getInstance(SecurityContext.getInstance(testUser,AccessMode.Backend));
+  try (final Tx tx=userApp.tx()){
+    assertEquals("Invalid grant() scripting result",0,userApp.nodeQuery(sourceType).getAsList().size());
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+    fail("Unexpected exception.");
+  }
+  try (final Tx tx=app.tx()){
+    app.nodeQuery(sourceType).getFirst().invokeMethod("doTest01",Collections.EMPTY_MAP,true);
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+    fail("Unexpected exception.");
+  }
+  try (final Tx tx=userApp.tx()){
+    assertEquals("Invalid grant() scripting result",1,userApp.nodeQuery(sourceType).getAsList().size());
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+    fail("Unexpected exception.");
+  }
+}

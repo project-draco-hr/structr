@@ -1,27 +1,12 @@
 {
   JsonObject jsonObject=new JsonObject();
-  if (depth > outputNestingDepth) {
-    jsonObject.add("id",new JsonPrimitive(source.getUuid()));
-  }
- else {
-    if (idProperty == null) {
-      jsonObject.add("id",new JsonPrimitive(source.getId()));
-    }
- else {
-      Object idPropertyValue=source.getProperty(idProperty);
-      if (idPropertyValue != null) {
-        String idString=idPropertyValue.toString();
-        jsonObject.add("id",new JsonPrimitive(idString));
-      }
-    }
+  jsonObject.add("id",new JsonPrimitive(source.getUuid()));
+  if (depth <= outputNestingDepth) {
     Iterable<PropertyKey> keys=source.getPropertyKeys(localPropertyView);
     if (keys != null) {
       for (      PropertyKey key : keys) {
         Object value=source.getProperty(key);
         PropertyKey localKey=key;
-        if (localKey.equals(idProperty)) {
-          localKey=id;
-        }
         if (value != null) {
           jsonObject.add(localKey.jsonName(),serializeProperty(key,value,localPropertyView,depth + 1));
         }

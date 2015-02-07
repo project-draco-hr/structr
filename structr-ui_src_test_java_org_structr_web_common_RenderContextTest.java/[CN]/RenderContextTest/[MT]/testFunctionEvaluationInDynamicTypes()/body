@@ -21,9 +21,9 @@
   try (final Tx tx=app.tx()){
     final RenderContext renderContext=new RenderContext();
     renderContext.putDataObject("item",item);
-    assertEquals("Invalid combined array dot syntax result: ","Item",item.replaceVariables(securityContext,renderContext,"${find('Item')[0].name}"));
-    item.replaceVariables(securityContext,renderContext,"${item.testMethod()}");
-    assertEquals("Invalid method evaluation result: ","true",item.replaceVariables(securityContext,renderContext,"${item.testMethodCalled}"));
+    assertEquals("Invalid combined array dot syntax result: ","Item",Scripting.replaceVariables(securityContext,item,renderContext,"${find('Item')[0].name}"));
+    Scripting.replaceVariables(securityContext,item,renderContext,"${item.testMethod()}");
+    assertEquals("Invalid method evaluation result: ","true",Scripting.replaceVariables(securityContext,item,renderContext,"${item.testMethodCalled}"));
     tx.success();
   }
  catch (  FrameworkException fex) {

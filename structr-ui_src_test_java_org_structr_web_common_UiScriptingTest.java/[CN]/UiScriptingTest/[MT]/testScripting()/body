@@ -1,0 +1,51 @@
+{
+  NodeInterface detailsDataObject=null;
+  Page page=null;
+  DOMNode html=null;
+  DOMNode head=null;
+  DOMNode body=null;
+  DOMNode title=null;
+  DOMNode div=null;
+  DOMNode p=null;
+  DOMNode text=null;
+  try (final Tx tx=app.tx()){
+    detailsDataObject=app.create(TestOne.class,"TestOne");
+    page=Page.createNewPage(securityContext,"testpage");
+    page.setProperty(Page.visibleToPublicUsers,true);
+    assertTrue(page != null);
+    assertTrue(page instanceof Page);
+    html=(DOMNode)page.createElement("html");
+    head=(DOMNode)page.createElement("head");
+    body=(DOMNode)page.createElement("body");
+    title=(DOMNode)page.createElement("title");
+    div=(DOMNode)page.createElement("div");
+    p=(DOMNode)page.createElement("p");
+    text=(DOMNode)page.createTextNode("x");
+    page.appendChild(html);
+    html.appendChild(head);
+    html.appendChild(body);
+    head.appendChild(title);
+    body.appendChild(div);
+    div.appendChild(p);
+    p.setProperty(DOMElement.restQuery,"/divs");
+    p.setProperty(DOMElement.dataKey,"div");
+    p.appendChild(text);
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fail("Unexpected exception");
+  }
+  try (final Tx tx=app.tx()){
+    final RenderContext ctx=new RenderContext(securityContext,new RequestMockUp(),new ResponseMockUp(),RenderContext.EditMode.NONE,Locale.GERMAN);
+    ctx.setDetailsDataObject(detailsDataObject);
+    ctx.setPage(page);
+    test(p,text,"${{ return Structr.get('div').id}}","<p>" + div.getUuid() + "</p>",ctx);
+    test(p,text,"${{ return Structr.get('page').id}}","<p>" + page.getUuid() + "</p>",ctx);
+    test(p,text,"${{ return Structr.get('parent').id}}","<p>" + p.getUuid() + "</p>",ctx);
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+    fail("Unexpected exception.");
+  }
+}

@@ -1,5 +1,5 @@
 {
-  final GsonBuilder gsonBuilder=new GsonBuilder().setPrettyPrinting().registerTypeAdapter(WebSocketMessage.class,new WebSocketDataGSONAdapter(config.getDefaultIdProperty(),config.getOutputNestingDepth()));
+  final GsonBuilder gsonBuilder=new GsonBuilder().setPrettyPrinting().registerTypeAdapter(WebSocketMessage.class,new WebSocketDataGSONAdapter(config.getOutputNestingDepth()));
   final boolean lenient=Boolean.parseBoolean(StructrApp.getConfigurationValue("json.lenient","false"));
   if (lenient) {
     gsonBuilder.serializeSpecialFloatingPointValues();
@@ -8,7 +8,7 @@
   final WebsocketController syncController=new WebsocketController(gson);
   TransactionCommand.registerTransactionListener(syncController);
   factory.getPolicy().setIdleTimeout(61000);
-  factory.setCreator(new StructrWebSocketCreator(syncController,gson,config.getDefaultIdProperty(),config.getAuthenticator()));
+  factory.setCreator(new StructrWebSocketCreator(syncController,gson,config.getAuthenticator()));
   factory.register(StructrWebSocket.class);
   factory.getExtensionFactory().unregister("x-webkit-deflate-frame");
   factory.getExtensionFactory().unregister("permessage-deflate");

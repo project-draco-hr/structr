@@ -25,16 +25,8 @@
   logger.log(Level.INFO,"Database ready.");
   logger.log(Level.FINE,"Initializing UUID index...");
   try (final Transaction tx=graphDb.beginTx()){
-    uuidIndex=graphDb.index().forNodes("uuidAllNodes",LuceneIndexImplementation.EXACT_CONFIG);
-    nodeIndices.put(NodeIndex.uuid,uuidIndex);
-    logger.log(Level.FINE,"UUID index ready.");
-    logger.log(Level.FINE,"Initializing user index...");
-    userIndex=graphDb.index().forNodes("nameEmailAllUsers",LuceneIndexImplementation.EXACT_CONFIG);
-    nodeIndices.put(NodeIndex.user,userIndex);
-    logger.log(Level.FINE,"Node Email index ready.");
-    logger.log(Level.FINE,"Initializing exact email index...");
-    caseInsensitiveUserIndex=graphDb.index().forNodes("caseInsensitiveAllUsers",MapUtil.stringMap("provider","lucene","type","exact","to_lower_case","true"));
-    nodeIndices.put(NodeIndex.caseInsensitiveUser,caseInsensitiveUserIndex);
+    caseInsensitiveIndex=graphDb.index().forNodes("caseInsensitiveAllNodes",MapUtil.stringMap("provider","lucene","type","exact","to_lower_case","true"));
+    nodeIndices.put(NodeIndex.caseInsensitive,caseInsensitiveIndex);
     logger.log(Level.FINE,"Node case insensitive node index ready.");
     logger.log(Level.FINE,"Initializing case insensitive fulltext node index...");
     fulltextIndex=graphDb.index().forNodes("fulltextAllNodes",LuceneIndexImplementation.FULLTEXT_CONFIG);

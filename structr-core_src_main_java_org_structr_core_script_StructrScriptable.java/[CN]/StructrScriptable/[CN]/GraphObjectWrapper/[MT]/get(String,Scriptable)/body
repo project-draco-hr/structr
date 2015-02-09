@@ -1,0 +1,21 @@
+{
+  final PropertyKey key=getKey(name);
+  if (key != null) {
+    return wrap(parentScope,obj.getProperty(key));
+  }
+  final Object value=checkEntityMethods(name);
+  if (value != null) {
+    return value;
+  }
+  final Method method=StructrApp.getConfiguration().getAnnotatedMethods(obj.getClass(),Export.class).get(name);
+  if (method != null) {
+    return new NativeJavaMethod(method,name);
+  }
+  try {
+    return obj.evaluate(actionContext.getSecurityContext(),name,null);
+  }
+ catch (  FrameworkException fex) {
+    exception=fex;
+  }
+  return null;
+}

@@ -1,0 +1,16 @@
+{
+  renderContext.setPage(this);
+  DOMNode subNode=(DOMNode)this.getFirstChild().getNextSibling();
+  if (subNode == null) {
+    subNode=(DOMNode)super.getFirstChild();
+  }
+ else {
+    renderContext.getBuffer().append("<!DOCTYPE html>\n");
+  }
+  while (subNode != null) {
+    if (subNode.isNotDeleted() && securityContext.isVisible(subNode)) {
+      subNode.render(renderContext,depth);
+    }
+    subNode=(DOMNode)subNode.getNextSibling();
+  }
+}

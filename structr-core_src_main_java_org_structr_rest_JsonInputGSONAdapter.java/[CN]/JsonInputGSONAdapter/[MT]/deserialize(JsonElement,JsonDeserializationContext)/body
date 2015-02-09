@@ -5,9 +5,6 @@
     for (    Entry<String,JsonElement> entry : obj.entrySet()) {
       String key=entry.getKey();
       JsonElement elem=entry.getValue();
-      if ((idProperty != null) && "id".equals(key)) {
-        key=idProperty.jsonName();
-      }
       if (elem.isJsonNull()) {
         wrapper.add(key,null);
       }
@@ -15,8 +12,8 @@
         wrapper.add(key,deserialize(elem,context));
       }
  else       if (elem.isJsonArray()) {
-        JsonArray array=elem.getAsJsonArray();
-        List list=new LinkedList();
+        final JsonArray array=elem.getAsJsonArray();
+        final List list=new LinkedList();
         for (        JsonElement element : array) {
           if (element.isJsonPrimitive()) {
             list.add(fromPrimitive((element.getAsJsonPrimitive())));
@@ -35,7 +32,6 @@
  else   if (json.isJsonArray()) {
     JsonArray array=json.getAsJsonArray();
     for (    JsonElement elem : array) {
-      wrapper=new JsonInput();
       if (elem.isJsonPrimitive()) {
         wrapper.add(elem.toString(),fromPrimitive(elem.getAsJsonPrimitive()));
       }

@@ -49,18 +49,18 @@
     fail("Unexpected exception");
   }
   try (final Tx tx=app.tx()){
-    final RenderContext renderContext=new RenderContext();
+    final RenderContext renderContext=new RenderContext(securityContext);
     renderContext.putDataObject("project",project);
     renderContext.putDataObject("task",task1);
-    assertEquals("Invalid dot syntax result: ","Project1",project.replaceVariables(securityContext,renderContext,"${project.name}"));
-    assertEquals("Invalid dot syntax result: ","Task1",project.replaceVariables(securityContext,renderContext,"${project.tasks[0].name}"));
-    assertEquals("Invalid dot syntax result: ","Task2",project.replaceVariables(securityContext,renderContext,"${project.tasks[1].name}"));
-    assertEquals("Invalid dot syntax result: ","Task3",project.replaceVariables(securityContext,renderContext,"${project.tasks[2].name}"));
-    assertEquals("Invalid dot syntax result: ","[Task1, Task2, Task3]",project.replaceVariables(securityContext,renderContext,"${project.taskNames}"));
-    assertEquals("Invalid dot syntax result: ","Task1",project.replaceVariables(securityContext,renderContext,"${project.taskNames[0]}"));
-    assertEquals("Invalid dot syntax result: ","Task2",project.replaceVariables(securityContext,renderContext,"${project.taskNames[1]}"));
-    assertEquals("Invalid dot syntax result: ","Task3",project.replaceVariables(securityContext,renderContext,"${project.taskNames[2]}"));
-    assertEquals("Invalid dot syntax result: ","Task3",project.replaceVariables(securityContext,renderContext,"${project.currentTask.name}"));
+    assertEquals("Invalid dot syntax result: ","Project1",Scripting.replaceVariables(renderContext,project,"${project.name}"));
+    assertEquals("Invalid dot syntax result: ","Task1",Scripting.replaceVariables(renderContext,project,"${project.tasks[0].name}"));
+    assertEquals("Invalid dot syntax result: ","Task2",Scripting.replaceVariables(renderContext,project,"${project.tasks[1].name}"));
+    assertEquals("Invalid dot syntax result: ","Task3",Scripting.replaceVariables(renderContext,project,"${project.tasks[2].name}"));
+    assertEquals("Invalid dot syntax result: ","[Task1, Task2, Task3]",Scripting.replaceVariables(renderContext,project,"${project.taskNames}"));
+    assertEquals("Invalid dot syntax result: ","Task1",Scripting.replaceVariables(renderContext,project,"${project.taskNames[0]}"));
+    assertEquals("Invalid dot syntax result: ","Task2",Scripting.replaceVariables(renderContext,project,"${project.taskNames[1]}"));
+    assertEquals("Invalid dot syntax result: ","Task3",Scripting.replaceVariables(renderContext,project,"${project.taskNames[2]}"));
+    assertEquals("Invalid dot syntax result: ","Task3",Scripting.replaceVariables(renderContext,project,"${project.currentTask.name}"));
     tx.success();
   }
  catch (  FrameworkException fex) {

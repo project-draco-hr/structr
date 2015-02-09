@@ -1,0 +1,28 @@
+{
+  final StringBuilder buf=new StringBuilder();
+  buf.append("package org.structr.core.script;\n\n");
+  buf.append("import org.structr.common.error.FrameworkException;\n");
+  buf.append("import org.structr.core.parser.Functions;\n");
+  buf.append("import org.structr.schema.action.ActionContext;\n");
+  buf.append("import org.structr.common.SecurityContext;\n");
+  buf.append("import org.structr.schema.action.Function;\n");
+  buf.append("import org.structr.core.GraphObject;\n\n");
+  buf.append("public class FunctionsProxy {\n\n");
+  buf.append("	private SecurityContext securityContext = null;\n");
+  buf.append("	private ActionContext actionContext     = null;\n");
+  buf.append("	private GraphObject entity              = null;\n\n");
+  buf.append("	public FunctionsProxy(final SecurityContext securityContext, final ActionContext actionContext, final GraphObject entity) {\n");
+  buf.append("		this.securityContext = securityContext;\n");
+  buf.append("		this.actionContext   = actionContext;\n");
+  buf.append("		this.entity          = entity;\n");
+  buf.append("	}\n\n");
+  for (  final String name : Functions.functions.keySet()) {
+    if (!"if".equals(name)) {
+      buf.append("	public Object ").append(name).append("(final Object... params) throws FrameworkException {\n");
+      buf.append("		return Functions.functions.get(\"").append(name).append("\").apply(actionContext, entity, params);\n");
+      buf.append("	}\n\n");
+    }
+  }
+  buf.append("}\n");
+  return buf.toString();
+}

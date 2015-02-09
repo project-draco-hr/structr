@@ -1,0 +1,4 @@
+{
+  createEntity("/schema_node","{ \"name\": \"TestType6\", \"_foo\": \"String!(bar)\" }");
+  RestAssured.given().contentType("application/json; charset=UTF-8").filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(200)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(201)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(400)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(404)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(422)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(500)).expect().statusCode(200).body("result",hasSize(14)).body("result_count",equalTo(14)).body("result[-1].dbName",equalTo("foo")).body("result[-1].unique",equalTo(true)).body("result[-1].format",equalTo("bar")).when().get("/_schema/TestType6/ui");
+}

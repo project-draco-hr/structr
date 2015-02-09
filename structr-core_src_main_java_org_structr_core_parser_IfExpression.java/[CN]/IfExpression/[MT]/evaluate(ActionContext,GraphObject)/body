@@ -1,0 +1,21 @@
+{
+  if (condition == null) {
+    return Functions.ERROR_MESSAGE_IF;
+  }
+  if (isTrue(condition.evaluate(ctx,entity))) {
+    if (trueExpression != null) {
+      return trueExpression.evaluate(ctx,entity);
+    }
+ else {
+      throw new FrameworkException(422,"Invalid if() expression in builtin function: missing trueExpression.");
+    }
+  }
+ else {
+    if (falseExpression != null) {
+      return falseExpression.evaluate(ctx,entity);
+    }
+ else {
+      throw new FrameworkException(422,"Invalid if() expression in builtin function: missing falseExpression.");
+    }
+  }
+}

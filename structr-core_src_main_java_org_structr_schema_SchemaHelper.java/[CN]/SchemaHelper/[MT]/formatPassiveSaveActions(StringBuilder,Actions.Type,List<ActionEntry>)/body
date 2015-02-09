@@ -11,18 +11,11 @@
   src.append(type.getParameters());
   src.append(");\n\n");
   if (!actionList.isEmpty()) {
-    src.append("\t\tif (!error) {\n");
     for (    final ActionEntry action : actionList) {
-      if (action.runOnError()) {
-        src.append("\t\t\terror |= ").append(action.getSource("this")).append(";\n");
-      }
- else {
-        src.append("\t\tif (!error) {\n");
-        src.append("\t\t\terror |= ").append(action.getSource("this")).append(";\n");
-        src.append("\t\t}\n");
-      }
+      src.append("\t\tif (!error) {\n");
+      src.append("\t\t\terror |= ").append(action.getSource("this")).append(";\n");
+      src.append("\t\t}\n");
     }
-    src.append("\t\t}\n");
   }
   src.append("\n\t\treturn !error;\n");
   src.append("\t}\n");

@@ -1,0 +1,29 @@
+{
+  out.append("<").append(tag);
+  for (  PropertyKey attribute : StructrApp.getConfiguration().getPropertySet(entityType,PropertyView.Html)) {
+    String value=getPropertyWithVariableReplacement(renderContext,attribute);
+    if (!(EditMode.RAW.equals(editMode) || EditMode.WIDGET.equals(editMode))) {
+      value=escapeForHtmlAttributes(value);
+    }
+    if (value != null) {
+      String key=attribute.jsonName().substring(PropertyView.Html.length());
+      out.append(" ").append(key).append("=\"").append(value).append("\"");
+    }
+  }
+  renderCustomAttributes(out,securityContext,renderContext);
+switch (editMode) {
+case CONTENT:
+    if (depth == 0) {
+      String pageId=renderContext.getPageId();
+      if (pageId != null) {
+        out.append(" data-structr-page=\"").append(pageId).append("\"");
+      }
+    }
+  out.append(" data-structr-id=\"").append(getUuid()).append("\"");
+break;
+case RAW:
+out.append(" ").append(DOMElement.dataHashProperty.jsonName()).append("=\"").append(getIdHash()).append("\"");
+break;
+}
+out.append(">");
+}

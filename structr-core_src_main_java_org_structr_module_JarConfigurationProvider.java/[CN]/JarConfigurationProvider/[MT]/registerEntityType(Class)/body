@@ -46,11 +46,11 @@
     logger.log(Level.SEVERE,"Unable to register type {0}: {1}",new Object[]{type,t.getMessage()});
     t.printStackTrace();
   }
-  Set<Method> typeMethods=exportedMethodMap.get(type.getName());
+  Map<String,Method> typeMethods=exportedMethodMap.get(type.getName());
   if (typeMethods == null) {
-    typeMethods=new LinkedHashSet<>();
+    typeMethods=new HashMap<>();
     exportedMethodMap.put(type.getName(),typeMethods);
   }
-  typeMethods.addAll(getAnnotatedMethods(type,Export.class));
+  typeMethods.putAll(getAnnotatedMethods(type,Export.class));
   getInterfacesForType(type);
 }

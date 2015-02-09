@@ -1,0 +1,32 @@
+{
+  Group group=null;
+  TestUser user1=null;
+  TestUser user2=null;
+  try (final Tx tx=app.tx()){
+    group=app.create(Group.class,"Group");
+    user1=app.create(TestUser.class,"Tester1");
+    user2=app.create(TestUser.class,"Tester2");
+    group.setProperty(Group.members,Arrays.asList(new Principal[]{user1}));
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+    fail("Unexpected exception.");
+  }
+  try (final Tx tx=app.tx()){
+    final ActionContext actionContext=new ActionContext(securityContext);
+    assertEquals("Invalid prerequisite",1,group.getProperty(Group.members).size());
+    assertEquals("Invalid prerequisite",user2,Scripting.evaluate(actionContext,group,"${{ return Structr.find('TestUser', { name: 'Tester2' })[0]; }}"));
+    Scripting.evaluate(actionContext,group,"${{ var group = Structr.find('Group')[0]; var users = group.members; users.push(Structr.find('TestUser', { name: 'Tester2' })[0]); }}");
+    assertEquals("Invalid scripted array operation result",2,group.getProperty(Group.members).size());
+    group.setProperty(Group.members,Arrays.asList(new Principal[]{user1}));
+    assertEquals("Invalid prerequisite",1,group.getProperty(Group.members).size());
+    Scripting.evaluate(actionContext,group,"${{ var group = Structr.find('Group')[0]; group.members.push(Structr.find('TestUser', { name: 'Tester2' })[0]); }}");
+    assertEquals("Invalid scripted array operation result",2,group.getProperty(Group.members).size());
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+    fail("Unexpected exception.");
+  }
+}

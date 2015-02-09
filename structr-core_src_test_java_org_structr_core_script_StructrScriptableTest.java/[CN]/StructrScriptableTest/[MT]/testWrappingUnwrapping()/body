@@ -1,0 +1,14 @@
+{
+  try (final Tx tx=app.tx()){
+    final ActionContext actionContext=new ActionContext(securityContext);
+    final TestOne context=app.create(TestOne.class);
+    Scripting.evaluate(actionContext,context,"${{ Structr.create('Group', { name: 'Group1' } ); }}");
+    Scripting.evaluate(actionContext,context,"${{ Structr.create('Group', 'name', 'Group2'); }}");
+    assertEquals("Invalid unwrapping result",2,app.nodeQuery(Group.class).getAsList().size());
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+    fail("Unexpected exception.");
+  }
+}

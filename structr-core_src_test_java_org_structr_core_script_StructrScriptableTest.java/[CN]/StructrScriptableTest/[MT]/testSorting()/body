@@ -1,0 +1,26 @@
+{
+  final Random random=new Random();
+  TestOne testOne=null;
+  try (final Tx tx=app.tx()){
+    final List<TestSix> testSixs=createTestNodes(TestSix.class,10);
+    testOne=app.create(TestOne.class);
+    for (    final TestSix t : testSixs) {
+      t.setProperty(TestSix.index,random.nextInt(1000));
+    }
+    testOne.setProperty(TestOne.manyToManyTestSixs,testSixs);
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+    fail("Unexpected exception.");
+  }
+  try (final Tx tx=app.tx()){
+    final ActionContext actionContext=new ActionContext(securityContext);
+    Scripting.evaluate(actionContext,testOne,"${{" + "	var testOne = Structr.find('TestOne')[0]; " + "	var members = testOne.manyToManyTestSixs.sort(function(x, y) {"+ "		return x.index < y.index ? -1 : 1;"+ "	});"+ "	Structr.log(members);"+ "	return members;"+ "}}");
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+    fail("Unexpected exception.");
+  }
+}

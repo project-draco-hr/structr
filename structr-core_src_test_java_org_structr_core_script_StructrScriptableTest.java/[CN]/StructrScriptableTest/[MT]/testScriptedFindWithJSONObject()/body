@@ -34,8 +34,6 @@
     testOne1.setProperty(TestOne.anEnum,Status.One);
     testOne1.setProperty(TestOne.aString,"aString1");
     testOne1.setProperty(TestOne.aBoolean,true);
-    testOne1.setProperty(TestOne.anotherString,"anotherString1");
-    testOne1.setProperty(TestOne.stringWithQuotes,"1String\"with'quotes");
     testOne1.setProperty(TestOne.testTwo,testTwo1);
     testOne1.setProperty(TestOne.testThree,testThree1);
     testOne1.setProperty(TestOne.testFour,testFour1);
@@ -47,8 +45,6 @@
     testOne2.setProperty(TestOne.anEnum,Status.Two);
     testOne2.setProperty(TestOne.aString,"aString2");
     testOne2.setProperty(TestOne.aBoolean,false);
-    testOne2.setProperty(TestOne.anotherString,"anotherString2");
-    testOne2.setProperty(TestOne.stringWithQuotes,"2String\"with'quotes");
     testOne2.setProperty(TestOne.testTwo,testTwo2);
     testOne2.setProperty(TestOne.testThree,testThree2);
     testOne2.setProperty(TestOne.testFour,testFour2);
@@ -69,6 +65,8 @@
     assertEquals("Invalid scripted find() result",testOne2,Scripting.evaluate(actionContext,testOne1,"${{ return Structr.find('TestOne', { aDouble: " + double2 + " })[0]; }}"));
     assertEquals("Invalid scripted find() result",testOne1,Scripting.evaluate(actionContext,testOne1,"${{ return Structr.find('TestOne', { anEnum: 'One' })[0]; }}"));
     assertEquals("Invalid scripted find() result",testOne2,Scripting.evaluate(actionContext,testOne1,"${{ return Structr.find('TestOne', { anEnum: 'Two' })[0]; }}"));
+    assertEquals("Invalid scripted find() result",testOne1,Scripting.evaluate(actionContext,testOne1,"${{ return Structr.find('TestOne', { aBoolean: true })[0]; }}"));
+    assertEquals("Invalid scripted find() result",testOne2,Scripting.evaluate(actionContext,testOne1,"${{ return Structr.find('TestOne', { aBoolean: false })[0]; }}"));
     tx.success();
   }
  catch (  FrameworkException fex) {

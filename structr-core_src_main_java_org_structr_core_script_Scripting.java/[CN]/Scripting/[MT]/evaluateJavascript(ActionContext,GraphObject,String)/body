@@ -3,7 +3,7 @@
   try {
     scriptingContext.setLanguageVersion(Context.VERSION_1_2);
     Scriptable scope=scriptingContext.initStandardObjects();
-    final StructrScriptable scriptable=new StructrScriptable(actionContext,entity);
+    final StructrScriptable scriptable=new StructrScriptable(scriptingContext,scope,actionContext,entity);
     scope.put("Structr",scope,scriptable);
     actionContext.clear();
     Object extractedValue=scriptingContext.evaluateString(scope,embedInFunction(script),"source",1,null);
@@ -22,7 +22,11 @@
     }
     return extractedValue;
   }
-  finally {
+ catch (  Throwable t) {
+    t.printStackTrace();
+  }
+ finally {
     Context.exit();
   }
+  return null;
 }

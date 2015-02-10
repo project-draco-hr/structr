@@ -1,0 +1,13 @@
+{
+  try (final Tx tx=app.tx()){
+    final PropertyMap properties=new PropertyMap();
+    properties.put(AbstractNode.name,"Test");
+    properties.put(new StringProperty("_functionTest"),"Function({ // \"})");
+    app.create(SchemaNode.class,properties);
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+    fail("Unexpected exception.");
+  }
+}

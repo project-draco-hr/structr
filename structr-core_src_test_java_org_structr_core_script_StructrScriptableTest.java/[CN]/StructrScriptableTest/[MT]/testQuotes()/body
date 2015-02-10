@@ -1,0 +1,11 @@
+{
+  try (final Tx tx=app.tx()){
+    final ActionContext actionContext=new ActionContext(securityContext);
+    Scripting.evaluate(actionContext,app.create(TestOne.class),"${{\n // \"test\n}}");
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+    fail("Unexpected exception.");
+  }
+}

@@ -4,9 +4,10 @@
     scriptingContext.setLanguageVersion(Context.VERSION_1_2);
     Scriptable scope=scriptingContext.initStandardObjects();
     final StructrScriptable scriptable=new StructrScriptable(actionContext,entity);
+    scriptable.setParentScope(scope);
     scope.put("Structr",scope,scriptable);
     actionContext.clear();
-    Object extractedValue=scriptingContext.evaluateString(scope,embedInFunction(script),"source",1,null);
+    Object extractedValue=scriptingContext.evaluateString(scope,embedInFunction(script),"script source, line ",1,null);
     if (scriptable.hasException()) {
       throw scriptable.getException();
     }
@@ -22,7 +23,11 @@
     }
     return extractedValue;
   }
-  finally {
+ catch (  Throwable t) {
+    t.printStackTrace();
+  }
+ finally {
     Context.exit();
   }
+  return null;
 }

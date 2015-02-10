@@ -1,0 +1,21 @@
+{
+  final Object obj=super.get(name,s);
+  if (key != null && obj != null && "push".equals(name)) {
+    final Scriptable prototype=getPrototype();
+    if (prototype != null) {
+      final Object pushFunction=prototype.get(name,s);
+      if (pushFunction != null && pushFunction instanceof IdFunctionObject) {
+        final IdFunctionObject push=(IdFunctionObject)pushFunction;
+        return new IdFunctionObject(new IdFunctionCall(){
+          @Override public Object execIdCall(          IdFunctionObject f,          Context cx,          Scriptable scope,          Scriptable thisObj,          Object[] args){
+            final Object result=push.call(cx,scope,thisObj,args);
+            rootScriptable.put(key,rootScriptable,StructrArray.this);
+            return result;
+          }
+        }
+,"Array",push.methodId(),push.getArity());
+      }
+    }
+  }
+  return obj;
+}

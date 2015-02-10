@@ -1,9 +1,9 @@
 {
   final PropertyKey key=getKey(name);
   if (key != null) {
-    return wrap(parentScope,obj.getProperty(key));
+    return wrap(this,name,obj.getProperty(key));
   }
-  final Object value=checkEntityMethods(name);
+  final Object value=wrap(this,null,checkEntityMethods(name));
   if (value != null) {
     return value;
   }
@@ -12,7 +12,7 @@
     return new NativeJavaMethod(method,name);
   }
   try {
-    return obj.evaluate(actionContext.getSecurityContext(),name,null);
+    return wrap(this,null,obj.evaluate(actionContext.getSecurityContext(),name,null));
   }
  catch (  FrameworkException fex) {
     exception=fex;

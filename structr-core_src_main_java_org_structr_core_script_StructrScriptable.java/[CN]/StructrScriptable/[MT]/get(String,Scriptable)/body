@@ -48,6 +48,13 @@
     }
 ,null,0,0);
   }
+  if ("vars".equals(name)) {
+    NativeObject nobj=new NativeObject();
+    for (    Map.Entry<String,Object> entry : actionContext.getAllVariables().entrySet()) {
+      nobj.defineProperty(entry.getKey(),entry.getValue(),NativeObject.READONLY);
+    }
+    return nobj;
+  }
   final Function<Object,Object> function=Functions.functions.get(CaseHelper.toUnderscore(name,false));
   if (function != null) {
     return new IdFunctionObject(new FunctionWrapper(function),null,0,0);

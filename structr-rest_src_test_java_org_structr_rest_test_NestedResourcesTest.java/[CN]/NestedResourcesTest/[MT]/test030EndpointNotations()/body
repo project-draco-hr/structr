@@ -1,0 +1,11 @@
+{
+  String testOne=createEntity("/test_one","{ \"name\": \"TestOne\" }");
+  assertNotNull(testOne);
+  System.out.println(testOne);
+  String body="{ \"testOnes\": [ \"" + testOne + "\" ] }";
+  System.out.println(body);
+  String testTwo=createEntity("/test_two",body);
+  assertNotNull(testTwo);
+  System.out.println(testTwo);
+  RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(200).body("result_count",equalTo(1)).body("result[0].id",equalTo(testOne)).when().get("/test_two/" + testTwo + "/testOnes");
+}

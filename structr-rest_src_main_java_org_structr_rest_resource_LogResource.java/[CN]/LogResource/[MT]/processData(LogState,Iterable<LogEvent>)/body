@@ -4,8 +4,8 @@
     if ((++count % 100000) == 0) {
       System.out.println(count);
     }
-    final String pathSubjectId=state.inverse() ? event.getSubjectId() : event.getObjectId();
-    final String pathObjectId=state.inverse() ? event.getObjectId() : event.getSubjectId();
+    final String pathSubjectId=state.inverse() ? event.getObjectId() : event.getSubjectId();
+    final String pathObjectId=state.inverse() ? event.getSubjectId() : event.getObjectId();
     final long timestamp=event.getTimestamp();
     final String entryAction=event.getAction();
     final String entryMessage=event.getMessage();
@@ -19,14 +19,16 @@
       state.countAction(entryAction);
     }
  else {
-      if (state.correlates(key(pathSubjectId,pathObjectId),entryMessage)) {
-        final Map<String,Object> map=new HashMap<>();
-        map.put(subjectProperty.jsonName(),pathSubjectId);
-        map.put(objectProperty.jsonName(),pathObjectId);
-        map.put(actionProperty.jsonName(),entryAction);
-        map.put(timestampProperty.jsonName(),timestamp);
-        map.put(messageProperty.jsonName(),entryMessage);
-        state.addEntry(map);
+      if (state.correlates(pathSubjectId,pathObjectId,entryMessage)) {
+        if (pathObjectId.equals(event.getObjectId())) {
+          final Map<String,Object> map=new HashMap<>();
+          map.put(subjectProperty.jsonName(),pathSubjectId);
+          map.put(objectProperty.jsonName(),pathObjectId);
+          map.put(actionProperty.jsonName(),entryAction);
+          map.put(timestampProperty.jsonName(),timestamp);
+          map.put(messageProperty.jsonName(),entryMessage);
+          state.addEntry(map);
+        }
       }
     }
   }

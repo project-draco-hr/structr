@@ -2,17 +2,17 @@
   if (state.doCorrelate()) {
     final List<LogEvent> correlationResult=StructrApp.getInstance(securityContext).nodeQuery(LogEvent.class).and(LogEvent.actionProperty,state.correlationAction).getAsList();
     for (    final LogEvent entry : correlationResult) {
-      final String pathSubjectId=state.inverse() ? entry.getSubjectId() : entry.getObjectId();
-      final String pathObjectId=state.inverse() ? entry.getObjectId() : entry.getSubjectId();
+      final String pathSubjectId=state.inverse() ? entry.getObjectId() : entry.getSubjectId();
+      final String pathObjectId=state.inverse() ? entry.getSubjectId() : entry.getObjectId();
       final String entryMessage=entry.getMessage();
       if (state.correlationPattern != null) {
         final Matcher matcher=state.correlationPattern.matcher(entryMessage);
         if (matcher.matches()) {
-          state.addCorrelationEntry(matcher.group(1),entryMessage);
+          state.addCorrelationEntry(matcher.group(1),entry);
         }
       }
  else {
-        state.addCorrelationEntry(key(pathSubjectId,pathObjectId),entryMessage);
+        state.addCorrelationEntry(key(pathSubjectId,pathObjectId),entry);
       }
     }
   }

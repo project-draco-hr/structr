@@ -1,9 +1,17 @@
 {
-  try {
-    return new SimpleDateFormat(pattern).parse(value);
+  if (StringUtils.isBlank(pattern)) {
+    return parseISO8601DateString(source);
   }
- catch (  ParseException ex) {
-    Logger.getLogger(DatePropertyParser.class.getName()).log(Level.SEVERE,"Unable to parse " + value + " with pattern "+ pattern,ex);
+ else {
+    try {
+      if (StringUtils.contains(source,"Z")) {
+        source=StringUtils.replace(source,"Z","+0000");
+      }
+      return new SimpleDateFormat(pattern).parse(source);
+    }
+ catch (    ParseException ex) {
+      Logger.getLogger(DatePropertyParser.class.getName()).log(Level.WARNING,"Unable to parse " + source + " with primary pattern "+ pattern,ex.getMessage());
+    }
+    return parseISO8601DateString(source);
   }
-  return null;
 }

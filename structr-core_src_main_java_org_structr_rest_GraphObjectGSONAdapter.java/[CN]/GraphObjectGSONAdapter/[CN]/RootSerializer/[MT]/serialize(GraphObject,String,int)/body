@@ -1,6 +1,12 @@
 {
   JsonObject jsonObject=new JsonObject();
-  jsonObject.add("id",new JsonPrimitive(source.getUuid()));
+  final String uuid=source.getUuid();
+  if (uuid != null) {
+    jsonObject.add("id",new JsonPrimitive(uuid));
+  }
+ else {
+    logger.log(Level.WARNING,"Found object without UUID: {0}",source);
+  }
   if (depth <= outputNestingDepth) {
     Iterable<PropertyKey> keys=source.getPropertyKeys(localPropertyView);
     if (keys != null) {

@@ -1,14 +1,10 @@
 {
   if (StringUtils.isNotBlank(source)) {
-    try {
-      if (StringUtils.contains(source,"Z")) {
-        source=StringUtils.replace(source,"Z","+0000");
-      }
-      return new SimpleDateFormat(format).parse(source);
+    Date result=DatePropertyParser.parse(source,format);
+    if (result != null) {
+      return result;
     }
- catch (    Throwable t) {
-      throw new FrameworkException(declaringClass.getSimpleName(),new DateFormatToken(DateProperty.this));
-    }
+    throw new FrameworkException(declaringClass.getSimpleName(),new DateFormatToken(DateProperty.this));
   }
   return null;
 }

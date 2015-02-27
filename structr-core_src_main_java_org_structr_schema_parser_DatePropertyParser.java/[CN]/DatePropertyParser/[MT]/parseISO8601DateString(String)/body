@@ -1,0 +1,18 @@
+{
+  final String[] supportedFormats=new String[]{"yyyy-MM-dd'T'HH:mm:ss.SSSXXX","yyyy-MM-dd'T'HH:mm:ssXXX","yyyy-MM-dd'T'HH:mm:ssZ","yyyy-MM-dd'T'HH:mm:ss.SSSZ"};
+  if (StringUtils.contains(source,"Z")) {
+    source=StringUtils.replace(source,"Z","+0000");
+  }
+  Date parsedDate=null;
+  for (  final String format : supportedFormats) {
+    try {
+      parsedDate=new SimpleDateFormat(format).parse(source);
+    }
+ catch (    ParseException pe) {
+    }
+    if (parsedDate != null) {
+      return parsedDate;
+    }
+  }
+  return null;
+}

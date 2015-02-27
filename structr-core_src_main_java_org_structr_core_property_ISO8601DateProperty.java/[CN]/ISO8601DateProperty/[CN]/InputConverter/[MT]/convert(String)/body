@@ -1,17 +1,10 @@
 {
   if (StringUtils.isNotBlank(source)) {
-    try {
-      if (newStyle) {
-        return DatatypeConverter.parseDateTime(source).getTime();
-      }
- else {
-        if (StringUtils.contains(source,"Z")) {
-          source=StringUtils.replace(source,"Z","+0000");
-        }
-        return new SimpleDateFormat(format).parse(source);
-      }
+    Date result=DatePropertyParser.parseISO8601DateString(source);
+    if (result != null) {
+      return result;
     }
- catch (    Throwable t) {
+ else {
       throw new FrameworkException(declaringClass.getSimpleName(),new DateFormatToken(ISO8601DateProperty.this));
     }
   }

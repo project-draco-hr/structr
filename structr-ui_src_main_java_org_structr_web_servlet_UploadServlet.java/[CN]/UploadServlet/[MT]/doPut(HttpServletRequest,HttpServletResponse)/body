@@ -34,7 +34,7 @@
         }
         if (node instanceof org.structr.web.entity.AbstractFile) {
           final org.structr.dynamic.File file=(org.structr.dynamic.File)node;
-          if (securityContext.isAllowed(file,Permission.write)) {
+          if (file.isGranted(Permission.write,securityContext)) {
             FileHelper.writeToFile(file,fileItem.getInputStream());
             file.increaseVersion();
           }

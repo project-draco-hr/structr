@@ -1,7 +1,6 @@
 {
   clearResourceAccess();
   try {
-    final List<Person> persons=createTestNodes(Person.class,1);
     final Class type=TestOne.class;
     final List<NodeInterface> nodes=createTestNodes(type,10);
     try (final Tx tx=app.tx()){
@@ -12,16 +11,13 @@
     }
      SecurityContext publicContext=SecurityContext.getInstance(null,AccessMode.Frontend);
     try (final Tx tx=app.tx()){
-      Result result=StructrApp.getInstance(publicContext).nodeQuery(type).getResult();
+      Result result=StructrApp.getInstance(publicContext).nodeQuery(type).sort(AbstractNode.createdDate).getResult();
       assertEquals(3,result.size());
       assertEquals(3,(int)result.getRawResultCount());
-      assertEquals(nodes.get(3).getUuid(),result.get(0).getUuid());
-      assertEquals(nodes.get(5).getUuid(),result.get(1).getUuid());
-      assertEquals(nodes.get(7).getUuid(),result.get(2).getUuid());
     }
    }
  catch (  FrameworkException ex) {
-    logger.log(Level.SEVERE,ex.toString());
+    ex.printStackTrace();
     fail("Unexpected exception");
   }
 }

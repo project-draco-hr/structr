@@ -8,7 +8,7 @@
     Class type=TestOne.class;
     final TestOne t1=createTestNode(TestOne.class,user1);
     try (final Tx tx=app.tx()){
-      user2.grant(Permission.read,t1);
+      t1.grant(Permission.read,user2);
       tx.success();
     }
      SecurityContext user2Context=SecurityContext.getInstance(user2,AccessMode.Backend);
@@ -18,7 +18,7 @@
       assertEquals(t1.getUuid(),result.get(0).getUuid());
     }
      try (final Tx tx=app.tx()){
-      user2.revoke(Permission.read,t1);
+      t1.revoke(Permission.read,user2);
       tx.success();
     }
      try (final Tx tx=app.tx()){
@@ -27,7 +27,7 @@
     }
    }
  catch (  FrameworkException ex) {
-    logger.log(Level.SEVERE,ex.toString());
+    ex.printStackTrace();
     fail("Unexpected exception");
   }
 }

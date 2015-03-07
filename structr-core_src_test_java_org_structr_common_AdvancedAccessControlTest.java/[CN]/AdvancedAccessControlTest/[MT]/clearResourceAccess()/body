@@ -1,0 +1,12 @@
+{
+  final App app=StructrApp.getInstance();
+  try (final Tx tx=app.tx()){
+    for (    final ResourceAccess access : app.nodeQuery(ResourceAccess.class).getAsList()) {
+      app.delete(access);
+    }
+    tx.success();
+  }
+ catch (  Throwable t) {
+    t.printStackTrace();
+  }
+}

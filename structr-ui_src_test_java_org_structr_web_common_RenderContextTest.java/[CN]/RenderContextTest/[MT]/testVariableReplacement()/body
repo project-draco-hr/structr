@@ -117,7 +117,6 @@
     assertEquals("Invalid POST result","1.0",Scripting.replaceVariables(ctx,page,"${POST('http://localhost:8875/structr/rest/folders', '{name:Test}').body.result_count}"));
     assertEquals("Invalid POST result","application/json; charset=utf-8",Scripting.replaceVariables(ctx,page,"${POST('http://localhost:8875/structr/rest/folders', '{name:Test}').headers.Content-Type}"));
     assertEquals("Invalid POST result","422",Scripting.replaceVariables(ctx,page,"${POST('http://localhost:8875/structr/rest/folders', '{name:\"Test{{{}}{}{}{}\"}').status}"));
-    System.out.println(Scripting.replaceVariables(ctx,page,"${POST('http://localhost:8875/structr/rest/login', '{name:admin,password:admin}')}"));
     final String sessionIdCookie=Scripting.replaceVariables(ctx,page,"${POST('http://localhost:8875/structr/rest/login', '{name:admin,password:admin}').headers.Set-Cookie}");
     final String sessionId=HttpCookie.parse(sessionIdCookie).get(0).getValue();
     assertEquals("Invalid authenticated GET result","admin",Scripting.replaceVariables(ctx,page,"${add_header('Cookie', 'JSESSIONID=" + sessionId + ";Path=/')}${from_json(GET('http://localhost:8875/structr/rest/users')).result[0].name}"));

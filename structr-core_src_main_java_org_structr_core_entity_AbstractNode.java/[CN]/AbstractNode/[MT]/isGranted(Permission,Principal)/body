@@ -1,24 +1,34 @@
 {
-  if (accessingUser != null && accessingUser instanceof SuperUser) {
+  if (isCreation) {
     return true;
   }
-  if (permission == null) {
-    return false;
+  if (accessingUser != null && accessingUser.isAdmin()) {
+    return true;
+  }
+  if (this.equals(accessingUser)) {
+    return true;
   }
   final Principal owner=getOwnerNode();
   final boolean hasOwner=(owner != null);
+  if (!hasOwner) {
+    if (Permission.read.equals(permission)) {
+      if (accessingUser != null && isVisibleToAuthenticatedUsers()) {
+        return true;
+      }
+      if (accessingUser == null && isVisibleToPublicUsers()) {
+        return true;
+      }
+    }
+  }
   if (hasOwner && accessingUser == null) {
     return false;
-  }
-  if (!hasOwner && accessingUser == null) {
-    return true;
   }
   if (accessingUser != null) {
     if (hasOwner && accessingUser.equals(owner)) {
       return true;
     }
-    Security r=getSecurityRelationship(accessingUser);
-    if ((r != null) && r.isAllowed(permission)) {
+    final Security security=getSecurityRelationship(accessingUser);
+    if (security != null && security.isAllowed(permission)) {
       return true;
     }
     for (    Principal parent : accessingUser.getParents()) {

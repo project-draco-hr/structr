@@ -21,12 +21,13 @@
   }
   if (obj != null) {
     final Set<GraphObject> entities=new LinkedHashSet<>();
+    PropertyMap properties=null;
     try (final Tx tx=app.tx()){
       collectEntities(entities,obj,null,rec);
+      properties=PropertyMap.inputTypeToJavaType(this.getWebSocket().getSecurityContext(),obj.getClass(),webSocketData.getNodeData());
       tx.success();
     }
-     final PropertyMap properties=PropertyMap.inputTypeToJavaType(this.getWebSocket().getSecurityContext(),obj.getClass(),webSocketData.getNodeData());
-    final Iterator<GraphObject> iterator=entities.iterator();
+     final Iterator<GraphObject> iterator=entities.iterator();
     while (iterator.hasNext()) {
       count=0;
       try (final Tx tx=app.tx()){

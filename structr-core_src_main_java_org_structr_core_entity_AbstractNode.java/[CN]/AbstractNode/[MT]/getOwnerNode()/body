@@ -1,9 +1,14 @@
 {
   if (cachedOwnerNode == null) {
-    final Ownership ownership=getIncomingRelationshipAsSuperUser(PrincipalOwnsNode.class);
-    if (ownership != null) {
-      Principal principal=ownership.getSourceNode();
-      cachedOwnerNode=(Principal)principal;
+    if (this instanceof Principal) {
+      cachedOwnerNode=(Principal)this;
+    }
+ else {
+      final Ownership ownership=getIncomingRelationshipAsSuperUser(PrincipalOwnsNode.class);
+      if (ownership != null) {
+        Principal principal=ownership.getSourceNode();
+        cachedOwnerNode=(Principal)principal;
+      }
     }
   }
   return cachedOwnerNode;

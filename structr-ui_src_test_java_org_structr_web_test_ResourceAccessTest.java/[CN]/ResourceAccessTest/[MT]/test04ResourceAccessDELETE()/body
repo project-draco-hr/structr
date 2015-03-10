@@ -48,18 +48,9 @@
     fail("Unexpected exception");
   }
   try (final Tx tx=app.tx()){
-    RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(403).when().delete("/folder/" + testFolder.getUuid());
+    RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(404).when().delete("/folder/" + testFolder.getUuid());
     testUser.setProperty(AbstractNode.name,name);
     testUser.setProperty(User.password,password);
-    tx.success();
-  }
- catch (  FrameworkException fex) {
-    fex.printStackTrace();
-    logger.log(Level.SEVERE,fex.toString());
-    fail("Unexpected exception");
-  }
-  try (final Tx tx=app.tx()){
-    RestAssured.given().headers("X-User",name,"X-Password",password).contentType("application/json; charset=UTF-8").expect().statusCode(403).when().delete("/folder/" + testFolder.getUuid());
     testFolder.setProperty(AbstractNode.owner,testUser);
     tx.success();
   }
@@ -72,9 +63,9 @@
     RestAssured.given().headers("X-User",name,"X-Password",password).contentType("application/json; charset=UTF-8").expect().statusCode(200).when().delete("/folder/" + testFolder.getUuid());
     tx.success();
   }
- catch (  FrameworkException ex) {
-    ex.printStackTrace();
-    logger.log(Level.SEVERE,ex.toString());
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+    logger.log(Level.SEVERE,fex.toString());
     fail("Unexpected exception");
   }
 }

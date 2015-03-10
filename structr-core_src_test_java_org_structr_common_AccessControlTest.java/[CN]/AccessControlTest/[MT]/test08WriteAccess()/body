@@ -1,0 +1,21 @@
+{
+  clearResourceAccess();
+  try {
+    final TestUser owner=createTestNode(TestUser.class);
+    final TestUser user=createTestNode(TestUser.class);
+    createTestNode(TestOne.class,owner);
+    final SecurityContext userContext=SecurityContext.getInstance(owner,AccessMode.Frontend);
+    final App userApp=StructrApp.getInstance(userContext);
+    try (final Tx tx=userApp.tx()){
+      final TestOne t=StructrApp.getInstance(userContext).nodeQuery(TestOne.class).getFirst();
+      assertNotNull(t);
+      t.setProperty(TestOne.aString,"aString");
+      assertEquals("aString",t.getProperty(TestOne.aString));
+      tx.success();
+    }
+   }
+ catch (  FrameworkException ex) {
+    ex.printStackTrace();
+    fail("Unexpected exception");
+  }
+}

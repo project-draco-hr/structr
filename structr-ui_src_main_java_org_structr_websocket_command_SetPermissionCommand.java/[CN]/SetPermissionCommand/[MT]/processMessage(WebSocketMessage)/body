@@ -17,7 +17,7 @@
   if (obj != null) {
     final App app=StructrApp.getInstance(getWebSocket().getSecurityContext());
     try (final Tx tx=app.tx()){
-      if (!getWebSocket().getSecurityContext().isAllowed(((AbstractNode)obj),Permission.accessControl)) {
+      if (!((AbstractNode)obj).isGranted(Permission.accessControl,getWebSocket().getSecurityContext())) {
         logger.log(Level.WARNING,"No access control permission for {0} on {1}",new Object[]{getWebSocket().getCurrentUser().toString(),obj.toString()});
         getWebSocket().send(MessageBuilder.status().message("No access control permission").code(400).build(),true);
         tx.success();
@@ -29,7 +29,7 @@
       ex.printStackTrace();
     }
     try {
-      setPermission(app,obj,principal,action,Permission.valueOf(permission),rec);
+      setPermission(app,obj,principal,action,Permissions.valueOf(permission),rec);
       tx.success();
       tx.close();
       tx=null;

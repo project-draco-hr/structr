@@ -1,0 +1,15 @@
+{
+  if (!isGranted(Permission.accessControl,securityContext)) {
+    throw new FrameworkException(403,"Access control not permitted");
+  }
+  Security secRel=getSecurityRelationship(principal);
+  if (secRel == null) {
+    try {
+      secRel=StructrApp.getInstance().create(principal,(NodeInterface)this,Security.class);
+    }
+ catch (    FrameworkException ex) {
+      logger.log(Level.SEVERE,"Could not create security relationship!",ex);
+    }
+  }
+  secRel.addPermission(permission);
+}

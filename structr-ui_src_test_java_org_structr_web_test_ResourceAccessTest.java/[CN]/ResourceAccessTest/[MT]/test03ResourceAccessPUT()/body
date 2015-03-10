@@ -40,18 +40,9 @@
     fail("Unexpected exception");
   }
   try (final Tx tx=app.tx()){
-    RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(403).when().put("/folder/" + testFolder.getUuid());
+    RestAssured.given().contentType("application/json; charset=UTF-8").expect().statusCode(404).when().put("/folder/" + testFolder.getUuid());
     testUser.setProperty(AbstractNode.name,name);
     testUser.setProperty(User.password,password);
-    tx.success();
-  }
- catch (  FrameworkException fex) {
-    fex.printStackTrace();
-    logger.log(Level.SEVERE,fex.toString());
-    fail("Unexpected exception");
-  }
-  try (final Tx tx=app.tx()){
-    RestAssured.given().headers("X-User",name,"X-Password",password).contentType("application/json; charset=UTF-8").expect().statusCode(403).when().put("/folder/" + testFolder.getUuid());
     testFolder.setProperty(AbstractNode.owner,testUser);
     tx.success();
   }

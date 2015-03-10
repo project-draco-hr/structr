@@ -1,0 +1,23 @@
+{
+  final PropertyContainer propertyContainer=entity.getPropertyContainer();
+  final StringBuilder src=new StringBuilder();
+  for (  final String rawActionName : getActions(propertyContainer)) {
+    if (propertyContainer.hasProperty(rawActionName)) {
+      final String value=propertyContainer.getProperty(rawActionName).toString();
+      final ActionEntry entry=new ActionEntry(rawActionName,value);
+      List<ActionEntry> actionList=actions.get(entry.getType());
+      if (actionList == null) {
+        actionList=new LinkedList<>();
+        actions.put(entry.getType(),actionList);
+      }
+      actionList.add(entry);
+      Collections.sort(actionList);
+    }
+  }
+  final List<SchemaMethod> schemaMethods=entity.getSchemaMethods();
+  if (schemaMethods != null) {
+    for (    final SchemaMethod schemaMethod : schemaMethods) {
+    }
+  }
+  return src.toString();
+}

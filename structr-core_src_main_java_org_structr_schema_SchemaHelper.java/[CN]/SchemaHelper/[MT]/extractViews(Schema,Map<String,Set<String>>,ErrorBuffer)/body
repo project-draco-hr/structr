@@ -1,0 +1,28 @@
+{
+  final PropertyContainer propertyContainer=entity.getPropertyContainer();
+  final StringBuilder src=new StringBuilder();
+  for (  final String rawViewName : getViews(propertyContainer)) {
+    if (!rawViewName.startsWith("___") && propertyContainer.hasProperty(rawViewName)) {
+      final String value=propertyContainer.getProperty(rawViewName).toString();
+      final String[] parts=value.split("[,\\s]+");
+      final String viewName=rawViewName.substring(2);
+      Set<String> view=views.get(viewName);
+      if (view == null) {
+        view=new LinkedHashSet<>();
+        views.put(viewName,view);
+      }
+ else {
+        view.clear();
+      }
+      for (int i=0; i < parts.length; i++) {
+        view.add(parts[i].trim());
+      }
+    }
+  }
+  final List<SchemaView> schemaViews=entity.getSchemaViews();
+  if (schemaViews != null) {
+    for (    final SchemaView schemaView : schemaViews) {
+    }
+  }
+  return src.toString();
+}

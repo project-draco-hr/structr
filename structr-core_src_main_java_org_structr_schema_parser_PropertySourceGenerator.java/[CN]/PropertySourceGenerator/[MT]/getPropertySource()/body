@@ -1,0 +1,47 @@
+{
+  final StringBuilder buf=new StringBuilder();
+  final String valueType=getValueType();
+  buf.append("\tpublic static final Property<").append(valueType).append("> ").append(SchemaHelper.cleanPropertyName(propertyName)).append("Property");
+  buf.append(" = new ").append(getPropertyType()).append("(\"").append(propertyName).append("\"");
+  if (StringUtils.isNotBlank(dbName)) {
+    buf.append(", \"").append(dbName).append("\"");
+  }
+  buf.append(getPropertyParameters());
+  buf.append(localValidator);
+  buf.append(")");
+  if (StringUtils.isNotBlank(contentType)) {
+    buf.append(".contentType(\"").append(contentType).append("\")");
+  }
+  if (defaultValue != null) {
+    buf.append(".defaultValue(").append(getDefaultValueSource()).append(")");
+  }
+  if (StringUtils.isNotBlank(format)) {
+    buf.append(".format(\"").append(StringEscapeUtils.escapeJava(format)).append("\")");
+  }
+  if (unique) {
+    buf.append(".unique()");
+  }
+  if (notNull) {
+    buf.append(".notNull()");
+  }
+  if (defaultValue != null) {
+    buf.append(".indexedWhenEmpty()");
+  }
+ else {
+    buf.append(".indexed()");
+  }
+  buf.append(";\n");
+  System.out.println("##############################################");
+  System.out.println("propertyName:      " + propertyName);
+  System.out.println("dbName:            " + dbName);
+  System.out.println("localValidator:    " + localValidator);
+  System.out.println("className:         " + className);
+  System.out.println("rawSource:         " + rawSource);
+  System.out.println("source:            " + source);
+  System.out.println("format:            " + format);
+  System.out.println("defaultValue:      " + defaultValue);
+  System.out.println("contentType:       " + contentType);
+  System.out.println("notNull:           " + notNull);
+  System.out.println("unique:            " + unique);
+  return buf.toString();
+}

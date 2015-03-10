@@ -9,7 +9,9 @@
   final Set<String> enums=new LinkedHashSet<>();
   final String _className=getProperty(name);
   final ErrorBuffer dummyErrorBuffer=new ErrorBuffer();
-  final String propertyDefinitions=SchemaHelper.extractProperties(this,propertyNames,validators,enums,viewProperties,saveActions,dummyErrorBuffer);
+  final String propertyDefinitions=SchemaHelper.extractProperties(this,propertyNames,validators,enums,viewProperties,dummyErrorBuffer);
+  final String viewDefinitions=SchemaHelper.extractViews(this,viewProperties,dummyErrorBuffer);
+  final String methodDefinitions=SchemaHelper.extractMethods(this,saveActions);
   if (!propertyNames.isEmpty() || validators.isEmpty() || !saveActions.isEmpty()) {
     final StringBuilder src=new StringBuilder();
     src.append("package org.structr.dynamic;\n\n");
@@ -24,6 +26,8 @@
     if (!propertyNames.isEmpty()) {
       src.append("\n");
       src.append(propertyDefinitions);
+      src.append(viewDefinitions);
+      src.append(methodDefinitions);
       src.append("\n\tstatic {\n\n");
       for (      final String propertyName : propertyNames) {
         src.append("\t\t").append(propertyName).append(".setDeclaringClass(").append(_className).append(".class);\n\n");

@@ -1,4 +1,5 @@
 {
+  final boolean migrate="true".equals(StructrApp.getConfigurationValue("SchemaService.migrate","false"));
   final PropertyContainer propertyContainer=entity.getPropertyContainer();
   final StringBuilder src=new StringBuilder();
   for (  final String rawViewName : getViews(propertyContainer)) {
@@ -14,14 +15,44 @@
  else {
         view.clear();
       }
-      for (int i=0; i < parts.length; i++) {
-        view.add(parts[i].trim());
+      if (migrate && entity instanceof SchemaNode) {
+        final List<SchemaProperty> properties=new LinkedList<>();
+        final SchemaNode schemaNode=(SchemaNode)entity;
+        final App app=StructrApp.getInstance();
+        if (app.nodeQuery(SchemaView.class).and(SchemaView.schemaNode,schemaNode).and(AbstractNode.name,viewName).getFirst() == null) {
+          for (int i=0; i < parts.length; i++) {
+            final String propertyName=parts[i].trim();
+            final SchemaProperty propertyNode=app.nodeQuery(SchemaProperty.class).andName(propertyName).getFirst();
+            if (propertyNode != null) {
+              properties.add(propertyNode);
+            }
+          }
+          app.create(SchemaView.class,new NodeAttribute<>(SchemaView.schemaNode,schemaNode),new NodeAttribute<>(SchemaView.schemaProperties,properties),new NodeAttribute<>(SchemaView.name,viewName));
+          schemaNode.removeProperty(new StringProperty(rawViewName));
+        }
+      }
+ else {
+        for (int i=0; i < parts.length; i++) {
+          view.add(parts[i].trim());
+        }
       }
     }
   }
   final List<SchemaView> schemaViews=entity.getSchemaViews();
   if (schemaViews != null) {
     for (    final SchemaView schemaView : schemaViews) {
+      final String viewName=schemaView.getName();
+      Set<String> view=views.get(viewName);
+      if (view == null) {
+        view=new LinkedHashSet<>();
+        views.put(viewName,view);
+      }
+ else {
+        view.clear();
+      }
+      for (      final SchemaProperty property : schemaView.getProperty(SchemaView.schemaProperties)) {
+        view.add(property.getPropertyName() + "Property");
+      }
     }
   }
   return src.toString();

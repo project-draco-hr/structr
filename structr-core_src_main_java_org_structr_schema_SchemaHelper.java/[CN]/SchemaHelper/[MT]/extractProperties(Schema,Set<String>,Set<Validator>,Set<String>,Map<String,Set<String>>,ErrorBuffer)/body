@@ -1,4 +1,5 @@
 {
+  final boolean migrate="true".equals(StructrApp.getConfigurationValue("SchemaService.migrate","false"));
   final PropertyContainer propertyContainer=entity.getPropertyContainer();
   final StringBuilder src=new StringBuilder();
   for (  String propertyName : SchemaHelper.getProperties(propertyContainer)) {
@@ -6,11 +7,16 @@
       String rawType=propertyContainer.getProperty(propertyName).toString();
       PropertySourceGenerator parser=SchemaHelper.getSourceGenerator(errorBuffer,entity.getClassName(),new StringBasedPropertyDefinition(propertyName,rawType));
       if (parser != null) {
-        propertyNames.add(parser.getPropertyName());
-        src.append(parser.getPropertySource(entity));
-        validators.addAll(parser.getGlobalValidators());
-        enums.addAll(parser.getEnumDefinitions());
-        addPropertyToView(PropertyView.Ui,propertyName.substring(1),views);
+        if (migrate && entity instanceof SchemaNode) {
+          parser.createSchemaPropertyNode((SchemaNode)entity,propertyName);
+        }
+ else {
+          propertyNames.add(parser.getPropertyName());
+          parser.getPropertySource(src,entity);
+          validators.addAll(parser.getGlobalValidators());
+          enums.addAll(parser.getEnumDefinitions());
+          addPropertyToView(PropertyView.Ui,propertyName.substring(1),views);
+        }
       }
     }
   }
@@ -21,7 +27,7 @@
       if (parser != null) {
         final String propertyName=schemaProperty.getPropertyName();
         propertyNames.add(propertyName);
-        src.append(parser.getPropertySource(entity));
+        parser.getPropertySource(src,entity);
         validators.addAll(parser.getGlobalValidators());
         enums.addAll(parser.getEnumDefinitions());
         addPropertyToView(PropertyView.Ui,propertyName,views);

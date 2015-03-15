@@ -1,0 +1,62 @@
+{
+  final Map<Actions.Type,List<ActionEntry>> actions=new LinkedHashMap<>();
+  final Map<String,Set<String>> viewProperties=new LinkedHashMap<>();
+  final StringBuilder src=new StringBuilder();
+  final Class baseType=AbstractRelationship.class;
+  final String _className=getClassName();
+  final String _sourceNodeType=getSchemaNodeSourceType();
+  final String _targetNodeType=getSchemaNodeTargetType();
+  final Set<String> propertyNames=new LinkedHashSet<>();
+  final Set<Validator> validators=new LinkedHashSet<>();
+  final Set<String> enums=new LinkedHashSet<>();
+  src.append("package org.structr.dynamic;\n\n");
+  SchemaHelper.formatImportStatements(src,baseType);
+  src.append("public class ").append(_className).append(" extends ").append(getBaseType());
+  if ("OWNS".equals(getProperty(relationshipType))) {
+    src.append(" implements org.structr.core.entity.relationship.Ownership");
+  }
+  src.append(" {\n\n");
+  src.append(SchemaHelper.extractProperties(this,propertyNames,validators,enums,viewProperties,errorBuffer));
+  src.append(SchemaHelper.extractViews(this,viewProperties,errorBuffer));
+  src.append(SchemaHelper.extractMethods(this,actions));
+  src.append("\tpublic static final Property<String> sourceIdProperty = new SourceId(\"sourceId\");\n");
+  src.append("\tpublic static final Property<String> targetIdProperty = new TargetId(\"targetId\");\n");
+  SchemaHelper.addPropertyToView(PropertyView.Ui,"sourceId",viewProperties);
+  SchemaHelper.addPropertyToView(PropertyView.Ui,"targetId",viewProperties);
+  for (  final String enumDefition : enums) {
+    src.append(enumDefition);
+  }
+  for (  Map.Entry<String,Set<String>> entry : viewProperties.entrySet()) {
+    final String viewName=entry.getKey();
+    final Set<String> view=entry.getValue();
+    if (!view.isEmpty()) {
+      dynamicViews.add(viewName);
+      SchemaHelper.formatView(src,_className,viewName,viewName,view);
+    }
+  }
+  src.append("\n\t@Override\n");
+  src.append("\tpublic Class<").append(_sourceNodeType).append("> getSourceType() {\n");
+  src.append("\t\treturn ").append(_sourceNodeType).append(".class;\n");
+  src.append("\t}\n\n");
+  src.append("\t@Override\n");
+  src.append("\tpublic Class<").append(_targetNodeType).append("> getTargetType() {\n");
+  src.append("\t\treturn ").append(_targetNodeType).append(".class;\n");
+  src.append("\t}\n\n");
+  src.append("\t@Override\n");
+  src.append("\tpublic Property<String> getSourceIdProperty() {\n");
+  src.append("\t\treturn sourceId;\n");
+  src.append("\t}\n\n");
+  src.append("\t@Override\n");
+  src.append("\tpublic Property<String> getTargetIdProperty() {\n");
+  src.append("\t\treturn targetId;\n");
+  src.append("\t}\n\n");
+  src.append("\t@Override\n");
+  src.append("\tpublic String name() {\n");
+  src.append("\t\treturn \"").append(getRelationshipType()).append("\";\n");
+  src.append("\t}\n\n");
+  SchemaHelper.formatValidators(src,validators);
+  SchemaHelper.formatSaveActions(src,actions);
+  formatRelationshipFlags(src);
+  src.append("}\n");
+  return src.toString();
+}

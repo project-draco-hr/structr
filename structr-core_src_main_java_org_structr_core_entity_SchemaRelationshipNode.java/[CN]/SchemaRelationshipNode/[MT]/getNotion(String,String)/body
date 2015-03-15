@@ -1,0 +1,35 @@
+{
+  final StringBuilder buf=new StringBuilder();
+  if (StringUtils.isNotBlank(notionSource)) {
+    final Set<String> keys=new LinkedHashSet<>(Arrays.asList(notionSource.split("[\\s,]+")));
+    if (!keys.isEmpty()) {
+      if (keys.size() == 1) {
+        String key=keys.iterator().next();
+        boolean create=key.startsWith("+");
+        if (create) {
+          key=key.substring(1);
+        }
+        if (ValidKeyPattern.matcher(key).matches()) {
+          buf.append(", new PropertyNotion(");
+          buf.append(getNotionKey(_className,key));
+          buf.append(", ").append(create);
+          buf.append(")");
+        }
+ else {
+          logger.log(Level.WARNING,"Invalid key name {0} for notion.",key);
+        }
+      }
+ else {
+        buf.append(", new PropertySetNotion(");
+        for (final Iterator<String> it=Iterables.filter(new KeyMatcher(),keys).iterator(); it.hasNext(); ) {
+          buf.append(getNotionKey(_className,it.next()));
+          if (it.hasNext()) {
+            buf.append(", ");
+          }
+        }
+        buf.append(")");
+      }
+    }
+  }
+  return buf.toString();
+}

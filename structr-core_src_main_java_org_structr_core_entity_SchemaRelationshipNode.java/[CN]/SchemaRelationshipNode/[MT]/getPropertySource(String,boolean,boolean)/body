@@ -1,0 +1,51 @@
+{
+  final StringBuilder buf=new StringBuilder();
+  final String _sourceMultiplicity=getProperty(sourceMultiplicity);
+  final String _targetMultiplicity=getProperty(targetMultiplicity);
+  final String _sourceNotion=getProperty(sourceNotion);
+  final String _targetNotion=getProperty(targetNotion);
+  final String _sourceType=getSchemaNodeSourceType();
+  final String _targetType=getSchemaNodeTargetType();
+  final String _className=getClassName();
+  if (outgoing) {
+    if ("1".equals(_targetMultiplicity)) {
+      if (!newStatementOnly) {
+        buf.append("\tpublic static final Property<").append(_targetType).append("> ").append(SchemaHelper.cleanPropertyName(propertyName)).append("Property");
+        buf.append(" = ");
+      }
+      buf.append("new EndNode<>(\"").append(propertyName).append("\", ").append(_className).append(".class");
+      buf.append(getNotion(_sourceType,_targetNotion));
+      buf.append(newStatementOnly ? ")" : ");\n");
+    }
+ else {
+      if (!newStatementOnly) {
+        buf.append("\tpublic static final Property<java.util.List<").append(_targetType).append(">> ").append(SchemaHelper.cleanPropertyName(propertyName)).append("Property");
+        buf.append(" = ");
+      }
+      buf.append("new EndNodes<>(\"").append(propertyName).append("\", ").append(_className).append(".class");
+      buf.append(getNotion(_sourceType,_targetNotion));
+      buf.append(newStatementOnly ? ")" : ");\n");
+    }
+  }
+ else {
+    if ("1".equals(_sourceMultiplicity)) {
+      if (!newStatementOnly) {
+        buf.append("\tpublic static final Property<").append(_sourceType).append("> ").append(SchemaHelper.cleanPropertyName(propertyName)).append("Property");
+        buf.append(" = ");
+      }
+      buf.append("new StartNode<>(\"").append(propertyName).append("\", ").append(_className).append(".class");
+      buf.append(getNotion(_targetType,_sourceNotion));
+      buf.append(newStatementOnly ? ")" : ");\n");
+    }
+ else {
+      if (!newStatementOnly) {
+        buf.append("\tpublic static final Property<java.util.List<").append(_sourceType).append(">> ").append(SchemaHelper.cleanPropertyName(propertyName)).append("Property");
+        buf.append(" = ");
+      }
+      buf.append("new StartNodes<>(\"").append(propertyName).append("\", ").append(_className).append(".class");
+      buf.append(getNotion(_targetType,_sourceNotion));
+      buf.append(newStatementOnly ? ")" : ");\n");
+    }
+  }
+  return buf.toString();
+}

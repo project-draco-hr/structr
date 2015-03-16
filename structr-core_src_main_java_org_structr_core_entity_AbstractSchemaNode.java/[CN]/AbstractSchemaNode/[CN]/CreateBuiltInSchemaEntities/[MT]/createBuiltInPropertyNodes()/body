@@ -10,7 +10,9 @@
   }
   if (builtinClass != null) {
     for (    final PropertyKey key : config.getPropertySet(builtinClass,PropertyView.Ui)) {
-      createBuiltInSchemaProperty(config,builtinClass,propertyNames,key);
+      if (key.getDeclaringClass().equals(builtinClass)) {
+        createBuiltInSchemaProperty(config,builtinClass,propertyNames,key);
+      }
     }
   }
 }

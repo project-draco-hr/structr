@@ -23,14 +23,16 @@
   final List<SchemaProperty> schemaProperties=entity.getSchemaProperties();
   if (schemaProperties != null) {
     for (    final SchemaProperty schemaProperty : schemaProperties) {
-      final PropertySourceGenerator parser=SchemaHelper.getSourceGenerator(errorBuffer,entity.getClassName(),schemaProperty);
-      if (parser != null) {
-        final String propertyName=schemaProperty.getPropertyName();
-        propertyNames.add(propertyName);
-        parser.getPropertySource(src,entity);
-        validators.addAll(parser.getGlobalValidators());
-        enums.addAll(parser.getEnumDefinitions());
-        addPropertyToView(PropertyView.Ui,propertyName,views);
+      if (!schemaProperty.getProperty(SchemaProperty.isBuiltinProperty)) {
+        final PropertySourceGenerator parser=SchemaHelper.getSourceGenerator(errorBuffer,entity.getClassName(),schemaProperty);
+        if (parser != null) {
+          final String propertyName=schemaProperty.getPropertyName();
+          propertyNames.add(propertyName);
+          parser.getPropertySource(src,entity);
+          validators.addAll(parser.getGlobalValidators());
+          enums.addAll(parser.getEnumDefinitions());
+          addPropertyToView(PropertyView.Ui,propertyName,views);
+        }
       }
     }
   }

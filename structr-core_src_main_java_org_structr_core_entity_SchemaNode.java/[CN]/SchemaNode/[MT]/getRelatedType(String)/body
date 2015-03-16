@@ -1,12 +1,12 @@
 {
   final Set<String> existingPropertyNames=new LinkedHashSet<>();
   final String _className=getProperty(name);
-  for (  final SchemaRelationship outRel : getOutgoingRelationships(SchemaRelationship.class)) {
+  for (  final SchemaRelationshipNode outRel : getProperty(SchemaNode.relatedTo)) {
     if (propertyNameToCheck.equals(outRel.getPropertyName(_className,existingPropertyNames,true))) {
       return outRel.getSchemaNodeTargetType();
     }
   }
-  for (  final SchemaRelationship inRel : getIncomingRelationships(SchemaRelationship.class)) {
+  for (  final SchemaRelationshipNode inRel : getProperty(SchemaNode.relatedFrom)) {
     if (propertyNameToCheck.equals(inRel.getPropertyName(_className,existingPropertyNames,false))) {
       return inRel.getSchemaNodeSourceType();
     }

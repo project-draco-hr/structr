@@ -7,19 +7,24 @@
     final SchemaNode projectNode=app.create(SchemaNode.class,new NodeAttribute(SchemaNode.name,"Project"),new NodeAttribute(new StringProperty("_taskList"),"Notion(tasks, id, name)"),new NodeAttribute(new StringProperty("_taskNames"),"Notion(tasks, name)"));
     final SchemaNode taskNode=app.create(SchemaNode.class,new NodeAttribute(SchemaNode.name,"Task"));
     final PropertyMap taskProperties=new PropertyMap();
-    taskProperties.put(SchemaRelationship.relationshipType,"TASK");
-    taskProperties.put(SchemaRelationship.sourceMultiplicity,"1");
-    taskProperties.put(SchemaRelationship.targetMultiplicity,"*");
-    taskProperties.put(SchemaRelationship.sourceJsonName,"project");
-    taskProperties.put(SchemaRelationship.targetJsonName,"tasks");
-    app.create(projectNode,taskNode,SchemaRelationship.class,taskProperties);
+    taskProperties.put(SchemaRelationshipNode.sourceNode,projectNode);
+    taskProperties.put(SchemaRelationshipNode.targetNode,taskNode);
+    taskProperties.put(SchemaRelationshipNode.relationshipType,"TASK");
+    taskProperties.put(SchemaRelationshipNode.relationshipType,"TASK");
+    taskProperties.put(SchemaRelationshipNode.sourceMultiplicity,"1");
+    taskProperties.put(SchemaRelationshipNode.targetMultiplicity,"*");
+    taskProperties.put(SchemaRelationshipNode.sourceJsonName,"project");
+    taskProperties.put(SchemaRelationshipNode.targetJsonName,"tasks");
+    app.create(SchemaRelationshipNode.class,taskProperties);
     final PropertyMap currentTaskProperties=new PropertyMap();
-    currentTaskProperties.put(SchemaRelationship.relationshipType,"CURRENT");
-    currentTaskProperties.put(SchemaRelationship.sourceMultiplicity,"1");
-    currentTaskProperties.put(SchemaRelationship.targetMultiplicity,"1");
-    currentTaskProperties.put(SchemaRelationship.sourceJsonName,"project");
-    currentTaskProperties.put(SchemaRelationship.targetJsonName,"currentTask");
-    app.create(projectNode,taskNode,SchemaRelationship.class,currentTaskProperties);
+    currentTaskProperties.put(SchemaRelationshipNode.sourceNode,projectNode);
+    currentTaskProperties.put(SchemaRelationshipNode.targetNode,taskNode);
+    currentTaskProperties.put(SchemaRelationshipNode.relationshipType,"CURRENT");
+    currentTaskProperties.put(SchemaRelationshipNode.sourceMultiplicity,"1");
+    currentTaskProperties.put(SchemaRelationshipNode.targetMultiplicity,"1");
+    currentTaskProperties.put(SchemaRelationshipNode.sourceJsonName,"project");
+    currentTaskProperties.put(SchemaRelationshipNode.targetJsonName,"currentTask");
+    app.create(SchemaRelationshipNode.class,currentTaskProperties);
     tx.success();
   }
  catch (  FrameworkException fex) {

@@ -56,7 +56,12 @@
         view.clear();
       }
       for (      final SchemaProperty property : schemaView.getProperty(SchemaView.schemaProperties)) {
-        view.add(property.getPropertyName() + "Property");
+        if (property.getProperty(SchemaProperty.isBuiltinProperty)) {
+          view.add(property.getPropertyName());
+        }
+ else {
+          view.add(property.getPropertyName() + "Property");
+        }
       }
       if (StringUtils.isNotBlank(nonGraphProperties)) {
         for (        final String propertyName : nonGraphProperties.split("[, ]+")) {

@@ -15,7 +15,7 @@ synchronized (SchemaService.class) {
           }
           dynamicViews.addAll(schemaNode.getViews());
         }
-        for (        final SchemaRelationship schemaRelationship : StructrApp.getInstance().relationshipQuery(SchemaRelationship.class).getAsList()) {
+        for (        final SchemaRelationshipNode schemaRelationship : StructrApp.getInstance().nodeQuery(SchemaRelationshipNode.class).getAsList()) {
           nodeExtender.addClass(schemaRelationship.getClassName(),schemaRelationship.getSource(errorBuffer));
           final String auxSource=schemaRelationship.getAuxiliarySource();
           if (auxSource != null) {
@@ -25,12 +25,16 @@ synchronized (SchemaService.class) {
         }
         Map<String,Class> newTypes=nodeExtender.compile(errorBuffer);
         for (        final Class newType : newTypes.values()) {
+          config.unregisterEntityType(newType.getName());
           config.registerEntityType(newType);
           try {
             newType.newInstance();
           }
  catch (          Throwable t) {
           }
+        }
+        for (        final SchemaNode schemaNode : StructrApp.getInstance().nodeQuery(SchemaNode.class).getAsList()) {
+          schemaNode.createBuiltInSchemaEntities(errorBuffer);
         }
         success=!errorBuffer.hasError();
         if (success) {

@@ -26,12 +26,14 @@
     sourceNode.setProperty(new StringProperty("___doTest04"),"{ var e = Structr.get('this'); e.testEnum = 'INVALID'; }");
     sourceNode.setProperty(new StringProperty("___doTest05"),"{ var e = Structr.get('this'); e.testBoolean = true; e.testInteger = 123; e.testString = 'testing..'; e.testDouble = 1.2345; e.testDate = new Date(" + currentTimeMillis + "); }");
     final PropertyMap properties=new PropertyMap();
-    properties.put(SchemaRelationship.sourceJsonName,"source");
-    properties.put(SchemaRelationship.targetJsonName,"targets");
-    properties.put(SchemaRelationship.sourceMultiplicity,"*");
-    properties.put(SchemaRelationship.targetMultiplicity,"*");
-    properties.put(SchemaRelationship.relationshipType,"HAS");
-    app.create(sourceNode,targetNode,SchemaRelationship.class,properties);
+    properties.put(SchemaRelationshipNode.sourceId,sourceNode.getUuid());
+    properties.put(SchemaRelationshipNode.targetId,targetNode.getUuid());
+    properties.put(SchemaRelationshipNode.sourceJsonName,"source");
+    properties.put(SchemaRelationshipNode.targetJsonName,"targets");
+    properties.put(SchemaRelationshipNode.sourceMultiplicity,"*");
+    properties.put(SchemaRelationshipNode.targetMultiplicity,"*");
+    properties.put(SchemaRelationshipNode.relationshipType,"HAS");
+    app.create(SchemaRelationshipNode.class,properties);
     tx.success();
   }
  catch (  FrameworkException fex) {

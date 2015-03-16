@@ -41,10 +41,14 @@
       }
     }
     node.onNodeDeletion();
-    for (    AbstractRelationship r : node.getRelationships()) {
-      if (r != null) {
-        app.delete(r);
+    try {
+      for (      AbstractRelationship r : node.getRelationships()) {
+        if (r != null) {
+          app.delete(r);
+        }
       }
+    }
+ catch (    NotFoundException nfex) {
     }
     node.removeFromIndex();
     TransactionCommand.nodeDeleted(node);

@@ -1,0 +1,9 @@
+{
+  final String jsonName=template.jsonName();
+  if (!propertyNames.contains(jsonName) && !hiddenPropertyNames.contains(jsonName)) {
+    final boolean isInPublic=config.getPropertySet(builtinClass,PropertyView.Public).contains(template);
+    final boolean isInUi=config.getPropertySet(builtinClass,PropertyView.Ui).contains(template);
+    final SchemaProperty property=StructrApp.getInstance(node.getSecurityContext()).create(SchemaProperty.class,new NodeAttribute(SchemaProperty.schemaNode,node),new NodeAttribute(SchemaProperty.propertyType,template.typeName()),new NodeAttribute(SchemaProperty.defaultValue,template.defaultValue()),new NodeAttribute(SchemaProperty.name,template.jsonName()),new NodeAttribute(SchemaProperty.dbName,template.dbName()),new NodeAttribute(SchemaProperty.unique,template.isUnique()),new NodeAttribute(SchemaProperty.notNull,template.isNotNull()),new NodeAttribute(SchemaProperty.format,template.format()),new NodeAttribute(SchemaProperty.unique,template.isUnique()),new NodeAttribute(SchemaProperty.isBuiltinProperty,true),new NodeAttribute(SchemaProperty.isDefaultInUi,isInUi),new NodeAttribute(SchemaProperty.isDefaultInPublic,isInPublic));
+    property.setProperty(SchemaProperty.contentHash,property.getContentHash());
+  }
+}

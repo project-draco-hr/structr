@@ -1,10 +1,10 @@
 {
   final List<GraphObject> data=super.getSyncData();
   data.addAll(StructrApp.getInstance(securityContext).nodeQuery(SchemaNode.class).getAsList());
-  for (  final SchemaRelationship rel : getOutgoingRelationships(SchemaRelationship.class)) {
+  for (  final SchemaRelationshipNode rel : getProperty(SchemaNode.relatedTo)) {
     data.add(rel);
   }
-  for (  final SchemaRelationship rel : getIncomingRelationships(SchemaRelationship.class)) {
+  for (  final SchemaRelationshipNode rel : getProperty(SchemaNode.relatedFrom)) {
     data.add(rel);
   }
   return data;

@@ -13,6 +13,8 @@
   SchemaHelper.formatImportStatements(src,baseType);
   String superClass=_extendsClass != null ? _extendsClass : baseType.getSimpleName();
   src.append("public class ").append(_className).append(" extends ").append(superClass).append(" {\n\n");
+  if ("true".equals(StructrApp.getConfigurationValue("SchemaService.migrate","false"))) {
+  }
   for (  final SchemaRelationshipNode outRel : getProperty(SchemaNode.relatedTo)) {
     final String propertyName=outRel.getPropertyName(_className,existingPropertyNames,true);
     src.append(outRel.getPropertySource(propertyName,true));

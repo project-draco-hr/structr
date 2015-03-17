@@ -1,7 +1,12 @@
 {
   final boolean migrate="true".equals(StructrApp.getConfigurationValue("SchemaService.migrate","false"));
   final PropertyContainer propertyContainer=entity.getPropertyContainer();
+  final ConfigurationProvider config=StructrApp.getConfiguration();
   final StringBuilder src=new StringBuilder();
+  Class type=config.getNodeEntityClass(entity.getClassName());
+  if (type == null) {
+    type=config.getRelationshipEntityClass(entity.getClassName());
+  }
   for (  final String rawViewName : getViews(propertyContainer)) {
     if (!rawViewName.startsWith("___") && propertyContainer.hasProperty(rawViewName)) {
       final String value=propertyContainer.getProperty(rawViewName).toString();
@@ -60,7 +65,14 @@
       }
       if (StringUtils.isNotBlank(nonGraphProperties)) {
         for (        final String propertyName : nonGraphProperties.split("[, ]+")) {
-          view.add(propertyName);
+          String extendedPropertyName=propertyName;
+          if (type != null) {
+            final PropertyKey property=config.getPropertyKeyForJSONName(type,propertyName);
+            if (property != null && property.isDynamic()) {
+              extendedPropertyName=extendedPropertyName + "Property";
+            }
+          }
+          view.add(extendedPropertyName);
         }
       }
     }

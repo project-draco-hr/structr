@@ -1,5 +1,4 @@
 {
-  final boolean migrate="true".equals(StructrApp.getConfigurationValue("SchemaService.migrate","false"));
   final PropertyContainer propertyContainer=entity.getPropertyContainer();
   final ConfigurationProvider config=StructrApp.getConfiguration();
   final StringBuilder src=new StringBuilder();
@@ -23,10 +22,10 @@
  else {
         view.clear();
       }
-      if (migrate && entity instanceof SchemaNode) {
+      if (entity instanceof AbstractSchemaNode) {
         final List<String> nonGraphProperties=new LinkedList<>();
         final List<SchemaProperty> properties=new LinkedList<>();
-        final SchemaNode schemaNode=(SchemaNode)entity;
+        final AbstractSchemaNode schemaNode=(AbstractSchemaNode)entity;
         final App app=StructrApp.getInstance();
         if (app.nodeQuery(SchemaView.class).and(SchemaView.schemaNode,schemaNode).and(AbstractNode.name,viewName).getFirst() == null) {
           for (int i=0; i < parts.length; i++) {

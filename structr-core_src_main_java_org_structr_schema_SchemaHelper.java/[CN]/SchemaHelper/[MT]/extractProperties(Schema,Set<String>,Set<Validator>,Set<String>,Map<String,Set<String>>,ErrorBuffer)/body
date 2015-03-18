@@ -1,5 +1,4 @@
 {
-  final boolean migrate="true".equals(StructrApp.getConfigurationValue("SchemaService.migrate","false"));
   final PropertyContainer propertyContainer=entity.getPropertyContainer();
   final StringBuilder src=new StringBuilder();
   for (  String propertyName : SchemaHelper.getProperties(propertyContainer)) {
@@ -7,8 +6,8 @@
       String rawType=propertyContainer.getProperty(propertyName).toString();
       PropertySourceGenerator parser=SchemaHelper.getSourceGenerator(errorBuffer,entity.getClassName(),new StringBasedPropertyDefinition(propertyName,rawType));
       if (parser != null) {
-        if (migrate && entity instanceof SchemaNode) {
-          parser.createSchemaPropertyNode((SchemaNode)entity,propertyName);
+        if (entity instanceof AbstractSchemaNode) {
+          parser.createSchemaPropertyNode((AbstractSchemaNode)entity,propertyName);
         }
       }
     }

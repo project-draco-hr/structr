@@ -1,7 +1,6 @@
 {
   final App app=StructrApp.getInstance();
   final GraphDatabaseService graphDb=app.command(GraphDatabaseCommand.class).execute();
-  final NodeServiceCommand nodeServiceCommand=app.command(CreateNodeCommand.class);
   final ConfigurationProvider configuration=Services.getInstance().getConfigurationProvider();
   final Set<NodeInfo> nodeTypes=new LinkedHashSet<>();
   final Map<Long,TypeInfo> nodeTypeInfoMap=new LinkedHashMap<>();
@@ -55,7 +54,7 @@
           final String combinedType=startNodeType.concat(relationshipType).concat(endNodeType);
           rel.setProperty(GraphObject.type.dbName(),combinedType);
         }
-        rel.setProperty(GraphObject.id.dbName(),nodeServiceCommand.getNextUuid());
+        rel.setProperty(GraphObject.id.dbName(),NodeServiceCommand.getNextUuid());
       }
     }
     final Map<String,List<RelationshipInfo>> relTypeInfoMap=new LinkedHashMap<>();

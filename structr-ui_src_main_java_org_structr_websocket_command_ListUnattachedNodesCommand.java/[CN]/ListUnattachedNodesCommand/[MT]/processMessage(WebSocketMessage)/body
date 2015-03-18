@@ -9,21 +9,14 @@
   query.orTypes(DOMElement.class);
   query.orType(Content.class);
   query.orType(Template.class);
-  try {
-    List<AbstractNode> filteredResults=new LinkedList();
-    List<? extends GraphObject> resultList=query.getAsList();
-    for (    GraphObject obj : resultList) {
-      if (obj instanceof AbstractNode) {
-        AbstractNode node=(AbstractNode)obj;
-        if (!node.hasIncomingRelationships(DOMChildren.class) && node.getProperty(DOMNode.ownerDocument) == null && !(node instanceof ShadowDocument)) {
-          filteredResults.add(node);
-        }
-      }
-    }
+  final App app=StructrApp.getInstance(securityContext);
+  try (final Tx tx=app.tx()){
+    List<AbstractNode> filteredResults=getUnattachedNodes(app,securityContext,webSocketData);
     int resultCountBeforePaging=filteredResults.size();
     webSocketData.setResult(PagingHelper.subList(filteredResults,pageSize,page,null));
     webSocketData.setRawResultCount(resultCountBeforePaging);
     getWebSocket().send(webSocketData,true);
+    tx.success();
   }
  catch (  FrameworkException fex) {
     logger.log(Level.WARNING,"Exception occured",fex);

@@ -541,6 +541,13 @@
     assertEquals("Invalid usage message for each()",Functions.ERROR_MESSAGE_EACH,Scripting.replaceVariables(ctx,testOne,"${each()}"));
     assertEquals("Invalid usage message for get()",Functions.ERROR_MESSAGE_GET,Scripting.replaceVariables(ctx,testOne,"${get()}"));
     assertEquals("Invalid usage message for set()",Functions.ERROR_MESSAGE_SET,Scripting.replaceVariables(ctx,testOne,"${set()}"));
+    assertEquals("Setting the current date/time should not produce output (JS)","",Scripting.replaceVariables(ctx,testOne,"${{var t = Structr.get('this'); t.aDate = new Date();}}"));
+    try {
+      Scripting.replaceVariables(ctx,testOne,"${set(this, 'aDate', now)}");
+    }
+ catch (    FrameworkException fex) {
+      fail("Setting the current date/time should not cause an Exception (StructrScript)");
+    }
     assertEquals("Invalid usage message for geocode()",Functions.ERROR_MESSAGE_GEOCODE,Scripting.replaceVariables(ctx,testOne,"${geocode()}"));
     assertEquals("Invalid usage message for send_plaintext_mail()",Functions.ERROR_MESSAGE_SEND_PLAINTEXT_MAIL,Scripting.replaceVariables(ctx,testOne,"${send_plaintext_mail()}"));
     assertEquals("Invalid usage message for send_html_mail()",Functions.ERROR_MESSAGE_SEND_HTML_MAIL,Scripting.replaceVariables(ctx,testOne,"${send_html_mail()}"));

@@ -3,9 +3,12 @@
   final PropertyContainer propertyContainer=entity.getPropertyContainer();
   final ConfigurationProvider config=StructrApp.getConfiguration();
   final StringBuilder src=new StringBuilder();
-  Class type=config.getNodeEntityClass(entity.getClassName());
-  if (type == null) {
-    type=config.getRelationshipEntityClass(entity.getClassName());
+  Class superClass=config.getNodeEntityClass(entity.getSuperclassName());
+  if (superClass == null) {
+    superClass=config.getRelationshipEntityClass(entity.getSuperclassName());
+  }
+  if (superClass == null) {
+    superClass=AbstractNode.class;
   }
   for (  final String rawViewName : getViews(propertyContainer)) {
     if (!rawViewName.startsWith("___") && propertyContainer.hasProperty(rawViewName)) {
@@ -27,7 +30,10 @@
         final App app=StructrApp.getInstance();
         if (app.nodeQuery(SchemaView.class).and(SchemaView.schemaNode,schemaNode).and(AbstractNode.name,viewName).getFirst() == null) {
           for (int i=0; i < parts.length; i++) {
-            final String propertyName=parts[i].trim();
+            String propertyName=parts[i].trim();
+            while (propertyName.startsWith("_")) {
+              propertyName=propertyName.substring(1);
+            }
             final SchemaProperty propertyNode=app.nodeQuery(SchemaProperty.class).and(SchemaProperty.schemaNode,schemaNode).andName(propertyName).getFirst();
             if (propertyNode != null) {
               properties.add(propertyNode);
@@ -66,11 +72,24 @@
       if (StringUtils.isNotBlank(nonGraphProperties)) {
         for (        final String propertyName : nonGraphProperties.split("[, ]+")) {
           String extendedPropertyName=propertyName;
-          if (type != null) {
-            final PropertyKey property=config.getPropertyKeyForJSONName(type,propertyName);
-            if (property != null && property.isDynamic()) {
+          if (superClass != null) {
+            final PropertyKey property=config.getPropertyKeyForJSONName(superClass,propertyName,false);
+            if (property != null) {
+              if (property.isDynamic()) {
+                extendedPropertyName=extendedPropertyName + "Property";
+              }
+ else {
+                System.out.println("        property " + property.jsonName() + " is not dynamic: "+ property.getClass().getSimpleName()+ ", declared by "+ property.getDeclaringClass());
+              }
+            }
+ else {
+              System.out.println("        property not found for " + propertyName + ", assuming dynamic");
               extendedPropertyName=extendedPropertyName + "Property";
             }
+          }
+ else {
+            System.out.println("        type " + entity.getSuperclassName() + " not found for "+ propertyName+ ", assuming dynamic");
+            extendedPropertyName=extendedPropertyName + "Property";
           }
           view.add(extendedPropertyName);
         }

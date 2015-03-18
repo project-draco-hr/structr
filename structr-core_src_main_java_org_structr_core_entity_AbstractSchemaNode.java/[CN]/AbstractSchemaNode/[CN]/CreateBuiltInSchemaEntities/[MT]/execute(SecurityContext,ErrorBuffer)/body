@@ -1,5 +1,31 @@
 {
-  createBuiltInPropertyNodes();
-  createBuiltInViewNodes();
+  final ConfigurationProvider config=StructrApp.getConfiguration();
+  final Set<String> viewNames=new HashSet<>();
+  viewNames.add("all");
+  for (  final SchemaView view : node.getProperty(schemaViews)) {
+    viewNames.add(view.getProperty(AbstractNode.name));
+  }
+  Class builtinClass=config.getNodeEntityClass(node.getClassName());
+  if (builtinClass == null) {
+    builtinClass=config.getRelationshipEntityClass(node.getClassName());
+  }
+  if (builtinClass != null) {
+    for (    final String view : config.getPropertyViewsForType(builtinClass)) {
+      if (!viewNames.contains(view)) {
+        final Set<String> viewPropertyNames=new HashSet<>();
+        final List<SchemaProperty> properties=new LinkedList<>();
+        for (        final PropertyKey key : config.getPropertySet(builtinClass,view)) {
+          viewPropertyNames.add(key.jsonName());
+        }
+        for (        final SchemaProperty schemaProperty : node.getProperty(SchemaNode.schemaProperties)) {
+          final String schemaPropertyName=schemaProperty.getProperty(SchemaProperty.name);
+          if (viewPropertyNames.contains(schemaPropertyName)) {
+            properties.add(schemaProperty);
+          }
+        }
+        StructrApp.getInstance(node.getSecurityContext()).create(SchemaView.class,new NodeAttribute(SchemaView.schemaNode,node),new NodeAttribute(SchemaView.name,view),new NodeAttribute(SchemaView.schemaProperties,properties),new NodeAttribute(SchemaView.isBuiltinView,true));
+      }
+    }
+  }
   return true;
 }

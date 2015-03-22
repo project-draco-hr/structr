@@ -1,0 +1,28 @@
+{
+  setDescription(getString(source,JsonSchema.KEY_DESCRIPTION));
+  setTitle(getString(source,JsonSchema.KEY_TITLE));
+  final Map<String,StructrTypeDefinition> typeDefinitions=getTypeDefinitions();
+  final Map<String,Object> types=getMap(source,KEY_DEFINITIONS,false);
+  if (types != null) {
+    for (    final Entry<String,Object> entry : types.entrySet()) {
+      final String key=entry.getKey();
+      final Object value=entry.getValue();
+      if (value instanceof Map) {
+        final Map<String,Object> map=(Map<String,Object>)value;
+        final StructrTypeDefinition def=new StructrTypeDefinition(this,"definitions/" + key);
+        def.setName(key);
+        def.createFromSource(map);
+        typeDefinitions.put(key,def);
+      }
+ else {
+        throw new InvalidSchemaException("Type definition " + key + " has wrong type, expecting object.");
+      }
+    }
+  }
+ else {
+    throw new InvalidSchemaException("No type definitions found.");
+  }
+  if (typeDefinitions.isEmpty()) {
+    remove(JsonSchema.KEY_DEFINITIONS);
+  }
+}

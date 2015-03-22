@@ -1,0 +1,10 @@
+{
+  final List<SchemaNode> types=app.nodeQuery(SchemaNode.class).sort(AbstractNode.name).getAsList();
+  final Map<String,StructrTypeDefinition> typeDefinitions=getTypeDefinitions();
+  for (  final SchemaNode schemaNode : types) {
+    final String name=schemaNode.getName();
+    final StructrTypeDefinition type=new StructrTypeDefinition(this,"definitions/" + name);
+    type.createFromDatabase(schemaNode);
+    typeDefinitions.put(name,type);
+  }
+}

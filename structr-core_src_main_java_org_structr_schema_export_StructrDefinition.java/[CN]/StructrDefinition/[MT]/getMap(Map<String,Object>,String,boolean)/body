@@ -1,0 +1,15 @@
+{
+  Object value=rawData.get(key);
+  if (value != null) {
+    if (value instanceof Map) {
+      return (Map<String,Object>)value;
+    }
+    throw new IllegalStateException("Invalid type, expected object, got " + value.getClass().getName());
+  }
+  if (create) {
+    Map<String,Object> map=new TreeMap<>();
+    rawData.put(key,map);
+    return map;
+  }
+  return null;
+}

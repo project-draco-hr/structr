@@ -1,0 +1,13 @@
+{
+  final Map<String,StructrPropertyDefinition> propertyDefinitions=getPropertyDefinitions();
+  for (  final SchemaProperty property : schemaNode.getProperty(AbstractSchemaNode.schemaProperties)) {
+    final StructrPropertyDefinition def=StructrPropertyDefinition.forStructrType(this,property);
+    if (def.isRequired()) {
+      requiredProperties.add(def.getName());
+    }
+    propertyDefinitions.put(def.getName(),def);
+  }
+  if (propertyDefinitions.isEmpty()) {
+    remove(JsonSchema.KEY_PROPERTIES);
+  }
+}

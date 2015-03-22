@@ -1,0 +1,18 @@
+{
+  try (final Tx tx=app.tx()){
+    for (    final SchemaRelationshipNode schemaRelationship : app.nodeQuery(SchemaRelationshipNode.class).getAsList()) {
+      app.delete(schemaRelationship);
+    }
+    for (    final SchemaNode schemaNode : app.nodeQuery(SchemaNode.class).getAsList()) {
+      app.delete(schemaNode);
+    }
+    for (    final SchemaProperty schemaProperty : app.nodeQuery(SchemaProperty.class).getAsList()) {
+      app.delete(schemaProperty);
+    }
+    for (    final SchemaView schemaView : app.nodeQuery(SchemaView.class).getAsList()) {
+      app.delete(schemaView);
+    }
+    new StructrSchemaDefinition(newSchema).createDatabaseSchema(app);
+    tx.success();
+  }
+ }

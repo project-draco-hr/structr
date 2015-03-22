@@ -1,0 +1,24 @@
+{
+  try {
+    final JsonSchema sourceSchema=StructrSchema.createFromDatabase(app);
+    final JsonType task=sourceSchema.addType("Task");
+    final JsonProperty title=task.addStringProperty("title","public","ui").setRequired(true);
+    final JsonProperty desc=task.addStringProperty("description","public","ui").setRequired(true);
+    final JsonType project=sourceSchema.addType("Project");
+    project.addStringProperty("name","public","ui").setRequired(true);
+    project.addArrayReference("tasks",task).setDirection("out");
+    task.addReference("project",project).setDirection("in");
+    task.addScriptProperty("displayName","public","ui").setSource("this.name").setContentType("text/structrscript");
+    task.addScriptProperty("javascript","public","ui").setSource("{ var x = 'test'; return x; }").setContentType("text/javascript");
+    project.addEnumProperty("status","ui").setEnums("active","planned","finished");
+    assertEquals("Invalid schema URI","https://structr.org/schema#",sourceSchema.getId().toString());
+    assertEquals("Invalid schema URI","https://structr.org/definitions/Task",task.getId().toString());
+    assertEquals("Invalid schema URI","https://structr.org/definitions/Task/properties/title",title.getId().toString());
+    assertEquals("Invalid schema URI","https://structr.org/definitions/Task/properties/description",desc.getId().toString());
+    compareSchemaRoundtrip(sourceSchema);
+  }
+ catch (  FrameworkException|InvalidSchemaException|URISyntaxException ex) {
+    ex.printStackTrace();
+    fail("Unexpected exception.");
+  }
+}

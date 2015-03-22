@@ -1,0 +1,9 @@
+{
+  setName(source.getName());
+  final Map<String,StructrPropertyDefinition> propertyDefinitions=getPropertyDefinitions();
+  for (  final JsonProperty property : source.getProperties()) {
+    final boolean isEnum=property instanceof JsonEnumProperty;
+    propertyDefinitions.put(property.getName(),StructrPropertyDefinition.forJsonType(this,property,isEnum));
+  }
+  getViewDefinitions().putAll(source.getViews());
+}

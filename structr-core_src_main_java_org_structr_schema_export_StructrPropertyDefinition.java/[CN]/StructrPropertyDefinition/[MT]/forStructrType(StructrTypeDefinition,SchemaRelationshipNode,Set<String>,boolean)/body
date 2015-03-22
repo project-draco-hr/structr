@@ -1,0 +1,48 @@
+{
+  final String relType=property.getProperty(SchemaRelationshipNode.relationshipType);
+  final StructrPropertyDefinition def;
+  if (outgoing) {
+    final String targetType=property.getTargetNode().getName();
+    String name=property.getProperty(SchemaRelationshipNode.targetJsonName);
+    if (name == null) {
+      name=property.getPropertyName(targetType,existingPropertyNames,outgoing);
+    }
+    if ("1".equals(property.getProperty(SchemaRelationshipNode.targetMultiplicity))) {
+      def=StructrPropertyDefinition.forStringType(parent,"object",name,false);
+      def.put(JsonSchema.KEY_REFERENCE,"#/definitions/" + targetType);
+      def.put(JsonSchema.KEY_DIRECTION,"out");
+    }
+ else {
+      def=StructrPropertyDefinition.forStringType(parent,"array",name,false);
+      final Map<String,Object> items=new TreeMap<>();
+      items.put(JsonSchema.KEY_REFERENCE,"#/definitions/" + targetType);
+      def.put(JsonSchema.KEY_TYPE,"array");
+      def.put(JsonSchema.KEY_ITEMS,items);
+      def.put(JsonSchema.KEY_DIRECTION,"out");
+    }
+  }
+ else {
+    final String sourceType=property.getSourceNode().getName();
+    String name=property.getProperty(SchemaRelationshipNode.sourceJsonName);
+    if (name == null) {
+      name=property.getPropertyName(sourceType,existingPropertyNames,outgoing);
+    }
+    if ("1".equals(property.getProperty(SchemaRelationshipNode.sourceMultiplicity))) {
+      def=StructrPropertyDefinition.forStringType(parent,"object",name,false);
+      def.put(JsonSchema.KEY_REFERENCE,"#/definitions/" + sourceType);
+      def.put(JsonSchema.KEY_DIRECTION,"in");
+    }
+ else {
+      def=StructrPropertyDefinition.forStringType(parent,"array",name,false);
+      final Map<String,Object> items=new TreeMap<>();
+      items.put(JsonSchema.KEY_REFERENCE,"#/definitions/" + sourceType);
+      def.put(JsonSchema.KEY_TYPE,"array");
+      def.put(JsonSchema.KEY_ITEMS,items);
+      def.put(JsonSchema.KEY_DIRECTION,"in");
+    }
+  }
+  if (!SchemaRelationshipNode.getDefaultRelationshipType(property).equals(relType)) {
+    def.put(JsonSchema.KEY_RELATIONSHIP,relType);
+  }
+  return def;
+}

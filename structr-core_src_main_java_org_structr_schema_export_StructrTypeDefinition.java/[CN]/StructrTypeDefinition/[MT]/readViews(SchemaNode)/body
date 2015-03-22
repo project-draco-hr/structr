@@ -1,0 +1,24 @@
+{
+  final Map<String,Set<String>> viewDefinitions=getViewDefinitions();
+  for (  final SchemaView view : schemaNode.getProperty(AbstractSchemaNode.schemaViews)) {
+    final Set<String> propertySet=new TreeSet<>();
+    for (    final SchemaProperty property : view.getProperty(SchemaView.schemaProperties)) {
+      propertySet.add(property.getName());
+    }
+    final String nonGraphProperties=view.getProperty(SchemaView.nonGraphProperties);
+    if (nonGraphProperties != null) {
+      for (      final String property : nonGraphProperties.split("[, ]+")) {
+        final String trimmed=property.trim();
+        if (StringUtils.isNotBlank(trimmed)) {
+          propertySet.add(trimmed);
+        }
+      }
+    }
+    if (!propertySet.isEmpty()) {
+      viewDefinitions.put(view.getName(),propertySet);
+    }
+  }
+  if (viewDefinitions.isEmpty()) {
+    remove(JsonSchema.KEY_VIEWS);
+  }
+}

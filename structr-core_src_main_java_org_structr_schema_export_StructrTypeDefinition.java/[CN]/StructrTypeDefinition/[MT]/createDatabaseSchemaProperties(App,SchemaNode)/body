@@ -1,0 +1,25 @@
+{
+  final Map<String,StructrPropertyDefinition> propertyDefinitions=getPropertyDefinitions();
+  final Map<String,Set<String>> views=getViewDefinitions();
+  final Map<String,SchemaProperty> properties=new TreeMap<>();
+  for (  final Entry<String,StructrPropertyDefinition> entry : propertyDefinitions.entrySet()) {
+    final SchemaProperty property=entry.getValue().createDatabaseSchema(app,schemaNode);
+    if (property != null) {
+      properties.put(entry.getKey(),property);
+    }
+  }
+  for (  final Entry<String,Set<String>> view : views.entrySet()) {
+    final List<SchemaProperty> viewProperties=new LinkedList<>();
+    final List<String> nonGraphProperties=new LinkedList<>();
+    for (    final String propertyName : view.getValue()) {
+      final SchemaProperty property=properties.get(propertyName);
+      if (property != null) {
+        viewProperties.add(property);
+      }
+ else {
+        nonGraphProperties.add(propertyName);
+      }
+    }
+    app.create(SchemaView.class,new NodeAttribute(SchemaView.schemaNode,schemaNode),new NodeAttribute(AbstractNode.name,view.getKey()),new NodeAttribute(SchemaView.schemaProperties,viewProperties),new NodeAttribute(SchemaView.nonGraphProperties,StringUtils.join(nonGraphProperties,", ")));
+  }
+}

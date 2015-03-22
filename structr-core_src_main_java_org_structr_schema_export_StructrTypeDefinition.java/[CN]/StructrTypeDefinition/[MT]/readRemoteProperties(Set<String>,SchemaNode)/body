@@ -1,0 +1,21 @@
+{
+  final Map<String,StructrPropertyDefinition> propertyDefinitions=getPropertyDefinitions();
+  final Set<String> existingPropertyNames=new HashSet<>();
+  for (  final SchemaRelationshipNode relationship : schemaNode.getProperty(SchemaNode.relatedTo)) {
+    final StructrPropertyDefinition def=StructrPropertyDefinition.forStructrType(this,relationship,existingPropertyNames,true);
+    if (def.isRequired()) {
+      requiredProperties.add(def.getName());
+    }
+    propertyDefinitions.put(def.getName(),def);
+  }
+  for (  final SchemaRelationshipNode relationship : schemaNode.getProperty(SchemaNode.relatedFrom)) {
+    final StructrPropertyDefinition def=StructrPropertyDefinition.forStructrType(this,relationship,existingPropertyNames,false);
+    if (def.isRequired()) {
+      requiredProperties.add(def.getName());
+    }
+    propertyDefinitions.put(def.getName(),def);
+  }
+  if (propertyDefinitions.isEmpty()) {
+    remove(JsonSchema.KEY_PROPERTIES);
+  }
+}

@@ -1,0 +1,15 @@
+{
+  Object value=rawData.get(key);
+  if (value != null) {
+    if (value instanceof List) {
+      return (List)value;
+    }
+    throw new IllegalStateException("Invalid type, expected array, got " + value.getClass().getName());
+  }
+  if (create) {
+    final List list=new LinkedList<>();
+    rawData.put(key,list);
+    return list;
+  }
+  return null;
+}

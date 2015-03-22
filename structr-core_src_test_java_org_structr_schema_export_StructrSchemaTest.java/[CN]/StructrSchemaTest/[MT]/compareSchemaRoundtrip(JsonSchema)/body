@@ -1,0 +1,16 @@
+{
+  final String source=sourceSchema.toString();
+  System.out.println("##################### source");
+  System.out.println(source);
+  final JsonSchema targetSchema=StructrSchema.createFromSource(sourceSchema.toString());
+  final String target=targetSchema.toString();
+  System.out.println("##################### target");
+  System.out.println(target);
+  assertEquals("Invalid schema (de)serialization roundtrip result",source,target);
+  StructrSchema.replaceDatabaseSchema(app,targetSchema);
+  final JsonSchema replacedSchema=StructrSchema.createFromDatabase(app);
+  final String replaced=replacedSchema.toString();
+  System.out.println("##################### replaced");
+  System.out.println(replaced);
+  assertEquals("Invalid schema replacement result",source,replaced);
+}

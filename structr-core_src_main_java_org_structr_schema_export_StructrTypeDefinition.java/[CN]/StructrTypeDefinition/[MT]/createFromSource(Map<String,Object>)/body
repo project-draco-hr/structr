@@ -1,0 +1,63 @@
+{
+  final Map<String,StructrPropertyDefinition> propertyDefinitions=getPropertyDefinitions();
+  final Map<String,Set<String>> viewDefinitions=getViewDefinitions();
+  final String type=getString(source,JsonSchema.KEY_TYPE);
+  if ("object".equals(type)) {
+    final Map<String,Object> properties=getMap(source,JsonSchema.KEY_PROPERTIES,false);
+    if (properties != null) {
+      for (      final Entry<String,Object> entry : properties.entrySet()) {
+        final String key=entry.getKey();
+        final Object value=entry.getValue();
+        if (value instanceof Map) {
+          final Map<String,Object> map=(Map<String,Object>)value;
+          final String propertyType=getString(map,JsonSchema.KEY_TYPE);
+          final boolean isEnum=getList(map,JsonSchema.KEY_ENUM,false) != null;
+          final StructrPropertyDefinition def=StructrPropertyDefinition.forStringType(this,propertyType,key,isEnum);
+          def.createFromSource(map);
+          propertyDefinitions.put(key,def);
+        }
+ else {
+          throw new InvalidSchemaException("Property definition " + key + " has wrong type, expecting object.");
+        }
+      }
+    }
+    final Map<String,Object> views=getMap(source,JsonSchema.KEY_VIEWS,false);
+    if (views != null) {
+      for (      final Entry<String,Object> entry : views.entrySet()) {
+        final String key=entry.getKey();
+        final Object value=entry.getValue();
+        Set<String> view=viewDefinitions.get(key);
+        if (view == null) {
+          view=new TreeSet<>();
+          viewDefinitions.put(key,view);
+        }
+        if (value instanceof Collection) {
+          for (          final Object o : ((Collection)value)) {
+            view.add((String)o);
+          }
+        }
+ else {
+          throw new InvalidSchemaException("Invalid view " + key + ", expected array.");
+        }
+      }
+    }
+    final List<String> requiredProperties=getList(source,JsonSchema.KEY_REQUIRED,false);
+    if (requiredProperties != null) {
+      for (      final String propertyName : requiredProperties) {
+        final StructrPropertyDefinition def=propertyDefinitions.get(propertyName);
+        if (def != null) {
+          def.setRequired(true);
+        }
+      }
+    }
+  }
+ else {
+    throw new InvalidSchemaException("Encountered invalid type " + type + ", expected object.");
+  }
+  if (propertyDefinitions.isEmpty()) {
+    remove(JsonSchema.KEY_PROPERTIES);
+  }
+  if (viewDefinitions.isEmpty()) {
+    remove(JsonSchema.KEY_VIEWS);
+  }
+}

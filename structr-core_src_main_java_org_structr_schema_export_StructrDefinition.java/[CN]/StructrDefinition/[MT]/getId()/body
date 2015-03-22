@@ -1,0 +1,28 @@
+{
+  final StructrDefinition parent=getParent();
+  if (parent != null) {
+    final URI parentId=parent.getId();
+    if (parentId != null) {
+      try {
+        final URI containerURI=new URI(parentId.toString() + "/");
+        return containerURI.resolve(id);
+      }
+ catch (      URISyntaxException urex) {
+        urex.printStackTrace();
+      }
+    }
+  }
+  if (root != null) {
+    final URI rootId=root.getId();
+    if (rootId != null) {
+      try {
+        final URI containerURI=new URI(rootId.toString() + "/");
+        return containerURI.resolve(id);
+      }
+ catch (      URISyntaxException urex) {
+        urex.printStackTrace();
+      }
+    }
+  }
+  return id;
+}

@@ -1,0 +1,66 @@
+{
+  final String parentName=parent.getName();
+  final String name=property.getName();
+  final Type type=property.getPropertyType();
+  final String _format=property.getFormat();
+switch (type) {
+case Function:
+    final StructrScriptProperty func=new StructrScriptProperty(parent,name);
+  func.setContentType(property.getSourceContentType());
+func.setRequired(property.isRequired());
+func.setUnique(property.isUnique());
+func.setSource(_format);
+return func;
+case Cypher:
+final StructrScriptProperty cypher=new StructrScriptProperty(parent,name);
+cypher.setContentType(property.getSourceContentType());
+cypher.setSource("text/cypher");
+return cypher;
+case Notion:
+break;
+case StringArray:
+final StructrArrayProperty arr=new StructrArrayProperty(parent,name);
+return arr;
+case String:
+final StructrStringProperty str=new StructrStringProperty(parent,name);
+str.setRequired(property.isRequired());
+str.setUnique(property.isUnique());
+str.setDefaultValue(property.getDefaultValue());
+return str;
+case Boolean:
+final StructrBooleanProperty bool=new StructrBooleanProperty(parent,name);
+bool.setRequired(property.isRequired());
+bool.setUnique(property.isUnique());
+bool.setDefaultValue(property.getDefaultValue());
+return bool;
+case Count:
+final StructrNumberProperty count=new StructrNumberProperty(parent,name);
+count.setRequired(property.isRequired());
+count.setUnique(property.isUnique());
+count.setDefaultValue(property.getDefaultValue());
+return count;
+case Integer:
+case Long:
+case Double:
+final StructrNumberProperty num=new StructrNumberProperty(parent,name);
+num.setRequired(property.isRequired());
+num.setUnique(property.isUnique());
+num.setDefaultValue(property.getDefaultValue());
+return num;
+case Date:
+final StructrStringProperty date=new StructrStringProperty(parent,name);
+date.setRequired(property.isRequired());
+date.setUnique(property.isUnique());
+date.setDefaultValue(property.getDefaultValue());
+date.setFormat(_format);
+return date;
+case Enum:
+final StructrEnumProperty enumProperty=new StructrEnumProperty(parent,name);
+enumProperty.setRequired(property.isRequired());
+enumProperty.setUnique(property.isUnique());
+enumProperty.setDefaultValue(property.getDefaultValue());
+enumProperty.setEnums(property.getEnumDefinitions().toArray(new String[0]));
+return enumProperty;
+}
+throw new IllegalStateException("Unknown type " + type);
+}

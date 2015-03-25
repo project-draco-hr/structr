@@ -4,7 +4,7 @@
     final StructrDefinition def=resolveJsonPointer(reference);
     if (def != null) {
       final Set<String> properties=getProperties();
-      final String direction=getDirection();
+      final Direction direction=getDirection();
       if (direction == null || (properties != null && !properties.isEmpty())) {
         if (def instanceof JsonProperty) {
           final JsonProperty notionProperty=(JsonProperty)def;
@@ -18,29 +18,32 @@
         }
       }
  else {
-        String relationship=getRelationship();
         final SchemaNode otherNode=def.getSchemaNode();
-        if ("out".equals(direction)) {
+        String relationship=getRelationship();
+switch (direction) {
+case out:
           if (StringUtils.isEmpty(relationship)) {
             relationship=SchemaRelationshipNode.getDefaultRelationshipType(schemaNode,otherNode);
           }
-          final SchemaRelationshipNode rel=StructrDefinition.getRelationship(app,schemaNode,otherNode,relationship);
-          rel.setProperty(SchemaRelationshipNode.targetJsonName,getName());
-          rel.setProperty(SchemaRelationshipNode.targetMultiplicity,"*");
-        }
- else         if ("in".equals(direction)) {
-          if (StringUtils.isEmpty(relationship)) {
-            relationship=SchemaRelationshipNode.getDefaultRelationshipType(otherNode,schemaNode);
-          }
-          final SchemaRelationshipNode rel=StructrDefinition.getRelationship(app,otherNode,schemaNode,relationship);
-          rel.setProperty(SchemaRelationshipNode.sourceJsonName,getName());
-          rel.setProperty(SchemaRelationshipNode.sourceMultiplicity,"*");
-        }
- else {
-          throw new IllegalStateException("Invalid direction " + direction + " for property "+ getName()+ " in type "+ getParent().getName());
-        }
-      }
-    }
-  }
-  return null;
+        final SchemaRelationshipNode outRel=StructrDefinition.getRelationship(app,schemaNode,otherNode,relationship);
+      outRel.resolveCascadingEnums(getCascadingDelete(),getCascadingCreate());
+    outRel.setProperty(SchemaRelationshipNode.targetJsonName,getName());
+  outRel.setProperty(SchemaRelationshipNode.targetMultiplicity,"*");
+break;
+case in:
+if (StringUtils.isEmpty(relationship)) {
+relationship=SchemaRelationshipNode.getDefaultRelationshipType(otherNode,schemaNode);
+}
+final SchemaRelationshipNode inRel=StructrDefinition.getRelationship(app,otherNode,schemaNode,relationship);
+inRel.resolveCascadingEnums(getCascadingDelete(),getCascadingCreate());
+inRel.setProperty(SchemaRelationshipNode.sourceJsonName,getName());
+inRel.setProperty(SchemaRelationshipNode.sourceMultiplicity,"*");
+break;
+default :
+throw new IllegalStateException("Invalid direction " + direction + " for property "+ getName()+ " in type "+ getParent().getName());
+}
+}
+}
+}
+return null;
 }

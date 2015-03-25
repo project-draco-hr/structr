@@ -21,7 +21,7 @@ final String reference="#/definitions/" + parentName + "/properties/"+ property.
 final Set<String> notionProperties=property.getPropertiesForNotionProperty();
 final StructrPropertyDefinition notionProperty;
 if (property.getNotionMultiplicity().startsWith("*")) {
-notionProperty=new StructrArrayProperty(parent,name);
+notionProperty=new StructrArrayProperty(parent,name,null);
 final Map<String,Object> items=new TreeMap<>();
 items.put(JsonSchema.KEY_REFERENCE,reference);
 if (!notionProperties.isEmpty()) {
@@ -30,7 +30,7 @@ items.put(JsonSchema.KEY_PROPERTIES,notionProperties);
 notionProperty.put(JsonSchema.KEY_ITEMS,items);
 }
  else {
-notionProperty=new StructrObjectProperty(parent,name);
+notionProperty=new StructrObjectProperty(parent,name,null);
 notionProperty.put(JsonSchema.KEY_REFERENCE,reference);
 if (!notionProperties.isEmpty()) {
 notionProperty.put(JsonSchema.KEY_PROPERTIES,notionProperties);
@@ -38,7 +38,7 @@ notionProperty.put(JsonSchema.KEY_PROPERTIES,notionProperties);
 }
 return notionProperty;
 case StringArray:
-final StructrArrayProperty arr=new StructrArrayProperty(parent,name);
+final StructrArrayProperty arr=new StructrArrayProperty(parent,name,null);
 final Map<String,Object> items=new TreeMap<>();
 items.put(JsonSchema.KEY_TYPE,"string");
 arr.put(JsonSchema.KEY_TYPE,"array");

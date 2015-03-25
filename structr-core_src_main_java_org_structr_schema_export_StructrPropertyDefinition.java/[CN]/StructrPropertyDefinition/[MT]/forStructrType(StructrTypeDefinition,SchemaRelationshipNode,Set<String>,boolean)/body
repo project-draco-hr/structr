@@ -11,6 +11,10 @@
       def=StructrPropertyDefinition.forStringType(parent,"object",name,false);
       def.put(JsonSchema.KEY_REFERENCE,"#/definitions/" + targetType);
       def.put(JsonSchema.KEY_DIRECTION,"out");
+      final Map<String,Object> cascade=property.resolveCascadingFlags();
+      if (!cascade.isEmpty()) {
+        def.put(JsonSchema.KEY_CASCADE,cascade);
+      }
     }
  else {
       def=StructrPropertyDefinition.forStringType(parent,"array",name,false);
@@ -19,6 +23,10 @@
       def.put(JsonSchema.KEY_TYPE,"array");
       def.put(JsonSchema.KEY_ITEMS,items);
       def.put(JsonSchema.KEY_DIRECTION,"out");
+      final Map<String,Object> cascade=property.resolveCascadingFlags();
+      if (!cascade.isEmpty()) {
+        def.put(JsonSchema.KEY_CASCADE,cascade);
+      }
     }
   }
  else {
@@ -31,6 +39,10 @@
       def=StructrPropertyDefinition.forStringType(parent,"object",name,false);
       def.put(JsonSchema.KEY_REFERENCE,"#/definitions/" + sourceType);
       def.put(JsonSchema.KEY_DIRECTION,"in");
+      final Map<String,Object> cascade=property.resolveCascadingFlags();
+      if (!cascade.isEmpty()) {
+        def.put(JsonSchema.KEY_CASCADE,cascade);
+      }
     }
  else {
       def=StructrPropertyDefinition.forStringType(parent,"array",name,false);
@@ -39,6 +51,10 @@
       def.put(JsonSchema.KEY_TYPE,"array");
       def.put(JsonSchema.KEY_ITEMS,items);
       def.put(JsonSchema.KEY_DIRECTION,"in");
+      final Map<String,Object> cascade=property.resolveCascadingFlags();
+      if (!cascade.isEmpty()) {
+        def.put(JsonSchema.KEY_CASCADE,cascade);
+      }
     }
   }
   if (!SchemaRelationshipNode.getDefaultRelationshipType(property).equals(relType)) {

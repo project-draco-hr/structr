@@ -1,6 +1,7 @@
 {
   final Map<String,StructrPropertyDefinition> propertyDefinitions=getPropertyDefinitions();
   final Map<String,Set<String>> views=getViewDefinitions();
+  final Map<String,String> methods=getMethodDefinitions();
   final Map<String,SchemaProperty> properties=new TreeMap<>();
   for (  final Entry<String,StructrPropertyDefinition> entry : propertyDefinitions.entrySet()) {
     final SchemaProperty property=entry.getValue().createDatabaseSchema(app,schemaNode);
@@ -21,5 +22,8 @@
       }
     }
     app.create(SchemaView.class,new NodeAttribute(SchemaView.schemaNode,schemaNode),new NodeAttribute(AbstractNode.name,view.getKey()),new NodeAttribute(SchemaView.schemaProperties,viewProperties),new NodeAttribute(SchemaView.nonGraphProperties,StringUtils.join(nonGraphProperties,", ")));
+  }
+  for (  final Entry<String,String> method : methods.entrySet()) {
+    app.create(SchemaMethod.class,new NodeAttribute(SchemaMethod.schemaNode,schemaNode),new NodeAttribute(AbstractNode.name,method.getKey()),new NodeAttribute(SchemaMethod.source,method.getValue()));
   }
 }

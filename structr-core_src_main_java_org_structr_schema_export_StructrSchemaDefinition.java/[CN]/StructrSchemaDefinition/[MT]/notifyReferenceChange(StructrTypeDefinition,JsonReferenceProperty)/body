@@ -1,0 +1,15 @@
+{
+  final String reference=property.getReference();
+  if (reference != null) {
+    final StructrTypeDefinition targetType=(StructrTypeDefinition)sourceType.resolveJsonPointer(reference);
+    if (targetType != null) {
+      final String directionIndependentKey=createDirectionIndependentKey(sourceType.getName(),targetType.getName(),property.getRelationship());
+      SymmetricReference symmetricReference=referenceMapping.get(directionIndependentKey);
+      if (symmetricReference == null) {
+        symmetricReference=new SymmetricReference();
+        referenceMapping.put(directionIndependentKey,symmetricReference);
+      }
+      symmetricReference.registerProperty(sourceType,property);
+    }
+  }
+}

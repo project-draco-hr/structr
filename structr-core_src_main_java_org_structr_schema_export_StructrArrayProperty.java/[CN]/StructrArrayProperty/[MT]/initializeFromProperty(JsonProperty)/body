@@ -1,12 +1,23 @@
 {
-  if (property instanceof JsonArrayProperty) {
-    final JsonArrayProperty obj=(JsonArrayProperty)property;
-    setDirection(obj.getDirection());
+  if (property instanceof JsonReferenceProperty) {
+    final JsonReferenceProperty obj=(JsonReferenceProperty)property;
     setRelationship(obj.getRelationship());
     setReference(obj.getReference());
     final Set<String> properties=obj.getProperties();
     if (properties != null && !properties.isEmpty()) {
       setProperties(properties.toArray(new String[0]));
+    }
+    final Direction direction=obj.getDirection();
+    if (direction != null) {
+      setDirection(direction);
+    }
+    final Cascade delete=obj.getCascadingDelete();
+    if (delete != null) {
+      setCascadingDelete(delete);
+    }
+    final Cascade create=obj.getCascadingCreate();
+    if (create != null) {
+      setCascadingCreate(create);
     }
   }
  else {

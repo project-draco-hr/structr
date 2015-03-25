@@ -1,7 +1,31 @@
 {
   final Map<String,StructrTypeDefinition> typeDefinitions=getTypeDefinitions();
   for (  final StructrTypeDefinition type : typeDefinitions.values()) {
-    type.setSchemaNode(app.create(SchemaNode.class,type.getName()));
+    final SchemaNode schemaNode=app.create(SchemaNode.class,type.getName());
+    type.setSchemaNode(schemaNode);
+  }
+  for (  final StructrTypeDefinition type : typeDefinitions.values()) {
+    final String extendsReference=type.getExtends();
+    if (extendsReference != null) {
+      final StructrDefinition def=resolveJsonPointer(extendsReference);
+      final SchemaNode schemaNode=type.getSchemaNode();
+      if (def != null && def instanceof JsonType) {
+        final JsonType jsonType=(JsonType)def;
+        final String superclassName="org.structr.dynamic." + jsonType.getName();
+        schemaNode.setProperty(SchemaNode.extendsClass,superclassName);
+      }
+ else {
+        try {
+          final Class superclass=StructrApp.resolveSchemaId(new URI(extendsReference));
+          if (superclass != null) {
+            schemaNode.setProperty(SchemaNode.extendsClass,superclass.getName());
+          }
+        }
+ catch (        URISyntaxException uex) {
+          uex.printStackTrace();
+        }
+      }
+    }
   }
   for (  final StructrTypeDefinition type : typeDefinitions.values()) {
     type.createDatabaseSchemaProperties(app,type.getSchemaNode());

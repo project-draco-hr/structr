@@ -1,8 +1,8 @@
 {
   final App app=StructrApp.getInstance();
   try (final Tx tx=app.tx()){
-    final String fileName=attributes.containsKey("name") ? (String)attributes.get("name") : "schema.json";
-    try (final Writer writer=new FileWriter(fileName)){
+    final File snapshotFile=locateFile(name,true);
+    try (final Writer writer=new FileWriter(snapshotFile)){
       final JsonSchema schema=StructrSchema.createFromDatabase(app);
       writer.append(schema.toString());
       writer.append("\n");

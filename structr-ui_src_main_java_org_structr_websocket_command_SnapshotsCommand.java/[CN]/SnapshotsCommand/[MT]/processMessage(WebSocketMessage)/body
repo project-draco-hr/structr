@@ -1,0 +1,39 @@
+{
+  final SecurityContext securityContext=getWebSocket().getSecurityContext();
+  final App app=StructrApp.getInstance(securityContext);
+  final Map<String,Object> data=webSocketData.getNodeData();
+  final String mode=(String)data.get("mode");
+  final String name=(String)data.get("name");
+  if (mode != null) {
+    final List<GraphObject> result=new LinkedList<>();
+switch (mode) {
+case "list":
+      final List<String> snapshots=SnapshotCommand.listSnapshots();
+    if (snapshots != null) {
+      final GraphObjectMap snapshotContainer=new GraphObjectMap();
+      snapshotContainer.put(snapshotsProperty,snapshots);
+      result.add(snapshotContainer);
+      webSocketData.setResult(result);
+      webSocketData.setRawResultCount(1);
+      getWebSocket().send(webSocketData,true);
+    }
+  break;
+default :
+final GraphObjectMap msg=new GraphObjectMap();
+result.add(msg);
+try {
+app.command(SnapshotCommand.class).execute(mode,name);
+msg.put(statusProperty,"success");
+}
+ catch (Throwable t) {
+msg.put(statusProperty,t.getMessage());
+}
+}
+webSocketData.setResult(result);
+webSocketData.setRawResultCount(1);
+getWebSocket().send(webSocketData,true);
+}
+ else {
+getWebSocket().send(MessageBuilder.status().code(422).message("Mode must be one of list, export, restore.").build(),true);
+}
+}

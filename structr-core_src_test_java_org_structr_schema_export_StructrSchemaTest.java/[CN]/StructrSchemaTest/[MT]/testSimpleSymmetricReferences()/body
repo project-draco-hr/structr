@@ -1,0 +1,14 @@
+{
+  try {
+    final JsonSchema sourceSchema=StructrSchema.createFromDatabase(app);
+    final JsonType project=sourceSchema.addType("Project");
+    final JsonType task=sourceSchema.addType("Task");
+    final JsonRelationship rel=project.relate(task,"has",OneToMany);
+    rel.setName("ProjectTasks");
+    compareSchemaRoundtrip(sourceSchema);
+  }
+ catch (  FrameworkException|InvalidSchemaException|URISyntaxException ex) {
+    ex.printStackTrace();
+    fail("Unexpected exception.");
+  }
+}

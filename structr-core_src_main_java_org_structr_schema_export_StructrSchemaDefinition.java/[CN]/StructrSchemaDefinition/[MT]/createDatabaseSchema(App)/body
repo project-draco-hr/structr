@@ -1,14 +1,13 @@
 {
   final Map<String,StructrTypeDefinition> typeDefinitions=getTypeDefinitions();
   for (  final StructrTypeDefinition type : typeDefinitions.values()) {
-    final SchemaNode schemaNode=app.create(SchemaNode.class,type.getName());
-    type.setSchemaNode(schemaNode);
+    type.setSchemaNode(type.createDatabaseNode(app));
   }
   for (  final StructrTypeDefinition type : typeDefinitions.values()) {
     final String extendsReference=type.getExtends();
     if (extendsReference != null) {
       final StructrDefinition def=resolveJsonPointer(extendsReference);
-      final SchemaNode schemaNode=type.getSchemaNode();
+      final AbstractSchemaNode schemaNode=type.getSchemaNode();
       if (def != null && def instanceof JsonType) {
         final JsonType jsonType=(JsonType)def;
         final String superclassName="org.structr.dynamic." + jsonType.getName();

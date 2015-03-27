@@ -5,20 +5,24 @@
  else {
     final PropertyMap properties=new PropertyMap();
     for (Iterator<PropertyKey> it=getPropertyKeys(uiView.name()).iterator(); it.hasNext(); ) {
-      PropertyKey key=it.next();
+      final PropertyKey key=it.next();
       if (key.equals(GraphObject.type) || (!key.isUnvalidated() && !key.equals(GraphObject.id) && !key.equals(DOMNode.ownerDocument)&& !key.equals(DOMNode.pageId)&& !key.equals(DOMNode.parent)&& !key.equals(DOMNode.parentId)&& !key.equals(DOMElement.syncedNodes)&& !key.equals(DOMNode.children)&& !key.equals(DOMNode.childrenIds))) {
         properties.put(key,getProperty(key));
       }
     }
     for (Iterator<PropertyKey> it=getPropertyKeys(DOMElement.htmlView.name()).iterator(); it.hasNext(); ) {
-      PropertyKey key=it.next();
+      final PropertyKey key=it.next();
       if (key.equals(GraphObject.type) || (!key.isUnvalidated() && !key.equals(GraphObject.id) && !key.equals(DOMNode.ownerDocument)&& !key.equals(DOMNode.pageId)&& !key.equals(DOMNode.parent)&& !key.equals(DOMNode.parentId)&& !key.equals(DOMElement.syncedNodes)&& !key.equals(DOMNode.children)&& !key.equals(DOMNode.childrenIds))) {
         properties.put(key,getProperty(key));
       }
     }
+    if (this instanceof LinkSource) {
+      final LinkSource linkSourceElement=(LinkSource)this;
+      properties.put(LinkSource.linkable,linkSourceElement.getProperty(LinkSource.linkable));
+    }
     final App app=StructrApp.getInstance(securityContext);
     try {
-      DOMNode node=app.create(getClass(),properties);
+      final DOMNode node=app.create(getClass(),properties);
       return node;
     }
  catch (    FrameworkException ex) {

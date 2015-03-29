@@ -7,7 +7,6 @@
     final ActionContext userActionContext=new ActionContext(userContext,null);
     try (final Tx tx=userApp.tx()){
       assertEquals("node should be of type TestOne","TestOne",Scripting.replaceVariables(userActionContext,t1,"${(get(this, 'type'))}"));
-      assertEquals("initially setting the type should work (may be a bug)","TestTwo",Scripting.replaceVariables(userActionContext,t1,"${(set(this, 'type', 'TestTwo'), get(this, 'type'))}"));
       try {
         assertEquals("setting the type should fail","TestTwo",Scripting.replaceVariables(userActionContext,t1,"${(set(this, 'type', 'TestThree'), get(this, 'type'))}"));
         fail("setting the a readonly property should fail");

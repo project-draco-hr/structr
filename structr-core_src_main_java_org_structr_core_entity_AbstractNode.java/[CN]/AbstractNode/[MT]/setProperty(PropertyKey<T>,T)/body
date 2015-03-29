@@ -1,16 +1,14 @@
 {
-  if (!isGranted(Permission.write,securityContext)) {
-    throw new FrameworkException(403,"Modification not permitted.");
+  try {
+    if (!isGranted(Permission.write,securityContext)) {
+      throw new FrameworkException(403,"Modification not permitted.");
+    }
+    T oldValue=getProperty(key);
+    if (((oldValue == null) && (value != null)) || ((oldValue != null) && !oldValue.equals(value))) {
+      setPropertyInternal(key,value);
+    }
   }
-  T oldValue=getProperty(key);
-  if ((oldValue == null) && (value == null)) {
-    return;
-  }
-  if ((oldValue == null) && (value != null)) {
-    setPropertyInternal(key,value);
-    return;
-  }
-  if ((oldValue != null) && !oldValue.equals(value)) {
-    setPropertyInternal(key,value);
+  finally {
+    this.readOnlyPropertiesUnlocked=false;
   }
 }

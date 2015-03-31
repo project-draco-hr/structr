@@ -77,8 +77,13 @@
     assertEquals("Invalid setProperty result for EnumProperty",testEnumType.getEnumConstants()[1],sourceNode.getProperty(testEnumProperty));
     sourceNode.invokeMethod("doTest03",Collections.EMPTY_MAP,true);
     assertEquals("Invalid setProperty result for EnumProperty",testEnumType.getEnumConstants()[2],sourceNode.getProperty(testEnumProperty));
-    sourceNode.invokeMethod("doTest04",Collections.EMPTY_MAP,true);
-    assertEquals("Invalid setProperty result for EnumProperty",testEnumType.getEnumConstants()[2],sourceNode.getProperty(testEnumProperty));
+    try {
+      sourceNode.invokeMethod("doTest04",Collections.EMPTY_MAP,true);
+      assertEquals("Invalid setProperty result for EnumProperty",testEnumType.getEnumConstants()[2],sourceNode.getProperty(testEnumProperty));
+      fail("Setting EnumProperty to invalid value should result in an Exception!");
+    }
+ catch (    FrameworkException fx) {
+    }
     sourceNode.invokeMethod("doTest05",Collections.EMPTY_MAP,true);
     assertEquals("Invalid setProperty result for BooleanProperty",true,sourceNode.getProperty(testBooleanProperty));
     assertEquals("Invalid setProperty result for IntegerProperty",123,sourceNode.getProperty(testIntegerProperty));

@@ -1,4 +1,5 @@
 {
   final Principal user=getCurrentUser();
-  return (user != null && (user.getProperty(Principal.isAdmin) || user.getProperty(User.backendUser)));
+  final boolean allowWSInFrontend=Boolean.parseBoolean(StructrApp.getConfigurationValue(Services.WEBSOCKET_FRONTEND_ACCESS,"false"));
+  return (user != null && (allowWSInFrontend || user.getProperty(Principal.isAdmin) || user.getProperty(User.backendUser)));
 }

@@ -1,11 +1,17 @@
 {
-  if (key.isReadOnly() || (key.isWriteOnce() && (dbRelationship != null) && dbRelationship.hasProperty(key.dbName()))) {
-    if (readOnlyPropertiesUnlocked || securityContext.isSuperUser()) {
-      readOnlyPropertiesUnlocked=false;
-    }
- else {
-      throw new FrameworkException(getClass().getSimpleName(),new ReadOnlyPropertyToken(key));
-    }
+  if (key == null) {
+    logger.log(Level.SEVERE,"Tried to set property with null key (action was denied)");
+    throw new FrameworkException(getClass().getSimpleName(),new NullArgumentToken(base));
   }
-  key.setProperty(securityContext,this,value);
+  try {
+    if (key.isReadOnly() || (key.isWriteOnce() && (dbRelationship != null) && dbRelationship.hasProperty(key.dbName()))) {
+      if (!readOnlyPropertiesUnlocked && !securityContext.isSuperUser()) {
+        throw new FrameworkException(getClass().getSimpleName(),new ReadOnlyPropertyToken(key));
+      }
+    }
+    key.setProperty(securityContext,this,value);
+  }
+  finally {
+    this.readOnlyPropertiesUnlocked=false;
+  }
 }

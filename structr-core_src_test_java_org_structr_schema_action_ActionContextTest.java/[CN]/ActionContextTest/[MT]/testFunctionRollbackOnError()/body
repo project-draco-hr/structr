@@ -1,0 +1,31 @@
+{
+  final ActionContext ctx=new ActionContext(securityContext,null);
+  TestOne t1=null;
+  try (final Tx tx=app.tx()){
+    t1=createTestNode(TestOne.class);
+    t1.setProperty(TestOne.aString,"InitialString");
+    t1.setProperty(TestOne.anInt,42);
+    tx.success();
+  }
+ catch (  FrameworkException ex) {
+    ex.printStackTrace();
+    fail("Unexpected exception");
+  }
+  try (final Tx tx=app.tx()){
+    Scripting.replaceVariables(ctx,t1,"${ ( set(this, 'aString', 'NewString'), set(this, 'anInt', 'error') ) }");
+    fail("StructrScript: setting anInt to 'error' should cause an Exception");
+    tx.success();
+  }
+ catch (  FrameworkException expected) {
+  }
+  try {
+    try (final Tx tx=app.tx()){
+      assertEquals("StructrScript: String should still have initial value!","InitialString",Scripting.replaceVariables(ctx,t1,"${(get(this, 'aString'))}"));
+      tx.success();
+    }
+   }
+ catch (  FrameworkException ex) {
+    ex.printStackTrace();
+    fail("Unexpected exception");
+  }
+}

@@ -1,11 +1,6 @@
 {
   final Map<String,Object> nodeData=webSocketData.getNodeData();
-  final String url=(String)nodeData.get("url");
   final String method=(String)nodeData.get("method");
-  final String data=(String)nodeData.get("data");
-  final Gson gson=new GsonBuilder().create();
-  final Map<String,Object> jsonData=gson.fromJson(data,Map.class);
-  final StructrWebSocket socket=this.getWebSocket();
   if (method == null || !(method.equals("POST") || method.equals("PUT"))) {
     logger.log(Level.WARNING,"Method not supported: {0}",method);
     getWebSocket().send(MessageBuilder.wrappedRest().code(422).message("Method not supported: " + method).build(),true);
@@ -22,6 +17,8 @@
   }
   final Map<Pattern,Class<? extends Resource>> resourceMap=new LinkedHashMap<>();
   resourceMap.putAll(resourceProvider.getResources());
+  final StructrWebSocket socket=this.getWebSocket();
+  final String url=(String)nodeData.get("url");
   final HttpServletRequest wrappedRequest=new HttpServletRequestWrapper(socket.getRequest()){
     @Override public Enumeration<String> getParameterNames(){
       return new IteratorEnumeration(getParameterMap().keySet().iterator());
@@ -62,6 +59,9 @@
     getWebSocket().send(MessageBuilder.wrappedRest().code(422).message("Illegal path for REST query").build(),true);
     return;
   }
+  final String data=(String)nodeData.get("data");
+  final Gson gson=new GsonBuilder().create();
+  final Map<String,Object> jsonData=gson.fromJson(data,Map.class);
   RestMethodResult result=null;
 switch (method) {
 case "PUT":

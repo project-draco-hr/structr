@@ -23,11 +23,13 @@
     }
     return extractedValue;
   }
- catch (  Throwable t) {
-    t.printStackTrace();
+ catch (  final FrameworkException fex) {
+    throw fex;
+  }
+catch (  final Throwable t) {
+    throw new FrameworkException(422,t.getMessage());
   }
  finally {
     Context.exit();
   }
-  return null;
 }

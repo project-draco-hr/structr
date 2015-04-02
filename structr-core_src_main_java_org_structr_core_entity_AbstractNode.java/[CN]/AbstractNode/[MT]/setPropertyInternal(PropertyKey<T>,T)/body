@@ -4,10 +4,7 @@
     throw new FrameworkException(getClass().getSimpleName(),new NullArgumentToken(base));
   }
   if (key.isReadOnly() || (key.isWriteOnce() && (dbNode != null) && dbNode.hasProperty(key.dbName()))) {
-    if (readOnlyPropertiesUnlocked || securityContext.isSuperUser()) {
-      readOnlyPropertiesUnlocked=false;
-    }
- else {
+    if (!readOnlyPropertiesUnlocked && !securityContext.isSuperUser()) {
       throw new FrameworkException(getClass().getSimpleName(),new ReadOnlyPropertyToken(key));
     }
   }

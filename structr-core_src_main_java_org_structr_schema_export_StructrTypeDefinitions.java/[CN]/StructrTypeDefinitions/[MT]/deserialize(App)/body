@@ -1,0 +1,17 @@
+{
+  for (  final SchemaNode schemaNode : app.nodeQuery(SchemaNode.class).getAsList()) {
+    final StructrTypeDefinition type=StructrTypeDefinition.deserialize(root,schemaNode);
+    if (type != null) {
+      typeDefinitions.add(type);
+    }
+  }
+  for (  final SchemaRelationshipNode schemaRelationship : app.nodeQuery(SchemaRelationshipNode.class).getAsList()) {
+    final StructrTypeDefinition type=StructrTypeDefinition.deserialize(root,schemaRelationship);
+    if (type != null) {
+      typeDefinitions.add(type);
+      if (type instanceof StructrRelationshipTypeDefinition) {
+        relationships.add((StructrRelationshipTypeDefinition)type);
+      }
+    }
+  }
+}

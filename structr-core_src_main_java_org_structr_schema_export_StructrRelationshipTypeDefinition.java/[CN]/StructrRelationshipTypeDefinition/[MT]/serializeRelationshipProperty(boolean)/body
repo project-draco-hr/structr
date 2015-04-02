@@ -1,0 +1,36 @@
+{
+  final Map<String,Object> map=new TreeMap<>();
+  final Map<String,Object> items=new TreeMap<>();
+  if (outgoing) {
+switch (cardinality) {
+case OneToOne:
+case ManyToOne:
+      map.put(JsonSchema.KEY_TYPE,"object");
+    map.put(JsonSchema.KEY_REFERENCE,root.toJsonPointer(targetType));
+  break;
+case OneToMany:
+case ManyToMany:
+map.put(JsonSchema.KEY_TYPE,"array");
+map.put(JsonSchema.KEY_ITEMS,items);
+items.put(JsonSchema.KEY_REFERENCE,root.toJsonPointer(targetType));
+break;
+}
+}
+ else {
+switch (cardinality) {
+case OneToOne:
+case OneToMany:
+map.put(JsonSchema.KEY_TYPE,"object");
+map.put(JsonSchema.KEY_REFERENCE,root.toJsonPointer(sourceType));
+break;
+case ManyToOne:
+case ManyToMany:
+map.put(JsonSchema.KEY_TYPE,"array");
+map.put(JsonSchema.KEY_ITEMS,items);
+items.put(JsonSchema.KEY_REFERENCE,root.toJsonPointer(sourceType));
+break;
+}
+}
+map.put(JsonSchema.KEY_LINK,root.toJsonPointer(getId()));
+return map;
+}

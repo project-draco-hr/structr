@@ -1,0 +1,30 @@
+{
+  final String sourceTypeName=getName();
+  final String relatedClassName=outgoing ? targetTypeName : sourceTypeName;
+  String _sourceMultiplicity=null;
+  String _targetMultiplicity=null;
+switch (cardinality) {
+case OneToOne:
+    _sourceMultiplicity="1";
+  _targetMultiplicity="1";
+break;
+case OneToMany:
+_sourceMultiplicity="1";
+_targetMultiplicity="*";
+break;
+case ManyToOne:
+_sourceMultiplicity="*";
+_targetMultiplicity="1";
+break;
+case ManyToMany:
+_sourceMultiplicity="*";
+_targetMultiplicity="*";
+break;
+}
+if (!outgoing) {
+final String tmp=_sourceMultiplicity;
+_sourceMultiplicity=_targetMultiplicity;
+_targetMultiplicity=tmp;
+}
+return SchemaRelationshipNode.getPropertyName(relatedClassName,root.getExistingPropertyNames(),outgoing,relationshipTypeName,sourceTypeName,targetTypeName,null,_targetMultiplicity,null,_sourceMultiplicity);
+}

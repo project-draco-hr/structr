@@ -1,0 +1,48 @@
+{
+  final Map<String,StructrPropertyDefinition> deserializedProperties=new TreeMap<>();
+  final StructrTypeDefinition typeDefinition=StructrTypeDefinition.determineType(root,name,source);
+  final Map<String,Object> properties=(Map)source.get(JsonSchema.KEY_PROPERTIES);
+  final List<String> requiredPropertyNames=(List)source.get(JsonSchema.KEY_REQUIRED);
+  final Map<String,Object> views=(Map)source.get(JsonSchema.KEY_VIEWS);
+  if (properties != null) {
+    for (    final Entry<String,Object> entry : properties.entrySet()) {
+      final String propertyName=entry.getKey();
+      final Object value=entry.getValue();
+      if (value instanceof Map) {
+        final StructrPropertyDefinition property=StructrPropertyDefinition.deserialize(typeDefinition,propertyName,(Map)value);
+        if (property != null) {
+          deserializedProperties.put(property.getName(),property);
+          typeDefinition.getProperties().add(property);
+        }
+      }
+ else {
+        throw new IllegalStateException("Invalid JSON property definition for property " + propertyName + ", expected object.");
+      }
+    }
+  }
+  if (requiredPropertyNames != null) {
+    for (    final String requiredPropertyName : requiredPropertyNames) {
+      final StructrPropertyDefinition property=deserializedProperties.get(requiredPropertyName);
+      if (property != null) {
+        property.setRequired(true);
+      }
+ else {
+        throw new IllegalStateException("Required property " + requiredPropertyName + " not defined for type "+ typeDefinition.getName()+ ".");
+      }
+    }
+  }
+  if (views != null) {
+    for (    final Entry<String,Object> entry : views.entrySet()) {
+      final String viewName=entry.getKey();
+      final Object value=entry.getValue();
+      if (value instanceof List) {
+        final Set<String> viewProperties=new TreeSet<>((List)value);
+        typeDefinition.getViews().put(viewName,viewProperties);
+      }
+ else {
+        throw new IllegalStateException("View definition " + viewName + " must be of type array.");
+      }
+    }
+  }
+  return typeDefinition;
+}

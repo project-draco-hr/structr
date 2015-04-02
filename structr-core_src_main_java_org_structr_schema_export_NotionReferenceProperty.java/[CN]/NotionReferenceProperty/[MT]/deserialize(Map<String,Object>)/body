@@ -1,0 +1,18 @@
+{
+  super.deserialize(source);
+  final Object propertiesValue=source.get(JsonSchema.KEY_PROPERTIES);
+  if (propertiesValue != null && propertiesValue instanceof List) {
+    this.properties.addAll((List)propertiesValue);
+  }
+  final String type=(String)source.get(JsonSchema.KEY_TYPE);
+  if ("object".equals(type)) {
+    reference=(String)source.get(JsonSchema.KEY_REFERENCE);
+  }
+ else   if ("array".equals(type)) {
+    final Object itemsValue=source.get(JsonSchema.KEY_ITEMS);
+    if (itemsValue != null && itemsValue instanceof Map) {
+      final Map<String,Object> items=(Map)itemsValue;
+      reference=(String)items.get(JsonSchema.KEY_REFERENCE);
+    }
+  }
+}

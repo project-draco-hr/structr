@@ -1,0 +1,15 @@
+{
+  super.deserialize(source);
+  final Object enumValues=source.get(JsonSchema.KEY_ENUM);
+  if (enumValues != null) {
+    if (enumValues instanceof List) {
+      enums.addAll((List)enumValues);
+    }
+ else {
+      throw new IllegalStateException("Invalid enum values for property " + name + ", expected array.");
+    }
+  }
+ else {
+    throw new IllegalStateException("Missing enum values for property " + name);
+  }
+}

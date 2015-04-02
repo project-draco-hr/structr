@@ -1,0 +1,38 @@
+{
+  super.deserialize(schemaNode);
+  final SchemaNode sourceNode=schemaNode.getProperty(SchemaRelationshipNode.sourceNode);
+  final SchemaNode targetNode=schemaNode.getProperty(SchemaRelationshipNode.targetNode);
+  final String sourceNodeType=sourceNode.getClassName();
+  final String targetNodeType=targetNode.getClassName();
+  this.sourceType=root.getId().resolve("definitions/" + sourceNodeType);
+  this.targetType=root.getId().resolve("definitions/" + targetNodeType);
+  this.relationshipType=schemaNode.getProperty(SchemaRelationshipNode.relationshipType);
+  this.sourcePropertyName=schemaNode.getProperty(SchemaRelationshipNode.sourceJsonName);
+  this.targetPropertyName=schemaNode.getProperty(SchemaRelationshipNode.targetJsonName);
+  final Long cascadingDeleteFlag=schemaNode.getProperty(SchemaRelationshipNode.cascadingDeleteFlag);
+  if (cascadingDeleteFlag != null) {
+    this.cascadingDelete=getCascadingString(cascadingDeleteFlag.intValue());
+  }
+  final Long cascadingCreateFlag=schemaNode.getProperty(SchemaRelationshipNode.autocreationFlag);
+  if (cascadingCreateFlag != null) {
+    this.cascadingCreate=getCascadingString(cascadingCreateFlag.intValue());
+  }
+  final String sourceMultiplicity=schemaNode.getProperty(SchemaRelationship.sourceMultiplicity);
+  final String targetMultiplicity=schemaNode.getProperty(SchemaRelationship.targetMultiplicity);
+  if ("1".equals(sourceMultiplicity)) {
+    if ("1".equals(targetMultiplicity)) {
+      this.cardinality=Cardinality.OneToOne;
+    }
+ else {
+      this.cardinality=Cardinality.OneToMany;
+    }
+  }
+ else {
+    if ("1".equals(targetMultiplicity)) {
+      this.cardinality=Cardinality.ManyToOne;
+    }
+ else {
+      this.cardinality=Cardinality.ManyToMany;
+    }
+  }
+}

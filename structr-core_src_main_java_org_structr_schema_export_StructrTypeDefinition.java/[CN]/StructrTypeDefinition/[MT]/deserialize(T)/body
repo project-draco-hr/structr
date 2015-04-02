@@ -1,0 +1,41 @@
+{
+  for (  final SchemaProperty property : schemaNode.getProperty(AbstractSchemaNode.schemaProperties)) {
+    final StructrPropertyDefinition propertyDefinition=StructrPropertyDefinition.deserialize(this,property);
+    if (propertyDefinition != null) {
+      properties.add(propertyDefinition);
+    }
+  }
+  for (  final SchemaView view : schemaNode.getProperty(AbstractSchemaNode.schemaViews)) {
+    final Set<String> propertySet=new TreeSet<>();
+    for (    final SchemaProperty property : view.getProperty(SchemaView.schemaProperties)) {
+      propertySet.add(property.getName());
+    }
+    final String nonGraphProperties=view.getProperty(SchemaView.nonGraphProperties);
+    if (nonGraphProperties != null) {
+      for (      final String property : nonGraphProperties.split("[, ]+")) {
+        final String trimmed=property.trim();
+        if (StringUtils.isNotBlank(trimmed)) {
+          propertySet.add(trimmed);
+        }
+      }
+    }
+    if (!propertySet.isEmpty()) {
+      views.put(view.getName(),propertySet);
+    }
+  }
+  for (  final SchemaMethod method : schemaNode.getProperty(AbstractSchemaNode.schemaMethods)) {
+    final String _name=method.getName();
+    final String _source=method.getProperty(SchemaMethod.source);
+    methods.put(_name,_source);
+  }
+  final String extendsClass=schemaNode.getProperty(SchemaNode.extendsClass);
+  if (extendsClass != null) {
+    final String typeName=extendsClass.substring(extendsClass.lastIndexOf(".") + 1);
+    if (extendsClass.startsWith("org.structr.dynamic.")) {
+      this.baseTypeReference=root.getId().resolve("definitions/" + typeName);
+    }
+ else {
+      this.baseTypeReference=StructrApp.getSchemaBaseURI().resolve("definitions/" + typeName);
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  final Map<String,SchemaProperty> schemaProperties=new TreeMap<>();
+  final T schemaNode=createSchemaNode(app);
+  for (  final StructrPropertyDefinition property : properties) {
+    final SchemaProperty schemaProperty=property.createDatabaseSchema(app,schemaNode);
+    if (schemaProperty != null) {
+      schemaProperties.put(schemaProperty.getName(),schemaProperty);
+    }
+  }
+  for (  final Entry<String,Set<String>> view : views.entrySet()) {
+    final List<SchemaProperty> viewProperties=new LinkedList<>();
+    final List<String> nonGraphProperties=new LinkedList<>();
+    for (    final String propertyName : view.getValue()) {
+      final SchemaProperty property=schemaProperties.get(propertyName);
+      if (property != null) {
+        viewProperties.add(property);
+      }
+ else {
+        nonGraphProperties.add(propertyName);
+      }
+    }
+    app.create(SchemaView.class,new NodeAttribute(SchemaView.schemaNode,schemaNode),new NodeAttribute(AbstractNode.name,view.getKey()),new NodeAttribute(SchemaView.schemaProperties,viewProperties),new NodeAttribute(SchemaView.nonGraphProperties,StringUtils.join(nonGraphProperties,", ")));
+  }
+  for (  final Entry<String,String> method : methods.entrySet()) {
+    app.create(SchemaMethod.class,new NodeAttribute(SchemaMethod.schemaNode,schemaNode),new NodeAttribute(AbstractNode.name,method.getKey()),new NodeAttribute(SchemaMethod.source,method.getValue()));
+  }
+  if (baseTypeReference != null) {
+    final Object def=root.resolveURI(baseTypeReference);
+    if (def != null && def instanceof JsonType) {
+      final JsonType jsonType=(JsonType)def;
+      final String superclassName="org.structr.dynamic." + jsonType.getName();
+      schemaNode.setProperty(SchemaNode.extendsClass,superclassName);
+    }
+ else {
+      final Class superclass=StructrApp.resolveSchemaId(baseTypeReference);
+      if (superclass != null) {
+        schemaNode.setProperty(SchemaNode.extendsClass,superclass.getName());
+      }
+    }
+  }
+  return schemaNode;
+}

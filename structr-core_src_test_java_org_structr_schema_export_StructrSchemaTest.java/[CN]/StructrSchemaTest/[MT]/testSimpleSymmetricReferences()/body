@@ -1,10 +1,28 @@
 {
   try {
     final JsonSchema sourceSchema=StructrSchema.createFromDatabase(app);
-    final JsonType project=sourceSchema.addType("Project");
-    final JsonType task=sourceSchema.addType("Task");
-    final JsonRelationship rel=project.relate(task,"has",OneToMany);
+    final JsonObjectType project=sourceSchema.addType("Project");
+    final JsonObjectType task=sourceSchema.addType("Task");
+    final JsonReferenceType rel=project.relate(task,"has",Cardinality.OneToMany,"project","tasks");
     rel.setName("ProjectTasks");
+    final String schema=sourceSchema.toString();
+    System.out.println(schema);
+    final Map<String,Object> map=new GsonBuilder().create().fromJson(schema,Map.class);
+    testMapPathValue(map,"definitions.Project.type","object");
+    testMapPathValue(map,"definitions.Project.properties.tasks.$link","#/definitions/ProjectTasks");
+    testMapPathValue(map,"definitions.Project.properties.tasks.items.$ref","#/definitions/Task");
+    testMapPathValue(map,"definitions.Project.properties.tasks.type","array");
+    testMapPathValue(map,"definitions.ProjectTasks.$source","#/definitions/Project");
+    testMapPathValue(map,"definitions.ProjectTasks.$target","#/definitions/Task");
+    testMapPathValue(map,"definitions.ProjectTasks.cardinality","OneToMany");
+    testMapPathValue(map,"definitions.ProjectTasks.rel","has");
+    testMapPathValue(map,"definitions.ProjectTasks.sourceName","project");
+    testMapPathValue(map,"definitions.ProjectTasks.targetName","tasks");
+    testMapPathValue(map,"definitions.ProjectTasks.type","object");
+    testMapPathValue(map,"definitions.Task.type","object");
+    testMapPathValue(map,"definitions.Task.properties.project.$link","#/definitions/ProjectTasks");
+    testMapPathValue(map,"definitions.Task.properties.project.$ref","#/definitions/Project");
+    testMapPathValue(map,"definitions.Task.properties.project.type","object");
     compareSchemaRoundtrip(sourceSchema);
   }
  catch (  FrameworkException|InvalidSchemaException|URISyntaxException ex) {

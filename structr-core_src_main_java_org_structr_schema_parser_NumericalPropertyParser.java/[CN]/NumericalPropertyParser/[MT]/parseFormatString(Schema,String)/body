@@ -6,11 +6,13 @@
       final String range=expression.substring(1,expression.length() - 1);
       final String[] parts=range.split(",+");
       if (parts.length == 2) {
-        Number lowerBound=parseNumber(getErrorBuffer(),parts[0].trim(),"lower");
-        Number upperBound=parseNumber(getErrorBuffer(),parts[1].trim(),"upper");
+        lowerBound=parseNumber(getErrorBuffer(),parts[0].trim(),"lower");
+        upperBound=parseNumber(getErrorBuffer(),parts[1].trim(),"upper");
         if (lowerBound == null || upperBound == null) {
           error=true;
         }
+        lowerExclusive=expression.startsWith("]");
+        upperExclusive=expression.endsWith("[");
       }
  else {
         error=true;

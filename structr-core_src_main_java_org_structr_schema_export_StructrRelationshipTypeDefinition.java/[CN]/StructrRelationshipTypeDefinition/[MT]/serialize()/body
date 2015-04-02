@@ -1,0 +1,22 @@
+{
+  final Map<String,Object> map=super.serialize();
+  map.put(JsonSchema.KEY_RELATIONSHIP,relationshipType);
+  map.put(JsonSchema.KEY_LINK_SOURCE,root.toJsonPointer(sourceType));
+  map.put(JsonSchema.KEY_LINK_TARGET,root.toJsonPointer(targetType));
+  map.put(JsonSchema.KEY_SOURCE_NAME,sourcePropertyName);
+  map.put(JsonSchema.KEY_TARGET_NAME,targetPropertyName);
+  final Map<String,Object> cascade=new TreeMap<>();
+  if (cascadingCreate != null) {
+    cascade.put(JsonSchema.KEY_CREATE,cascadingCreate.name());
+  }
+  if (cascadingDelete != null) {
+    cascade.put(JsonSchema.KEY_DELETE,cascadingDelete.name());
+  }
+  if (!cascade.isEmpty()) {
+    map.put(JsonSchema.KEY_CASCADE,cascade);
+  }
+  if (cardinality != null && !Cardinality.ManyToMany.equals(cardinality)) {
+    map.put(JsonSchema.KEY_CARDINALITY,cardinality.name());
+  }
+  return map;
+}

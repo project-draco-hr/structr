@@ -1,0 +1,26 @@
+{
+  final Map<String,Object> map=super.serialize();
+  Map<String,Object> serializedProperties=(Map)map.get(JsonSchema.KEY_PROPERTIES);
+  if (serializedProperties == null) {
+    serializedProperties=new TreeMap<>();
+    map.put(JsonSchema.KEY_PROPERTIES,serializedProperties);
+  }
+  for (  final StructrRelationshipTypeDefinition rel : root.getRelationships()) {
+    if (getId().equals(rel.getSourceType())) {
+      final Map<String,Object> property=rel.serializeRelationshipProperty(true);
+      if (property != null) {
+        serializedProperties.put(rel.getTargetPropertyName(),property);
+      }
+    }
+    if (getId().equals(rel.getTargetType())) {
+      final Map<String,Object> property=rel.serializeRelationshipProperty(false);
+      if (property != null) {
+        serializedProperties.put(rel.getSourcePropertyName(),property);
+      }
+    }
+  }
+  if (serializedProperties.isEmpty()) {
+    map.remove(JsonSchema.KEY_PROPERTIES);
+  }
+  return map;
+}

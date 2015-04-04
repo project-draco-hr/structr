@@ -14,14 +14,6 @@
       final String value=propertyContainer.getProperty(rawViewName).toString();
       final String[] parts=value.split("[,\\s]+");
       final String viewName=rawViewName.substring(2);
-      Set<String> view=views.get(viewName);
-      if (view == null) {
-        view=new LinkedHashSet<>();
-        views.put(viewName,view);
-      }
- else {
-        view.clear();
-      }
       if (entity instanceof AbstractSchemaNode) {
         final List<String> nonGraphProperties=new LinkedList<>();
         final List<SchemaProperty> properties=new LinkedList<>();
@@ -56,9 +48,6 @@
       if (view == null) {
         view=new LinkedHashSet<>();
         views.put(viewName,view);
-      }
- else {
-        view.clear();
       }
       for (      final SchemaProperty property : schemaView.getProperty(SchemaView.schemaProperties)) {
         if (property.getProperty(SchemaProperty.isBuiltinProperty) && !property.getProperty(SchemaProperty.isDynamic)) {

@@ -1,0 +1,19 @@
+{
+  final String[] parts=mapPath.split("[\\.]+");
+  Object current=map;
+  for (int i=0; i < parts.length; i++) {
+    final String part=parts[i];
+    if (StringUtils.isNumeric(part)) {
+      int index=Integer.valueOf(part);
+      if (current instanceof List) {
+        current=((List)current).get(index);
+      }
+    }
+ else {
+      if (current instanceof Map) {
+        current=((Map)current).get(part);
+      }
+    }
+  }
+  assertEquals("Invalid map path result for " + mapPath,value,current);
+}

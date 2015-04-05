@@ -6,12 +6,14 @@
   try (final Tx tx=app.tx()){
     itemNode=app.create(SchemaNode.class,new NodeAttribute(SchemaNode.name,"Item"));
     final PropertyMap properties=new PropertyMap();
-    properties.put(SchemaRelationship.relationshipType,"CHILD");
-    properties.put(SchemaRelationship.sourceMultiplicity,"1");
-    properties.put(SchemaRelationship.targetMultiplicity,"*");
-    properties.put(SchemaRelationship.sourceJsonName,"parentItem");
-    properties.put(SchemaRelationship.targetJsonName,"children");
-    app.create(itemNode,itemNode,SchemaRelationship.class,properties);
+    properties.put(SchemaRelationshipNode.sourceId,itemNode.getUuid());
+    properties.put(SchemaRelationshipNode.targetId,itemNode.getUuid());
+    properties.put(SchemaRelationshipNode.relationshipType,"CHILD");
+    properties.put(SchemaRelationshipNode.sourceMultiplicity,"1");
+    properties.put(SchemaRelationshipNode.targetMultiplicity,"*");
+    properties.put(SchemaRelationshipNode.sourceJsonName,"parentItem");
+    properties.put(SchemaRelationshipNode.targetJsonName,"children");
+    app.create(SchemaRelationshipNode.class,properties);
     tx.success();
   }
  catch (  FrameworkException fex) {

@@ -1,0 +1,41 @@
+{
+  try {
+    final JsonSchema sourceSchema=StructrSchema.createFromDatabase(app);
+    final String instanceId=app.getInstanceId();
+    final JsonObjectType task=sourceSchema.addType("Task");
+    final JsonProperty title=task.addStringProperty("title","public","ui").setRequired(true);
+    final JsonProperty desc=task.addStringProperty("description","public","ui").setRequired(true);
+    task.addScriptProperty("displayName","public","ui").setSource("this.name");
+    task.addScriptProperty("javascript","public","ui").setSource("{ var x = 'test'; return x; }").setContentType("text/javascript");
+    final JsonObjectType project=sourceSchema.addType("Project");
+    project.addStringProperty("name","public","ui").setRequired(true);
+    final JsonReferenceType projectTasks=project.relate(task,"HAS",Cardinality.OneToMany,"project","tasks");
+    projectTasks.setCascadingCreate(Cascade.targetToSource);
+    project.getViewPropertyNames("public").add("tasks");
+    task.getViewPropertyNames("public").add("project");
+    project.addEnumProperty("status","ui").setEnums("active","planned","finished");
+    final JsonObjectType worker=sourceSchema.addType("Worker");
+    final JsonReferenceType workerTasks=worker.relate(task,"HAS",Cardinality.OneToMany,"worker","tasks");
+    workerTasks.setCascadingDelete(Cascade.sourceToTarget);
+    final JsonReferenceProperty workerProperty=workerTasks.getSourceProperty();
+    final JsonReferenceProperty tasksProperty=workerTasks.getTargetProperty();
+    tasksProperty.setName("renamedTasks");
+    worker.addReferenceProperty("taskNames",tasksProperty,"public","ui").setProperties("name");
+    worker.addReferenceProperty("taskInfos",tasksProperty,"public","ui").setProperties("id","name");
+    worker.addReferenceProperty("taskErrors",tasksProperty,"public","ui");
+    task.addReferenceProperty("workerName",workerProperty,"public","ui").setProperties("name");
+    task.addReferenceProperty("workerNotion",workerProperty,"public","ui");
+    project.addDateProperty("startDate","public","ui");
+    project.addMethod("onCreate","set(this, 'name', 'wurst')");
+    assertEquals("Invalid schema URI","https://structr.org/schema/" + instanceId + "/#",sourceSchema.getId().toString());
+    assertEquals("Invalid schema URI","https://structr.org/schema/" + instanceId + "/definitions/Task",task.getId().toString());
+    assertEquals("Invalid schema URI","https://structr.org/schema/" + instanceId + "/definitions/Task/properties/title",title.getId().toString());
+    assertEquals("Invalid schema URI","https://structr.org/schema/" + instanceId + "/definitions/Task/properties/description",desc.getId().toString());
+    assertEquals("Invalid schema URI","https://structr.org/schema/" + instanceId + "/definitions/Worker/properties/renamedTasks",tasksProperty.getId().toString());
+    compareSchemaRoundtrip(sourceSchema);
+  }
+ catch (  Exception ex) {
+    ex.printStackTrace();
+    fail("Unexpected exception.");
+  }
+}

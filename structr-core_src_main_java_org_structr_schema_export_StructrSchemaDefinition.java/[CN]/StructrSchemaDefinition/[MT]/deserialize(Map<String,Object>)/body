@@ -1,0 +1,13 @@
+{
+  final Map<String,Object> definitions=(Map<String,Object>)source.get(JsonSchema.KEY_DEFINITIONS);
+  if (definitions != null) {
+    typeDefinitions.deserialize(definitions);
+  }
+ else {
+    throw new IllegalStateException("Invalid JSON object for schema definitions, missing value for 'definitions'.");
+  }
+  final Object idValue=source.get(JsonSchema.KEY_ID);
+  if (idValue != null) {
+    this.id=URI.create(idValue.toString());
+  }
+}

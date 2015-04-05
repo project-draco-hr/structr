@@ -1,0 +1,64 @@
+{
+  final String propertyType=(String)source.get(JsonSchema.KEY_TYPE);
+  StructrPropertyDefinition newProperty=null;
+  if (propertyType != null) {
+    final boolean isDate=source.containsKey(JsonSchema.KEY_FORMAT) && "date-time".equals(source.get(JsonSchema.KEY_FORMAT));
+    final boolean isEnum=source.containsKey(JsonSchema.KEY_ENUM);
+switch (propertyType) {
+case "string":
+      if (isDate) {
+        newProperty=new StructrDateProperty(parent,name);
+      }
+ else       if (isEnum) {
+        newProperty=new StructrEnumProperty(parent,name);
+      }
+ else {
+        newProperty=new StructrStringProperty(parent,name);
+      }
+    break;
+case "script":
+  newProperty=new StructrScriptProperty(parent,name);
+break;
+case "boolean":
+newProperty=new StructrBooleanProperty(parent,name);
+break;
+case "number":
+newProperty=new StructrNumberProperty(parent,name);
+break;
+case "integer":
+newProperty=new StructrIntegerProperty(parent,name);
+break;
+case "long":
+newProperty=new StructrLongProperty(parent,name);
+break;
+case "object":
+if (source.containsKey(JsonSchema.KEY_REFERENCE) && !source.containsKey(JsonSchema.KEY_LINK)) {
+final Object reference=source.get(JsonSchema.KEY_REFERENCE);
+if (reference != null && reference instanceof String) {
+final String refName=StructrPropertyDefinition.getPropertyNameFromJsonPointer(reference.toString());
+newProperty=new NotionReferenceProperty(parent,name,(String)source.get(JsonSchema.KEY_REFERENCE),"object",refName);
+}
+}
+break;
+case "array":
+if (!source.containsKey(JsonSchema.KEY_LINK)) {
+final Map<String,Object> items=(Map)source.get(JsonSchema.KEY_ITEMS);
+if (items != null && items.containsKey(JsonSchema.KEY_REFERENCE)) {
+final Object reference=items.get(JsonSchema.KEY_REFERENCE);
+if (reference != null && reference instanceof String) {
+final String refName=StructrPropertyDefinition.getPropertyNameFromJsonPointer(reference.toString());
+newProperty=new NotionReferenceProperty(parent,name,(String)source.get(JsonSchema.KEY_REFERENCE),"array",refName);
+}
+}
+}
+break;
+}
+}
+ else {
+throw new IllegalStateException("Property " + name + " has no type.");
+}
+if (newProperty != null) {
+newProperty.deserialize(source);
+}
+return newProperty;
+}

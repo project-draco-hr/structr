@@ -1,0 +1,16 @@
+{
+  final URI pointer=id.relativize(uri);
+  if (!pointer.isAbsolute()) {
+    final String jsonPointer=pointer.toString();
+    if (jsonPointer.startsWith("#/")) {
+      return jsonPointer;
+    }
+ else     if (jsonPointer.startsWith("/")) {
+      return "#" + jsonPointer;
+    }
+ else {
+      return "#/" + jsonPointer;
+    }
+  }
+  return pointer.toString();
+}

@@ -1,0 +1,16 @@
+{
+  final Object source=root.resolveURI(uri);
+  if (source != null && source instanceof StructrTypeDefinition) {
+    return (SchemaNode)((StructrTypeDefinition)source).getSchemaNode();
+  }
+ else {
+    final URI rel=StructrApp.getSchemaBaseURI().relativize(uri);
+    if (rel.isAbsolute()) {
+      final Class type=StructrApp.resolveSchemaId(uri);
+      if (type != null) {
+        return app.nodeQuery(SchemaNode.class).andName(type.getSimpleName()).getFirst();
+      }
+    }
+  }
+  return null;
+}

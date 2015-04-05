@@ -28,15 +28,15 @@
   if (queryTime != null) {
     writer.name("query_time").value(queryTime);
   }
-  if (resultCount != null) {
+  if (resultCount != null && renderResultCount) {
     writer.name("result_count").value(resultCount);
   }
   if (results != null) {
     if (results.isEmpty()) {
-      writer.name("result").beginArray().endArray();
+      writer.name(resultKeyName).beginArray().endArray();
     }
  else     if (result.isPrimitiveArray()) {
-      writer.name("result").beginArray();
+      writer.name(resultKeyName).beginArray();
       for (      GraphObject graphObject : results) {
         Object value=graphObject.getProperty(GraphObject.id);
         if (value != null) {
@@ -52,7 +52,7 @@
       long startTime=System.currentTimeMillis();
       String localPropertyView=propertyView.get(null);
       if (result.isCollection()) {
-        writer.name("result").beginArray();
+        writer.name(resultKeyName).beginArray();
         for (        GraphObject graphObject : results) {
           root.serialize(writer,graphObject,localPropertyView,0);
           if (System.currentTimeMillis() > startTime + MAX_SERIALIZATION_TIME) {
@@ -63,7 +63,7 @@
         writer.endArray();
       }
  else {
-        writer.name("result");
+        writer.name(resultKeyName);
         root.serialize(writer,results.get(0),localPropertyView,0);
       }
     }
@@ -82,7 +82,9 @@
     writer.name("meta_data");
     root.serialize(writer,metaData,localPropertyView,0);
   }
-  writer.name("serialization_time").value(decimalFormat.format((System.nanoTime() - t0) / 1000000000.0));
+  if (renderSerializationTime) {
+    writer.name("serialization_time").value(decimalFormat.format((System.nanoTime() - t0) / 1000000000.0));
+  }
   writer.endObject();
   writer.endDocument();
 }

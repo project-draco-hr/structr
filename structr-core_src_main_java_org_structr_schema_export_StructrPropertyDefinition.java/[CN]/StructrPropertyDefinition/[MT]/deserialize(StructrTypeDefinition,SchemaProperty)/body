@@ -1,0 +1,67 @@
+{
+  final String parentName=parent.getName();
+  final Type type=property.getPropertyType();
+  final String name=property.getName();
+switch (type) {
+case Function:
+    final StructrScriptProperty func=new StructrScriptProperty(parent,name);
+  func.deserialize(property);
+return func;
+case Cypher:
+final StructrScriptProperty cypher=new StructrScriptProperty(parent,name);
+cypher.deserialize(property);
+cypher.setContentType("text/cypher");
+return cypher;
+case Notion:
+final String referenceName=property.getNotionBaseProperty();
+;
+final String reference="#/definitions/" + parentName + "/properties/"+ referenceName;
+final Set<String> notionProperties=property.getPropertiesForNotionProperty();
+final NotionReferenceProperty notionProperty;
+if (property.getNotionMultiplicity().startsWith("*")) {
+notionProperty=new NotionReferenceProperty(parent,name,reference,"array",referenceName);
+notionProperty.setProperties(notionProperties.toArray(new String[0]));
+}
+ else {
+notionProperty=new NotionReferenceProperty(parent,name,reference,"object",referenceName);
+notionProperty.setProperties(notionProperties.toArray(new String[0]));
+}
+notionProperty.deserialize(property);
+return notionProperty;
+case String:
+final StructrStringProperty str=new StructrStringProperty(parent,name);
+str.deserialize(property);
+str.setDefaultValue(property.getDefaultValue());
+return str;
+case Boolean:
+final StructrBooleanProperty bool=new StructrBooleanProperty(parent,name);
+bool.deserialize(property);
+return bool;
+case Count:
+final StructrIntegerProperty count=new StructrIntegerProperty(parent,name);
+count.deserialize(property);
+return count;
+case Integer:
+final StructrIntegerProperty intProperty=new StructrIntegerProperty(parent,name);
+intProperty.deserialize(property);
+return intProperty;
+case Long:
+final StructrLongProperty longProperty=new StructrLongProperty(parent,name);
+longProperty.deserialize(property);
+return longProperty;
+case Double:
+final StructrNumberProperty doubleProperty=new StructrNumberProperty(parent,name);
+doubleProperty.deserialize(property);
+return doubleProperty;
+case Date:
+final StructrStringProperty date=new StructrStringProperty(parent,name);
+date.deserialize(property);
+date.setFormat(JsonSchema.FORMAT_DATE_TIME);
+return date;
+case Enum:
+final StructrEnumProperty enumProperty=new StructrEnumProperty(parent,name);
+enumProperty.deserialize(property);
+return enumProperty;
+}
+throw new IllegalStateException("Unknown type " + type);
+}

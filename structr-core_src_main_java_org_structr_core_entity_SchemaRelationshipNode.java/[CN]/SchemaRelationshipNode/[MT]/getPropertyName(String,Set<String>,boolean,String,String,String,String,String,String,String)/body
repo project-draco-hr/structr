@@ -1,0 +1,38 @@
+{
+  String propertyName="";
+  if (outgoing) {
+    if (_targetJsonName != null) {
+      propertyName=_targetJsonName;
+    }
+ else {
+      if ("1".equals(_targetMultiplicity)) {
+        propertyName=CaseHelper.toLowerCamelCase(relationshipTypeName) + CaseHelper.toUpperCamelCase(_targetType);
+      }
+ else {
+        propertyName=CaseHelper.plural(CaseHelper.toLowerCamelCase(relationshipTypeName) + CaseHelper.toUpperCamelCase(_targetType));
+      }
+    }
+  }
+ else {
+    if (_sourceJsonName != null) {
+      propertyName=_sourceJsonName;
+    }
+ else {
+      if ("1".equals(_sourceMultiplicity)) {
+        propertyName=CaseHelper.toLowerCamelCase(_sourceType) + CaseHelper.toUpperCamelCase(relationshipTypeName);
+      }
+ else {
+        propertyName=CaseHelper.plural(CaseHelper.toLowerCamelCase(_sourceType) + CaseHelper.toUpperCamelCase(relationshipTypeName));
+      }
+    }
+  }
+  if (existingPropertyNames.contains(propertyName)) {
+    propertyName+=outgoing ? "Out" : "In";
+    int i=0;
+    while (existingPropertyNames.contains(propertyName)) {
+      propertyName+=++i;
+    }
+  }
+  existingPropertyNames.add(propertyName);
+  return propertyName;
+}

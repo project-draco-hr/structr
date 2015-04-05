@@ -1,0 +1,23 @@
+{
+  final Map<String,Object> serializedForm=new TreeMap<>();
+  final Map<String,Object> serializedProperties=new TreeMap<>();
+  for (  final StructrPropertyDefinition property : properties) {
+    serializedProperties.put(property.getName(),property.serialize());
+  }
+  serializedForm.put(JsonSchema.KEY_TYPE,"object");
+  if (!serializedProperties.isEmpty()) {
+    serializedForm.put(JsonSchema.KEY_PROPERTIES,serializedProperties);
+  }
+  final Set<String> requiredProperties=getRequiredProperties();
+  if (!requiredProperties.isEmpty()) {
+    serializedForm.put(JsonSchema.KEY_REQUIRED,requiredProperties);
+  }
+  if (!views.isEmpty()) {
+    serializedForm.put(JsonSchema.KEY_VIEWS,views);
+  }
+  final URI ext=getExtends();
+  if (ext != null) {
+    serializedForm.put(JsonSchema.KEY_EXTENDS,root.toJsonPointer(ext));
+  }
+  return serializedForm;
+}

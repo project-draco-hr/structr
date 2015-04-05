@@ -1,13 +1,15 @@
 {
-  if (dbRelationship.hasProperty(allowed.dbName())) {
-    String[] allowedProperties=(String[])dbRelationship.getProperty(allowed.dbName());
-    if (allowedProperties != null) {
-      for (      String p : allowedProperties) {
-        if (p.equals(permission.name())) {
-          return true;
-        }
-      }
+  final Set<String> permissionSet=SecurityDelegate.getPermissionSet(dbRelationship,Security.allowed);
+  final Principal principal=getSourceNode();
+  if (principal != null) {
+    final Set<String> allowedPermissions=SecurityDelegate.getPermissionSet(principal.getNode(),Principal.allowed);
+    final Set<String> deniedPermissions=SecurityDelegate.getPermissionSet(principal.getNode(),Principal.allowed);
+    if (allowedPermissions != null) {
+      permissionSet.addAll(allowedPermissions);
+    }
+    if (deniedPermissions != null) {
+      permissionSet.removeAll(deniedPermissions);
     }
   }
-  return false;
+  return permissionSet.contains(permission.name());
 }

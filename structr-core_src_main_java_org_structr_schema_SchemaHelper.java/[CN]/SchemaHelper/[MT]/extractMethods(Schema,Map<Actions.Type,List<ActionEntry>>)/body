@@ -1,0 +1,32 @@
+{
+  final PropertyContainer propertyContainer=entity.getPropertyContainer();
+  final StringBuilder src=new StringBuilder();
+  for (  final String rawActionName : getActions(propertyContainer)) {
+    if (propertyContainer.hasProperty(rawActionName)) {
+      final String value=propertyContainer.getProperty(rawActionName).toString();
+      if (entity instanceof AbstractSchemaNode) {
+        final AbstractSchemaNode schemaNode=(AbstractSchemaNode)entity;
+        final App app=StructrApp.getInstance();
+        final String methodName=rawActionName.substring(3);
+        if (app.nodeQuery(SchemaMethod.class).and(SchemaMethod.schemaNode,schemaNode).and(AbstractNode.name,methodName).getFirst() == null) {
+          app.create(SchemaMethod.class,new NodeAttribute<>(SchemaMethod.schemaNode,schemaNode),new NodeAttribute<>(SchemaMethod.name,methodName),new NodeAttribute<>(SchemaMethod.source,value));
+          schemaNode.removeProperty(new StringProperty(rawActionName));
+        }
+      }
+    }
+  }
+  final List<SchemaMethod> schemaMethods=entity.getSchemaMethods();
+  if (schemaMethods != null) {
+    for (    final SchemaMethod schemaMethod : schemaMethods) {
+      final ActionEntry entry=schemaMethod.getActionEntry();
+      List<ActionEntry> actionList=actions.get(entry.getType());
+      if (actionList == null) {
+        actionList=new LinkedList<>();
+        actions.put(entry.getType(),actionList);
+      }
+      actionList.add(entry);
+      Collections.sort(actionList);
+    }
+  }
+  return src.toString();
+}

@@ -1,0 +1,22 @@
+{
+  final App app=StructrApp.getInstance();
+  try (final Tx tx=app.tx()){
+    if (fileName != null) {
+      final File snapshotFile=locateFile(fileName,false);
+      try (final Reader reader=new FileReader(snapshotFile)){
+        final JsonSchema schema=StructrSchema.createFromSource(reader);
+        StructrSchema.replaceDatabaseSchema(app,schema);
+      }
+ catch (      InvalidSchemaException iex) {
+        throw new FrameworkException(422,iex.getMessage());
+      }
+    }
+ else {
+      throw new FrameworkException(422,"Please supply schema name to import.");
+    }
+    tx.success();
+  }
+ catch (  IOException|URISyntaxException ioex) {
+    ioex.printStackTrace();
+  }
+}

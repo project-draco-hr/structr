@@ -1,0 +1,19 @@
+{
+  final SchemaProperty property=super.createDatabaseSchema(app,schemaNode);
+  final String contentType=getContentType();
+  if (contentType != null) {
+switch (contentType) {
+case "text/javascript":
+case "text/structrscript":
+      property.setProperty(SchemaProperty.propertyType,Type.Function.name());
+    break;
+case "text/cypher":
+  property.setProperty(SchemaProperty.propertyType,Type.Cypher.name());
+}
+}
+ else {
+property.setProperty(SchemaProperty.propertyType,Type.Function.name());
+}
+property.setProperty(SchemaProperty.format,source);
+return property;
+}

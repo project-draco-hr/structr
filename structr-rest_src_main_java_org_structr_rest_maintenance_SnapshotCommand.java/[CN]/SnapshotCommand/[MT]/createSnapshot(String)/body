@@ -1,0 +1,16 @@
+{
+  final App app=StructrApp.getInstance();
+  try (final Tx tx=app.tx()){
+    final File snapshotFile=locateFile(name,true);
+    try (final Writer writer=new FileWriter(snapshotFile)){
+      final JsonSchema schema=StructrSchema.createFromDatabase(app);
+      writer.append(schema.toString());
+      writer.append("\n");
+      writer.flush();
+    }
+     tx.success();
+  }
+ catch (  IOException|URISyntaxException ioex) {
+    ioex.printStackTrace();
+  }
+}

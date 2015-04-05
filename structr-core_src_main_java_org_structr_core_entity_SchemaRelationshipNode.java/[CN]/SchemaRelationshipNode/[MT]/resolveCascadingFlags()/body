@@ -1,0 +1,38 @@
+{
+  final Long cascadingDelete=getProperty(SchemaRelationshipNode.cascadingDeleteFlag);
+  final Long autoCreate=getProperty(SchemaRelationshipNode.autocreationFlag);
+  final Map<String,Object> cascade=new TreeMap<>();
+  if (cascadingDelete != null) {
+switch (cascadingDelete.intValue()) {
+case Relation.SOURCE_TO_TARGET:
+      cascade.put(JsonSchema.KEY_DELETE,JsonSchema.Cascade.sourceToTarget.name());
+    break;
+case Relation.TARGET_TO_SOURCE:
+  cascade.put(JsonSchema.KEY_DELETE,JsonSchema.Cascade.targetToSource.name());
+break;
+case Relation.ALWAYS:
+cascade.put(JsonSchema.KEY_DELETE,JsonSchema.Cascade.always.name());
+break;
+case Relation.CONSTRAINT_BASED:
+cascade.put(JsonSchema.KEY_DELETE,JsonSchema.Cascade.constraintBased.name());
+break;
+}
+}
+if (autoCreate != null) {
+switch (autoCreate.intValue()) {
+case Relation.SOURCE_TO_TARGET:
+cascade.put(JsonSchema.KEY_CREATE,JsonSchema.Cascade.sourceToTarget.name());
+break;
+case Relation.TARGET_TO_SOURCE:
+cascade.put(JsonSchema.KEY_CREATE,JsonSchema.Cascade.targetToSource.name());
+break;
+case Relation.ALWAYS:
+cascade.put(JsonSchema.KEY_CREATE,JsonSchema.Cascade.always.name());
+break;
+case Relation.CONSTRAINT_BASED:
+cascade.put(JsonSchema.KEY_CREATE,JsonSchema.Cascade.constraintBased.name());
+break;
+}
+}
+return cascade;
+}

@@ -1,0 +1,14 @@
+{
+  final AbstractSchemaNode parent=getProperty(SchemaProperty.schemaNode);
+  if (parent != null) {
+    for (    final SchemaView view : parent.getProperty(AbstractSchemaNode.schemaViews)) {
+      if (PropertyView.Ui.equals(view.getName())) {
+        final Set<SchemaProperty> properties=new LinkedHashSet<>(view.getProperty(SchemaView.schemaProperties));
+        properties.add(this);
+        view.setProperty(SchemaView.schemaProperties,new LinkedList<>(properties));
+        break;
+      }
+    }
+  }
+  return super.onCreation(securityContext,errorBuffer);
+}

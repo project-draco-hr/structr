@@ -1,0 +1,33 @@
+{
+  buf.append("\tpublic static final Property<").append(getValueType()).append("> ").append(SchemaHelper.cleanPropertyName(source.getPropertyName())).append("Property");
+  buf.append(" = new ").append(getPropertyType()).append("(\"").append(source.getPropertyName()).append("\"");
+  if (StringUtils.isNotBlank(source.getDbName())) {
+    buf.append(", \"").append(source.getDbName()).append("\"");
+  }
+  buf.append(getPropertyParameters());
+  buf.append(localValidator);
+  buf.append(")");
+  if (StringUtils.isNotBlank(source.getContentType())) {
+    buf.append(".contentType(\"").append(source.getContentType()).append("\")");
+  }
+  if (StringUtils.isNotBlank(source.getDefaultValue())) {
+    buf.append(".defaultValue(").append(getDefaultValue()).append(")");
+  }
+  if (StringUtils.isNotBlank(source.getFormat())) {
+    buf.append(".format(\"").append(StringEscapeUtils.escapeJava(source.getFormat())).append("\")");
+  }
+  if (source.isUnique()) {
+    buf.append(".unique()");
+  }
+  if (source.isNotNull()) {
+    buf.append(".notNull()");
+  }
+  if (StringUtils.isNotBlank(source.getDefaultValue())) {
+    buf.append(".indexedWhenEmpty()");
+  }
+ else {
+    buf.append(".indexed()");
+  }
+  buf.append(".dynamic()");
+  buf.append(";\n");
+}

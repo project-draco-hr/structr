@@ -1,0 +1,57 @@
+{
+  super.deserialize(source);
+  final Object relValue=source.get(JsonSchema.KEY_RELATIONSHIP);
+  if (relValue != null && relValue instanceof String) {
+    this.relationshipType=relValue.toString();
+  }
+  final Object sourceValue=source.get(JsonSchema.KEY_LINK_SOURCE);
+  if (sourceValue != null && sourceValue instanceof String) {
+    String sourceURI=sourceValue.toString();
+    if (sourceURI.startsWith("#/")) {
+      sourceURI=sourceURI.substring(2);
+    }
+    this.sourceType=root.getId().resolve(URI.create(sourceURI));
+  }
+  final Object targetValue=source.get(JsonSchema.KEY_LINK_TARGET);
+  if (targetValue != null && targetValue instanceof String) {
+    String targetURI=targetValue.toString();
+    if (targetURI.startsWith("#/")) {
+      targetURI=targetURI.substring(2);
+    }
+    this.targetType=root.getId().resolve(URI.create(targetURI));
+  }
+  final Object cardinalityValue=source.get(JsonSchema.KEY_CARDINALITY);
+  if (cardinalityValue != null) {
+    this.cardinality=Cardinality.valueOf(cardinalityValue.toString());
+  }
+ else {
+    this.cardinality=Cardinality.ManyToMany;
+  }
+  final Object sourceNameValue=source.get(JsonSchema.KEY_SOURCE_NAME);
+  if (sourceNameValue != null) {
+    this.sourcePropertyName=sourceNameValue.toString();
+  }
+  final Object targetNameValue=source.get(JsonSchema.KEY_TARGET_NAME);
+  if (targetNameValue != null) {
+    this.targetPropertyName=targetNameValue.toString();
+  }
+  final Object cascadeObject=source.get(JsonSchema.KEY_CASCADE);
+  if (cascadeObject != null) {
+    if (cascadeObject instanceof Map) {
+      final Map<String,Object> cascade=(Map)cascadeObject;
+      if (cascade != null) {
+        final Object deleteValue=cascade.get(JsonSchema.KEY_DELETE);
+        if (deleteValue != null && deleteValue instanceof String) {
+          this.cascadingDelete=Cascade.valueOf(deleteValue.toString());
+        }
+        final Object createValue=cascade.get(JsonSchema.KEY_CREATE);
+        if (createValue != null && createValue instanceof String) {
+          this.cascadingCreate=Cascade.valueOf(createValue.toString());
+        }
+      }
+    }
+ else {
+      throw new IllegalStateException("Invalid JSON source for cascade, expected object.");
+    }
+  }
+}

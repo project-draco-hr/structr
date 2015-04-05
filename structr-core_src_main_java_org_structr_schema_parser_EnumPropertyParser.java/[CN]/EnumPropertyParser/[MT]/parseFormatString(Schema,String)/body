@@ -1,7 +1,7 @@
 {
   final String[] enumTypes=expression.split("[, ]+");
   if (StringUtils.isNotBlank(expression) && enumTypes.length > 0) {
-    enumTypeName=StringUtils.capitalize(propertyName);
+    enumTypeName=StringUtils.capitalize(getSourcePropertyName());
     enumType=", " + enumTypeName + ".class";
     final StringBuilder buf=new StringBuilder();
     buf.append("\n\tpublic enum ").append(enumTypeName).append(" {\n\t\t");
@@ -14,13 +14,13 @@
         }
       }
  else {
-        errorBuffer.add(SchemaNode.class.getSimpleName(),new InvalidPropertySchemaToken(expression,"invalid_property_definition","Invalid enum type name, must match [a-zA-Z_]+."));
+        reportError(SchemaNode.class.getSimpleName(),new InvalidPropertySchemaToken(expression,"invalid_property_definition","Invalid enum type name, must match [a-zA-Z_]+."));
       }
     }
     buf.append("\n\t};");
-    enumDefinitions.add(buf.toString());
+    addEnumDefinition(buf.toString());
   }
  else {
-    errorBuffer.add(SchemaNode.class.getSimpleName(),new InvalidPropertySchemaToken(expression,"invalid_property_definition","No enum types found, please specify a list of types, e.g. (red, green, blue)"));
+    reportError(SchemaNode.class.getSimpleName(),new InvalidPropertySchemaToken(expression,"invalid_property_definition","No enum types found, please specify a list of types, e.g. (red, green, blue)"));
   }
 }

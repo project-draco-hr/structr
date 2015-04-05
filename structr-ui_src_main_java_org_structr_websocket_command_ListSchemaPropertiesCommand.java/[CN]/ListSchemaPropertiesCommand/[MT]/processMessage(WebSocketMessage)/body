@@ -1,0 +1,51 @@
+{
+  final String view=(String)webSocketData.getNodeData().get("view");
+  final String id=webSocketData.getId();
+  final List<GraphObject> result=new LinkedList();
+  if (view != null) {
+    if (id != null) {
+      AbstractNode schemaObject=getNode(id);
+      if (schemaObject != null) {
+        final ConfigurationProvider config=StructrApp.getConfiguration();
+        final String typeName=schemaObject.getProperty(AbstractNode.name);
+        Class type=config.getNodeEntityClass(typeName);
+        if (type == null) {
+          type=config.getRelationshipEntityClass(typeName);
+        }
+        if (type != null) {
+          final Set<PropertyKey> allProperties=config.getPropertySet(type,PropertyView.All);
+          final Set<PropertyKey> viewProperties=config.getPropertySet(type,view);
+          final Set<PropertyKey> parentProperties=config.getPropertySet(type.getSuperclass(),view);
+          for (          final PropertyKey key : allProperties) {
+            final String propertyName=key.jsonName();
+            final GraphObjectMap property=new GraphObjectMap();
+            boolean _isDisabled=false;
+            if (parentProperties.contains(key)) {
+              _isDisabled=true;
+            }
+            property.put(AbstractNode.name,propertyName);
+            property.put(isSelected,viewProperties.contains(key));
+            property.put(isDisabled,_isDisabled);
+            result.add(property);
+          }
+        }
+ else {
+          getWebSocket().send(MessageBuilder.status().code(404).message("Type " + typeName + " not found.").build(),true);
+        }
+      }
+ else {
+        getWebSocket().send(MessageBuilder.status().code(404).message("Schema node with ID " + id + " not found.").build(),true);
+      }
+    }
+ else {
+      getWebSocket().send(MessageBuilder.status().code(422).message("LIST_SCHEMA_PROPERTIES needs an ID.").build(),true);
+    }
+  }
+ else {
+    getWebSocket().send(MessageBuilder.status().code(422).message("LIST_SCHEMA_PROPERTIES needs a view name in nodeData.").build(),true);
+  }
+  webSocketData.setView(PropertyView.Ui);
+  webSocketData.setResult(result);
+  webSocketData.setRawResultCount(1);
+  getWebSocket().send(webSocketData,true);
+}

@@ -1,0 +1,83 @@
+{
+  final PropertyContainer propertyContainer=entity.getPropertyContainer();
+  final ConfigurationProvider config=StructrApp.getConfiguration();
+  final StringBuilder src=new StringBuilder();
+  Class superClass=config.getNodeEntityClass(entity.getSuperclassName());
+  if (superClass == null) {
+    superClass=config.getRelationshipEntityClass(entity.getSuperclassName());
+  }
+  if (superClass == null) {
+    superClass=AbstractNode.class;
+  }
+  for (  final String rawViewName : getViews(propertyContainer)) {
+    if (!rawViewName.startsWith("___") && propertyContainer.hasProperty(rawViewName)) {
+      final String value=propertyContainer.getProperty(rawViewName).toString();
+      final String[] parts=value.split("[,\\s]+");
+      final String viewName=rawViewName.substring(2);
+      if (entity instanceof AbstractSchemaNode) {
+        final List<String> nonGraphProperties=new LinkedList<>();
+        final List<SchemaProperty> properties=new LinkedList<>();
+        final AbstractSchemaNode schemaNode=(AbstractSchemaNode)entity;
+        final App app=StructrApp.getInstance();
+        if (app.nodeQuery(SchemaView.class).and(SchemaView.schemaNode,schemaNode).and(AbstractNode.name,viewName).getFirst() == null) {
+          for (int i=0; i < parts.length; i++) {
+            String propertyName=parts[i].trim();
+            while (propertyName.startsWith("_")) {
+              propertyName=propertyName.substring(1);
+            }
+            final SchemaProperty propertyNode=app.nodeQuery(SchemaProperty.class).and(SchemaProperty.schemaNode,schemaNode).andName(propertyName).getFirst();
+            if (propertyNode != null) {
+              properties.add(propertyNode);
+            }
+ else {
+              nonGraphProperties.add(propertyName);
+            }
+          }
+          app.create(SchemaView.class,new NodeAttribute<>(SchemaView.schemaNode,schemaNode),new NodeAttribute<>(SchemaView.schemaProperties,properties),new NodeAttribute<>(SchemaView.name,viewName),new NodeAttribute<>(SchemaView.nonGraphProperties,StringUtils.join(nonGraphProperties,",")));
+          schemaNode.removeProperty(new StringProperty(rawViewName));
+        }
+      }
+    }
+  }
+  final List<SchemaView> schemaViews=entity.getSchemaViews();
+  if (schemaViews != null) {
+    for (    final SchemaView schemaView : schemaViews) {
+      final String nonGraphProperties=schemaView.getProperty(SchemaView.nonGraphProperties);
+      final String viewName=schemaView.getName();
+      Set<String> view=views.get(viewName);
+      if (view == null) {
+        view=new LinkedHashSet<>();
+        views.put(viewName,view);
+      }
+      for (      final SchemaProperty property : schemaView.getProperty(SchemaView.schemaProperties)) {
+        if (property.getProperty(SchemaProperty.isBuiltinProperty) && !property.getProperty(SchemaProperty.isDynamic)) {
+          view.add(property.getPropertyName());
+        }
+ else {
+          view.add(property.getPropertyName() + "Property");
+        }
+      }
+      if (StringUtils.isNotBlank(nonGraphProperties)) {
+        for (        final String propertyName : nonGraphProperties.split("[, ]+")) {
+          String extendedPropertyName=propertyName;
+          if (superClass != null) {
+            final PropertyKey property=config.getPropertyKeyForJSONName(superClass,propertyName,false);
+            if (property != null) {
+              if (property.isDynamic()) {
+                extendedPropertyName=extendedPropertyName + "Property";
+              }
+            }
+ else {
+              extendedPropertyName=extendedPropertyName + "Property";
+            }
+          }
+ else {
+            extendedPropertyName=extendedPropertyName + "Property";
+          }
+          view.add(extendedPropertyName);
+        }
+      }
+    }
+  }
+  return src.toString();
+}

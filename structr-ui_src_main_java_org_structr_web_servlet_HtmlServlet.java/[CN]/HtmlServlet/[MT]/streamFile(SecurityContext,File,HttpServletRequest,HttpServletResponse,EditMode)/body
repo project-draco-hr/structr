@@ -13,33 +13,43 @@
     out.close();
   }
  else {
-    final InputStream in=file.getInputStream();
-    final String contentType=file.getContentType();
-    if (contentType != null) {
-      response.setContentType(contentType);
+    final String downloadAsDataUrl=request.getParameter(DOWNLOAD_AS_DATA_URL_KEY);
+    if (downloadAsDataUrl != null) {
+      IOUtils.write(FileHelper.getBase64String(file),out);
+      response.setContentType("text/plain");
+      response.setStatus(HttpServletResponse.SC_OK);
+      out.flush();
+      out.close();
     }
  else {
-      response.setContentType("application/octet-stream");
-    }
-    response.setStatus(HttpServletResponse.SC_OK);
-    try {
-      IOUtils.copy(in,out);
-    }
- catch (    Throwable t) {
-    }
- finally {
-      if (out != null) {
-        try {
-          out.flush();
-          out.close();
-        }
- catch (        Throwable t) {
-        }
+      final InputStream in=file.getInputStream();
+      final String contentType=file.getContentType();
+      if (contentType != null) {
+        response.setContentType(contentType);
       }
-      if (in != null) {
-        in.close();
+ else {
+        response.setContentType("application/octet-stream");
       }
       response.setStatus(HttpServletResponse.SC_OK);
+      try {
+        IOUtils.copy(in,out);
+      }
+ catch (      Throwable t) {
+      }
+ finally {
+        if (out != null) {
+          try {
+            out.flush();
+            out.close();
+          }
+ catch (          Throwable t) {
+          }
+        }
+        if (in != null) {
+          in.close();
+        }
+        response.setStatus(HttpServletResponse.SC_OK);
+      }
     }
   }
 }

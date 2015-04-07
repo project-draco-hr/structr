@@ -19,13 +19,22 @@
           for (          final PropertyKey key : allProperties) {
             final String propertyName=key.jsonName();
             final GraphObjectMap property=new GraphObjectMap();
+            final Class valueType=key.valueType();
+            String valueTypeName="Unknown";
             boolean _isDisabled=false;
+            if (valueType != null) {
+              valueTypeName=valueType.getSimpleName();
+            }
             if (parentProperties.contains(key)) {
               _isDisabled=true;
             }
             property.put(AbstractNode.name,propertyName);
             property.put(isSelected,viewProperties.contains(key));
             property.put(isDisabled,_isDisabled);
+            property.put(SchemaProperty.propertyType,valueTypeName);
+            property.put(SchemaProperty.notNull,key.isNotNull());
+            property.put(SchemaProperty.unique,key.isUnique());
+            property.put(SchemaProperty.isDynamic,key.isDynamic());
             result.add(property);
           }
         }

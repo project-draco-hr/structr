@@ -4,6 +4,17 @@
   final AbstractNode obj=getNode(webSocketData.getId());
   if (obj != null) {
     final App app=StructrApp.getInstance(securityContext);
+    try (final Tx tx=app.tx()){
+      if (!(obj.isGranted(Permission.delete,getWebSocket().getSecurityContext()))) {
+        logger.log(Level.WARNING,"No delete permission for {0} on {1}",new Object[]{getWebSocket().getCurrentUser().toString(),obj.toString()});
+        getWebSocket().send(MessageBuilder.status().message("No delete permission").code(400).build(),true);
+        tx.success();
+        return;
+      }
+    }
+ catch (    FrameworkException ex) {
+      ex.printStackTrace();
+    }
     if (Boolean.TRUE.equals(recursive)) {
       try {
         final List<AbstractNode> filteredResults=new LinkedList();

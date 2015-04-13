@@ -30,9 +30,14 @@
     final String methodName=typeResource.getRawType();
     if (entity != null && entityType != null && methodName != null) {
       final Object obj=entity.invokeMethod(methodName,propertySet,true);
-      final RestMethodResult result=new RestMethodResult(200);
-      unwrapTo(obj,result);
-      return result;
+      if (obj instanceof RestMethodResult) {
+        return (RestMethodResult)obj;
+      }
+ else {
+        final RestMethodResult result=new RestMethodResult(200);
+        unwrapTo(obj,result);
+        return result;
+      }
     }
   }
   throw new IllegalPathException();

@@ -1,0 +1,39 @@
+{
+  boolean existingUser=false;
+  if (propertySet.containsKey(User.eMail.jsonName())) {
+    final Principal user;
+    final String emailString=(String)propertySet.get(User.eMail.jsonName());
+    if (StringUtils.isEmpty(emailString)) {
+      return new RestMethodResult(HttpServletResponse.SC_BAD_REQUEST);
+    }
+    localeString=(String)propertySet.get(MailTemplate.locale.jsonName());
+    confKey=UUID.randomUUID().toString();
+    Result result=StructrApp.getInstance().nodeQuery(User.class).and(User.eMail,emailString).getResult();
+    if (!result.isEmpty()) {
+      final App app=StructrApp.getInstance(securityContext);
+      user=(Principal)result.get(0);
+      user.setProperty(User.confirmationKey,confKey);
+      existingUser=true;
+    }
+ else {
+      return new RestMethodResult(HttpServletResponse.SC_OK);
+    }
+    if (user != null) {
+      if (!sendResetPasswordLink(user,propertySet)) {
+        return new RestMethodResult(HttpServletResponse.SC_BAD_REQUEST);
+      }
+      if (existingUser) {
+        return new RestMethodResult(HttpServletResponse.SC_OK);
+      }
+ else {
+        return new RestMethodResult(HttpServletResponse.SC_CREATED);
+      }
+    }
+ else {
+      return new RestMethodResult(HttpServletResponse.SC_BAD_REQUEST);
+    }
+  }
+ else {
+    return new RestMethodResult(HttpServletResponse.SC_BAD_REQUEST);
+  }
+}

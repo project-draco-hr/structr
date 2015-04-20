@@ -7,9 +7,12 @@
       AbstractNode schemaObject=getNode(id);
       if (schemaObject != null) {
         final ConfigurationProvider config=StructrApp.getConfiguration();
-        final String typeName=schemaObject.getProperty(AbstractNode.name);
+        String typeName=schemaObject.getProperty(AbstractNode.name);
+        if (typeName == null && schemaObject instanceof SchemaRelationshipNode) {
+          typeName=((SchemaRelationshipNode)schemaObject).getClassName();
+        }
         Class type=config.getNodeEntityClass(typeName);
-        if (type == null) {
+        if (type == null || GenericNode.class.equals(type)) {
           type=config.getRelationshipEntityClass(typeName);
         }
         if (type != null) {

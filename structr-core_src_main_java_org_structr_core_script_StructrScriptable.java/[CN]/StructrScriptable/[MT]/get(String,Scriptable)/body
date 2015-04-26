@@ -81,9 +81,40 @@
     }
 ,null,0,0);
   }
-  final Function<Object,Object> function=Functions.functions.get(CaseHelper.toUnderscore(name,false));
-  if (function != null) {
-    return new IdFunctionObject(new FunctionWrapper(function),null,0,0);
+  if ("call".equals(name)) {
+    return new IdFunctionObject(new IdFunctionCall(){
+      @Override public Object execIdCall(      final IdFunctionObject info,      final Context context,      final Scriptable scope,      final Scriptable thisObject,      final Object[] parameters){
+        try {
+          if (parameters.length > 0) {
+            final String methodName=parameters[0].toString();
+switch (parameters.length) {
+case 0:
+              break;
+case 1:
+            return Actions.call(methodName);
+case 2:
+          if (parameters[1] instanceof Map) {
+            return Actions.call(methodName,(Map)parameters[1]);
+          }
+ else {
+            return Actions.call(methodName,parameters[1]);
+          }
+default :
+        return Actions.call(methodName,Arrays.copyOfRange(parameters,1,parameters.length));
+    }
   }
-  return null;
+}
+ catch (FrameworkException fex) {
+  fex.printStackTrace();
+}
+return null;
+}
+}
+,null,0,0);
+}
+final Function<Object,Object> function=Functions.functions.get(CaseHelper.toUnderscore(name,false));
+if (function != null) {
+return new IdFunctionObject(new FunctionWrapper(function),null,0,0);
+}
+return null;
 }

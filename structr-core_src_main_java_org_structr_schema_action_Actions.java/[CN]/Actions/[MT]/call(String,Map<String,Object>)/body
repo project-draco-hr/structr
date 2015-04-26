@@ -1,0 +1,34 @@
+{
+  final Integer depth=recursionDetection.get();
+  if (depth > 100) {
+    logger.log(Level.WARNING,"Deep recursion (>100 levels) detected, aborting.");
+    return null;
+  }
+ else {
+    recursionDetection.set(depth + 1);
+  }
+  final SecurityContext superUserContext=SecurityContext.getSuperUserInstance();
+  final App app=StructrApp.getInstance(superUserContext);
+  final List<SchemaMethod> methods=app.nodeQuery(SchemaMethod.class).andName(key).getAsList();
+  if (methods.isEmpty()) {
+    logger.log(Level.INFO,"Tried to call method {0} but no SchemaMethod entity was found.",key);
+  }
+ else {
+    for (    final SchemaMethod method : methods) {
+      final AbstractSchemaNode entity=method.getProperty(SchemaMethod.schemaNode);
+      if (entity == null) {
+        final String source=method.getProperty(SchemaMethod.source);
+        if (source != null) {
+          return Actions.execute(superUserContext,null,"${" + source + "}",parameters);
+        }
+ else {
+          logger.log(Level.INFO,"Schema method {0} has no source code, will NOT be executed.",key);
+        }
+      }
+ else {
+        logger.log(Level.INFO,"Schema method {0} is attached to an entity, will NOT be executed.",key);
+      }
+    }
+  }
+  return null;
+}

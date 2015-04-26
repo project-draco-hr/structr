@@ -1,4 +1,6 @@
 {
+  final String entityName=entity != null ? entity.getProperty(AbstractNode.name) : null;
+  final String entityDescription=entity != null ? (StringUtils.isNotBlank(entityName) ? "\"" + entityName + "\":" : "") + entity.getUuid() : "anonymous";
   final Context scriptingContext=Context.enter();
   try {
     scriptingContext.setLanguageVersion(Context.VERSION_1_2);
@@ -7,7 +9,7 @@
     scriptable.setParentScope(scope);
     scope.put("Structr",scope,scriptable);
     actionContext.clear();
-    Object extractedValue=scriptingContext.evaluateString(scope,embedInFunction(script),"script source [" + (!((NodeInterface)entity).getName().equals("") ? "\"" + ((NodeInterface)entity).getName() + "\":" : "") + entity.getUuid()+ "], line ",1,null);
+    Object extractedValue=scriptingContext.evaluateString(scope,embedInFunction(script),"script source [" + entityDescription + "], line ",1,null);
     if (scriptable.hasException()) {
       throw scriptable.getException();
     }

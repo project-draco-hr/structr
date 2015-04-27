@@ -37,6 +37,24 @@
     }
   }
 );
+  final String configForOwnerlessNodes=this.structrConf.getProperty(Services.APPLICATION_SECURITY_OWNERLESS_NODES,"read");
+  if (StringUtils.isNotBlank(configForOwnerlessNodes)) {
+    for (    final String permission : configForOwnerlessNodes.split("[, ]+")) {
+      final String trimmed=permission.trim();
+      if (StringUtils.isNotBlank(trimmed)) {
+        final Permission val=Permissions.valueOf(trimmed);
+        if (val != null) {
+          permissionsForOwnerlessNodes.add(val);
+        }
+ else {
+          logger.log(Level.WARNING,"Invalid permisson {0}, ignoring.",trimmed);
+        }
+      }
+    }
+  }
+ else {
+    permissionsForOwnerlessNodes.add(Permission.read);
+  }
   logger.log(Level.INFO,"Initialization complete");
   initializationDone=true;
 }

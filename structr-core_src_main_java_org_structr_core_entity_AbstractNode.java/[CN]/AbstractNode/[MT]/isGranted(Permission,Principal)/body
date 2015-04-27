@@ -10,14 +10,12 @@
   }
   final Principal owner=getOwnerNode();
   final boolean hasOwner=(owner != null);
-  if (!hasOwner) {
-    if (Permission.read.equals(permission)) {
-      if (accessingUser != null && isVisibleToAuthenticatedUsers()) {
-        return true;
-      }
-      if (accessingUser == null && isVisibleToPublicUsers()) {
-        return true;
-      }
+  if (!hasOwner && Services.getPermissionsForOwnerlessNodes().contains(permission)) {
+    if (accessingUser != null && isVisibleToAuthenticatedUsers()) {
+      return true;
+    }
+    if (accessingUser == null && isVisibleToPublicUsers()) {
+      return true;
     }
   }
   if (hasOwner && accessingUser == null) {

@@ -9,18 +9,24 @@
       user.setProperty(User.confirmationKey,confKey);
     }
  else     if (autoCreate) {
+      final App app=StructrApp.getInstance(securityContext);
       propertySet.remove(credentialKey.jsonName());
-      propertySet.remove(User.name.jsonName());
       propertySet.remove(User.confirmationKey.jsonName());
       PropertyMap props=PropertyMap.inputTypeToJavaType(securityContext,Principal.class,propertySet);
+      final String customAttributesString=User.eMail.jsonName().concat(",").concat(Services.getInstance().getConfigurationValue(CUSTOM_ATTRIBUTES));
+      final List<String> customAttributes=Arrays.asList(customAttributesString.split("[ ,]+"));
+      final Set<PropertyKey> propsToRemove=new HashSet<>();
+      for (      final PropertyKey key : props.keySet()) {
+        if (!customAttributes.contains(key.jsonName())) {
+          propsToRemove.add(key);
+        }
+      }
+      for (      final PropertyKey propToRemove : propsToRemove) {
+        props.remove(propToRemove);
+      }
       props.put(credentialKey,credentialValue);
-      props.put(User.name,credentialValue);
       props.put(User.confirmationKey,confKey);
-      props.remove(Principal.isAdmin);
-      props.remove(Principal.ownedNodes);
-      props.remove(Principal.salt);
-      props.remove(Principal.sessionIds);
-      user=(Principal)StructrApp.getInstance(securityContext).create(userClass,props);
+      user=(Principal)app.create(userClass,props);
     }
   }
  catch (  FrameworkException ex) {

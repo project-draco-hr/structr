@@ -8,15 +8,14 @@
     }
     localeString=(String)propertySet.get(MailTemplate.locale.jsonName());
     confKey=UUID.randomUUID().toString();
-    Result result=StructrApp.getInstance().nodeQuery(User.class).and(User.eMail,emailString).getResult();
+    final Result result=StructrApp.getInstance().nodeQuery(User.class).and(User.eMail,emailString).getResult();
     if (!result.isEmpty()) {
-      final App app=StructrApp.getInstance(securityContext);
       user=(Principal)result.get(0);
       user.setProperty(User.confirmationKey,confKey);
       existingUser=true;
     }
  else {
-      Authenticator auth=securityContext.getAuthenticator();
+      final Authenticator auth=securityContext.getAuthenticator();
       user=createUser(securityContext,User.eMail,emailString,propertySet,auth.getUserAutoCreate(),auth.getUserClass());
     }
     if (user != null) {

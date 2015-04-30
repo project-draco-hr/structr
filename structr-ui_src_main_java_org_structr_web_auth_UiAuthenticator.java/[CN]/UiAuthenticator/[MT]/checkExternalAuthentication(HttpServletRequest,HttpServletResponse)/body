@@ -1,14 +1,14 @@
 {
-  String path=PathHelper.clean(request.getPathInfo());
-  String[] uriParts=PathHelper.getParts(path);
+  final String path=PathHelper.clean(request.getPathInfo());
+  final String[] uriParts=PathHelper.getParts(path);
   logger.log(Level.FINE,"Checking external authentication ...");
   if (uriParts == null || uriParts.length != 3 || !("oauth".equals(uriParts[0]))) {
     logger.log(Level.FINE,"Incorrect URI parts for OAuth process, need /oauth/<name>/<action>");
     return null;
   }
-  String name=uriParts[1];
-  String action=uriParts[2];
-  StructrOAuthClient oauthServer=StructrOAuthClient.getServer(name);
+  final String name=uriParts[1];
+  final String action=uriParts[2];
+  final StructrOAuthClient oauthServer=StructrOAuthClient.getServer(name);
   if (oauthServer == null) {
     logger.log(Level.FINE,"No OAuth2 authentication server configured for {0}",path);
     return null;
@@ -23,8 +23,8 @@
     }
   }
  else   if ("auth".equals(action)) {
-    String accessToken=oauthServer.getAccessToken(request);
-    SecurityContext superUserContext=SecurityContext.getSuperUserInstance();
+    final String accessToken=oauthServer.getAccessToken(request);
+    final SecurityContext superUserContext=SecurityContext.getSuperUserInstance();
     if (accessToken != null) {
       logger.log(Level.FINE,"Got access token {0}",accessToken);
       String value=oauthServer.getCredential(request);

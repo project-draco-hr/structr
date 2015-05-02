@@ -1,0 +1,13 @@
+{
+  final SecurityContext securityContext=getWebSocket().getSecurityContext();
+  final App app=StructrApp.getInstance(securityContext);
+  try (final Tx tx=app.tx()){
+    final GraphObject graphObject=(GraphObject)app.get(id);
+    tx.success();
+    return graphObject;
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"Unable to get graph object",fex);
+  }
+  return null;
+}

@@ -1,10 +1,10 @@
 {
-  AbstractNode node=getNode(webSocketData.getId());
+  final GraphObject obj=getGraphObject(webSocketData.getId());
   String key=(String)webSocketData.getNodeData().get("key");
-  if (node != null) {
-    PropertyKey propertyKey=StructrApp.getConfiguration().getPropertyKeyForJSONName(node.getClass(),key);
+  if (obj != null) {
+    PropertyKey propertyKey=StructrApp.getConfiguration().getPropertyKeyForJSONName(obj.getClass(),key);
     PropertyConverter converter=propertyKey.inputConverter(getWebSocket().getSecurityContext());
-    Object value=node.getProperty(propertyKey);
+    Object value=obj.getProperty(propertyKey);
     if (converter != null) {
       try {
         value=converter.revert(value);

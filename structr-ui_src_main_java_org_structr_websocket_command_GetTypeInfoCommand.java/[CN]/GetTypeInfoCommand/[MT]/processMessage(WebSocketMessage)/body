@@ -1,0 +1,21 @@
+{
+  final String type=(String)webSocketData.getNodeData().get("type");
+  if (type == null) {
+    logger.log(Level.WARNING,"Node type given not found");
+    getWebSocket().send(MessageBuilder.status().code(400).build(),true);
+  }
+  final SecurityContext securityContext=getWebSocket().getSecurityContext();
+  final App app=StructrApp.getInstance(securityContext);
+  final SchemaNode typeNode;
+  try {
+    typeNode=app.nodeQuery(SchemaNode.class).andName(type).getFirst();
+    if (typeNode != null) {
+      webSocketData.setResult(Arrays.asList(typeNode));
+      getWebSocket().send(webSocketData,true);
+    }
+  }
+ catch (  FrameworkException ex) {
+    logger.log(Level.SEVERE,null,ex);
+    getWebSocket().send(MessageBuilder.status().code(500).build(),true);
+  }
+}

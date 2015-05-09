@@ -1,0 +1,26 @@
+{
+  final Map<String,Object> properties=webSocketData.getRelData();
+  final String sourceId=(String)properties.get("sourceId");
+  final String targetId=(String)properties.get("targetId");
+  final String relType=(String)properties.get("relType");
+  final AbstractNode sourceNode=getNode(sourceId);
+  final AbstractNode targetNode=getNode(targetId);
+  if ((sourceNode != null) && (targetNode != null)) {
+    final SecurityContext securityContext=getWebSocket().getSecurityContext();
+    final App app=StructrApp.getInstance(securityContext);
+    try {
+      final Class relationClass=StructrApp.getConfiguration().getRelationClassForCombinedType(sourceNode.getType(),relType,targetNode.getType());
+      final RelationshipInterface rel=app.create(sourceNode,targetNode,relationClass);
+      if (rel != null) {
+        webSocketData.setResult(Arrays.asList(rel));
+        getWebSocket().send(webSocketData,true);
+      }
+    }
+ catch (    FrameworkException t) {
+      getWebSocket().send(MessageBuilder.status().code(400).message(t.getMessage()).build(),true);
+    }
+  }
+ else {
+    getWebSocket().send(MessageBuilder.status().code(400).message("The CREATE_RELATIONSHIP command needs source and target!").build(),true);
+  }
+}

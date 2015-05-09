@@ -1,0 +1,20 @@
+{
+  try (final Tx tx=StructrApp.getInstance().tx()){
+    final List<SchemaNode> schemaNodes=StructrApp.getInstance().nodeQuery(SchemaNode.class).getAsList();
+    final Set<String> alreadyCalculated=new HashSet<>();
+    final Map<String,SchemaNode> map=new LinkedHashMap<>();
+    for (    final SchemaNode schemaNode : schemaNodes) {
+      map.put(schemaNode.getName(),schemaNode);
+    }
+    for (    final SchemaNode schemaNode : schemaNodes) {
+      final int relCount=schemaNode.getProperty(SchemaNode.relatedFrom).size() + schemaNode.getProperty(SchemaNode.relatedTo).size();
+      final int level=recursiveGetHierarchyLevel(map,alreadyCalculated,schemaNode);
+      schemaNode.setProperty(SchemaNode.hierarchyLevel,level);
+      schemaNode.setProperty(SchemaNode.relCount,relCount);
+    }
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+  }
+}

@@ -7,7 +7,8 @@ synchronized (SchemaService.class) {
       final NodeExtender nodeExtender=new NodeExtender();
       try (final Tx tx=StructrApp.getInstance().tx()){
         SchemaService.ensureBuiltinTypesExist();
-        for (        final SchemaNode schemaNode : StructrApp.getInstance().nodeQuery(SchemaNode.class).getAsList()) {
+        final List<SchemaNode> schemaNodes=StructrApp.getInstance().nodeQuery(SchemaNode.class).getAsList();
+        for (        final SchemaNode schemaNode : schemaNodes) {
           nodeExtender.addClass(schemaNode.getClassName(),schemaNode.getSource(errorBuffer));
           final String auxSource=schemaNode.getAuxiliarySource();
           if (auxSource != null) {
@@ -47,6 +48,7 @@ synchronized (SchemaService.class) {
         t.printStackTrace();
         success=false;
       }
+      calculateHierarchy();
     }
     compiling.set(false);
   }

@@ -5,13 +5,13 @@
   final String appHost=Services.getInstance().getConfigurationValue(HttpService.APPLICATION_HOST);
   final String httpPort=Services.getInstance().getConfigurationValue(HttpService.APPLICATION_HTTP_PORT);
   replacementMap.put(toPlaceholder(User.eMail.jsonName()),userEmail);
-  replacementMap.put(toPlaceholder("link"),getTemplateText(TemplateKey.BASE_URL,"http://" + appHost + ":"+ httpPort) + getTemplateText(TemplateKey.RESET_PASSWORD_PAGE,HtmlServlet.RESET_PASSWORD_PAGE) + "?"+ getTemplateText(TemplateKey.CONFIRM_KEY_KEY,HtmlServlet.CONFIRM_KEY_KEY)+ "="+ confKey+ "&"+ getTemplateText(TemplateKey.TARGET_PAGE_KEY,HtmlServlet.TARGET_PAGE_KEY)+ "="+ getTemplateText(TemplateKey.TARGET_PAGE,HtmlServlet.RESET_PASSWORD_PAGE));
-  String textMailTemplate=getTemplateText(TemplateKey.TEXT_BODY,"Go to ${link} to reset your password.");
-  String htmlMailTemplate=getTemplateText(TemplateKey.HTML_BODY,"<div>Click <a href='${link}'>here</a> to reset your password.</div>");
+  replacementMap.put(toPlaceholder("link"),getTemplateText(TemplateKey.RESET_PASSWORD_BASE_URL,"http://" + appHost + ":"+ httpPort) + getTemplateText(TemplateKey.RESET_PASSWORD_PAGE,HtmlServlet.RESET_PASSWORD_PAGE) + "?"+ getTemplateText(TemplateKey.RESET_PASSWORD_CONFIRM_KEY_KEY,HtmlServlet.CONFIRM_KEY_KEY)+ "="+ confKey+ "&"+ getTemplateText(TemplateKey.RESET_PASSWORD_TARGET_PAGE_KEY,HtmlServlet.TARGET_PAGE_KEY)+ "="+ getTemplateText(TemplateKey.RESET_PASSWORD_TARGET_PAGE,HtmlServlet.RESET_PASSWORD_PAGE));
+  String textMailTemplate=getTemplateText(TemplateKey.RESET_PASSWORD_TEXT_BODY,"Go to ${link} to reset your password.");
+  String htmlMailTemplate=getTemplateText(TemplateKey.RESET_PASSWORD_HTML_BODY,"<div>Click <a href='${link}'>here</a> to reset your password.</div>");
   String textMailContent=MailHelper.replacePlaceHoldersInTemplate(textMailTemplate,replacementMap);
   String htmlMailContent=MailHelper.replacePlaceHoldersInTemplate(htmlMailTemplate,replacementMap);
   try {
-    MailHelper.sendHtmlMail(getTemplateText(TemplateKey.SENDER_ADDRESS,"structr-mail-daemon@localhost"),getTemplateText(TemplateKey.SENDER_NAME,"Structr Mail Daemon"),userEmail,"",null,null,null,getTemplateText(TemplateKey.SUBJECT,"Request to reset your Structr password"),htmlMailContent,textMailContent);
+    MailHelper.sendHtmlMail(getTemplateText(TemplateKey.RESET_PASSWORD_SENDER_ADDRESS,"structr-mail-daemon@localhost"),getTemplateText(TemplateKey.RESET_PASSWORD_SENDER_NAME,"Structr Mail Daemon"),userEmail,"",null,null,null,getTemplateText(TemplateKey.RESET_PASSWORD_SUBJECT,"Request to reset your Structr password"),htmlMailContent,textMailContent);
   }
  catch (  Exception e) {
     logger.log(Level.SEVERE,"Unable to send reset password e-mail",e);

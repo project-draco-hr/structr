@@ -9,7 +9,7 @@
     return true;
   }
   try {
-    if (StringUtils.isNotBlank(_hideConditions) && Boolean.TRUE.equals(Functions.evaluate(renderContext,this,_hideConditions))) {
+    if (StringUtils.isNotBlank(_hideConditions) && Boolean.TRUE.equals(Scripting.evaluate(renderContext,this,"${".concat(_hideConditions).concat("}")))) {
       return false;
     }
   }
@@ -17,7 +17,7 @@
     logger.log(Level.SEVERE,"Hide conditions " + _hideConditions + " could not be evaluated.",ex);
   }
   try {
-    if (StringUtils.isNotBlank(_showConditions) && !(Boolean.TRUE.equals(Functions.evaluate(renderContext,this,_showConditions)))) {
+    if (StringUtils.isNotBlank(_showConditions) && Boolean.FALSE.equals(Scripting.evaluate(renderContext,this,"${".concat(_showConditions).concat("}")))) {
       return false;
     }
   }

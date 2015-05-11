@@ -1,11 +1,11 @@
 {
   boolean notModified=false;
   final Date lastModified=node.getLastModifiedDate();
-  DateFormat httpDateFormat=new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z",Locale.US);
+  final DateFormat httpDateFormat=new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z",Locale.US);
   httpDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
   response.setHeader("Date",httpDateFormat.format(new Date()));
-  Calendar cal=new GregorianCalendar();
-  Integer seconds=node.getProperty(Page.cacheForSeconds);
+  final Calendar cal=new GregorianCalendar();
+  final Integer seconds=node.getProperty(Page.cacheForSeconds);
   if (!dontCache && seconds != null) {
     cal.add(Calendar.SECOND,seconds);
     response.setHeader("Cache-Control","max-age=" + seconds + ", s-maxage="+ seconds+ "");
@@ -20,9 +20,9 @@
     }
   }
   if (lastModified != null) {
-    Date roundedLastModified=DateUtils.round(lastModified,Calendar.SECOND);
+    final Date roundedLastModified=DateUtils.round(lastModified,Calendar.SECOND);
     response.setHeader("Last-Modified",httpDateFormat.format(roundedLastModified));
-    String ifModifiedSince=request.getHeader("If-Modified-Since");
+    final String ifModifiedSince=request.getHeader("If-Modified-Since");
     if (StringUtils.isNotBlank(ifModifiedSince)) {
       try {
         Date ifModSince=httpDateFormat.parse(ifModifiedSince);

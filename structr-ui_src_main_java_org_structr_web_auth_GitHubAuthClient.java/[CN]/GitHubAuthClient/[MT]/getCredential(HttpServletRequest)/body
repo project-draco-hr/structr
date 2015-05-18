@@ -5,6 +5,16 @@
   }
   String body=userResponse.getBody();
   logger.log(Level.FINE,"User response body: {0}",body);
-  String[] addresses=StringUtils.stripAll(StringUtils.stripAll(StringUtils.stripEnd(StringUtils.stripStart(body,"["),"]").split(",")),"\"");
-  return addresses.length > 0 ? addresses[0] : null;
+  final JsonParser parser=new JsonParser();
+  final JsonElement result=parser.parse(body);
+  if (result instanceof JsonArray) {
+    final JsonArray arr=(JsonArray)result;
+    if (arr.iterator().hasNext()) {
+      final JsonElement el=arr.iterator().next();
+      final String address=el.getAsJsonObject().get("email").getAsString();
+      logger.log(Level.INFO,"Got 'email' credential from GitHub: {0}",address);
+      return address;
+    }
+  }
+  return null;
 }

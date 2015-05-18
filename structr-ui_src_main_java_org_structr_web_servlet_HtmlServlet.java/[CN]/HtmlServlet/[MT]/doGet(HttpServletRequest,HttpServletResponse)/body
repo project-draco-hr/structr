@@ -115,10 +115,7 @@
             contentType=contentType.concat(";charset=UTF-8");
           }
           response.setContentType(contentType);
-          response.setHeader("Strict-Transport-Security","max-age=60");
-          response.setHeader("X-Content-Type-Options","nosniff");
-          response.setHeader("X-Frame-Options","SAMEORIGIN");
-          response.setHeader("X-XSS-Protection","1; mode=block");
+          setCustomResponseHeaders(response);
           boolean isAsync=Services.parseBoolean(Services.getBaseConfiguration().getProperty(HttpService.ASYNC),true);
           if (isAsync) {
             final AsyncContext async=request.startAsync();

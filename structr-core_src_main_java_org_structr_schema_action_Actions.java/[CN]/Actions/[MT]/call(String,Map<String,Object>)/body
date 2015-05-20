@@ -3,7 +3,7 @@
   final App app=StructrApp.getInstance(superUserContext);
   final List<SchemaMethod> methods=app.nodeQuery(SchemaMethod.class).andName(key).getAsList();
   if (methods.isEmpty()) {
-    logger.log(Level.INFO,"Tried to call method {0} but no SchemaMethod entity was found.",key);
+    logger.log(Level.FINE,"Tried to call method {0} but no SchemaMethod entity was found.",key);
   }
  else {
     for (    final SchemaMethod method : methods) {
@@ -14,11 +14,11 @@
           return Actions.execute(superUserContext,null,"${" + source + "}",parameters);
         }
  else {
-          logger.log(Level.INFO,"Schema method {0} has no source code, will NOT be executed.",key);
+          logger.log(Level.WARNING,"Schema method {0} has no source code, will NOT be executed.",key);
         }
       }
  else {
-        logger.log(Level.INFO,"Schema method {0} is attached to an entity, will NOT be executed.",key);
+        logger.log(Level.WARNING,"Schema method {0} is attached to an entity, will NOT be executed.",key);
       }
     }
   }

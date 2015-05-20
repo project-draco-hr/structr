@@ -5,7 +5,7 @@
   finalConfig.setProperty(APPLICATION_HTTP_PORT,"8082");
   finalConfig.setProperty(APPLICATION_HTTPS_ENABLED,"false");
   finalConfig.setProperty(APPLICATION_HTTPS_PORT,"8083");
-  finalConfig.setProperty(ASYNC,"false");
+  finalConfig.setProperty(ASYNC,"true");
   finalConfig.setProperty(SERVLETS,"JsonRestServlet");
   finalConfig.setProperty("JsonRestServlet.class",JsonRestServlet.class.getName());
   finalConfig.setProperty("JsonRestServlet.path","/structr/rest/*");
@@ -16,7 +16,7 @@
   finalConfig.setProperty("JsonRestServlet.defaultview",PropertyView.Public);
   finalConfig.setProperty("JsonRestServlet.outputdepth","3");
   Services.mergeConfiguration(finalConfig,additionalConfig);
-  String mainClassName=(String)finalConfig.get(MAIN_CLASS);
+  final String mainClassName=(String)finalConfig.get(MAIN_CLASS);
   Class mainClass=null;
   if (mainClassName != null) {
     logger.log(Level.INFO,"Running main class {0}",new Object[]{mainClassName});
@@ -42,29 +42,29 @@
   httpPort=Services.parseInt(finalConfig.getProperty(APPLICATION_HTTP_PORT),8082);
   maxIdleTime=Services.parseInt(System.getProperty("maxIdleTime"),30000);
   requestHeaderSize=Services.parseInt(System.getProperty("requestHeaderSize"),8192);
-  async=Services.parseBoolean(finalConfig.getProperty(ASYNC),false);
+  async=Services.parseBoolean(finalConfig.getProperty(ASYNC),true);
   if (async) {
     logger.log(Level.INFO,"Running in asynchronous mode");
   }
-  String keyStorePath=finalConfig.getProperty(APPLICATION_KEYSTORE_PATH);
-  String keyStorePassword=finalConfig.getProperty(APPLICATION_KEYSTORE_PASSWORD);
-  String contextPath=System.getProperty("contextPath","/");
-  String logPrefix="structr";
-  boolean enableRewriteFilter=true;
-  boolean enableHttps=Services.parseBoolean(finalConfig.getProperty(APPLICATION_HTTPS_ENABLED),false);
-  boolean enableGzipCompression=true;
-  boolean logRequests=false;
-  int httpsPort=Services.parseInt(finalConfig.getProperty(APPLICATION_HTTPS_PORT),8083);
+  final String keyStorePath=finalConfig.getProperty(APPLICATION_KEYSTORE_PATH);
+  final String keyStorePassword=finalConfig.getProperty(APPLICATION_KEYSTORE_PASSWORD);
+  final String contextPath=System.getProperty("contextPath","/");
+  final String logPrefix="structr";
+  final boolean enableRewriteFilter=true;
+  final boolean enableHttps=Services.parseBoolean(finalConfig.getProperty(APPLICATION_HTTPS_ENABLED),false);
+  final boolean enableGzipCompression=true;
+  final boolean logRequests=false;
+  final int httpsPort=Services.parseInt(finalConfig.getProperty(APPLICATION_HTTPS_PORT),8083);
   basePath=System.getProperty("home",basePath);
   if (basePath.isEmpty()) {
     basePath=System.getProperty("user.dir","/tmp");
   }
-  File baseDir=new File(basePath);
+  final File baseDir=new File(basePath);
   if (!baseDir.exists()) {
     baseDir.mkdirs();
   }
   server=new Server(httpPort);
-  ContextHandlerCollection contexts=new ContextHandlerCollection();
+  final ContextHandlerCollection contexts=new ContextHandlerCollection();
   contexts.addHandler(new DefaultHandler());
   final ServletContextHandler servletContext=new ServletContextHandler(server,contextPath,true,true);
   final List<Connector> connectors=new LinkedList<>();
@@ -76,13 +76,21 @@
   }
   servletContext.addServlet("org.eclipse.jetty.servlet.DefaultServlet","/");
   servletContext.setInitParameter("org.eclipse.jetty.servlet.Default.dirAllowed","false");
+  final HashSessionManager sessionManager=new HashSessionManager();
+  try {
+    sessionManager.setStoreDirectory(new File(baseDir + "/sessions"));
+  }
+ catch (  IOException ex) {
+    logger.log(Level.WARNING,"Could not set custom session manager with session store directory {0}/sessions",baseDir);
+  }
+  servletContext.getSessionHandler().setSessionManager(sessionManager);
   if (enableRewriteFilter) {
-    FilterHolder rewriteFilter=new FilterHolder(UrlRewriteFilter.class);
+    final FilterHolder rewriteFilter=new FilterHolder(UrlRewriteFilter.class);
     rewriteFilter.setInitParameter("confPath","urlrewrite.xml");
     servletContext.addFilter(rewriteFilter,"/*",EnumSet.of(DispatcherType.REQUEST,async ? DispatcherType.ASYNC : DispatcherType.FORWARD));
   }
   if (enableGzipCompression) {
-    FilterHolder gzipFilter=async ? new FilterHolder(AsyncGzipFilter.class) : new FilterHolder(GzipFilter.class);
+    final FilterHolder gzipFilter=async ? new FilterHolder(AsyncGzipFilter.class) : new FilterHolder(GzipFilter.class);
     gzipFilter.setInitParameter("mimeTypes","text/html,text/plain,text/css,text/javascript,application/json");
     gzipFilter.setInitParameter("bufferSize","32768");
     gzipFilter.setInitParameter("minGzipSize","256");
@@ -92,13 +100,13 @@
   }
   contexts.addHandler(servletContext);
   if (logRequests || "true".equals(finalConfig.getProperty("log.requests","false"))) {
-    String etcPath=basePath + "/etc";
-    File etcDir=new File(etcPath);
+    final String etcPath=basePath + "/etc";
+    final File etcDir=new File(etcPath);
     if (!etcDir.exists()) {
       etcDir.mkdir();
     }
-    String logbackConfFilePath=basePath + "/etc/logback-access.xml";
-    File logbackConfFile=new File(logbackConfFilePath);
+    final String logbackConfFilePath=basePath + "/etc/logback-access.xml";
+    final File logbackConfFile=new File(logbackConfFilePath);
     if (!logbackConfFile.exists()) {
       List<String> config=new LinkedList<>();
       config.add("<configuration>");
@@ -121,19 +129,19 @@
         logger.log(Level.WARNING,"Unable to write logback configuration.",ioex);
       }
     }
-    FilterHolder loggingFilter=new FilterHolder(TeeFilter.class);
+    final FilterHolder loggingFilter=new FilterHolder(TeeFilter.class);
     servletContext.addFilter(loggingFilter,"/*",EnumSet.of(DispatcherType.REQUEST,async ? DispatcherType.ASYNC : DispatcherType.FORWARD));
     loggingFilter.setInitParameter("includes","");
-    RequestLogHandler requestLogHandler=new RequestLogHandler();
-    String logPath=basePath + "/logs";
-    File logDir=new File(logPath);
+    final RequestLogHandler requestLogHandler=new RequestLogHandler();
+    final String logPath=basePath + "/logs";
+    final File logDir=new File(logPath);
     if (!logDir.exists()) {
       logDir.mkdir();
     }
     final RequestLogImpl requestLog=new RequestLogImpl();
     requestLogHandler.setRequestLog(requestLog);
     final HandlerCollection handlers=new HandlerCollection();
-    handlers.setHandlers(new Handler[]{contexts,new DefaultHandler(),requestLogHandler});
+    handlers.setHandlers(new Handler[]{contexts,requestLogHandler});
     server.setHandler(handlers);
   }
  else {
@@ -146,8 +154,8 @@
   final Map<String,ServletHolder> servlets=collectServlets(finalConfig);
   int position=1;
   for (  Map.Entry<String,ServletHolder> servlet : servlets.entrySet()) {
-    ServletHolder servletHolder=servlet.getValue();
-    String path=servlet.getKey();
+    final ServletHolder servletHolder=servlet.getValue();
+    final String path=servlet.getKey();
     servletHolder.setInitOrder(position++);
     logger.log(Level.INFO,"Adding servlet {0} for {1}",new Object[]{servletHolder,path});
     servletContext.addServlet(servletHolder,path);
@@ -158,7 +166,7 @@
     httpConfig.setSecureScheme("https");
     httpConfig.setSecurePort(httpsPort);
     httpConfig.setRequestHeaderSize(requestHeaderSize);
-    ServerConnector httpConnector=new ServerConnector(server,new HttpConnectionFactory(httpConfig));
+    final ServerConnector httpConnector=new ServerConnector(server,new HttpConnectionFactory(httpConfig));
     httpConnector.setHost(host);
     httpConnector.setPort(httpPort);
     connectors.add(httpConnector);
@@ -170,10 +178,10 @@
     if (httpsPort > -1 && keyStorePath != null && !keyStorePath.isEmpty() && keyStorePassword != null) {
       httpsConfig=new HttpConfiguration(httpConfig);
       httpsConfig.addCustomizer(new SecureRequestCustomizer());
-      SslContextFactory sslContextFactory=new SslContextFactory();
+      final SslContextFactory sslContextFactory=new SslContextFactory();
       sslContextFactory.setKeyStorePath(keyStorePath);
       sslContextFactory.setKeyStorePassword(keyStorePassword);
-      ServerConnector https=new ServerConnector(server,new SslConnectionFactory(sslContextFactory,"http/1.1"),new HttpConnectionFactory(httpsConfig));
+      final ServerConnector https=new ServerConnector(server,new SslConnectionFactory(sslContextFactory,"http/1.1"),new HttpConnectionFactory(httpsConfig));
       https.setPort(httpsPort);
       https.setIdleTimeout(500000);
       https.setHost(host);

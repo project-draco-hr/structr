@@ -1,8 +1,11 @@
 {
-  String sessionIdFromRequest=getSessionId(request);
-  if (sessionIdFromRequest != null) {
-    AuthHelper.clearSession(sessionIdFromRequest);
-    user.addSessionId(sessionIdFromRequest);
+  HttpSession session=request.getSession(false);
+  if (session == null) {
+    session=newSession(request);
+  }
+  if (session != null) {
+    AuthHelper.clearSession(session.getId());
+    user.addSessionId(session.getId());
     Actions.call(Actions.NOTIFICATION_LOGIN,user);
   }
 }

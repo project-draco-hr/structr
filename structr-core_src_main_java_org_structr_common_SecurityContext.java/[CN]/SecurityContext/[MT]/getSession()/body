@@ -1,7 +1,10 @@
 {
-  final HttpSession session=request.getSession();
-  if (session != null) {
-    session.setMaxInactiveInterval(Services.getGlobalSessionTimeout());
+  if (request != null) {
+    final HttpSession session=request.getSession(false);
+    if (session != null) {
+      session.setMaxInactiveInterval(Services.getGlobalSessionTimeout());
+    }
+    return session;
   }
-  return session;
+  return null;
 }

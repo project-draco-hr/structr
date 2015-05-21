@@ -1,8 +1,14 @@
 {
-  final String sessionId=getSessionId(request);
-  if (sessionId != null) {
-    AuthHelper.clearSession(sessionId);
-    user.removeSessionId(sessionId);
+  final HttpSession session=request.getSession(false);
+  if (session != null) {
+    AuthHelper.clearSession(session.getId());
+    user.removeSessionId(session.getId());
     Actions.call(Actions.NOTIFICATION_LOGOUT,user);
+    try {
+      request.logout();
+      request.changeSessionId();
+    }
+ catch (    Throwable t) {
+    }
   }
 }

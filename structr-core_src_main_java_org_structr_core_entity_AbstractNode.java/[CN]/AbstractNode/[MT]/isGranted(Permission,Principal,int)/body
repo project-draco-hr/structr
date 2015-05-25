@@ -5,7 +5,10 @@
   if (accessingUser != null && accessingUser.isAdmin()) {
     return true;
   }
-  if (this.equals(accessingUser)) {
+  if (this.equals(accessingUser) && level == 0) {
+    return true;
+  }
+  if (level > 0 && permission.equals(Permission.read)) {
     return true;
   }
   final Principal owner=getOwnerNode();
@@ -30,7 +33,7 @@
       return true;
     }
     for (    Principal parent : accessingUser.getParents()) {
-      if (isGranted(permission,parent)) {
+      if (isGranted(permission,parent,level + 1)) {
         return true;
       }
     }

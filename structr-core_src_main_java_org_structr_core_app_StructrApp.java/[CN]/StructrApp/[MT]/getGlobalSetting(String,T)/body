@@ -1,12 +1,24 @@
 {
-  final NodeManager mgr=((GraphDatabaseAPI)getGraphDatabaseService()).getDependencyResolver().resolveDependency(NodeManager.class);
-  final GraphProperties config=mgr.getGraphProperties();
+  if (config == null) {
+    config=getOrCreateGraphProperties();
+  }
   T value=null;
   try (final Tx tx=StructrApp.getInstance().tx()){
     value=(T)config.getProperty(key);
     tx.success();
   }
  catch (  Throwable t) {
+    logger.log(Level.WARNING,t.getMessage());
+    t.printStackTrace();
+    try (final Tx tx=StructrApp.getInstance().tx()){
+      config=getOrCreateGraphProperties();
+      config.setProperty(key,value);
+      tx.success();
+    }
+ catch (    Throwable t1) {
+      logger.log(Level.WARNING,t1.getMessage());
+      t1.printStackTrace();
+    }
   }
   if (value == null) {
     return defaultValue;

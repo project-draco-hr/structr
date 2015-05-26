@@ -5,10 +5,7 @@
   if (accessingUser != null && accessingUser.isAdmin()) {
     return true;
   }
-  if (this.equals(accessingUser) && level == 0) {
-    return true;
-  }
-  if (level > 0 && this instanceof Group && permission.equals(Permission.read)) {
+  if (this.equals(accessingUser) && (level == 0 || (permission.equals(Permission.read) && level > 0))) {
     return true;
   }
   final Principal owner=getOwnerNode();

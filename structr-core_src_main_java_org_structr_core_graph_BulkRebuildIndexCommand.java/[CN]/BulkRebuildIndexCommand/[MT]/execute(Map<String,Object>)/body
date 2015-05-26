@@ -6,33 +6,23 @@
   final SecurityContext superUserContext=SecurityContext.getSuperUserInstance();
   final NodeFactory nodeFactory=new NodeFactory(superUserContext);
   final RelationshipFactory relFactory=new RelationshipFactory(superUserContext);
-  Class type=null;
-  if (entityType != null) {
-    type=SchemaHelper.getEntityClassForRawType(entityType);
-  }
   if (mode == null || "nodesOnly".equals(mode)) {
-    final List<AbstractNode> nodes=new LinkedList<>();
+    Iterator<AbstractNode> nodeIterator=null;
     try (final Tx tx=StructrApp.getInstance().tx()){
-      final Result<AbstractNode> result=nodeFactory.instantiateAll(Iterables.filter(new StructrAndSpatialPredicate(true,false,false),GlobalGraphOperations.at(graphDb).getAllNodes()));
-      for (      AbstractNode node : result.getResults()) {
-        if (type == null || node.getClass().equals(type)) {
-          nodes.add(node);
-        }
-      }
+      nodeIterator=Iterables.filter(new TypePredicate<>(entityType),Iterables.map(nodeFactory,Iterables.filter(new StructrAndSpatialPredicate(true,false,false),GlobalGraphOperations.at(graphDb).getAllNodes()))).iterator();
       tx.success();
     }
  catch (    FrameworkException fex) {
+      logger.log(Level.WARNING,"Exception while creating all nodes iterator.");
       fex.printStackTrace();
-      logger.log(Level.SEVERE,"Unable to instantiate nodes, aborting.");
-      return;
     }
-    if (type == null) {
+    if (entityType == null) {
       logger.log(Level.INFO,"Node type not set or no entity class found. Starting (re-)indexing all nodes");
     }
  else {
-      logger.log(Level.INFO,"Starting (re-)indexing all nodes of type {0}",new Object[]{type.getSimpleName()});
+      logger.log(Level.INFO,"Starting (re-)indexing all nodes of type {0}",entityType);
     }
-    long count=bulkGraphOperation(securityContext,nodes,100,"RebuildNodeIndex",new BulkGraphOperation<AbstractNode>(){
+    long count=bulkGraphOperation(securityContext,nodeIterator,100,"RebuildNodeIndex",new BulkGraphOperation<AbstractNode>(){
       @Override public void handleGraphObject(      SecurityContext securityContext,      AbstractNode node){
         node.updateInIndex();
       }
@@ -47,21 +37,16 @@
     logger.log(Level.INFO,"Done with (re-)indexing {0} nodes",count);
   }
   if (mode == null || "relsOnly".equals(mode)) {
-    final List<AbstractRelationship> rels=new LinkedList<>();
+    Iterator<AbstractRelationship> relIterator=null;
     long count=0;
     try (final Tx tx=StructrApp.getInstance().tx()){
-      final List<AbstractRelationship> unfilteredRels=relFactory.instantiate(Iterables.filter(new StructrAndSpatialPredicate(true,false,false),GlobalGraphOperations.at(graphDb).getAllRelationships()));
-      for (      AbstractRelationship rel : unfilteredRels) {
-        if (relType == null || rel.getType().equals(relType)) {
-          rels.add(rel);
-        }
-      }
+      relIterator=Iterables.filter(new TypePredicate<>(relType),Iterables.map(relFactory,Iterables.filter(new StructrAndSpatialPredicate(true,false,false),GlobalGraphOperations.at(graphDb).getAllRelationships()))).iterator();
+      ;
       tx.success();
     }
  catch (    FrameworkException fex) {
+      logger.log(Level.WARNING,"Exception while creating all nodes iterator.");
       fex.printStackTrace();
-      logger.log(Level.SEVERE,"Unable to instantiate relationships, aborting.");
-      return;
     }
     if (relType == null) {
       logger.log(Level.INFO,"Relationship type not set, starting (re-)indexing all relationships");
@@ -69,7 +54,7 @@
  else {
       logger.log(Level.INFO,"Starting (re-)indexing all relationships of type {0}",new Object[]{relType});
     }
-    count=bulkGraphOperation(securityContext,rels,100,"RebuildRelIndex",new BulkGraphOperation<AbstractRelationship>(){
+    count=bulkGraphOperation(securityContext,relIterator,100,"RebuildRelIndex",new BulkGraphOperation<AbstractRelationship>(){
       @Override public void handleGraphObject(      SecurityContext securityContext,      AbstractRelationship rel){
         rel.updateInIndex();
       }

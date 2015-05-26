@@ -1,11 +1,13 @@
 {
   final App app=StructrApp.getInstance(securityContext);
-  final Iterator<T> iterator=nodes.iterator();
   long objectCount=0L;
-  while (iterator.hasNext()) {
+  boolean active=true;
+  while (active) {
     try (final Tx tx=app.tx()){
+      active=false;
       while (iterator.hasNext()) {
         T node=iterator.next();
+        active=true;
         try {
           operation.handleGraphObject(securityContext,node);
         }

@@ -2,20 +2,22 @@
   final GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
   final RelationshipFactory relationshipFactory=new RelationshipFactory(securityContext);
   if (graphDb != null) {
-    List<AbstractRelationship> rels=null;
+    Iterator<AbstractRelationship> relIterator=null;
     final String typeName="type";
     if (properties.containsKey(typeName)) {
       try (final Tx tx=StructrApp.getInstance().tx()){
-        rels=StructrApp.getInstance(securityContext).relationshipQuery(SchemaHelper.getEntityClassForRawType(typeName)).getAsList();
+        relIterator=StructrApp.getInstance(securityContext).relationshipQuery(SchemaHelper.getEntityClassForRawType(typeName)).getAsList().iterator();
+        tx.success();
       }
        properties.remove(typeName);
     }
  else {
       try (final Tx tx=StructrApp.getInstance().tx()){
-        rels=(List<AbstractRelationship>)relationshipFactory.instantiate(GlobalGraphOperations.at(graphDb).getAllRelationships());
+        relIterator=Iterables.map(relationshipFactory,GlobalGraphOperations.at(graphDb).getAllRelationships()).iterator();
+        tx.success();
       }
      }
-    long count=NodeServiceCommand.bulkGraphOperation(securityContext,rels,1000,"SetRelationshipProperties",new BulkGraphOperation<AbstractRelationship>(){
+    long count=NodeServiceCommand.bulkGraphOperation(securityContext,relIterator,1000,"SetRelationshipProperties",new BulkGraphOperation<AbstractRelationship>(){
       @Override public void handleGraphObject(      SecurityContext securityContext,      AbstractRelationship rel){
         if (rel.getProperty(AbstractRelationship.id) != null) {
           for (          Entry entry : properties.entrySet()) {

@@ -6,20 +6,22 @@
   final String oldKey=(String)properties.get("oldKey");
   final String newKey=(String)properties.get("newKey");
   if (graphDb != null && StringUtils.isNotBlank(oldKey) && StringUtils.isNotBlank(newKey)) {
-    Result<AbstractNode> nodes=null;
+    Iterator<AbstractNode> nodeIterator=null;
     if (properties.containsKey(AbstractNode.type.dbName())) {
       type=(String)properties.get(AbstractNode.type.dbName());
       try (final Tx tx=StructrApp.getInstance().tx()){
-        nodes=StructrApp.getInstance(securityContext).nodeQuery(SchemaHelper.getEntityClassForRawType(type)).getResult();
+        nodeIterator=StructrApp.getInstance(securityContext).nodeQuery(SchemaHelper.getEntityClassForRawType(type)).getResult().getResults().iterator();
+        tx.success();
       }
        properties.remove(AbstractNode.type.dbName());
     }
  else {
       try (final Tx tx=StructrApp.getInstance().tx()){
-        nodes=nodeFactory.instantiateAll(GlobalGraphOperations.at(graphDb).getAllNodes());
+        nodeIterator=Iterables.map(nodeFactory,GlobalGraphOperations.at(graphDb).getAllNodes()).iterator();
+        tx.success();
       }
      }
-    long nodeCount=bulkGraphOperation(securityContext,nodes.getResults(),1000,"ChangeNodePropertyKey",new BulkGraphOperation<AbstractNode>(){
+    long nodeCount=bulkGraphOperation(securityContext,nodeIterator,1000,"ChangeNodePropertyKey",new BulkGraphOperation<AbstractNode>(){
       @Override public void handleGraphObject(      SecurityContext securityContext,      AbstractNode node){
         for (        Entry entry : properties.entrySet()) {
           String key=(String)entry.getKey();

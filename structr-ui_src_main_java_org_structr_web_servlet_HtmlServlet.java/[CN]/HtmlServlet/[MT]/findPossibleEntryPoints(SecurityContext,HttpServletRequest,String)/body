@@ -3,10 +3,11 @@
   if (CollectionUtils.isNotEmpty(possibleEntryPoints)) {
     return possibleEntryPoints;
   }
-  if (path.length() > 0) {
+  final int numberOfParts=PathHelper.getParts(path).length;
+  if (numberOfParts > 0) {
     logger.log(Level.FINE,"Requested name {0}",path);
     possibleEntryPoints=findPossibleEntryPointsByPath(securityContext,request,path);
-    if (possibleEntryPoints.isEmpty()) {
+    if (possibleEntryPoints.isEmpty() && numberOfParts == 1) {
       possibleEntryPoints=findPossibleEntryPointsByUuid(securityContext,request,PathHelper.getName(path));
     }
     return possibleEntryPoints;

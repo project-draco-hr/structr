@@ -3,27 +3,22 @@
   final GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
   final SecurityContext superUserContext=SecurityContext.getSuperUserInstance();
   final NodeFactory nodeFactory=new NodeFactory(superUserContext);
-  Class type=null;
-  if (entityType != null) {
-    type=SchemaHelper.getEntityClassForRawType(entityType);
-  }
-  final List<AbstractNode> nodes=new LinkedList<>();
+  Iterator<AbstractNode> nodeIterator=null;
   try (final Tx tx=StructrApp.getInstance().tx()){
-    final Result<AbstractNode> result=nodeFactory.instantiateAll(Iterables.filter(new StructrAndSpatialPredicate(true,false,false),GlobalGraphOperations.at(graphDb).getAllNodes()));
-    for (    AbstractNode node : result.getResults()) {
-      if (type == null || node.getClass().equals(type)) {
-        nodes.add(node);
-      }
-    }
+    nodeIterator=Iterables.filter(new TypePredicate<>(entityType),Iterables.map(nodeFactory,Iterables.filter(new StructrAndSpatialPredicate(true,false,false),GlobalGraphOperations.at(graphDb).getAllNodes()))).iterator();
     tx.success();
   }
-   if (type == null) {
-    logger.log(Level.INFO,"Node type not set or no entity class found. Starting creation of labels for {0} nodes",nodes.size());
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"Exception while creating all nodes iterator.");
+    fex.printStackTrace();
+  }
+  if (entityType == null) {
+    logger.log(Level.INFO,"Node type not set or no entity class found. Starting creation of labels for all nodes.");
   }
  else {
-    logger.log(Level.INFO,"Starting creation of labels for {0} nodes of type {0}",new Object[]{nodes.size(),type.getSimpleName()});
+    logger.log(Level.INFO,"Starting creation of labels for all nodes of type {0}",entityType);
   }
-  long count=bulkGraphOperation(securityContext,nodes,1000,"CreateLabels",new BulkGraphOperation<AbstractNode>(){
+  long count=bulkGraphOperation(securityContext,nodeIterator,1000,"CreateLabels",new BulkGraphOperation<AbstractNode>(){
     @Override public void handleGraphObject(    SecurityContext securityContext,    AbstractNode node){
       final String type=node.getProperty(GraphObject.type);
       if (type != null) {

@@ -2,11 +2,16 @@
   final GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
   final NodeFactory nodeFactory=new NodeFactory(securityContext);
   if (graphDb != null) {
-    final List<AbstractNode> result=new LinkedList<>();
+    Iterator<AbstractNode> nodeIterator=null;
     try (final Tx tx=StructrApp.getInstance().tx()){
-      result.addAll(nodeFactory.bulkInstantiate(GlobalGraphOperations.at(graphDb).getAllNodes()));
+      nodeIterator=Iterables.map(nodeFactory,Iterables.filter(new StructrAndSpatialPredicate(true,false,false),GlobalGraphOperations.at(graphDb).getAllNodes())).iterator();
+      tx.success();
     }
-     long deletedNodes=bulkGraphOperation(securityContext,result,1000,"ClearDatabase",new BulkGraphOperation<AbstractNode>(){
+ catch (    FrameworkException fex) {
+      logger.log(Level.WARNING,"Exception while creating all nodes iterator.");
+      fex.printStackTrace();
+    }
+    long deletedNodes=bulkGraphOperation(securityContext,nodeIterator,1000,"ClearDatabase",new BulkGraphOperation<AbstractNode>(){
       @Override public void handleGraphObject(      SecurityContext securityContext,      AbstractNode node){
         if (node.getProperty(GraphObject.id) != null) {
           try {

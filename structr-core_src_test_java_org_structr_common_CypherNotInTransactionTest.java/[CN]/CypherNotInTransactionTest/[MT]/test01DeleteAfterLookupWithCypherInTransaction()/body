@@ -11,9 +11,8 @@
     }
      assertNotNull(rel);
     GraphDatabaseService graphDb=graphDbCommand.execute();
-    ExecutionEngine engine=(ExecutionEngine)new ExecutionEngine(graphDb);
     try (final Tx tx=app.tx()){
-      ExecutionResult result=engine.execute("start n = node(*) match (n)<-[r:ONE_TO_ONE]-() return r");
+      Result result=graphDb.execute("start n = node(*) match (n)<-[r:ONE_TO_ONE]-() return r");
       final Iterator<Relationship> rels=result.columnAs("r");
       assertTrue(rels.hasNext());
       rels.next().delete();

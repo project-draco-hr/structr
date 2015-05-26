@@ -1,0 +1,17 @@
+{
+  if (session == null) {
+    return true;
+  }
+  final long now=(new Date()).getTime();
+  try {
+    final long lastAccessed=session.getLastAccessedTime();
+    if (now > lastAccessed + Services.getGlobalSessionTimeout() * 1000) {
+      logger.log(Level.INFO,"Session {0} timed out, last accessed at {1}",new Object[]{session,lastAccessed});
+      return true;
+    }
+    return false;
+  }
+ catch (  IllegalStateException ise) {
+    return true;
+  }
+}

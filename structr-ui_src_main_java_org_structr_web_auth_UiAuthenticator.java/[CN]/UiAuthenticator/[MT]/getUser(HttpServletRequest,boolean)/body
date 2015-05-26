@@ -1,5 +1,9 @@
 {
-  Principal user=checkSessionAuthentication(request);
+  Principal user=null;
+  final HttpSession session=request.getSession(false);
+  if (session != null) {
+    user=AuthHelper.getPrincipalForSessionId(session.getId());
+  }
   if (user == null) {
     String userName=request.getHeader("X-User");
     String password=request.getHeader("X-Password");

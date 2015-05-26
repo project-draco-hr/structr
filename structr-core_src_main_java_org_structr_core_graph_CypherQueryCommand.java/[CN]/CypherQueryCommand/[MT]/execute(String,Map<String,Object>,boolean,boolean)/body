@@ -1,16 +1,17 @@
 {
-  ExecutionEngine engine=(ExecutionEngine)arguments.get("cypherExecutionEngine");
+  GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
   RelationshipFactory relFactory=new RelationshipFactory(securityContext);
   NodeFactory nodeFactory=new NodeFactory(securityContext);
   List<GraphObject> resultList=new LinkedList<>();
-  ExecutionResult result=null;
+  Result result=null;
   if (parameters != null) {
-    result=engine.execute(query,parameters);
+    result=graphDb.execute(query,parameters);
   }
  else {
-    result=engine.execute(query);
+    result=graphDb.execute(query);
   }
-  for (  Map<String,Object> row : result) {
+  while (result.hasNext()) {
+    final Map<String,Object> row=result.next();
     GraphObjectMap dummyObject=null;
     for (    Entry<String,Object> entry : row.entrySet()) {
       String key=entry.getKey();

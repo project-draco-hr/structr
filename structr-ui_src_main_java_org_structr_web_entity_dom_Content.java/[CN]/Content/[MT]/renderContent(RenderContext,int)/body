@@ -2,10 +2,10 @@
   if (isDeleted() || isHidden() || !displayForLocale(renderContext)|| !displayForConditions(renderContext)) {
     return;
   }
-  String id=getUuid();
-  EditMode edit=renderContext.getEditMode(securityContext.getUser(false));
-  boolean inBody=renderContext.inBody();
-  AsyncBuffer out=renderContext.getBuffer();
+  final String id=getUuid();
+  final EditMode edit=renderContext.getEditMode(securityContext.getUser(false));
+  final boolean inBody=renderContext.inBody();
+  final AsyncBuffer out=renderContext.getBuffer();
   String _contentType=getProperty(contentType);
   String _content=getPropertyWithVariableReplacement(renderContext,Content.content);
   if (!(EditMode.RAW.equals(edit) || EditMode.WIDGET.equals(edit)) && (_contentType == null || ("text/plain".equals(_contentType)))) {
@@ -24,7 +24,7 @@
     }
   }
   if (_contentType != null) {
-    Adapter<String,String> converter=contentConverters.get(_contentType);
+    final Adapter<String,String> converter=contentConverters.get(_contentType);
     if (converter != null) {
       try {
         _content=converter.adapt(_content);

@@ -2,55 +2,58 @@
   final ConfigurationProvider config=StructrApp.getConfiguration();
   boolean success=true;
   if (compiling.compareAndSet(false,true)) {
+    try {
 synchronized (SchemaService.class) {
-      final Set<String> dynamicViews=new LinkedHashSet<>();
-      final NodeExtender nodeExtender=new NodeExtender();
-      try (final Tx tx=StructrApp.getInstance().tx()){
-        SchemaService.ensureBuiltinTypesExist();
-        final List<SchemaNode> schemaNodes=StructrApp.getInstance().nodeQuery(SchemaNode.class).getAsList();
-        for (        final SchemaNode schemaNode : schemaNodes) {
-          nodeExtender.addClass(schemaNode.getClassName(),schemaNode.getSource(errorBuffer));
-          final String auxSource=schemaNode.getAuxiliarySource();
-          if (auxSource != null) {
-            nodeExtender.addClass("_" + schemaNode.getClassName() + "Helper",auxSource);
+        final Set<String> dynamicViews=new LinkedHashSet<>();
+        final NodeExtender nodeExtender=new NodeExtender();
+        try (final Tx tx=StructrApp.getInstance().tx()){
+          SchemaService.ensureBuiltinTypesExist();
+          final List<SchemaNode> schemaNodes=StructrApp.getInstance().nodeQuery(SchemaNode.class).getAsList();
+          for (          final SchemaNode schemaNode : schemaNodes) {
+            nodeExtender.addClass(schemaNode.getClassName(),schemaNode.getSource(errorBuffer));
+            final String auxSource=schemaNode.getAuxiliarySource();
+            if (auxSource != null) {
+              nodeExtender.addClass("_" + schemaNode.getClassName() + "Helper",auxSource);
+            }
+            dynamicViews.addAll(schemaNode.getViews());
           }
-          dynamicViews.addAll(schemaNode.getViews());
-        }
-        for (        final SchemaRelationshipNode schemaRelationship : StructrApp.getInstance().nodeQuery(SchemaRelationshipNode.class).getAsList()) {
-          nodeExtender.addClass(schemaRelationship.getClassName(),schemaRelationship.getSource(errorBuffer));
-          final String auxSource=schemaRelationship.getAuxiliarySource();
-          if (auxSource != null) {
-            nodeExtender.addClass("_" + schemaRelationship.getClassName() + "Helper",auxSource);
+          for (          final SchemaRelationshipNode schemaRelationship : StructrApp.getInstance().nodeQuery(SchemaRelationshipNode.class).getAsList()) {
+            nodeExtender.addClass(schemaRelationship.getClassName(),schemaRelationship.getSource(errorBuffer));
+            final String auxSource=schemaRelationship.getAuxiliarySource();
+            if (auxSource != null) {
+              nodeExtender.addClass("_" + schemaRelationship.getClassName() + "Helper",auxSource);
+            }
+            dynamicViews.addAll(schemaRelationship.getViews());
           }
-          dynamicViews.addAll(schemaRelationship.getViews());
-        }
-        Map<String,Class> newTypes=nodeExtender.compile(errorBuffer);
-        for (        final Class newType : newTypes.values()) {
-          config.unregisterEntityType(newType.getName());
-          config.registerEntityType(newType);
-          try {
-            newType.newInstance();
+          Map<String,Class> newTypes=nodeExtender.compile(errorBuffer);
+          for (          final Class newType : newTypes.values()) {
+            config.registerEntityType(newType);
+            try {
+              newType.newInstance();
+            }
+ catch (            Throwable t) {
+            }
           }
- catch (          Throwable t) {
+          for (          final SchemaNode schemaNode : StructrApp.getInstance().nodeQuery(SchemaNode.class).getAsList()) {
+            schemaNode.createBuiltInSchemaEntities(errorBuffer);
+          }
+          success=!errorBuffer.hasError();
+          if (success) {
+            config.registerDynamicViews(dynamicViews);
+            tx.success();
           }
         }
-        for (        final SchemaNode schemaNode : StructrApp.getInstance().nodeQuery(SchemaNode.class).getAsList()) {
-          schemaNode.createBuiltInSchemaEntities(errorBuffer);
+ catch (        Throwable t) {
+          logger.log(Level.SEVERE,"Unable to compile dynamic schema.",t);
+          t.printStackTrace();
+          success=false;
         }
-        success=!errorBuffer.hasError();
-        if (success) {
-          config.registerDynamicViews(dynamicViews);
-          tx.success();
-        }
+        calculateHierarchy();
       }
- catch (      Throwable t) {
-        logger.log(Level.SEVERE,"Unable to compile dynamic schema.",t);
-        t.printStackTrace();
-        success=false;
-      }
-      calculateHierarchy();
     }
-    compiling.set(false);
+  finally {
+      compiling.set(false);
+    }
   }
   return success;
 }

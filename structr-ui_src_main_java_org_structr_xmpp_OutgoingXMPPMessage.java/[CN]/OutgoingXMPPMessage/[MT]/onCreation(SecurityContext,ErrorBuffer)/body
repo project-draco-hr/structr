@@ -1,0 +1,20 @@
+{
+  if (super.isValid(errorBuffer)) {
+    if (sender != null) {
+      final XMPPClient _sender=getProperty(sentBy);
+      if (_sender != null) {
+        final XMPPClientConnection connection=XMPPContext.getClientForId(_sender.getUuid());
+        if (connection.isConnected()) {
+          connection.sendMessage(getProperty(recipient),getProperty(text));
+          setProperty(sent,true);
+        }
+ else {
+          errorBuffer.add("base",new NotConnectedToken());
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+  return false;
+}

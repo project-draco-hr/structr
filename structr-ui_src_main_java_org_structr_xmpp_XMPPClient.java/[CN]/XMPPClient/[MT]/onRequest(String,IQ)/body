@@ -1,0 +1,13 @@
+{
+  final App app=StructrApp.getInstance();
+  try (final Tx tx=app.tx()){
+    final XMPPClient client=StructrApp.getInstance().get(XMPPClient.class,uuid);
+    if (client != null) {
+      app.create(XMPPRequest.class,new NodeAttribute(XMPPRequest.client,client),new NodeAttribute(XMPPRequest.sender,request.getFrom()),new NodeAttribute(XMPPRequest.owner,client.getProperty(XMPPClient.owner)),new NodeAttribute(XMPPRequest.content,request.toXML().toString()),new NodeAttribute(XMPPRequest.requestType,request.getType()));
+    }
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+  }
+}

@@ -1,7 +1,6 @@
 {
   this.connection=connection;
+  this.uuid=info.getUuid();
   connection.addConnectionListener(this);
-  connection.addAsyncStanzaListener(new CallbackAdapter(info.getPresenceCallback()),new StanzaTypeFilter(Presence.class));
-  connection.addAsyncStanzaListener(new CallbackAdapter(info.getMessageCallback()),MessageWithBodiesFilter.INSTANCE);
-  connection.addAsyncStanzaListener(new CallbackAdapter(info.getIqCallback()),new StanzaTypeFilter(IQ.class));
+  connection.addAsyncStanzaListener(this,ForEveryStanza.INSTANCE);
 }

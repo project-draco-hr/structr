@@ -26,7 +26,8 @@
       }
      }
     properties.remove("type");
-    long nodeCount=bulkGraphOperation(securityContext,nodeIterator,1000,"SetNodeProperties",new BulkGraphOperation<AbstractNode>(){
+    final AtomicLong nodeCount=new AtomicLong();
+    bulkGraphOperation(securityContext,nodeIterator,1000,"SetNodeProperties",new BulkGraphOperation<AbstractNode>(){
       @Override public void handleGraphObject(      SecurityContext securityContext,      AbstractNode node){
         if (node.getProperty(GraphObject.id) != null) {
           for (          Entry entry : properties.entrySet()) {
@@ -69,9 +70,12 @@
       @Override public Predicate<Long> getCondition(){
         return null;
       }
+      @Override public AtomicLong getCounter(){
+        return nodeCount;
+      }
     }
 );
-    logger.log(Level.INFO,"Fixed {0} nodes ...",nodeCount);
+    logger.log(Level.INFO,"Fixed {0} nodes ...",nodeCount.get());
   }
   logger.log(Level.INFO,"Done");
 }

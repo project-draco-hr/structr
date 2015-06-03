@@ -18,7 +18,8 @@
  else {
     logger.log(Level.INFO,"Starting creation of labels for all nodes of type {0}",entityType);
   }
-  long count=bulkGraphOperation(securityContext,nodeIterator,1000,"CreateLabels",new BulkGraphOperation<AbstractNode>(){
+  final AtomicLong count=new AtomicLong();
+  bulkGraphOperation(securityContext,nodeIterator,1000,"CreateLabels",new BulkGraphOperation<AbstractNode>(){
     @Override public void handleGraphObject(    SecurityContext securityContext,    AbstractNode node){
       final String type=node.getProperty(GraphObject.type);
       if (type != null) {
@@ -40,7 +41,10 @@
     @Override public Predicate<Long> getCondition(){
       return null;
     }
+    @Override public AtomicLong getCounter(){
+      return count;
+    }
   }
 );
-  logger.log(Level.INFO,"Done with creating labels on {0} nodes",count);
+  logger.log(Level.INFO,"Done with creating labels on {0} nodes",count.get());
 }

@@ -1,11 +1,12 @@
 {
+  final org.neo4j.helpers.Predicate<Long> condition=operation.getCondition();
   final App app=StructrApp.getInstance(securityContext);
-  long objectCount=0L;
+  final AtomicLong objectCount=operation.getCounter();
   boolean active=true;
   while (active) {
+    active=false;
     try (final Tx tx=app.tx()){
-      active=false;
-      while (iterator.hasNext()) {
+      while (iterator.hasNext() && (condition == null || condition.accept(objectCount.get()))) {
         T node=iterator.next();
         active=true;
         try {
@@ -14,7 +15,7 @@
  catch (        Throwable t) {
           operation.handleThrowable(securityContext,t,node);
         }
-        if ((++objectCount % commitCount) == 0) {
+        if ((objectCount.incrementAndGet() % commitCount) == 0) {
           break;
         }
       }
@@ -24,8 +25,7 @@
       operation.handleTransactionFailure(securityContext,t);
     }
     if (description != null) {
-      logger.log(Level.INFO,"{0}: {1} objects processed",new Object[]{description,objectCount});
+      logger.log(Level.INFO,"{0}: {1} objects processed",new Object[]{description,objectCount.get()});
     }
   }
-  return objectCount;
 }

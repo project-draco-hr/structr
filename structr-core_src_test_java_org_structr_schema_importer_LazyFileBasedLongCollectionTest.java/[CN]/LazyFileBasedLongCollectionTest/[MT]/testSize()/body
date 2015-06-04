@@ -1,0 +1,14 @@
+{
+  try (final LazyFileBasedLongCollection coll=new LazyFileBasedLongCollection("/tmp/" + System.nanoTime() + ".lfc")){
+    assertEquals("Invalid test prerequisite",true,coll.isEmpty());
+    final int count=new Random().nextInt(100);
+    for (int i=0; i < count; i++) {
+      coll.add((long)i);
+    }
+    assertEquals("Invalid size() result",count,coll.size());
+  }
+ catch (  Exception ex) {
+    ex.printStackTrace();
+    fail("Unexpected exception.");
+  }
+}

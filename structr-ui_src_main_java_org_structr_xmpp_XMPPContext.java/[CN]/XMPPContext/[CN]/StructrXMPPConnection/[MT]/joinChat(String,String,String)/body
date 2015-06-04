@@ -1,0 +1,24 @@
+{
+  if (isConnected) {
+    try {
+      final MultiUserChatManager manager=MultiUserChatManager.getInstanceFor(connection);
+      if (manager != null) {
+        final MultiUserChat chat=manager.getMultiUserChat(chatRoom);
+        if (chat != null) {
+          if (password != null) {
+            chat.join(nickname,password);
+          }
+ else {
+            chat.join(nickname);
+          }
+        }
+      }
+    }
+ catch (    XMPPErrorException|SmackException ex) {
+      throw new FrameworkException(422,"Connection error: " + ex.getMessage());
+    }
+  }
+ else {
+    throw new FrameworkException(422,"Not connected");
+  }
+}

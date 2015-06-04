@@ -17,7 +17,8 @@
         tx.success();
       }
      }
-    long count=NodeServiceCommand.bulkGraphOperation(securityContext,relIterator,1000,"SetRelationshipProperties",new BulkGraphOperation<AbstractRelationship>(){
+    final AtomicLong count=new AtomicLong();
+    NodeServiceCommand.bulkGraphOperation(securityContext,relIterator,1000,"SetRelationshipProperties",new BulkGraphOperation<AbstractRelationship>(){
       @Override public void handleGraphObject(      SecurityContext securityContext,      AbstractRelationship rel){
         if (rel.getProperty(AbstractRelationship.id) != null) {
           for (          Entry entry : properties.entrySet()) {
@@ -41,8 +42,14 @@
       @Override public void handleTransactionFailure(      SecurityContext securityContext,      Throwable t){
         logger.log(Level.WARNING,"Unable to set relationship properties: {0}",t.getMessage());
       }
+      @Override public Predicate<Long> getCondition(){
+        return null;
+      }
+      @Override public AtomicLong getCounter(){
+        return count;
+      }
     }
 );
-    logger.log(Level.INFO,"Finished setting properties on {0} relationships",count);
+    logger.log(Level.INFO,"Finished setting properties on {0} relationships",count.get());
   }
 }

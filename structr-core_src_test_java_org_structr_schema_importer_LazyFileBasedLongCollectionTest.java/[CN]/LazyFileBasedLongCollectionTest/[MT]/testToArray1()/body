@@ -1,0 +1,19 @@
+{
+  try (final LazyFileBasedLongCollection coll=new LazyFileBasedLongCollection("/tmp/" + System.nanoTime() + ".lfc")){
+    assertEquals("Invalid test prerequisite",true,coll.isEmpty());
+    for (int i=0; i < 10; i++) {
+      coll.add((long)i);
+    }
+    final Object[] arr=coll.toArray();
+    assertNotNull("Invalid toArray() result",arr);
+    assertEquals("Invalid toArray() result",10,arr.length);
+    long test=0;
+    for (    final Long val : coll) {
+      assertEquals("Invalid value in collection",test++,val.longValue());
+    }
+  }
+ catch (  Exception ex) {
+    ex.printStackTrace();
+    fail("Unexpected exception.");
+  }
+}

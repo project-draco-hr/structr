@@ -18,8 +18,7 @@
         fex.printStackTrace();
       }
       logger.log(Level.INFO,"Start setting UUID on all nodes of type {0}",new Object[]{entityType});
-      final AtomicLong count=new AtomicLong();
-      bulkGraphOperation(securityContext,nodeIterator,1000,"SetNodeProperties",new BulkGraphOperation<AbstractNode>(){
+      final long count=bulkGraphOperation(securityContext,nodeIterator,1000,"SetNodeProperties",new BulkGraphOperation<AbstractNode>(){
         @Override public void handleGraphObject(        final SecurityContext securityContext,        final AbstractNode node){
           try {
             node.setProperty(GraphObject.id,UUID.randomUUID().toString().replaceAll("[\\-]+",""));
@@ -37,15 +36,9 @@
         @Override public void handleTransactionFailure(        SecurityContext securityContext,        Throwable t){
           logger.log(Level.WARNING,"Unable to set UUID on node: {0}",t.getMessage());
         }
-        @Override public Predicate<Long> getCondition(){
-          return null;
-        }
-        @Override public AtomicLong getCounter(){
-          return count;
-        }
       }
 );
-      logger.log(Level.INFO,"Done with setting UUID on {0} nodes",count.get());
+      logger.log(Level.INFO,"Done with setting UUID on {0} nodes",count);
       return;
     }
   }
@@ -60,8 +53,7 @@
       fex.printStackTrace();
     }
     logger.log(Level.INFO,"Start setting UUID on all rels of type {0}",new Object[]{relType});
-    final AtomicLong count=new AtomicLong();
-    bulkGraphOperation(securityContext,relIterator,1000,"SetRelationshipUuid",new BulkGraphOperation<AbstractRelationship>(){
+    final long count=bulkGraphOperation(securityContext,relIterator,1000,"SetRelationshipUuid",new BulkGraphOperation<AbstractRelationship>(){
       @Override public void handleGraphObject(      SecurityContext securityContext,      AbstractRelationship rel){
         try {
           rel.setProperty(AbstractRelationship.id,UUID.randomUUID().toString().replaceAll("[\\-]+",""));
@@ -75,12 +67,6 @@
       }
       @Override public void handleTransactionFailure(      SecurityContext securityContext,      Throwable t){
         logger.log(Level.WARNING,"Unable to set UUID on relationship: {0}",t.getMessage());
-      }
-      @Override public Predicate<Long> getCondition(){
-        return null;
-      }
-      @Override public AtomicLong getCounter(){
-        return count;
       }
     }
 );

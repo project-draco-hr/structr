@@ -1,0 +1,32 @@
+{
+  final NodeFactory nodeFactory=new NodeFactory(SecurityContext.getSuperUserInstance());
+  final GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
+  Iterator<AbstractNode> nodeIterator=null;
+  try (final Tx tx=StructrApp.getInstance().tx()){
+    nodeIterator=Iterables.filter(new TypePredicate<>(entityType),Iterables.map(nodeFactory,Iterables.filter(new StructrAndSpatialPredicate(true,false,false),GlobalGraphOperations.at(graphDb).getAllNodes()))).iterator();
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"Exception while creating all nodes iterator.");
+    fex.printStackTrace();
+  }
+  if (entityType == null) {
+    logger.log(Level.INFO,"Node type not set or no entity class found. Starting (re-)indexing all nodes");
+  }
+ else {
+    logger.log(Level.INFO,"Starting (re-)indexing all nodes of type {0}",entityType);
+  }
+  long count=NodeServiceCommand.bulkGraphOperation(securityContext,nodeIterator,1000,"RebuildNodeIndex",new BulkGraphOperation<AbstractNode>(){
+    @Override public void handleGraphObject(    SecurityContext securityContext,    AbstractNode node){
+      node.updateInIndex();
+    }
+    @Override public void handleThrowable(    SecurityContext securityContext,    Throwable t,    AbstractNode node){
+      logger.log(Level.WARNING,"Unable to index node {0}: {1}",new Object[]{node,t.getMessage()});
+    }
+    @Override public void handleTransactionFailure(    SecurityContext securityContext,    Throwable t){
+      logger.log(Level.WARNING,"Unable to index node: {0}",t.getMessage());
+    }
+  }
+);
+  logger.log(Level.INFO,"Done with (re-)indexing {0} nodes",count);
+}

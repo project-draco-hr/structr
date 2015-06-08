@@ -1,19 +1,11 @@
 {
-  final ExecutorService service=Executors.newCachedThreadPool();
   final String mode=(String)attributes.get("mode");
   final String entityType=(String)attributes.get("type");
   final String relType=(String)attributes.get("relType");
-  try {
-    threadCount=(Integer)attributes.get("threads");
-  }
- catch (  Throwable t) {
-    threadCount=4;
-  }
   if (mode == null || "nodesOnly".equals(mode)) {
-    rebuildNodeIndex(service,entityType);
+    rebuildNodeIndex(entityType);
   }
   if (mode == null || "relsOnly".equals(mode)) {
-    rebuildRelationshipIndex(service,relType);
+    rebuildRelationshipIndex(relType);
   }
-  service.shutdown();
 }

@@ -1,0 +1,15 @@
+{
+  this.securityContext=securityContext;
+  if ("me".equalsIgnoreCase(part)) {
+    this.typeResource=new TypeResource();
+    this.typeResource.setSecurityContext(securityContext);
+    this.typeResource.checkAndConfigure("user",securityContext,request);
+    Principal user=securityContext.getUser(true);
+    if (user != null) {
+      this.idResource=new UuidResource();
+      this.idResource.setSecurityContext(securityContext);
+      this.idResource.checkAndConfigure(user.getProperty(GraphObject.id),securityContext,request);
+    }
+  }
+  return true;
+}

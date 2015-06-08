@@ -12,8 +12,7 @@
       relIterator=Iterables.map(relFactory,GlobalGraphOperations.at(graphDb).getAllRelationships()).iterator();
       tx.success();
     }
-     final AtomicLong count=new AtomicLong();
-    bulkGraphOperation(securityContext,relIterator,1000,"CopyRelationshipProperties",new BulkGraphOperation<AbstractRelationship>(){
+     final long count=bulkGraphOperation(securityContext,relIterator,1000,"CopyRelationshipProperties",new BulkGraphOperation<AbstractRelationship>(){
       @Override public void handleGraphObject(      SecurityContext securityContext,      AbstractRelationship rel){
         if (rel.getProperty(GraphObject.id) != null) {
           Class type=rel.getClass();
@@ -33,14 +32,8 @@
       @Override public void handleTransactionFailure(      SecurityContext securityContext,      Throwable t){
         logger.log(Level.WARNING,"Unable to copy relationship properties: {0}",t.getMessage());
       }
-      @Override public Predicate<Long> getCondition(){
-        return null;
-      }
-      @Override public AtomicLong getCounter(){
-        return count;
-      }
     }
 );
-    logger.log(Level.INFO,"Finished setting properties on {0} nodes",count.get());
+    logger.log(Level.INFO,"Finished setting properties on {0} nodes",count);
   }
 }

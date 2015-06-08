@@ -21,8 +21,7 @@
         tx.success();
       }
      }
-    final AtomicLong nodeCount=new AtomicLong();
-    bulkGraphOperation(securityContext,nodeIterator,1000,"ChangeNodePropertyKey",new BulkGraphOperation<AbstractNode>(){
+    final long count=bulkGraphOperation(securityContext,nodeIterator,1000,"ChangeNodePropertyKey",new BulkGraphOperation<AbstractNode>(){
       @Override public void handleGraphObject(      SecurityContext securityContext,      AbstractNode node){
         for (        Entry entry : properties.entrySet()) {
           String key=(String)entry.getKey();
@@ -47,15 +46,9 @@
       @Override public void handleTransactionFailure(      SecurityContext securityContext,      Throwable t){
         logger.log(Level.WARNING,"Unable to set node properties: {0}",t.getMessage());
       }
-      @Override public Predicate<Long> getCondition(){
-        return null;
-      }
-      @Override public AtomicLong getCounter(){
-        return nodeCount;
-      }
     }
 );
-    logger.log(Level.INFO,"Fixed {0} nodes ...",nodeCount.get());
+    logger.log(Level.INFO,"Fixed {0} nodes ...",count);
   }
  else {
     logger.log(Level.INFO,"No values for oldKey and/or newKey found, aborting.");

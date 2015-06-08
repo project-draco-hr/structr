@@ -26,21 +26,12 @@
       nodeTypes.add(nodeInfo);
       nodeIdMap.add(nodeInfo,node.getId());
     }
-    @Override public void handleThrowable(    SecurityContext securityContext,    Throwable t,    Node currentObject){
-    }
-    @Override public void handleTransactionFailure(    SecurityContext securityContext,    Throwable t){
-    }
-    @Override public Predicate<Long> getCondition(){
-      return null;
-    }
-    @Override public AtomicLong getCounter(){
-      return new AtomicLong();
-    }
   }
 );
   logger.log(Level.INFO,"Identifying common base classes..");
   try (final Tx tx=app.tx(true,false,false)){
     identifyCommonBaseClasses(app,nodeTypes,nodeIdMap,typeInfos);
+    tx.success();
   }
  catch (  FrameworkException fex) {
     fex.printStackTrace();
@@ -48,6 +39,7 @@
   logger.log(Level.INFO,"Collecting type information..");
   try (final Tx tx=app.tx(true,false,false)){
     collectTypeInfos(typeInfos,typeInfoTypeMap);
+    tx.success();
   }
  catch (  FrameworkException fex) {
     fex.printStackTrace();
@@ -55,6 +47,7 @@
   logger.log(Level.INFO,"Aggregating type information..");
   try (final Tx tx=app.tx(true,false,false)){
     reduceTypeInfos(typeInfoTypeMap,reducedTypeInfos);
+    tx.success();
   }
  catch (  FrameworkException fex) {
     fex.printStackTrace();
@@ -62,6 +55,7 @@
   logger.log(Level.INFO,"Identifying property sets..");
   try (final Tx tx=app.tx(true,false,false)){
     intersectPropertySets(reducedTypeInfos);
+    tx.success();
   }
  catch (  FrameworkException fex) {
     fex.printStackTrace();
@@ -69,6 +63,7 @@
   logger.log(Level.INFO,"Sorting result..");
   try (final Tx tx=app.tx(false,false,false)){
     Collections.sort(reducedTypeInfos,new HierarchyComparator(false));
+    tx.success();
   }
  catch (  FrameworkException fex) {
     fex.printStackTrace();
@@ -83,16 +78,6 @@
         final Node node=graphDb.getNodeById(nodeId);
         node.setProperty(GraphObject.id.dbName(),NodeServiceCommand.getNextUuid());
         node.setProperty(GraphObject.type.dbName(),type);
-      }
-      @Override public void handleThrowable(      SecurityContext securityContext,      Throwable t,      Long currentObject){
-      }
-      @Override public void handleTransactionFailure(      SecurityContext securityContext,      Throwable t){
-      }
-      @Override public Predicate<Long> getCondition(){
-        return null;
-      }
-      @Override public AtomicLong getCounter(){
-        return new AtomicLong();
       }
     }
 );
@@ -121,16 +106,6 @@
         }
         rel.setProperty(GraphObject.id.dbName(),NodeServiceCommand.getNextUuid());
       }
-    }
-    @Override public void handleThrowable(    SecurityContext securityContext,    Throwable t,    Relationship currentObject){
-    }
-    @Override public void handleTransactionFailure(    SecurityContext securityContext,    Throwable t){
-    }
-    @Override public Predicate<Long> getCondition(){
-      return null;
-    }
-    @Override public AtomicLong getCounter(){
-      return new AtomicLong();
     }
   }
 );
@@ -182,16 +157,6 @@
         schemaNodes.put(type,app.create(SchemaNode.class,propertyMap));
       }
     }
-    @Override public void handleThrowable(    SecurityContext securityContext,    Throwable t,    TypeInfo currentObject){
-    }
-    @Override public void handleTransactionFailure(    SecurityContext securityContext,    Throwable t){
-    }
-    @Override public Predicate<Long> getCondition(){
-      return null;
-    }
-    @Override public AtomicLong getCounter(){
-      return new AtomicLong();
-    }
   }
 );
   logger.log(Level.INFO,"Starting with schema relationship creation..");
@@ -205,16 +170,6 @@
       propertyMap.put(SchemaRelationshipNode.targetId,endNode.getUuid());
       propertyMap.put(SchemaRelationshipNode.relationshipType,relationshipType);
       app.create(SchemaRelationshipNode.class,propertyMap);
-    }
-    @Override public void handleThrowable(    SecurityContext securityContext,    Throwable t,    RelationshipInfo currentObject){
-    }
-    @Override public void handleTransactionFailure(    SecurityContext securityContext,    Throwable t){
-    }
-    @Override public Predicate<Long> getCondition(){
-      return null;
-    }
-    @Override public AtomicLong getCounter(){
-      return new AtomicLong();
     }
   }
 );

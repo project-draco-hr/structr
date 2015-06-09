@@ -7,6 +7,7 @@
     return;
   }
   if (resourceAccess == null) {
+    logger.log(Level.INFO,"No resource access grant found for signature {0}.",rawResourceSignature);
     throw new UnauthorizedException("Forbidden");
   }
  else {
@@ -61,5 +62,6 @@ return;
 break;
 }
 }
+logger.log(Level.INFO,"Resource access grant found for signature {0}, but method {1} not allowed for {2}.",new Object[]{rawResourceSignature,method,validUser ? "authenticated users" : "public users"});
 throw new UnauthorizedException("Forbidden");
 }

@@ -154,7 +154,16 @@
  else         if (!typeInfo.getOtherTypes().isEmpty()) {
           propertyMap.put(SchemaNode.extendsClass,typeInfo.getSuperclass(reducedTypeInfoMap));
         }
-        schemaNodes.put(type,app.create(SchemaNode.class,propertyMap));
+        final SchemaNode existingNode=app.nodeQuery(SchemaNode.class).andName(type).getFirst();
+        if (existingNode != null) {
+          for (          final Entry<PropertyKey,Object> entry : propertyMap.entrySet()) {
+            existingNode.setProperty(entry.getKey(),entry.getValue());
+          }
+          schemaNodes.put(type,existingNode);
+        }
+ else {
+          schemaNodes.put(type,app.create(SchemaNode.class,propertyMap));
+        }
       }
     }
   }

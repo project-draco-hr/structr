@@ -6,7 +6,7 @@
     boolean reachable=true;
     try {
       final SingleTransmission<ReplicationStatus> transmission=new SingleTransmission<>(new ReplicationStatus(instanceId));
-      final ReplicationStatus status=CloudService.doRemote(transmission,host,new LoggingListener());
+      final ReplicationStatus status=CloudService.doRemote(SecurityContext.getSuperUserInstance(),transmission,host,new LoggingListener());
       if (status != null) {
         final String slaveId=status.getSlaveId();
         if (slaveId != null) {

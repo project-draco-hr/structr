@@ -12,7 +12,7 @@ synchronized (syncQueue) {
         final SyncTransmission transmission=new SyncTransmission(transaction);
         for (        final SyncHostInfo info : syncHosts) {
           try {
-            CloudService.doRemote(transmission,info,successListener);
+            CloudService.doRemote(SecurityContext.getSuperUserInstance(),transmission,info,successListener);
           }
  catch (          FrameworkException fex) {
             logger.log(Level.WARNING,"Unable to synchronize with host {0}: {1}",new Object[]{info,fex.getMessage()});

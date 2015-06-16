@@ -17,6 +17,14 @@
   }
  else {
     final PropertyMap properties=PropertyMap.databaseTypeToJavaType(securityContext,nodeType,receivedNodeData.getProperties());
+    final List<DOMNode> existingChildren=new LinkedList<>();
+    if (ShadowDocument.class.getSimpleName().equals(typeName)) {
+      for (      ShadowDocument existingDoc : app.nodeQuery(ShadowDocument.class).includeDeletedAndHidden().getAsList()) {
+        existingChildren.addAll(existingDoc.getProperty(Page.elements));
+        app.delete(existingDoc);
+      }
+      properties.put(Page.elements,existingChildren);
+    }
     newOrExistingNode=app.create(nodeType,properties);
   }
   idMap.put(receivedNodeData.getSourceNodeId(),newOrExistingNode.getUuid());

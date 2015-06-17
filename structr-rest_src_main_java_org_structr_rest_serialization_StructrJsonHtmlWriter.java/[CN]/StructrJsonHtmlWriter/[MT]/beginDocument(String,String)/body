@@ -11,7 +11,9 @@
   left.inline("button").attr(new Css("collapse right")).attr(new Attr("onclick","CollapsibleLists.closeAll()")).text(" - ");
   left.inline("button").attr(new Css("expand right")).attr(new Attr("onclick","CollapsibleLists.openAll()")).text(" + ");
   try (final Tx tx=app.tx()){
-    for (    SchemaNode node : app.nodeQuery(SchemaNode.class).getAsList()) {
+    final List<SchemaNode> schemaNodes=app.nodeQuery(SchemaNode.class).getAsList();
+    Collections.sort(schemaNodes);
+    for (    SchemaNode node : schemaNodes) {
       final String rawType=node.getName();
       top.inline("a").attr(new Href(restPath + "/" + rawType),new If(rawType.equals(currentType),new Css("active"))).text(rawType);
     }

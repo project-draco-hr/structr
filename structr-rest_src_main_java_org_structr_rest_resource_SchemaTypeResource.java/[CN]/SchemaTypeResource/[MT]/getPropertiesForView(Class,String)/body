@@ -29,6 +29,18 @@
       propProperties.put("type",property.typeName());
     }
     propProperties.put("isCollection",property.isCollection());
+    if (property.isDynamic()) {
+      try {
+        for (        final SchemaProperty schemaProp : StructrApp.getInstance().nodeQuery(SchemaProperty.class).andName(property.jsonName()).getAsList()) {
+          if (schemaProp.schemaNode.getProperty(securityContext,schemaProp,false).getName().equals(declaringClass.getSimpleName())) {
+            propProperties.put("labels",schemaProp.labels.getProperty(securityContext,schemaProp,false));
+          }
+        }
+      }
+ catch (      FrameworkException ex) {
+        Logger.getLogger(SchemaTypeResource.class.getName()).log(Level.SEVERE,"Error looking up SchemaProperty!",ex);
+      }
+    }
     final PropertyConverter databaseConverter=property.databaseConverter(securityContext,null);
     final PropertyConverter inputConverter=property.inputConverter(securityContext);
     if (databaseConverter != null) {

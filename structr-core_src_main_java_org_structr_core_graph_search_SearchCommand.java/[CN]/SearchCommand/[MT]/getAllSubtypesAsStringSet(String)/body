@@ -1,0 +1,31 @@
+{
+  Set<String> allSubtypes=subtypeMapForType.get(type);
+  if (allSubtypes == null) {
+    allSubtypes=new TLinkedHashSet<>();
+    subtypeMapForType.put(type,allSubtypes);
+    final ConfigurationProvider configuration=StructrApp.getConfiguration();
+    final Map<String,Class<? extends NodeInterface>> nodeEntities=configuration.getNodeEntities();
+    final Map<String,Class<? extends RelationshipInterface>> relEntities=configuration.getRelationshipEntities();
+    allSubtypes.add(type);
+    for (    Map.Entry<String,Class<? extends NodeInterface>> entity : nodeEntities.entrySet()) {
+      final Class entityType=entity.getValue();
+      final Set<Class> ancestors=typeAndAllSupertypes(entityType);
+      for (      final Class superClass : ancestors) {
+        final String superClassName=superClass.getSimpleName();
+        if (superClassName.equals(type)) {
+          allSubtypes.add(entityType.getSimpleName());
+        }
+      }
+    }
+    for (    Map.Entry<String,Class<? extends RelationshipInterface>> entity : relEntities.entrySet()) {
+      final Class entityType=entity.getClass();
+      for (      final Class superClass : typeAndAllSupertypes(entityType)) {
+        final String superClassName=superClass.getSimpleName();
+        if (superClassName.equals(type)) {
+          allSubtypes.add(entityType.getSimpleName());
+        }
+      }
+    }
+  }
+  return allSubtypes;
+}

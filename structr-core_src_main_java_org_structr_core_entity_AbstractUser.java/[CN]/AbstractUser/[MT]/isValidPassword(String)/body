@@ -1,0 +1,17 @@
+{
+  final String encryptedPasswordFromDatabase=getEncryptedPassword();
+  if (encryptedPasswordFromDatabase != null) {
+    final String salt=getProperty(Principal.salt);
+    String encryptedPasswordToCheck=null;
+    if (salt != null) {
+      encryptedPasswordToCheck=getHash(password,salt);
+    }
+ else {
+      encryptedPasswordToCheck=getSimpleHash(password);
+    }
+    if (encryptedPasswordFromDatabase.equals(encryptedPasswordToCheck)) {
+      return true;
+    }
+  }
+  return false;
+}

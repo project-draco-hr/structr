@@ -1,6 +1,14 @@
 {
   final Set<PropertyKey> properties=new LinkedHashSet<>(StructrApp.getConfiguration().getPropertySet(type,view));
   final Map<String,Object> propertyConverterMap=new LinkedHashMap<>();
+  List<SchemaProperty> schemaProperties=null;
+  try {
+    SchemaNode schemaNode=StructrApp.getInstance().nodeQuery(SchemaNode.class).andName(type.getSimpleName()).getFirst();
+    schemaProperties=schemaNode.schemaProperties.getProperty(securityContext,schemaNode,false);
+  }
+ catch (  FrameworkException ex) {
+    Logger.getLogger(SchemaTypeResource.class.getName()).log(Level.SEVERE,"Error looking up SchemaNode - cannot display labels for properties!",ex);
+  }
   for (  PropertyKey property : properties) {
     final Map<String,Object> propProperties=new LinkedHashMap();
     propProperties.put("dbName",property.dbName());
@@ -20,6 +28,14 @@
     propProperties.put("unique",property.isUnique());
     propProperties.put("notNull",property.isNotNull());
     propProperties.put("dynamic",property.isDynamic());
+    if (property.isDynamic() && schemaProperties != null) {
+      for (      final SchemaProperty sProp : schemaProperties) {
+        if (sProp.getName().equals(property.jsonName())) {
+          propProperties.put("labels",sProp.labels.getProperty(securityContext,sProp,false));
+          break;
+        }
+      }
+    }
     final Class<? extends GraphObject> relatedType=property.relatedType();
     if (relatedType != null) {
       propProperties.put("relatedType",relatedType.getName());
@@ -29,18 +45,6 @@
       propProperties.put("type",property.typeName());
     }
     propProperties.put("isCollection",property.isCollection());
-    if (property.isDynamic()) {
-      try {
-        for (        final SchemaProperty schemaProp : StructrApp.getInstance().nodeQuery(SchemaProperty.class).andName(property.jsonName()).getAsList()) {
-          if (schemaProp.schemaNode.getProperty(securityContext,schemaProp,false).getName().equals(declaringClass.getSimpleName())) {
-            propProperties.put("labels",schemaProp.labels.getProperty(securityContext,schemaProp,false));
-          }
-        }
-      }
- catch (      FrameworkException ex) {
-        Logger.getLogger(SchemaTypeResource.class.getName()).log(Level.SEVERE,"Error looking up SchemaProperty!",ex);
-      }
-    }
     final PropertyConverter databaseConverter=property.databaseConverter(securityContext,null);
     final PropertyConverter inputConverter=property.inputConverter(securityContext);
     if (databaseConverter != null) {

@@ -4,7 +4,9 @@
   List<SchemaProperty> schemaProperties=null;
   try {
     SchemaNode schemaNode=StructrApp.getInstance().nodeQuery(SchemaNode.class).andName(type.getSimpleName()).getFirst();
-    schemaProperties=schemaNode.schemaProperties.getProperty(securityContext,schemaNode,false);
+    if (schemaNode != null) {
+      schemaProperties=schemaNode.schemaProperties.getProperty(securityContext,schemaNode,false);
+    }
   }
  catch (  FrameworkException ex) {
     Logger.getLogger(SchemaTypeResource.class.getName()).log(Level.SEVERE,"Error looking up SchemaNode - cannot display labels for properties!",ex);

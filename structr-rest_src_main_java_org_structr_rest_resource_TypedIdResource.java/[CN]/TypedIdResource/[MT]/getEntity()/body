@@ -1,10 +1,11 @@
 {
-  GraphObject entity=idResource.getEntity();
-  String type=SchemaHelper.normalizeEntityName(typeResource.getRawType());
-  Class parentClass=SchemaHelper.getEntityClassForRawType(type);
-  Class entityClass=entity.getClass();
-  if (parentClass.isAssignableFrom(entityClass)) {
-    return entity;
+  final GraphObject entity=idResource.getEntity();
+  if (entity != null) {
+    String type=SchemaHelper.normalizeEntityName(typeResource.getRawType());
+    Class parentClass=SchemaHelper.getEntityClassForRawType(type);
+    if (SearchCommand.getAllSubtypesAsStringSet(parentClass.getSimpleName()).contains(type)) {
+      return entity;
+    }
   }
   throw new NotFoundException();
 }

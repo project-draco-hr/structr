@@ -2,14 +2,8 @@
   final Set<PropertyKey> properties=new LinkedHashSet<>(StructrApp.getConfiguration().getPropertySet(type,view));
   final Map<String,Object> propertyConverterMap=new LinkedHashMap<>();
   List<SchemaProperty> schemaProperties=null;
-  try {
-    SchemaNode schemaNode=StructrApp.getInstance().nodeQuery(SchemaNode.class).andName(type.getSimpleName()).getFirst();
-    if (schemaNode != null) {
-      schemaProperties=schemaNode.schemaProperties.getProperty(securityContext,schemaNode,false);
-    }
-  }
- catch (  FrameworkException ex) {
-    Logger.getLogger(SchemaTypeResource.class.getName()).log(Level.SEVERE,"Error looking up SchemaNode - cannot display labels for properties!",ex);
+  if (schemaNode != null) {
+    schemaProperties=schemaNode.schemaProperties.getProperty(securityContext,schemaNode,false);
   }
   for (  PropertyKey property : properties) {
     final Map<String,Object> propProperties=new LinkedHashMap();
@@ -33,16 +27,16 @@
     if (property.isDynamic() && schemaProperties != null) {
       for (      final SchemaProperty sProp : schemaProperties) {
         if (sProp.getName().equals(property.jsonName())) {
-          final List<SchemaPropertyLocalization> labels=sProp.localizations.getProperty(securityContext,sProp,false);
-          final List<Map<String,Object>> labelMap=new ArrayList<>(labels.size());
-          for (          final SchemaPropertyLocalization lbl : labels) {
+          final List<SchemaPropertyLocalization> propertyLocalizations=sProp.localizations.getProperty(securityContext,sProp,false);
+          final List<Map<String,Object>> localizationsMap=new ArrayList<>(propertyLocalizations.size());
+          for (          final SchemaPropertyLocalization loc : propertyLocalizations) {
             final HashMap tmpMap=new HashMap(3);
-            tmpMap.put("id",lbl.getProperty(SchemaPropertyLocalization.id));
-            tmpMap.put("locale",lbl.getProperty(SchemaPropertyLocalization.locale));
-            tmpMap.put("name",lbl.getProperty(SchemaPropertyLocalization.name));
-            labelMap.add(tmpMap);
+            tmpMap.put("id",loc.getProperty(SchemaPropertyLocalization.id));
+            tmpMap.put("locale",loc.getProperty(SchemaPropertyLocalization.locale));
+            tmpMap.put("name",loc.getProperty(SchemaPropertyLocalization.name));
+            localizationsMap.add(tmpMap);
           }
-          propProperties.put("labels",labelMap);
+          propProperties.put("localizations",localizationsMap);
           break;
         }
       }

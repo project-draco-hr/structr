@@ -28,12 +28,12 @@
       for (      final SchemaProperty sProp : schemaProperties) {
         if (sProp.getName().equals(property.jsonName())) {
           final List<SchemaPropertyLocalization> propertyLocalizations=sProp.localizations.getProperty(securityContext,sProp,false);
-          final List<Map<String,Object>> localizationsMap=new ArrayList<>(propertyLocalizations.size());
+          final List<GraphObjectMap> localizationsMap=new ArrayList<>(propertyLocalizations.size());
           for (          final SchemaPropertyLocalization loc : propertyLocalizations) {
-            final HashMap tmpMap=new HashMap(3);
-            tmpMap.put("id",loc.getProperty(SchemaPropertyLocalization.id));
-            tmpMap.put("locale",loc.getProperty(SchemaPropertyLocalization.locale));
-            tmpMap.put("name",loc.getProperty(SchemaPropertyLocalization.name));
+            final GraphObjectMap tmpMap=new GraphObjectMap();
+            tmpMap.setProperty(new UuidProperty(),loc.getProperty(SchemaPropertyLocalization.id));
+            tmpMap.setProperty(new StringProperty("locale"),loc.getProperty(SchemaPropertyLocalization.locale));
+            tmpMap.setProperty(new StringProperty("name"),loc.getProperty(SchemaPropertyLocalization.name));
             localizationsMap.add(tmpMap);
           }
           propProperties.put("localizations",localizationsMap);

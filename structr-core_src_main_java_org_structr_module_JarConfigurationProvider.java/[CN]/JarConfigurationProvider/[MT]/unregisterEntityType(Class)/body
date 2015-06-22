@@ -1,18 +1,20 @@
 {
-  final String simpleName=oldType.getSimpleName();
-  final String fqcn=oldType.getName();
-  nodeEntityClassCache.remove(simpleName);
-  relationshipEntityClassCache.remove(simpleName);
-  nodeEntityPackages.remove(fqcn);
-  relationshipPackages.remove(fqcn);
-  globalPropertyViewMap.remove(simpleName);
-  globalClassDBNamePropertyMap.remove(simpleName);
-  globalClassJSNamePropertyMap.remove(simpleName);
-  interfaceMap.remove(oldType);
-  combinedTypeRelationClassCache.clear();
-  for (  final Set<Class> classes : interfaceCache.values()) {
-    if (classes.contains(oldType)) {
-      classes.remove(oldType);
+synchronized (SchemaService.class) {
+    final String simpleName=oldType.getSimpleName();
+    final String fqcn=oldType.getName();
+    nodeEntityClassCache.remove(simpleName);
+    relationshipEntityClassCache.remove(simpleName);
+    nodeEntityPackages.remove(fqcn);
+    relationshipPackages.remove(fqcn);
+    globalPropertyViewMap.remove(simpleName);
+    globalClassDBNamePropertyMap.remove(simpleName);
+    globalClassJSNamePropertyMap.remove(simpleName);
+    interfaceMap.remove(oldType);
+    combinedTypeRelationClassCache.clear();
+    for (    final Set<Class> classes : interfaceCache.values()) {
+      if (classes.contains(oldType)) {
+        classes.remove(oldType);
+      }
     }
   }
 }

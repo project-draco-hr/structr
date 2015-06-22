@@ -1,6 +1,10 @@
 {
   final Set<PropertyKey> properties=new LinkedHashSet<>(StructrApp.getConfiguration().getPropertySet(type,view));
   final Map<String,Object> propertyConverterMap=new LinkedHashMap<>();
+  List<SchemaProperty> schemaProperties=null;
+  if (schemaNode != null) {
+    schemaProperties=schemaNode.schemaProperties.getProperty(securityContext,schemaNode,false);
+  }
   for (  PropertyKey property : properties) {
     final Map<String,Object> propProperties=new LinkedHashMap();
     propProperties.put("dbName",property.dbName());
@@ -20,6 +24,23 @@
     propProperties.put("unique",property.isUnique());
     propProperties.put("notNull",property.isNotNull());
     propProperties.put("dynamic",property.isDynamic());
+    if (property.isDynamic() && schemaProperties != null) {
+      for (      final SchemaProperty sProp : schemaProperties) {
+        if (sProp.getName().equals(property.jsonName())) {
+          final List<SchemaPropertyLocalization> propertyLocalizations=sProp.localizations.getProperty(securityContext,sProp,false);
+          final List<Map<String,Object>> localizationsMap=new ArrayList<>(propertyLocalizations.size());
+          for (          final SchemaPropertyLocalization loc : propertyLocalizations) {
+            final HashMap tmpMap=new HashMap(3);
+            tmpMap.put("id",loc.getProperty(SchemaPropertyLocalization.id));
+            tmpMap.put("locale",loc.getProperty(SchemaPropertyLocalization.locale));
+            tmpMap.put("name",loc.getProperty(SchemaPropertyLocalization.name));
+            localizationsMap.add(tmpMap);
+          }
+          propProperties.put("localizations",localizationsMap);
+          break;
+        }
+      }
+    }
     final Class<? extends GraphObject> relatedType=property.relatedType();
     if (relatedType != null) {
       propProperties.put("relatedType",relatedType.getName());

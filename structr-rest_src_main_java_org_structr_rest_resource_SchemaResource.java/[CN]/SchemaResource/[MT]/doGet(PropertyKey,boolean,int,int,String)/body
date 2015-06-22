@@ -11,6 +11,24 @@
       schema.setProperty(new StringProperty("className"),type.getName());
       schema.setProperty(new StringProperty("isRel"),AbstractRelationship.class.isAssignableFrom(type));
       schema.setProperty(new LongProperty("flags"),SecurityContext.getResourceFlags(rawType));
+      try {
+        SchemaNode schemaNode=StructrApp.getInstance().nodeQuery(SchemaNode.class).andName(type.getSimpleName()).getFirst();
+        if (schemaNode != null) {
+          final List<SchemaNodeLocalization> nodeLocalizations=schemaNode.localizations.getProperty(securityContext,schemaNode,false);
+          final List<Map<String,Object>> localizationsMap=new ArrayList<>(nodeLocalizations.size());
+          for (          final SchemaNodeLocalization loc : nodeLocalizations) {
+            final HashMap tmpMap=new HashMap(3);
+            tmpMap.put("id",loc.getProperty(SchemaNodeLocalization.id));
+            tmpMap.put("locale",loc.getProperty(SchemaNodeLocalization.locale));
+            tmpMap.put("name",loc.getProperty(SchemaNodeLocalization.name));
+            localizationsMap.add(tmpMap);
+          }
+          schema.setProperty(new GenericProperty("localizations"),localizationsMap);
+        }
+      }
+ catch (      FrameworkException ex) {
+        Logger.getLogger(SchemaTypeResource.class.getName()).log(Level.SEVERE,"Error looking up SchemaNode - cannot display labels for properties!",ex);
+      }
     }
   }
   return new Result(resultList,resultList.size(),false,false);

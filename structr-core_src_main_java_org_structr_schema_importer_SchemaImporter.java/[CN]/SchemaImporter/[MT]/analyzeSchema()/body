@@ -28,6 +28,7 @@
     }
   }
 );
+  printNodeTypes(nodeTypes);
   logger.log(Level.INFO,"Identifying common base classes..");
   try (final Tx tx=app.tx(true,false,false)){
     identifyCommonBaseClasses(app,nodeTypes,nodeIdMap,typeInfos);
@@ -36,6 +37,7 @@
  catch (  FrameworkException fex) {
     fex.printStackTrace();
   }
+  printNodeTypes(nodeTypes);
   logger.log(Level.INFO,"Collecting type information..");
   try (final Tx tx=app.tx(true,false,false)){
     collectTypeInfos(typeInfos,typeInfoTypeMap);
@@ -101,7 +103,8 @@
         final String endNodeType=(String)endNode.getProperty("type");
         relationships.add(new RelationshipInfo(startNodeType,endNodeType,relationshipType));
         if (startNodeType != null && endNodeType != null) {
-          final String combinedType=startNodeType.concat(relationshipType).concat(endNodeType);
+          final String combinedType=getCombinedType(startNodeType,relationshipType,endNodeType);
+          logger.log(Level.INFO,"Combined relationship type {0} found for rel type {1}, start node type {2}, end node type {3}",new Object[]{combinedType,relationshipType,startNodeType,endNodeType});
           rel.setProperty(GraphObject.type.dbName(),combinedType);
         }
         rel.setProperty(GraphObject.id.dbName(),NodeServiceCommand.getNextUuid());
@@ -112,11 +115,11 @@
   logger.log(Level.INFO,"Grouping relationships..");
   final Map<String,List<RelationshipInfo>> relTypeInfoMap=new THashMap<>();
   for (  final RelationshipInfo relInfo : relationships) {
-    final String relType=relInfo.getRelType();
-    List<RelationshipInfo> infos=relTypeInfoMap.get(relType);
+    final String combinedType=getCombinedType(relInfo.getStartNodeType(),relInfo.getRelType(),relInfo.getEndNodeType());
+    List<RelationshipInfo> infos=relTypeInfoMap.get(combinedType);
     if (infos == null) {
       infos=new LinkedList<>();
-      relTypeInfoMap.put(relType,infos);
+      relTypeInfoMap.put(combinedType,infos);
     }
     infos.add(relInfo);
   }

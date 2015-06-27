@@ -1,7 +1,6 @@
 {
   final Set<PropertyKey> properties=new LinkedHashSet<>(StructrApp.getConfiguration().getPropertySet(type,view));
   final Map<String,Object> propertyConverterMap=new LinkedHashMap<>();
-  final List<SchemaProperty> schemaProperties=getSchemaProperties(schemaNode);
   for (  PropertyKey property : properties) {
     final Map<String,Object> propProperties=new LinkedHashMap();
     propProperties.put("dbName",property.dbName());
@@ -22,23 +21,26 @@
     propProperties.put("notNull",property.isNotNull());
     propProperties.put("dynamic",property.isDynamic());
     if (property.isDynamic()) {
-      final List<SchemaProperty> schemaPropertiesOfDeclaringClass=getSchemaProperties(StructrApp.getInstance().nodeQuery(SchemaNode.class).andName(declaringClass.getSimpleName()).getFirst());
-      final List<SchemaProperty> effectiveSchemaProperties=type.equals(declaringClass) ? schemaProperties : schemaPropertiesOfDeclaringClass;
-      if (effectiveSchemaProperties != null && !effectiveSchemaProperties.isEmpty()) {
-        for (        final SchemaProperty sProp : effectiveSchemaProperties) {
-          if (sProp.getName().equals(property.jsonName())) {
-            final List<SchemaPropertyLocalization> propertyLocalizations=sProp.localizations.getProperty(securityContext,sProp,false);
-            final List<GraphObjectMap> localizationsMap=new ArrayList<>(propertyLocalizations.size());
-            for (            final SchemaPropertyLocalization loc : propertyLocalizations) {
-              final GraphObjectMap tmpMap=new GraphObjectMap();
-              tmpMap.setProperty(new UuidProperty(),loc.getProperty(SchemaPropertyLocalization.id));
-              tmpMap.setProperty(new StringProperty("locale"),loc.getProperty(SchemaPropertyLocalization.locale));
-              tmpMap.setProperty(new StringProperty("name"),loc.getProperty(SchemaPropertyLocalization.name));
-              localizationsMap.add(tmpMap);
-            }
-            propProperties.put("localizations",localizationsMap);
-            break;
+      final List<SchemaProperty> effectiveSchemaProperties;
+      if (type.equals(declaringClass)) {
+        effectiveSchemaProperties=getSchemaProperties(schemaNode);
+      }
+ else {
+        effectiveSchemaProperties=getSchemaProperties(StructrApp.getInstance().nodeQuery(SchemaNode.class).andName(declaringClass.getSimpleName()).getFirst());
+      }
+      for (      final SchemaProperty sProp : effectiveSchemaProperties) {
+        if (sProp.getName().equals(property.jsonName())) {
+          final List<SchemaPropertyLocalization> propertyLocalizations=sProp.localizations.getProperty(securityContext,sProp,false);
+          final List<GraphObjectMap> localizationsMap=new ArrayList<>(propertyLocalizations.size());
+          for (          final SchemaPropertyLocalization loc : propertyLocalizations) {
+            final GraphObjectMap tmpMap=new GraphObjectMap();
+            tmpMap.setProperty(new UuidProperty(),loc.getProperty(SchemaPropertyLocalization.id));
+            tmpMap.setProperty(new StringProperty("locale"),loc.getProperty(SchemaPropertyLocalization.locale));
+            tmpMap.setProperty(new StringProperty("name"),loc.getProperty(SchemaPropertyLocalization.name));
+            localizationsMap.add(tmpMap);
           }
+          propProperties.put("localizations",localizationsMap);
+          break;
         }
       }
     }

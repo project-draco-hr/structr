@@ -28,7 +28,6 @@
     }
   }
 );
-  printNodeTypes(nodeTypes);
   logger.log(Level.INFO,"Identifying common base classes..");
   try (final Tx tx=app.tx(true,false,false)){
     identifyCommonBaseClasses(app,nodeTypes,nodeIdMap,typeInfos);
@@ -37,7 +36,6 @@
  catch (  FrameworkException fex) {
     fex.printStackTrace();
   }
-  printNodeTypes(nodeTypes);
   logger.log(Level.INFO,"Collecting type information..");
   try (final Tx tx=app.tx(true,false,false)){
     collectTypeInfos(typeInfos,typeInfoTypeMap);
@@ -104,7 +102,7 @@
         relationships.add(new RelationshipInfo(startNodeType,endNodeType,relationshipType));
         if (startNodeType != null && endNodeType != null) {
           final String combinedType=getCombinedType(startNodeType,relationshipType,endNodeType);
-          logger.log(Level.INFO,"Combined relationship type {0} found for rel type {1}, start node type {2}, end node type {3}",new Object[]{combinedType,relationshipType,startNodeType,endNodeType});
+          logger.log(Level.FINE,"Combined relationship type {0} found for rel type {1}, start node type {2}, end node type {3}",new Object[]{combinedType,relationshipType,startNodeType,endNodeType});
           rel.setProperty(GraphObject.type.dbName(),combinedType);
         }
         rel.setProperty(GraphObject.id.dbName(),NodeServiceCommand.getNextUuid());

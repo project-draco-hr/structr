@@ -1,6 +1,6 @@
 {
   Set<String> allSubtypes=subtypeMapForType.get(type);
-  if (allSubtypes == null) {
+  if (allSubtypes == null || baseTypes.contains(type)) {
     allSubtypes=new TLinkedHashSet<>();
     subtypeMapForType.put(type,allSubtypes);
     final ConfigurationProvider configuration=StructrApp.getConfiguration();
@@ -18,8 +18,9 @@
       }
     }
     for (    Map.Entry<String,Class<? extends RelationshipInterface>> entity : relEntities.entrySet()) {
-      final Class entityType=entity.getClass();
-      for (      final Class superClass : typeAndAllSupertypes(entityType)) {
+      final Class entityType=entity.getValue();
+      final Set<Class> ancestors=typeAndAllSupertypes(entityType);
+      for (      final Class superClass : ancestors) {
         final String superClassName=superClass.getSimpleName();
         if (superClass.getName().startsWith("org.structr.") && superClassName.equals(type)) {
           allSubtypes.add(entityType.getSimpleName());

@@ -9,20 +9,22 @@
   try (final Tx tx=app.tx()){
     final TestFour testEntity=createTestNode(TestFour.class);
     assertNotNull(testEntity);
-    assertTrue(labelsBefore.containsAll(Iterables.toSet(testEntity.getNode().getLabels())));
+    assertTrue(Iterables.toSet(testEntity.getNode().getLabels()).containsAll(labelsBefore));
     id=testEntity.getUuid();
     testEntity.setProperty(GraphObject.type,TestFive.class.getSimpleName());
     tx.success();
   }
  catch (  FrameworkException fex) {
+    fex.printStackTrace();
     fail("Unexpected exception");
   }
   try (final Tx tx=app.tx()){
     final TestFive testEntity=app.get(TestFive.class,id);
     assertNotNull(testEntity);
-    assertTrue(labelsAfter.containsAll(Iterables.toSet(testEntity.getNode().getLabels())));
+    assertTrue(Iterables.toSet(testEntity.getNode().getLabels()).containsAll(labelsAfter));
   }
  catch (  FrameworkException fex) {
+    fex.printStackTrace();
     fail("Unexpected exception");
   }
 }

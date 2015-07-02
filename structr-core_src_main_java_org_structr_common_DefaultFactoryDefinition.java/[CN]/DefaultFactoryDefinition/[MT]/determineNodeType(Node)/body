@@ -26,9 +26,11 @@
       }
     }
     final Iterable<Label> labels=node.getLabels();
-    if (labels != null && labels.iterator().hasNext()) {
-      final Label firstLabel=labels.iterator().next();
-      final Class dynamicType=StructrApp.getConfiguration().getNodeEntityClass(firstLabel.name());
+    if (labels != null) {
+      final List<String> sortedLabels=Iterables.toList(Iterables.map(new LabelExtractor(),labels));
+      Collections.sort(sortedLabels);
+      final String typeName=StringUtils.join(sortedLabels,"");
+      final Class dynamicType=StructrApp.getConfiguration().getNodeEntityClass(typeName);
       if (dynamicType != null) {
         return dynamicType;
       }

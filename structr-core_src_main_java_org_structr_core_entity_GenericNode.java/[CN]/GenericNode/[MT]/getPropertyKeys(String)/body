@@ -1,0 +1,36 @@
+{
+  final Node node=getNode();
+  if (node != null) {
+    final long id=node.getId();
+    Set<PropertyKey> keys=propertyKeys.get(id);
+    if (keys == null) {
+      keys=new TreeSet<>(new PropertyKeyComparator());
+      final Set<String> outgoing=new LinkedHashSet<>();
+      final Set<String> incoming=new LinkedHashSet<>();
+      keys.addAll(Iterables.toList(super.getPropertyKeys(propertyView)));
+      keys.addAll(Iterables.toList(Iterables.map(new GenericPropertyKeyMapper(),dbNode.getPropertyKeys())));
+      final boolean examineRelationships=false;
+      if (examineRelationships) {
+        for (        final Relationship in : node.getRelationships(Direction.INCOMING)) {
+          incoming.add(in.getType().name());
+        }
+        for (        final String incomingRelType : incoming) {
+          final String propertyName=CaseHelper.toLowerCamelCase(incomingRelType);
+          final PropertyKey property=new StartNodes(propertyName + "In",new GenericRelation(incomingRelType),new ObjectNotion());
+          keys.add(property);
+        }
+        for (        final Relationship out : node.getRelationships(Direction.OUTGOING)) {
+          outgoing.add(out.getType().name());
+        }
+        for (        final String outgoingRelType : outgoing) {
+          final String propertyName=CaseHelper.toLowerCamelCase(outgoingRelType);
+          final PropertyKey property=new EndNodes(propertyName + "Out",new GenericRelation(outgoingRelType),new ObjectNotion());
+          keys.add(property);
+        }
+      }
+      propertyKeys.put(id,keys);
+    }
+    return keys;
+  }
+  return Collections.EMPTY_SET;
+}

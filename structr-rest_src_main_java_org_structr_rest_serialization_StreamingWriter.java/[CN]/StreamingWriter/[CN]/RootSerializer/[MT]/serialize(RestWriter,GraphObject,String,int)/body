@@ -1,10 +1,7 @@
 {
-  String id=null;
-  if (source != null) {
-    id=source.getUuid();
-    if (id != null) {
-      visitedObjects.add(id);
-    }
+  if (reduceRedundancy && source != null) {
+    final int hashCode=source.hashCode();
+    visitedObjects.add(hashCode);
   }
   writer.beginObject(source);
   if (depth <= outputNestingDepth) {
@@ -17,21 +14,9 @@
         final Predicate predicate=writer.getSecurityContext().getRange(key.jsonName());
         final Object value=source.getProperty(key,predicate);
         final PropertyKey localKey=key;
-        if (value != null) {
-          boolean skip=false;
-          if (reduceRedundancy && value instanceof GraphObject) {
-            String valueId=((GraphObject)value).getUuid();
-            if (valueId != null) {
-              skip=visitedObjects.contains(valueId);
-            }
-          }
-          if (skip) {
-            continue;
-          }
- else {
-            writer.name(localKey.jsonName());
-            serializeProperty(writer,key,value,localPropertyView,depth + 1);
-          }
+        if (value != null && !visitedObjects.contains(value.hashCode())) {
+          writer.name(localKey.jsonName());
+          serializeProperty(writer,key,value,localPropertyView,depth + 1);
         }
  else {
           writer.name(localKey.jsonName()).nullValue();
@@ -40,7 +25,4 @@
     }
   }
   writer.endObject(source);
-  if (id != null) {
-    visitedObjects.remove(id);
-  }
 }

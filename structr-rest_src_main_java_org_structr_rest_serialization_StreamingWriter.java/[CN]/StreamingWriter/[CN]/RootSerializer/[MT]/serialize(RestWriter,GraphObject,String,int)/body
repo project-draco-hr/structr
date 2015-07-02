@@ -1,6 +1,7 @@
 {
-  if (reduceRedundancy && source != null) {
-    final int hashCode=source.hashCode();
+  int hashCode=-1;
+  if (source != null) {
+    hashCode=source.hashCode();
     visitedObjects.add(hashCode);
   }
   writer.beginObject(source);
@@ -14,9 +15,11 @@
         final Predicate predicate=writer.getSecurityContext().getRange(key.jsonName());
         final Object value=source.getProperty(key,predicate);
         final PropertyKey localKey=key;
-        if (value != null && !visitedObjects.contains(value.hashCode())) {
-          writer.name(localKey.jsonName());
-          serializeProperty(writer,key,value,localPropertyView,depth + 1);
+        if (value != null) {
+          if (!(reduceRedundancy && visitedObjects.contains(value.hashCode()))) {
+            writer.name(localKey.jsonName());
+            serializeProperty(writer,key,value,localPropertyView,depth + 1);
+          }
         }
  else {
           writer.name(localKey.jsonName()).nullValue();
@@ -25,4 +28,5 @@
     }
   }
   writer.endObject(source);
+  visitedObjects.remove(hashCode);
 }

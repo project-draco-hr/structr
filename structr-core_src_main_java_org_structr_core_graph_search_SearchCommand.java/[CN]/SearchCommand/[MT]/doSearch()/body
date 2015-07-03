@@ -77,36 +77,30 @@
         params.put(LayerNodeIndex.DISTANCE_IN_KM_PARAMETER,dist);
         LayerNodeIndex spatialIndex=this.getSpatialIndex();
         if (spatialIndex != null) {
-synchronized (spatialIndex) {
-            try (final IndexHits hits=spatialIndex.query(LayerNodeIndex.WITHIN_DISTANCE_QUERY,params)){
-              intermediateResult=new NodeFactory(securityContext).instantiate(hits);
-            }
-           }
-        }
+          try (final IndexHits hits=spatialIndex.query(LayerNodeIndex.WITHIN_DISTANCE_QUERY,params)){
+            intermediateResult=new NodeFactory(securityContext).instantiate(hits);
+          }
+         }
       }
     }
  else     if (allExactMatch) {
       index=getKeywordIndex();
-synchronized (index) {
-        try (final IndexHits hits=index.query(queryContext)){
-          filterResults=hasEmptySearchFields;
-          intermediateResult=factory.instantiate(hits);
-        }
- catch (        NumberFormatException nfe) {
-          logger.log(Level.SEVERE,"Could not sort results",nfe);
-        }
+      try (final IndexHits hits=index.query(queryContext)){
+        filterResults=hasEmptySearchFields;
+        intermediateResult=factory.instantiate(hits);
+      }
+ catch (      NumberFormatException nfe) {
+        logger.log(Level.SEVERE,"Could not sort results",nfe);
       }
     }
  else {
       index=getFulltextIndex();
-synchronized (index) {
-        try (final IndexHits hits=index.query(queryContext)){
-          filterResults=hasEmptySearchFields;
-          intermediateResult=factory.instantiate(hits);
-        }
- catch (        NumberFormatException nfe) {
-          logger.log(Level.SEVERE,"Could not sort results",nfe);
-        }
+      try (final IndexHits hits=index.query(queryContext)){
+        filterResults=hasEmptySearchFields;
+        intermediateResult=factory.instantiate(hits);
+      }
+ catch (      NumberFormatException nfe) {
+        logger.log(Level.SEVERE,"Could not sort results",nfe);
       }
     }
   }

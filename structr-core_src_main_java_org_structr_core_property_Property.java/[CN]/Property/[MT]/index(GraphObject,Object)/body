@@ -7,14 +7,16 @@
       Index<Node> index=nodeService.getNodeIndex(indexName);
       if (index != null) {
         try {
-          index.remove(dbNode,dbName);
-          if (value != null && !StringUtils.isBlank(value.toString())) {
-            index.add(dbNode,dbName,value);
-          }
- else           if (isIndexedWhenEmpty()) {
-            value=getValueForEmptyFields();
-            if (value != null) {
+synchronized (index) {
+            index.remove(dbNode,dbName);
+            if (value != null && !StringUtils.isBlank(value.toString())) {
               index.add(dbNode,dbName,value);
+            }
+ else             if (isIndexedWhenEmpty()) {
+              value=getValueForEmptyFields();
+              if (value != null) {
+                index.add(dbNode,dbName,value);
+              }
             }
           }
         }
@@ -32,14 +34,16 @@
       Index<Relationship> index=nodeService.getRelationshipIndex(indexName);
       if (index != null) {
         try {
-          index.remove(dbRel,dbName);
-          if (value != null && !StringUtils.isBlank(value.toString())) {
-            index.add(dbRel,dbName,value);
-          }
- else           if (isIndexedWhenEmpty()) {
-            value=getValueForEmptyFields();
-            if (value != null) {
+synchronized (index) {
+            index.remove(dbRel,dbName);
+            if (value != null && !StringUtils.isBlank(value.toString())) {
               index.add(dbRel,dbName,value);
+            }
+ else             if (isIndexedWhenEmpty()) {
+              value=getValueForEmptyFields();
+              if (value != null) {
+                index.add(dbRel,dbName,value);
+              }
             }
           }
         }

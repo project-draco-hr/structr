@@ -6,7 +6,6 @@
   boolean filterResults=true;
   boolean hasGraphSources=false;
   boolean hasSpatialSource=false;
-  final Index<S> index;
   if (securityContext.getUser(false) == null) {
     rootGroup.add(new PropertySearchAttribute(GraphObject.visibleToPublicUsers,true,BooleanClause.Occur.MUST,true));
   }
@@ -77,15 +76,14 @@
         params.put(LayerNodeIndex.DISTANCE_IN_KM_PARAMETER,dist);
         LayerNodeIndex spatialIndex=this.getSpatialIndex();
         if (spatialIndex != null) {
-          try (final IndexHits hits=spatialIndex.query(LayerNodeIndex.WITHIN_DISTANCE_QUERY,params)){
+          try (final IndexHits hits=synchronizedSpatialQuery(spatialIndex,params)){
             intermediateResult=new NodeFactory(securityContext).instantiate(hits);
           }
          }
       }
     }
  else     if (allExactMatch) {
-      index=getKeywordIndex();
-      try (final IndexHits hits=index.query(queryContext)){
+      try (final IndexHits hits=synchronizedLuceneQuery(getKeywordIndex(),query)){
         filterResults=hasEmptySearchFields;
         intermediateResult=factory.instantiate(hits);
       }
@@ -94,8 +92,7 @@
       }
     }
  else {
-      index=getFulltextIndex();
-      try (final IndexHits hits=index.query(queryContext)){
+      try (final IndexHits hits=synchronizedLuceneQuery(getFulltextIndex(),query)){
         filterResults=hasEmptySearchFields;
         intermediateResult=factory.instantiate(hits);
       }

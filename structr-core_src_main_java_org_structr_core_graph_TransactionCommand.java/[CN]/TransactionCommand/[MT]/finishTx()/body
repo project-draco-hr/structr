@@ -4,6 +4,7 @@
   if (tx != null) {
     if (tx.isToplevel()) {
       modificationQueue=queues.get();
+      final Set<String> synchronizationKeys=modificationQueue.getSynchronizationKeys();
       queues.remove();
       buffers.remove();
       currentCommand.remove();
@@ -13,6 +14,9 @@
       }
  catch (      Throwable t) {
         t.printStackTrace();
+      }
+ finally {
+        semaphore.release(synchronizationKeys);
       }
     }
  else {

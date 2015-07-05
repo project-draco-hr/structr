@@ -17,17 +17,14 @@
       }
     }
     Set<String> synchronizationKeys=modificationQueue.getSynchronizationKeys();
-    System.out.println("Waiting for semaphore on " + synchronizationKeys);
     try {
       semaphore.acquire(synchronizationKeys);
     }
  catch (    InterruptedException iex) {
       return;
     }
-    System.out.println("Got semaphore on " + synchronizationKeys);
     if (!modificationQueue.doValidation(securityContext,errorBuffer,doValidation)) {
       tx.failure();
-      semaphore.release(synchronizationKeys);
       throw new FrameworkException(422,errorBuffer);
     }
     try {
@@ -36,6 +33,5 @@
  catch (    Throwable t) {
       t.printStackTrace();
     }
-    semaphore.release(synchronizationKeys);
   }
 }

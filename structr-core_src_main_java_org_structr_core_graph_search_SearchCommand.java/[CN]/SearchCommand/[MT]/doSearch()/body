@@ -76,14 +76,14 @@
         params.put(LayerNodeIndex.DISTANCE_IN_KM_PARAMETER,dist);
         LayerNodeIndex spatialIndex=this.getSpatialIndex();
         if (spatialIndex != null) {
-          try (final IndexHits hits=synchronizedSpatialQuery(spatialIndex,params)){
+          try (final IndexHits hits=spatialIndex.query(LayerNodeIndex.WITHIN_DISTANCE_QUERY,params)){
             intermediateResult=new NodeFactory(securityContext).instantiate(hits);
           }
          }
       }
     }
  else     if (allExactMatch) {
-      try (final IndexHits hits=synchronizedLuceneQuery(getKeywordIndex(),query)){
+      try (final IndexHits hits=getKeywordIndex().query(queryContext)){
         filterResults=hasEmptySearchFields;
         intermediateResult=factory.instantiate(hits);
       }
@@ -92,7 +92,7 @@
       }
     }
  else {
-      try (final IndexHits hits=synchronizedLuceneQuery(getFulltextIndex(),query)){
+      try (final IndexHits hits=getFulltextIndex().query(queryContext)){
         filterResults=hasEmptySearchFields;
         intermediateResult=factory.instantiate(hits);
       }

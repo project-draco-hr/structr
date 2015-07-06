@@ -25,7 +25,6 @@
     }
     if (!modificationQueue.doValidation(securityContext,errorBuffer,doValidation)) {
       tx.failure();
-      semaphore.release(synchronizationKeys);
       throw new FrameworkException(422,errorBuffer);
     }
     try {
@@ -34,6 +33,5 @@
  catch (    Throwable t) {
       t.printStackTrace();
     }
-    semaphore.release(synchronizationKeys);
   }
 }

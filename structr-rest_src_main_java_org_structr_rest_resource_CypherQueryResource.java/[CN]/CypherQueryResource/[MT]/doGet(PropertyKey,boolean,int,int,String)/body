@@ -1,3 +1,17 @@
 {
-  throw new IllegalMethodException();
+  if (!securityContext.isSuperUser()) {
+    throw new NotAllowedException();
+  }
+  try {
+    Object queryObject=securityContext.getRequest().getParameter("query");
+    if (queryObject != null) {
+      String query=queryObject.toString();
+      List<GraphObject> resultList=StructrApp.getInstance(securityContext).command(CypherQueryCommand.class).execute(query,Collections.EMPTY_MAP);
+      return new Result(resultList,resultList.size(),true,false);
+    }
+  }
+ catch (  org.neo4j.graphdb.NotFoundException nfe) {
+    throw new NotFoundException();
+  }
+  return new Result(Collections.EMPTY_LIST,0,false,false);
 }

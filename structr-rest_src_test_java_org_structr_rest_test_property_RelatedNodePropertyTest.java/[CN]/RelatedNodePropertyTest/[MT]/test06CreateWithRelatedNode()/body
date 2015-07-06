@@ -1,0 +1,5 @@
+{
+  String test01=createEntity("/test_ones","{ name: test01 }");
+  String test02=createEntity("/test_fives","{ name: test02, manyToManyTestOnes: [",test01,"] }");
+  RestAssured.given().contentType("application/json; charset=UTF-8").filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(200)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(201)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(400)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(404)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(422)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(500)).expect().statusCode(200).body("result.manyToManyTestOnes[0]",equalTo(test01)).when().get(concat("/test_fives/",test02));
+}

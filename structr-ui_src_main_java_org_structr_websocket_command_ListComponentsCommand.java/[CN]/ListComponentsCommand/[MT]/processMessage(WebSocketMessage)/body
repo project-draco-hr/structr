@@ -20,6 +20,25 @@
         }
       }
     }
+    Collections.sort(filteredResults,new Comparator<AbstractNode>(){
+      @Override public int compare(      AbstractNode node1,      AbstractNode node2){
+        final String nameNode1=node1.getProperty(AbstractNode.name);
+        final String nameNode2=node2.getProperty(AbstractNode.name);
+        if (nameNode1 != null && nameNode2 != null) {
+          return nameNode1.compareTo(nameNode2);
+        }
+ else         if (nameNode1 == null && nameNode2 == null) {
+          return 0;
+        }
+ else         if (nameNode1 == null) {
+          return -1;
+        }
+ else {
+          return 1;
+        }
+      }
+    }
+);
     int resultCountBeforePaging=filteredResults.size();
     webSocketData.setResult(PagingHelper.subList(filteredResults,pageSize,page,null));
     webSocketData.setRawResultCount(resultCountBeforePaging);

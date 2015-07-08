@@ -1,0 +1,24 @@
+{
+  final List<T> nodes=new LinkedList<>();
+  int position=0;
+  int count=0;
+  int overallCount=0;
+  boolean pageFull=false;
+  try (final IndexHits<S> closeable=input){
+    for (    S s : closeable) {
+      T node=instantiate(s);
+      if (node != null) {
+        overallCount++;
+        if (++position > offset) {
+          if (++count > pageSize) {
+            pageFull=true;
+          }
+          if (!pageFull) {
+            nodes.add(node);
+          }
+        }
+      }
+    }
+  }
+   return new Result(nodes,overallCount,true,false);
+}

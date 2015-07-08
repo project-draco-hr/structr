@@ -14,15 +14,7 @@
     return new Result(nodes,size,true,false);
   }
  else {
-    int size=input.size();
-    SecurityContext securityContext=factoryProfile.getSecurityContext();
-    boolean dontCheckCount=securityContext.isSuperUser() || securityContext.getUser(false) == null;
-    if (dontCheckCount) {
-      fromIndex=pageSize == Integer.MAX_VALUE ? 0 : (page - 1);
-    }
- else {
-      fromIndex=pageSize == Integer.MAX_VALUE ? 0 : (page - 1) * pageSize;
-    }
-    return page(input,size,fromIndex,pageSize,dontCheckCount);
+    fromIndex=pageSize == Integer.MAX_VALUE ? 0 : (page - 1) * pageSize;
+    return page(input,fromIndex,pageSize);
   }
 }

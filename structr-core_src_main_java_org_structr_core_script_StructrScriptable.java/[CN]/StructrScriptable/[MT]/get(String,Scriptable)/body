@@ -4,7 +4,7 @@
       @Override public Object execIdCall(      final IdFunctionObject info,      final Context context,      final Scriptable scope,      final Scriptable thisObject,      final Object[] parameters){
         if (parameters.length > 0 && parameters[0] != null) {
           try {
-            return wrap(thisObject,null,actionContext.evaluate(entity,parameters[0].toString(),null,null));
+            return wrap(context,thisObject,null,actionContext.evaluate(entity,parameters[0].toString(),null,null));
           }
  catch (          FrameworkException ex) {
             exception=ex;
@@ -49,10 +49,10 @@
 ,null,0,0);
   }
   if ("this".equals(name)) {
-    return wrap(start,null,entity);
+    return wrap(null,start,null,entity);
   }
   if ("me".equals(name)) {
-    return wrap(start,null,actionContext.getSecurityContext().getUser(false));
+    return wrap(null,start,null,actionContext.getSecurityContext().getUser(false));
   }
   if ("vars".equals(name)) {
     NativeObject nobj=new NativeObject();

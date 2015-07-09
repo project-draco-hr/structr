@@ -1,15 +1,18 @@
 {
   if (value instanceof Collection) {
-    return new StructrArray(scope,key,wrapCollection(scope,key,(Collection)value));
+    return new StructrArray(scope,key,wrapCollection(context,scope,key,(Collection)value));
   }
   if (value instanceof GraphObject) {
-    return new GraphObjectWrapper(scope,(GraphObject)value);
+    return new GraphObjectWrapper(context,scope,(GraphObject)value);
   }
   if (value instanceof HttpServletRequest) {
     return new HttpServletRequestWrapper((HttpServletRequest)value);
   }
   if (value != null && value.getClass().isEnum()) {
     return ((Enum)value).name();
+  }
+  if (value instanceof Date) {
+    return context.newObject(scope,"Date",new Object[]{((Date)value).getTime()});
   }
   return value;
 }

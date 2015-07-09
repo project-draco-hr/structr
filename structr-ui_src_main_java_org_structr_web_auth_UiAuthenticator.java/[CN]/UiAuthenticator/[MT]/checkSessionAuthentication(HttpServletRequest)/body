@@ -9,11 +9,18 @@
  else {
     if (session != null) {
       if (session.getId().equals(requestedSessionId)) {
-        sessionValid=!AuthHelper.isSessionTimedOut(session);
+        if (AuthHelper.isSessionTimedOut(session)) {
+          sessionValid=false;
+          invalidateSessionId(requestedSessionId);
+        }
+ else {
+          sessionValid=true;
+        }
       }
     }
  else {
       session=AuthHelper.newSession(request);
+      invalidateSessionId(requestedSessionId);
     }
   }
   if (sessionValid) {

@@ -1,0 +1,22 @@
+{
+  final Long id=relUuidMap.get(uuid);
+  if (id == null) {
+    GraphObject entity=relationshipQuery().uuid(uuid).getFirst();
+    if (entity != null && uuid.equals(entity.getUuid())) {
+      relUuidMap.put(uuid,entity.getId());
+      return (RelationshipInterface)entity;
+    }
+  }
+  if (id != null) {
+    try {
+      final GraphDatabaseService graphDb=getGraphDatabaseService();
+      return relFactory.instantiate(graphDb.getRelationshipById(id));
+    }
+ catch (    NotFoundException ignore) {
+    }
+  }
+ else {
+    relUuidMap.remove(uuid);
+  }
+  return null;
+}

@@ -1,5 +1,7 @@
 {
   super.setProperty(securityContext,obj,value);
+  RelationshipFactory.invalidateCache();
+  NodeFactory.invalidateCache();
   if (obj instanceof NodeInterface) {
     final Class type=StructrApp.getConfiguration().getNodeEntityClass(value);
     final Set<Label> intersection=new LinkedHashSet<>();
@@ -10,7 +12,10 @@
       toRemove.add(label);
     }
     for (    final Class supertype : SearchCommand.typeAndAllSupertypes(type)) {
-      toAdd.add(DynamicLabel.label(supertype.getSimpleName()));
+      final String supertypeName=supertype.getName();
+      if (supertypeName.startsWith("org.structr.") || supertypeName.startsWith("com.structr.")) {
+        toAdd.add(DynamicLabel.label(supertype.getSimpleName()));
+      }
     }
     intersection.addAll(toAdd);
     intersection.retainAll(toRemove);

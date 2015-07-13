@@ -7,16 +7,13 @@
       return (RelationshipInterface)entity;
     }
   }
-  if (id != null) {
+ else {
     try {
-      final GraphDatabaseService graphDb=getGraphDatabaseService();
-      return relFactory.instantiate(graphDb.getRelationshipById(id));
+      return relFactory.instantiate(getGraphDatabaseService().getRelationshipById(id));
     }
  catch (    NotFoundException ignore) {
+      relUuidMap.remove(uuid);
     }
-  }
- else {
-    relUuidMap.remove(uuid);
   }
   return null;
 }

@@ -9,6 +9,10 @@
   if (securityContext.getUser(false) == null) {
     rootGroup.add(new PropertySearchAttribute(GraphObject.visibleToPublicUsers,true,BooleanClause.Occur.MUST,true));
   }
+  if (!includeDeletedAndHidden && !isRelationshipSearch()) {
+    rootGroup.add(new PropertySearchAttribute(NodeInterface.hidden,true,BooleanClause.Occur.MUST_NOT,true));
+    rootGroup.add(new PropertySearchAttribute(NodeInterface.deleted,true,BooleanClause.Occur.MUST_NOT,true));
+  }
   List<SourceSearchAttribute> sources=new ArrayList<>();
   DistanceSearchAttribute distanceSearch=null;
   boolean hasEmptySearchFields=false;

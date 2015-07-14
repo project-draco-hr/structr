@@ -1,0 +1,26 @@
+{
+  GraphObject graphObject=null;
+  if (value instanceof Node) {
+    graphObject=nodeFactory.instantiate((Node)value,includeHiddenAndDeleted,publicOnly);
+  }
+ else   if (value instanceof Relationship) {
+    graphObject=relFactory.instantiate((Relationship)value);
+  }
+ else   if (value instanceof Map) {
+    final Map<String,Object> valueMap=(Map<String,Object>)value;
+    graphObject=new GraphObjectMap();
+    for (    final Entry<String,Object> valueEntry : valueMap.entrySet()) {
+      final String valueKey=valueEntry.getKey();
+      final Object valueValue=valueEntry.getValue();
+      graphObject.setProperty(new GenericProperty(valueKey),handleObject(nodeFactory,relFactory,valueKey,valueValue,includeHiddenAndDeleted,publicOnly,level + 1));
+    }
+  }
+ else   if (level == 0) {
+    graphObject=new GraphObjectMap();
+    graphObject.setProperty(new GenericProperty(key),value);
+  }
+ else {
+    return value;
+  }
+  return graphObject;
+}

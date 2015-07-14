@@ -1,0 +1,15 @@
+{
+  try {
+    final Principal user=getUser(request,false);
+    if (user != null) {
+      AuthHelper.doLogout(request,user);
+    }
+    final HttpSession session=request.getSession(false);
+    if (session != null) {
+      session.invalidate();
+    }
+  }
+ catch (  IllegalStateException|FrameworkException ex) {
+    logger.log(Level.WARNING,"Error while logging out user",ex);
+  }
+}

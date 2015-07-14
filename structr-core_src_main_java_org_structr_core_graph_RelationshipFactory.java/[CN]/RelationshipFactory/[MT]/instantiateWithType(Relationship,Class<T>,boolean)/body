@@ -15,10 +15,12 @@
     newRel=(T)StructrApp.getConfiguration().getFactoryDefinition().createGenericRelationship();
   }
   newRel.init(securityContext,relationship,relClass);
-  final String type=newRel.getProperty(GraphObject.type);
-  if (type == null || (type != null && !type.equals(relClass.getSimpleName()))) {
-    newRel.unlockReadOnlyPropertiesOnce();
-    newRel.setProperty(GraphObject.type,relClass.getSimpleName());
+  if (!TransactionCommand.isDeleted(relationship)) {
+    final String type=newRel.getProperty(GraphObject.type);
+    if (type == null || (type != null && !type.equals(relClass.getSimpleName()))) {
+      newRel.unlockReadOnlyPropertiesOnce();
+      newRel.setProperty(GraphObject.type,relClass.getSimpleName());
+    }
   }
   newRel.onRelationshipInstantiation();
   return newRel;

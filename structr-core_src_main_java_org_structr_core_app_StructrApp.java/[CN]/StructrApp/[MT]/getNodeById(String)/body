@@ -1,0 +1,19 @@
+{
+  final Long nodeId=nodeUuidMap.get(uuid);
+  if (nodeId == null) {
+    GraphObject entity=nodeQuery().uuid(uuid).includeDeletedAndHidden().getFirst();
+    if (entity != null && uuid.equals(entity.getUuid())) {
+      nodeUuidMap.put(uuid,entity.getId());
+      return (NodeInterface)entity;
+    }
+  }
+ else {
+    try {
+      return nodeFactory.instantiate(getGraphDatabaseService().getNodeById(nodeId));
+    }
+ catch (    NotFoundException ignore) {
+      nodeUuidMap.remove(uuid);
+    }
+  }
+  return null;
+}

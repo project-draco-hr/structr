@@ -1,7 +1,11 @@
 {
-  GraphObject entity=nodeQuery().uuid(uuid).includeDeletedAndHidden().getFirst();
-  if (entity == null) {
-    entity=relationshipQuery().uuid(uuid).getFirst();
+  final NodeInterface node=getNodeById(uuid);
+  if (node != null) {
+    return node;
   }
-  return entity;
+  final RelationshipInterface rel=getRelationshipById(uuid);
+  if (rel != null) {
+    return rel;
+  }
+  return null;
 }

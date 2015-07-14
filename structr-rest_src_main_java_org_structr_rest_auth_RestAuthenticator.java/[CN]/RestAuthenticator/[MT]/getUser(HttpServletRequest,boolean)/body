@@ -1,0 +1,21 @@
+{
+  Principal user=null;
+  final HttpSession session=request.getSession(false);
+  if (session != null) {
+    user=AuthHelper.getPrincipalForSessionId(session.getId());
+  }
+  if (user == null) {
+    String userName=request.getHeader("X-User");
+    String password=request.getHeader("X-Password");
+    String token=request.getHeader("X-StructrSessionToken");
+    if (token != null) {
+      user=AuthHelper.getPrincipalForSessionId(token);
+    }
+ else     if ((userName != null) && (password != null)) {
+      if (tryLogin) {
+        user=AuthHelper.getPrincipalForPassword(AbstractNode.name,userName,password);
+      }
+    }
+  }
+  return user;
+}

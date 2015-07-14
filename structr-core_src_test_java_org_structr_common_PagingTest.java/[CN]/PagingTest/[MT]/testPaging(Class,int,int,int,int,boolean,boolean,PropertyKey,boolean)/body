@@ -1,5 +1,9 @@
 {
-  Result result=app.nodeQuery(type).sort(sortKey).order(sortDesc).page(page).pageSize(pageSize).getResult();
+  final Query query=app.nodeQuery(type).sort(sortKey).order(sortDesc).page(page).pageSize(pageSize);
+  if (includeDeletedAndHidden) {
+    query.includeDeletedAndHidden();
+  }
+  final Result result=query.getResult();
   logger.log(Level.INFO,"Raw result size: {0}, expected: {1} (page size: {2}, page: {3})",new Object[]{result.getRawResultCount(),number,pageSize,page});
   assertTrue(result.getRawResultCount() == ((pageSize == 0 || page == 0) ? 0 : number));
   long expectedResultCount=(pageSize == 0 || page == 0) ? 0 : Math.min(number,pageSize);

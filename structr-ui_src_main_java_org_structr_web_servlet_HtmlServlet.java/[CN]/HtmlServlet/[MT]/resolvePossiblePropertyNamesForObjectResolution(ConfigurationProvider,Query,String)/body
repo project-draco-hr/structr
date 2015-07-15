@@ -1,0 +1,31 @@
+{
+  for (  final String possiblePropertyName : possiblePropertyNamesForEntityResolving) {
+    final String[] parts=possiblePropertyName.split("\\.");
+    String className=AbstractNode.class.getSimpleName();
+    String keyName=AbstractNode.name.jsonName();
+switch (parts.length) {
+case 2:
+      className=parts[0];
+    keyName=parts[1];
+  break;
+default :
+logger.log(Level.WARNING,"Unable to process key for object resolution {0}.",possiblePropertyName);
+break;
+}
+if (StringUtils.isNoneBlank(className,keyName)) {
+final Class type=config.getNodeEntityClass(className);
+if (type != null) {
+final PropertyKey key=config.getPropertyKeyForJSONName(type,keyName,false);
+if (key != null) {
+query.or(key,name);
+}
+ else {
+logger.log(Level.WARNING,"Unable to find property key {0} of type {1} defined in key {2} used for object resolution.",new Object[]{keyName,className,possiblePropertyName});
+}
+}
+ else {
+logger.log(Level.WARNING,"Unable to find type {0} defined in key {1} used for object resolution.",new Object[]{className,possiblePropertyName});
+}
+}
+}
+}

@@ -1,15 +1,30 @@
 {
-  if (request == null) {
-    return Locale.getDefault();
-  }
-  String requestedLocaleString=request.getParameter(LOCALE_KEY);
-  Locale locale=request.getLocale();
-  if (StringUtils.isNotBlank(requestedLocaleString)) {
-    try {
-      locale=LocaleUtils.toLocale(requestedLocaleString);
+  Locale locale=Locale.getDefault();
+  boolean userHasLocaleString=false;
+  if (cachedUser != null) {
+    final String userLocaleString=cachedUser.getProperty(Principal.locale);
+    if (userLocaleString != null) {
+      userHasLocaleString=true;
+      try {
+        locale=LocaleUtils.toLocale(userLocaleString);
+      }
+ catch (      IllegalArgumentException e) {
+        locale=Locale.forLanguageTag(userLocaleString);
+      }
     }
- catch (    IllegalArgumentException e) {
-      locale=Locale.forLanguageTag(requestedLocaleString);
+  }
+  if (request != null) {
+    if (!userHasLocaleString) {
+      locale=request.getLocale();
+    }
+    String requestedLocaleString=request.getParameter(LOCALE_KEY);
+    if (StringUtils.isNotBlank(requestedLocaleString)) {
+      try {
+        locale=LocaleUtils.toLocale(requestedLocaleString);
+      }
+ catch (      IllegalArgumentException e) {
+        locale=Locale.forLanguageTag(requestedLocaleString);
+      }
     }
   }
   return locale;

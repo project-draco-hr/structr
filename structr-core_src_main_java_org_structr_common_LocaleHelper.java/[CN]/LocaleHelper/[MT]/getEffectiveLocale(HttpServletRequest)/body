@@ -1,0 +1,13 @@
+{
+  String requestedLocaleString=request.getParameter(LOCALE_KEY);
+  Locale locale=request.getLocale();
+  if (StringUtils.isNotBlank(requestedLocaleString)) {
+    try {
+      locale=LocaleUtils.toLocale(requestedLocaleString);
+    }
+ catch (    IllegalArgumentException e) {
+      locale=Locale.forLanguageTag(requestedLocaleString);
+    }
+  }
+  return locale;
+}

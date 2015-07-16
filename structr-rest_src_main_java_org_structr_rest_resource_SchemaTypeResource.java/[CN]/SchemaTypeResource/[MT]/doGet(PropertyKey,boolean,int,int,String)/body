@@ -27,18 +27,6 @@
       schema.setProperty(new StringProperty("className"),type.getName());
       schema.setProperty(new BooleanProperty("isRel"),AbstractRelationship.class.isAssignableFrom(type));
       schema.setProperty(new LongProperty("flags"),SecurityContext.getResourceFlags(rawType));
-      if (schemaNode != null) {
-        final List<SchemaNodeLocalization> nodeLocalizations=schemaNode.localizations.getProperty(securityContext,schemaNode,false);
-        final List<GraphObjectMap> localizationsMap=new ArrayList<>(nodeLocalizations.size());
-        for (        final SchemaNodeLocalization loc : nodeLocalizations) {
-          final GraphObjectMap tmpMap=new GraphObjectMap();
-          tmpMap.setProperty(new UuidProperty(),loc.getProperty(SchemaNodeLocalization.id));
-          tmpMap.setProperty(new StringProperty("locale"),loc.getProperty(SchemaNodeLocalization.locale));
-          tmpMap.setProperty(new StringProperty("name"),loc.getProperty(SchemaNodeLocalization.name));
-          localizationsMap.add(tmpMap);
-        }
-        schema.setProperty(new GenericProperty("localizations"),localizationsMap);
-      }
       Set<String> propertyViews=new LinkedHashSet<>(StructrApp.getConfiguration().getPropertyViews());
       Map<String,Map<String,Object>> views=new TreeMap();
       schema.setProperty(new GenericProperty("views"),views);

@@ -1,0 +1,27 @@
+{
+  final Page page=Page.createNewPage(securityContext,name);
+  if (page != null) {
+    Element html=page.createElement("html");
+    Element head=page.createElement("head");
+    Element body=page.createElement("body");
+    Element title=page.createElement("title");
+    Element h1=page.createElement("h1");
+    Element div=page.createElement("div");
+    try {
+      page.appendChild(html);
+      html.appendChild(head);
+      html.appendChild(body);
+      head.appendChild(title);
+      body.appendChild(h1);
+      body.appendChild(div);
+      title.appendChild(page.createTextNode("${capitalize(page.name)}"));
+      h1.appendChild(page.createTextNode("${capitalize(page.name)}"));
+      div.appendChild(page.createTextNode("Initial body text"));
+    }
+ catch (    DOMException dex) {
+      dex.printStackTrace();
+      throw new FrameworkException(422,dex.getMessage());
+    }
+  }
+  return page;
+}

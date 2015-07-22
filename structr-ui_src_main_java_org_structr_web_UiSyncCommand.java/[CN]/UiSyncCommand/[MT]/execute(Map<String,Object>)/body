@@ -1,0 +1,20 @@
+{
+  final String mode=(String)attributes.get("mode");
+  if (mode != null) {
+    final String fileName=(String)attributes.get("file");
+    if (fileName != null) {
+      if ("export".equals(mode)) {
+        doExport(fileName);
+      }
+      if ("import".equals(mode)) {
+        doImport(fileName);
+      }
+    }
+ else {
+      throw new FrameworkException(400,"Please specify file name using the file parameter.");
+    }
+  }
+ else {
+    throw new FrameworkException(400,"Please specify mode, must be one of (import|export)");
+  }
+}

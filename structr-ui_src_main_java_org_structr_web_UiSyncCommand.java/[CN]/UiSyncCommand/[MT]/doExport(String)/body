@@ -1,0 +1,13 @@
+{
+  final Set<RelationshipInterface> rels=new LinkedHashSet<>();
+  final Set<NodeInterface> nodes=new LinkedHashSet<>();
+  final Set<String> filePaths=new LinkedHashSet<>();
+  final App app=StructrApp.getInstance();
+  try (final Tx tx=app.tx()){
+    for (    final Page page : app.nodeQuery(Page.class).getAsList()) {
+      collectDataRecursively(page,nodes,rels,filePaths);
+    }
+    SyncCommand.exportToFile(fileName,nodes,rels,filePaths,true);
+    tx.success();
+  }
+ }

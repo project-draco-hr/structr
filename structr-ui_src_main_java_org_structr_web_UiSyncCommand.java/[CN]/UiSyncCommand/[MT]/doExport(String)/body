@@ -4,6 +4,9 @@
   final Set<String> filePaths=new LinkedHashSet<>();
   final App app=StructrApp.getInstance();
   try (final Tx tx=app.tx()){
+    for (    final Folder folder : app.nodeQuery(Folder.class).and(Folder.includeInFrontendExport,true).getAsList()) {
+      collectDataRecursively(app,folder,nodes,rels,filePaths);
+    }
     for (    final Page page : app.nodeQuery(Page.class).getAsList()) {
       collectDataRecursively(app,page,nodes,rels,filePaths);
     }

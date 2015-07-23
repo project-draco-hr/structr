@@ -1,0 +1,38 @@
+{
+  if (root.isNode()) {
+    final NodeInterface node=root.getSyncNode();
+    if (node instanceof FileBase) {
+      final String fileUuid=node.getUuid();
+      files.add(fileUuid);
+    }
+    if (nodes.add(node)) {
+      final List<GraphObject> syncData=node.getSyncData();
+      if (syncData != null) {
+        for (        final GraphObject obj : syncData) {
+          if (obj != null) {
+            collectDataRecursively(obj,nodes,rels,files);
+          }
+        }
+      }
+ else {
+        logger.log(Level.WARNING,"Node {0} returned null syncData!",node);
+      }
+    }
+  }
+ else   if (root.isRelationship()) {
+    final RelationshipInterface rel=root.getSyncRelationship();
+    if (rels.add(rel)) {
+      final List<GraphObject> syncData=rel.getSyncData();
+      if (syncData != null) {
+        for (        final GraphObject obj : syncData) {
+          if (obj != null) {
+            collectDataRecursively(obj,nodes,rels,files);
+          }
+        }
+      }
+ else {
+        logger.log(Level.WARNING,"Relationship {0} returned null syncData!",rel);
+      }
+    }
+  }
+}

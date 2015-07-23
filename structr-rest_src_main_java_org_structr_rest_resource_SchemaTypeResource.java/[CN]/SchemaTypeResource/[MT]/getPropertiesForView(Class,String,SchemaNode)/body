@@ -28,21 +28,6 @@
  else {
         effectiveSchemaProperties=getSchemaProperties(StructrApp.getInstance().nodeQuery(SchemaNode.class).andName(declaringClass.getSimpleName()).getFirst());
       }
-      for (      final SchemaProperty sProp : effectiveSchemaProperties) {
-        if (sProp.getName().equals(property.jsonName())) {
-          final List<SchemaPropertyLocalization> propertyLocalizations=sProp.localizations.getProperty(securityContext,sProp,false);
-          final List<GraphObjectMap> localizationsMap=new ArrayList<>(propertyLocalizations.size());
-          for (          final SchemaPropertyLocalization loc : propertyLocalizations) {
-            final GraphObjectMap tmpMap=new GraphObjectMap();
-            tmpMap.setProperty(new UuidProperty(),loc.getProperty(SchemaPropertyLocalization.id));
-            tmpMap.setProperty(new StringProperty("locale"),loc.getProperty(SchemaPropertyLocalization.locale));
-            tmpMap.setProperty(new StringProperty("name"),loc.getProperty(SchemaPropertyLocalization.name));
-            localizationsMap.add(tmpMap);
-          }
-          propProperties.put("localizations",localizationsMap);
-          break;
-        }
-      }
     }
     final Class<? extends GraphObject> relatedType=property.relatedType();
     if (relatedType != null) {

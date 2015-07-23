@@ -17,7 +17,17 @@ final Class type=config.getNodeEntityClass(className);
 if (type != null) {
 final PropertyKey key=config.getPropertyKeyForJSONName(type,keyName,false);
 if (key != null) {
-query.or(key,name);
+try {
+  final PropertyConverter converter=key.inputConverter(SecurityContext.getSuperUserInstance());
+  if (converter != null) {
+    query.or(key,converter.convert(name));
+  }
+ else {
+    query.or(key,name);
+  }
+}
+ catch (FrameworkException ignore) {
+}
 }
  else {
 logger.log(Level.WARNING,"Unable to find property key {0} of type {1} defined in key {2} used for object resolution.",new Object[]{keyName,className,possiblePropertyName});

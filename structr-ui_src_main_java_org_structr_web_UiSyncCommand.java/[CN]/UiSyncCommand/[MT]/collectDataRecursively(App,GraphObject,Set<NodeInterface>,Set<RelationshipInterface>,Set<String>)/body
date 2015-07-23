@@ -1,16 +1,20 @@
 {
+  System.out.println("                                                                               nodes: " + nodes.size());
   if (root.isNode()) {
     final NodeInterface node=root.getSyncNode();
     if (node instanceof FileBase) {
       final String fileUuid=node.getUuid();
       files.add(fileUuid);
     }
+    if (node instanceof Content) {
+      extractInlinedFiles(app,((Content)node).getProperty(Content.content),nodes,files);
+    }
     if (nodes.add(node)) {
       final List<GraphObject> syncData=node.getSyncData();
       if (syncData != null) {
         for (        final GraphObject obj : syncData) {
           if (obj != null) {
-            collectDataRecursively(obj,nodes,rels,files);
+            collectDataRecursively(app,obj,nodes,rels,files);
           }
         }
       }
@@ -26,7 +30,7 @@
       if (syncData != null) {
         for (        final GraphObject obj : syncData) {
           if (obj != null) {
-            collectDataRecursively(obj,nodes,rels,files);
+            collectDataRecursively(app,obj,nodes,rels,files);
           }
         }
       }

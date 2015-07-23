@@ -1,0 +1,33 @@
+{
+  final Set<String> possibleNames=new LinkedHashSet<>();
+  final Document document=Jsoup.parse(content);
+  for (  final Element element : document.getElementsByAttribute("src")) {
+    possibleNames.add(element.attr("src"));
+  }
+  for (  final Element element : document.getElementsByTag("link")) {
+switch (element.attr("rel")) {
+case "stylesheet":
+case "icon":
+      possibleNames.add(element.attr("href"));
+    break;
+}
+}
+for (final String possibleName : possibleNames) {
+try {
+  final URI url=URI.create(possibleName.replace("/..","").replace("..",""));
+  final String path=url.getPath();
+  final FileBase file=app.nodeQuery(FileBase.class).and(FileBase.path,path).getFirst();
+  System.out.println("Looking for file " + path + "..");
+  if (file != null) {
+    System.out.println("        " + file.getUuid());
+    System.out.println("                                                                                     nodes: " + nodes.size());
+    files.add(file.getUuid());
+    nodes.add(file);
+    System.out.println("                                                                                     nodes: " + nodes.size());
+  }
+}
+ catch (Throwable ignore) {
+  ignore.printStackTrace();
+}
+}
+}

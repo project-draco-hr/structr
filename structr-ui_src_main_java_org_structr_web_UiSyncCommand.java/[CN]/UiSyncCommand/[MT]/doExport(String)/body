@@ -5,7 +5,7 @@
   final App app=StructrApp.getInstance();
   try (final Tx tx=app.tx()){
     for (    final Page page : app.nodeQuery(Page.class).getAsList()) {
-      collectDataRecursively(page,nodes,rels,filePaths);
+      collectDataRecursively(app,page,nodes,rels,filePaths);
     }
     SyncCommand.exportToFile(fileName,nodes,rels,filePaths,true);
     tx.success();

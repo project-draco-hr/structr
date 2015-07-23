@@ -1,8 +1,24 @@
 {
   final App app=StructrApp.getInstance();
   final GraphDatabaseService graphDb=app.getGraphDatabaseService();
+  SyncCommand.importFromFile(graphDb,securityContext,fileName,true);
   try (final Tx tx=app.tx()){
-    SyncCommand.importFromFile(graphDb,securityContext,fileName,true);
+    final List<ShadowDocument> shadowDocuments=app.nodeQuery(ShadowDocument.class).includeDeletedAndHidden().getAsList();
+    if (shadowDocuments.size() > 1) {
+      final List<DOMNode> collectiveChildren=new LinkedList<>();
+      Collections.sort(shadowDocuments,new Comparator<ShadowDocument>(){
+        @Override public int compare(        final ShadowDocument t1,        final ShadowDocument t2){
+          return t2.getNodeId().compareTo(t1.getNodeId());
+        }
+      }
+);
+      final ShadowDocument previousShadowDoc=shadowDocuments.get(0);
+      final ShadowDocument newShadowDoc=shadowDocuments.get(1);
+      collectiveChildren.addAll(previousShadowDoc.getProperty(Page.elements));
+      collectiveChildren.addAll(newShadowDoc.getProperty(Page.elements));
+      app.delete(previousShadowDoc);
+      newShadowDoc.setProperty(Page.elements,collectiveChildren);
+    }
     tx.success();
   }
  }

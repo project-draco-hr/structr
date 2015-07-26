@@ -22,11 +22,13 @@
   if (source.isNotNull()) {
     buf.append(".notNull()");
   }
-  if (StringUtils.isNotBlank(source.getDefaultValue())) {
-    buf.append(".indexedWhenEmpty()");
-  }
+  if (source.isIndexed()) {
+    if (StringUtils.isNotBlank(source.getDefaultValue())) {
+      buf.append(".indexedWhenEmpty()");
+    }
  else {
-    buf.append(".indexed()");
+      buf.append(".indexed()");
+    }
   }
   buf.append(".dynamic()");
   buf.append(";\n");

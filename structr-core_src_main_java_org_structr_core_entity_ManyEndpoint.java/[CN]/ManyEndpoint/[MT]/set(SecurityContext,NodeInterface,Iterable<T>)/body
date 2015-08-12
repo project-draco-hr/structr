@@ -22,11 +22,14 @@
       }
     }
   }
+  final List<Relation> createdRelationships=new LinkedList<>();
   for (  T targetNode : toBeCreated) {
     if (sourceNode != null && targetNode != null) {
       final String storageKey=sourceNode.getName() + relation.name() + targetNode.getName();
       relation.ensureCardinality(securityContext,sourceNode,targetNode);
-      app.create(sourceNode,targetNode,relation.getClass(),getNotionProperties(securityContext,relation.getClass(),storageKey));
+      final Relation newRelation=app.create(sourceNode,targetNode,relation.getClass(),getNotionProperties(securityContext,relation.getClass(),storageKey));
+      createdRelationships.add(newRelation);
     }
   }
+  return createdRelationships;
 }

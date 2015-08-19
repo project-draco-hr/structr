@@ -20,8 +20,14 @@
     }
     logger.log(Level.WARNING,"Unable to download from {0} {1}",new Object[]{originalUrl,downloadAddress});
     try {
-      logger.log(Level.INFO,"Starting download from alternative URL {0} {1} {2}",new Object[]{originalUrl,address.concat("/"),downloadAddress});
-      downloadUrl=new URL(new URL(originalUrl,address.concat("/")),downloadAddress);
+      if (address.endsWith("/")) {
+        logger.log(Level.INFO,"Starting download from alternative URL {0} {1} {2}",new Object[]{originalUrl,address,downloadAddress});
+        downloadUrl=new URL(new URL(originalUrl,address),downloadAddress);
+      }
+ else {
+        logger.log(Level.INFO,"Starting download from alternative URL {0} {1} {2}",new Object[]{originalUrl,address.concat("/"),downloadAddress});
+        downloadUrl=new URL(new URL(originalUrl,address.concat("/")),downloadAddress);
+      }
       FileUtils.copyURLToFile(downloadUrl,fileOnDisk);
     }
  catch (    MalformedURLException ex) {
@@ -58,8 +64,8 @@ catch (    IOException ex) {
   }
   final String ct=contentType;
   try {
-    if (!(fileExists(fileName,checksum))) {
-      File fileNode;
+    FileBase fileNode=fileExists(fileName,checksum);
+    if (fileNode == null) {
       if (ImageHelper.isImageType(fileName)) {
         fileNode=createImageNode(uuid,fileName,ct,size,checksum);
       }
@@ -79,6 +85,7 @@ catch (    IOException ex) {
     }
  else {
       fileOnDisk.delete();
+      return fileNode;
     }
   }
  catch (  FrameworkException|IOException fex) {

@@ -32,6 +32,9 @@
       if (location != null) {
         final String newLocation=new URL(originalUrl,location.getValue()).toString();
         address=newLocation;
+        if (address.endsWith("/")) {
+          address=address.substring(0,address.length() - 1);
+        }
         logger.log(Level.INFO,"New location: {0}",new Object[]{newLocation});
         client=new DefaultHttpClient();
         int attempts=1;

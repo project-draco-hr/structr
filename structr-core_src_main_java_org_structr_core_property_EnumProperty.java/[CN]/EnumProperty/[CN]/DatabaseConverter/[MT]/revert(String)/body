@@ -1,6 +1,11 @@
 {
   if (source != null) {
-    return (T)Enum.valueOf(enumType,source);
+    try {
+      return (T)Enum.valueOf(enumType,source);
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"Cannot convert database value {0} to enum of type {1}, ignoring.",new Object[]{source,enumType.getSimpleName()});
+    }
   }
   return null;
 }

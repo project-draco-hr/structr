@@ -1,0 +1,34 @@
+{
+  try {
+    final String user1=createEntity("/test_users","{ name: user1 }");
+    final String user2=createEntity("/test_users","{ name: user2 }");
+    final String user3=createEntity("/test_users","{ name: user3 }");
+    SchemaNode node=null;
+    try (final Tx tx=app.tx()){
+      node=app.create(SchemaNode.class,new NodeAttribute(SchemaNode.name,"TestType"));
+      node.setProperty(new StringProperty("_status"),"Enum(one, two, three)");
+      node.setProperty(new StringProperty("___ui"),"status");
+      tx.success();
+    }
+     final String test1=createEntity("/test_types","{ name: test1, owner: " + user1 + ", status: one }");
+    final String test2=createEntity("/test_types","{ name: test2, owner: " + user2 + ", status: two }");
+    final String test3=createEntity("/test_types","{ name: test3, owner: " + user3 + ", status: one }");
+    final String test4=createEntity("/test_types","{ name: test4, owner: " + user1 + ", status: two }");
+    final String test5=createEntity("/test_types","{ name: test5, owner: " + user2 + ", status: three }");
+    final String test6=createEntity("/test_types","{ name: test6, owner: " + user3 + ", status: one }");
+    final String test7=createEntity("/test_types","{ name: test7, owner: " + user1 + ", status: two }");
+    final String test8=createEntity("/test_types","{ name: test8, owner: " + user2 + ", status: three }");
+    final String test9=createEntity("/test_types","{ name: test9, owner: " + user3 + ", status: one }");
+    RestAssured.given().contentType("application/json; charset=UTF-8").filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(201)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(400)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(401)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(403)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(404)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(500)).expect().statusCode(200).body("result",hasSize(9)).body("result_count",equalTo(9)).body("result[0].id",equalTo(test1)).body("result[1].id",equalTo(test2)).body("result[2].id",equalTo(test3)).body("result[3].id",equalTo(test4)).body("result[4].id",equalTo(test5)).body("result[5].id",equalTo(test6)).body("result[6].id",equalTo(test7)).body("result[7].id",equalTo(test8)).body("result[8].id",equalTo(test9)).when().get("/test_types/ui?sort=name");
+    RestAssured.given().contentType("application/json; charset=UTF-8").filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(201)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(400)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(401)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(403)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(404)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(500)).expect().statusCode(200).body("result",hasSize(3)).body("result_count",equalTo(3)).body("result[0].id",equalTo(test1)).body("result[1].id",equalTo(test4)).body("result[2].id",equalTo(test7)).when().get("/test_types/ui?sort=createdDate&owner=" + user1);
+    RestAssured.given().contentType("application/json; charset=UTF-8").filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(201)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(400)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(401)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(403)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(404)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(500)).expect().statusCode(200).body("result",hasSize(3)).body("result_count",equalTo(3)).body("result[0].id",equalTo(test2)).body("result[1].id",equalTo(test5)).body("result[2].id",equalTo(test8)).when().get("/test_types/ui?sort=createdDate&owner=" + user2);
+    RestAssured.given().contentType("application/json; charset=UTF-8").filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(201)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(400)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(401)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(403)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(404)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(500)).expect().statusCode(200).body("result",hasSize(3)).body("result_count",equalTo(3)).body("result[0].id",equalTo(test3)).body("result[1].id",equalTo(test6)).body("result[2].id",equalTo(test9)).when().get("/test_types/ui?sort=createdDate&owner=" + user3);
+    RestAssured.given().contentType("application/json; charset=UTF-8").filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(201)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(400)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(401)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(403)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(404)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(500)).expect().statusCode(200).body("result",hasSize(1)).body("result_count",equalTo(1)).body("result[0].id",equalTo(test1)).when().get("/test_types/ui?sort=createdDate&owner=" + user1 + "&status=one");
+    RestAssured.given().contentType("application/json; charset=UTF-8").filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(201)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(400)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(401)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(403)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(404)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(500)).expect().statusCode(200).body("result",hasSize(2)).body("result_count",equalTo(2)).body("result[0].id",equalTo(test4)).body("result[1].id",equalTo(test7)).when().get("/test_types/ui?sort=createdDate&owner=" + user1 + "&status=two");
+    RestAssured.given().contentType("application/json; charset=UTF-8").filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(201)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(400)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(401)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(403)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(404)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(500)).expect().statusCode(200).body("result",hasSize(2)).body("result_count",equalTo(2)).body("result[0].id",equalTo(test5)).body("result[1].id",equalTo(test8)).when().get("/test_types/ui?sort=createdDate&owner=" + user2 + "&status=three");
+  }
+ catch (  FrameworkException ex) {
+    ex.printStackTrace();
+    fail("Unexpected exception");
+  }
+}

@@ -1,18 +1,16 @@
 {
-  final StringBuilder commandLine=new StringBuilder("avconv -y -strict experimental -i ");
-  commandLine.append(inputFile.getDiskFilePath(securityContext));
-  if (outputSize != null) {
-    commandLine.append(" -s ");
-    commandLine.append(outputSize);
+  final String scriptNameFromConfig=StructrApp.getConfigurationValue("VideoFile." + scriptName);
+  if (scriptNameFromConfig != null) {
+    final StringBuilder commandLine=new StringBuilder(scriptNameFromConfig);
     commandLine.append(" ");
+    commandLine.append(inputFile.getDiskFilePath(securityContext));
+    commandLine.append(" ");
+    commandLine.append(outputFileName);
+    commandLine.append(fileExtension);
+    return commandLine;
   }
  else {
-    commandLine.append(" -vcodec copy ");
+    logger.log(Level.WARNING,"No VideoFile.{0} registered in structr.conf.",scriptName);
   }
-  commandLine.append(outputFileName);
-  if (!fileExtension.isEmpty()) {
-    commandLine.append(".");
-    commandLine.append(fileExtension);
-  }
-  return commandLine;
+  return null;
 }

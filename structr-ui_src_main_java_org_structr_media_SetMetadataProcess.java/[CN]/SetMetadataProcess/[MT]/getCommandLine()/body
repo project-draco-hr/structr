@@ -6,11 +6,16 @@
   final String diskFilePath=inputVideo.getDiskFilePath(securityContext);
   commandLine.append(diskFilePath);
   for (  final Entry<String,String> meta : metadata.entrySet()) {
-    commandLine.append(" -metadata ");
-    commandLine.append(meta.getKey());
-    commandLine.append("=\"");
-    commandLine.append(meta.getValue());
-    commandLine.append("\"");
+    try {
+      commandLine.append(" -metadata ");
+      commandLine.append(clean(meta.getKey()));
+      commandLine.append("=\"");
+      commandLine.append(escape(meta.getValue()));
+      commandLine.append("\"");
+    }
+ catch (    Throwable t) {
+      t.printStackTrace();
+    }
   }
   commandLine.append(" -codec copy ");
   commandLine.append(diskFilePath);

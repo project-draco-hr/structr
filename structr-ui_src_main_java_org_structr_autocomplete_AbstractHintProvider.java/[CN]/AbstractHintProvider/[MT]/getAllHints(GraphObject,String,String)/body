@@ -1,0 +1,75 @@
+{
+  final Map<String,DataKey> dataKeys=new TreeMap<>();
+  final List<Hint> hints=new LinkedList<>();
+  final List<Hint> local=new LinkedList<>();
+  if (currentNode != null) {
+    recursivelyFindDataKeys(currentNode,dataKeys);
+  }
+switch (previousToken) {
+case "current":
+    local.add(createHint("id","","ID of current entity"));
+  break;
+case "this":
+local.add(createHint("id","","ID of current node"));
+break;
+case "me":
+local.add(createHint("id","","ID of current user"));
+local.add(createHint("name","","Name of current user"));
+break;
+case "page":
+local.add(createHint("id","","ID of current page"));
+local.add(createHint("name","","Name of current page"));
+break;
+case "link":
+local.add(createHint("id","","ID of current link"));
+local.add(createHint("name","","Name of current link"));
+local.add(createHint("version","","Version of current link"));
+break;
+default :
+final ConfigurationProvider config=StructrApp.getConfiguration();
+final DataKey key=dataKeys.get(previousToken);
+if (key != null) {
+final Class type=key.identifyType(config);
+if (type != null) {
+final List<Hint> propertyHints=new LinkedList<>();
+for (final PropertyKey propertyKey : config.getPropertySet(type,PropertyView.All)) {
+final Hint propertyHint=createHint(propertyKey.jsonName(),"",type.getSimpleName() + " property");
+propertyHint.preventModification();
+propertyHints.add(propertyHint);
+}
+Collections.sort(propertyHints,comparator);
+hints.addAll(0,propertyHints);
+}
+}
+break;
+}
+if (!keywords.contains(previousToken) && !".".equals(currentToken) && !dataKeys.containsKey(previousToken)) {
+for (final Function<Object,Object> func : Functions.functions.values()) {
+hints.add(func);
+}
+Collections.sort(hints,comparator);
+local.add(createHint("current","","Current data object",!isJavascript() ? null : "get('current')"));
+local.add(createHint("request","","Current request object",!isJavascript() ? null : "get('request')"));
+local.add(createHint("this","","Current object",!isJavascript() ? null : "get('this')"));
+local.add(createHint("element","","Current object",!isJavascript() ? null : "get('element')"));
+local.add(createHint("page","","Current page",!isJavascript() ? null : "get('page')"));
+local.add(createHint("link","","Current link",!isJavascript() ? null : "get('link')"));
+local.add(createHint("template","","Closest template node",!isJavascript() ? null : "get('template')"));
+local.add(createHint("parent","","Parent node",!isJavascript() ? null : "get('parent')"));
+local.add(createHint("children","","Collection of child nodes",!isJavascript() ? null : "get('children')"));
+local.add(createHint("host","","Client's host name",!isJavascript() ? null : "get('host')"));
+local.add(createHint("port","","Client's port",!isJavascript() ? null : "get('port')"));
+local.add(createHint("path_info","","URL path",!isJavascript() ? null : "get('path_info')"));
+local.add(createHint("now","","Current date",!isJavascript() ? null : "get('now')"));
+local.add(createHint("me","","Current user",!isJavascript() ? null : "get('me)"));
+local.add(createHint("locale","","Current locale",!isJavascript() ? null : "get('locale')"));
+}
+Collections.sort(local,comparator);
+hints.addAll(0,local);
+if (!dataKeys.containsKey(previousToken)) {
+for (final DataKey dataKey : dataKeys.values()) {
+hints.add(0,createHint(dataKey.getDataKey(),"",dataKey.getDescription(),isJavascript() ? "get('" + dataKey.getDataKey() + "')" : null));
+}
+}
+return hints;
+}

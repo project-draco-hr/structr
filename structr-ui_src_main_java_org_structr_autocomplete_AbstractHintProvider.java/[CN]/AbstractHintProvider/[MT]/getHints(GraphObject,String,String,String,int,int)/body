@@ -1,0 +1,46 @@
+{
+  final List<GraphObject> hints=new LinkedList<>();
+  int maxNameLength=0;
+  if (StringUtils.isBlank(currentToken) || startChars.contains(currentToken)) {
+    for (    final Hint hint : getAllHints(currentEntity,currentToken,previousToken)) {
+      final GraphObjectMap item=new GraphObjectMap();
+      String functionName=getFunctionName(hint.getReplacement());
+      if (hint.mayModify()) {
+        item.put(text,visitReplacement(functionName));
+      }
+ else {
+        item.put(text,functionName);
+      }
+      item.put(displayText,getFunctionName(hint.getName()) + " - " + textOrPlaceholder(hint.shortDescription()));
+      addPosition(item,hint,cursorLine,cursorPosition,cursorPosition);
+      if (functionName.length() > maxNameLength) {
+        maxNameLength=functionName.length();
+      }
+      hints.add(item);
+    }
+  }
+ else {
+    final int currentTokenLength=currentToken.length();
+    for (    final Hint hint : getAllHints(currentEntity,currentToken,previousToken)) {
+      final String functionName=getFunctionName(hint.getName());
+      final String replacement=hint.getReplacement();
+      if (functionName.startsWith(currentToken)) {
+        final GraphObjectMap item=new GraphObjectMap();
+        if (hint.mayModify()) {
+          item.put(text,visitReplacement(replacement));
+        }
+ else {
+          item.put(text,replacement);
+        }
+        item.put(displayText,getFunctionName(hint.getName()) + " - " + textOrPlaceholder(hint.shortDescription()));
+        addPosition(item,hint,cursorLine,cursorPosition - currentTokenLength,cursorPosition);
+        if (functionName.length() > maxNameLength) {
+          maxNameLength=functionName.length();
+        }
+        hints.add(item);
+      }
+    }
+  }
+  alignHintDescriptions(hints,maxNameLength);
+  return hints;
+}

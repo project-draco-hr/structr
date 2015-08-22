@@ -1,0 +1,32 @@
+{
+  final Map<String,Object> data=webSocketData.getNodeData();
+  final String id=webSocketData.getId();
+  final List<GraphObject> result=new LinkedList<>();
+  final String contentType=(String)data.get("contentType");
+  if (contentType != null) {
+    final AbstractHintProvider hintProvider=hintProviders.get(contentType);
+    if (hintProvider != null) {
+      final String currentToken=getAndTrim(data.get("currentToken"));
+      final String previousToken=getAndTrim(data.get("previousToken"));
+      final String type=getAndTrim(data.get("type"));
+      final int cursorPosition=getInt(data.get("cursorPosition"));
+      final int line=getInt(data.get("line"));
+      try {
+        final List<GraphObject> hints=hintProvider.getHints(StructrApp.getInstance().get(id),type,currentToken,previousToken,line,cursorPosition);
+        result.addAll(hints);
+      }
+ catch (      FrameworkException fex) {
+        fex.printStackTrace();
+      }
+    }
+ else {
+      logger.log(Level.WARNING,"No HintProvider for content type {0}, ignoring.",contentType);
+    }
+  }
+ else {
+    logger.log(Level.WARNING,"No content type for AutocompleteCommand, ignoring.");
+  }
+  webSocketData.setResult(result);
+  webSocketData.setRawResultCount(result.size());
+  getWebSocket().send(webSocketData,true);
+}

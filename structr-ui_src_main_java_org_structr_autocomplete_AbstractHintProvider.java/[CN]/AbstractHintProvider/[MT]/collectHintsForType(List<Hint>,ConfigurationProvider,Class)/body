@@ -1,0 +1,16 @@
+{
+  if (type != null) {
+    final List<Hint> propertyHints=new LinkedList<>();
+    for (    final PropertyKey propertyKey : config.getPropertySet(type,PropertyView.All)) {
+      final String keyName=propertyKey.jsonName();
+      if (!keyName.startsWith(PropertyView.Html) && !keyName.startsWith("data-structr-")) {
+        final Hint propertyHint=createHint(keyName,"",type.getSimpleName() + " property");
+        propertyHint.setIsDynamic(propertyKey.isDynamic());
+        propertyHint.allowNameModification(false);
+        propertyHints.add(propertyHint);
+      }
+    }
+    Collections.sort(propertyHints,comparator);
+    hints.addAll(0,propertyHints);
+  }
+}

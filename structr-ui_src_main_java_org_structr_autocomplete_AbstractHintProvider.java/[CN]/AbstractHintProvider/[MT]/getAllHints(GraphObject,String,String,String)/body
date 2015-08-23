@@ -1,51 +1,59 @@
 {
+  final boolean isDeclaration=isJavascript() && "var".equals(previousToken);
+  final boolean isAssignment=isJavascript() && "=".equals(previousToken);
+  final boolean isDotNotationRequest=".".equals(currentToken);
+  final ConfigurationProvider config=StructrApp.getConfiguration();
   final Map<String,DataKey> dataKeys=new TreeMap<>();
   final List<Hint> hints=new LinkedList<>();
   final List<Hint> local=new LinkedList<>();
+  Class currentObjectType=null;
   if (currentNode != null) {
     recursivelyFindDataKeys(currentNode,dataKeys);
   }
 switch (previousToken) {
 case "current":
-    local.add(createHint("id","","ID of current entity"));
+    currentObjectType=AbstractNode.class;
   break;
 case "this":
-local.add(createHint("id","","ID of current node"));
+currentObjectType=DOMNode.class;
 break;
 case "me":
-local.add(createHint("id","","ID of current user"));
-local.add(createHint("name","","Name of current user"));
+currentObjectType=User.class;
 break;
 case "page":
-local.add(createHint("id","","ID of current page"));
-local.add(createHint("name","","Name of current page"));
+currentObjectType=Page.class;
 break;
 case "link":
-local.add(createHint("id","","ID of current link"));
-local.add(createHint("name","","Name of current link"));
-local.add(createHint("version","","Version of current link"));
+currentObjectType=File.class;
+break;
+case "template":
+currentObjectType=Template.class;
+break;
+case "parent":
+currentObjectType=DOMElement.class;
 break;
 default :
-final ConfigurationProvider config=StructrApp.getConfiguration();
-final DataKey key=dataKeys.get(previousToken);
+DataKey key=dataKeys.get(previousToken);
 if (key != null) {
-final Class type=key.identifyType(config);
-if (type != null) {
-final List<Hint> propertyHints=new LinkedList<>();
-for (final PropertyKey propertyKey : config.getPropertySet(type,PropertyView.All)) {
-final Hint propertyHint=createHint(propertyKey.jsonName(),"",type.getSimpleName() + " property");
-propertyHint.preventModification();
-propertyHints.add(propertyHint);
+currentObjectType=key.identifyType(config);
 }
-Collections.sort(propertyHints,comparator);
-hints.addAll(0,propertyHints);
+ else if (StringUtils.isNotBlank(thirdToken)) {
+key=dataKeys.get(thirdToken);
+if (key != null) {
+currentObjectType=key.identifyType(config);
+final PropertyKey nestedKey=config.getPropertyKeyForJSONName(currentObjectType,previousToken,false);
+if (nestedKey != null) {
+currentObjectType=nestedKey.relatedType();
+}
 }
 }
 break;
 }
-if (!keywords.contains(previousToken) && !".".equals(currentToken) && !dataKeys.containsKey(previousToken)) {
+if (!keywords.contains(previousToken) && !isDotNotationRequest && !dataKeys.containsKey(previousToken)) {
+if (!isAssignment) {
 for (final Function<Object,Object> func : Functions.functions.values()) {
 hints.add(func);
+}
 }
 Collections.sort(hints,comparator);
 local.add(createHint("current","","Current data object",!isJavascript() ? null : "get('current')"));
@@ -66,10 +74,14 @@ local.add(createHint("locale","","Current locale",!isJavascript() ? null : "get(
 }
 Collections.sort(local,comparator);
 hints.addAll(0,local);
-if (!dataKeys.containsKey(previousToken)) {
+if (currentObjectType == null && !dataKeys.containsKey(previousToken) && !isDotNotationRequest || isAssignment) {
 for (final DataKey dataKey : dataKeys.values()) {
-hints.add(0,createHint(dataKey.getDataKey(),"",dataKey.getDescription(),isJavascript() ? "get('" + dataKey.getDataKey() + "')" : null));
+final String replacement=isJavascript() && !isDeclaration ? "get('" + dataKey.getDataKey() + "')" : null;
+final Hint dataKeyHint=createHint(dataKey.getDataKey(),"",dataKey.getDescription(),replacement);
+dataKeyHint.allowNameModification(!isDeclaration);
+hints.add(0,dataKeyHint);
 }
 }
+collectHintsForType(hints,config,currentObjectType);
 return hints;
 }

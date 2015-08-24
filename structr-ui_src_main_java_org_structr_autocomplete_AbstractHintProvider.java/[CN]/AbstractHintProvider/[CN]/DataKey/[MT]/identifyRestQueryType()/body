@@ -1,0 +1,11 @@
+{
+  String cleanedQuery=query.replaceAll("\\$\\{.*\\}","");
+  if (cleanedQuery.startsWith("/")) {
+    cleanedQuery=cleanedQuery.substring(1);
+  }
+  final int queryStart=cleanedQuery.indexOf("?");
+  if (queryStart >= 0 && queryStart < cleanedQuery.length()) {
+    cleanedQuery=cleanedQuery.substring(0,queryStart);
+  }
+  return SchemaHelper.getEntityClassForRawType(cleanedQuery);
+}

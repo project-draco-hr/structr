@@ -6,5 +6,21 @@
   final String _targetMultiplicity=getProperty(targetMultiplicity);
   final String _sourceJsonName=getProperty(sourceJsonName);
   final String _sourceMultiplicity=getProperty(sourceMultiplicity);
-  return SchemaRelationshipNode.getPropertyName(relatedClassName,existingPropertyNames,outgoing,relationshipTypeName,_sourceType,_targetType,_targetJsonName,_targetMultiplicity,_sourceJsonName,_sourceMultiplicity);
+  final String propertyName=SchemaRelationshipNode.getPropertyName(relatedClassName,existingPropertyNames,outgoing,relationshipTypeName,_sourceType,_targetType,_targetJsonName,_targetMultiplicity,_sourceJsonName,_sourceMultiplicity);
+  try {
+    if (outgoing) {
+      if (_targetJsonName == null) {
+        setProperty(previousTargetJsonName,propertyName);
+      }
+    }
+ else {
+      if (_sourceJsonName == null) {
+        setProperty(previousSourceJsonName,propertyName);
+      }
+    }
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+  }
+  return propertyName;
 }

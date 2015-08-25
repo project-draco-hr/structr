@@ -1,5 +1,8 @@
 {
   if (super.onModification(securityContext,errorBuffer)) {
+    checkAndRenameSourceAndTargetJsonNames();
+    setProperty(previousSourceJsonName,getProperty(sourceJsonName));
+    setProperty(previousTargetJsonName,getProperty(targetJsonName));
     TransactionCommand.postProcess("reloadSchema",new ReloadSchema());
     return true;
   }

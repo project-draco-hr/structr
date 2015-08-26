@@ -34,6 +34,7 @@
   logger.log(Level.FINE,"Creating thumbnail for {0}",getName());
   final App app=StructrApp.getInstance(securityContext);
   try {
+    originalImage.unlockReadOnlyPropertiesOnce();
     originalImage.setProperty(File.checksum,newChecksum);
     if (origWidth != null && origHeight != null) {
       if (origWidth <= maxWidth && origHeight <= maxHeight) {
@@ -57,6 +58,7 @@
         final Thumbnails thumbnailRelationship=app.create(originalImage,thumbnail,Thumbnails.class);
         thumbnailRelationship.setProperty(AbstractRelationship.cascadeDelete,Relation.SOURCE_TO_TARGET);
         long size=data.length;
+        thumbnail.unlockReadOnlyPropertiesOnce();
         thumbnail.setProperty(File.size,size);
         thumbnail.setProperty(Image.width,tnWidth);
         thumbnail.setProperty(Image.height,tnHeight);

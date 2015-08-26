@@ -1,0 +1,12 @@
+{
+  if (super.onCreation(securityContext,errorBuffer)) {
+    if ("true".equals(StructrApp.getConfigurationValue(Services.APPLICATION_FILESYSTEM_ENABLED,"false"))) {
+      final Folder workingOrHomeDir=getCurrentWorkingDir();
+      if (workingOrHomeDir != null && getProperty(FileBase.parent) == null) {
+        setProperty(FileBase.parent,workingOrHomeDir);
+      }
+    }
+    return true;
+  }
+  return false;
+}

@@ -1,0 +1,14 @@
+{
+  final String text=getProperty(extractedContent);
+  if (text != null) {
+    final int pos=text.toLowerCase().indexOf(searchString.toLowerCase());
+    if (pos >= 0) {
+      final int start=Math.max(0,pos - prefixLength);
+      final int end=Math.min(text.length(),pos + prefixLength);
+      final GraphObjectMap obj=new GraphObjectMap();
+      obj.put(new StringProperty("context"),text.substring(start,end));
+      return obj;
+    }
+  }
+  return null;
+}

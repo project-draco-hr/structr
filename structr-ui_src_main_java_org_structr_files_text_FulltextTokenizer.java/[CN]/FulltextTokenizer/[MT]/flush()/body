@@ -1,0 +1,24 @@
+{
+  final String word=wordBuffer.toString().trim();
+  if (StringUtils.isNotBlank(word) && word.length() > 4) {
+    if (word.contains(".") || word.contains(",")) {
+      if (word.matches("[\\-0-9\\.,]+")) {
+        words.add(word);
+      }
+ else {
+        final String[] parts=word.split("[\\.,]+");
+        final int len=parts.length;
+        for (int i=0; i < len; i++) {
+          final String part=parts[i].trim();
+          if (StringUtils.isNotBlank(part)) {
+            words.add(part.toLowerCase());
+          }
+        }
+      }
+    }
+ else {
+      words.add(word.toLowerCase());
+    }
+  }
+  wordBuffer.setLength(0);
+}

@@ -1,0 +1,81 @@
+{
+  final String text=getProperty(extractedContent);
+  if (text != null) {
+    final GenericProperty contextKey=new GenericProperty("context");
+    final String lowerCaseSearchString=searchString.toLowerCase();
+    final String lowerCaseText=text.toLowerCase();
+    final GraphObjectMap contextObject=new GraphObjectMap();
+    final List<String> contextValues=new LinkedList<>();
+    final StringBuilder wordBuffer=new StringBuilder();
+    final StringBuilder lineBuffer=new StringBuilder();
+    final int textLength=text.length();
+    int newlineCount=0;
+    int wordCount=1;
+    int pos=-1;
+    do {
+      pos=lowerCaseText.indexOf(lowerCaseSearchString,pos + 1);
+      if (pos >= 0) {
+        lineBuffer.setLength(0);
+        wordBuffer.setLength(0);
+        wordCount=0;
+        newlineCount=0;
+        for (int i=pos - 1; i >= 0; i--) {
+          final char c=text.charAt(i);
+          wordBuffer.insert(0,c);
+          if (!Character.isAlphabetic(c) && !Character.isDigit(c) && !FulltextTokenizer.SpecialChars.contains(c)) {
+            lineBuffer.insert(0,wordBuffer.toString());
+            wordBuffer.setLength(0);
+            if (c == '\n') {
+              newlineCount++;
+            }
+ else {
+              wordCount++;
+              newlineCount=0;
+            }
+          }
+ else {
+            newlineCount=0;
+          }
+          if (newlineCount > 1) {
+            break;
+          }
+          if (wordCount >= contextLength / 2) {
+            break;
+          }
+        }
+        lineBuffer.insert(0,wordBuffer.toString());
+        wordBuffer.setLength(0);
+        for (int i=pos; i < textLength; i++) {
+          final char c=text.charAt(i);
+          wordBuffer.append(c);
+          if (!Character.isAlphabetic(c) && !Character.isDigit(c) && !FulltextTokenizer.SpecialChars.contains(c)) {
+            lineBuffer.append(wordBuffer.toString());
+            wordBuffer.setLength(0);
+            if (c == '\n') {
+              newlineCount++;
+            }
+ else {
+              wordCount++;
+              newlineCount=0;
+            }
+          }
+ else {
+            newlineCount=0;
+          }
+          if (newlineCount > 1) {
+            break;
+          }
+          if (wordCount > contextLength) {
+            break;
+          }
+        }
+        lineBuffer.append(wordBuffer.toString());
+        contextValues.add(lineBuffer.toString());
+      }
+    }
+ while (pos >= 0);
+    contextObject.put(contextKey,contextValues);
+    return contextObject;
+  }
+  return null;
+}

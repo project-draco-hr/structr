@@ -1,0 +1,14 @@
+{
+  final int pos=line.indexOf(" ");
+  final String commandString=pos > 0 ? line.substring(0,pos) : line;
+  final Class<? extends ShellCommand> clazz=commands.get(commandString);
+  if (clazz != null) {
+    try {
+      return clazz.newInstance();
+    }
+ catch (    Throwable t) {
+      t.printStackTrace();
+    }
+  }
+  return null;
+}

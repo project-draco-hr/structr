@@ -1,0 +1,11 @@
+{
+  term.setEcho(false);
+  super.execute(parent);
+  try (final Tx tx=StructrApp.getInstance(SecurityContext.getInstance(user,AccessMode.Backend)).tx()){
+    term.println("Changing password for " + user.getName());
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+  }
+}

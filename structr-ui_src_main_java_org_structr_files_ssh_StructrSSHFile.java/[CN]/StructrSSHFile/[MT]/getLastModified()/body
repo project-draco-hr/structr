@@ -1,0 +1,13 @@
+{
+  if (actualFile != null) {
+    try (final Tx tx=StructrApp.getInstance(parent.getSecurityContext()).tx()){
+      final long time=actualFile.getLastModifiedDate().getTime();
+      tx.success();
+      return time;
+    }
+ catch (    FrameworkException fex) {
+      fex.printStackTrace();
+    }
+  }
+  return 0;
+}

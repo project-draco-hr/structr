@@ -1,0 +1,13 @@
+{
+  if (actualFile != null) {
+    try (final Tx tx=StructrApp.getInstance(parent.getSecurityContext()).tx()){
+      final long size=actualFile.getProperty(FileBase.size);
+      tx.success();
+      return size;
+    }
+ catch (    FrameworkException fex) {
+      fex.printStackTrace();
+    }
+  }
+  return 0;
+}

@@ -1,9 +1,9 @@
 {
   final String word=wordBuffer.toString().trim();
-  if (StringUtils.isNotBlank(word) && word.length() > 4) {
+  if (StringUtils.isNotBlank(word)) {
     if (word.contains(".") || word.contains(",")) {
       if (word.matches("[\\-0-9\\.,]+")) {
-        words.add(word);
+        addWord(word);
       }
  else {
         final String[] parts=word.split("[\\.,]+");
@@ -11,13 +11,13 @@
         for (int i=0; i < len; i++) {
           final String part=parts[i].trim();
           if (StringUtils.isNotBlank(part)) {
-            words.add(part.toLowerCase());
+            addWord(part.toLowerCase());
           }
         }
       }
     }
  else {
-      words.add(word.toLowerCase());
+      addWord(word.toLowerCase());
     }
   }
   wordBuffer.setLength(0);

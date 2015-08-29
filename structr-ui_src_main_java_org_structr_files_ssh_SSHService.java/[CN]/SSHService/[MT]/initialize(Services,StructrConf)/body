@@ -1,0 +1,20 @@
+{
+  server=SshServer.setUpDefaultServer();
+  server.setPort(8022);
+  server.setKeyPairProvider(new SimpleGeneratorHostKeyProvider("hostkey.ser"));
+  server.setPasswordAuthenticator(new PasswordAuthenticator(){
+    @Override public boolean authenticate(    final String username,    final String password,    final ServerSession session){
+      return true;
+    }
+  }
+);
+  server.setFileSystemFactory(new StructrSSHFileSystemFactory());
+  server.setCommandFactory(new ScpCommandFactory());
+  try {
+    server.start();
+    running=true;
+  }
+ catch (  IOException ex) {
+    Logger.getLogger(SSHService.class.getName()).log(Level.SEVERE,null,ex);
+  }
+}

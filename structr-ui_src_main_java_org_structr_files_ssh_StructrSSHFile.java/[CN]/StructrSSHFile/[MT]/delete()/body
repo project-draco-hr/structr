@@ -1,0 +1,14 @@
+{
+  if (actualFile != null) {
+    final App app=StructrApp.getInstance(parent.getSecurityContext());
+    try (final Tx tx=app.tx()){
+      app.delete(actualFile);
+      tx.success();
+      return true;
+    }
+ catch (    FrameworkException fex) {
+      fex.printStackTrace();
+    }
+  }
+  return false;
+}

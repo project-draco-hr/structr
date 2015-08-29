@@ -1,0 +1,14 @@
+{
+  if (actualFile == null) {
+    final App app=StructrApp.getInstance(parent.getSecurityContext());
+    try (final Tx tx=app.tx()){
+      actualFile=app.create(Folder.class,new NodeAttribute(AbstractNode.name,name),new NodeAttribute(AbstractFile.parent,parent != null ? parent.getActualFile() : null));
+      tx.success();
+      return true;
+    }
+ catch (    FrameworkException fex) {
+      fex.printStackTrace();
+    }
+  }
+  return false;
+}

@@ -1,11 +1,16 @@
 {
-  term.setBold(true);
-  term.setTextColor(4);
-  term.print("bin boot cdrom data dev etc home ");
-  term.setTextColor(6);
-  term.print("initrd.img");
-  term.setTextColor(4);
-  term.print(" lib lib32");
-  term.setTextColor(7);
-  term.setBold(false);
+  final App app=StructrApp.getInstance(SecurityContext.getInstance(user,AccessMode.Backend));
+  try (final Tx tx=app.tx()){
+    final Folder currentFolder=parent.getCurrentFolder();
+    if (currentFolder != null) {
+      listFolder(currentFolder.getProperty(AbstractFile.children));
+    }
+ else {
+      listFolder(app.nodeQuery(AbstractFile.class).and(AbstractFile.parent,null).getAsList());
+    }
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+  }
 }

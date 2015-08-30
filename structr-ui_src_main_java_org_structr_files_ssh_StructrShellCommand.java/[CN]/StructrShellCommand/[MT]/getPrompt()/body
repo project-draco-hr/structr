@@ -3,11 +3,27 @@
   final StringBuilder buf=new StringBuilder();
   try (final Tx tx=app.tx()){
     buf.append(user.getName());
+    buf.append("@structr:");
+    if (currentFolder != null) {
+      String folderPart=currentFolder.getProperty(AbstractFile.path);
+      final Folder homeFolder=user.getProperty(User.homeDirectory);
+      if (homeFolder != null) {
+        final String homeFolderPath=homeFolder.getProperty(AbstractFile.path);
+        if (folderPart.startsWith(homeFolderPath)) {
+          folderPart="~" + folderPart.substring(homeFolderPath.length());
+        }
+      }
+      buf.append(folderPart);
+    }
+ else {
+      buf.append("/");
+    }
+    buf.append(user.isAdmin() ? "#" : "$");
+    buf.append(" ");
     tx.success();
   }
  catch (  FrameworkException fex) {
     fex.printStackTrace();
   }
-  buf.append("@structr:~$ ");
   return buf.toString();
 }

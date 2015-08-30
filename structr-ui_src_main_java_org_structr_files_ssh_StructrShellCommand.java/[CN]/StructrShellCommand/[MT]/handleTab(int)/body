@@ -1,12 +1,11 @@
 {
+  final String line=term.getLineBuffer().toString();
   if (StringUtils.isNotBlank(line)) {
     final ShellCommand cmd=getCommandForLine(line);
     if (cmd != null) {
-      cmd.setCommand(line);
       cmd.setUser(user);
       cmd.setTerminalEmulator(term);
-      cmd.execute(this);
+      cmd.handleTabCompletion(this,line,tabCount);
     }
-    commandHistory.add(line);
   }
 }

@@ -1,0 +1,40 @@
+{
+  final App app=StructrApp.getInstance(SecurityContext.getInstance(user,AccessMode.Backend));
+  String target=targetFolderName;
+  if (target.endsWith("/")) {
+    target=target.substring(0,target.length() - 1);
+  }
+  if (target.startsWith("/")) {
+    final Folder folder=app.nodeQuery(Folder.class).and(Folder.path,target).getFirst();
+    if (folder != null) {
+      parent.setCurrentFolder(folder);
+    }
+ else {
+      term.println("Folder " + target + " does not exist");
+    }
+  }
+ else {
+    Folder newFolder=currentFolder;
+    boolean found=false;
+    for (    final String part : target.split("[/]+")) {
+      if (newFolder == null) {
+        newFolder=app.nodeQuery(Folder.class).and(Folder.name,part).getFirst();
+      }
+ else {
+        for (        final Folder folder : newFolder.getProperty(Folder.folders)) {
+          if (part.equals(folder.getName())) {
+            newFolder=folder;
+            found=true;
+          }
+        }
+        if (!found) {
+          term.println("Folder " + target + " does not exist");
+          return;
+        }
+      }
+    }
+    if (newFolder != null) {
+      parent.setCurrentFolder(newFolder);
+    }
+  }
+}

@@ -5,6 +5,11 @@
     final App app=StructrApp.getInstance();
     try (final Tx tx=app.tx()){
       user=app.nodeQuery(User.class).andName(userName).getFirst();
+      if (user != null) {
+        if ("true".equals(StructrApp.getConfigurationValue(Services.APPLICATION_FILESYSTEM_ENABLED,"false"))) {
+          currentFolder=user.getProperty(User.homeDirectory);
+        }
+      }
       tx.success();
     }
  catch (    FrameworkException fex) {

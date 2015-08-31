@@ -1,0 +1,26 @@
+{
+  final App app=StructrApp.getInstance();
+  final Folder currentFolder=parent.getCurrentFolder();
+  try (final Tx tx=app.tx()){
+    if (target != null) {
+switch (target) {
+case "..":
+case ".":
+case "/":
+case "~":
+        term.println("Folder " + target + " already exists");
+      break;
+default :
+    createFolder(parent,currentFolder,target);
+  break;
+}
+}
+ else {
+term.println("mkdir needs parameter");
+}
+tx.success();
+}
+ catch (FrameworkException fex) {
+fex.printStackTrace();
+}
+}

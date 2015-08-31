@@ -1,12 +1,12 @@
 {
-  if (line.contains(" ") && line.length() > 3) {
+  if (line.contains(" ") && line.length() >= 3) {
     String incompletePath=line.substring(line.indexOf(" ") + 1);
     Folder baseFolder=null;
     String lastPathPart=null;
     if (incompletePath.startsWith("\"")) {
       incompletePath=incompletePath.substring(1);
     }
-    final App app=StructrApp.getInstance(SecurityContext.getInstance(user,AccessMode.Backend));
+    final App app=StructrApp.getInstance();
     if ("..".equals(incompletePath)) {
       term.handleCharacter('/');
       return;
@@ -46,15 +46,22 @@
           displayAutocompleteSuggestions(parent,folders,line);
         }
       }
- else {
+ else       if (!folders.isEmpty()) {
         final Folder folder=folders.get(0);
-        if (lastPathPart.equals(folder.getName())) {
-          if (tabCount > 1) {
-            displayAutocompleteSuggestions(parent,folder.getProperty(Folder.folders),line);
-          }
-        }
+        if (parent.isAllowed(folder,Permission.read,false)) {
+          if (lastPathPart.equals(folder.getName())) {
+            if (tabCount > 1) {
+              displayAutocompleteSuggestions(parent,folder.getProperty(Folder.folders),line);
+            }
  else {
-          displayAutocompleteFolder(folder,lastPathPart);
+              if (!line.endsWith("/")) {
+                term.handleCharacter('/');
+              }
+            }
+          }
+ else {
+            displayAutocompleteFolder(folder,lastPathPart);
+          }
         }
       }
       tx.success();

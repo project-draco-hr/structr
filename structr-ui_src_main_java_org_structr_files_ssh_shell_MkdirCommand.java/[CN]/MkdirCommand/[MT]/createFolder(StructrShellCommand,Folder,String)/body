@@ -1,0 +1,18 @@
+{
+  final App app=StructrApp.getInstance();
+  if (target.contains("/")) {
+    final int lastSlashIndex=target.lastIndexOf("/");
+    final String targetFolderPath=target.substring(0,lastSlashIndex);
+    final String targetFolderName=target.substring(lastSlashIndex + 1);
+    final Folder parentFolder=parent.findRelativeFolder(currentFolder,targetFolderPath);
+    if (parentFolder != null) {
+      checkAndCreateFolder(app,parent,parentFolder,targetFolderName);
+    }
+ else {
+      term.println("Folder " + targetFolderPath + " does not exist");
+    }
+  }
+ else {
+    checkAndCreateFolder(app,parent,currentFolder,target);
+  }
+}

@@ -1,8 +1,17 @@
 {
   if ("true".equals(StructrApp.getConfigurationValue(Services.APPLICATION_FILESYSTEM_ENABLED,"false"))) {
-    final Folder homeDir=getProperty(User.homeDirectory);
-    if (homeDir != null) {
-      StructrApp.getInstance(securityContext).delete(homeDir);
+    final SecurityContext storedContext=this.securityContext;
+    try {
+      this.securityContext=SecurityContext.getSuperUserInstance();
+      final Folder homeDir=getProperty(User.homeDirectory);
+      if (homeDir != null) {
+        StructrApp.getInstance().delete(homeDir);
+      }
+    }
+ catch (    Throwable t) {
+    }
+ finally {
+      this.securityContext=storedContext;
     }
   }
 }

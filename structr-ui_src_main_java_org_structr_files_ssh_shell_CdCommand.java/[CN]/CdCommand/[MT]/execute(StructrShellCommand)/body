@@ -1,12 +1,20 @@
 {
-  final App app=StructrApp.getInstance(SecurityContext.getInstance(user,AccessMode.Backend));
+  final App app=StructrApp.getInstance();
   final Folder currentFolder=parent.getCurrentFolder();
   try (final Tx tx=app.tx()){
     if (target != null) {
 switch (target) {
 case "..":
         if (currentFolder != null) {
-          parent.setCurrentFolder(currentFolder.getProperty(Folder.parent));
+          final Folder parentFolder=currentFolder.getProperty(Folder.parent);
+          if (parentFolder != null) {
+            if (parent.isAllowed(parentFolder,Permission.read,true)) {
+              parent.setCurrentFolder(parentFolder);
+            }
+          }
+ else {
+            parent.setCurrentFolder(null);
+          }
         }
       break;
 case ".":

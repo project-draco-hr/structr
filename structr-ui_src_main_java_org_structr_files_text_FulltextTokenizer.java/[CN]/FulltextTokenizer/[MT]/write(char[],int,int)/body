@@ -1,29 +1,31 @@
 {
-  final int limit=off + len;
-  final int length=Math.min(limit,cbuf.length);
-  for (int i=off; i < length; i++) {
-    final char c=cbuf[i];
-    if (c == lastCharacter) {
-      if (consecutiveCharCount++ >= 10) {
-        continue;
+  if (wordCount < wordCountLimit) {
+    final int limit=off + len;
+    final int length=Math.min(limit,cbuf.length);
+    for (int i=off; i < length; i++) {
+      final char c=cbuf[i];
+      if (c == lastCharacter) {
+        if (consecutiveCharCount++ >= 10) {
+          continue;
+        }
       }
-    }
  else {
-      consecutiveCharCount=0;
-    }
-    if (!Character.isAlphabetic(c) && !Character.isDigit(c) && !SpecialChars.contains(c)) {
-      flush();
-      if (Character.isWhitespace(c)) {
+        consecutiveCharCount=0;
+      }
+      if (!Character.isAlphabetic(c) && !Character.isDigit(c) && !SpecialChars.contains(c)) {
+        flush();
+        if (Character.isWhitespace(c)) {
+          rawText.append(c);
+        }
+ else {
+          rawText.append(" ");
+        }
+      }
+ else {
+        wordBuffer.append(c);
         rawText.append(c);
       }
- else {
-        rawText.append(" ");
-      }
+      lastCharacter=c;
     }
- else {
-      wordBuffer.append(c);
-      rawText.append(c);
-    }
-    lastCharacter=c;
   }
 }

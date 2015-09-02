@@ -1,31 +1,27 @@
 {
-  final int maxWordsToIndex=Services.parseInt(StructrApp.getConfigurationValue(Services.APPLICATION_FILESYSTEM_INDEXING_LIMIT),100);
   boolean parsingSuccessful=false;
   InputStream inputStream=null;
+  String fileName=null;
   try (final Tx tx=StructrApp.getInstance().tx()){
-    System.out.println("Extracting content from " + file.getName() + "...");
     inputStream=file.getInputStream();
+    fileName=file.getName();
     tx.success();
   }
  catch (  FrameworkException fex) {
     fex.printStackTrace();
   }
   if (inputStream != null) {
-    final FulltextTokenizer tokenizer=new FulltextTokenizer();
+    final FulltextTokenizer tokenizer=new FulltextTokenizer(fileName);
     try (final InputStream is=inputStream){
-      new AutoDetectParser().parse(is,new BodyContentHandler(tokenizer),new Metadata());
+      final AutoDetectParser parser=new AutoDetectParser();
+      parser.parse(is,new BodyContentHandler(tokenizer),new Metadata());
       parsingSuccessful=true;
     }
  catch (    Throwable t) {
       t.printStackTrace();
     }
     if (parsingSuccessful) {
-      try (final Tx tx=StructrApp.getInstance().tx()){
-        System.out.println("Indexing " + file.getName() + "...");
-        final NodeService nodeService=Services.getInstance().getService(NodeService.class);
-        final Index<Node> fulltextIndex=nodeService.getNodeIndex(NodeService.NodeIndex.fulltext);
-        final String indexKeyName=FileBase.indexedContent.jsonName();
-        final Node node=file.getNode();
+      try (Tx tx=StructrApp.getInstance().tx()){
         file.setProperty(extractedContent,tokenizer.getRawText());
         tokenizer.write(getName());
         final Principal _owner=file.getProperty(owner);
@@ -43,25 +39,48 @@
             tokenizer.write(twitterName);
           }
         }
-        fulltextIndex.remove(node,indexKeyName);
-        final Set<String> stopWords=languageStopwordMap.get(tokenizer.getLanguage());
-        final StringBuilder buf=new StringBuilder();
-        int indexedWords=0;
-        for (        final String word : tokenizer.getWords()) {
-          if (!stopWords.contains(word)) {
-            buf.append(word + " ");
-            fulltextIndex.add(node,indexKeyName,word);
+        tx.success();
+      }
+ catch (      Throwable t) {
+        t.printStackTrace();
+      }
+      final NodeService nodeService=Services.getInstance().getService(NodeService.class);
+      final Index<Node> fulltextIndex=nodeService.getNodeIndex(NodeService.NodeIndex.fulltext);
+      final Set<String> stopWords=languageStopwordMap.get(tokenizer.getLanguage());
+      final String indexKeyName=FileBase.indexedContent.jsonName();
+      final Iterator<String> wordIterator=tokenizer.getWords().iterator();
+      final StringBuilder buf=new StringBuilder();
+      final Node node=file.getNode();
+      int indexedWords=0;
+      logger.log(Level.INFO,"Indexing {0}..",fileName);
+      while (wordIterator.hasNext()) {
+        try (Tx tx=StructrApp.getInstance().tx()){
+          fulltextIndex.remove(node,indexKeyName);
+          while (wordIterator.hasNext()) {
+            final String word=wordIterator.next();
+            if (!stopWords.contains(word)) {
+              buf.append(word).append(" ");
+              fulltextIndex.add(node,indexKeyName,word);
+              if (indexedWords > 1000) {
+                indexedWords=0;
+                break;
+              }
+            }
           }
-          if (indexedWords++ > maxWordsToIndex) {
-            break;
-          }
+          tx.success();
         }
+ catch (        Throwable t) {
+          t.printStackTrace();
+        }
+      }
+      try (Tx tx=StructrApp.getInstance().tx()){
         file.setProperty(FileBase.indexedWords,buf.toString());
         tx.success();
       }
  catch (      Throwable t) {
         t.printStackTrace();
       }
+      logger.log(Level.INFO,"Indexing of {0} finished, {1} words extracted",new Object[]{fileName,tokenizer.getWordCount()});
     }
   }
 }

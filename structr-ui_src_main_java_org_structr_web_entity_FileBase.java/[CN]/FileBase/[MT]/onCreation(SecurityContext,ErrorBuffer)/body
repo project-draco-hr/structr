@@ -1,9 +1,10 @@
 {
   if (super.onCreation(securityContext,errorBuffer)) {
+    setProperty(hasParent,getProperty(parentId) != null);
     if ("true".equals(StructrApp.getConfigurationValue(Services.APPLICATION_FILESYSTEM_ENABLED,"false"))) {
       final Folder workingOrHomeDir=getCurrentWorkingDir();
-      if (workingOrHomeDir != null && getProperty(FileBase.parent) == null) {
-        setProperty(FileBase.parent,workingOrHomeDir);
+      if (workingOrHomeDir != null && getProperty(AbstractFile.parent) == null) {
+        setProperty(AbstractFile.parent,workingOrHomeDir);
       }
     }
     return true;

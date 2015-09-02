@@ -6,7 +6,7 @@
   final App app=StructrApp.getInstance(securityContext);
   Folder folder=null;
   for (  final Folder possibleRootFolder : app.nodeQuery(Folder.class).andName(parts[0])) {
-    if (possibleRootFolder.getProperty(Folder.parent) == null) {
+    if (possibleRootFolder.getProperty(AbstractFile.parent) == null) {
       folder=possibleRootFolder;
       break;
     }
@@ -16,7 +16,7 @@
     logger.log(Level.INFO,"Created root folder {0}",new Object[]{parts[0]});
     for (int i=1; i < parts.length - 1; i++) {
       Folder childFolder=app.create(Folder.class,parts[i]);
-      childFolder.setProperty(Folder.parent,folder);
+      childFolder.setProperty(AbstractFile.parent,folder);
       logger.log(Level.INFO,"Created {0} {1} with path {2}",new Object[]{childFolder.getType(),childFolder,FileHelper.getFolderPath(childFolder)});
       folder=childFolder;
     }
@@ -32,7 +32,7 @@
     }
     if (subFolder == null) {
       subFolder=app.create(Folder.class,parts[i]);
-      subFolder.setProperty(Folder.parent,folder);
+      subFolder.setProperty(AbstractFile.parent,folder);
       logger.log(Level.INFO,"Created {0} {1} with path {2}",new Object[]{subFolder.getType(),subFolder,FileHelper.getFolderPath(subFolder)});
     }
     folder=subFolder;

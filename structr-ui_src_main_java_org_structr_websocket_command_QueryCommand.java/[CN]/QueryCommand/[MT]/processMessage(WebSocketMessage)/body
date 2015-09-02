@@ -1,0 +1,51 @@
+{
+  final SecurityContext securityContext=getWebSocket().getSecurityContext();
+  final Map<String,Object> nodeData=webSocketData.getNodeData();
+  final String rawType=(String)nodeData.get("type");
+  final String properties=(String)nodeData.get("properties");
+  final Class type=SchemaHelper.getEntityClassForRawType(rawType);
+  if (type == null) {
+    getWebSocket().send(MessageBuilder.status().code(404).message("Type " + rawType + " not found").build(),true);
+    return;
+  }
+  final String sortOrder=webSocketData.getSortOrder();
+  final String sortKey=webSocketData.getSortKey();
+  final int pageSize=webSocketData.getPageSize();
+  final int page=webSocketData.getPage();
+  final PropertyKey sortProperty=StructrApp.getConfiguration().getPropertyKeyForJSONName(type,sortKey);
+  final Query query=StructrApp.getInstance(securityContext).nodeQuery(type).sort(sortProperty).order("desc".equals(sortOrder)).page(page).pageSize(pageSize);
+  if (properties != null) {
+    try {
+      final Gson gson=new GsonBuilder().create();
+      final Map<String,Object> querySource=gson.fromJson(properties,new TypeToken<Map<String,Object>>(){
+      }
+.getType());
+      final PropertyMap queryMap=PropertyMap.inputTypeToJavaType(securityContext,type,querySource);
+      for (      final Entry<PropertyKey,Object> entry : queryMap.entrySet()) {
+        query.and(entry.getKey(),entry.getValue());
+      }
+    }
+ catch (    FrameworkException fex) {
+      logger.log(Level.WARNING,"Exception occured",fex);
+      getWebSocket().send(MessageBuilder.status().code(fex.getStatus()).message(fex.getMessage()).build(),true);
+      return;
+    }
+  }
+  if (type.equals(Image.class)) {
+    query.and(Image.isThumbnail,false);
+  }
+  if (type.equals(File.class)) {
+    query.not().and(Image.isThumbnail,true);
+  }
+  try {
+    final Result result=query.getResult();
+    int resultCountBeforePaging=result.getRawResultCount();
+    webSocketData.setResult(result.getResults());
+    webSocketData.setRawResultCount(resultCountBeforePaging);
+    getWebSocket().send(webSocketData,true);
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"Exception occured",fex);
+    getWebSocket().send(MessageBuilder.status().code(fex.getStatus()).message(fex.getMessage()).build(),true);
+  }
+}

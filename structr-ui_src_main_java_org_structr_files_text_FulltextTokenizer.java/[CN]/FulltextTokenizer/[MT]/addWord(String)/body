@@ -1,12 +1,10 @@
 {
   final int length=word.length();
-  if (length > 3 && length < 40) {
-    final Integer count=words.get(word);
-    if (count == null) {
-      words.put(word,1);
-    }
- else {
-      words.put(word,count + 1);
+  if (length >= wordMinLength && length <= wordMaxLength) {
+    words.add(word);
+    wordCount++;
+    if (wordCount > wordCountLimit) {
+      logger.log(Level.INFO,"Indexing word count of {0} reached for {1}, no more words will be indexed. Set {2} in structr.conf to increase this limit.",new Object[]{wordCountLimit,fileName,Services.APPLICATION_FILESYSTEM_INDEXING_LIMIT});
     }
   }
 }

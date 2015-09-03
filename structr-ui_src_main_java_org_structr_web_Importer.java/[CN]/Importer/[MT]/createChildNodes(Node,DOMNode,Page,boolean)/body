@@ -78,7 +78,7 @@
         newNode.setProperty(DOMElement._class,StringUtils.trim(classString.toString()));
       }
       for (      Attribute nodeAttr : node.attributes()) {
-        String key=nodeAttr.getKey();
+        final String key=nodeAttr.getKey();
         if (!key.equals("text")) {
           if (key.startsWith("data-")) {
             String value=nodeAttr.getValue();
@@ -113,7 +113,7 @@
             }
           }
  else {
-            String value=nodeAttr.getValue();
+            final String value=nodeAttr.getValue();
             boolean isAnchor=StringUtils.isNotBlank(value) && value.startsWith("#");
             boolean isLocal=StringUtils.isNotBlank(value) && !value.startsWith("http");
             boolean isActive=StringUtils.isNotBlank(value) && (value.startsWith("${") || value.startsWith("/${"));
@@ -124,10 +124,14 @@
               newNode.setProperty(new StringProperty(PropertyView.Html.concat(key)),"${link.path}");
             }
  else {
-              newNode.setProperty(new StringProperty(PropertyView.Html.concat(nodeAttr.getKey())),value);
+              newNode.setProperty(new StringProperty(PropertyView.Html.concat(key)),value);
             }
           }
         }
+      }
+      final StringProperty typeKey=new StringProperty(PropertyView.Html.concat("type"));
+      if ("script".equals(tag) && newNode.getProperty(typeKey) == null) {
+        newNode.setProperty(typeKey,"text/javascript");
       }
       parent.appendChild(newNode);
       createChildNodes(node,newNode,page,removeHashAttribute);

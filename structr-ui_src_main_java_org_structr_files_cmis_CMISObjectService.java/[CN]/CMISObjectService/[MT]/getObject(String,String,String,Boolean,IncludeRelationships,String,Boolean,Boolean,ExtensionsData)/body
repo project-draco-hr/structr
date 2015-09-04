@@ -1,0 +1,12 @@
+{
+  final App app=StructrApp.getInstance();
+  try (final Tx tx=app.tx()){
+    final ObjectData data=CMISObjectWrapper.wrap(app.get(objectId));
+    tx.success();
+    return data;
+  }
+ catch (  Throwable t) {
+    t.printStackTrace();
+  }
+  throw new CmisObjectNotFoundException("Object with ID " + objectId + " does not exist");
+}

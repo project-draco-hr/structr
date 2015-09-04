@@ -1,0 +1,13 @@
+{
+  final Map<String,PropertyDefinition<?>> properties=new LinkedHashMap<>();
+  final TypeDefinitionFactory factory=TypeDefinitionFactory.newInstance();
+switch (getBaseTypeId()) {
+case CMIS_DOCUMENT:
+    properties.putAll(factory.createDocumentTypeDefinition(CmisVersion.CMIS_1_1,getParentTypeId()).getPropertyDefinitions());
+  break;
+case CMIS_FOLDER:
+properties.putAll(factory.createFolderTypeDefinition(CmisVersion.CMIS_1_1,getParentTypeId()).getPropertyDefinitions());
+break;
+}
+return properties;
+}

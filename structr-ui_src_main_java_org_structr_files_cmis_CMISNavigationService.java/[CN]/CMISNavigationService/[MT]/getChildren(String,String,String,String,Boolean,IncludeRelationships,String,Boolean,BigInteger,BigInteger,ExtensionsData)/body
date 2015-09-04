@@ -1,0 +1,42 @@
+{
+  final App app=StructrApp.getInstance();
+  if (folderId != null && folderId.equals(CMISInfo.ROOT_FOLDER_ID)) {
+    try (final Tx tx=app.tx()){
+      final StructrCmisWrapper wrapper=new StructrCmisWrapper(CMISInfo.ROOT_FOLDER_ID){
+        @Override protected ObjectData wrap(        final GraphObject item) throws FrameworkException {
+          return CMISObjectWrapper.wrap(item);
+        }
+      }
+;
+      wrapper.wrap(app.nodeQuery(Folder.class).and(Folder.parent,null).getAsList());
+      wrapper.wrap(app.nodeQuery(FileBase.class).and(FileBase.parent,null).getAsList());
+      tx.success();
+      return wrapper;
+    }
+ catch (    Throwable t) {
+      t.printStackTrace();
+    }
+  }
+ else {
+    try (final Tx tx=app.tx()){
+      final Folder parent=app.get(Folder.class,folderId);
+      StructrCmisWrapper wrapper=null;
+      if (parent != null) {
+        wrapper=new StructrCmisWrapper(parent.getProperty(Folder.path)){
+          @Override protected ObjectData wrap(          final GraphObject item) throws FrameworkException {
+            return CMISObjectWrapper.wrap(item);
+          }
+        }
+;
+        wrapper.wrap(parent.getProperty(Folder.folders));
+        wrapper.wrap(parent.getProperty(Folder.files));
+      }
+      tx.success();
+      return wrapper;
+    }
+ catch (    Throwable t) {
+      t.printStackTrace();
+    }
+  }
+  throw new CmisObjectNotFoundException("Folder with ID " + folderId + " does not exist");
+}

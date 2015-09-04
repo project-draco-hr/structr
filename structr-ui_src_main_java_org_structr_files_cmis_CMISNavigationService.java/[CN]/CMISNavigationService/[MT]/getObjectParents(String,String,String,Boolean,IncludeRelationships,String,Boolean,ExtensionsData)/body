@@ -1,0 +1,22 @@
+{
+  final App app=StructrApp.getInstance();
+  try (final Tx tx=app.tx()){
+    final List<ObjectParentData> data=new LinkedList<>();
+    final GraphObject graphObject=app.get(objectId);
+    if (graphObject instanceof AbstractFile) {
+      final Folder parent=((AbstractFile)graphObject).getProperty(AbstractFile.parent);
+      if (parent != null) {
+        final CMISObjectWrapper element=CMISObjectWrapper.wrap(parent);
+        final ObjectParentDataImpl impl=new ObjectParentDataImpl(element);
+        impl.setRelativePathSegment(parent.getProperty(Folder.path));
+        data.add(impl);
+      }
+    }
+    tx.success();
+    return data;
+  }
+ catch (  Throwable t) {
+    t.printStackTrace();
+  }
+  return null;
+}

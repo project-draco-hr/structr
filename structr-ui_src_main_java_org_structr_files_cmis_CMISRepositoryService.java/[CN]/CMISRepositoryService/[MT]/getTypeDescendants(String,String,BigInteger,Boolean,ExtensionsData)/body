@@ -1,0 +1,30 @@
+{
+  final Set<TypeDefinitionContainer> results=new LinkedHashSet<>();
+  final ConfigurationProvider config=StructrApp.getConfiguration();
+  final App app=StructrApp.getInstance();
+  if (typeId != null) {
+    final Class parentType=config.getNodeEntityClass(typeId);
+    if (parentType != null) {
+      results.addAll(getTypeDefinitions(config,typeId,true));
+    }
+ else {
+      throw new CmisNotSupportedException("Type with ID " + typeId + " does not exist");
+    }
+  }
+ else {
+    try (final Tx tx=app.tx()){
+      for (      final SchemaNode schemaNode : app.nodeQuery(SchemaNode.class).getAsList()) {
+        final Class type=config.getNodeEntityClass(schemaNode.getName());
+        if (type != null) {
+          results.add(new StructrTypeWrapper(type));
+          results.addAll(getTypeDefinitions(config,type.getSimpleName(),true));
+        }
+      }
+      tx.success();
+    }
+ catch (    FrameworkException fex) {
+      fex.printStackTrace();
+    }
+  }
+  return new LinkedList<>(results);
+}

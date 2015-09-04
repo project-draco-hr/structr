@@ -1,0 +1,21 @@
+{
+  final App app=StructrApp.getInstance();
+  ObjectData result=null;
+  try (final Tx tx=app.tx()){
+    final GraphObject graphObject=app.get(folderId);
+    if (graphObject != null && graphObject instanceof AbstractFile) {
+      final Folder parent=((AbstractFile)graphObject).getProperty(AbstractFile.parent);
+      if (parent != null) {
+        result=CMISObjectWrapper.wrap(parent);
+      }
+    }
+    tx.success();
+  }
+ catch (  Throwable t) {
+    t.printStackTrace();
+  }
+  if (result != null) {
+    return result;
+  }
+  return null;
+}

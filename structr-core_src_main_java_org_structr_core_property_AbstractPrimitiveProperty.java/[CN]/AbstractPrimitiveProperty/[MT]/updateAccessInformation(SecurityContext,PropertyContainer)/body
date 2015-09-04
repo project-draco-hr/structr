@@ -1,0 +1,19 @@
+{
+  try {
+    final Principal user=securityContext.getUser(false);
+    String modifiedById=null;
+    if (user != null) {
+      if (user instanceof SuperUser) {
+        modifiedById=Principal.SUPERUSER_ID;
+      }
+ else {
+        modifiedById=user.getUuid();
+      }
+    }
+    propertyContainer.setProperty(AbstractNode.lastModifiedDate.dbName(),System.currentTimeMillis());
+    propertyContainer.setProperty(AbstractNode.lastModifiedBy.dbName(),modifiedById);
+  }
+ catch (  Throwable t) {
+    t.printStackTrace();
+  }
+}

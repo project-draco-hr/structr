@@ -76,6 +76,16 @@
   }
   servletContext.addServlet("org.eclipse.jetty.servlet.DefaultServlet","/");
   servletContext.setInitParameter("org.eclipse.jetty.servlet.Default.dirAllowed","false");
+  try {
+    servletContext.addEventListener(new CmisRepositoryContextListener());
+    final ServletHolder cmisAtomHolder=servletContext.addServlet(CmisAtomPubServlet.class.getName(),"/structr/cmis/atom/*");
+    cmisAtomHolder.setInitParameter("cmisVersion","1.1");
+    final ServletHolder cmisBrowserHolder=servletContext.addServlet(CmisBrowserBindingServlet.class.getName(),"/structr/cmis/browser/*");
+    cmisBrowserHolder.setInitParameter("cmisVersion","1.1");
+  }
+ catch (  Throwable t) {
+    t.printStackTrace();
+  }
   final HashSessionManager sessionManager=new HashSessionManager();
   try {
     sessionManager.setStoreDirectory(new File(baseDir + "/sessions"));

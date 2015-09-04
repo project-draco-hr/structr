@@ -7,8 +7,10 @@
       if (servletClassName != null) {
         final String servletPath=properties.getProperty(servletName.concat(".path"));
         if (servletPath != null) {
-          final HttpServiceServlet servlet=(HttpServiceServlet)Class.forName(servletClassName).newInstance();
-          servlet.getConfig().initializeFromProperties(properties,servletName,resourceProviders);
+          final HttpServlet servlet=(HttpServlet)Class.forName(servletClassName).newInstance();
+          if (servlet instanceof HttpServiceServlet) {
+            ((HttpServiceServlet)servlet).getConfig().initializeFromProperties(properties,servletName,resourceProviders);
+          }
           if (servletPath.endsWith("*")) {
             servlets.put(servletPath,new ServletHolder(servlet));
           }

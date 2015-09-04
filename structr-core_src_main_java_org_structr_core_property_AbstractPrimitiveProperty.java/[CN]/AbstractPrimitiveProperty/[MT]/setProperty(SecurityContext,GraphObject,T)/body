@@ -26,14 +26,14 @@
         propertyContainer.removeProperty(dbName());
       }
  else {
-        if (!AbstractPrimitiveProperty.this.equals(AbstractNode.lastModifiedDate)) {
+        if (!internalSystemProperty) {
           propertyContainer.setProperty(dbName(),convertedValue);
-          propertyContainer.setProperty(AbstractNode.lastModifiedDate.dbName(),System.currentTimeMillis());
         }
  else {
-          logger.log(Level.FINE,"Tried to set lastModifiedDate explicitly (action was denied)");
+          logger.log(Level.FINE,"Tried to set internal system property (action was denied).");
         }
       }
+      updateAccessInformation(securityContext,propertyContainer);
     }
  catch (    Throwable t) {
       t.printStackTrace();

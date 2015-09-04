@@ -1,0 +1,17 @@
+{
+  if (StringUtils.isBlank(typeId)) {
+    logger.log(Level.WARNING,"###################### Empty type ID!");
+    return null;
+  }
+switch (typeId) {
+case "cmis:document":
+    return documentDefinition;
+case "cmis:folder":
+  return folderDefinition;
+}
+final Class type=StructrApp.getConfiguration().getNodeEntityClass(typeId);
+if (type != null) {
+return new StructrTypeWrapper(type);
+}
+throw new CmisObjectNotFoundException("Type with ID " + typeId + " does not exist");
+}

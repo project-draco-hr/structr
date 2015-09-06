@@ -9,5 +9,24 @@ case CMIS_FOLDER:
 properties.putAll(factory.createFolderTypeDefinition(CmisVersion.CMIS_1_1,getParentTypeId()).getPropertyDefinitions());
 break;
 }
+for (final PropertyKey key : StructrApp.getConfiguration().getPropertySet(type,PropertyView.All)) {
+if (key.isDynamic()) {
+final PropertyType dataType=key.getDataType();
+if (dataType != null) {
+final String propertyId=key.jsonName();
+final String displayName=propertyId;
+final String description=displayName + " property";
+final Class declaringClass=key.getDeclaringClass();
+final boolean isInherited=!type.getName().equals(declaringClass.getName());
+final Cardinality cardinality=Cardinality.SINGLE;
+final Updatability updatability=Updatability.READWRITE;
+final boolean required=key.isNotNull();
+final boolean queryable=key.isIndexed();
+final boolean orderable=key.isIndexed();
+final PropertyDefinition propertyDefinition=factory.createPropertyDefinition(propertyId,displayName,description,dataType,cardinality,updatability,isInherited,required,queryable,orderable);
+properties.put(propertyId,propertyDefinition);
+}
+}
+}
 return properties;
 }

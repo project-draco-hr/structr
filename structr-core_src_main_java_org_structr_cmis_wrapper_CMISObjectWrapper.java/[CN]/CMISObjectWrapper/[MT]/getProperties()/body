@@ -10,6 +10,37 @@
   properties.add(objFactory.createPropertyStringData(PropertyIds.LAST_MODIFIED_BY,lastModifiedBy));
   properties.add(objFactory.createPropertyDateTimeData(PropertyIds.CREATION_DATE,creationDate));
   properties.add(objFactory.createPropertyDateTimeData(PropertyIds.LAST_MODIFICATION_DATE,lastModificationDate));
-  createProperties(objFactory,properties);
-  return objFactory.createPropertiesData(properties);
+  if (dynamicPropertyMap != null) {
+    for (    final Entry<PropertyKey,Object> entry : dynamicPropertyMap.entrySet()) {
+      final PropertyKey key=entry.getKey();
+      final PropertyType dataType=key.getDataType();
+      if (dataType != null) {
+switch (dataType) {
+case BOOLEAN:
+          final Boolean booleanValue=(Boolean)entry.getValue();
+        properties.add(objFactory.createPropertyBooleanData(key.jsonName(),booleanValue));
+      break;
+case DATETIME:
+    final GregorianCalendar dateValue=new GregorianCalendar();
+  dateValue.setTime((Date)entry.getValue());
+properties.add(objFactory.createPropertyDateTimeData(key.jsonName(),dateValue));
+break;
+case DECIMAL:
+final BigDecimal decimalValue=BigDecimal.valueOf((Double)entry.getValue());
+properties.add(objFactory.createPropertyDecimalData(key.jsonName(),decimalValue));
+break;
+case INTEGER:
+final BigInteger integerValue=BigInteger.valueOf((Long)entry.getValue());
+properties.add(objFactory.createPropertyIntegerData(key.jsonName(),integerValue));
+break;
+case STRING:
+final String stringValue=(String)entry.getValue();
+properties.add(objFactory.createPropertyStringData(key.jsonName(),stringValue));
+break;
+}
+}
+}
+}
+createProperties(objFactory,properties);
+return objFactory.createPropertiesData(properties);
 }

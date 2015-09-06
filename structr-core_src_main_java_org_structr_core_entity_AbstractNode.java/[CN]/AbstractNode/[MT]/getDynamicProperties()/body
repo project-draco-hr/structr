@@ -1,0 +1,13 @@
+{
+  final PropertyMap propertyMap=new PropertyMap();
+  final Class type=getClass();
+  for (  final PropertyKey key : StructrApp.getConfiguration().getPropertySet(type,PropertyView.All)) {
+    if (key.isDynamic()) {
+      final PropertyType dataType=key.getDataType();
+      if (dataType != null) {
+        propertyMap.put(key,getProperty(key));
+      }
+    }
+  }
+  return propertyMap;
+}

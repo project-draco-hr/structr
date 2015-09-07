@@ -1,0 +1,28 @@
+{
+  final App app=StructrApp.getInstance();
+  try (final Tx tx=app.tx()){
+    final String username=callContext.getUsername();
+    final String password=callContext.getPassword();
+    final Principal principal=AuthHelper.getPrincipalForPassword(Principal.name,username,password);
+    SecurityContext securityContext=null;
+    if (principal != null) {
+      if (principal instanceof SuperUser) {
+        securityContext=SecurityContext.getSuperUserInstance();
+      }
+ else {
+        securityContext=SecurityContext.getInstance(principal,AccessMode.Backend);
+      }
+    }
+    tx.success();
+    if (securityContext != null) {
+      return securityContext;
+    }
+  }
+ catch (  AuthenticationException aex) {
+    throw new CmisUnauthorizedException(aex.getMessage());
+  }
+catch (  FrameworkException fex) {
+    fex.printStackTrace();
+  }
+  throw new CmisUnauthorizedException();
+}

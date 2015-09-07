@@ -1,0 +1,25 @@
+{
+  final ConfigurationProvider config=StructrApp.getConfiguration();
+  final PropertyMap propertyMap=new PropertyMap();
+  final Map<String,PropertyData<?>> map=properties.getProperties();
+  for (  final Entry<String,PropertyData<?>> entry : map.entrySet()) {
+    final PropertyData<?> propertyValue=entry.getValue();
+    Object value=propertyValue.getFirstValue();
+    String key=entry.getKey();
+    if (CMIS_PROPERTY_MAPPING.containsKey(key)) {
+      key=CMIS_PROPERTY_MAPPING.get(key);
+    }
+    final PropertyKey propertyKey=config.getPropertyKeyForJSONName(type,key,false);
+    if (propertyKey != null) {
+      final PropertyConverter converter=propertyKey.inputConverter(securityContext);
+      if (converter != null) {
+        value=converter.convert(value);
+      }
+      propertyMap.put(propertyKey,value);
+    }
+ else {
+      throw new FrameworkException(500,"Invalid property key " + key + " for type "+ type.getSimpleName()+ " provided.");
+    }
+  }
+  return propertyMap;
+}

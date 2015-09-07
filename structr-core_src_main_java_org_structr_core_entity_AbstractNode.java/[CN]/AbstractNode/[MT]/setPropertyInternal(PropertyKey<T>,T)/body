@@ -1,11 +1,11 @@
 {
   if (key == null) {
     logger.log(Level.SEVERE,"Tried to set property with null key (action was denied)");
-    throw new FrameworkException(getClass().getSimpleName(),new NullArgumentToken(base));
+    throw new FrameworkException(422,new NullArgumentToken(getClass().getSimpleName(),base));
   }
   if (key.isReadOnly() || (key.isWriteOnce() && (dbNode != null) && dbNode.hasProperty(key.dbName()))) {
     if (!readOnlyPropertiesUnlocked && !securityContext.isSuperUser()) {
-      throw new FrameworkException(getClass().getSimpleName(),new ReadOnlyPropertyToken(key));
+      throw new FrameworkException(422,new ReadOnlyPropertyToken(getClass().getSimpleName(),key));
     }
   }
   return key.setProperty(securityContext,this,value);

@@ -1,30 +1,44 @@
 {
   final Set<TypeDefinitionContainer> results=new LinkedHashSet<>();
   final ConfigurationProvider config=StructrApp.getConfiguration();
-  final App app=StructrApp.getInstance();
   if (typeId != null) {
-    final Class parentType=config.getNodeEntityClass(typeId);
-    if (parentType != null) {
-      results.addAll(getTypeDefinitions(config,typeId,true));
-    }
+switch (typeId) {
+case "cmis:document":
+      results.addAll(getTypeDescendants(BaseTypeId.CMIS_DOCUMENT,includePropertyDefinitions));
+    break;
+case "cmis:folder":
+  results.addAll(getTypeDescendants(BaseTypeId.CMIS_FOLDER,includePropertyDefinitions));
+break;
+case "cmis:item":
+results.addAll(getTypeDescendants(BaseTypeId.CMIS_ITEM,includePropertyDefinitions));
+break;
+case "cmis:policy":
+results.addAll(getTypeDescendants(BaseTypeId.CMIS_POLICY,includePropertyDefinitions));
+break;
+case "cmis:relationship":
+results.addAll(getTypeDescendants(BaseTypeId.CMIS_RELATIONSHIP,includePropertyDefinitions));
+break;
+case "cmis:secondary":
+results.addAll(getTypeDescendants(BaseTypeId.CMIS_SECONDARY,includePropertyDefinitions));
+break;
+default :
+final Class parentType=config.getNodeEntityClass(typeId);
+if (parentType != null) {
+results.addAll(getTypeDefinitions(config,typeId,true,includePropertyDefinitions));
+}
  else {
-      throw new CmisNotSupportedException("Type with ID " + typeId + " does not exist");
-    }
-  }
+throw new CmisNotSupportedException("Type with ID " + typeId + " does not exist");
+}
+break;
+}
+}
  else {
-    try (final Tx tx=app.tx()){
-      for (      final SchemaNode schemaNode : app.nodeQuery(SchemaNode.class).getAsList()) {
-        final Class type=config.getNodeEntityClass(schemaNode.getName());
-        if (type != null) {
-          results.add(new StructrTypeWrapper(type));
-          results.addAll(getTypeDefinitions(config,type.getSimpleName(),true));
-        }
-      }
-      tx.success();
-    }
- catch (    FrameworkException fex) {
-      fex.printStackTrace();
-    }
-  }
-  return new LinkedList<>(results);
+results.add(this.wrap(getDocumentTypeDefinition(includePropertyDefinitions),includePropertyDefinitions));
+results.add(this.wrap(getFolderTypeDefinition(includePropertyDefinitions),includePropertyDefinitions));
+results.add(this.wrap(getItemTypeDefinition(includePropertyDefinitions),includePropertyDefinitions));
+results.add(this.wrap(getPolicyTypeDefinition(includePropertyDefinitions),includePropertyDefinitions));
+results.add(this.wrap(getRelationshipTypeDefinition(includePropertyDefinitions),includePropertyDefinitions));
+results.add(this.wrap(getSecondaryTypeDefinition(includePropertyDefinitions),includePropertyDefinitions));
+}
+return new LinkedList<>(results);
 }

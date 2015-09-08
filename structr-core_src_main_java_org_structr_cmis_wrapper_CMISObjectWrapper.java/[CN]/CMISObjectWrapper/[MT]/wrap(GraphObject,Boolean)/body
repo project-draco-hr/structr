@@ -1,0 +1,38 @@
+{
+  CMISObjectWrapper wrapper=null;
+  if (source != null) {
+    final CMISInfo cmisInfo=source.getCMISInfo();
+    if (cmisInfo != null) {
+      final BaseTypeId baseTypeId=cmisInfo.getBaseTypeId();
+      if (baseTypeId != null) {
+switch (baseTypeId) {
+case CMIS_DOCUMENT:
+          wrapper=new CMISDocumentWrapper(includeAllowableActions);
+        wrapper.initializeFrom(cmisInfo.getDocumentInfo());
+      break;
+case CMIS_FOLDER:
+    wrapper=new CMISFolderWrapper(includeAllowableActions);
+  wrapper.initializeFrom(cmisInfo.getFolderInfo());
+break;
+case CMIS_ITEM:
+wrapper=new CMISItemWrapper(includeAllowableActions);
+wrapper.initializeFrom(cmisInfo.geItemInfo());
+break;
+case CMIS_POLICY:
+wrapper=new CMISPolicyWrapper(includeAllowableActions);
+wrapper.initializeFrom(cmisInfo.getPolicyInfo());
+break;
+case CMIS_RELATIONSHIP:
+wrapper=new CMISRelationshipWrapper(includeAllowableActions);
+wrapper.initializeFrom(cmisInfo.getRelationshipInfo());
+break;
+case CMIS_SECONDARY:
+wrapper=new CMISSecondaryWrapper(includeAllowableActions);
+wrapper.initializeFrom(cmisInfo.getSecondaryInfo());
+break;
+}
+}
+}
+}
+return wrapper;
+}

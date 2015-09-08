@@ -1,17 +1,21 @@
 {
-  if (StringUtils.isBlank(typeId)) {
-    logger.log(Level.WARNING,"###################### Empty type ID!");
-    return null;
-  }
 switch (typeId) {
 case "cmis:document":
-    return documentDefinition;
+    return getDocumentTypeDefinition(true);
 case "cmis:folder":
-  return folderDefinition;
+  return getFolderTypeDefinition(true);
+case "cmis:item":
+return getItemTypeDefinition(true);
+case "cmis:policy":
+return getPolicyTypeDefinition(true);
+case "cmis:relationship":
+return getRelationshipTypeDefinition(true);
+case "cmis:secondary":
+return getSecondaryTypeDefinition(true);
 }
 final Class type=StructrApp.getConfiguration().getNodeEntityClass(typeId);
 if (type != null) {
-return new StructrTypeWrapper(type);
+return new StructrTypeWrapper(type,true);
 }
 throw new CmisObjectNotFoundException("Type with ID " + typeId + " does not exist");
 }

@@ -1,4 +1,7 @@
 {
+  if (!includePropertyDefinitions) {
+    return null;
+  }
   final Map<String,PropertyDefinition<?>> properties=new LinkedHashMap<>();
   final TypeDefinitionFactory factory=TypeDefinitionFactory.newInstance();
 switch (getBaseTypeId()) {
@@ -9,17 +12,16 @@ case CMIS_FOLDER:
 properties.putAll(factory.createFolderTypeDefinition(CmisVersion.CMIS_1_1,getParentTypeId()).getPropertyDefinitions());
 break;
 }
-properties.remove(PropertyIds.DESCRIPTION);
 properties.remove("cmis:localNamespace");
 properties.remove("cmis:displayName");
 properties.remove("cmis:queryName");
 for (final PropertyKey key : StructrApp.getConfiguration().getPropertySet(type,PropertyView.All)) {
-if (key.isDynamic()) {
+if (key.isDynamic() || key.isCMISProperty()) {
 final PropertyType dataType=key.getDataType();
 if (dataType != null) {
 final String propertyId=key.jsonName();
 final String displayName=propertyId;
-final String description=displayName + " property";
+final String description=StringUtils.capitalize(propertyId);
 final Class declaringClass=key.getDeclaringClass();
 final boolean isInherited=!type.getName().equals(declaringClass.getName());
 final Cardinality cardinality=Cardinality.SINGLE;

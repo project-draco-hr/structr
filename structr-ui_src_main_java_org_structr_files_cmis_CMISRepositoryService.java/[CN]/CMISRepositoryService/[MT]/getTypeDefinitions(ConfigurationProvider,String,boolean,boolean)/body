@@ -1,0 +1,13 @@
+{
+  final Set<String> types=SearchCommand.getAllSubtypesAsStringSet(typeId,!recursive);
+  final Set<StructrTypeWrapper> results=new LinkedHashSet<>();
+  for (  final String type : types) {
+    if (!type.equals(typeId)) {
+      final Class clazz=config.getNodeEntityClass(type);
+      if (clazz != null) {
+        results.add(new StructrTypeWrapper(clazz,includePropertyDefinitions));
+      }
+    }
+  }
+  return results;
+}

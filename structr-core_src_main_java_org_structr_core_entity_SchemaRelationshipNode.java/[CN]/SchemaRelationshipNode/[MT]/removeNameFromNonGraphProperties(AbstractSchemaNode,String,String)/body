@@ -3,7 +3,10 @@
     final String nonGraphProperties=view.getProperty(SchemaView.nonGraphProperties);
     if (nonGraphProperties != null) {
       final ArrayList<String> properties=new ArrayList<>(Arrays.asList(nonGraphProperties.split("[, ]+")));
-      properties.remove(toRemove);
+      final int pos=properties.indexOf(toRemove);
+      if (pos != -1) {
+        properties.set(pos,newValue);
+      }
       view.setProperty(SchemaView.nonGraphProperties,StringUtils.join(properties,", "));
     }
   }

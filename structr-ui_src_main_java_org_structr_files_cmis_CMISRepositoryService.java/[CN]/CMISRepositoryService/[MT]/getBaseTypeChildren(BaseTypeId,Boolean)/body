@@ -1,0 +1,34 @@
+{
+  final ConfigurationProvider config=StructrApp.getConfiguration();
+  final List<TypeDefinition> result=new LinkedList<>();
+  final App app=StructrApp.getInstance();
+switch (baseTypeId) {
+case CMIS_DOCUMENT:
+    result.add(extendTypeDefinition(File.class,includePropertyDefinitions));
+  break;
+case CMIS_FOLDER:
+result.add(extendTypeDefinition(Folder.class,includePropertyDefinitions));
+break;
+case CMIS_ITEM:
+try (final Tx tx=app.tx()){
+for (final SchemaNode schemaNode : app.nodeQuery(SchemaNode.class).sort(AbstractNode.name).getAsList()) {
+final Class type=config.getNodeEntityClass(schemaNode.getClassName());
+if (type != null) {
+  final CMISInfo info=getCMISInfo(type);
+  if (info != null && baseTypeId.equals(info.getBaseTypeId())) {
+    final TypeDefinition extendedTypeDefinition=extendTypeDefinition(type,includePropertyDefinitions);
+    if (extendedTypeDefinition != null) {
+      result.add(extendedTypeDefinition);
+    }
+  }
+}
+}
+tx.success();
+}
+ catch (final FrameworkException fex) {
+fex.printStackTrace();
+}
+break;
+}
+return result;
+}

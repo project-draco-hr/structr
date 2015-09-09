@@ -1,44 +1,35 @@
 {
-  final Set<TypeDefinitionContainer> results=new LinkedHashSet<>();
-  final ConfigurationProvider config=StructrApp.getConfiguration();
+  final List<TypeDefinitionContainer> results=new LinkedList<>();
   if (typeId != null) {
-switch (typeId) {
-case "cmis:document":
-      results.addAll(getTypeDescendants(BaseTypeId.CMIS_DOCUMENT,includePropertyDefinitions));
-    break;
-case "cmis:folder":
-  results.addAll(getTypeDescendants(BaseTypeId.CMIS_FOLDER,includePropertyDefinitions));
-break;
-case "cmis:item":
-results.addAll(getTypeDescendants(BaseTypeId.CMIS_ITEM,includePropertyDefinitions));
-break;
-case "cmis:policy":
-results.addAll(getTypeDescendants(BaseTypeId.CMIS_POLICY,includePropertyDefinitions));
-break;
-case "cmis:relationship":
-results.addAll(getTypeDescendants(BaseTypeId.CMIS_RELATIONSHIP,includePropertyDefinitions));
-break;
-case "cmis:secondary":
-results.addAll(getTypeDescendants(BaseTypeId.CMIS_SECONDARY,includePropertyDefinitions));
-break;
-default :
-final Class parentType=config.getNodeEntityClass(typeId);
-if (parentType != null) {
-results.addAll(getTypeDefinitions(config,typeId,true,includePropertyDefinitions));
-}
+    final BaseTypeId baseTypeId=getBaseTypeId(typeId);
+    if (baseTypeId != null) {
+      final TypeDefinition typeDefinition=getTypeDefinition(repositoryId,typeId,extension);
+      final TypeDefinitionContainer container=getTypeDefinitionContainer(typeDefinition,includePropertyDefinitions);
+      results.add(container);
+    }
  else {
-throw new CmisNotSupportedException("Type with ID " + typeId + " does not exist");
-}
-break;
-}
-}
+      final Class type=StructrApp.getConfiguration().getNodeEntityClass(typeId);
+      if (type != null) {
+        final TypeDefinition typeDefinition=extendTypeDefinition(type,includePropertyDefinitions);
+        if (typeDefinition != null) {
+          results.add(getTypeDefinitionContainer(typeDefinition,includePropertyDefinitions));
+        }
  else {
-results.add(this.wrap(getDocumentTypeDefinition(includePropertyDefinitions),includePropertyDefinitions));
-results.add(this.wrap(getFolderTypeDefinition(includePropertyDefinitions),includePropertyDefinitions));
-results.add(this.wrap(getItemTypeDefinition(includePropertyDefinitions),includePropertyDefinitions));
-results.add(this.wrap(getPolicyTypeDefinition(includePropertyDefinitions),includePropertyDefinitions));
-results.add(this.wrap(getRelationshipTypeDefinition(includePropertyDefinitions),includePropertyDefinitions));
-results.add(this.wrap(getSecondaryTypeDefinition(includePropertyDefinitions),includePropertyDefinitions));
-}
-return new LinkedList<>(results);
+          throw new CmisObjectNotFoundException("Type with ID " + typeId + " does not exist");
+        }
+      }
+ else {
+        throw new CmisObjectNotFoundException("Type with ID " + typeId + " does not exist");
+      }
+    }
+  }
+ else {
+    results.add(getTypeDefinitionContainer(getDocumentTypeDefinition(BaseTypeId.CMIS_DOCUMENT.value(),includePropertyDefinitions,true),includePropertyDefinitions));
+    results.add(getTypeDefinitionContainer(getFolderTypeDefinition(BaseTypeId.CMIS_FOLDER.value(),includePropertyDefinitions,true),includePropertyDefinitions));
+    results.add(getTypeDefinitionContainer(getItemTypeDefinition(BaseTypeId.CMIS_ITEM.value(),includePropertyDefinitions,true),includePropertyDefinitions));
+    results.add(getTypeDefinitionContainer(getPolicyTypeDefinition(BaseTypeId.CMIS_POLICY.value(),includePropertyDefinitions,true),includePropertyDefinitions));
+    results.add(getTypeDefinitionContainer(getRelationshipTypeDefinition(BaseTypeId.CMIS_RELATIONSHIP.value(),includePropertyDefinitions,true),includePropertyDefinitions));
+    results.add(getTypeDefinitionContainer(getSecondaryTypeDefinition(BaseTypeId.CMIS_SECONDARY.value(),includePropertyDefinitions,true),includePropertyDefinitions));
+  }
+  return results;
 }

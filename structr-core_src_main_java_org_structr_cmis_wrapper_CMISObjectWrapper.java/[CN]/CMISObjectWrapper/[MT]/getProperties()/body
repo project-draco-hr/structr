@@ -5,6 +5,7 @@
   properties.add(objFactory.createPropertyIdData(PropertyIds.OBJECT_TYPE_ID,type));
   properties.add(objFactory.createPropertyIdData(PropertyIds.OBJECT_ID,id));
   properties.add(objFactory.createPropertyStringData(PropertyIds.NAME,name));
+  properties.add(objFactory.createPropertyStringData(PropertyIds.DESCRIPTION,description));
   properties.add(objFactory.createPropertyStringData(PropertyIds.CREATED_BY,createdBy));
   properties.add(objFactory.createPropertyStringData(PropertyIds.LAST_MODIFIED_BY,lastModifiedBy));
   properties.add(objFactory.createPropertyDateTimeData(PropertyIds.CREATION_DATE,creationDate));
@@ -16,25 +17,19 @@
       if (dataType != null) {
 switch (dataType) {
 case BOOLEAN:
-          final Boolean booleanValue=(Boolean)entry.getValue();
-        properties.add(objFactory.createPropertyBooleanData(key.jsonName(),booleanValue));
-      break;
+          properties.add(objFactory.createPropertyBooleanData(key.jsonName(),(Boolean)entry.getValue()));
+        break;
 case DATETIME:
-    final GregorianCalendar dateValue=new GregorianCalendar();
-  dateValue.setTime((Date)entry.getValue());
-properties.add(objFactory.createPropertyDateTimeData(key.jsonName(),dateValue));
-break;
+      properties.add(objFactory.createPropertyDateTimeData(key.jsonName(),valueOrNull((Date)entry.getValue())));
+    break;
 case DECIMAL:
-final BigDecimal decimalValue=BigDecimal.valueOf((Double)entry.getValue());
-properties.add(objFactory.createPropertyDecimalData(key.jsonName(),decimalValue));
+  properties.add(objFactory.createPropertyDecimalData(key.jsonName(),valueOrNull((Double)entry.getValue())));
 break;
 case INTEGER:
-final BigInteger integerValue=BigInteger.valueOf((Long)entry.getValue());
-properties.add(objFactory.createPropertyIntegerData(key.jsonName(),integerValue));
+properties.add(objFactory.createPropertyIntegerData(key.jsonName(),intOrNull(entry.getValue())));
 break;
 case STRING:
-final String stringValue=(String)entry.getValue();
-properties.add(objFactory.createPropertyStringData(key.jsonName(),stringValue));
+properties.add(objFactory.createPropertyStringData(key.jsonName(),(String)entry.getValue()));
 break;
 }
 }

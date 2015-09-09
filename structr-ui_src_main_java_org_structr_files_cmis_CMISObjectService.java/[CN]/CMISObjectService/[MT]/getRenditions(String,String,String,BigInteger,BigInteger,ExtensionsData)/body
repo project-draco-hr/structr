@@ -1,4 +1,7 @@
 {
-  System.out.println("getAllowableActions");
-  throw new UnsupportedOperationException("Not supported yet.");
+  final ObjectData obj=getObject(repositoryId,objectId,renditionFilter,false,IncludeRelationships.NONE,null,false,false,extension);
+  if (obj != null) {
+    return applyPaging(obj.getRenditions(),maxItems,skipCount);
+  }
+  throw new CmisObjectNotFoundException("Object with ID " + objectId + " does not exist");
 }

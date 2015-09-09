@@ -1,21 +1,24 @@
 {
 switch (typeId) {
 case "cmis:document":
-    return getDocumentTypeDefinition(true);
+    return getDocumentTypeDefinition(typeId,true,true);
 case "cmis:folder":
-  return getFolderTypeDefinition(true);
+  return getFolderTypeDefinition(typeId,true,true);
 case "cmis:item":
-return getItemTypeDefinition(true);
+return getItemTypeDefinition(typeId,true,true);
 case "cmis:policy":
-return getPolicyTypeDefinition(true);
+return getPolicyTypeDefinition(typeId,true,true);
 case "cmis:relationship":
-return getRelationshipTypeDefinition(true);
+return getRelationshipTypeDefinition(typeId,true,true);
 case "cmis:secondary":
-return getSecondaryTypeDefinition(true);
+return getSecondaryTypeDefinition(typeId,true,true);
 }
 final Class type=StructrApp.getConfiguration().getNodeEntityClass(typeId);
 if (type != null) {
-return new StructrTypeWrapper(type,true);
+final TypeDefinition extendedTypeDefinition=extendTypeDefinition(type,true);
+if (extendedTypeDefinition != null) {
+return extendedTypeDefinition;
+}
 }
 throw new CmisObjectNotFoundException("Type with ID " + typeId + " does not exist");
 }

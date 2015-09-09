@@ -5,12 +5,10 @@
     final GraphObject graphObject=app.get(objectId);
     if (graphObject instanceof AbstractFile) {
       final Folder parent=((AbstractFile)graphObject).getProperty(AbstractFile.parent);
-      if (parent != null) {
-        final CMISObjectWrapper element=CMISObjectWrapper.wrap(parent,includeAllowableActions);
-        final ObjectParentDataImpl impl=new ObjectParentDataImpl(element);
-        impl.setRelativePathSegment(parent.getProperty(Folder.path));
-        data.add(impl);
-      }
+      final ObjectData element=parent != null ? CMISObjectWrapper.wrap(parent,includeAllowableActions) : new CMISRootFolder(includeAllowableActions);
+      final ObjectParentDataImpl impl=new ObjectParentDataImpl(element);
+      impl.setRelativePathSegment(graphObject.getProperty(AbstractNode.name));
+      data.add(impl);
     }
     tx.success();
     return data;

@@ -1,3 +1,33 @@
 {
-  throw new CmisNotSupportedException();
+  final List<ObjectInFolderContainer> result=new LinkedList<>();
+  final App app=StructrApp.getInstance();
+  try (final Tx tx=app.tx()){
+    int maxDepth=Integer.MAX_VALUE;
+    if (depth != null && depth.intValue() >= 0) {
+      maxDepth=depth.intValue();
+    }
+    if (CMISInfo.ROOT_FOLDER_ID.equals(folderId)) {
+      for (      final Folder folder : app.nodeQuery(Folder.class).and(Folder.parent,null).sort(AbstractNode.name).getAsList()) {
+        recursivelyCollectFolderTree(result,folder,maxDepth,1,includeAllowableActions);
+      }
+    }
+ else {
+      final Folder folder=app.get(Folder.class,folderId);
+      if (folder != null) {
+        final List<Folder> children=folder.getProperty(Folder.folders);
+        Collections.sort(children,new GraphObjectComparator(AbstractNode.name,false));
+        for (        final Folder child : children) {
+          recursivelyCollectFolderTree(result,child,maxDepth,1,includeAllowableActions);
+        }
+      }
+ else {
+        throw new CmisObjectNotFoundException("Folder with ID " + folderId + " does not exist");
+      }
+    }
+    tx.success();
+  }
+ catch (  final FrameworkException fex) {
+    fex.printStackTrace();
+  }
+  return result;
 }

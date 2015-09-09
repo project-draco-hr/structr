@@ -2,14 +2,8 @@
   final App app=StructrApp.getInstance();
   if (folderId != null && folderId.equals(CMISInfo.ROOT_FOLDER_ID)) {
     try (final Tx tx=app.tx()){
-      final StructrCmisWrapper wrapper=new StructrCmisWrapper(CMISInfo.ROOT_FOLDER_ID){
-        @Override protected ObjectData wrap(        final GraphObject item) throws FrameworkException {
-          return CMISObjectWrapper.wrap(item,includeAllowableActions);
-        }
-      }
-;
-      wrapper.wrap(app.nodeQuery(Folder.class).and(Folder.parent,null).getAsList());
-      wrapper.wrap(app.nodeQuery(FileBase.class).and(FileBase.parent,null).getAsList());
+      final CMISObjectInFolderWrapper wrapper=new CMISObjectInFolderWrapper(includeAllowableActions);
+      wrapper.wrap(app.nodeQuery(AbstractFile.class).and(Folder.parent,null).sort(AbstractNode.name).getAsList());
       tx.success();
       return wrapper;
     }
@@ -20,16 +14,12 @@
  else {
     try (final Tx tx=app.tx()){
       final Folder parent=app.get(Folder.class,folderId);
-      StructrCmisWrapper wrapper=null;
+      CMISObjectInFolderWrapper wrapper=null;
       if (parent != null) {
-        wrapper=new StructrCmisWrapper(parent.getProperty(Folder.path)){
-          @Override protected ObjectData wrap(          final GraphObject item) throws FrameworkException {
-            return CMISObjectWrapper.wrap(item,includeAllowableActions);
-          }
-        }
-;
-        wrapper.wrap(parent.getProperty(Folder.folders));
-        wrapper.wrap(parent.getProperty(Folder.files));
+        final List<AbstractFile> children=parent.getProperty(AbstractFile.children);
+        wrapper=new CMISObjectInFolderWrapper(includeAllowableActions);
+        Collections.sort(children,new GraphObjectComparator(AbstractNode.name,false));
+        wrapper.wrap(children);
       }
       tx.success();
       return wrapper;

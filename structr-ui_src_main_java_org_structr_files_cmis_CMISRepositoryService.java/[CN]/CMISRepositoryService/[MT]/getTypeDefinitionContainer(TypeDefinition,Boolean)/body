@@ -1,0 +1,19 @@
+{
+  final TypeDefinitionContainerImpl result=new TypeDefinitionContainerImpl();
+  final List<TypeDefinitionContainer> list=new LinkedList<>();
+  result.setTypeDefinition(typeDefinition);
+  result.setChildren(list);
+  final String typeId=typeDefinition.getId();
+  final BaseTypeId baseTypeId=getBaseTypeId(typeId);
+  if (baseTypeId != null) {
+    for (    final TypeDefinition child : getBaseTypeChildren(baseTypeId,includePropertyDefinitions)) {
+      list.add(getTypeDefinitionContainer(child,includePropertyDefinitions));
+    }
+  }
+ else {
+    for (    final TypeDefinition child : getTypeChildren(typeDefinition.getId(),includePropertyDefinitions)) {
+      list.add(getTypeDefinitionContainer(child,includePropertyDefinitions));
+    }
+  }
+  return result;
+}

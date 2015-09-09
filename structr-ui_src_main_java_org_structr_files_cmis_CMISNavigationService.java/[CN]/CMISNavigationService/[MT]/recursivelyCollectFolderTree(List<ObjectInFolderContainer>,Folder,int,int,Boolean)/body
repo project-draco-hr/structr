@@ -1,0 +1,17 @@
+{
+  if (depth > maxDepth) {
+    return;
+  }
+  final CMISObjectInFolderWrapper wrapper=new CMISObjectInFolderWrapper(includeAllowableActions);
+  final ObjectInFolderContainerImpl impl=new ObjectInFolderContainerImpl();
+  final List<ObjectInFolderContainer> childContainerList=new LinkedList<>();
+  final String pathSegment=child.getName();
+  impl.setObject(wrapper.wrapObjectData(wrapper.wrapGraphObject(child),pathSegment));
+  impl.setChildren(childContainerList);
+  list.add(impl);
+  final List<Folder> children=child.getProperty(Folder.folders);
+  Collections.sort(children,new GraphObjectComparator(AbstractNode.name,false));
+  for (  final Folder folderChild : children) {
+    recursivelyCollectFolderTree(childContainerList,folderChild,maxDepth,depth + 1,includeAllowableActions);
+  }
+}

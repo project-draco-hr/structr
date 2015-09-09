@@ -1,0 +1,16 @@
+{
+  final Set<String> subtypes=new LinkedHashSet<>(SearchCommand.getAllSubtypesAsStringSet(typeId));
+  final ConfigurationProvider config=StructrApp.getConfiguration();
+  final List<TypeDefinition> result=new LinkedList<>();
+  subtypes.remove(typeId);
+  for (  final String subtype : subtypes) {
+    final Class subclass=config.getNodeEntityClass(subtype);
+    if (subclass != null) {
+      final TypeDefinition extendedTypeDefinition=extendTypeDefinition(subclass,includePropertyDefinitions);
+      if (extendedTypeDefinition != null) {
+        result.add(extendedTypeDefinition);
+      }
+    }
+  }
+  return result;
+}

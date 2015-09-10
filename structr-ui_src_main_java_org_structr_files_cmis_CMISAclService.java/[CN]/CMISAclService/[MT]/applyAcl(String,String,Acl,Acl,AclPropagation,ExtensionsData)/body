@@ -1,3 +1,26 @@
 {
-  throw new UnsupportedOperationException("Not supported yet.");
+  final App app=StructrApp.getInstance(securityContext);
+  try (final Tx tx=app.tx()){
+    final GraphObject obj=app.get(objectId);
+    if (obj != null) {
+      if (obj instanceof AccessControllable) {
+        final AccessControllable node=(AccessControllable)obj;
+        for (        final Ace toRemove : removeAces.getAces()) {
+          applyAce(node,toRemove,true);
+        }
+        for (        final Ace toAdd : addAces.getAces()) {
+          applyAce(node,toAdd,false);
+        }
+      }
+ else {
+        throw new CmisInvalidArgumentException("Object with ID " + objectId + " is not access controllable");
+      }
+    }
+    tx.success();
+    return CMISObjectWrapper.wrap(obj,false);
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+  }
+  throw new CmisObjectNotFoundException("Object with ID " + objectId + " does not exist");
 }

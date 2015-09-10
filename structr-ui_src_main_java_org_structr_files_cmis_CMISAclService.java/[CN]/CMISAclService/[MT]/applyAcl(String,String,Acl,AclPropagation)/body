@@ -1,0 +1,24 @@
+{
+  final App app=StructrApp.getInstance(securityContext);
+  try (final Tx tx=app.tx()){
+    final GraphObject obj=app.get(objectId);
+    if (obj != null) {
+      if (obj instanceof AbstractNode) {
+        final AbstractNode node=(AbstractNode)obj;
+        node.revokeAll();
+        for (        final Ace toAdd : acl.getAces()) {
+          applyAce(node,toAdd,false);
+        }
+      }
+ else {
+        throw new CmisInvalidArgumentException("Object with ID " + objectId + " is not access controllable");
+      }
+    }
+    tx.success();
+    return CMISObjectWrapper.wrap(obj,false);
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+  }
+  throw new CmisObjectNotFoundException("Object with ID " + objectId + " does not exist");
+}

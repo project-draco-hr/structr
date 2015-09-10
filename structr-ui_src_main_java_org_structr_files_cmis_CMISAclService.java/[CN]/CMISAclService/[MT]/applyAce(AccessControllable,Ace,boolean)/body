@@ -1,0 +1,24 @@
+{
+  final String principalId=toAdd.getPrincipalId();
+  final List<String> permissions=toAdd.getPermissions();
+  final Principal principal=CMISObjectWrapper.translateUsernameToPrincipal(principalId);
+  if (principal != null) {
+    for (    final String permissionString : permissions) {
+      final Permission permission=Permissions.valueOf(permissionString);
+      if (permission != null) {
+        if (revoke) {
+          node.revoke(permission,principal);
+        }
+ else {
+          node.grant(permission,principal);
+        }
+      }
+ else {
+        throw new CmisInvalidArgumentException("Permission with ID " + permissionString + " does not exist");
+      }
+    }
+  }
+ else {
+    throw new CmisObjectNotFoundException("Principal with ID " + principalId + " does not exist");
+  }
+}

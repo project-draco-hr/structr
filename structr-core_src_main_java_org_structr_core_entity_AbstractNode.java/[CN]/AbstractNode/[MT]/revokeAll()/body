@@ -1,0 +1,9 @@
+{
+  if (!isGranted(Permission.accessControl,securityContext)) {
+    throw new FrameworkException(403,"Access control not permitted");
+  }
+  final App app=StructrApp.getInstance();
+  for (  final Security security : getIncomingRelationshipsAsSuperUser(Security.class)) {
+    app.delete(security);
+  }
+}

@@ -1,3 +1,27 @@
 {
-  throw new UnsupportedOperationException("Not supported yet.");
+  final App app=StructrApp.getInstance(securityContext);
+  final Principal principal=securityContext.getUser(false);
+  try (final Tx tx=app.tx()){
+    final GraphObject obj=app.get(objectId);
+    if (obj != null) {
+      if (principal.isGranted(Permission.delete,securityContext)) {
+        if (obj.isNode()) {
+          app.delete(obj.getSyncNode());
+        }
+ else {
+          app.delete(obj.getSyncRelationship());
+        }
+      }
+ else {
+        throw new CmisPermissionDeniedException("Cannot delete object with ID " + objectId);
+      }
+    }
+ else {
+      throw new CmisObjectNotFoundException("Object with ID " + objectId + " does not exist");
+    }
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    throw new CmisConstraintException(fex.getMessage(),fex);
+  }
 }

@@ -1,0 +1,31 @@
+{
+  if (key.isDynamic() || key.isCMISProperty()) {
+    final TypeDefinitionFactory factory=TypeDefinitionFactory.newInstance();
+    final PropertyType dataType=key.getDataType();
+    if (dataType != null) {
+      final String propertyId=key.jsonName();
+      final String displayName=propertyId;
+      final String description=StringUtils.capitalize(propertyId);
+      final Class declaringClass=key.getDeclaringClass();
+      final boolean isInherited=!type.getSimpleName().equals(declaringClass.getSimpleName());
+      final Cardinality cardinality=Cardinality.SINGLE;
+      final Updatability updatability=Updatability.READWRITE;
+      final boolean required=key.isNotNull();
+      final boolean queryable=key.isIndexed();
+      final boolean orderable=key.isIndexed();
+      final MutablePropertyDefinition property=factory.createPropertyDefinition(propertyId,displayName,description,dataType,cardinality,updatability,isInherited,required,queryable,orderable);
+      final Class valueType=key.valueType();
+      if (valueType != null && valueType.isEnum()) {
+        final List<Choice> choices=new LinkedList<>();
+        for (        final Object option : valueType.getEnumConstants()) {
+          final String optionName=option.toString();
+          choices.add(factory.createChoice(optionName,optionName));
+        }
+        property.setIsOpenChoice(false);
+        property.setChoices(choices);
+      }
+      return property;
+    }
+  }
+  return null;
+}

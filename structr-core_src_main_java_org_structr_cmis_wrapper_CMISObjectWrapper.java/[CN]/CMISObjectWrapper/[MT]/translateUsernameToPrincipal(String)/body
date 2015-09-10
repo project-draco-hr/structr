@@ -1,0 +1,10 @@
+{
+  if (StructrApp.getConfigurationValue(Services.SUPERUSER_USERNAME).equals(username)) {
+    return new SuperUser();
+  }
+  final Principal principal=StructrApp.getInstance().nodeQuery(Principal.class).andName(username).getFirst();
+  if (principal != null) {
+    return principal;
+  }
+  return null;
+}

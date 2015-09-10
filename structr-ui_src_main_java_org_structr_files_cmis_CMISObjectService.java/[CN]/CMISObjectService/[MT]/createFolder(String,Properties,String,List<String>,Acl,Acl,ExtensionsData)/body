@@ -1,3 +1,35 @@
 {
-  throw new UnsupportedOperationException("Not supported yet.");
+  final App app=StructrApp.getInstance(securityContext);
+  String uuid=null;
+  try (final Tx tx=app.tx()){
+    final String objectTypeId=getStringValue(properties,PropertyIds.OBJECT_TYPE_ID);
+    final Class type=typeFromObjectTypeId(objectTypeId,BaseTypeId.CMIS_FOLDER,Folder.class);
+    if (type != null) {
+      final BaseTypeId baseTypeId=getBaseTypeId(type);
+      if (baseTypeId != null && BaseTypeId.CMIS_FOLDER.equals(baseTypeId)) {
+        final NodeInterface newFolder=app.create(type,PropertyMap.cmisTypeToJavaType(securityContext,type,properties));
+        if (!CMISInfo.ROOT_FOLDER_ID.equals(folderId)) {
+          final Folder parent=app.get(Folder.class,folderId);
+          if (parent != null) {
+            newFolder.setProperty(Folder.parent,parent);
+          }
+ else {
+            throw new CmisObjectNotFoundException("Folder with ID " + folderId + " does not exist");
+          }
+        }
+        uuid=newFolder.getUuid();
+      }
+ else {
+        throw new CmisConstraintException("Cannot create cmis:folder of type " + objectTypeId);
+      }
+    }
+ else {
+      throw new CmisObjectNotFoundException("Type with ID " + objectTypeId + " does not exist");
+    }
+    tx.success();
+  }
+ catch (  Throwable t) {
+    throw new CmisRuntimeException("New folder could not be created: " + t.getMessage());
+  }
+  return uuid;
 }

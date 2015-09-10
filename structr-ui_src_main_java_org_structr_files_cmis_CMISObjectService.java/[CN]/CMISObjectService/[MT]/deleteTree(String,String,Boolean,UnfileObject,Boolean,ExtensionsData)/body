@@ -1,3 +1,22 @@
 {
-  throw new UnsupportedOperationException("Not supported yet.");
+  if (UnfileObject.UNFILE.equals(unfileObjects)) {
+    throw new CmisNotSupportedException("Unfiling not supported");
+  }
+  final App app=StructrApp.getInstance(securityContext);
+  final FailedToDeleteDataImpl result=new FailedToDeleteDataImpl();
+  result.setIds(new LinkedList<String>());
+  try (final Tx tx=app.tx()){
+    final Folder folder=app.get(Folder.class,folderId);
+    if (folder != null) {
+      recursivelyCheckAndDeleteFiles(app,result,folder,continueOnFailure);
+    }
+ else {
+      throw new CmisObjectNotFoundException("Folder with ID " + folderId + " does not exist");
+    }
+    tx.success();
+  }
+ catch (  final FrameworkException fex) {
+    fex.printStackTrace();
+  }
+  return result;
 }

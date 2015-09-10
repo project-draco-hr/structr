@@ -1,3 +1,14 @@
 {
-  throw new UnsupportedOperationException("Not supported yet.");
+  final App app=StructrApp.getInstance(securityContext);
+  try (final Tx tx=app.tx()){
+    final GraphObject node=app.get(objectId);
+    if (node != null) {
+      return CMISObjectWrapper.wrap(node,false);
+    }
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+  }
+  throw new CmisObjectNotFoundException("Object with ID " + objectId + " does not exist");
 }

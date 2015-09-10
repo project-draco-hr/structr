@@ -1,0 +1,19 @@
+{
+  if (toDelete != null) {
+    final Principal owner=toDelete.getOwnerNode();
+    if (owner == null || owner.isGranted(Permission.delete,securityContext)) {
+      app.delete(toDelete);
+      for (      final AbstractFile child : toDelete.getProperty(AbstractFile.children)) {
+        recursivelyCheckAndDeleteFiles(app,result,child,continueOnFailure);
+      }
+    }
+ else {
+      if (continueOnFailure) {
+        result.getIds().add(toDelete.getUuid());
+      }
+ else {
+        throw new CmisPermissionDeniedException("Cannot delete object with ID " + toDelete.getUuid());
+      }
+    }
+  }
+}

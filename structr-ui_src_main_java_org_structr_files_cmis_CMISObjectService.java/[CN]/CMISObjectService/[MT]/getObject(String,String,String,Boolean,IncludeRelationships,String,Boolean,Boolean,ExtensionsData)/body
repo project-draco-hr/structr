@@ -1,9 +1,12 @@
 {
   final App app=StructrApp.getInstance();
   try (final Tx tx=app.tx()){
-    final ObjectData data=CMISObjectWrapper.wrap(app.get(objectId),includeAllowableActions);
-    tx.success();
-    return data;
+    final GraphObject obj=app.get(objectId);
+    if (obj != null) {
+      final ObjectData data=CMISObjectWrapper.wrap(obj,includeAllowableActions);
+      tx.success();
+      return data;
+    }
   }
  catch (  Throwable t) {
     t.printStackTrace();

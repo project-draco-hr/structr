@@ -11,7 +11,9 @@
       }
       propertyContainer.setProperty(AbstractNode.lastModifiedBy.dbName(),modifiedById);
     }
-    propertyContainer.setProperty(AbstractNode.lastModifiedDate.dbName(),System.currentTimeMillis());
+    if (!securityContext.dontModifyAccessTime()) {
+      propertyContainer.setProperty(AbstractNode.lastModifiedDate.dbName(),System.currentTimeMillis());
+    }
   }
  catch (  Throwable t) {
     t.printStackTrace();

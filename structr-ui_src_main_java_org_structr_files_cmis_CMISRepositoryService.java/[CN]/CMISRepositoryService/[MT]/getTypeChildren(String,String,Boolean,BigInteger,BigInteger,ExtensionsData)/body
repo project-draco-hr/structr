@@ -1,5 +1,5 @@
 {
-  final Set<TypeDefinition> results=new LinkedHashSet<>();
+  final CMISTypeDefinitionListWrapper results=new CMISTypeDefinitionListWrapper(maxItems,skipCount);
   if (typeId != null) {
     final BaseTypeId baseTypeId=getBaseTypeId(typeId);
     if (baseTypeId != null) {
@@ -23,16 +23,5 @@
     results.add(getRelationshipTypeDefinition(BaseTypeId.CMIS_RELATIONSHIP.value(),includePropertyDefinitions,true));
     results.add(getSecondaryTypeDefinition(BaseTypeId.CMIS_SECONDARY.value(),includePropertyDefinitions,true));
   }
-  final TypeDefinitionListImpl returnValue=new TypeDefinitionListImpl();
-  final List<TypeDefinition> unpagedList=new LinkedList<>(results);
-  final int resultSize=unpagedList.size();
-  final List<TypeDefinition> pagedList=applyPaging(unpagedList,maxItems,skipCount);
-  int skip=0;
-  if (skipCount != null) {
-    skip=skipCount.intValue();
-  }
-  returnValue.setNumItems(BigInteger.valueOf(resultSize));
-  returnValue.setList(pagedList);
-  returnValue.setHasMoreItems(resultSize > pagedList.size() + skip);
-  return returnValue;
+  return results;
 }

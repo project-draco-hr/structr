@@ -1,3 +1,44 @@
 {
-  throw new UnsupportedOperationException("Not supported yet.");
+  final App app=StructrApp.getInstance(securityContext);
+  File newFile=null;
+  String uuid=null;
+  try (final Tx tx=app.tx()){
+    final String objectTypeId=getStringValue(properties,PropertyIds.OBJECT_TYPE_ID);
+    final String fileName=getStringValue(properties,PropertyIds.NAME);
+    final Class type=typeFromObjectTypeId(objectTypeId,BaseTypeId.CMIS_DOCUMENT,File.class);
+    if (type != null) {
+      final BaseTypeId baseTypeId=getBaseTypeId(type);
+      if (baseTypeId != null && BaseTypeId.CMIS_DOCUMENT.equals(baseTypeId)) {
+        newFile=FileHelper.createFile(securityContext,new byte[0],contentStream.getMimeType(),type,fileName);
+        if (!CMISInfo.ROOT_FOLDER_ID.equals(folderId)) {
+          final Folder parent=app.get(Folder.class,folderId);
+          if (parent != null) {
+            newFile.setProperty(Folder.parent,parent);
+          }
+ else {
+            throw new CmisObjectNotFoundException("Folder with ID " + folderId + " does not exist");
+          }
+        }
+        uuid=newFile.getUuid();
+        try (final OutputStream outputStream=newFile.getOutputStream(false)){
+          IOUtils.copy(contentStream.getStream(),outputStream);
+        }
+         FileHelper.updateMetadata(newFile);
+      }
+ else {
+        throw new CmisConstraintException("Cannot create cmis:document of type " + objectTypeId);
+      }
+    }
+ else {
+      throw new CmisObjectNotFoundException("Type with ID " + objectTypeId + " does not exist");
+    }
+    tx.success();
+  }
+ catch (  Throwable t) {
+    throw new CmisRuntimeException("New document could not be created: " + t.getMessage());
+  }
+  if (newFile != null) {
+    newFile.notifyUploadCompletion();
+  }
+  return uuid;
 }

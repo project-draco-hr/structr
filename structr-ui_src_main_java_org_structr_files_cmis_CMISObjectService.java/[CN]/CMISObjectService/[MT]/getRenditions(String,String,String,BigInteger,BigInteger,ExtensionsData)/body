@@ -1,7 +1,7 @@
 {
   final ObjectData obj=getObject(repositoryId,objectId,renditionFilter,false,IncludeRelationships.NONE,null,false,false,extension);
   if (obj != null) {
-    return applyPaging(obj.getRenditions(),maxItems,skipCount);
+    return new CMISPagingListWrapper<>(obj.getRenditions(),maxItems,skipCount).getPagedList();
   }
   throw new CmisObjectNotFoundException("Object with ID " + objectId + " does not exist");
 }

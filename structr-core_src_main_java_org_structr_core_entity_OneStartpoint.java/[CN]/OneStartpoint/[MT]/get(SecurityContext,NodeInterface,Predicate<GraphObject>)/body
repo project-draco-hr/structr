@@ -1,8 +1,11 @@
 {
+  final RelationshipFactory relFactory=new RelationshipFactory<>(securityContext);
   final NodeFactory<S> nodeFactory=new NodeFactory<>(securityContext);
   final Relationship rel=getRawSource(securityContext,node.getNode(),predicate);
   if (rel != null) {
-    return nodeFactory.adapt(rel.getStartNode());
+    final S value=nodeFactory.adapt(rel.getStartNode());
+    value.setRelationshipPathSegment(relFactory.adapt(rel));
+    return value;
   }
   return null;
 }

@@ -2,7 +2,7 @@
   if (singletonInstance == null) {
     singletonInstance=new Services();
     singletonInstance.initialize();
-    new Thread(new Runnable(){
+    final Thread thread=new Thread(new Runnable(){
       @Override public void run(){
         try {
           Thread.sleep(100);
@@ -14,7 +14,9 @@
         }
       }
     }
-).start();
+);
+    thread.setDaemon(true);
+    thread.start();
   }
   return singletonInstance;
 }

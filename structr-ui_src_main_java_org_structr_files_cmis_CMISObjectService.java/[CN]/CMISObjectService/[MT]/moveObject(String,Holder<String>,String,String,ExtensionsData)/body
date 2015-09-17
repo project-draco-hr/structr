@@ -1,3 +1,31 @@
 {
-  throw new UnsupportedOperationException("Not supported yet.");
+  if (sourceFolderId != null && targetFolderId != null) {
+    if (sourceFolderId.equals(targetFolderId)) {
+      return;
+    }
+    final App app=StructrApp.getInstance(securityContext);
+    try (final Tx tx=app.tx()){
+      final FileBase file=get(app,FileBase.class,objectId.getValue());
+      final Folder parent=file.getProperty(FileBase.parent);
+      if (CMISInfo.ROOT_FOLDER_ID.equals(sourceFolderId) && parent != null) {
+        throw new CmisInvalidArgumentException("Object with ID " + objectId.getValue() + " is not filed in folder with ID "+ sourceFolderId);
+      }
+      if (parent != null && !sourceFolderId.equals(parent.getUuid())) {
+        throw new CmisInvalidArgumentException("Object with ID " + objectId.getValue() + " is not filed in folder with ID "+ sourceFolderId);
+      }
+      if (CMISInfo.ROOT_FOLDER_ID.equals(targetFolderId)) {
+        file.setProperty(FileBase.parent,null);
+      }
+ else {
+        file.setProperty(FileBase.parent,get(app,Folder.class,targetFolderId));
+      }
+      tx.success();
+    }
+ catch (    FrameworkException fex) {
+      throw new CmisConstraintException(fex.getMessage(),fex);
+    }
+  }
+ else {
+    throw new CmisInvalidArgumentException("Source and target folder must be set");
+  }
 }

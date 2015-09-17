@@ -4,11 +4,7 @@
   try (final Tx tx=app.tx()){
     final FileBase file=app.get(FileBase.class,objectId);
     if (file != null) {
-      result=new ContentStreamImpl();
-      result.setFileName(file.getName());
-      result.setLength(BigInteger.valueOf(file.getProperty(FileBase.size)));
-      result.setMimeType(file.getProperty(FileBase.contentType));
-      result.setStream(file.getInputStream());
+      return new CMISContentStream(file,offset,length);
     }
     tx.success();
   }

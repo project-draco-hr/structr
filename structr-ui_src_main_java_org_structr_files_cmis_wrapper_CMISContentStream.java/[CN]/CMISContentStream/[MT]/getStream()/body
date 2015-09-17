@@ -1,0 +1,11 @@
+{
+  try {
+    final FileChannel channel=FileChannel.open(file.toPath(),StandardOpenOption.READ);
+    final long mappedLength=Math.max(0,Math.min(channel.size() - offset,length));
+    final MappedByteBuffer buffer=channel.map(FileChannel.MapMode.READ_ONLY,offset,mappedLength);
+    return new MappedInputStream(buffer);
+  }
+ catch (  IOException ioex) {
+    throw new CmisConstraintException(ioex.getMessage());
+  }
+}

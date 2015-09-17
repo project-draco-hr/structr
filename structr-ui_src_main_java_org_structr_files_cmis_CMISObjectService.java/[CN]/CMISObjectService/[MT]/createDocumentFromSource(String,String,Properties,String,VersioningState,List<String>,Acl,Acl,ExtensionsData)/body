@@ -1,3 +1,25 @@
 {
-  throw new UnsupportedOperationException("Not supported yet.");
+  final App app=StructrApp.getInstance(securityContext);
+  String uuid=null;
+  try (final Tx tx=app.tx()){
+    final FileBase existingDocument=app.get(FileBase.class,sourceId);
+    if (existingDocument != null) {
+      try (final InputStream inputStream=existingDocument.getInputStream()){
+        final ContentStreamImpl copyContentStream=new ContentStreamImpl();
+        copyContentStream.setFileName(existingDocument.getName());
+        copyContentStream.setMimeType(existingDocument.getContentType());
+        copyContentStream.setLength(BigInteger.valueOf(existingDocument.getSize()));
+        copyContentStream.setStream(inputStream);
+        uuid=createDocument(repositoryId,properties,folderId,copyContentStream,versioningState,policies,addAces,removeAces,extension);
+      }
+     }
+ else {
+      throw new CmisObjectNotFoundException("Document with ID " + sourceId + " does not exist");
+    }
+    tx.success();
+  }
+ catch (  Throwable t) {
+    throw new CmisRuntimeException("New document could not be created: " + t.getMessage());
+  }
+  return uuid;
 }

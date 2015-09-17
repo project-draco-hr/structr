@@ -1,0 +1,38 @@
+{
+  final String objectTypeId=objectService.getStringValue(properties,PropertyIds.OBJECT_TYPE_ID);
+  if (objectTypeId != null) {
+    BaseTypeId baseTypeId=objectService.getBaseTypeId(objectTypeId);
+    if (baseTypeId == null) {
+      final Class type=StructrApp.getConfiguration().getNodeEntityClass(objectTypeId);
+      if (type != null) {
+        baseTypeId=objectService.getBaseTypeId(type);
+      }
+    }
+    if (baseTypeId != null) {
+switch (baseTypeId) {
+case CMIS_DOCUMENT:
+        if (contentStream == null) {
+          throw new CmisInvalidArgumentException("Document object must have a content stream");
+        }
+      return objectService.createDocument(repositoryId,properties,folderId,contentStream,versioningState,policies,null,null,extension);
+case CMIS_FOLDER:
+    if (contentStream != null) {
+      throw new CmisInvalidArgumentException("Folder object must not have a content stream");
+    }
+  return objectService.createFolder(repositoryId,properties,folderId,policies,null,null,extension);
+case CMIS_ITEM:
+return objectService.createItem(repositoryId,properties,folderId,policies,null,null,extension);
+case CMIS_RELATIONSHIP:
+return objectService.createRelationship(repositoryId,properties,policies,null,null,extension);
+case CMIS_POLICY:
+return objectService.createPolicy(repositoryId,properties,folderId,policies,null,null,extension);
+case CMIS_SECONDARY:
+throw new CmisInvalidArgumentException("Cannot create object of secondary type");
+}
+}
+ else {
+throw new CmisObjectNotFoundException("Type " + objectTypeId + " does not exist");
+}
+}
+throw new CmisInvalidArgumentException("Property '" + PropertyIds.OBJECT_TYPE_ID + "' must be set!");
+}

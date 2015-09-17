@@ -9,7 +9,8 @@
     if (type != null) {
       final BaseTypeId baseTypeId=getBaseTypeId(type);
       if (baseTypeId != null && BaseTypeId.CMIS_DOCUMENT.equals(baseTypeId)) {
-        newFile=FileHelper.createFile(securityContext,new byte[0],contentStream.getMimeType(),type,fileName);
+        final String mimeType=contentStream != null ? contentStream.getMimeType() : null;
+        newFile=FileHelper.createFile(securityContext,new byte[0],mimeType,type,fileName);
         if (!CMISInfo.ROOT_FOLDER_ID.equals(folderId)) {
           final Folder parent=app.get(Folder.class,folderId);
           if (parent != null) {
@@ -20,10 +21,16 @@
           }
         }
         uuid=newFile.getUuid();
-        try (final OutputStream outputStream=newFile.getOutputStream(false)){
-          IOUtils.copy(contentStream.getStream(),outputStream);
+        if (contentStream != null) {
+          final InputStream inputStream=contentStream.getStream();
+          if (inputStream != null) {
+            try (final OutputStream outputStream=newFile.getOutputStream(false)){
+              IOUtils.copy(inputStream,outputStream);
+            }
+             inputStream.close();
+            FileHelper.updateMetadata(newFile);
+          }
         }
-         FileHelper.updateMetadata(newFile);
       }
  else {
         throw new CmisConstraintException("Cannot create cmis:document of type " + objectTypeId);

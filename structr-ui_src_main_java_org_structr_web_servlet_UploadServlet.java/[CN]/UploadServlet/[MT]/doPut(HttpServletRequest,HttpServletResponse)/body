@@ -20,8 +20,8 @@
     if (response.getStatus() == 302) {
       return;
     }
-    uploader.setFileSizeMax(Integer.parseInt(StructrApp.getConfigurationValue("UploadServlet.maxFileSize",MAX_FILE_SIZE)));
-    uploader.setSizeMax(Integer.parseInt(StructrApp.getConfigurationValue("UploadServlet.maxRequestSize",MAX_REQUEST_SIZE)));
+    uploader.setFileSizeMax(MEGABYTE * Long.parseLong(StructrApp.getConfigurationValue("UploadServlet.maxFileSize",MAX_FILE_SIZE)));
+    uploader.setSizeMax(MEGABYTE * Long.parseLong(StructrApp.getConfigurationValue("UploadServlet.maxRequestSize",MAX_REQUEST_SIZE)));
     List<FileItem> fileItemsList=uploader.parseRequest(request);
     Iterator<FileItem> fileItemsIterator=fileItemsList.iterator();
     while (fileItemsIterator.hasNext()) {

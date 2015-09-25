@@ -1,0 +1,23 @@
+{
+  for (  final AbstractRelationship relationship : startNode.getRelationshipsAsSuperUser()) {
+    final long relationshipId=relationship.getId();
+    if (relationship != null && relationship instanceof PermissionPropagation && !visitedIds.contains(relationshipId)) {
+      visitedIds.add(relationshipId);
+      modifyEffectivePermissions((PermissionPropagation)relationship,effectivePermissions);
+      if (effectivePermissions.isEmpty()) {
+        continue;
+      }
+      final NodeInterface otherNode=relationship.getOtherNode(startNode);
+      if (otherNode.getId() == getId()) {
+        if (effectivePermissions.contains(permission)) {
+          return true;
+        }
+        continue;
+      }
+      if (hasEffectivePermissions(otherNode,permission,effectivePermissions,visitedIds)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}

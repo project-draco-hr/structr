@@ -9,11 +9,24 @@
   final Set<String> propertyNames=new LinkedHashSet<>();
   final Set<Validator> validators=new LinkedHashSet<>();
   final Set<String> enums=new LinkedHashSet<>();
+  final Set<String> interfaces=new LinkedHashSet<>();
   src.append("package org.structr.dynamic;\n\n");
   SchemaHelper.formatImportStatements(src,baseType);
   src.append("public class ").append(_className).append(" extends ").append(getBaseType());
   if ("OWNS".equals(getProperty(relationshipType))) {
-    src.append(" implements org.structr.core.entity.relationship.Ownership");
+    interfaces.add(Ownership.class.getName());
+  }
+  if (Boolean.TRUE.equals(getProperty(propagatesPermissions))) {
+    interfaces.add(PermissionPropagation.class.getName());
+  }
+  if (!interfaces.isEmpty()) {
+    src.append(" implements ");
+    for (final Iterator<String> it=interfaces.iterator(); it.hasNext(); ) {
+      src.append(it.next());
+      if (it.hasNext()) {
+        src.append(", ");
+      }
+    }
   }
   src.append(" {\n\n");
   src.append(SchemaHelper.extractProperties(this,propertyNames,validators,enums,viewProperties,errorBuffer));
@@ -57,6 +70,7 @@
   SchemaHelper.formatValidators(src,validators);
   SchemaHelper.formatSaveActions(src,actions);
   formatRelationshipFlags(src);
+  formatPermissionPropagation(src);
   src.append("}\n");
   return src.toString();
 }

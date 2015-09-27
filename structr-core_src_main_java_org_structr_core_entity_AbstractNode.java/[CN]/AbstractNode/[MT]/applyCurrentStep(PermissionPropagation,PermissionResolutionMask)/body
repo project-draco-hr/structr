@@ -1,42 +1,43 @@
 {
 switch (rel.getReadPropagation()) {
 case Add:
-    effectivePermissions.add(Permission.read);
+    mask.addRead();
   break;
 case Remove:
-effectivePermissions.remove(Permission.read);
+mask.removeRead();
 break;
 default :
 break;
 }
 switch (rel.getWritePropagation()) {
 case Add:
-effectivePermissions.add(Permission.write);
+mask.addWrite();
 break;
 case Remove:
-effectivePermissions.remove(Permission.write);
+mask.removeWrite();
 break;
 default :
 break;
 }
 switch (rel.getDeletePropagation()) {
 case Add:
-effectivePermissions.add(Permission.delete);
+mask.addDelete();
 break;
 case Remove:
-effectivePermissions.remove(Permission.delete);
+mask.removeDelete();
 break;
 default :
 break;
 }
 switch (rel.getAccessControlPropagation()) {
 case Add:
-effectivePermissions.add(Permission.accessControl);
+mask.addAccessControl();
 break;
 case Remove:
-effectivePermissions.remove(Permission.accessControl);
+mask.removeAccessControl();
 break;
 default :
 break;
 }
+mask.handleProperties(rel.getDeltaProperties());
 }

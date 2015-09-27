@@ -2,5 +2,13 @@
   if (key == null || key.dbName() == null) {
     return null;
   }
+  if (permissionResolutionMask != null) {
+    if (!permissionResolutionMask.allowsPermission(Permission.read)) {
+      return null;
+    }
+    if (!permissionResolutionMask.allowsProperty(key)) {
+      return null;
+    }
+  }
   return key.getProperty(securityContext,this,applyConverter,predicate);
 }

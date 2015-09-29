@@ -1,0 +1,45 @@
+{
+  final Class type=node.getClass();
+  final String name=node.getName();
+  final NodeInterface existingNode=(NodeInterface)StructrApp.getInstance().nodeQuery(type).andName(name).getFirst();
+  if (existingNode != null) {
+    logger.log(Level.INFO,"Found existing schema node {0}, merging!",name);
+    final Node sourceNode=node.getNode();
+    final Node targetNode=existingNode.getNode();
+    copyProperties(sourceNode,targetNode);
+    for (    final Relationship outRel : sourceNode.getRelationships(Direction.OUTGOING)) {
+      final Node otherNode=outRel.getEndNode();
+      final Relationship newRel=targetNode.createRelationshipTo(otherNode,outRel.getType());
+      copyProperties(outRel,newRel);
+      deletedRels.add(outRel.getId());
+      outRel.delete();
+    }
+    for (    final Relationship inRel : sourceNode.getRelationships(Direction.INCOMING)) {
+      final Node otherNode=inRel.getStartNode();
+      final Relationship newRel=otherNode.createRelationshipTo(targetNode,inRel.getType());
+      copyProperties(inRel,newRel);
+      deletedRels.add(inRel.getId());
+      inRel.delete();
+    }
+    final Map<String,List<Node>> groupedNodes=groupByTypeAndName(Iterables.toList(Iterables.map(new EndNodes(),targetNode.getRelationships(Direction.OUTGOING))));
+    for (    final List<Node> nodes : groupedNodes.values()) {
+      final int size=nodes.size();
+      if (size > 1) {
+        final Node groupTargetNode=nodes.get(0);
+        for (        final Node groupSourceNode : nodes.subList(1,size)) {
+          copyProperties(groupSourceNode,groupTargetNode);
+          for (          final Relationship groupRel : groupTargetNode.getRelationships()) {
+            deletedRels.add(groupRel.getId());
+            groupRel.delete();
+          }
+          deletedNodes.add(groupTargetNode.getId());
+          groupTargetNode.delete();
+        }
+      }
+    }
+    deletedNodes.add(sourceNode.getId());
+    sourceNode.delete();
+    return true;
+  }
+  return false;
+}

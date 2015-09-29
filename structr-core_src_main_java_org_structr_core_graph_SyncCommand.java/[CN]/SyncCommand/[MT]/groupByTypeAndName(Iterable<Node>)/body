@@ -1,0 +1,15 @@
+{
+  final Map<String,List<Node>> groupedNodes=new LinkedHashMap<>();
+  for (  final Node node : nodes) {
+    if (node.hasProperty("name") && node.hasProperty("type")) {
+      final String typeAndName=node.getProperty("type") + "." + node.getProperty("name");
+      List<Node> nodeList=groupedNodes.get(typeAndName);
+      if (nodeList == null) {
+        nodeList=new LinkedList<>();
+        groupedNodes.put(typeAndName,nodeList);
+      }
+      nodeList.add(node);
+    }
+  }
+  return groupedNodes;
+}

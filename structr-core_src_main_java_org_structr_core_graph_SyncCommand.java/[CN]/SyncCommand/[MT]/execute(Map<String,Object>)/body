@@ -3,6 +3,8 @@
   String mode=(String)attributes.get("mode");
   String fileName=(String)attributes.get("file");
   String validate=(String)attributes.get("validate");
+  String query=(String)attributes.get("query");
+  Long batchSize=(Long)attributes.get("batchSize");
   boolean doValidation=true;
   if (validate != null) {
     try {
@@ -16,13 +18,13 @@
     throw new FrameworkException(400,"Please specify sync file.");
   }
   if ("export".equals(mode)) {
-    exportToFile(graphDb,fileName,true);
+    exportToFile(graphDb,fileName,query,true);
   }
  else   if ("exportDb".equals(mode)) {
-    exportToFile(graphDb,fileName,false);
+    exportToFile(graphDb,fileName,query,false);
   }
  else   if ("import".equals(mode)) {
-    importFromFile(graphDb,securityContext,fileName,doValidation);
+    importFromFile(graphDb,securityContext,fileName,doValidation,batchSize);
   }
  else {
     throw new FrameworkException(400,"Please specify sync mode (import|export).");

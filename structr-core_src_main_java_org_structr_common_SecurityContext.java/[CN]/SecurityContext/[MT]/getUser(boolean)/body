@@ -1,5 +1,11 @@
 {
   if (cachedUser != null) {
+    if (cachedUserId == null) {
+      this.cachedUserId=cachedUser.getUuid();
+    }
+    if (cachedUserName == null) {
+      this.cachedUserName=cachedUser.getName();
+    }
     return cachedUser;
   }
   if (authenticator == null) {
@@ -10,6 +16,10 @@
   }
   try {
     cachedUser=authenticator.getUser(request,tryLogin);
+    if (cachedUser != null) {
+      cachedUserId=cachedUser.getUuid();
+      cachedUserName=cachedUser.getName();
+    }
   }
  catch (  Throwable t) {
     logger.log(Level.WARNING,"No user found");

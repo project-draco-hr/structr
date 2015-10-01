@@ -1,0 +1,20 @@
+{
+  int statusBefore=status;
+  status|=STATE_MODIFIED | STATE_PROPAGATING_MODIFICATION;
+  if (key != null) {
+    removedProperties.put(key,previousValue);
+  }
+  if (status != statusBefore) {
+    if (key != null) {
+      modifiedProperties.put(key,newValue);
+      updateChangeLog(user,Verb.change,key,previousValue,newValue);
+    }
+    modified=true;
+  }
+ else {
+    if (key != null) {
+      newProperties.put(key,newValue);
+      updateChangeLog(user,Verb.change,key,previousValue,newValue);
+    }
+  }
+}

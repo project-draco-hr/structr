@@ -6,6 +6,7 @@
   final NodeFactory nodeFactory=new NodeFactory(securityContext);
   final String uuidPropertyName=GraphObject.id.dbName();
   final Map<String,Node> uuidMap=new LinkedHashMap<>();
+  final SuperUser superUser=new SuperUser();
   double t0=System.nanoTime();
   PropertyContainer currentObject=null;
   String currentKey=null;
@@ -98,14 +99,14 @@
           checkAndMerge(entity,deletedNodes,deletedRels);
         }
         if (!deletedNodes.contains(node.getId())) {
-          TransactionCommand.nodeCreated(entity);
+          TransactionCommand.nodeCreated(superUser,entity);
           entity.addToIndex();
         }
       }
       for (      Relationship rel : rels) {
         if (!deletedRels.contains(rel.getId())) {
           RelationshipInterface entity=relFactory.instantiate(rel);
-          TransactionCommand.relationshipCreated(entity);
+          TransactionCommand.relationshipCreated(superUser,entity);
           entity.addToIndex();
         }
       }

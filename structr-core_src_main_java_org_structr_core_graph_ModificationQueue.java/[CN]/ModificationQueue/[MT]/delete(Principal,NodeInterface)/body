@@ -1,0 +1,12 @@
+{
+  getState(node).delete(false);
+  if (auditLogEnabled) {
+    final SecurityContext securityContext=node.getSecurityContext();
+    if (securityContext != null) {
+      final Principal principal=securityContext.getCachedUser();
+      if (principal != null) {
+        getState(principal).updateChangeLog(user,GraphObjectModificationState.Verb.delete,node.getUuid());
+      }
+    }
+  }
+}

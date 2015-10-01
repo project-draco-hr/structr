@@ -1,0 +1,8 @@
+{
+  getState(relationship).delete(passive);
+  final NodeInterface sourceNode=relationship.getSourceNodeAsSuperUser();
+  final NodeInterface targetNode=relationship.getTargetNodeAsSuperUser();
+  modifyEndNodes(user,sourceNode,targetNode,relationship.getRelType());
+  getState(sourceNode).updateChangeLog(user,GraphObjectModificationState.Verb.unlink,relationship.getType(),targetNode.getUuid());
+  getState(targetNode).updateChangeLog(user,GraphObjectModificationState.Verb.unlink,relationship.getType(),sourceNode.getUuid());
+}

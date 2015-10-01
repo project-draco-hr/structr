@@ -1,0 +1,46 @@
+{
+  if (level > 100) {
+    logger.log(Level.WARNING,"Aborting recursive permission resolution because of recursion level > 100, this is quite likely an infinite loop.");
+    return false;
+  }
+  if (isCreation && (accessingUser == null || accessingUser.equals(getOwnerNode()))) {
+    return true;
+  }
+  if (accessingUser != null && accessingUser.isAdmin()) {
+    return true;
+  }
+  if (this.equals(accessingUser) && (level == 0 || (permission.equals(Permission.read) && level > 0))) {
+    return true;
+  }
+  final Principal _owner=getOwnerNode();
+  final boolean hasOwner=(_owner != null);
+  if (!hasOwner && Services.getPermissionsForOwnerlessNodes().contains(permission)) {
+    if (accessingUser != null && isVisibleToAuthenticatedUsers()) {
+      return true;
+    }
+    if (accessingUser == null && isVisibleToPublicUsers()) {
+      return true;
+    }
+  }
+  if (hasOwner && accessingUser == null) {
+    return false;
+  }
+  if (accessingUser != null) {
+    if (hasOwner && accessingUser.equals(_owner)) {
+      return true;
+    }
+    final Security security=getSecurityRelationship(accessingUser);
+    if (security != null && security.isAllowed(permission)) {
+      return true;
+    }
+    if (hasEffectivePermissions(accessingUser,permission)) {
+      return true;
+    }
+    for (    Principal parent : accessingUser.getParents()) {
+      if (isGranted(permission,parent,level + 1,alreadyTraversed)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}

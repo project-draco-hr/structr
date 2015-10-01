@@ -15,15 +15,6 @@
     }
 ,null,0,0);
   }
-  if ("print".equals(name)) {
-    return new IdFunctionObject(new IdFunctionCall(){
-      @Override public Object execIdCall(      final IdFunctionObject info,      final Context context,      final Scriptable scope,      final Scriptable thisObject,      final Object[] parameters){
-        actionContext.print(parameters);
-        return null;
-      }
-    }
-,null,0,0);
-  }
   if ("clear".equals(name)) {
     return new IdFunctionObject(new IdFunctionCall(){
       @Override public Object execIdCall(      final IdFunctionObject info,      final Context context,      final Scriptable scope,      final Scriptable thisObject,      final Object[] parameters){
@@ -33,26 +24,11 @@
     }
 ,null,0,0);
   }
-  if ("log".equals(name)) {
-    return new IdFunctionObject(new IdFunctionCall(){
-      @Override public Object execIdCall(      final IdFunctionObject info,      final Context context,      final Scriptable scope,      final Scriptable thisObject,      final Object[] parameters){
-        if (parameters.length > 0 && parameters[0] != null) {
-          final StringBuilder buf=new StringBuilder();
-          for (          final Object obj : parameters) {
-            buf.append(obj);
-          }
-          logger.log(Level.INFO,buf.toString());
-        }
-        return null;
-      }
-    }
-,null,0,0);
-  }
   if ("this".equals(name)) {
-    return wrap(null,start,null,entity);
+    return wrap(this.scriptingContext,start,null,entity);
   }
   if ("me".equals(name)) {
-    return wrap(null,start,null,actionContext.getSecurityContext().getUser(false));
+    return wrap(this.scriptingContext,start,null,actionContext.getSecurityContext().getUser(false));
   }
   if ("vars".equals(name)) {
     NativeObject nobj=new NativeObject();

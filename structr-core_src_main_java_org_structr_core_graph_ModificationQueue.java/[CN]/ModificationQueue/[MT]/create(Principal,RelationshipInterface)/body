@@ -1,0 +1,10 @@
+{
+  getState(relationship).create();
+  final NodeInterface sourceNode=relationship.getSourceNodeAsSuperUser();
+  final NodeInterface targetNode=relationship.getTargetNodeAsSuperUser();
+  if (sourceNode != null && targetNode != null) {
+    modifyEndNodes(user,sourceNode,targetNode,relationship.getRelType());
+    getState(sourceNode).updateChangeLog(user,GraphObjectModificationState.Verb.link,relationship.getType(),targetNode.getUuid());
+    getState(targetNode).updateChangeLog(user,GraphObjectModificationState.Verb.link,relationship.getType(),sourceNode.getUuid());
+  }
+}

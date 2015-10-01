@@ -3,14 +3,27 @@
     if (source instanceof Wrapper) {
       return unwrap(((Wrapper)source).unwrap());
     }
- else {
-      if (source.getClass().isArray()) {
-        final List list=new ArrayList();
-        for (        final Object obj : (Object[])source) {
-          list.add(unwrap(obj));
-        }
-        return list;
+ else     if (source.getClass().isArray()) {
+      final List list=new ArrayList();
+      for (      final Object obj : (Object[])source) {
+        list.add(unwrap(obj));
       }
+      return list;
+    }
+ else     if (source.getClass().getName().equals("org.mozilla.javascript.NativeDate")) {
+      try {
+        final Class type=source.getClass();
+        final Field field=type.getDeclaredField("date");
+        field.setAccessible(true);
+        final Double value=field.getDouble(source);
+        return new Date(value.longValue());
+      }
+ catch (      Throwable t) {
+        t.printStackTrace();
+      }
+    }
+ else {
+      return ScriptUtils.unwrap(source);
     }
   }
   return source;

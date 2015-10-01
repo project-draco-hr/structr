@@ -22,8 +22,8 @@
     if (StringUtils.isNotBlank(pathInfo)) {
       type=SchemaHelper.normalizeEntityName(StringUtils.stripStart(pathInfo.trim(),"/"));
     }
-    uploader.setFileSizeMax(MAX_FILE_SIZE);
-    uploader.setSizeMax(MAX_REQUEST_SIZE);
+    uploader.setFileSizeMax(MEGABYTE * Long.parseLong(StructrApp.getConfigurationValue("UploadServlet.maxFileSize",MAX_FILE_SIZE)));
+    uploader.setSizeMax(MEGABYTE * Long.parseLong(StructrApp.getConfigurationValue("UploadServlet.maxRequestSize",MAX_REQUEST_SIZE)));
     response.setContentType("text/html");
     final PrintWriter out=response.getWriter();
     List<FileItem> fileItemsList=uploader.parseRequest(request);

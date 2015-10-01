@@ -16,6 +16,18 @@
   if (schemaProperties != null) {
     for (    final SchemaProperty schemaProperty : schemaProperties) {
       if (!schemaProperty.getProperty(SchemaProperty.isBuiltinProperty)) {
+        if (Type.Function.equals(schemaProperty.getPropertyType())) {
+          final String format=schemaProperty.getFormat();
+          if (format != null) {
+            try {
+              schemaProperty.setProperty(SchemaProperty.readFunction,format);
+              schemaProperty.setProperty(SchemaProperty.format,null);
+            }
+ catch (            FrameworkException ex) {
+              ex.printStackTrace();
+            }
+          }
+        }
         final PropertySourceGenerator parser=SchemaHelper.getSourceGenerator(errorBuffer,entity.getClassName(),schemaProperty);
         if (parser != null) {
           final String propertyName=schemaProperty.getPropertyName();

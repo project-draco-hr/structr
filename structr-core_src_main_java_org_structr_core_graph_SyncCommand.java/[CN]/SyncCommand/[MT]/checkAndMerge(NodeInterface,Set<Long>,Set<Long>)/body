@@ -13,6 +13,7 @@
       copyProperties(outRel,newRel);
       deletedRels.add(outRel.getId());
       outRel.delete();
+      System.out.println("############################################ Deleting relationship " + outRel.getId());
     }
     for (    final Relationship inRel : sourceNode.getRelationships(Direction.INCOMING)) {
       final Node otherNode=inRel.getStartNode();
@@ -20,6 +21,7 @@
       copyProperties(inRel,newRel);
       deletedRels.add(inRel.getId());
       inRel.delete();
+      System.out.println("############################################ Deleting relationship " + inRel.getId());
     }
     final Map<String,List<Node>> groupedNodes=groupByTypeAndName(Iterables.toList(Iterables.map(new EndNodes(),targetNode.getRelationships(Direction.OUTGOING))));
     for (    final List<Node> nodes : groupedNodes.values()) {
@@ -28,17 +30,19 @@
         final Node groupTargetNode=nodes.get(0);
         for (        final Node groupSourceNode : nodes.subList(1,size)) {
           copyProperties(groupSourceNode,groupTargetNode);
-          for (          final Relationship groupRel : groupTargetNode.getRelationships()) {
+          for (          final Relationship groupRel : groupSourceNode.getRelationships()) {
             deletedRels.add(groupRel.getId());
             groupRel.delete();
           }
-          deletedNodes.add(groupTargetNode.getId());
-          groupTargetNode.delete();
+          deletedNodes.add(groupSourceNode.getId());
+          groupSourceNode.delete();
+          System.out.println("############################################ Deleting node " + groupSourceNode.getId());
         }
       }
     }
     deletedNodes.add(sourceNode.getId());
     sourceNode.delete();
+    System.out.println("############################################ Deleting node " + sourceNode.getId());
     return true;
   }
   return false;

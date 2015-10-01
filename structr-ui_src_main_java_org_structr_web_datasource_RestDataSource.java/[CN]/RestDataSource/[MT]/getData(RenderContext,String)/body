@@ -22,9 +22,12 @@
     @Override public Enumeration<String> getParameterNames(){
       return new IteratorEnumeration(getParameterMap().keySet().iterator());
     }
-    @Override public String getParameter(    String key){
+    @Override public String getParameter(    final String key){
       String[] p=getParameterMap().get(key);
       return p != null ? p[0] : null;
+    }
+    @Override public String[] getParameterValues(    final String key){
+      return getParameterMap().get(key);
     }
     @Override public Map<String,String[]> getParameterMap(){
       String[] parts=StringUtils.split(getQueryString(),"&");

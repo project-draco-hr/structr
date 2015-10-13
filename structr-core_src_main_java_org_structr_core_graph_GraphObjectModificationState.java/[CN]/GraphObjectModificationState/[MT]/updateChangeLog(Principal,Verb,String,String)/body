@@ -1,16 +1,12 @@
 {
   if (auditLogEnabled && changeLog != null) {
-    changeLog.append(System.currentTimeMillis());
-    changeLog.append(":");
-    changeLog.append(user.getUuid());
-    changeLog.append(":");
-    changeLog.append(user.getName());
-    changeLog.append(":");
-    changeLog.append(verb);
-    changeLog.append(":");
-    changeLog.append(linkType);
-    changeLog.append(":");
-    changeLog.append(object);
-    changeLog.append('\n');
+    final JsonObject obj=new JsonObject();
+    obj.add("time",toElement(System.currentTimeMillis()));
+    obj.add("userId",toElement(user.getUuid()));
+    obj.add("userName",toElement(user.getName()));
+    obj.add("verb",toElement(verb));
+    obj.add("rel",toElement(linkType));
+    obj.add("target",toElement(object));
+    changeLog.append(obj.toString());
   }
 }

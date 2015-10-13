@@ -2,20 +2,15 @@
   if (auditLogEnabled && changeLog != null && key != null) {
     final String name=key.jsonName();
     if (!hiddenPropertiesInAuditLog.contains(name) && !(key.isUnvalidated() || key.isReadOnly())) {
-      changeLog.append(System.currentTimeMillis());
-      changeLog.append(":");
-      changeLog.append(user.getUuid());
-      changeLog.append(":");
-      changeLog.append(user.getName());
-      changeLog.append(":");
-      changeLog.append(verb);
-      changeLog.append(":");
-      changeLog.append(key.jsonName());
-      changeLog.append(":");
-      changeLog.append(previousValue);
-      changeLog.append(":");
-      changeLog.append(newValue);
-      changeLog.append("\n");
+      final JsonObject obj=new JsonObject();
+      obj.add("time",toElement(System.currentTimeMillis()));
+      obj.add("userId",toElement(user.getUuid()));
+      obj.add("userName",toElement(user.getName()));
+      obj.add("verb",toElement(verb));
+      obj.add("key",toElement(key.jsonName()));
+      obj.add("prev",toElement(previousValue));
+      obj.add("val",toElement(newValue));
+      changeLog.append(obj.toString());
     }
   }
 }

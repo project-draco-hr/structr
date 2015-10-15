@@ -1,0 +1,41 @@
+{
+  final GraphObjectMap map=new GraphObjectMap();
+  final Relation relation=relationProperty.getRelation();
+  map.put(sourceMultiplicity,multiplictyToString(relation.getSourceMultiplicity()));
+  map.put(targetMultiplicity,multiplictyToString(relation.getTargetMultiplicity()));
+  map.put(typeProperty,relation.getClass().getSimpleName());
+  map.put(relationshipType,relation.name());
+  final Class sourceType=relation.getSourceType();
+  final Class targetType=relation.getTargetType();
+  if (sourceType.isAssignableFrom(AbstractNode.class)) {
+    map.put(allSourceTypesPossibleProperty,true);
+    map.put(htmlSourceTypesPossibleProperty,true);
+    map.put(possibleSourceTypesProperty,null);
+  }
+ else   if ("DOMNode".equals(sourceType.getSimpleName())) {
+    map.put(allTargetTypesPossibleProperty,false);
+    map.put(htmlTargetTypesPossibleProperty,true);
+    map.put(possibleTargetTypesProperty,null);
+  }
+ else {
+    map.put(allSourceTypesPossibleProperty,false);
+    map.put(htmlSourceTypesPossibleProperty,false);
+    map.put(possibleSourceTypesProperty,StringUtils.join(SearchCommand.getAllSubtypesAsStringSet(sourceType.getSimpleName()),","));
+  }
+  if (targetType.isAssignableFrom(AbstractNode.class)) {
+    map.put(allTargetTypesPossibleProperty,true);
+    map.put(htmlTargetTypesPossibleProperty,true);
+    map.put(possibleTargetTypesProperty,null);
+  }
+ else   if ("DOMNode".equals(targetType.getSimpleName())) {
+    map.put(allTargetTypesPossibleProperty,false);
+    map.put(htmlTargetTypesPossibleProperty,true);
+    map.put(possibleTargetTypesProperty,null);
+  }
+ else {
+    map.put(allTargetTypesPossibleProperty,false);
+    map.put(htmlTargetTypesPossibleProperty,false);
+    map.put(possibleTargetTypesProperty,StringUtils.join(SearchCommand.getAllSubtypesAsStringSet(targetType.getSimpleName()),","));
+  }
+  return map;
+}

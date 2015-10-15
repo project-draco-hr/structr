@@ -1,0 +1,47 @@
+{
+  final List<GraphObjectMap> resultList=new LinkedList<>();
+  final ConfigurationProvider config=StructrApp.getConfiguration();
+  for (  String rawType : config.getNodeEntities().keySet()) {
+    Class type=SchemaHelper.getEntityClassForRawType(rawType);
+    GraphObjectMap schema=new GraphObjectMap();
+    resultList.add(schema);
+    if (type != null) {
+      String url="/".concat(rawType);
+      schema.setProperty(urlProperty,url);
+      schema.setProperty(typeProperty,type.getSimpleName());
+      schema.setProperty(nameProperty,type.getSimpleName());
+      schema.setProperty(classNameProperty,type.getName());
+      schema.setProperty(isRelProperty,AbstractRelationship.class.isAssignableFrom(type));
+      schema.setProperty(flagsProperty,SecurityContext.getResourceFlags(rawType));
+      final List<GraphObjectMap> relatedTo=new LinkedList<>();
+      final List<GraphObjectMap> relatedFrom=new LinkedList<>();
+      for (      final PropertyKey key : config.getPropertySet(type,PropertyView.All)) {
+        if (key instanceof RelationProperty) {
+          final RelationProperty relationProperty=(RelationProperty)key;
+          final Relation relation=relationProperty.getRelation();
+          if (!relation.isInternalStructrRelationship()) {
+switch (relation.getDirectionForType(type)) {
+case OUTGOING:
+              relatedTo.add(relationPropertyToMap(config,relationProperty));
+            break;
+case INCOMING:
+          relatedFrom.add(relationPropertyToMap(config,relationProperty));
+        break;
+case BOTH:
+      relatedTo.add(relationPropertyToMap(config,relationProperty));
+    relatedFrom.add(relationPropertyToMap(config,relationProperty));
+  break;
+}
+}
+}
+}
+if (!relatedTo.isEmpty()) {
+schema.setProperty(relatedToProperty,relatedTo);
+}
+if (!relatedFrom.isEmpty()) {
+schema.setProperty(relatedFromProperty,relatedFrom);
+}
+}
+}
+return new Result(resultList,resultList.size(),false,false);
+}

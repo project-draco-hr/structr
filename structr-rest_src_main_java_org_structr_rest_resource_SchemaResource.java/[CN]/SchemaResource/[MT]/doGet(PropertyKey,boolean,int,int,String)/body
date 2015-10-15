@@ -1,17 +1,3 @@
 {
-  List<GraphObjectMap> resultList=new LinkedList<>();
-  for (  String rawType : StructrApp.getConfiguration().getNodeEntities().keySet()) {
-    Class type=SchemaHelper.getEntityClassForRawType(rawType);
-    GraphObjectMap schema=new GraphObjectMap();
-    resultList.add(schema);
-    if (type != null) {
-      String url="/".concat(rawType);
-      schema.setProperty(new StringProperty("url"),url);
-      schema.setProperty(new StringProperty("type"),type.getSimpleName());
-      schema.setProperty(new StringProperty("className"),type.getName());
-      schema.setProperty(new StringProperty("isRel"),AbstractRelationship.class.isAssignableFrom(type));
-      schema.setProperty(new LongProperty("flags"),SecurityContext.getResourceFlags(rawType));
-    }
-  }
-  return new Result(resultList,resultList.size(),false,false);
+  return getSchemaOverviewResult();
 }

@@ -1,0 +1,19 @@
+{
+  final HttpClient client=getHttpClient();
+  final HttpMethod get=new GetMethod(uri);
+  get.addRequestHeader("User-Agent","curl/7.35.0");
+  logger.log(Level.INFO,"Downloading from {0}",uri);
+  get.setFollowRedirects(true);
+  final int statusCode=client.executeMethod(get);
+  if (statusCode == 200) {
+    try (final InputStream is=get.getResponseBodyAsStream()){
+      try (final OutputStream os=new FileOutputStream(fileOnDisk)){
+        IOUtils.copy(is,os);
+      }
+     }
+   }
+ else {
+    System.out.println("response body: " + new String(get.getResponseBody(),"utf-8"));
+    logger.log(Level.WARNING,"Unable to create file {0}: status code was {1}",new Object[]{uri,statusCode});
+  }
+}

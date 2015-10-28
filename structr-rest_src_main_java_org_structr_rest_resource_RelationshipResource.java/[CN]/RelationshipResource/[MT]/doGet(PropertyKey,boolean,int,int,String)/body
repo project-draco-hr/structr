@@ -6,11 +6,25 @@
       List<GraphObject> resultList=new LinkedList<>();
       for (      GraphObject obj : results) {
         if (obj instanceof AbstractNode) {
-          final List relationships=Direction.INCOMING.equals(direction) ? (sortDescending ? app.relationshipQuery().and(AbstractRelationship.targetId,obj.getUuid()).sortDescending(sortKey).pageSize(pageSize).page(page).offsetId(offsetId).getAsList() : app.relationshipQuery().and(AbstractRelationship.targetId,obj.getUuid()).sortAscending(sortKey).pageSize(pageSize).page(page).offsetId(offsetId).getAsList()) : (sortDescending ? app.relationshipQuery().and(AbstractRelationship.sourceId,obj.getUuid()).sortDescending(sortKey).pageSize(pageSize).page(page).offsetId(offsetId).getAsList() : app.relationshipQuery().and(AbstractRelationship.sourceId,obj.getUuid()).sortAscending(sortKey).pageSize(pageSize).page(page).offsetId(offsetId).getAsList());
+          final List<? extends RelationshipInterface> relationships=Direction.INCOMING.equals(direction) ? (sortDescending ? app.relationshipQuery().and(AbstractRelationship.targetId,obj.getUuid()).sortDescending(sortKey).pageSize(pageSize).page(page).offsetId(offsetId).getAsList() : app.relationshipQuery().and(AbstractRelationship.targetId,obj.getUuid()).sortAscending(sortKey).pageSize(pageSize).page(page).offsetId(offsetId).getAsList()) : (sortDescending ? app.relationshipQuery().and(AbstractRelationship.sourceId,obj.getUuid()).sortDescending(sortKey).pageSize(pageSize).page(page).offsetId(offsetId).getAsList() : app.relationshipQuery().and(AbstractRelationship.sourceId,obj.getUuid()).sortAscending(sortKey).pageSize(pageSize).page(page).offsetId(offsetId).getAsList());
           if (relationships != null) {
-            final int rels=relationships.size();
-            logger.log(Level.FINE,"Number of relationships: {0} for parameters {1}, {2}, {3}, {4}, {5}",new Object[]{rels,sortKey,sortDescending,pageSize,page,offsetId});
-            resultList.addAll(relationships);
+            boolean filterInternalRelationshipTypes=false;
+            if (securityContext != null && securityContext.getRequest() != null) {
+              final String filterInternal=securityContext.getRequest().getParameter(REQUEST_PARAMETER_FILTER_INTERNAL_RELATIONSHIP_TYPES);
+              if (filterInternal != null) {
+                filterInternalRelationshipTypes="true".equals(filterInternal);
+              }
+            }
+            if (filterInternalRelationshipTypes) {
+              for (              final RelationshipInterface rel : relationships) {
+                if (!rel.isInternal()) {
+                  resultList.add(rel);
+                }
+              }
+            }
+ else {
+              resultList.addAll(relationships);
+            }
           }
         }
       }

@@ -116,8 +116,8 @@
           }
           response.setContentType(contentType);
           setCustomResponseHeaders(response);
-          boolean isAsync=Services.parseBoolean(Services.getBaseConfiguration().getProperty(HttpService.ASYNC),true);
-          if (isAsync) {
+          final boolean createsRawData=rootElement.getProperty(Page.pageCreatesRawData);
+          if (isAsync && !createsRawData) {
             final AsyncContext async=request.startAsync();
             final ServletOutputStream out=async.getResponse().getOutputStream();
             final AtomicBoolean finished=new AtomicBoolean(false);
@@ -179,9 +179,14 @@ synchronized (queue) {
             final StringRenderBuffer buffer=new StringRenderBuffer();
             renderContext.setBuffer(buffer);
             rootElement.render(renderContext,0);
-            response.getOutputStream().write(buffer.getBuffer().toString().getBytes("utf-8"));
-            response.getOutputStream().flush();
-            response.getOutputStream().close();
+            try {
+              response.getOutputStream().write(buffer.getBuffer().toString().getBytes("utf-8"));
+              response.getOutputStream().flush();
+              response.getOutputStream().close();
+            }
+ catch (            IOException ioex) {
+              ioex.printStackTrace();
+            }
           }
         }
       }

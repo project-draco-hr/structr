@@ -18,17 +18,16 @@
   final int page=webSocketData.getPage();
   final PropertyKey sortProperty=StructrApp.getConfiguration().getPropertyKeyForJSONName(type,sortKey);
   final Query query=StructrApp.getInstance(securityContext).nodeQuery(type).sort(sortProperty).order("desc".equals(sortOrder)).page(page).pageSize(pageSize);
-  if (FileBase.class.isAssignableFrom(type) && rootOnly) {
-    query.and(FileBase.hasParent,false);
+  if (FileBase.class.isAssignableFrom(type)) {
+    if (rootOnly) {
+      query.and(FileBase.hasParent,false);
+    }
+    if (FileBase.class.isAssignableFrom(type)) {
+      query.not().and(Image.isThumbnail,true);
+    }
   }
   if (Folder.class.isAssignableFrom(type) && rootOnly) {
     query.and(Folder.hasParent,false);
-  }
-  if (type.equals(Image.class)) {
-    query.and(Image.isThumbnail,false);
-  }
-  if (type.equals(File.class)) {
-    query.not().and(Image.isThumbnail,true);
   }
   try {
     final Result result=query.getResult();

@@ -3,8 +3,9 @@
   certList.add(publicKey);
   final JcaCertStore certs=new JcaCertStore(certList);
   final CMSSignedDataGenerator gen=new CMSSignedDataGenerator();
-  final ContentSigner sha1Signer=new JcaContentSignerBuilder("SHA1with" + privateKey.getAlgorithm()).build(privateKey);
-  gen.addSignerInfoGenerator(new JcaSignerInfoGeneratorBuilder(new JcaDigestCalculatorProviderBuilder().build()).setDirectSignature(true).build(sha1Signer,publicKey));
+  final ContentSigner signer=new JcaContentSignerBuilder(algorithm + "with" + privateKey.getAlgorithm()).build(privateKey);
+  final SignerInfoGenerator infoGenerator=new JcaSignerInfoGeneratorBuilder(new JcaDigestCalculatorProviderBuilder().build()).setDirectSignature(true).build(signer,publicKey);
+  gen.addSignerInfoGenerator(infoGenerator);
   gen.addCertificates(certs);
   final CMSSignedData sigData=gen.generate(data,false);
   final ASN1InputStream asn1=new ASN1InputStream(sigData.getEncoded());

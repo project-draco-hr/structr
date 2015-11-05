@@ -1,9 +1,10 @@
 {
-  List<GraphObject> list=result.getResults();
+  final List<GraphObject> list=result.getResults();
+  final StringBuilder row=new StringBuilder();
   boolean headerWritten=false;
-  for (  GraphObject obj : list) {
+  for (  final GraphObject obj : list) {
     if (!headerWritten) {
-      StringBuilder row=new StringBuilder();
+      row.setLength(0);
       for (      PropertyKey key : obj.getPropertyKeys(propertyView)) {
         row.append("\"").append(key.dbName()).append("\"").append(DELIMITER);
       }
@@ -15,7 +16,7 @@
       out.flush();
       headerWritten=true;
     }
-    StringBuilder row=new StringBuilder();
+    row.setLength(0);
     for (    PropertyKey key : obj.getPropertyKeys(propertyView)) {
       Object value=obj.getProperty(key);
       row.append("\"").append((value != null ? escapeForCsv(value) : "")).append("\"").append(DELIMITER);

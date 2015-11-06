@@ -14,8 +14,11 @@
       }
       for (      PropertyKey key : keys) {
         if (permissionResolutionMask == null || permissionResolutionMask.allowsProperty(key)) {
-          final Predicate predicate=writer.getSecurityContext().getRange(key.jsonName());
-          final Object value=source.getProperty(key,predicate);
+          final QueryRange range=writer.getSecurityContext().getRange(key.jsonName());
+          if (range != null) {
+            range.resetCount();
+          }
+          final Object value=source.getProperty(key,range);
           final PropertyKey localKey=key;
           if (value != null) {
             if (!(reduceRedundancy && visitedObjects.contains(value.hashCode()))) {

@@ -1,14 +1,9 @@
 {
-  try {
-    final NodeInterface otherNode=nodeFactory.instantiate(item.getOtherNode(thisNode));
-    if (otherNode != null && (nodePredicate == null || nodePredicate.accept(otherNode))) {
-      final Class otherNodeType=otherNode.getClass();
-      final boolean desiredTypeIsAssignableFromOtherNodeType=SearchCommand.getAllSubtypesAsStringSet(desiredType.getSimpleName()).contains(otherNodeType.getSimpleName());
-      return desiredTypeIsAssignableFromOtherNodeType;
-    }
-  }
- catch (  FrameworkException fex) {
-    fex.printStackTrace();
+  final NodeInterface otherNode=nodeFactory.instantiate(item.getOtherNode(thisNode),item);
+  if (otherNode != null && (nodePredicate == null || nodePredicate.accept(otherNode))) {
+    final Class otherNodeType=otherNode.getClass();
+    final boolean desiredTypeIsAssignableFromOtherNodeType=SearchCommand.getAllSubtypesAsStringSet(desiredType.getSimpleName()).contains(otherNodeType.getSimpleName());
+    return desiredTypeIsAssignableFromOtherNodeType;
   }
   return false;
 }

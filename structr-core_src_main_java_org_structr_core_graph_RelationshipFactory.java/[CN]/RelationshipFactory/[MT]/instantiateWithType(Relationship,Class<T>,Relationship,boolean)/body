@@ -18,8 +18,13 @@
   if (!TransactionCommand.isDeleted(relationship)) {
     final String type=newRel.getProperty(GraphObject.type);
     if (type == null || (type != null && !type.equals(relClass.getSimpleName()))) {
-      newRel.unlockReadOnlyPropertiesOnce();
-      newRel.setProperty(GraphObject.type,relClass.getSimpleName());
+      try {
+        newRel.unlockReadOnlyPropertiesOnce();
+        newRel.setProperty(GraphObject.type,relClass.getSimpleName());
+      }
+ catch (      FrameworkException fex) {
+        fex.printStackTrace();
+      }
     }
   }
   newRel.onRelationshipInstantiation();

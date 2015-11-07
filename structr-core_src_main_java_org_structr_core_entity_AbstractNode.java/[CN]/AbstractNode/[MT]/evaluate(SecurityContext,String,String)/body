@@ -3,7 +3,12 @@ switch (key) {
 case "owner":
     return getOwnerNode();
 case "_path":
-  return relationshipPathSegment;
+  if (rawPathSegment != null) {
+    return new RelationshipFactory<>(securityContext).adapt(rawPathSegment);
+  }
+ else {
+    return null;
+  }
 default :
 Object value=getProperty(StructrApp.getConfiguration().getPropertyKeyForJSONName(entityType,key));
 if (value != null) {

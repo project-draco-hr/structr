@@ -1,13 +1,17 @@
 {
-  final RelationshipFactory factory=new RelationshipFactory(SecurityContext.getSuperUserInstance());
+  final RelationshipFactory relFactory=new RelationshipFactory(SecurityContext.getSuperUserInstance());
   final String relTypes=getPermissionPropagationRelTypes();
   final Map<String,Object> params=new HashMap<>();
   params.put("id1",this.getId());
   params.put("id2",startNode.getId());
+  PermissionResolutionMask mask=AccessPathCache.get(startNode,this);
+  if (mask != null) {
+    return mask.allowsPermission(permission);
+  }
   final String query="MATCH n, m, p = allShortestPaths(n-[" + relTypes + "]-m) WHERE id(n) = {id1} AND id(m) = {id2} RETURN p";
   final Result result=StructrApp.getInstance().getGraphDatabaseService().execute(query,params);
   while (result.hasNext()) {
-    final PermissionResolutionMask mask=new PermissionResolutionMask();
+    mask=new PermissionResolutionMask();
     final Map<String,Object> row=result.next();
     final Path path=(Path)row.get("p");
     Node previousNode=null;
@@ -15,12 +19,14 @@
     for (    final PropertyContainer container : path) {
       if (container instanceof Node) {
         previousNode=(Node)container;
+        AccessPathCache.update(startNode,this,previousNode);
       }
  else {
         final Relationship rel=(Relationship)container;
         try {
-          final RelationshipInterface r=factory.instantiate(rel);
+          final RelationshipInterface r=relFactory.instantiate(rel);
           if (r instanceof PermissionPropagation) {
+            AccessPathCache.update(startNode,this,rel);
             final PermissionPropagation propagation=(PermissionPropagation)r;
             final long startNodeId=rel.getStartNode().getId();
             final long thisId=previousNode.getId();
@@ -48,6 +54,7 @@
         }
       }
     }
+    AccessPathCache.put(startNode,this,mask);
     if (arrived && mask.allowsPermission(permission)) {
       return true;
     }

@@ -1,14 +1,10 @@
 {
-  final RelationshipFactory relFactory=new RelationshipFactory<>(securityContext);
   final NodeFactory<S> nodeFactory=new NodeFactory<>(securityContext);
   final Iterable<Relationship> rels=getRawSource(securityContext,node.getNode(),predicate);
   if (rels != null) {
     return Iterables.map(new Function<Relationship,S>(){
       @Override public S apply(      Relationship from) throws RuntimeException {
-        final Node startNode=from.getStartNode();
-        final S value=nodeFactory.adapt(startNode);
-        value.setRelationshipPathSegment(relFactory.adapt(from));
-        return value;
+        return nodeFactory.instantiate(from.getStartNode(),from);
       }
     }
 ,sort(rels));

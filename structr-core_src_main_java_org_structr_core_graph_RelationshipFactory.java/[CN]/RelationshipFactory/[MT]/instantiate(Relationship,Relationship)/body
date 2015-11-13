@@ -1,0 +1,13 @@
+{
+  if (TransactionCommand.isDeleted(relationship)) {
+    return (T)instantiateWithType(relationship,null,null,false);
+  }
+  Class type=idTypeMap.get(relationship.getId());
+  if (type == null) {
+    type=factoryDefinition.determineRelationshipType(relationship);
+    if (type != null) {
+      idTypeMap.put(relationship.getId(),type);
+    }
+  }
+  return (T)instantiateWithType(relationship,type,null,false);
+}

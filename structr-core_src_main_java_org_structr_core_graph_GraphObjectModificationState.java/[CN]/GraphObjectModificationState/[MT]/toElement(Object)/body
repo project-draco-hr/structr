@@ -9,6 +9,14 @@
  else     if (value instanceof Boolean) {
       return new JsonPrimitive((Boolean)value);
     }
+ else     if (value.getClass().isArray()) {
+      final JsonArray arr=new JsonArray();
+      final Object[] values=(Object[])value;
+      for (      final Object v : values) {
+        arr.add(toElement(v));
+      }
+      return arr;
+    }
  else {
       return new JsonPrimitive(value.toString());
     }

@@ -1,0 +1,13 @@
+{
+  if (TransactionCommand.isDeleted(node)) {
+    return (T)instantiateWithType(node,null,pathSegment,false);
+  }
+  Class type=idTypeMap.get(node.getId());
+  if (type == null) {
+    type=factoryDefinition.determineNodeType(node);
+    if (type != null && !GenericNode.class.equals(type)) {
+      idTypeMap.put(node.getId(),type);
+    }
+  }
+  return (T)instantiateWithType(node,type,pathSegment,false);
+}

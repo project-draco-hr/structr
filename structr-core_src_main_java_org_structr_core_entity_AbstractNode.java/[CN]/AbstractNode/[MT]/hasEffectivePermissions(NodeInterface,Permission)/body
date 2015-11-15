@@ -36,10 +36,13 @@
           mask.addAccessControl();
         }
         applyCurrentStep(propagation,mask);
+        AccessPathCache.put(startNode,this,mask);
         if (mask.allowsPermission(permission)) {
-          AccessPathCache.put(startNode,this,mask);
           return true;
         }
+      }
+ else {
+        AccessPathCache.put(startNode,this,new PermissionResolutionMask());
       }
     }
  else {
@@ -92,10 +95,8 @@
           AccessPathCache.put(startNode,this,mask);
           return true;
         }
- else {
-          AccessPathCache.put(startNode,this,new PermissionResolutionMask());
-        }
       }
+      AccessPathCache.put(startNode,this,new PermissionResolutionMask());
     }
   }
  catch (  Throwable t) {

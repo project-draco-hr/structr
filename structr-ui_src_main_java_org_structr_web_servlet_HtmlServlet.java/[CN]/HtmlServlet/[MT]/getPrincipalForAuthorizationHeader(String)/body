@@ -1,0 +1,27 @@
+{
+  if (authHeader != null) {
+    final String[] authParts=authHeader.split(" ");
+    if (authParts.length == 2) {
+      final String authType=authParts[0];
+      final String authValue=authParts[1];
+      String username=null;
+      String password=null;
+      if ("Basic".equals(authType)) {
+        final String value=new String(Base64.decode(authValue),Charset.forName("utf-8"));
+        final String[] parts=value.split(":");
+        if (parts.length == 2) {
+          username=parts[0];
+          password=parts[1];
+        }
+      }
+      if (StringUtils.isNoneBlank(username,password)) {
+        try {
+          return AuthHelper.getPrincipalForPassword(Principal.name,username,password);
+        }
+ catch (        Throwable t) {
+        }
+      }
+    }
+  }
+  return null;
+}

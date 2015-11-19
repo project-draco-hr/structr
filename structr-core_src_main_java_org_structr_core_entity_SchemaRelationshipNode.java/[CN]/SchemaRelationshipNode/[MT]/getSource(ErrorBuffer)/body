@@ -29,6 +29,9 @@
     }
   }
   src.append(" {\n\n");
+  if (!Direction.None.equals(getProperty(permissionPropagation))) {
+    src.append("\tstatic {\n\t\tSchemaRelationshipNode.registerPropagatingRelationshipType(\"").append(getRelationshipType()).append("\");\n\t}\n\n");
+  }
   src.append(SchemaHelper.extractProperties(this,propertyNames,validators,enums,viewProperties,errorBuffer));
   src.append(SchemaHelper.extractViews(this,viewProperties,errorBuffer));
   src.append(SchemaHelper.extractMethods(this,actions));

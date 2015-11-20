@@ -28,6 +28,19 @@ case "size":
 switch (key) {
 case "request":
   return securityContext.getRequest();
+case "response":
+if (securityContext != null) {
+  final HttpServletResponse response=securityContext.getResponse();
+  if (response != null) {
+    try {
+      return response.getOutputStream();
+    }
+ catch (    IOException ioex) {
+      ioex.printStackTrace();
+    }
+  }
+}
+return null;
 case "now":
 return DatePropertyParser.format(new Date(),DateProperty.DEFAULT_FORMAT);
 case "me":

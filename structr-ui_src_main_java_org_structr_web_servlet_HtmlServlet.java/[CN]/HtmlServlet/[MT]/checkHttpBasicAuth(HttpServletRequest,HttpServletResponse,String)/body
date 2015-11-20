@@ -1,0 +1,31 @@
+{
+  Page possiblePage=null;
+  if (possiblePage == null) {
+    possiblePage=StructrApp.getInstance().nodeQuery(Page.class).and(Page.path,path).and(Page.enableBasicAuth,true).sort(Page.position).getFirst();
+  }
+  if (possiblePage == null) {
+    possiblePage=StructrApp.getInstance().nodeQuery(Page.class).and(Page.name,PathHelper.getName(path)).and(Page.enableBasicAuth,true).sort(Page.position).getFirst();
+  }
+  if (possiblePage != null) {
+    String realm=possiblePage.getProperty(Page.basicAuthRealm);
+    if (realm == null) {
+      realm=possiblePage.getName();
+    }
+    final Principal principal=getPrincipalForAuthorizationHeader(request.getHeader("Authorization"));
+    if (principal != null) {
+      final SecurityContext securityContext=SecurityContext.getInstance(principal,AccessMode.Frontend);
+      if (securityContext != null) {
+        final Page page=StructrApp.getInstance(securityContext).get(Page.class,possiblePage.getUuid());
+        if (page != null) {
+          securityContext.setRequest(request);
+          securityContext.setResponse(response);
+          return new HttpBasicAuthResult(AuthState.Authenticated,securityContext,page);
+        }
+      }
+    }
+    response.setHeader("WWW-Authenticate","BASIC realm=\"" + realm + "\"");
+    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+    return HttpBasicAuthResult.MUST_AUTHENTICATE;
+  }
+  return HttpBasicAuthResult.NO_BASIC_AUTH;
+}

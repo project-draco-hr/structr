@@ -1,0 +1,124 @@
+{
+  if (SchemaRelationshipNode.getPropagatingRelationshipTypes().isEmpty()) {
+    return false;
+  }
+  final SecurityContext superUserContext=SecurityContext.getSuperUserInstance();
+  final RelationshipFactory relFactory=new RelationshipFactory(superUserContext);
+  final NodeFactory nodeFactory=new NodeFactory(superUserContext);
+  PermissionResolutionMask mask=AccessPathCache.get(principal,this);
+  if (mask != null && mask.alreadyChecked(permission)) {
+    return mask.allowsPermission(permission);
+  }
+  try {
+    if (mask == null) {
+      mask=new PermissionResolutionMask();
+      AccessPathCache.put(principal,this,mask);
+    }
+    mask.setChecked(permission);
+    if (rawPathSegment != null) {
+      final RelationshipInterface r=relFactory.instantiate(rawPathSegment);
+      if (r instanceof PermissionPropagation) {
+        AccessPathCache.update(principal,this,rawPathSegment);
+        final PermissionPropagation propagation=(PermissionPropagation)r;
+        final long startNodeId=rawPathSegment.getStartNode().getId();
+        final long thisId=getId();
+        final SchemaRelationshipNode.Direction relDirection=thisId == startNodeId ? SchemaRelationshipNode.Direction.In : SchemaRelationshipNode.Direction.Out;
+        final SchemaRelationshipNode.Direction propagationDirection=propagation.getPropagationDirection();
+        if (!propagationDirection.equals(SchemaRelationshipNode.Direction.Both)) {
+          if (propagationDirection.equals(SchemaRelationshipNode.Direction.None)) {
+            return false;
+          }
+          if (!relDirection.equals(propagationDirection)) {
+            return false;
+          }
+        }
+        if (permission.equals(Permission.read)) {
+          mask.addRead();
+        }
+        if (permission.equals(Permission.write)) {
+          mask.addWrite();
+        }
+        if (permission.equals(Permission.delete)) {
+          mask.addDelete();
+        }
+        if (permission.equals(Permission.accessControl)) {
+          mask.addAccessControl();
+        }
+        applyCurrentStep(propagation,mask);
+        if (mask.allowsPermission(permission)) {
+          AccessPathCache.put(principal,this,mask);
+          return true;
+        }
+      }
+    }
+ else {
+      final GraphDatabaseService db=StructrApp.getInstance().getGraphDatabaseService();
+      final String relTypes=getPermissionPropagationRelTypes();
+      final Map<String,Object> params=new HashMap<>();
+      final long principalId=principal.getId();
+      params.put("id1",principalId);
+      params.put("id2",this.getId());
+      for (int i=1; i < 5; i++) {
+        final String query="MATCH n, m, p = (n-[" + relTypes + "*.."+ i+ "]-m) WHERE id(n) = {id1} AND id(m) = {id2} RETURN p";
+        final Result result=db.execute(query,params);
+        while (result.hasNext()) {
+          final Map<String,Object> row=result.next();
+          final Path path=(Path)row.get("p");
+          Node previousNode=null;
+          boolean arrived=true;
+          for (          final PropertyContainer container : path) {
+            if (container instanceof Node) {
+              previousNode=(Node)container;
+              AccessPathCache.update(principal,this,previousNode);
+              if (previousNode.getId() != principalId) {
+                final NodeInterface pathNode=nodeFactory.instantiate(previousNode);
+                if (AccessPathCache.get(principal,pathNode) == null) {
+                  AccessPathCache.put(principal,pathNode,mask.copy());
+                }
+              }
+            }
+ else {
+              final Relationship rel=(Relationship)container;
+              final RelationshipInterface r=relFactory.instantiate(rel);
+              if (r instanceof PermissionPropagation) {
+                AccessPathCache.update(principal,this,rel);
+                final PermissionPropagation propagation=(PermissionPropagation)r;
+                final long startNodeId=rel.getStartNode().getId();
+                final long thisId=previousNode.getId();
+                final SchemaRelationshipNode.Direction relDirection=thisId == startNodeId ? SchemaRelationshipNode.Direction.Out : SchemaRelationshipNode.Direction.In;
+                final SchemaRelationshipNode.Direction propagationDirection=propagation.getPropagationDirection();
+                if (!propagationDirection.equals(SchemaRelationshipNode.Direction.Both)) {
+                  if (propagationDirection.equals(SchemaRelationshipNode.Direction.None)) {
+                    arrived=false;
+                    break;
+                  }
+                  if (!relDirection.equals(propagationDirection)) {
+                    arrived=false;
+                    break;
+                  }
+                }
+                applyCurrentStep(propagation,mask);
+                if (!mask.allowsPermission(permission)) {
+                  arrived=false;
+                  break;
+                }
+              }
+ else {
+                arrived=false;
+                break;
+              }
+            }
+          }
+          if (arrived && mask.allowsPermission(permission)) {
+            AccessPathCache.put(principal,this,mask);
+            return true;
+          }
+        }
+      }
+    }
+  }
+ catch (  Throwable t) {
+    t.printStackTrace();
+  }
+  return false;
+}

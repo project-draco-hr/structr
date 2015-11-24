@@ -1,0 +1,20 @@
+{
+  Item<S> item;
+  do {
+    item=source.poll();
+    if (item != null) {
+      processedItems.incrementAndGet();
+      T n=instantiate(item.item);
+      if (n != null) {
+        overallCount.incrementAndGet();
+synchronized (nodes) {
+          nodes.add(new Item<>(item.index,n));
+        }
+        if (dontCheckCount && overallCount.get() > offset + pageSize) {
+          keepRunning.set(false);
+        }
+      }
+    }
+  }
+ while (item != null && keepRunning.get());
+}

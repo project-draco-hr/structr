@@ -1,15 +1,39 @@
 {
+  final boolean doLog=securityContext.hasParameter("debugLoggingEnabled");
   if (SchemaRelationshipNode.getPropagatingRelationshipTypes().isEmpty()) {
     return false;
   }
+  if (doLog) {
+    System.out.println("Resolving " + permission.name() + " for user "+ principal.getName()+ " to "+ this.getType()+ " ("+ this.getUuid()+ ")");
+  }
   final SecurityContext superUserContext=SecurityContext.getSuperUserInstance();
   final RelationshipFactory relFactory=new RelationshipFactory(superUserContext);
-  if (rawPathSegment != null) {
-    return checkPathSegment(permission,relFactory);
-  }
   PermissionResolutionMask mask=AccessPathCache.get(principal,this);
+  if (rawPathSegment != null) {
+    final boolean result=checkPathSegment(principal,permission,relFactory);
+    if (doLog) {
+      if (result) {
+        System.out.println("        " + permission.name() + " ALLOWED by path segment "+ rawPathSegment.getType().name());
+      }
+ else {
+        System.out.println("        " + permission.name() + " DENIED by path segment "+ rawPathSegment.getType().name());
+      }
+    }
+    if (result) {
+      return true;
+    }
+  }
   if (mask != null && mask.alreadyChecked(permission)) {
-    return mask.allowsPermission(permission);
+    final boolean result=mask.allowsPermission(permission);
+    if (doLog) {
+      if (result) {
+        System.out.println("        " + permission.name() + " ALLOWED by cached mask "+ mask);
+      }
+ else {
+        System.out.println("        " + permission.name() + " DENIED by cached mask "+ mask);
+      }
+    }
+    return result;
   }
   try {
     if (mask == null) {
@@ -60,17 +84,27 @@
               }
               applyCurrentStep(propagation,mask);
               if (!mask.allowsPermission(permission)) {
+                if (doLog) {
+                  System.out.println("        " + permission.name() + " DENIED by "+ path);
+                }
                 arrived=false;
                 break;
               }
             }
  else {
+              if (doLog) {
+                System.out.println("        " + permission.name() + " DENIED by "+ path);
+              }
               arrived=false;
               break;
             }
           }
         }
         if (arrived && mask.allowsPermission(permission)) {
+          if (doLog) {
+            System.out.println("        " + permission.name() + " ALLOWED by "+ path);
+          }
+          AccessPathCache.put(principal,this,mask);
           return true;
         }
       }
@@ -79,5 +113,7 @@
  catch (  Throwable t) {
     t.printStackTrace();
   }
+  mask.clear();
+  AccessPathCache.put(principal,this,mask);
   return false;
 }

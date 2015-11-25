@@ -28,7 +28,11 @@
       mask.addAccessControl();
     }
     applyCurrentStep(propagation,mask);
-    return mask.allowsPermission(permission);
+    if (mask.allowsPermission(permission)) {
+      mask.setChecked(permission);
+      AccessPathCache.put(principal,this,mask);
+      return true;
+    }
   }
   return false;
 }

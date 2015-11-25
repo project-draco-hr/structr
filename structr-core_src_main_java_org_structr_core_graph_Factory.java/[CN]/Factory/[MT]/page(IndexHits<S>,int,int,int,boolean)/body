@@ -42,14 +42,14 @@
         worker.doRun();
       }
  else {
-        logger.log(Level.INFO,"Fetched {0} elements for instantiation",rawCount);
-        final long t0=System.currentTimeMillis();
+        final double t0=System.nanoTime();
         threadCount=8;
         for (int i=0; i < threadCount; i++) {
           final InstantiationWorker worker=new InstantiationWorker(securityContext,queue,nodes,offset,pageSize,dontCheckCount || preventFullCount);
           worker.setProcessedItems(processedItems);
           worker.setOverallCount(overallCount);
           worker.setKeepRunning(keepRunning);
+          worker.pleaseLog(i == 0);
           futures.add(service.submit(worker));
         }
         for (        final Future future : futures) {
@@ -60,8 +60,10 @@
             iex.printStackTrace();
           }
         }
-        final long t1=System.currentTimeMillis();
-        logger.log(Level.INFO,"Instantiated {0} out of {1} elements in {2} s using {3} threads.",new Object[]{nodes.size(),rawCount,(t1 - t0) / 1000,threadCount});
+        final double t1=System.nanoTime();
+        if (t1 - t0 > 1000000000) {
+          logger.log(Level.INFO,"Instantiated {0} out of {1} elements in {2} s using {3} threads.",new Object[]{nodes.size(),rawCount,(t1 - t0) / 1000000000.0,threadCount});
+        }
       }
     }
      Collections.sort(nodes);

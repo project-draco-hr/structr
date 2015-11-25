@@ -1,4 +1,6 @@
 {
+  final long t0=System.currentTimeMillis();
+  long t1=t0;
   Item<S> item;
   do {
     item=source.poll();
@@ -14,6 +16,10 @@ synchronized (nodes) {
           keepRunning.set(false);
         }
       }
+    }
+    if (doLogOutput && System.currentTimeMillis() - t1 > 2000) {
+      t1=System.currentTimeMillis();
+      logger.log(Level.INFO,"Parallel instantiation: checked {0} nodes so far",processedItems.get());
     }
   }
  while (item != null && keepRunning.get());

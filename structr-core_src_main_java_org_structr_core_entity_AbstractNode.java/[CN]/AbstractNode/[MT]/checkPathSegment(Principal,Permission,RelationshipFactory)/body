@@ -1,4 +1,5 @@
 {
+  final boolean doLog=securityContext.hasParameter("debugLoggingEnabled");
   final RelationshipInterface r=relFactory.instantiate(rawPathSegment);
   if (r instanceof PermissionPropagation) {
     final PermissionPropagation propagation=(PermissionPropagation)r;
@@ -20,6 +21,9 @@
     if (mask.allowsPermission(permission)) {
       mask.setChecked(permission);
       AccessPathCache.put(principal,this,mask);
+      if (doLog) {
+        System.out.println("Storing mask from path segment: " + mask);
+      }
       return true;
     }
   }

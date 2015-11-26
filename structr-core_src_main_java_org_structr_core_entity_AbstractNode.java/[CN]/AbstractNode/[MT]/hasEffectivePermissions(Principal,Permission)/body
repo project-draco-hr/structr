@@ -4,7 +4,7 @@
     return false;
   }
   if (doLog) {
-    System.out.println("Resolving " + permission.name() + " for user "+ principal.getName()+ " to "+ this.getType()+ " ("+ this.getUuid()+ ")");
+    System.out.println("\n#######################################################\nResolving " + permission.name() + " for user "+ principal.getName()+ " to "+ this.getType()+ " ("+ this.getUuid()+ ")");
   }
   final SecurityContext superUserContext=SecurityContext.getSuperUserInstance();
   final RelationshipFactory relFactory=new RelationshipFactory(superUserContext);
@@ -39,6 +39,9 @@
     if (mask == null) {
       mask=new PermissionResolutionMask();
       AccessPathCache.put(principal,this,mask);
+      if (doLog) {
+        System.out.println("        Storing initial mask: " + mask);
+      }
     }
     mask.setChecked(permission);
     final GraphDatabaseService db=StructrApp.getInstance().getGraphDatabaseService();
@@ -103,6 +106,7 @@
         if (arrived && mask.allowsPermission(permission)) {
           if (doLog) {
             System.out.println("        " + permission.name() + " ALLOWED by "+ path);
+            System.out.println("        Storing mask from path: " + mask);
           }
           AccessPathCache.put(principal,this,mask);
           return true;
@@ -113,7 +117,10 @@
  catch (  Throwable t) {
     t.printStackTrace();
   }
-  mask.clear();
+  mask.setPermission(permission,false);
   AccessPathCache.put(principal,this,mask);
+  if (doLog) {
+    System.out.println("        Storing mask from unsuccessful path: " + mask);
+  }
   return false;
 }

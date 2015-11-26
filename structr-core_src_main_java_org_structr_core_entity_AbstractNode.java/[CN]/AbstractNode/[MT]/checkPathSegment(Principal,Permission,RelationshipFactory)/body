@@ -6,10 +6,7 @@
     final long thisId=getId();
     final SchemaRelationshipNode.Direction relDirection=thisId == startNodeId ? SchemaRelationshipNode.Direction.In : SchemaRelationshipNode.Direction.Out;
     final SchemaRelationshipNode.Direction propagationDirection=propagation.getPropagationDirection();
-    PermissionResolutionMask mask=AccessPathCache.get(principal,this);
-    if (mask == null) {
-      mask=new PermissionResolutionMask();
-    }
+    final PermissionResolutionMask mask=new PermissionResolutionMask();
     if (!propagationDirection.equals(SchemaRelationshipNode.Direction.Both)) {
       if (propagationDirection.equals(SchemaRelationshipNode.Direction.None)) {
         return false;
@@ -18,7 +15,7 @@
         return false;
       }
     }
-    mask.setPermission(permission,true);
+    mask.setPermission(Permission.read,true);
     applyCurrentStep(propagation,mask);
     if (mask.allowsPermission(permission)) {
       mask.setChecked(permission);

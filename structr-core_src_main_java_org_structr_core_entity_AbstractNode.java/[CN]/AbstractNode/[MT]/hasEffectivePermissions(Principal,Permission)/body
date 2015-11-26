@@ -47,7 +47,7 @@
     final long principalId=principal.getId();
     params.put("id1",principalId);
     params.put("id2",this.getId());
-    for (int i=1; i < 8; i++) {
+    for (int i=1; i < 10; i++) {
       final String query="MATCH n, m, p = allShortestPaths(n-[" + relTypes + "*.."+ i+ "]-m) WHERE id(n) = {id1} AND id(m) = {id2} RETURN p";
       final Result result=db.execute(query,params);
       while (result.hasNext()) {
@@ -113,7 +113,7 @@
  catch (  Throwable t) {
     t.printStackTrace();
   }
-  mask.clear();
+  mask.setPermission(permission,false);
   AccessPathCache.put(principal,this,mask);
   return false;
 }

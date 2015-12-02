@@ -1,0 +1,16 @@
+{
+  try {
+    final URL originalUrl=new URL(getProperty(url));
+    HttpClient client=Importer.getHttpClient();
+    GetMethod get=new GetMethod(originalUrl.toString());
+    get.addRequestHeader("User-Agent","curl/7.35.0");
+    get.addRequestHeader("Connection","close");
+    get.getParams().setParameter("http.protocol.single-cookie-header",true);
+    get.setFollowRedirects(true);
+    client.executeMethod(get);
+    return get.getResponseBodyAsStream();
+  }
+ catch (  Throwable t) {
+  }
+  return null;
+}

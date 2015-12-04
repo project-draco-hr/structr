@@ -45,11 +45,13 @@
         continue;
       }
     }
- else     if (type.equals("#text")) {
-      tag="";
-      content=((TextNode)node).text();
-      if (!("p".equals(startNode.nodeName().toLowerCase())) && StringUtils.isWhitespace(content)) {
-        continue;
+ else {
+      if (type.equals("#text")) {
+        tag="";
+        content=((TextNode)node).text();
+        if (!("p".equals(startNode.nodeName().toLowerCase())) && StringUtils.isWhitespace(content)) {
+          continue;
+        }
       }
     }
     org.structr.web.entity.dom.DOMNode newNode;
@@ -79,7 +81,18 @@
       }
       for (      Attribute nodeAttr : node.attributes()) {
         final String key=nodeAttr.getKey();
-        if (!key.equals("text")) {
+        PropertyKey propertyKey=config.getPropertyKeyForJSONName(newNode.getClass(),key);
+        if (propertyKey != null) {
+          final Object value=nodeAttr.getValue();
+          final PropertyConverter inputConverter=propertyKey.inputConverter(securityContext);
+          if (value != null && inputConverter != null) {
+            newNode.setProperty(propertyKey,propertyKey.inputConverter(securityContext).convert(value));
+          }
+ else {
+            newNode.setProperty(propertyKey,value);
+          }
+        }
+ else         if (!key.equals("text")) {
           if (key.startsWith("data-")) {
             String value=nodeAttr.getValue();
             if (!key.startsWith(DATA_META_PREFIX)) {

@@ -1,0 +1,22 @@
+{
+  final String remoteUrl=getProperty(url);
+  if (StringUtils.isNotBlank(remoteUrl)) {
+    final App app=StructrApp.getInstance(securityContext);
+    try {
+      final FeedFetcher feedFetcher=new HttpURLFeedFetcher();
+      final SyndFeed feed=feedFetcher.retrieveFeed(new URL(remoteUrl));
+      final List<SyndEntry> entries=feed.getEntries();
+      final List<FeedItem> items=new LinkedList<>();
+      for (      final SyndEntry entry : entries) {
+        final String title=entry.getTitle();
+        final String link=entry.getLink();
+        final FeedItem item=app.create(FeedItem.class,title);
+        item.setProperty(FeedItem.url,link);
+        items.add(item);
+      }
+    }
+ catch (    IllegalArgumentException|IOException|FetcherException|FeedException|FrameworkException ex) {
+      Logger.getLogger(DataFeed.class.getName()).log(Level.SEVERE,null,ex);
+    }
+  }
+}

@@ -122,6 +122,10 @@
     assertEquals("Invalid merge() result","[one, two, three, two, one, two, three]",Scripting.replaceVariables(ctx,testOne,"${merge(merge('one', 'two', 'three'), 'two', merge('one', 'two', 'three'))}"));
     assertEquals("Invalid merge() result","[1, 2, 3, 4, 5, 6, 7, 8]",Scripting.replaceVariables(ctx,testOne,"${merge(merge('1', '2', '3'), merge('4', '5', merge('6', '7', '8')))}"));
     assertEquals("Invalid merge() result","[1, 2, 3, 4, 5, 6, 1, 2, 3, 8]",Scripting.replaceVariables(ctx,testOne,"${ ( store('list', merge('1', '2', '3')), merge(retrieve('list'), merge('4', '5', merge('6', retrieve('list'), '8'))) )}"));
+    assertEquals("Invalid merge_unique() result","[one, two, three]",Scripting.replaceVariables(ctx,testOne,"${merge_unique('one', 'two', 'three', 'two')}"));
+    assertEquals("Invalid merge_unique() result","[one, two, three]",Scripting.replaceVariables(ctx,testOne,"${merge_unique(merge_unique('one', 'two', 'three'), 'two', merge_unique('one', 'two', 'three'))}"));
+    assertEquals("Invalid merge_unique() result","[1, 2, 3, 4, 5, 6, 7, 8]",Scripting.replaceVariables(ctx,testOne,"${merge_unique(merge_unique('1', '2', '3'), merge_unique('4', '5', merge_unique('6', '7', '8')))}"));
+    assertEquals("Invalid merge_unique() result","[1, 2, 3, 4, 5, 6, 8]",Scripting.replaceVariables(ctx,testOne,"${ ( store('list', merge_unique('1', '2', '3')), merge_unique(retrieve('list'), merge_unique('4', '5', merge_unique('6', retrieve('list'), '8'))) )}"));
     assertEquals("Invalid complement() result","[]",Scripting.replaceVariables(ctx,testOne,"${complement(merge('one', 'two', 'three'), 'one', merge('two', 'three', 'four'))}"));
     assertEquals("Invalid complement() result","[two]",Scripting.replaceVariables(ctx,testOne,"${complement(merge('one', 'two', 'three'), merge('one', 'four', 'three'))}"));
     assertEquals("Invalid join() result","one,two,three",Scripting.replaceVariables(ctx,testOne,"${join(merge(\"one\", \"two\", \"three\"), \",\")}"));

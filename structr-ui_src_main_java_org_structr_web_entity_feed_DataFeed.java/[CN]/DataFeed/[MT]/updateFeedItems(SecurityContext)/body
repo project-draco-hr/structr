@@ -6,13 +6,14 @@
       final FeedFetcher feedFetcher=new HttpURLFeedFetcher();
       final SyndFeed feed=feedFetcher.retrieveFeed(new URL(remoteUrl));
       final List<SyndEntry> entries=feed.getEntries();
-      final List<FeedItem> items=new LinkedList<>();
+      final List<FeedItem> newItems=new LinkedList<>();
       for (      final SyndEntry entry : entries) {
         final String title=entry.getTitle();
         final String link=entry.getLink();
         final FeedItem item=app.create(FeedItem.class,title);
         item.setProperty(FeedItem.url,link);
-        items.add(item);
+        newItems.add(item);
+        setProperty(items,newItems);
       }
     }
  catch (    IllegalArgumentException|IOException|FetcherException|FeedException|FrameworkException ex) {

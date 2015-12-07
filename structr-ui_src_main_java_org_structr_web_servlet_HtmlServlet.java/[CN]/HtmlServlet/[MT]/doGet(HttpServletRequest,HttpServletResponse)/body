@@ -78,14 +78,21 @@
         final HttpBasicAuthResult authResult=checkHttpBasicAuth(request,response,path);
 switch (authResult.authState()) {
 case Authenticated:
-          rootElement=authResult.getRootElement();
-        securityContext=authResult.getSecurityContext();
-      renderContext.pushSecurityContext(securityContext);
-    break;
+          final Linkable result=authResult.getRootElement();
+        if (result instanceof Page) {
+          rootElement=(DOMNode)result;
+          securityContext=authResult.getSecurityContext();
+          renderContext.pushSecurityContext(securityContext);
+        }
+ else         if (result instanceof File) {
+          streamFile(authResult.getSecurityContext(),(File)result,request,response,EditMode.NONE);
+          return;
+        }
+      break;
 case MustAuthenticate:
-  return;
+    return;
 case NoBasicAuth:
-break;
+  break;
 }
 }
 if (rootElement == null) {
@@ -114,84 +121,84 @@ out.close();
 response.setCharacterEncoding("UTF-8");
 String contentType=rootElement.getProperty(Page.contentType);
 if (contentType == null) {
-contentType="text/html;charset=UTF-8";
+  contentType="text/html;charset=UTF-8";
 }
 if (contentType.equals("text/html")) {
-contentType=contentType.concat(";charset=UTF-8");
+  contentType=contentType.concat(";charset=UTF-8");
 }
 response.setContentType(contentType);
 setCustomResponseHeaders(response);
 final boolean createsRawData=rootElement.getProperty(Page.pageCreatesRawData);
 if (isAsync && !createsRawData) {
-final AsyncContext async=request.startAsync();
-final ServletOutputStream out=async.getResponse().getOutputStream();
-final AtomicBoolean finished=new AtomicBoolean(false);
-final DOMNode rootNode=rootElement;
-threadPool.submit(new Runnable(){
-  @Override public void run(){
-    try (final Tx tx=app.tx()){
-      rootNode.render(renderContext,0);
-      finished.set(true);
-      tx.success();
-    }
- catch (    Throwable t) {
-      t.printStackTrace();
-      final String errorMsg=t.getMessage();
-      try {
-        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,errorMsg);
+  final AsyncContext async=request.startAsync();
+  final ServletOutputStream out=async.getResponse().getOutputStream();
+  final AtomicBoolean finished=new AtomicBoolean(false);
+  final DOMNode rootNode=rootElement;
+  threadPool.submit(new Runnable(){
+    @Override public void run(){
+      try (final Tx tx=app.tx()){
+        rootNode.render(renderContext,0);
         finished.set(true);
+        tx.success();
       }
- catch (      IOException ex) {
-        ex.printStackTrace();
+ catch (      Throwable t) {
+        t.printStackTrace();
+        final String errorMsg=t.getMessage();
+        try {
+          response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,errorMsg);
+          finished.set(true);
+        }
+ catch (        IOException ex) {
+          ex.printStackTrace();
+        }
       }
     }
   }
-}
 );
-out.setWriteListener(new WriteListener(){
-  @Override public void onWritePossible() throws IOException {
-    try {
-      final Queue<String> queue=renderContext.getBuffer().getQueue();
-      while (out.isReady()) {
-        String buffer=null;
+  out.setWriteListener(new WriteListener(){
+    @Override public void onWritePossible() throws IOException {
+      try {
+        final Queue<String> queue=renderContext.getBuffer().getQueue();
+        while (out.isReady()) {
+          String buffer=null;
 synchronized (queue) {
-          buffer=queue.poll();
-        }
-        if (buffer != null) {
-          out.print(buffer);
-        }
- else {
-          if (finished.get()) {
-            async.complete();
-            response.setStatus(HttpServletResponse.SC_OK);
-            break;
+            buffer=queue.poll();
           }
-          Thread.sleep(1);
+          if (buffer != null) {
+            out.print(buffer);
+          }
+ else {
+            if (finished.get()) {
+              async.complete();
+              response.setStatus(HttpServletResponse.SC_OK);
+              break;
+            }
+            Thread.sleep(1);
+          }
         }
       }
+ catch (      Throwable t) {
+        t.printStackTrace();
+      }
     }
- catch (    Throwable t) {
+    @Override public void onError(    Throwable t){
       t.printStackTrace();
     }
   }
-  @Override public void onError(  Throwable t){
-    t.printStackTrace();
-  }
-}
 );
 }
  else {
-final StringRenderBuffer buffer=new StringRenderBuffer();
-renderContext.setBuffer(buffer);
-rootElement.render(renderContext,0);
-try {
-  response.getOutputStream().write(buffer.getBuffer().toString().getBytes("utf-8"));
-  response.getOutputStream().flush();
-  response.getOutputStream().close();
-}
- catch (IOException ioex) {
-  ioex.printStackTrace();
-}
+  final StringRenderBuffer buffer=new StringRenderBuffer();
+  renderContext.setBuffer(buffer);
+  rootElement.render(renderContext,0);
+  try {
+    response.getOutputStream().write(buffer.getBuffer().toString().getBytes("utf-8"));
+    response.getOutputStream().flush();
+    response.getOutputStream().close();
+  }
+ catch (  IOException ioex) {
+    ioex.printStackTrace();
+  }
 }
 }
 }

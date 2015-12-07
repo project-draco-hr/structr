@@ -72,20 +72,26 @@
         final HttpBasicAuthResult authResult=checkHttpBasicAuth(request,response,path);
 switch (authResult.authState()) {
 case Authenticated:
-          rootElement=authResult.getRootElement();
-        securityContext=authResult.getSecurityContext();
-      renderContext.pushSecurityContext(securityContext);
-    break;
+          final Linkable result=authResult.getRootElement();
+        if (result instanceof Page) {
+          rootElement=(DOMNode)result;
+          renderContext.pushSecurityContext(authResult.getSecurityContext());
+        }
+ else         if (result instanceof File) {
+          streamFile(authResult.getSecurityContext(),(File)result,request,response,EditMode.NONE);
+          return;
+        }
+      break;
 case MustAuthenticate:
-  return;
+    return;
 case NoBasicAuth:
-break;
+  break;
 }
 }
 if (rootElement == null) {
 if (response.getStatus() == HttpServletResponse.SC_UNAUTHORIZED) {
 try {
-UiAuthenticator.writeUnauthorized(response);
+  UiAuthenticator.writeUnauthorized(response);
 }
  catch (IllegalStateException ise) {
 }
@@ -117,10 +123,10 @@ response.getOutputStream().close();
 response.setCharacterEncoding("UTF-8");
 String contentType=rootElement.getProperty(Page.contentType);
 if (contentType == null) {
-contentType="text/html;charset=UTF-8";
+  contentType="text/html;charset=UTF-8";
 }
 if (contentType.equals("text/html")) {
-contentType=contentType.concat(";charset=UTF-8");
+  contentType=contentType.concat(";charset=UTF-8");
 }
 response.setContentType(contentType);
 setCustomResponseHeaders(response);

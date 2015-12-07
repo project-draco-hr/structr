@@ -1,10 +1,16 @@
 {
-  Page possiblePage=null;
+  Linkable possiblePage=null;
   if (possiblePage == null) {
     possiblePage=StructrApp.getInstance().nodeQuery(Page.class).and(Page.path,path).and(Page.enableBasicAuth,true).sort(Page.position).getFirst();
   }
   if (possiblePage == null) {
     possiblePage=StructrApp.getInstance().nodeQuery(Page.class).and(Page.name,PathHelper.getName(path)).and(Page.enableBasicAuth,true).sort(Page.position).getFirst();
+  }
+  if (possiblePage == null) {
+    possiblePage=StructrApp.getInstance().nodeQuery(File.class).and(File.path,path).and(File.enableBasicAuth,true).getFirst();
+  }
+  if (possiblePage == null) {
+    possiblePage=StructrApp.getInstance().nodeQuery(File.class).and(File.name,PathHelper.getName(path)).and(File.enableBasicAuth,true).getFirst();
   }
   if (possiblePage != null) {
     String realm=possiblePage.getProperty(Page.basicAuthRealm);
@@ -15,7 +21,7 @@
     if (principal != null) {
       final SecurityContext securityContext=SecurityContext.getInstance(principal,AccessMode.Frontend);
       if (securityContext != null) {
-        final Page page=StructrApp.getInstance(securityContext).get(Page.class,possiblePage.getUuid());
+        final Linkable page=StructrApp.getInstance(securityContext).get(Linkable.class,possiblePage.getUuid());
         if (page != null) {
           securityContext.setRequest(request);
           securityContext.setResponse(response);

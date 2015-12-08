@@ -45,11 +45,13 @@
         continue;
       }
     }
- else     if (type.equals("#text")) {
-      tag="";
-      content=((TextNode)node).text();
-      if (!("p".equals(startNode.nodeName().toLowerCase())) && StringUtils.isWhitespace(content)) {
-        continue;
+ else {
+      if (type.equals("#text")) {
+        tag="";
+        content=((TextNode)node).text();
+        if (!("p".equals(startNode.nodeName().toLowerCase())) && StringUtils.isWhitespace(content)) {
+          continue;
+        }
       }
     }
     org.structr.web.entity.dom.DOMNode newNode;
@@ -80,22 +82,9 @@
       for (      Attribute nodeAttr : node.attributes()) {
         final String key=nodeAttr.getKey();
         if (!key.equals("text")) {
+          final String value=nodeAttr.getValue();
           if (key.startsWith("data-")) {
-            String value=nodeAttr.getValue();
-            if (!key.startsWith(DATA_META_PREFIX)) {
-              if (value != null) {
-                if (value.equalsIgnoreCase("true")) {
-                  newNode.setProperty(new BooleanProperty(key),true);
-                }
- else                 if (value.equalsIgnoreCase("false")) {
-                  newNode.setProperty(new BooleanProperty(key),false);
-                }
- else {
-                  newNode.setProperty(new StringProperty(key),nodeAttr.getValue());
-                }
-              }
-            }
- else {
+            if (key.startsWith(DATA_META_PREFIX)) {
               int l=DATA_META_PREFIX.length();
               String upperCaseKey=WordUtils.capitalize(key.substring(l),new char[]{'-'}).replaceAll("-","");
               String camelCaseKey=key.substring(l,l + 1).concat(upperCaseKey.substring(1));
@@ -111,9 +100,20 @@
                 }
               }
             }
+ else             if (key.startsWith(DATA_STRUCTR_PREFIX)) {
+              PropertyKey propertyKey=config.getPropertyKeyForJSONName(newNode.getClass(),key);
+              if (propertyKey != null) {
+                final PropertyConverter inputConverter=propertyKey.inputConverter(securityContext);
+                if (value != null && inputConverter != null) {
+                  newNode.setProperty(propertyKey,propertyKey.inputConverter(securityContext).convert(value));
+                }
+ else {
+                  newNode.setProperty(propertyKey,value);
+                }
+              }
+            }
           }
  else {
-            final String value=nodeAttr.getValue();
             boolean notBlank=StringUtils.isNotBlank(value);
             boolean isAnchor=notBlank && value.startsWith("#");
             boolean isLocal=notBlank && !value.startsWith("http");

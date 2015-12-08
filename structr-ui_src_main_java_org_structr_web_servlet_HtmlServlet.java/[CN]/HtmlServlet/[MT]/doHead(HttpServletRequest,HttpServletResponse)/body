@@ -17,6 +17,7 @@
       boolean dontCache=false;
       logger.log(Level.FINE,"Path info {0}",path);
       if (response.getStatus() == 302) {
+        tx.success();
         return;
       }
       final Principal user=securityContext.getUser(false);
@@ -44,6 +45,7 @@
       if (rootElement == null) {
         File file=findFile(securityContext,request,path);
         if (file != null) {
+          tx.success();
           return;
         }
         Matcher matcher=threadLocalUUIDMatcher.get();
@@ -79,6 +81,7 @@ case Authenticated:
         }
  else         if (result instanceof File) {
           streamFile(authResult.getSecurityContext(),(File)result,request,response,EditMode.NONE);
+          tx.success();
           return;
         }
       break;
@@ -103,6 +106,7 @@ rootElement=notFound(response,securityContext);
 if (rootElement == null) {
 response.setContentLength(0);
 response.getOutputStream().close();
+tx.success();
 return;
 }
 dontCache|=rootElement.getProperty(Page.dontCache);
@@ -112,6 +116,7 @@ setNoCacheHeaders(response);
 if (!securityContext.isVisible(rootElement)) {
 rootElement=notFound(response,securityContext);
 if (rootElement == null) {
+tx.success();
 return;
 }
 }

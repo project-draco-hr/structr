@@ -1,0 +1,13 @@
+{
+  final FileBase file;
+  try (final Tx tx=app.tx()){
+    final String filename=PathHelper.getName(expectedPath);
+    file=app.nodeQuery(FileBase.class).andName(filename).getFirst();
+    assertNotNull(filename + " file not found",file);
+    assertEquals("Wrong path of " + filename + " file",(String)file.getProperty(FileBase.path),expectedPath);
+    assertEquals("Wrong version of " + filename + " file",(int)file.getProperty(FileBase.version),expectedVersion);
+  }
+ catch (  FrameworkException ex) {
+    ex.printStackTrace();
+  }
+}

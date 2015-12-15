@@ -1,0 +1,4 @@
+{
+  RestAssured.given().contentType("application/json; charset=UTF-8").body("[" + "{ 'name': 'test1', 'stringArrayProperty' : ['one'] }," + "{ 'name': 'test2', 'stringArrayProperty' : ['two'] },"+ "{ 'name': 'test3', 'stringArrayProperty' : ['three'] }"+ "]").expect().statusCode(201).when().post("/test_threes?sort=name").getHeader("Location");
+  RestAssured.given().contentType("application/json; charset=UTF-8").filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(200)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(500)).expect().statusCode(200).body("result_count",equalTo(2)).body("result[0].stringArrayProperty[0]",equalTo("one")).body("result[1].stringArrayProperty[0]",equalTo("two")).when().get("/test_threes?sort=name&stringArrayProperty=one;two");
+}

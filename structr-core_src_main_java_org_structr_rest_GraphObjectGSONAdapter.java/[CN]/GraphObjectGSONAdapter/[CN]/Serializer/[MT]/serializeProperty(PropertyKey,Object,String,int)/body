@@ -2,7 +2,13 @@
   try {
     PropertyConverter converter=key.inputConverter(securityContext);
     if (converter != null) {
-      return serializeRoot(converter.revert(value),localPropertyView,depth);
+      try {
+        return serializeRoot(converter.revert(value),localPropertyView,depth);
+      }
+ catch (      ClassCastException cce) {
+        value=key.fixDatabaseProperty(value);
+        return serializeRoot(converter.revert(value),localPropertyView,depth);
+      }
     }
  else {
       return serializeRoot(value,localPropertyView,depth);

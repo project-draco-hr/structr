@@ -1,3 +1,22 @@
 {
+  if (value != null && value instanceof String) {
+    String[] fixedValue=null;
+    final String stringValue=(String)value;
+    if (stringValue.contains(",")) {
+      fixedValue=stringValue.split(",");
+    }
+    if (stringValue.contains(" ")) {
+      fixedValue=stringValue.split(" ");
+    }
+    if (securityContext != null && entity != null) {
+      try {
+        setProperty(securityContext,entity,(T[])fixedValue);
+      }
+ catch (      FrameworkException ex) {
+        ex.printStackTrace();
+      }
+    }
+    return fixedValue;
+  }
   return value;
 }

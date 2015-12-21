@@ -115,7 +115,7 @@
     grant("_login",64,false);
     assertEquals("Invalid POST result","201",Scripting.replaceVariables(ctx,page,"${POST('http://localhost:" + httpPort + "/structr/rest/folders', '{name:Test}').status}"));
     assertEquals("Invalid POST result","1.0",Scripting.replaceVariables(ctx,page,"${POST('http://localhost:" + httpPort + "/structr/rest/folders', '{name:Test}').body.result_count}"));
-    assertEquals("Invalid POST result","application/json; charset=utf-8",Scripting.replaceVariables(ctx,page,"${POST('http://localhost:" + httpPort + "/structr/rest/folders', '{name:Test}').headers.Content-Type}"));
+    assertEquals("Invalid POST result","application/json; charset=utf-8;",Scripting.replaceVariables(ctx,page,"${POST('http://localhost:" + httpPort + "/structr/rest/folders', '{name:Test}').headers.Content-Type}"));
     assertEquals("Invalid POST result","422",Scripting.replaceVariables(ctx,page,"${POST('http://localhost:" + httpPort + "/structr/rest/folders', '{name:\"Test{{{}}{}{}{}\"}').status}"));
     final String sessionIdCookie=Scripting.replaceVariables(ctx,page,"${POST('http://localhost:" + httpPort + "/structr/rest/login', '{name:admin,password:admin}').headers.Set-Cookie}");
     final String sessionId=HttpCookie.parse(sessionIdCookie).get(0).getValue();

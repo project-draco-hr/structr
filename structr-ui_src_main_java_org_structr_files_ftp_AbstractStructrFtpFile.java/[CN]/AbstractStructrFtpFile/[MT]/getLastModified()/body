@@ -1,6 +1,8 @@
 {
   try (Tx tx=StructrApp.getInstance().tx()){
-    return structrFile.getProperty(AbstractFile.lastModifiedDate).getTime();
+    final Date date=structrFile.getProperty(AbstractFile.lastModifiedDate);
+    tx.success();
+    return date.getTime();
   }
  catch (  FrameworkException fex) {
     logger.log(Level.SEVERE,"Error while last modified date of " + this,fex);

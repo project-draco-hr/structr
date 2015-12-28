@@ -14,6 +14,9 @@
       fileNode.setProperty(File.size,size != null ? size : 0L);
       fileNode.setProperty(File.contentType,contentType);
       fileNode.setProperty(AbstractNode.name,name);
+      if (!fileNode.validatePath(securityContext,null)) {
+        fileNode.setProperty(AbstractNode.name,name.concat("_").concat(FileHelper.getDateString()));
+      }
       getWebSocket().createFileUploadHandler(fileNode);
     }
   }

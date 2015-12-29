@@ -3,15 +3,15 @@
   HttpSession session=request.getSession(false);
   boolean sessionValid=false;
   if (requestedSessionId == null) {
-    AuthHelper.newSession(request);
+    SessionHelper.newSession(request);
     return null;
   }
  else {
     if (session != null) {
       if (session.getId().equals(requestedSessionId)) {
-        if (AuthHelper.isSessionTimedOut(session)) {
+        if (SessionHelper.isSessionTimedOut(session)) {
           sessionValid=false;
-          AuthHelper.clearSession(requestedSessionId);
+          SessionHelper.clearSession(requestedSessionId);
         }
  else {
           sessionValid=true;
@@ -19,8 +19,8 @@
       }
     }
  else {
-      session=AuthHelper.newSession(request);
-      AuthHelper.clearSession(requestedSessionId);
+      session=SessionHelper.newSession(request);
+      SessionHelper.clearSession(requestedSessionId);
     }
   }
   if (sessionValid) {

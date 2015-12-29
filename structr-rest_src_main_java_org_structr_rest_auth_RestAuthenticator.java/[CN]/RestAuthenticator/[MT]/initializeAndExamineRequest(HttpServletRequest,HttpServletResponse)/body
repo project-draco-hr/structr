@@ -1,6 +1,6 @@
 {
   SecurityContext securityContext;
-  Principal user=AuthHelper.checkSessionAuthentication(request);
+  Principal user=SessionHelper.checkSessionAuthentication(request);
   if (user == null) {
     user=getUser(request,true);
   }
@@ -13,6 +13,7 @@
     }
  else {
       securityContext=SecurityContext.getInstance(user,request,AccessMode.Backend);
+      SessionHelper.clearOldSessions(user);
     }
   }
   securityContext.setAuthenticator(this);

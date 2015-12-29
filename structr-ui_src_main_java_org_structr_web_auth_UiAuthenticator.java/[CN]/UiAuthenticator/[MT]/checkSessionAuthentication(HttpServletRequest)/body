@@ -11,7 +11,7 @@
       if (session.getId().equals(requestedSessionId)) {
         if (AuthHelper.isSessionTimedOut(session)) {
           sessionValid=false;
-          invalidateSessionId(requestedSessionId);
+          AuthHelper.clearSession(requestedSessionId);
         }
  else {
           sessionValid=true;
@@ -20,7 +20,7 @@
     }
  else {
       session=AuthHelper.newSession(request);
-      invalidateSessionId(requestedSessionId);
+      AuthHelper.clearSession(requestedSessionId);
     }
   }
   if (sessionValid) {

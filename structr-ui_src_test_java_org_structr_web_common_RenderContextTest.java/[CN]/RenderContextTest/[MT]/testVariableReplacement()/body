@@ -113,10 +113,11 @@
     assertEquals("Invalid GET notation result",page.getName(),Scripting.replaceVariables(ctx,p1,"${from_json(GET('http://localhost:" + httpPort + "/structr/rest/pages/ui')).result[0].name}"));
     grant("Folder",64,true);
     grant("_login",64,false);
-    assertEquals("Invalid POST result","201",Scripting.replaceVariables(ctx,page,"${POST('http://localhost:" + httpPort + "/structr/rest/folders', '{name:Test}').status}"));
-    assertEquals("Invalid POST result","1.0",Scripting.replaceVariables(ctx,page,"${POST('http://localhost:" + httpPort + "/structr/rest/folders', '{name:Test}').body.result_count}"));
-    assertEquals("Invalid POST result","application/json; charset=utf-8;",Scripting.replaceVariables(ctx,page,"${POST('http://localhost:" + httpPort + "/structr/rest/folders', '{name:Test}').headers.Content-Type}"));
-    assertEquals("Invalid POST result","422",Scripting.replaceVariables(ctx,page,"${POST('http://localhost:" + httpPort + "/structr/rest/folders', '{name:\"Test{{{}}{}{}{}\"}').status}"));
+    assertEquals("Invalid POST result","201",Scripting.replaceVariables(ctx,page,"${POST('http://localhost:" + httpPort + "/structr/rest/folders', '{name:status}').status}"));
+    assertEquals("Invalid POST result","1.0",Scripting.replaceVariables(ctx,page,"${POST('http://localhost:" + httpPort + "/structr/rest/folders', '{name:result_count}').body.result_count}"));
+    assertEquals("Invalid POST result","application/json; charset=utf-8;",Scripting.replaceVariables(ctx,page,"${POST('http://localhost:" + httpPort + "/structr/rest/folders', '{name:content-type}').headers.Content-Type}"));
+    assertEquals("Invalid POST result","422",Scripting.replaceVariables(ctx,page,"${POST('http://localhost:" + httpPort + "/structr/rest/folders', '{name:\"ShouldFail{{{}}{}{}{}\"}').status}"));
+    assertEquals("Invalid POST result","422",Scripting.replaceVariables(ctx,page,"${POST('http://localhost:" + httpPort + "/structr/rest/folders', '{name:status}').status}"));
     final String sessionIdCookie=Scripting.replaceVariables(ctx,page,"${POST('http://localhost:" + httpPort + "/structr/rest/login', '{name:admin,password:admin}').headers.Set-Cookie}");
     final String sessionId=HttpCookie.parse(sessionIdCookie).get(0).getValue();
     assertEquals("Invalid authenticated GET result","admin",Scripting.replaceVariables(ctx,page,"${add_header('Cookie', 'JSESSIONID=" + sessionId + ";Path=/')}${from_json(GET('http://localhost:"+ httpPort+ "/structr/rest/users')).result[0].name}"));

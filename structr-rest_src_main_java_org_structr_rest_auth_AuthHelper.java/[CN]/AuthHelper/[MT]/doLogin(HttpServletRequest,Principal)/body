@@ -1,0 +1,12 @@
+{
+  HttpSession session=request.getSession(false);
+  if (session == null) {
+    session=SessionHelper.newSession(request);
+  }
+  SessionHelper.clearInvalidSessions(user);
+  if (session != null) {
+    SessionHelper.clearSession(session.getId());
+    user.addSessionId(session.getId());
+    Actions.call(Actions.NOTIFICATION_LOGIN,user);
+  }
+}

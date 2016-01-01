@@ -1,0 +1,13 @@
+{
+  final HttpSession session=request.getSession(false);
+  if (session != null) {
+    SessionHelper.clearSession(session.getId());
+    Actions.call(Actions.NOTIFICATION_LOGOUT,user);
+    try {
+      request.logout();
+      request.changeSessionId();
+    }
+ catch (    Throwable t) {
+    }
+  }
+}

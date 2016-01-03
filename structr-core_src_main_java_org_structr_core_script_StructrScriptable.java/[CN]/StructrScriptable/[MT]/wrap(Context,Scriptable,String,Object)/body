@@ -14,6 +14,9 @@
   if (value != null && value.getClass().isEnum()) {
     return ((Enum)value).name();
   }
+  if (value instanceof Map && !(value instanceof GraphObjectMap) && !(value instanceof PropertyMap)) {
+    return new MapWrapper((Map)value);
+  }
   if (value instanceof Date) {
     return context.newObject(scope,"Date",new Object[]{((Date)value).getTime()});
   }

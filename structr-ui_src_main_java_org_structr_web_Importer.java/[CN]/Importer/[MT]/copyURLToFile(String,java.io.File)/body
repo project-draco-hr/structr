@@ -1,9 +1,9 @@
 {
   final HttpClient client=getHttpClient();
-  final HttpMethod get=new GetMethod(uri);
+  final HttpMethod get=new GetMethod();
+  get.setURI(new URI(uri,false));
   get.addRequestHeader("User-Agent","curl/7.35.0");
   logger.log(Level.INFO,"Downloading from {0}",uri);
-  get.setFollowRedirects(true);
   final int statusCode=client.executeMethod(get);
   if (statusCode == 200) {
     try (final InputStream is=get.getResponseBodyAsStream()){

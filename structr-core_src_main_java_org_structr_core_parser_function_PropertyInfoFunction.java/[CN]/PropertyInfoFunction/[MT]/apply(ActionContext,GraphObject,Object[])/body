@@ -1,0 +1,26 @@
+{
+  if (arrayHasLengthAndAllElementsNotNull(sources,2)) {
+    final ConfigurationProvider config=StructrApp.getConfiguration();
+    final String typeName=sources[0].toString();
+    final String keyName=sources[1].toString();
+    Class type=config.getNodeEntityClass(typeName);
+    if (type == null) {
+      type=config.getRelationshipEntityClass(typeName);
+    }
+    if (type != null) {
+      final PropertyKey key=config.getPropertyKeyForJSONName(type,keyName,false);
+      if (key != null) {
+        return SchemaHelper.getPropertyInfo(ctx.getSecurityContext(),key);
+      }
+ else {
+        return "Unknown property " + typeName + "."+ keyName;
+      }
+    }
+ else {
+      return "Unknown type " + typeName;
+    }
+  }
+ else {
+    return usage(ctx.isJavaScriptContext());
+  }
+}

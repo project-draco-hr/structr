@@ -1,0 +1,11 @@
+{
+  if (arrayHasMinLengthAndAllElementsNotNull(sources,1)) {
+    final Map<String,Object> params=new LinkedHashMap<>();
+    final String query=sources[0].toString();
+    if (sources.length > 1 && sources[1] != null && sources[1] instanceof Map) {
+      params.putAll((Map)sources[1]);
+    }
+    return StructrApp.getInstance(ctx.getSecurityContext()).cypher(query,params);
+  }
+  return "";
+}

@@ -1,0 +1,15 @@
+{
+  if (sources != null && sources.length == 2) {
+    final String name=sources[0].toString();
+    final String value=sources[1].toString();
+    final SecurityContext securityContext=ctx.getSecurityContext();
+    if (securityContext != null) {
+      final HttpServletResponse response=securityContext.getResponse();
+      if (response != null) {
+        response.addHeader(name,value);
+      }
+    }
+    return "";
+  }
+  return usage(ctx.isJavaScriptContext());
+}

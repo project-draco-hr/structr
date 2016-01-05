@@ -1,0 +1,14 @@
+{
+  if (sources != null && arrayHasMinLengthAndAllElementsNotNull(sources,1)) {
+    final SecurityContext securityContext=ctx.getSecurityContext();
+    final String name=sources[0].toString();
+    if (securityContext != null) {
+      final HttpServletRequest request=securityContext.getRequest();
+      if (request != null) {
+        return request.getHeader(name);
+      }
+    }
+    return "";
+  }
+  return usage(ctx.isJavaScriptContext());
+}

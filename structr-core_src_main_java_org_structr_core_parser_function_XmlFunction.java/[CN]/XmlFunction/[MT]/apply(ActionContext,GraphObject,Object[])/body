@@ -1,0 +1,17 @@
+{
+  if (arrayHasLengthAndAllElementsNotNull(sources,1) && sources[0] instanceof String) {
+    try {
+      final DocumentBuilder builder=DocumentBuilderFactory.newInstance().newDocumentBuilder();
+      if (builder != null) {
+        final String xml=(String)sources[0];
+        final StringReader reader=new StringReader(xml);
+        final InputSource src=new InputSource(reader);
+        return builder.parse(src);
+      }
+    }
+ catch (    IOException|SAXException|ParserConfigurationException ex) {
+      ex.printStackTrace();
+    }
+  }
+  return "";
+}

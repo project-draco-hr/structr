@@ -1,0 +1,26 @@
+{
+  if (sources == null || sources != null && sources.length != 2) {
+    return usage(ctx.isJavaScriptContext());
+  }
+  if (arrayHasLengthAndAllElementsNotNull(sources,2)) {
+    Date date=null;
+    if (sources[0] instanceof Date) {
+      date=(Date)sources[0];
+    }
+ else     if (sources[0] instanceof Number) {
+      date=new Date(((Number)sources[0]).longValue());
+    }
+ else     if (sources[0] instanceof ScriptableObject) {
+    }
+ else {
+      try {
+        date=new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").parse(sources[0].toString());
+      }
+ catch (      ParseException ex) {
+        ex.printStackTrace();
+      }
+    }
+    return new SimpleDateFormat(sources[1].toString()).format(date);
+  }
+  return "";
+}

@@ -1,0 +1,31 @@
+{
+  if (arrayHasMinLengthAndAllElementsNotNull(sources,2)) {
+    if (sources[0] instanceof GraphObject) {
+      final GraphObject source=(GraphObject)sources[0];
+      final Map<String,Object> properties=new LinkedHashMap<>();
+      final SecurityContext securityContext=source.getSecurityContext();
+      final Gson gson=new GsonBuilder().create();
+      final Class type=source.getClass();
+      final int sourceCount=sources.length;
+      if (sources.length == 3 && sources[2] != null && sources[1].toString().matches("[a-zA-Z0-9_]+")) {
+        properties.put(sources[1].toString(),sources[2]);
+      }
+ else {
+        for (int i=1; i < sourceCount; i++) {
+          final Map<String,Object> values=deserialize(gson,sources[i].toString());
+          if (values != null) {
+            properties.putAll(values);
+          }
+        }
+      }
+      final PropertyMap map=PropertyMap.inputTypeToJavaType(securityContext,type,properties);
+      for (      final Map.Entry<PropertyKey,Object> entry : map.entrySet()) {
+        source.setProperty(entry.getKey(),entry.getValue());
+      }
+    }
+ else {
+      throw new FrameworkException(422,"Invalid use of builtin method set, usage: set(entity, params..)");
+    }
+  }
+  return "";
+}

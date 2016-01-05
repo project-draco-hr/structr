@@ -1,0 +1,19 @@
+{
+  if (sources == null || sources != null && sources.length != 2) {
+    return usage(ctx.isJavaScriptContext());
+  }
+  if (arrayHasLengthAndAllElementsNotNull(sources,2)) {
+    String dateString=sources[0].toString();
+    if (StringUtils.isBlank(dateString)) {
+      return "";
+    }
+    String pattern=sources[1].toString();
+    try {
+      return new SimpleDateFormat(pattern).parse(dateString);
+    }
+ catch (    ParseException ex) {
+      logger.log(Level.WARNING,"Could not parse date " + dateString + " and format it to pattern "+ pattern,ex);
+    }
+  }
+  return "";
+}

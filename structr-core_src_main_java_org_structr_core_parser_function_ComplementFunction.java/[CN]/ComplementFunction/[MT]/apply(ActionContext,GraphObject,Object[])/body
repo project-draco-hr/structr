@@ -1,0 +1,19 @@
+{
+  final Set sourceSet=new HashSet();
+  if (sources[0] instanceof Collection) {
+    sourceSet.addAll((Collection)sources[0]);
+    for (int cnt=1; cnt < sources.length; cnt++) {
+      final Object source=sources[cnt];
+      if (source instanceof Collection) {
+        sourceSet.removeAll((Collection)source);
+      }
+ else       if (source != null) {
+        sourceSet.remove(source);
+      }
+    }
+  }
+ else {
+    return "Argument 1 for complement must be a Collection";
+  }
+  return sourceSet;
+}

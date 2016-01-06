@@ -1,32 +1,12 @@
 {
   final App app=StructrApp.getInstance();
-  if (folderId != null && folderId.equals(CMISInfo.ROOT_FOLDER_ID)) {
-    try (final Tx tx=app.tx()){
-      final CMISObjectInFolderWrapper wrapper=new CMISObjectInFolderWrapper(propertyFilter,includeAllowableActions,maxItems,skipCount);
-      wrapper.wrap(app.nodeQuery(AbstractFile.class).and(Folder.parent,null).sort(AbstractNode.name).getAsList());
-      tx.success();
-      return wrapper;
-    }
- catch (    Throwable t) {
-      t.printStackTrace();
-    }
+  final CMISObjectInFolderWrapper wrapper=new CMISObjectInFolderWrapper(propertyFilter,includeAllowableActions,maxItems,skipCount);
+  try (final Tx tx=app.tx()){
+    wrapper.wrap(getChildrenQuery(app,folderId).getAsList());
+    tx.success();
   }
- else {
-    try (final Tx tx=app.tx()){
-      final Folder parent=app.get(Folder.class,folderId);
-      CMISObjectInFolderWrapper wrapper=null;
-      if (parent != null) {
-        final List<AbstractFile> children=parent.getProperty(AbstractFile.children);
-        wrapper=new CMISObjectInFolderWrapper(propertyFilter,includeAllowableActions,maxItems,skipCount);
-        Collections.sort(children,new GraphObjectComparator(AbstractNode.name,false));
-        wrapper.wrap(children);
-      }
-      tx.success();
-      return wrapper;
-    }
- catch (    Throwable t) {
-      t.printStackTrace();
-    }
+ catch (  final FrameworkException fex) {
+    fex.printStackTrace();
   }
-  throw new CmisObjectNotFoundException("Folder with ID " + folderId + " does not exist");
+  return wrapper;
 }

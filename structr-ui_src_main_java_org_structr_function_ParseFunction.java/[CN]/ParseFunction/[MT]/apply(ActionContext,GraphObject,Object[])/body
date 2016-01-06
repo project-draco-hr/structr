@@ -1,0 +1,21 @@
+{
+  if (sources != null && sources.length > 1) {
+    try {
+      final String source=sources[0].toString();
+      final String selector=sources[1].toString();
+      final List<Map<String,Object>> objects=new MicroformatParser().parse(source,selector);
+      final List<GraphObjectMap> elements=new LinkedList<>();
+      for (      final Map<String,Object> map : objects) {
+        final GraphObjectMap obj=new GraphObjectMap();
+        elements.add(obj);
+        recursivelyConvertMapToGraphObjectMap(obj,map,0);
+      }
+      return elements;
+    }
+ catch (    Throwable t) {
+      t.printStackTrace();
+    }
+    return "";
+  }
+  return usage(ctx.isJavaScriptContext());
+}

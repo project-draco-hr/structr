@@ -1,0 +1,36 @@
+{
+  final List<AbstractRelationship> list=new ArrayList<>();
+  if (arrayHasMinLengthAndAllElementsNotNull(sources,2)) {
+    final Object source=sources[0];
+    final Object target=sources[1];
+    NodeInterface sourceNode=null;
+    NodeInterface targetNode=null;
+    if (source instanceof NodeInterface && target instanceof NodeInterface) {
+      sourceNode=(NodeInterface)source;
+      targetNode=(NodeInterface)target;
+    }
+ else {
+      return "Error: Entities are not nodes.";
+    }
+    if (sources.length == 2) {
+      for (      final AbstractRelationship rel : sourceNode.getRelationships()) {
+        final NodeInterface s=rel.getSourceNode();
+        final NodeInterface t=rel.getTargetNode();
+        if (s != null && t != null && ((s.equals(sourceNode) && t.equals(targetNode)) || (s.equals(targetNode) && t.equals(sourceNode)))) {
+          list.add(rel);
+        }
+      }
+    }
+ else     if (sources.length == 3) {
+      final String relType=(String)sources[2];
+      for (      final AbstractRelationship rel : sourceNode.getRelationships()) {
+        final NodeInterface s=rel.getSourceNode();
+        final NodeInterface t=rel.getTargetNode();
+        if (s != null && t != null && rel.getRelType().name().equals(relType) && ((s.equals(sourceNode) && t.equals(targetNode)) || (s.equals(targetNode) && t.equals(sourceNode)))) {
+          list.add(rel);
+        }
+      }
+    }
+  }
+  return list;
+}

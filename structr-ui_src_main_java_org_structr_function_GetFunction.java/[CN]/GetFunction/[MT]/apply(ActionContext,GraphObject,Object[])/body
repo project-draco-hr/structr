@@ -1,0 +1,39 @@
+{
+  if (sources != null && sources.length > 0) {
+    try {
+      String address=sources[0].toString();
+      String contentType=null;
+      String username=null;
+      String password=null;
+      if (sources.length > 1) {
+        contentType=sources[1].toString();
+      }
+      if (sources.length > 2) {
+        username=sources[2].toString();
+      }
+      if (sources.length > 3) {
+        password=sources[3].toString();
+      }
+      if ("text/html".equals(contentType)) {
+        final Connection connection=Jsoup.connect(address);
+        for (        final Map.Entry<String,String> header : ctx.getHeaders().entrySet()) {
+          connection.header(header.getKey(),header.getValue());
+        }
+        if (sources.length > 2) {
+          return connection.get().select(sources[2].toString()).html();
+        }
+ else {
+          return connection.get().html();
+        }
+      }
+ else {
+        return getFromUrl(ctx,address,username,password);
+      }
+    }
+ catch (    Throwable t) {
+      t.printStackTrace();
+    }
+    return "";
+  }
+  return usage(ctx.isJavaScriptContext());
+}

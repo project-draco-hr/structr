@@ -1,0 +1,38 @@
+{
+  if (arrayHasMinLengthAndAllElementsNotNull(sources,3)) {
+    if (sources[0] instanceof Principal) {
+      final Principal principal=(Principal)sources[0];
+      if (sources[1] instanceof AbstractNode) {
+        final AbstractNode node=(AbstractNode)sources[1];
+        if (sources[2] instanceof String) {
+          final String[] parts=((String)sources[2]).split("[,]+");
+          for (          final String part : parts) {
+            final String trimmedPart=part.trim();
+            if (trimmedPart.length() > 0) {
+              final Permission permission=Permissions.valueOf(trimmedPart);
+              if (permission != null) {
+                node.grant(permission,principal);
+              }
+ else {
+                return "Error: unknown permission " + trimmedPart;
+              }
+            }
+          }
+          return "";
+        }
+ else {
+          return "Error: third argument is not a string.";
+        }
+      }
+ else {
+        return "Error: second argument is not a node.";
+      }
+    }
+ else {
+      return "Error: first argument is not of type Principal.";
+    }
+  }
+ else {
+    return usage(ctx.isJavaScriptContext());
+  }
+}

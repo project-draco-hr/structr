@@ -1,0 +1,16 @@
+{
+  if (arrayHasLengthAndAllElementsNotNull(sources,3)) {
+    final Gson gson=new GsonBuilder().create();
+    final String street=sources[0].toString();
+    final String city=sources[1].toString();
+    final String country=sources[2].toString();
+    GeoCodingResult result=GeoHelper.geocode(street,null,null,city,null,country);
+    if (result != null) {
+      final Map<String,Object> map=new LinkedHashMap<>();
+      map.put("latitude",result.getLatitude());
+      map.put("longitude",result.getLongitude());
+      return serialize(gson,map);
+    }
+  }
+  return "";
+}

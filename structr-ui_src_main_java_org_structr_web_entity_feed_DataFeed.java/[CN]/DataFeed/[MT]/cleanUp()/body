@@ -1,0 +1,20 @@
+{
+  final Integer maxItemsToRetain=getProperty(maxItems);
+  final Long maxItemAge=getProperty(maxAge);
+  int i=0;
+  if (maxItemsToRetain != null || maxItemAge != null) {
+    final List<FeedItem> feedItems=getProperty(items);
+    for (    final FeedItem item : feedItems) {
+      i++;
+      final Date itemDate=item.getProperty(FeedItem.pubDate);
+      if ((maxItemsToRetain != null && i > maxItemsToRetain) || (maxItemAge != null && itemDate.before(new Date(new Date().getTime() - maxItemAge)))) {
+        try {
+          StructrApp.getInstance().delete(item);
+        }
+ catch (        FrameworkException ex) {
+          logger.log(Level.SEVERE,"Error while deleting old/surplus feed item " + item,ex);
+        }
+      }
+    }
+  }
+}

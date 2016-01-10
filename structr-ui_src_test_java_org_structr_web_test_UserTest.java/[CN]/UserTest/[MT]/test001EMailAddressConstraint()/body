@@ -1,0 +1,22 @@
+{
+  try (final Tx tx=app.tx()){
+    app.create(User.class,new NodeAttribute(User.name,"TestUser1"),new NodeAttribute(User.eMail,"user@structr.test"));
+    app.create(User.class,new NodeAttribute(User.name,"TestUser2"),new NodeAttribute(User.eMail,"user@structr.test"));
+    tx.success();
+    fail("Expected exception to be thrown.");
+  }
+ catch (  FrameworkException fex) {
+    assertEquals("Invalid error code",422,fex.getStatus());
+  }
+  check();
+  try (final Tx tx=app.tx()){
+    app.create(User.class,new NodeAttribute(User.name,"TestUser1"),new NodeAttribute(User.eMail,"user@structr.test"));
+    app.create(User.class,new NodeAttribute(User.name,"TestUser2"),new NodeAttribute(User.eMail,"User@Structr.test"));
+    tx.success();
+    fail("Expected exception to be thrown.");
+  }
+ catch (  FrameworkException fex) {
+    assertEquals("Invalid error code",422,fex.getStatus());
+  }
+  check();
+}

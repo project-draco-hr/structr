@@ -15,10 +15,12 @@
       tx.success();
     }
      try (final Tx tx=app.tx()){
-      String uuid=rel.getUuid();
-      assertNull("UUID of deleted relationship should be null",uuid);
+      rel.getUuid();
+      fail("Accessing a deleted relationship should thow an exception.");
+      tx.success();
     }
- catch (    IllegalStateException iex) {
+ catch (    NotFoundException nfex) {
+      assertNotNull(nfex.getMessage());
     }
   }
  catch (  FrameworkException ex) {

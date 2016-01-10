@@ -2,23 +2,20 @@
   if (page == 0 || pageSize <= 0) {
     return Result.EMPTY_RESULT;
   }
-  Factory<S,T> factory=getFactory(securityContext,includeDeletedAndHidden,publicOnly,pageSize,page,offsetId);
-  boolean filterResults=true;
+  final Factory<S,T> factory=getFactory(securityContext,includeDeletedAndHidden,publicOnly,pageSize,page,offsetId);
   boolean hasGraphSources=false;
   boolean hasSpatialSource=false;
   if (securityContext.getUser(false) == null) {
-    rootGroup.add(new PropertySearchAttribute(GraphObject.visibleToPublicUsers,true,BooleanClause.Occur.MUST,true));
+    rootGroup.add(new PropertySearchAttribute(GraphObject.visibleToPublicUsers,true,Occurrence.REQUIRED,true));
   }
   if (!includeDeletedAndHidden && !isRelationshipSearch()) {
-    rootGroup.add(new PropertySearchAttribute(NodeInterface.hidden,true,BooleanClause.Occur.MUST_NOT,true));
-    rootGroup.add(new PropertySearchAttribute(NodeInterface.deleted,true,BooleanClause.Occur.MUST_NOT,true));
+    rootGroup.add(new PropertySearchAttribute(NodeInterface.hidden,true,Occurrence.FORBIDDEN,true));
+    rootGroup.add(new PropertySearchAttribute(NodeInterface.deleted,true,Occurrence.FORBIDDEN,true));
   }
   List<SourceSearchAttribute> sources=new ArrayList<>();
-  DistanceSearchAttribute distanceSearch=null;
   boolean hasEmptySearchFields=false;
+  boolean allExactMatch=true;
   Result intermediateResult=null;
-  GeoCodingResult coords=null;
-  Double dist=null;
   for (Iterator<SearchAttribute> it=rootGroup.getSearchAttributes().iterator(); it.hasNext(); ) {
     SearchAttribute attr=it.next();
     if (attr instanceof SearchAttributeGroup) {
@@ -35,77 +32,38 @@
       }
     }
     if (attr instanceof DistanceSearchAttribute) {
-      distanceSearch=(DistanceSearchAttribute)attr;
-      coords=GeoHelper.geocode(distanceSearch);
-      dist=distanceSearch.getValue();
-      it.remove();
+      final DistanceSearchAttribute distanceSearch=(DistanceSearchAttribute)attr;
+      final GeoCodingResult coords=GeoHelper.geocode(distanceSearch);
+      if (coords != null) {
+        distanceSearch.setCoords(coords.toArray());
+      }
+      indexType=IndexType.Spatial;
       hasSpatialSource=true;
     }
     if (attr instanceof SourceSearchAttribute) {
       sources.add((SourceSearchAttribute)attr);
-      it.remove();
       hasGraphSources=true;
     }
     if (attr instanceof EmptySearchAttribute) {
       hasEmptySearchFields=true;
     }
+    allExactMatch&=attr.isExactMatch();
   }
-  if (distanceSearch == null && !sources.isEmpty()) {
+  if (!allExactMatch) {
+    indexType=IndexType.Fulltext;
+  }
+  if (!hasSpatialSource && !sources.isEmpty()) {
     intermediateResult=new Result(new ArrayList<>(),null,false,false);
   }
  else {
-    BooleanQuery query=new BooleanQuery();
-    boolean allExactMatch=true;
-    for (    SearchAttribute attr : rootGroup.getSearchAttributes()) {
-      Query queryElement=attr.getQuery();
-      if (queryElement != null) {
-        query.add(queryElement,attr.getOccur());
-      }
-      allExactMatch&=attr.isExactMatch();
-    }
-    QueryContext queryContext=new QueryContext(query);
     if (sortKey != null && !doNotSort) {
-      Integer sortType=sortKey.getSortType();
-      if (sortType != null) {
-        queryContext.sort(new Sort(new SortField(sortKey.dbName(),sortType,sortDescending)));
-      }
- else {
-        queryContext.sort(new Sort(new SortField(sortKey.dbName(),Locale.getDefault(),sortDescending)));
-      }
+      rootGroup.setSortKey(sortKey);
+      rootGroup.sortDescending(sortDescending);
     }
-    if (distanceSearch != null) {
-      if (coords != null) {
-        Map<String,Object> params=new HashMap<>();
-        params.put(LayerNodeIndex.POINT_PARAMETER,coords.toArray());
-        params.put(LayerNodeIndex.DISTANCE_IN_KM_PARAMETER,dist);
-        LayerNodeIndex spatialIndex=this.getSpatialIndex();
-        if (spatialIndex != null) {
-          try (final IndexHits hits=spatialIndex.query(LayerNodeIndex.WITHIN_DISTANCE_QUERY,params)){
-            intermediateResult=new NodeFactory(securityContext).instantiate(hits);
-          }
-         }
-      }
-    }
- else     if (allExactMatch) {
-      try (final IndexHits hits=getKeywordIndex().query(queryContext)){
-        filterResults=hasEmptySearchFields;
-        intermediateResult=factory.instantiate(hits);
-      }
- catch (      NumberFormatException nfe) {
-        logger.log(Level.SEVERE,"Could not sort results",nfe);
-      }
-    }
- else {
-      try (final IndexHits hits=getFulltextIndex().query(queryContext)){
-        filterResults=hasEmptySearchFields;
-        intermediateResult=factory.instantiate(hits);
-      }
- catch (      NumberFormatException nfe) {
-        logger.log(Level.SEVERE,"Could not sort results",nfe);
-      }
-    }
+    final QueryResult hits=getIndex().query(rootGroup);
+    intermediateResult=factory.instantiate(hits);
   }
-  if (intermediateResult != null && filterResults) {
+  if (intermediateResult != null && (hasEmptySearchFields || hasGraphSources || hasSpatialSource)) {
     Set<GraphObject> intermediateResultSet=new LinkedHashSet<>(intermediateResult.getResults());
     List<GraphObject> finalResult=new ArrayList<>();
     int resultCount=0;

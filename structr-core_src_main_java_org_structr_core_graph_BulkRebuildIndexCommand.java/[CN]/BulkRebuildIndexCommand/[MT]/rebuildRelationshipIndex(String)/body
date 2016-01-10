@@ -1,9 +1,9 @@
 {
   final RelationshipFactory relFactory=new RelationshipFactory(SecurityContext.getSuperUserInstance());
-  final GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
+  final DatabaseService graphDb=(DatabaseService)arguments.get("graphDb");
   Iterator<AbstractRelationship> relIterator=null;
   try (final Tx tx=StructrApp.getInstance().tx()){
-    relIterator=Iterables.filter(new TypePredicate<>(relType),Iterables.map(relFactory,Iterables.filter(new StructrAndSpatialPredicate(true,false,false),GlobalGraphOperations.at(graphDb).getAllRelationships()))).iterator();
+    relIterator=Iterables.filter(new TypePredicate<>(relType),Iterables.map(relFactory,Iterables.filter(new StructrAndSpatialPredicate(true,false,false),graphDb.getAllRelationships()))).iterator();
     ;
     tx.success();
   }

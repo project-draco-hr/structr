@@ -1,22 +1,6 @@
 {
-  if (config == null) {
-    config=getOrCreateGraphProperties();
-  }
-  try (final Tx tx=StructrApp.getInstance().tx()){
+  final GraphProperties config=getDatabaseService().getGlobalProperties();
+  if (config != null) {
     config.setProperty(key,value);
-    tx.success();
-  }
- catch (  Throwable t) {
-    logger.log(Level.WARNING,t.getMessage());
-    t.printStackTrace();
-    try (final Tx tx=StructrApp.getInstance().tx()){
-      config=getOrCreateGraphProperties();
-      config.setProperty(key,value);
-      tx.success();
-    }
- catch (    Throwable t1) {
-      logger.log(Level.WARNING,t1.getMessage());
-      t1.printStackTrace();
-    }
   }
 }

@@ -3,7 +3,7 @@
   T command=null;
   try {
     command=commandType.newInstance();
-    command.setSecurityContext(securityContext);
+    command.setArgument("securityContext",securityContext);
     serviceClass=command.getServiceClass();
     if ((serviceClass != null) && configuredServiceClasses.contains(serviceClass.getSimpleName())) {
       Service service=serviceCache.get(serviceClass);
@@ -23,6 +23,7 @@
       logger.log(Level.FINEST,"Initializing command ",commandType.getName());
       service.injectArguments(command);
     }
+    command.initialized();
   }
  catch (  Throwable t) {
     t.printStackTrace();

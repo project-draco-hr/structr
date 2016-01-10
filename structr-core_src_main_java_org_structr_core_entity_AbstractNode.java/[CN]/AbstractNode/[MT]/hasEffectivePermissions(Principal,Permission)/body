@@ -13,10 +13,10 @@
     final boolean result=checkPathSegment(principal,permission,relFactory);
     if (doLog) {
       if (result) {
-        System.out.println("        " + permission.name() + " ALLOWED by path segment "+ rawPathSegment.getType().name());
+        System.out.println("        " + permission.name() + " ALLOWED by path segment "+ rawPathSegment.getType());
       }
  else {
-        System.out.println("        " + permission.name() + " DENIED by path segment "+ rawPathSegment.getType().name());
+        System.out.println("        " + permission.name() + " DENIED by path segment "+ rawPathSegment.getType());
       }
     }
     if (result) {
@@ -44,7 +44,7 @@
       }
     }
     mask.setChecked(permission);
-    final GraphDatabaseService db=StructrApp.getInstance().getGraphDatabaseService();
+    final DatabaseService db=StructrApp.getInstance().getDatabaseService();
     final String relTypes=getPermissionPropagationRelTypes();
     final Map<String,Object> params=new HashMap<>();
     final long principalId=principal.getId();
@@ -52,7 +52,7 @@
     params.put("id2",this.getId());
     for (int i=1; i < 10; i++) {
       final String query="MATCH n, m, p = allShortestPaths(n-[" + relTypes + "*.."+ i+ "]-m) WHERE id(n) = {id1} AND id(m) = {id2} RETURN p";
-      final Result result=db.execute(query,params);
+      final NativeResult result=db.execute(query,params);
       while (result.hasNext()) {
         final Map<String,Object> row=result.next();
         final Path path=(Path)row.get("p");

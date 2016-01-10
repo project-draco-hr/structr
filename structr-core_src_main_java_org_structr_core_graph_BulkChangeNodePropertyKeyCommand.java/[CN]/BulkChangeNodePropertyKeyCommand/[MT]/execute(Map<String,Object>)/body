@@ -1,5 +1,5 @@
 {
-  final GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
+  final DatabaseService graphDb=(DatabaseService)arguments.get("graphDb");
   final SecurityContext superUserContext=SecurityContext.getSuperUserInstance();
   final NodeFactory nodeFactory=new NodeFactory(superUserContext);
   String type=null;
@@ -17,7 +17,7 @@
     }
  else {
       try (final Tx tx=StructrApp.getInstance().tx()){
-        nodeIterator=Iterables.map(nodeFactory,GlobalGraphOperations.at(graphDb).getAllNodes()).iterator();
+        nodeIterator=Iterables.map(nodeFactory,graphDb.getAllNodes()).iterator();
         tx.success();
       }
      }

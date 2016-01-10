@@ -1,11 +1,11 @@
 {
   boolean includeInResult=true;
   for (  SearchAttribute attr : getSearchAttributes()) {
-switch (attr.getOccur()) {
-case MUST:
+switch (attr.getOccurrence()) {
+case REQUIRED:
       includeInResult&=attr.includeInResult(entity);
     break;
-case SHOULD:
+case OPTIONAL:
   if (attr.includeInResult(entity)) {
     return true;
   }
@@ -13,7 +13,7 @@ case SHOULD:
     includeInResult=false;
   }
 break;
-case MUST_NOT:
+case FORBIDDEN:
 includeInResult&=!attr.includeInResult(entity);
 break;
 }

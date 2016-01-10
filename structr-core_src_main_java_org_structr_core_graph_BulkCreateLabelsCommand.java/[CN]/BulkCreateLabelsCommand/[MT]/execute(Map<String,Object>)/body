@@ -1,11 +1,11 @@
 {
   final String entityType=(String)attributes.get("type");
-  final GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
+  final DatabaseService graphDb=(DatabaseService)arguments.get("graphDb");
   final SecurityContext superUserContext=SecurityContext.getSuperUserInstance();
   final NodeFactory nodeFactory=new NodeFactory(superUserContext);
   Iterator<AbstractNode> nodeIterator=null;
   try (final Tx tx=StructrApp.getInstance().tx()){
-    nodeIterator=Iterables.filter(new TypePredicate<>(entityType),Iterables.map(nodeFactory,Iterables.filter(new StructrAndSpatialPredicate(true,false,false),GlobalGraphOperations.at(graphDb).getAllNodes()))).iterator();
+    nodeIterator=Iterables.filter(new TypePredicate<>(entityType),Iterables.map(nodeFactory,Iterables.filter(new StructrAndSpatialPredicate(true,false,false),graphDb.getAllNodes()))).iterator();
     tx.success();
   }
  catch (  FrameworkException fex) {

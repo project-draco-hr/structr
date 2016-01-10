@@ -4,6 +4,7 @@
   NodeFactory.invalidateCache();
   if (obj instanceof NodeInterface) {
     final Class type=StructrApp.getConfiguration().getNodeEntityClass(value);
+    final DatabaseService db=StructrApp.getInstance().getDatabaseService();
     final Set<Label> intersection=new LinkedHashSet<>();
     final Set<Label> toRemove=new LinkedHashSet<>();
     final Set<Label> toAdd=new LinkedHashSet<>();
@@ -14,7 +15,7 @@
     for (    final Class supertype : SearchCommand.typeAndAllSupertypes(type)) {
       final String supertypeName=supertype.getName();
       if (supertypeName.startsWith("org.structr.") || supertypeName.startsWith("com.structr.")) {
-        toAdd.add(DynamicLabel.label(supertype.getSimpleName()));
+        toAdd.add(db.forName(Label.class,supertype.getSimpleName()));
       }
     }
     intersection.addAll(toAdd);

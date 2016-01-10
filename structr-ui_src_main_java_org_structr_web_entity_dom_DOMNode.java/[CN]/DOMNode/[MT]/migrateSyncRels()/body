@@ -1,8 +1,9 @@
 {
   try {
-    org.neo4j.graphdb.Node n=getNode();
-    Iterable<Relationship> incomingSyncRels=n.getRelationships(DynamicRelationshipType.withName("SYNC"),Direction.INCOMING);
-    Iterable<Relationship> outgoingSyncRels=n.getRelationships(DynamicRelationshipType.withName("SYNC"),Direction.OUTGOING);
+    final DatabaseService db=StructrApp.getInstance().getDatabaseService();
+    org.structr.api.graph.Node n=getNode();
+    Iterable<Relationship> incomingSyncRels=n.getRelationships(Direction.INCOMING,db.forName(RelationshipType.class,"SYNC"));
+    Iterable<Relationship> outgoingSyncRels=n.getRelationships(Direction.OUTGOING,db.forName(RelationshipType.class,"SYNC"));
     if (getOwnerDocument() instanceof ShadowDocument) {
       for (      Relationship r : incomingSyncRels) {
         r.delete();

@@ -1,0 +1,49 @@
+{
+  final Predicate<GraphObject> predicate=query != null ? query.toPredicate() : null;
+  final SourceSearchAttribute attr=new SourceSearchAttribute(occur);
+  final Set<GraphObject> intersectionResult=new LinkedHashSet<>();
+  boolean alreadyAdded=false;
+  try {
+    if (searchValue != null && !StringUtils.isBlank(searchValue.toString())) {
+      final App app=StructrApp.getInstance(securityContext);
+      final PropertyKey key=notion.getPrimaryPropertyKey();
+      final PropertyConverter inputConverter=key != null ? key.inputConverter(securityContext) : null;
+      final Object transformedValue=inputConverter != null ? inputConverter.convert(searchValue) : searchValue;
+      if (exactMatch) {
+        Result<AbstractNode> result=app.nodeQuery(entityProperty.relatedType()).and(key,transformedValue).getResult();
+        for (        AbstractNode node : result.getResults()) {
+switch (occur) {
+case REQUIRED:
+            if (!alreadyAdded) {
+              intersectionResult.addAll(entityProperty.getRelatedNodesReverse(securityContext,node,declaringClass,predicate));
+              alreadyAdded=true;
+            }
+ else {
+              intersectionResult.retainAll(entityProperty.getRelatedNodesReverse(securityContext,node,declaringClass,predicate));
+            }
+          break;
+case OPTIONAL:
+        intersectionResult.addAll(entityProperty.getRelatedNodesReverse(securityContext,node,declaringClass,predicate));
+      break;
+case FORBIDDEN:
+    break;
+}
+}
+}
+ else {
+Result<AbstractNode> result=app.nodeQuery(entityProperty.relatedType(),false).and(key,transformedValue,false).getResult();
+for (AbstractNode node : result.getResults()) {
+intersectionResult.addAll(entityProperty.getRelatedNodesReverse(securityContext,node,declaringClass,predicate));
+}
+}
+attr.setResult(intersectionResult);
+}
+ else {
+return new EmptySearchAttribute(this,null);
+}
+}
+ catch (FrameworkException fex) {
+fex.printStackTrace();
+}
+return attr;
+}

@@ -3,11 +3,11 @@
   final String relType=(String)attributes.get("relType");
   final Boolean allNodes=(Boolean)attributes.get("allNodes");
   final Boolean allRels=(Boolean)attributes.get("allRels");
-  final GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
+  final DatabaseService graphDb=(DatabaseService)arguments.get("graphDb");
   if (nodeType != null || Boolean.TRUE.equals(allNodes)) {
     Iterator<Node> nodeIterator=null;
     try (final Tx tx=StructrApp.getInstance().tx()){
-      nodeIterator=Iterables.filter(new StructrAndSpatialPredicate(false,false,true),GlobalGraphOperations.at(graphDb).getAllNodes()).iterator();
+      nodeIterator=Iterables.filter(new StructrAndSpatialPredicate(false,false,true),graphDb.getAllNodes()).iterator();
       tx.success();
     }
  catch (    FrameworkException fex) {
@@ -36,7 +36,7 @@
   if (relType != null || Boolean.TRUE.equals(allRels)) {
     Iterator<Relationship> relIterator=null;
     try (final Tx tx=StructrApp.getInstance().tx()){
-      relIterator=Iterables.filter(new StructrAndSpatialPredicate(false,false,true),GlobalGraphOperations.at(graphDb).getAllRelationships()).iterator();
+      relIterator=Iterables.filter(new StructrAndSpatialPredicate(false,false,true),graphDb.getAllRelationships()).iterator();
       tx.success();
     }
  catch (    FrameworkException fex) {

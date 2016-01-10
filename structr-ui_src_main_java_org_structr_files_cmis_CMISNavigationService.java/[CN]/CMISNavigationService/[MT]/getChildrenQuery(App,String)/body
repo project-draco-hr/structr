@@ -1,0 +1,16 @@
+{
+  final Query<AbstractFile> query=app.nodeQuery(AbstractFile.class).sort(AbstractNode.name);
+  if (CMISInfo.ROOT_FOLDER_ID.equals(folderId)) {
+    query.and(AbstractFile.hasParent,false).not().and(Image.isThumbnail,true);
+  }
+ else {
+    final Folder folder=app.get(Folder.class,folderId);
+    if (folder != null) {
+      query.and(AbstractFile.parent,folder).and(Image.isThumbnail,false);
+    }
+ else {
+      throw new CmisObjectNotFoundException("Folder with ID " + folderId + " does not exist");
+    }
+  }
+  return query;
+}

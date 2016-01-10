@@ -9,9 +9,10 @@
   impl.setObject(wrapper.wrapObjectData(wrapper.wrapGraphObject(child),pathSegment));
   impl.setChildren(childContainerList);
   list.add(impl);
-  final List<AbstractFile> children=child.getProperty(AbstractFile.children);
-  Collections.sort(children,new GraphObjectComparator(AbstractNode.name,false));
-  for (  final AbstractFile folderChild : children) {
-    recursivelyCollectDescendants(childContainerList,folderChild,maxDepth,depth + 1,includeAllowableActions);
+  if (child.getProperty(AbstractNode.type).equals("Folder")) {
+    final App app=StructrApp.getInstance();
+    for (    final AbstractFile folderChild : app.nodeQuery(AbstractFile.class).sort(AbstractNode.name).and(AbstractFile.parent,(Folder)child).and(Image.isThumbnail,false).getAsList()) {
+      recursivelyCollectDescendants(childContainerList,folderChild,maxDepth,depth + 1,includeAllowableActions);
+    }
   }
 }

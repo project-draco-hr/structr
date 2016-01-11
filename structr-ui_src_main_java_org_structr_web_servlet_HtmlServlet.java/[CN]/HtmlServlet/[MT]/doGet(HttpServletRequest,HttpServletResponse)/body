@@ -1,6 +1,8 @@
 {
-  final Authenticator auth=config.getAuthenticator();
-  SecurityContext securityContext=null;
+  final Authenticator auth=getConfig().getAuthenticator();
+  pages=null;
+  requestUriContainsUuids=false;
+  SecurityContext securityContext;
   final App app;
   try {
     final String path=request.getPathInfo();
@@ -55,7 +57,6 @@
           return;
         }
         final Matcher matcher=threadLocalUUIDMatcher.get();
-        boolean requestUriContainsUuids=false;
         for (int i=0; i < uriParts.length; i++) {
           request.setAttribute(uriParts[i],i);
           matcher.reset(uriParts[i]);

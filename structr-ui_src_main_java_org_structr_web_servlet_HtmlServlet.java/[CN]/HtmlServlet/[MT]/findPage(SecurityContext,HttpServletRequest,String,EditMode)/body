@@ -1,14 +1,9 @@
 {
-  List<Linkable> entryPoints=findPossibleEntryPoints(securityContext,request,path);
-  if (entryPoints.isEmpty()) {
-    entryPoints=findPossibleEntryPointsByName(securityContext,request,PathHelper.getName(path));
-  }
-  for (  Linkable node : entryPoints) {
-    if (node instanceof Page) {
-      final Page page=(Page)node;
-      if (EditMode.CONTENT.equals(edit) || isVisibleForSite(securityContext.getRequest(),page)) {
-        return page;
-      }
+  for (  final Page page : getPages(securityContext)) {
+    final String pagePath=page.getPath();
+    final String name=PathHelper.getName(path);
+    if (((pagePath != null && pagePath.equals(path)) || name.equals(page.getName()) || name.equals(page.getUuid())) && (EditMode.CONTENT.equals(edit) || isVisibleForSite(securityContext.getRequest(),page))) {
+      return page;
     }
   }
   return null;

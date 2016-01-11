@@ -1,7 +1,7 @@
 {
   final ResourceAccess resourceAccess=ResourceAccess.findGrant(securityContext,rawResourceSignature);
   final Method method=methods.get(request.getMethod());
-  final Principal user=getUser(request,true);
+  final Principal user=securityContext.getUser(false);
   final boolean validUser=(user != null);
   if (validUser && (user instanceof SuperUser || user.getProperty(Principal.isAdmin))) {
     return;

@@ -1,6 +1,7 @@
 {
   if (pages == null) {
     pages=StructrApp.getInstance(securityContext).nodeQuery(Page.class).sort(Page.position).order(false).getAsList();
+    Collections.sort(pages,new GraphObjectComparator(Page.position,GraphObjectComparator.ASCENDING));
   }
   for (  Page page : pages) {
     if (securityContext.isVisible(page) && (EditMode.CONTENT.equals(edit) || isVisibleForSite(securityContext.getRequest(),page))) {

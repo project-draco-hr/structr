@@ -1,0 +1,51 @@
+{
+  try {
+    final List<TestOne> nodes=this.createTestNodes(TestOne.class,10);
+    try (final Tx tx=app.tx()){
+      int i=0;
+      for (      NodeInterface node : nodes) {
+        node.setProperty(AbstractNode.name,Integer.toString(i));
+        if (i < 7) {
+          node.setProperty(TestOne.anInt,i);
+        }
+        i++;
+      }
+      tx.success();
+    }
+     try (final Tx tx=app.tx()){
+      boolean sortDesc=false;
+      final List<TestOne> result=app.nodeQuery(TestOne.class).sort(TestOne.anInt).order(sortDesc).getAsList();
+      final Iterator<TestOne> nameIterator=result.iterator();
+      while (nameIterator.hasNext()) {
+        assertEquals("Invalid sort result with mixed values (null vs. int)","7",nameIterator.next().getProperty(TestOne.name));
+        assertEquals("Invalid sort result with mixed values (null vs. int)","8",nameIterator.next().getProperty(TestOne.name));
+        assertEquals("Invalid sort result with mixed values (null vs. int)","9",nameIterator.next().getProperty(TestOne.name));
+        assertEquals("Invalid sort result with mixed values (null vs. int)","0",nameIterator.next().getProperty(TestOne.name));
+        assertEquals("Invalid sort result with mixed values (null vs. int)","1",nameIterator.next().getProperty(TestOne.name));
+        assertEquals("Invalid sort result with mixed values (null vs. int)","2",nameIterator.next().getProperty(TestOne.name));
+        assertEquals("Invalid sort result with mixed values (null vs. int)","3",nameIterator.next().getProperty(TestOne.name));
+        assertEquals("Invalid sort result with mixed values (null vs. int)","4",nameIterator.next().getProperty(TestOne.name));
+        assertEquals("Invalid sort result with mixed values (null vs. int)","5",nameIterator.next().getProperty(TestOne.name));
+        assertEquals("Invalid sort result with mixed values (null vs. int)","6",nameIterator.next().getProperty(TestOne.name));
+      }
+      final Iterator<TestOne> intIterator=result.iterator();
+      while (intIterator.hasNext()) {
+        assertEquals("Invalid sort result with mixed values (null vs. int)",null,intIterator.next().getProperty(TestOne.anInt));
+        assertEquals("Invalid sort result with mixed values (null vs. int)",null,intIterator.next().getProperty(TestOne.anInt));
+        assertEquals("Invalid sort result with mixed values (null vs. int)",null,intIterator.next().getProperty(TestOne.anInt));
+        assertEquals("Invalid sort result with mixed values (null vs. int)",0,(int)intIterator.next().getProperty(TestOne.anInt));
+        assertEquals("Invalid sort result with mixed values (null vs. int)",1,(int)intIterator.next().getProperty(TestOne.anInt));
+        assertEquals("Invalid sort result with mixed values (null vs. int)",2,(int)intIterator.next().getProperty(TestOne.anInt));
+        assertEquals("Invalid sort result with mixed values (null vs. int)",3,(int)intIterator.next().getProperty(TestOne.anInt));
+        assertEquals("Invalid sort result with mixed values (null vs. int)",4,(int)intIterator.next().getProperty(TestOne.anInt));
+        assertEquals("Invalid sort result with mixed values (null vs. int)",5,(int)intIterator.next().getProperty(TestOne.anInt));
+        assertEquals("Invalid sort result with mixed values (null vs. int)",6,(int)intIterator.next().getProperty(TestOne.anInt));
+      }
+      tx.success();
+    }
+   }
+ catch (  FrameworkException ex) {
+    logger.log(Level.SEVERE,ex.toString());
+    fail("Unexpected exception");
+  }
+}

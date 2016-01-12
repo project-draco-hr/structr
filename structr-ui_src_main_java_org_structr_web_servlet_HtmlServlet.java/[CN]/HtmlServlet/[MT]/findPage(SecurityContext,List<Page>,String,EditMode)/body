@@ -1,5 +1,8 @@
 {
-  for (  final Page page : getPages(securityContext)) {
+  if (pages == null) {
+    pages=StructrApp.getInstance(securityContext).nodeQuery(Page.class).sort(Page.position).order(false).getAsList();
+  }
+  for (  final Page page : pages) {
     final String pagePath=page.getPath();
     final String name=PathHelper.getName(path);
     if (((pagePath != null && pagePath.equals(path)) || name.equals(page.getName()) || name.equals(page.getUuid())) && (EditMode.CONTENT.equals(edit) || isVisibleForSite(securityContext.getRequest(),page))) {

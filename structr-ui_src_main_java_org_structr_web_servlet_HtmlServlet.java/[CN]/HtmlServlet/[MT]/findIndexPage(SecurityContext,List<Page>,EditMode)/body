@@ -1,5 +1,8 @@
 {
-  for (  Page page : getPages(securityContext)) {
+  if (pages == null) {
+    pages=StructrApp.getInstance(securityContext).nodeQuery(Page.class).sort(Page.position).order(false).getAsList();
+  }
+  for (  Page page : pages) {
     if (securityContext.isVisible(page) && (EditMode.CONTENT.equals(edit) || isVisibleForSite(securityContext.getRequest(),page))) {
       return page;
     }

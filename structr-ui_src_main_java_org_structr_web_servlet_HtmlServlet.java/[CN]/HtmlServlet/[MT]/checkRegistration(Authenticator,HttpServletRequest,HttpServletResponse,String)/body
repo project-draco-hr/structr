@@ -11,6 +11,7 @@
     Result<Principal> results;
     try (final Tx tx=app.tx()){
       results=app.nodeQuery(Principal.class).and(User.confirmationKey,key).getResult();
+      tx.success();
     }
      if (!results.isEmpty()) {
       final Principal user=results.get(0);

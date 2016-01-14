@@ -20,12 +20,6 @@
   TestFour testFour=null;
   List<TestSix> testSixs=null;
   int index=0;
-  final Object nullValue1=null;
-  final Object nullValue2=null;
-  final String nullString1=null;
-  final String nullString2=null;
-  final String emptyString1="";
-  final String emptyString2="";
   try (final Tx tx=app.tx()){
     testOne=createTestNode(TestOne.class);
     testTwo=createTestNode(TestTwo.class);
@@ -588,6 +582,7 @@
     assertEquals("Invalid replace() result","equal",Scripting.replaceVariables(ctx,testOne,"${if(equal(2, 2),\n    (\"equal\"),\n    (\"not equal\")\n)}"));
     assertEquals("Invalid replace() result","not equal",Scripting.replaceVariables(ctx,testOne,"${if(equal(2, 3),\n    (\"equal\"),\n    (\"not equal\")\n)}"));
     assertEquals("Invalid keys() / join() result","id,name,owner,type,createdBy,deleted,hidden,createdDate,lastModifiedDate,visibleToPublicUsers,visibleToAuthenticatedUsers,visibilityStartDate,visibilityEndDate",Scripting.replaceVariables(ctx,testOne,"${join(keys(this, 'ui'), ',')}"));
+    assertEquals("Invalid values() / join() result","A-nice-little-name-for-my-test-object,1,String",Scripting.replaceVariables(ctx,testOne,"${join(values(this, 'protected'), ',')}"));
     assertEquals("Invalid string default value","blah",Scripting.replaceVariables(ctx,testOne,"${this.alwaysNull!blah}"));
     assertEquals("Invalid numeric default value","12",Scripting.replaceVariables(ctx,testOne,"${this.alwaysNull!12}"));
     assertEquals("true",Scripting.replaceVariables(ctx,testOne,"${equal(42, this.alwaysNull!42)}"));

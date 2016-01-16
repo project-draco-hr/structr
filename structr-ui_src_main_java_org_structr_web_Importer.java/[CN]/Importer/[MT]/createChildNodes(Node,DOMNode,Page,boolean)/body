@@ -132,8 +132,17 @@
         }
       }
       final StringProperty typeKey=new StringProperty(PropertyView.Html.concat("type"));
-      if ("script".equals(tag) && newNode.getProperty(typeKey) == null) {
-        newNode.setProperty(typeKey,"text/javascript");
+      if ("script".equals(tag)) {
+        final String contentType=newNode.getProperty(typeKey);
+        if (contentType == null) {
+          newNode.setProperty(typeKey,"text/javascript");
+        }
+ else         if (contentType.equals("application/schema+json")) {
+          for (          final Node scriptContentNode : node.childNodes()) {
+            final String source=scriptContentNode.toString();
+            SchemaJsonImporter.importSchemaJson(source);
+          }
+        }
       }
       parent.appendChild(newNode);
       createChildNodes(node,newNode,page,removeHashAttribute);

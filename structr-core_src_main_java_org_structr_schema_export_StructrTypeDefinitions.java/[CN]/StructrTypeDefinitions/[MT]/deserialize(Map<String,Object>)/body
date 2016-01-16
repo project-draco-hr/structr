@@ -1,22 +1,3 @@
 {
-  for (  final Entry<String,Object> entry : source.entrySet()) {
-    final String name=entry.getKey();
-    final Object value=entry.getValue();
-    if (value instanceof Map) {
-      final Map<String,Object> map=(Map)value;
-      final StructrTypeDefinition type=StructrTypeDefinition.deserialize(root,name,map);
-      if (type != null) {
-        typeDefinitions.add(type);
-        if (type instanceof StructrRelationshipTypeDefinition) {
-          relationships.add((StructrRelationshipTypeDefinition)type);
-        }
-      }
-    }
- else {
-      throw new IllegalStateException("Invalid JSON object for " + name + ", expected object, got "+ value.getClass().getSimpleName());
-    }
-  }
-  for (  final StructrTypeDefinition type : typeDefinitions) {
-    type.initializeReferenceProperties();
-  }
+  deserialize(source,null);
 }

@@ -1,0 +1,22 @@
+{
+  if (StringUtils.isBlank(source)) {
+    return;
+  }
+  final App app=StructrApp.getInstance();
+  try (final Tx tx=app.tx()){
+    final JsonSchema schema;
+    try {
+      schema=StructrSchema.createFromSource(source);
+    }
+ catch (    InvalidSchemaException|URISyntaxException ex) {
+      throw new FrameworkException(422,ex.getMessage());
+    }
+    try {
+      StructrSchema.extendDatabaseSchema(app,schema);
+    }
+ catch (    URISyntaxException ex) {
+      throw new FrameworkException(422,ex.getMessage());
+    }
+    tx.success();
+  }
+ }

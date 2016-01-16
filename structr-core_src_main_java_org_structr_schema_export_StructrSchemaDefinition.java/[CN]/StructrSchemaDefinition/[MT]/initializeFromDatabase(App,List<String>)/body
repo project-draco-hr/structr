@@ -1,0 +1,27 @@
+{
+  URI id=null;
+  try {
+    id=new URI("https://structr.org/schema/" + app.getInstanceId() + "/#");
+  }
+ catch (  URISyntaxException ex) {
+    ex.printStackTrace();
+  }
+  final StructrSchemaDefinition sourceSchema=new StructrSchemaDefinition(id);
+  sourceSchema.deserialize(app);
+  final StructrSchemaDefinition schema=new StructrSchemaDefinition(id);
+  schema.deserialize(app);
+  if (types != null && !types.isEmpty()) {
+    for (    final StructrTypeDefinition t : sourceSchema.getTypes()) {
+      final String name=t.getName();
+      if (!types.contains(name)) {
+        try {
+          schema.removeType(name);
+        }
+ catch (        URISyntaxException ex) {
+          throw new FrameworkException(422,ex.getMessage());
+        }
+      }
+    }
+  }
+  return schema;
+}

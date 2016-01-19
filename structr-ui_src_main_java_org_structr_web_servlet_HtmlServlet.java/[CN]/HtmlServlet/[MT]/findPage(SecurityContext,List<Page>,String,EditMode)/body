@@ -1,6 +1,7 @@
 {
   if (pages == null) {
-    pages=StructrApp.getInstance(securityContext).nodeQuery(Page.class).sort(Page.position).order(false).getAsList();
+    pages=StructrApp.getInstance(securityContext).nodeQuery(Page.class).getAsList();
+    Collections.sort(pages,new GraphObjectComparator(Page.position,GraphObjectComparator.ASCENDING));
   }
   for (  final Page page : pages) {
     final String pagePath=page.getPath();

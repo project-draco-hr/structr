@@ -1,10 +1,16 @@
 {
   if (pages == null) {
-    pages=StructrApp.getInstance(securityContext).nodeQuery(Page.class).sort(Page.position).order(false).getAsList();
+    pages=StructrApp.getInstance(securityContext).nodeQuery(Page.class).getAsList();
     Collections.sort(pages,new GraphObjectComparator(Page.position,GraphObjectComparator.ASCENDING));
   }
   for (  Page page : pages) {
-    if (securityContext.isVisible(page) && (EditMode.CONTENT.equals(edit) || isVisibleForSite(securityContext.getRequest(),page))) {
+    if (page.getProperty(Page.position) == null) {
+      continue;
+    }
+    boolean isProtectedAndHasBasicAuthEnabled=page.getProperty(Page.enableBasicAuth) != null && page.getProperty(Page.visibleToAuthenticatedUsers);
+    boolean isPublicOrVisibleForAuthenticatedUser=securityContext.isVisible(page);
+    boolean isVisibleForSiteOrIsEditMode=(EditMode.CONTENT.equals(edit) || isVisibleForSite(securityContext.getRequest(),page));
+    if (isProtectedAndHasBasicAuthEnabled || isPublicOrVisibleForAuthenticatedUser || isVisibleForSiteOrIsEditMode) {
       return page;
     }
   }

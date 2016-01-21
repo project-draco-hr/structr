@@ -5,9 +5,9 @@
       Collections.sort(result.getResults(),new GraphObjectComparator(sortKey,sortOrder));
     }
  catch (    Throwable t) {
-      throw new FrameworkException(422,new InvalidSortKey(GraphObject.class.getSimpleName(),sortKey));
+      throw new FrameworkException(422,"Unable to sort results by " + sortKey.jsonName() + ": "+ t.toString(),new InvalidSortKey(GraphObject.class.getSimpleName(),sortKey));
     }
     return result;
   }
-  throw new IllegalPathException();
+  throw new IllegalPathException("Illegal path, sort resource needs a wrapped resource");
 }

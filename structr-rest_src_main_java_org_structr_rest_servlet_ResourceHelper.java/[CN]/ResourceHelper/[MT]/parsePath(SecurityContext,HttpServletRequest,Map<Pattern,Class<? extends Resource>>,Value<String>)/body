@@ -1,7 +1,7 @@
 {
   final String path=request.getPathInfo();
   if (StringUtils.isBlank(path)) {
-    throw new NoResultsException();
+    throw new NoResultsException("No content");
   }
   final String[] pathParts=path.split("[/]+");
   final Set<String> propertyViews=Services.getInstance().getConfigurationProvider().getPropertyViews();
@@ -44,7 +44,7 @@
         }
       }
       if (!found) {
-        throw new NotFoundException();
+        throw new NotFoundException("Cannot resolve URL path");
       }
     }
   }

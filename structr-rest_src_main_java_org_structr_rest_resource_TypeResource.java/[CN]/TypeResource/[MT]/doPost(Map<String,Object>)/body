@@ -25,7 +25,7 @@
         errorBuffer.add(new EmptyPropertyToken(entityClass.getSimpleName(),template.getTargetIdProperty()));
       }
       if (errorBuffer.hasError()) {
-        throw new FrameworkException(422,errorBuffer);
+        throw new FrameworkException(422,"Source node ID and target node ID of relationsips must be set",errorBuffer);
       }
       newRelationship=app.create(sourceNode,targetNode,entityClass,properties);
       RestMethodResult result=new RestMethodResult(HttpServletResponse.SC_CREATED);
@@ -36,6 +36,6 @@
       result.serializeAsPrimitiveArray(true);
       return result;
     }
-    throw new NotFoundException();
+    throw new NotFoundException("Type" + rawType + " does not exist");
   }
 }

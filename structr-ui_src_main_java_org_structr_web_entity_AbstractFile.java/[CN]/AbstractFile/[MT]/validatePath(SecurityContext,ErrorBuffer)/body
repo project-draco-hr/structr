@@ -1,8 +1,19 @@
 {
-  boolean valid=true;
-  final List<PropertyValidator<String>> validators=path.getValidators();
-  for (  final PropertyValidator validator : validators) {
-    valid=valid && validator.isValid(securityContext,this,path,getProperty(path),errorBuffer);
+  if (validatePathUniqueness) {
+    final String filePath=getProperty(path);
+    if (filePath != null) {
+      final List<AbstractFile> files=StructrApp.getInstance().nodeQuery(AbstractFile.class).and(path,filePath).getAsList();
+      for (      final AbstractFile file : files) {
+        if (!file.getUuid().equals(getUuid())) {
+          if (errorBuffer != null) {
+            final UniqueToken token=new UniqueToken(AbstractFile.class.getSimpleName(),path,file.getUuid());
+            token.setValue(filePath);
+            errorBuffer.add(token);
+          }
+          return false;
+        }
+      }
+    }
   }
-  return valid;
+  return true;
 }

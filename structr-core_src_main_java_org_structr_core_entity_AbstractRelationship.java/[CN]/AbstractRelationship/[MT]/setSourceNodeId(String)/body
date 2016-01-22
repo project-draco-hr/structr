@@ -1,15 +1,15 @@
 {
-  if (getSourceNodeId().equals(startNodeId)) {
+  if (getSourceNodeId().equals(sourceNodeId)) {
     return;
   }
   final App app=StructrApp.getInstance(securityContext);
-  final NodeInterface newStartNode=app.getNodeById(startNodeId);
+  final NodeInterface newStartNode=app.getNodeById(sourceNodeId);
   final NodeInterface endNode=getTargetNode();
   final Class relationType=getClass();
   final PropertyMap _props=getProperties();
   final String type=this.getClass().getSimpleName();
   if (newStartNode == null) {
-    throw new FrameworkException(404,new IdNotFoundToken(type,startNodeId));
+    throw new FrameworkException(404,"Node with ID " + sourceNodeId + " not found",new IdNotFoundToken(type,sourceNodeId));
   }
   app.delete(this);
   app.create(newStartNode,endNode,relationType,_props);

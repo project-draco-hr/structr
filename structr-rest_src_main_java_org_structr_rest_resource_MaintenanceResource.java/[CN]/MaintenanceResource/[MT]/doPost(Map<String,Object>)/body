@@ -32,10 +32,15 @@ catch (      IllegalAccessException iaex) {
       }
     }
  else {
-      throw new NotFoundException();
+      if (taskOrCommandName != null) {
+        throw new NotFoundException("No such task or command: " + this.taskOrCommandName);
+      }
+ else {
+        throw new IllegalPathException("Maintenance resource needs parameter");
+      }
     }
   }
  else {
-    throw new NotAllowedException();
+    throw new NotAllowedException("Use of the maintenance endpoint is restricted to admin users");
   }
 }

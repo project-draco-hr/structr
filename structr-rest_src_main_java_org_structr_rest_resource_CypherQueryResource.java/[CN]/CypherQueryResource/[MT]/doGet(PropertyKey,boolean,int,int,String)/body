@@ -1,6 +1,6 @@
 {
   if (!securityContext.isSuperUser()) {
-    throw new NotAllowedException();
+    throw new NotAllowedException("Use of the cypher endpoint is restricted to admin users");
   }
   try {
     Object queryObject=securityContext.getRequest().getParameter("query");
@@ -11,7 +11,7 @@
     }
   }
  catch (  org.structr.api.NotFoundException nfe) {
-    throw new NotFoundException();
+    throw new NotFoundException("Entity not found for the given query");
   }
   return new Result(Collections.EMPTY_LIST,0,false,false);
 }

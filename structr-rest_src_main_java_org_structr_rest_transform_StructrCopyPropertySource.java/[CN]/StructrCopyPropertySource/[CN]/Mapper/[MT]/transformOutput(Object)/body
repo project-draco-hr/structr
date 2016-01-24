@@ -1,0 +1,15 @@
+{
+  if (output != null) {
+    if (outputFunction != null) {
+      final ActionContext ctx=new ActionContext(securityContext);
+      ctx.setConstant("input",output);
+      try {
+        return Scripting.evaluate(ctx,null,"${" + outputFunction + "}");
+      }
+ catch (      FrameworkException fex) {
+        fex.printStackTrace();
+      }
+    }
+  }
+  return output;
+}

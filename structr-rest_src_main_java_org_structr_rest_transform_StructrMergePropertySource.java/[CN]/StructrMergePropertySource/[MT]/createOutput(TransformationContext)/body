@@ -1,0 +1,41 @@
+{
+  final String _targetName=getProperty(targetName);
+  if (_targetName != null) {
+    final String _mergeFunction=getProperty(mergeFunction);
+    if (_mergeFunction != null) {
+      final ActionContext ctx=new ActionContext(context.getSecurityContext());
+      final List<Iterator<NamedValue>> sources=new LinkedList<>();
+      final List<Object> values=new LinkedList<>();
+      final List<NamedValue> _output=new LinkedList<>();
+      for (      final StructrPropertySource source : sort(getProperty(inputs))) {
+        final Iterable<NamedValue> msg=source.createOutput(context);
+        sources.add(msg.iterator());
+      }
+      boolean hasData=true;
+      while (hasData) {
+        values.clear();
+        hasData=false;
+        for (        final Iterator<NamedValue> source : sources) {
+          if (source.hasNext()) {
+            final Object value=source.next().value();
+            if (value != null) {
+              values.add(value);
+            }
+            hasData=true;
+          }
+        }
+        if (hasData) {
+          ctx.setConstant("inputs",values);
+          _output.add(new NamedValue(_targetName,Scripting.evaluate(ctx,null,"${" + _mergeFunction + "}")));
+        }
+      }
+      return _output;
+    }
+ else {
+      throw new FrameworkException(500,"Merge property source with ID " + getUuid() + " needs merge function");
+    }
+  }
+ else {
+    throw new FrameworkException(500,"Merge property source with ID " + getUuid() + " needs target property name");
+  }
+}

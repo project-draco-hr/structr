@@ -1,0 +1,17 @@
+{
+  final StructrPropertyExtractor extractor=getProperty(input);
+  if (extractor != null) {
+    final String _sourceName=getProperty(sourceName);
+    if (_sourceName != null) {
+      String _targetName=getProperty(targetName);
+      if (_targetName == null) {
+        return extractor.createOutput(context,_sourceName);
+      }
+      return Iterables.map(new Mapper(context.getSecurityContext(),getProperty(outputFunction),_targetName),extractor.createOutput(context,_sourceName));
+    }
+ else {
+      throw new FrameworkException(500,"Property extractor with ID " + getUuid() + " needs source name");
+    }
+  }
+  throw new FrameworkException(500,"Property extractor with ID " + getUuid() + " has no source");
+}

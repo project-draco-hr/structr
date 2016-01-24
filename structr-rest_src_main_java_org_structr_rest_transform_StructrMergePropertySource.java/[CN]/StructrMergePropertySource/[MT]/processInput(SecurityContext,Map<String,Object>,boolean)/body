@@ -1,0 +1,41 @@
+{
+  final String _targetName=getProperty(targetName);
+  if (_targetName != null) {
+    final String _splitFunction=getProperty(splitFunction);
+    if (_splitFunction != null) {
+      final ActionContext ctx=new ActionContext(securityContext);
+      GraphObject result=null;
+      Iterator iterator=null;
+      ctx.setConstant("input",propertyMap.get(_targetName));
+      final Object splitResult=Scripting.evaluate(ctx,null,"${" + _splitFunction + "}");
+      if (splitResult instanceof Map) {
+        iterator=((Map)splitResult).values().iterator();
+      }
+      if (splitResult instanceof Collection) {
+        iterator=((Collection)splitResult).iterator();
+      }
+      if (iterator != null) {
+        for (        final StructrPropertySource source : sort(getProperty(inputs))) {
+          if (iterator.hasNext()) {
+            final String _sourceName=source.getSourceName();
+            propertyMap.put(_sourceName,iterator.next());
+            result=source.processInput(securityContext,propertyMap,commit && !iterator.hasNext());
+          }
+ else {
+            throw new FrameworkException(500,"Merge property source with ID " + getUuid() + ": property count mismatch");
+          }
+        }
+        return result;
+      }
+ else {
+        throw new FrameworkException(500,"Merge property source with ID " + getUuid() + ": invalid split function result.");
+      }
+    }
+ else {
+      throw new FrameworkException(500,"Merge property source with ID " + getUuid() + " needs split function");
+    }
+  }
+ else {
+    throw new FrameworkException(500,"Merge property source with ID " + getUuid() + " needs target property name");
+  }
+}

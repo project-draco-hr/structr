@@ -37,10 +37,17 @@
     }
  else     if (result.isPrimitiveArray()) {
       writer.name(resultKeyName).beginArray();
-      for (      GraphObject graphObject : results) {
-        Object value=graphObject.getProperty(GraphObject.id);
-        if (value != null) {
-          writer.value(value.toString());
+      for (      final Object object : results) {
+        if (object != null) {
+          if (object instanceof GraphObject) {
+            Object value=((GraphObject)object).getProperty(GraphObject.id);
+            if (value != null) {
+              writer.value(value.toString());
+            }
+          }
+ else {
+            writer.value(object.toString());
+          }
         }
       }
       writer.endArray();

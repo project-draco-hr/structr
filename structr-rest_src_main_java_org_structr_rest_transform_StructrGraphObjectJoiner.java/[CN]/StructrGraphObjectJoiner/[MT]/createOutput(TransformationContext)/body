@@ -1,0 +1,26 @@
+{
+  final List<Iterator<NamedValue>> sources=new LinkedList<>();
+  final Map<String,Object> object=new HashMap<>();
+  final List<GraphObject> output=new LinkedList<>();
+  for (  final StructrPropertySource source : sort(getProperty(inputs))) {
+    final Iterable<NamedValue> msg=source.createOutput(context);
+    sources.add(msg.iterator());
+  }
+  boolean hasData=true;
+  while (hasData) {
+    final GraphObjectMap entity=new GraphObjectMap();
+    object.clear();
+    hasData=false;
+    for (    final Iterator<NamedValue> source : sources) {
+      if (source.hasNext()) {
+        final NamedValue value=source.next();
+        entity.put(new GenericProperty(value.name()),value.value());
+        hasData=true;
+      }
+    }
+    if (hasData) {
+      output.add(entity);
+    }
+  }
+  return output;
+}

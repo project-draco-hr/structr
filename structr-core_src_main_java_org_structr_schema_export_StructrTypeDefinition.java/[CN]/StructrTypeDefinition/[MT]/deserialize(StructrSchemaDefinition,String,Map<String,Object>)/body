@@ -50,10 +50,16 @@
       final String methodName=entry.getKey();
       final Object value=entry.getValue();
       if (value instanceof String) {
-        typeDefinition.getMethods().put(methodName,value.toString());
+        final TreeMap methodDefinition=new TreeMap();
+        methodDefinition.put(SchemaMethod.source.jsonName(),value.toString());
+        methodDefinition.put(SchemaMethod.comment.jsonName(),"");
+        typeDefinition.getMethods().put(methodName,methodDefinition);
+      }
+ else       if (value instanceof Map) {
+        typeDefinition.getMethods().put(methodName,value);
       }
  else {
-        throw new IllegalStateException("Method definition " + methodName + " must be of type string.");
+        throw new IllegalStateException("Method definition " + methodName + " must be of type string or map.");
       }
     }
   }

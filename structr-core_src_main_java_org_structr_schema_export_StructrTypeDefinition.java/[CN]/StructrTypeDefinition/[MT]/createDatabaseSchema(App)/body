@@ -21,8 +21,9 @@
     }
     app.create(SchemaView.class,new NodeAttribute(SchemaView.schemaNode,schemaNode),new NodeAttribute(AbstractNode.name,view.getKey()),new NodeAttribute(SchemaView.schemaProperties,viewProperties),new NodeAttribute(SchemaView.nonGraphProperties,StringUtils.join(nonGraphProperties,", ")));
   }
-  for (  final Entry<String,String> method : methods.entrySet()) {
-    app.create(SchemaMethod.class,new NodeAttribute(SchemaMethod.schemaNode,schemaNode),new NodeAttribute(AbstractNode.name,method.getKey()),new NodeAttribute(SchemaMethod.source,method.getValue()));
+  for (  final Entry<String,Map<String,String>> method : getMethods().entrySet()) {
+    final Map methodDefinition=method.getValue();
+    app.create(SchemaMethod.class,new NodeAttribute(SchemaMethod.schemaNode,schemaNode),new NodeAttribute(AbstractNode.name,method.getKey()),new NodeAttribute(SchemaMethod.source,methodDefinition.get(SchemaMethod.source.jsonName())),new NodeAttribute(SchemaMethod.comment,methodDefinition.get(SchemaMethod.comment.jsonName())));
   }
   if (baseTypeReference != null) {
     final Object def=root.resolveURI(baseTypeReference);

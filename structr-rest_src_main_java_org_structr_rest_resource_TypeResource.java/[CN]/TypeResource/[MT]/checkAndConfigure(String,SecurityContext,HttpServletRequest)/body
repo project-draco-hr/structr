@@ -1,10 +1,20 @@
 {
+  final App app=StructrApp.getInstance(securityContext);
   this.securityContext=securityContext;
   this.request=request;
   this.rawType=part;
   if (rawType != null) {
+    virtualType=app.nodeQuery(VirtualType.class).andName(rawType).sort(VirtualType.position).getFirst();
+    if (virtualType != null) {
+      final String sourceType=virtualType.getProperty(VirtualType.sourceType);
+      if (sourceType != null) {
+        rawType=sourceType;
+      }
+ else {
+        throw new FrameworkException(500,"Invalid virtual type " + rawType + ", missing value for sourceType");
+      }
+    }
     final boolean inexactSearch=parseInteger(request.getParameter(JsonRestServlet.REQUEST_PARAMETER_LOOSE_SEARCH)) == 1;
-    final App app=StructrApp.getInstance(securityContext);
     entityClass=SchemaHelper.getEntityClassForRawType(rawType);
     if (entityClass != null) {
       if (AbstractRelationship.class.isAssignableFrom(entityClass)) {
@@ -19,9 +29,6 @@
         isNode=true;
         return true;
       }
-    }
- else {
-      transformation=app.nodeQuery(StructrNodeSink.class).andName(rawType).sort(StructrNodeSink.position).getFirst();
     }
   }
   return true;

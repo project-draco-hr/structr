@@ -3,9 +3,6 @@
   boolean publicOnly=false;
   PropertyKey actualSortKey=sortKey;
   boolean actualSortOrder=sortDescending;
-  if (transformation != null) {
-    return transformation.doGet(sortKey,sortDescending,pageSize,page,offsetId);
-  }
   if (rawType != null) {
     if (entityClass == null) {
       throw new NotFoundException("Type " + rawType + " does not exist");
@@ -27,7 +24,11 @@
         actualSortKey=AbstractNode.name;
       }
     }
-    return query.includeDeletedAndHidden(includeDeletedAndHidden).publicOnly(publicOnly).sort(actualSortKey).order(actualSortOrder).pageSize(pageSize).page(page).offsetId(offsetId).getResult();
+    final Result result=query.includeDeletedAndHidden(includeDeletedAndHidden).publicOnly(publicOnly).sort(actualSortKey).order(actualSortOrder).pageSize(pageSize).page(page).offsetId(offsetId).getResult();
+    if (virtualType != null) {
+      return virtualType.transformOutput(securityContext,entityClass,result);
+    }
+    return result;
   }
  else {
     logger.log(Level.WARNING,"type was null");

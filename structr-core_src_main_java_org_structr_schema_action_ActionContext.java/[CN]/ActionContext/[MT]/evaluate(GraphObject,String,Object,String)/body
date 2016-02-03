@@ -28,17 +28,23 @@ case "size":
 switch (key) {
 case "request":
   return securityContext.getRequest();
+case "host":
+return securityContext.getRequest().getServerName();
+case "port":
+return securityContext.getRequest().getServerPort();
+case "path_info":
+return securityContext.getRequest().getPathInfo();
 case "response":
 if (securityContext != null) {
-  final HttpServletResponse response=securityContext.getResponse();
-  if (response != null) {
-    try {
-      return response.getOutputStream();
-    }
- catch (    IOException ioex) {
-      ioex.printStackTrace();
-    }
-  }
+final HttpServletResponse response=securityContext.getResponse();
+if (response != null) {
+try {
+return response.getOutputStream();
+}
+ catch (IOException ioex) {
+ioex.printStackTrace();
+}
+}
 }
 return null;
 case "now":

@@ -6,7 +6,15 @@
     item=source.poll();
     if (item != null) {
       processedItems.incrementAndGet();
-      T n=instantiate(item.item);
+      T n=null;
+      try {
+        n=instantiate(item.item);
+      }
+ catch (      NotFoundException nfe) {
+synchronized (failed) {
+          failed.add(item);
+        }
+      }
       if (n != null) {
         overallCount.incrementAndGet();
 synchronized (nodes) {

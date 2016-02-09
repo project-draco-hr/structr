@@ -177,7 +177,9 @@ synchronized (queue) {
  else {
           if (finished.get()) {
             async.complete();
-            response.setStatus(HttpServletResponse.SC_OK);
+            if (response.getStatus() != HttpServletResponse.SC_NOT_FOUND) {
+              response.setStatus(HttpServletResponse.SC_OK);
+            }
             break;
           }
           Thread.sleep(1);

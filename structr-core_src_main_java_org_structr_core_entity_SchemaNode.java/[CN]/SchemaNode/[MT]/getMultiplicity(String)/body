@@ -1,15 +1,16 @@
 {
-  final Set<String> existingPropertyNames=new LinkedHashSet<>();
-  final String _className=getProperty(name);
-  for (  final SchemaRelationshipNode outRel : getProperty(SchemaNode.relatedTo)) {
-    if (propertyNameToCheck.equals(outRel.getPropertyName(_className,existingPropertyNames,true))) {
-      return outRel.getMultiplicity(true);
+  String multiplicity=getMultiplicity(this,propertyNameToCheck);
+  if (multiplicity == null) {
+    try {
+      final SchemaNode parentSchemaNode=StructrApp.getInstance().nodeQuery(SchemaNode.class).andName(StringUtils.substringAfterLast(getProperty(SchemaNode.extendsClass),".")).getFirst();
+      multiplicity=getMultiplicity(parentSchemaNode,propertyNameToCheck);
+    }
+ catch (    FrameworkException ex) {
+      logger.log(Level.WARNING,"Can't find schema node for parent class!",ex);
     }
   }
-  for (  final SchemaRelationshipNode inRel : getProperty(SchemaNode.relatedFrom)) {
-    if (propertyNameToCheck.equals(inRel.getPropertyName(_className,existingPropertyNames,false))) {
-      return inRel.getMultiplicity(false);
-    }
+  if (multiplicity != null) {
+    return multiplicity;
   }
   final PropertyKey key=StructrApp.getConfiguration().getPropertyKeyForJSONName(NodeInterface.class,propertyNameToCheck,false);
   if (key != null) {

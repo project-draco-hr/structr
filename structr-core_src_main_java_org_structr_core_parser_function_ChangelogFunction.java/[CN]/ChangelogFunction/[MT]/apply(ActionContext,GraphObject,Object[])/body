@@ -14,6 +14,7 @@
       final String[] entries=changelog.split("\n");
       if (entries.length > 0) {
         final boolean resolveTargets=(sources.length >= 2 && Boolean.TRUE.equals(sources[1]));
+        final Gson gson=new GsonBuilder().disableHtmlEscaping().create();
         final JsonParser parser=new JsonParser();
         for (        String entry : entries) {
           final JsonObject jsonObj=parser.parse(entry).getAsJsonObject();
@@ -40,10 +41,8 @@
           }
  else           if (verb.equals("change")) {
             obj.put("key",jsonObj.get("key").getAsString());
-            final JsonElement prev=jsonObj.get("prev");
-            obj.put("prev",(prev.isJsonNull() ? null : prev.getAsString()));
-            final JsonElement val=jsonObj.get("val");
-            obj.put("val",(val.isJsonNull() ? null : val.getAsString()));
+            obj.put("prev",gson.toJson(jsonObj.get("prev")));
+            obj.put("val",gson.toJson(jsonObj.get("val")));
             list.add(obj);
           }
  else {

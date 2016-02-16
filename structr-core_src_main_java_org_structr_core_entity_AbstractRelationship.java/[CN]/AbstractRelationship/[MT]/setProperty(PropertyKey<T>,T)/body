@@ -4,14 +4,18 @@
     throw new FrameworkException(422,"Tried to set property with null key (action was denied)",new NullArgumentToken(getClass().getSimpleName(),base));
   }
   try {
-    if (key.isReadOnly() || (key.isWriteOnce() && (dbRelationship != null) && dbRelationship.hasProperty(key.dbName()))) {
-      if (!readOnlyPropertiesUnlocked && !securityContext.isSuperUser()) {
+    if (dbRelationship != null && dbRelationship.hasProperty(key.dbName())) {
+      if (key.isSystemInternal() && !internalSystemPropertiesUnlocked) {
+        throw new FrameworkException(422,"Property " + key.jsonName() + " is an internal system property",new InternalSystemPropertyToken(getClass().getSimpleName(),key));
+      }
+      if ((key.isReadOnly() || key.isWriteOnce()) && !readOnlyPropertiesUnlocked && !securityContext.isSuperUser()) {
         throw new FrameworkException(422,"Property " + key.jsonName() + " is read-only",new ReadOnlyPropertyToken(getClass().getSimpleName(),key));
       }
     }
     return key.setProperty(securityContext,this,value);
   }
   finally {
-    this.readOnlyPropertiesUnlocked=false;
+    internalSystemPropertiesUnlocked=false;
+    readOnlyPropertiesUnlocked=false;
   }
 }

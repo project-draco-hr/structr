@@ -34,7 +34,7 @@
   logger.log(Level.FINE,"Creating thumbnail for {0}",getName());
   final App app=StructrApp.getInstance(securityContext);
   try {
-    originalImage.unlockReadOnlyPropertiesOnce();
+    originalImage.unlockSystemPropertiesOnce();
     originalImage.setProperty(File.checksum,newChecksum);
     if (origWidth != null && origHeight != null) {
       if (origWidth <= maxWidth && origHeight <= maxHeight) {
@@ -58,7 +58,7 @@
         final Thumbnails thumbnailRelationship=app.create(originalImage,thumbnail,Thumbnails.class);
         thumbnailRelationship.setProperty(AbstractRelationship.cascadeDelete,Relation.SOURCE_TO_TARGET);
         long size=data.length;
-        thumbnail.unlockReadOnlyPropertiesOnce();
+        thumbnail.unlockSystemPropertiesOnce();
         thumbnail.setProperty(File.size,size);
         thumbnail.setProperty(Image.width,tnWidth);
         thumbnail.setProperty(Image.height,tnHeight);
@@ -68,7 +68,7 @@
         thumbnail.setProperty(AbstractNode.owner,originalImage.getProperty(AbstractNode.owner));
         thumbnailRelationship.setProperty(Image.width,tnWidth);
         thumbnailRelationship.setProperty(Image.height,tnHeight);
-        thumbnailRelationship.unlockReadOnlyPropertiesOnce();
+        thumbnailRelationship.unlockSystemPropertiesOnce();
         thumbnailRelationship.setProperty(Image.checksum,newChecksum);
         for (        final Image tn : oldThumbnails) {
           app.delete(tn);

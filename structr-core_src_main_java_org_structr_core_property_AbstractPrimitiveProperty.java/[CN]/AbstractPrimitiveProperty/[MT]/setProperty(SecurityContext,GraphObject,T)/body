@@ -13,24 +13,29 @@
       logger.log(Level.SEVERE,"setProperty outside of transaction");
       throw new FrameworkException(500,"setProperty outside of transaction.");
     }
-    if (!unvalidated) {
-      if (obj instanceof AbstractNode) {
+    boolean internalSystemPropertiesUnlocked=false;
+    if (obj instanceof AbstractNode) {
+      if (!unvalidated) {
         TransactionCommand.nodeModified(securityContext.getCachedUser(),(AbstractNode)obj,AbstractPrimitiveProperty.this,propertyContainer.hasProperty(dbName()) ? propertyContainer.getProperty(dbName()) : null,value);
       }
- else       if (obj instanceof AbstractRelationship) {
+      internalSystemPropertiesUnlocked=((AbstractNode)obj).internalSystemPropertiesUnlocked;
+    }
+ else     if (obj instanceof AbstractRelationship) {
+      if (!unvalidated) {
         TransactionCommand.relationshipModified(securityContext.getCachedUser(),(AbstractRelationship)obj,AbstractPrimitiveProperty.this,propertyContainer.hasProperty(dbName()) ? propertyContainer.getProperty(dbName()) : null,value);
       }
+      internalSystemPropertiesUnlocked=((AbstractRelationship)obj).internalSystemPropertiesUnlocked;
     }
     try {
       if (convertedValue == null) {
         propertyContainer.removeProperty(dbName());
       }
  else {
-        if (!internalSystemProperty) {
+        if (!internalSystemProperty || internalSystemPropertiesUnlocked) {
           propertyContainer.setProperty(dbName(),convertedValue);
         }
  else {
-          logger.log(Level.FINE,"Tried to set internal system property (action was denied).");
+          logger.log(Level.WARNING,"Tried to set internal system property {0} to {1}. Action was denied.",new Object[]{dbName(),convertedValue});
         }
       }
       updateAccessInformation(securityContext,propertyContainer);

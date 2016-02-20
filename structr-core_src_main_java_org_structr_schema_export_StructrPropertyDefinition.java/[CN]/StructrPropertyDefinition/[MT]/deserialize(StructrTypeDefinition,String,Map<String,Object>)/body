@@ -2,7 +2,7 @@
   final String propertyType=(String)source.get(JsonSchema.KEY_TYPE);
   StructrPropertyDefinition newProperty=null;
   if (propertyType != null) {
-    final boolean isDate=source.containsKey(JsonSchema.KEY_FORMAT) && "date-time".equals(source.get(JsonSchema.KEY_FORMAT));
+    final boolean isDate=source.containsKey(JsonSchema.KEY_FORMAT) && JsonSchema.FORMAT_DATE_TIME.equals(source.get(JsonSchema.KEY_FORMAT));
     final boolean isEnum=source.containsKey(JsonSchema.KEY_ENUM);
 switch (propertyType) {
 case "string":
@@ -16,8 +16,14 @@ case "string":
         newProperty=new StructrStringProperty(parent,name);
       }
     break;
+case "thumbnail":
+  newProperty=new StructrThumbnailProperty(parent,name);
+break;
+case "count":
+newProperty=new StructrCountProperty(parent,name);
+break;
 case "script":
-  newProperty=new StructrScriptProperty(parent,name);
+newProperty=new StructrScriptProperty(parent,name);
 break;
 case "function":
 newProperty=new StructrFunctionProperty(parent,name);

@@ -2,8 +2,13 @@
   String relatedType=getRelatedType(this,propertyNameToCheck);
   if (relatedType == null) {
     try {
-      final SchemaNode parentSchemaNode=StructrApp.getInstance().nodeQuery(SchemaNode.class).andName(StringUtils.substringAfterLast(getProperty(SchemaNode.extendsClass),".")).getFirst();
-      relatedType=getRelatedType(parentSchemaNode,propertyNameToCheck);
+      final String parentClass=getProperty(SchemaNode.extendsClass);
+      if (parentClass != null) {
+        final SchemaNode parentSchemaNode=StructrApp.getInstance().nodeQuery(SchemaNode.class).andName(StringUtils.substringAfterLast(parentClass,".")).getFirst();
+        if (parentSchemaNode != null) {
+          relatedType=getRelatedType(parentSchemaNode,propertyNameToCheck);
+        }
+      }
     }
  catch (    FrameworkException ex) {
       logger.log(Level.WARNING,"Can't find schema node for parent class!",ex);

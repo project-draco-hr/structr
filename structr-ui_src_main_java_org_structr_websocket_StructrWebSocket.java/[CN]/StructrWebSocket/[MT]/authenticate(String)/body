@@ -1,6 +1,17 @@
 {
   final Principal user=AuthHelper.getPrincipalForSessionId(sessionId);
   if (user != null) {
-    this.setAuthenticated(sessionId,user);
+    try {
+      final boolean sessionValid=!SessionHelper.isSessionTimeOut(sessionId);
+      if (sessionValid) {
+        this.setAuthenticated(sessionId,user);
+      }
+ else {
+        logger.log(Level.WARNING,"Session timed out - ignoring request");
+      }
+    }
+ catch (    FrameworkException ex) {
+      logger.log(Level.WARNING,"FXE",ex);
+    }
   }
 }

@@ -1,0 +1,13 @@
+{
+  final HashSessionManager sessionManager=Services.getInstance().getService(HttpService.class).getHashSessionManager();
+  HttpSession session=sessionManager.getSession(sessionId);
+  final boolean sessionTimedOut=SessionHelper.isSessionTimedOut(session);
+  if (sessionTimedOut) {
+    final Principal user=AuthHelper.getPrincipalForSessionId(sessionId);
+    logger.log(Level.FINE,"Invalid session: {0}, last accessed {1}, authenticated with user {2}",new Object[]{session,(session != null ? session.getLastAccessedTime() : ""),user});
+    if (user != null) {
+      AuthHelper.killSession(session,user);
+    }
+  }
+  return sessionTimedOut;
+}

@@ -1,0 +1,15 @@
+{
+  for (  final DOMNode node : parent.getProperty(DOMNode.children)) {
+    final String tag=node.getProperty(DOMElement.tag);
+    if (tag != null && !Page.nonBodyTags.contains(tag)) {
+      final Integer value=cachedMostUsedTagNames.get(tag);
+      if (value == null) {
+        cachedMostUsedTagNames.put(tag,1);
+      }
+ else {
+        cachedMostUsedTagNames.put(tag,value + 1);
+      }
+    }
+    getMostUsedElementNames(mostUsedElements,node,depth + 1);
+  }
+}

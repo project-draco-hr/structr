@@ -1,0 +1,23 @@
+{
+  final List<String> recentNodes=new LinkedList<>();
+  if (obj instanceof DOMNode) {
+    DOMNode node=(DOMNode)obj;
+    final Map<String,Integer> mostUsed=node.getMostUsedElementNames();
+    final List<Entry<String,Integer>> list=new LinkedList<>(mostUsed.entrySet());
+    Collections.sort(list,new Comparator<Entry<String,Integer>>(){
+      @Override public int compare(      final Entry<String,Integer> o1,      final Entry<String,Integer> o2){
+        final Integer v1=o1.getValue();
+        final Integer v2=o2.getValue();
+        return v2.compareTo(v1);
+      }
+    }
+);
+    for (    final Entry<String,Integer> entry : list) {
+      recentNodes.add(entry.getKey());
+      if (recentNodes.size() > 4) {
+        break;
+      }
+    }
+  }
+  return recentNodes;
+}

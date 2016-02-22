@@ -1,12 +1,12 @@
 {
   final HttpSession session=request.getSession(false);
-  if (session != null) {
-    AuthHelper.killSession(session,user);
-    try {
-      request.logout();
-      request.changeSessionId();
-    }
- catch (    Throwable t) {
-    }
+  SessionHelper.clearSession(session.getId());
+  SessionHelper.invalidateSession(session);
+  AuthHelper.sendLogoutNotification(user);
+  try {
+    request.logout();
+    request.changeSessionId();
+  }
+ catch (  Throwable t) {
   }
 }

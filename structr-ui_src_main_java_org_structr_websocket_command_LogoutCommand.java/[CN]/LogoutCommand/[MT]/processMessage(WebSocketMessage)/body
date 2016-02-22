@@ -4,9 +4,9 @@
     final String sessionId=webSocketData.getSessionId();
     if (sessionId != null) {
       SessionHelper.clearSession(sessionId);
-      SessionHelper.invalidateSessionId(sessionId);
+      SessionHelper.invalidateSession(SessionHelper.getSessionBySessionId(sessionId));
     }
-    Actions.call(Actions.NOTIFICATION_LOGOUT,user);
+    AuthHelper.sendLogoutNotification(user);
     getWebSocket().setAuthenticated(null,null);
     getWebSocket().send(MessageBuilder.status().code(401).build(),true);
   }

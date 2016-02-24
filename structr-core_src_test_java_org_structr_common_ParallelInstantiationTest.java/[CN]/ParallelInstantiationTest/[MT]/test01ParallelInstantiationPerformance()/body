@@ -1,0 +1,19 @@
+{
+  try {
+    for (int i=0; i < 10; i++) {
+      System.out.println("Creating nodes..");
+      createTestNodes(TestOne.class,100);
+    }
+  }
+ catch (  FrameworkException fex) {
+    fail("Unexpected exception.");
+  }
+  try (final Tx tx=app.tx()){
+    System.out.println("Loading nodes..");
+    final List<TestOne> testOnes=app.nodeQuery(TestOne.class).getAsList();
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fail("Unexpected exception.");
+  }
+}

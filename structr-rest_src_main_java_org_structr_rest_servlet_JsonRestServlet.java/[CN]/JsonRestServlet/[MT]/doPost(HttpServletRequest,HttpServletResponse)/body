@@ -7,13 +7,13 @@
     request.setCharacterEncoding("UTF-8");
     response.setCharacterEncoding("UTF-8");
     response.setContentType("application/json; charset=utf-8;");
+    final String input=IOUtils.toString(request.getReader());
     try (final Tx tx=StructrApp.getInstance().tx()){
       authenticator=config.getAuthenticator();
       securityContext=authenticator.initializeAndExamineRequest(request,response);
       tx.success();
     }
      final App app=StructrApp.getInstance(securityContext);
-    final String input=IOUtils.toString(request.getReader());
     final IJsonInput jsonInput=cleanAndParseJsonString(app,input);
     if (securityContext != null) {
       try (final Tx tx=app.tx()){

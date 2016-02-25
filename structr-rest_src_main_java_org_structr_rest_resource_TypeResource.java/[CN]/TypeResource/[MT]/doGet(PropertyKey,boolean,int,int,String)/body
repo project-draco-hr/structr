@@ -24,11 +24,14 @@
         actualSortKey=AbstractNode.name;
       }
     }
-    final Result result=query.includeDeletedAndHidden(includeDeletedAndHidden).publicOnly(publicOnly).sort(actualSortKey).order(actualSortOrder).pageSize(pageSize).page(page).offsetId(offsetId).getResult();
     if (virtualType != null) {
-      return virtualType.transformOutput(securityContext,entityClass,result);
+      final Result untransformedResult=query.includeDeletedAndHidden(includeDeletedAndHidden).publicOnly(publicOnly).sort(actualSortKey).order(actualSortOrder).offsetId(offsetId).getResult();
+      final Result result=virtualType.transformOutput(securityContext,entityClass,untransformedResult);
+      return PagingHelper.subResult(result,pageSize,page,offsetId);
     }
-    return result;
+ else {
+      return query.includeDeletedAndHidden(includeDeletedAndHidden).publicOnly(publicOnly).sort(actualSortKey).order(actualSortOrder).pageSize(pageSize).page(page).offsetId(offsetId).getResult();
+    }
   }
  else {
     logger.log(Level.WARNING,"type was null");

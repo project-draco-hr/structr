@@ -1,5 +1,8 @@
 {
-  final GsonBuilder gsonBuilder=new GsonBuilder().setPrettyPrinting().registerTypeAdapter(WebSocketMessage.class,new WebSocketDataGSONAdapter(config.getOutputNestingDepth()));
+  final GsonBuilder gsonBuilder=new GsonBuilder().registerTypeAdapter(WebSocketMessage.class,new WebSocketDataGSONAdapter(config.getOutputNestingDepth()));
+  if (Boolean.parseBoolean(StructrApp.getConfigurationValue(Services.WS_INDENTATION,"true"))) {
+    gsonBuilder.setPrettyPrinting();
+  }
   final boolean lenient=Boolean.parseBoolean(StructrApp.getConfigurationValue("json.lenient","false"));
   if (lenient) {
     gsonBuilder.serializeSpecialFloatingPointValues();

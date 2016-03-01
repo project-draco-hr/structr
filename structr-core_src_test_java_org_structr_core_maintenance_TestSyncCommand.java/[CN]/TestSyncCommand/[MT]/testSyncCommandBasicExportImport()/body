@@ -1,0 +1,19 @@
+{
+  try {
+    final List<TestOne> testNodes=createTestNodes(TestOne.class,100);
+    app.command(SyncCommand.class).execute(toMap("mode","export","file",EXPORT_FILENAME));
+    final Path exportFile=Paths.get(EXPORT_FILENAME);
+    assertTrue("Export file doesn't exist!",Files.exists(exportFile));
+    this.tearDown();
+    this.setUp();
+    app.command(SyncCommand.class).execute(toMap("mode","import","file",EXPORT_FILENAME));
+    try (final Tx tx=app.tx()){
+      assertEquals(100,app.nodeQuery(TestOne.class).getResult().size());
+    }
+     Files.delete(exportFile);
+  }
+ catch (  Exception ex) {
+    ex.printStackTrace();
+    fail("Unexpected exception.");
+  }
+}

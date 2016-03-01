@@ -1,0 +1,50 @@
+{
+  try {
+    final List<TestEleven> testNodes=createTestNodes(TestEleven.class,10);
+    try (final Tx tx=app.tx()){
+      for (      final TestEleven node : testNodes) {
+        Iterable<Label> labels=node.getNode().getLabels();
+        assertEquals(7,Iterables.count(labels));
+        for (        final Label label : labels) {
+          System.out.print(label.name() + " ");
+        }
+        System.out.println();
+        assertEquals("First label has to be AbstractNode",Iterables.toList(labels).get(0).name(),"AbstractNode");
+        assertEquals("Second label has to be NodeInterface",Iterables.toList(labels).get(1).name(),"NodeInterface");
+        assertEquals("Third label has to be AccessControllable",Iterables.toList(labels).get(2).name(),"AccessControllable");
+        assertEquals("Fourth label has to be CMISInfo",Iterables.toList(labels).get(3).name(),"CMISInfo");
+        assertEquals("Firth label has to be CMISItemInfo",Iterables.toList(labels).get(4).name(),"CMISItemInfo");
+        assertEquals("Sixth label has to be TestEleven",Iterables.toList(labels).get(5).name(),"TestEleven");
+        assertEquals("Seventh label has to be TestOne",Iterables.toList(labels).get(6).name(),"TestOne");
+      }
+      tx.success();
+    }
+     app.command(SyncCommand.class).execute(toMap("mode","export","file",EXPORT_FILENAME));
+    final Path exportFile=Paths.get(EXPORT_FILENAME);
+    assertTrue("Export file doesn't exist!",Files.exists(exportFile));
+    this.tearDown();
+    this.setUp();
+    app.command(SyncCommand.class).execute(toMap("mode","import","file",EXPORT_FILENAME));
+    try (final Tx tx=app.tx()){
+      final Result<TestEleven> result=app.nodeQuery(TestEleven.class).getResult();
+      assertEquals(10,result.size());
+      for (      final TestEleven node : result.getResults()) {
+        Iterable<Label> labels=node.getNode().getLabels();
+        assertEquals(7,Iterables.count(labels));
+        assertEquals("First label has to be AbstractNode",Iterables.toList(labels).get(0).name(),"AbstractNode");
+        assertEquals("Second label has to be NodeInterface",Iterables.toList(labels).get(1).name(),"NodeInterface");
+        assertEquals("Third label has to be AccessControllable",Iterables.toList(labels).get(2).name(),"AccessControllable");
+        assertEquals("Fourth label has to be CMISInfo",Iterables.toList(labels).get(3).name(),"CMISInfo");
+        assertEquals("Firth label has to be CMISItemInfo",Iterables.toList(labels).get(4).name(),"CMISItemInfo");
+        assertEquals("Sixth label has to be TestEleven",Iterables.toList(labels).get(5).name(),"TestEleven");
+        assertEquals("Seventh label has to be TestOne",Iterables.toList(labels).get(6).name(),"TestOne");
+      }
+      tx.success();
+    }
+     Files.delete(exportFile);
+  }
+ catch (  Exception ex) {
+    ex.printStackTrace();
+    fail("Unexpected exception.");
+  }
+}

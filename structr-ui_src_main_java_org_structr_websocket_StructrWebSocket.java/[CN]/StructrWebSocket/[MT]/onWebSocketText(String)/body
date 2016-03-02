@@ -6,7 +6,6 @@
   logger.log(Level.FINE,"############################################################ RECEIVED \n{0}",data.substring(0,Math.min(data.length(),1000)));
   final WebSocketMessage webSocketData=gson.fromJson(data,WebSocketMessage.class);
   final App app=StructrApp.getInstance(securityContext);
-  this.callback=webSocketData.getCallback();
   final String command=webSocketData.getCommand();
   final Class type=commandSet.get(command);
   final String sessionIdFromMessage=webSocketData.getSessionId();
@@ -28,6 +27,7 @@
       AbstractCommand abstractCommand=(AbstractCommand)type.newInstance();
       abstractCommand.setWebSocket(this);
       abstractCommand.setSession(session);
+      abstractCommand.setCallback(webSocketData.getCallback());
       if (abstractCommand.requiresEnclosingTransaction()) {
         try (final Tx tx=app.tx()){
           webSocketData.setSessionValid(isAuthenticated());

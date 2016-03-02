@@ -14,8 +14,8 @@
       if (recursiveSource != null) {
         recursive="true".equals(recursiveSource.toString());
       }
-      CloudService.doRemote(webSocket.getSecurityContext(),new PullTransmission(sourceId,recursive),new HostInfo(username,password,host,port.intValue()),new WebsocketProgressListener(getWebSocket(),key));
-      getWebSocket().send(MessageBuilder.finished().build(),true);
+      CloudService.doRemote(webSocket.getSecurityContext(),new PullTransmission(sourceId,recursive),new HostInfo(username,password,host,port.intValue()),new WebsocketProgressListener(getWebSocket(),key,callback));
+      getWebSocket().send(MessageBuilder.finished().callback(webSocketData.getCallback()).build(),true);
     }
  catch (    FrameworkException fex) {
       getWebSocket().send(MessageBuilder.status().code(400).message(fex.getMessage()).build(),true);

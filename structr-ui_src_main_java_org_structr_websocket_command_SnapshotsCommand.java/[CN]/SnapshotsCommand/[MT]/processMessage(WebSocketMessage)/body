@@ -21,11 +21,21 @@ case "list":
       final GraphObjectMap snapshotContainer=new GraphObjectMap();
       snapshotContainer.put(snapshotsProperty,snapshots);
       result.add(snapshotContainer);
-      webSocketData.setResult(result);
-      webSocketData.setRawResultCount(1);
-      getWebSocket().send(webSocketData,true);
     }
   break;
+case "get":
+final Path snapshotFile=Paths.get(SnapshotCommand.getBasePath() + name);
+if (Files.exists(snapshotFile)) {
+try {
+  final String content=new String(Files.readAllBytes(snapshotFile));
+  getWebSocket().send(MessageBuilder.finished().callback(callback).data("schemaJson",content).build(),true);
+  return;
+}
+ catch (IOException ex) {
+  Logger.getLogger(SnapshotsCommand.class.getName()).log(Level.SEVERE,null,ex);
+}
+}
+break;
 default :
 final GraphObjectMap msg=new GraphObjectMap();
 result.add(msg);

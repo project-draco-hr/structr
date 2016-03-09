@@ -36,13 +36,19 @@
       writer.name(resultKeyName).beginArray().endArray();
     }
  else     if (result.isPrimitiveArray()) {
-      writer.name(resultKeyName).beginArray();
+      writer.name(resultKeyName);
+      if (results.size() > 1) {
+        writer.beginArray();
+      }
       for (      final Object object : results) {
         if (object != null) {
           if (object instanceof GraphObject) {
-            Object value=((GraphObject)object).getProperty(GraphObject.id);
-            if (value != null) {
-              writer.value(value.toString());
+            long startTime=System.currentTimeMillis();
+            String localPropertyView=propertyView.get(null);
+            root.serialize(writer,(GraphObject)object,localPropertyView,0);
+            if (System.currentTimeMillis() > startTime + MAX_SERIALIZATION_TIME) {
+              logger.log(Level.SEVERE,"JSON serialization took more than {0} ms, aborted. Please review output view size or adjust timeout.",MAX_SERIALIZATION_TIME);
+              break;
             }
           }
  else {
@@ -50,7 +56,9 @@
           }
         }
       }
-      writer.endArray();
+      if (results.size() > 1) {
+        writer.endArray();
+      }
     }
  else {
       if (results.size() > 1 && !result.isCollection()) {

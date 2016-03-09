@@ -32,6 +32,7 @@
       if (value != null) {
         if (value instanceof Iterable) {
           final Set<GraphObject> propertyResults=new LinkedHashSet<>();
+          final Set<Object> rawPropertyResults=new LinkedHashSet<>();
           boolean iterableContainsGraphObject=false;
           Iterator<Object> iter=((Iterable<Object>)value).iterator();
           while (iter.hasNext()) {
@@ -46,11 +47,15 @@
                   propertyResults.add((GraphObject)obj);
                 }
  else {
-                  logger.log(Level.INFO,"Found object {0} of type iterable, but contained elements are not of type GraphObject.",value);
-                  break;
+                  rawPropertyResults.add(obj);
                 }
               }
             }
+          }
+          if (rawPropertyResults.size() > 0) {
+            GraphObjectMap gObject=new GraphObjectMap();
+            gObject.setProperty(new ArrayProperty(this.typeResource.rawType,Object.class,new TypeValidator(Object.class)),rawPropertyResults.toArray());
+            return new Result(gObject,true);
           }
           final List<GraphObject> finalResult=new LinkedList<>(propertyResults);
           applyDefaultSorting(finalResult,sortKey,sortDescending);
@@ -58,6 +63,37 @@
         }
  else         if (value instanceof GraphObject) {
           return new Result((GraphObject)value,isPrimitiveArray());
+        }
+ else         if (value != null) {
+          GraphObjectMap gObject=new GraphObjectMap();
+          PropertyKey key;
+          String keyName=this.typeResource.rawType;
+          if (value instanceof String) {
+            key=new StringProperty(keyName);
+          }
+ else           if (value instanceof Integer) {
+            key=new IntProperty(keyName);
+          }
+ else           if (value instanceof Long) {
+            key=new LongProperty(keyName);
+          }
+ else           if (value instanceof Double) {
+            key=new DoubleProperty(keyName);
+          }
+ else           if (value instanceof Boolean) {
+            key=new BooleanProperty(keyName);
+          }
+ else           if (value instanceof Date) {
+            key=new DateProperty(keyName);
+          }
+ else           if (value instanceof String[]) {
+            key=new ArrayProperty(keyName,String.class,new TypeValidator(String.class));
+          }
+ else {
+            key=new StringProperty(keyName);
+          }
+          gObject.setProperty(key,value);
+          return new Result(gObject,true);
         }
  else {
           logger.log(Level.INFO,"Found object {0}, but will not return as it is no graph object or iterable",value);

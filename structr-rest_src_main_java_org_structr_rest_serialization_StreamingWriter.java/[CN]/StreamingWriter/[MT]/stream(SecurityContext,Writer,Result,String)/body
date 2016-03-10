@@ -32,7 +32,10 @@
     writer.name("result_count").value(resultCount);
   }
   if (results != null) {
-    if (results.isEmpty()) {
+    if (results.isEmpty() && result.isPrimitiveArray()) {
+      writer.name(resultKeyName).nullValue();
+    }
+ else     if (results.isEmpty() && !result.isPrimitiveArray()) {
       writer.name(resultKeyName).beginArray().endArray();
     }
  else     if (result.isPrimitiveArray()) {
@@ -45,7 +48,13 @@
           if (object instanceof GraphObject) {
             long startTime=System.currentTimeMillis();
             String localPropertyView=propertyView.get(null);
-            root.serialize(writer,(GraphObject)object,localPropertyView,0);
+            GraphObject obj=(GraphObject)object;
+            Iterator<PropertyKey> keyIt=obj.getPropertyKeys(localPropertyView).iterator();
+            while (keyIt.hasNext()) {
+              PropertyKey k=keyIt.next();
+              Object value=obj.getProperty(k);
+              root.serializeProperty(writer,k,value,localPropertyView,0);
+            }
             if (System.currentTimeMillis() > startTime + MAX_SERIALIZATION_TIME) {
               logger.log(Level.SEVERE,"JSON serialization took more than {0} ms, aborted. Please review output view size or adjust timeout.",MAX_SERIALIZATION_TIME);
               break;

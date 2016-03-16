@@ -49,8 +49,10 @@
       }
     }
     if (returnContent) {
-      result.setIsCollection(resource.isCollectionResource());
-      result.setIsPrimitiveArray(resource.isPrimitiveArray());
+      if (!(resource instanceof StaticRelationshipResource) && !result.isPrimitiveArray() && !result.isEmpty()) {
+        result.setIsCollection(resource.isCollectionResource());
+        result.setIsPrimitiveArray(resource.isPrimitiveArray());
+      }
       PagingHelper.addPagingParameter(result,pageSize,page);
       double queryTimeEnd=System.nanoTime();
       result.setPropertyView(propertyView.get(securityContext));

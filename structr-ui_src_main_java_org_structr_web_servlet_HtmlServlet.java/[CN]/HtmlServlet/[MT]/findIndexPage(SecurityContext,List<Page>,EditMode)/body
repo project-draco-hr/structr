@@ -4,7 +4,7 @@
     Collections.sort(pages,new GraphObjectComparator(Page.position,GraphObjectComparator.ASCENDING));
   }
   for (  Page page : pages) {
-    if (page.getProperty(Page.position) != null && ((page.getProperty(Page.enableBasicAuth) != null && page.getProperty(Page.visibleToAuthenticatedUsers)) || securityContext.isVisible(page) || (EditMode.CONTENT.equals(edit) || isVisibleForSite(securityContext.getRequest(),page)))) {
+    if (securityContext.isVisible(page) && page.getProperty(Page.position) != null && ((EditMode.CONTENT.equals(edit) || isVisibleForSite(securityContext.getRequest(),page)) || (page.getProperty(Page.enableBasicAuth) && page.getProperty(Page.visibleToAuthenticatedUsers)))) {
       return page;
     }
   }

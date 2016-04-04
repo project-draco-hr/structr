@@ -1,4 +1,5 @@
 {
+  final List<Resource> resourceChain=ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView);
   ViewFilterResource view=null;
   int num=resourceChain.size();
   boolean found=false;
@@ -37,6 +38,9 @@
       finalResource=resourceChain.get(0);
     }
     return finalResource;
+  }
+ else {
+    logger.log(Level.WARNING,"Resource chain evaluation for path {0} resulted in {1} entries, returning status code 400.",new Object[]{request.getPathInfo(),resourceChain.size()});
   }
   throw new IllegalPathException("Cannot resolve URL path");
 }

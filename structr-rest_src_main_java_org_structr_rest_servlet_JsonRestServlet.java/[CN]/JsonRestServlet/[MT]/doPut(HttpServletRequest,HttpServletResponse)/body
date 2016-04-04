@@ -17,7 +17,7 @@
     final IJsonInput jsonInput=cleanAndParseJsonString(app,input);
     if (securityContext != null) {
       try (final Tx tx=app.tx()){
-        resource=ResourceHelper.applyViewTransformation(request,securityContext,ResourceHelper.optimizeNestedResourceChain(ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView)),propertyView);
+        resource=ResourceHelper.applyViewTransformation(request,securityContext,ResourceHelper.optimizeNestedResourceChain(securityContext,request,resourceMap,propertyView),propertyView);
         authenticator.checkResourceAccess(securityContext,request,resource.getResourceSignature(),propertyView.get(securityContext));
         tx.success();
       }

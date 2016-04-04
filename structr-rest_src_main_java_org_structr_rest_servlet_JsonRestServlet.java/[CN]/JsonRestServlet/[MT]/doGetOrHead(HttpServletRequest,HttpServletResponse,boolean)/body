@@ -16,7 +16,7 @@
     propertyView.set(securityContext,config.getDefaultPropertyView());
     double queryTimeStart=System.nanoTime();
     try (final Tx tx=app.tx()){
-      resource=ResourceHelper.applyViewTransformation(request,securityContext,ResourceHelper.optimizeNestedResourceChain(ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView)),propertyView);
+      resource=ResourceHelper.applyViewTransformation(request,securityContext,ResourceHelper.optimizeNestedResourceChain(securityContext,request,resourceMap,propertyView),propertyView);
       authenticator.checkResourceAccess(securityContext,request,resource.getResourceSignature(),propertyView.get(securityContext));
       tx.success();
     }

@@ -17,7 +17,7 @@
     tx.success();
   }
  catch (  FrameworkException fex) {
-    fex.printStackTrace();
+    logger.log(Level.WARNING,"",fex);
   }
   logger.log(Level.INFO,"Starting to analyze nodes..");
   NodeServiceCommand.bulkGraphOperation(SecurityContext.getSuperUserInstance(),nodeIterator,100000,"Analyzing nodes",new BulkGraphOperation<Node>(){
@@ -34,7 +34,7 @@
     tx.success();
   }
  catch (  FrameworkException fex) {
-    fex.printStackTrace();
+    logger.log(Level.WARNING,"",fex);
   }
   logger.log(Level.INFO,"Collecting type information..");
   try (final Tx tx=app.tx(true,false,false)){
@@ -42,7 +42,7 @@
     tx.success();
   }
  catch (  FrameworkException fex) {
-    fex.printStackTrace();
+    logger.log(Level.WARNING,"",fex);
   }
   logger.log(Level.INFO,"Aggregating type information..");
   try (final Tx tx=app.tx(true,false,false)){
@@ -50,7 +50,7 @@
     tx.success();
   }
  catch (  FrameworkException fex) {
-    fex.printStackTrace();
+    logger.log(Level.WARNING,"",fex);
   }
   logger.log(Level.INFO,"Identifying property sets..");
   try (final Tx tx=app.tx(true,false,false)){
@@ -58,7 +58,7 @@
     tx.success();
   }
  catch (  FrameworkException fex) {
-    fex.printStackTrace();
+    logger.log(Level.WARNING,"",fex);
   }
   logger.log(Level.INFO,"Sorting result..");
   try (final Tx tx=app.tx(false,false,false)){
@@ -66,7 +66,7 @@
     tx.success();
   }
  catch (  FrameworkException fex) {
-    fex.printStackTrace();
+    logger.log(Level.WARNING,"",fex);
   }
   final Map<String,TypeInfo> reducedTypeInfoMap=new LinkedHashMap<>();
   for (  final TypeInfo info : reducedTypeInfos) {
@@ -88,7 +88,7 @@
     tx.success();
   }
  catch (  FrameworkException fex) {
-    fex.printStackTrace();
+    logger.log(Level.WARNING,"",fex);
   }
   logger.log(Level.INFO,"Starting with analyzing relationships..");
   NodeServiceCommand.bulkGraphOperation(SecurityContext.getSuperUserInstance(),relIterator,10000,"Analyzing relationships",new BulkGraphOperation<Relationship>(){

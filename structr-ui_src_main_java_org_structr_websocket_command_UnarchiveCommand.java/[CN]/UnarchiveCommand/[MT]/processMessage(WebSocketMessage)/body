@@ -21,7 +21,7 @@
      unarchive(securityContext,file);
   }
  catch (  Throwable t) {
-    t.printStackTrace();
+    logger.log(Level.WARNING,"",t);
     String msg=t.toString();
     try (final Tx tx=app.tx()){
       getWebSocket().send(MessageBuilder.status().code(400).message("Could not unarchive file: ".concat((msg != null) ? msg : "")).build(),true);

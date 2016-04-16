@@ -19,7 +19,7 @@
       return null;
     }
     logger.log(Level.WARNING,"Unable to download from {0} {1}",new Object[]{originalUrl,downloadAddress});
-    ioe.printStackTrace();
+    logger.log(Level.WARNING,"",ioe);
     try {
       if (address.endsWith("/")) {
         logger.log(Level.INFO,"Starting download from alternative URL {0} {1} {2}",new Object[]{originalUrl,address,downloadAddress});
@@ -32,12 +32,12 @@
       copyURLToFile(downloadUrl.toString(),fileOnDisk);
     }
  catch (    MalformedURLException ex) {
-      ex.printStackTrace();
+      logger.log(Level.WARNING,"",ex);
       logger.log(Level.SEVERE,"Could not resolve address {0}",address.concat("/"));
       return null;
     }
 catch (    IOException ex) {
-      ex.printStackTrace();
+      logger.log(Level.WARNING,"",ex);
       logger.log(Level.WARNING,"Unable to download from {0}",address.concat("/"));
       return null;
     }

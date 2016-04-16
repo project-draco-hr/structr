@@ -12,7 +12,7 @@
     tx.success();
   }
  catch (  FrameworkException fex) {
-    fex.printStackTrace();
+    logger.log(Level.WARNING,"",fex);
     fail("Unexpected exception");
   }
   try (final Tx tx=app.tx()){
@@ -27,7 +27,7 @@
     tx.success();
   }
  catch (  FrameworkException|IOException fex) {
-    fex.printStackTrace();
+    logger.log(Level.WARNING,"",fex);
     fail("Unexpected exception");
   }
   try (final Tx tx=app.tx()){
@@ -38,7 +38,7 @@
     tx.success();
   }
  catch (  FrameworkException fex) {
-    fex.printStackTrace();
+    logger.log(Level.WARNING,"",fex);
     fail("Unexpected exception");
   }
   RestAssured.given().header("X-User","superadmin").header("X-Password","sehrgeheim").body("{ mode: export, file: '" + fileName + "' }").filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(201)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(400)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(401)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(403)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(404)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(422)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(500)).expect().response().contentType("application/json").statusCode(200).when().post("/maintenance/syncUi");
@@ -46,7 +46,7 @@
     app.command(ClearDatabase.class).execute();
   }
  catch (  FrameworkException fex) {
-    fex.printStackTrace();
+    logger.log(Level.WARNING,"",fex);
     fail("Unexpected exception");
   }
   try (final Tx tx=app.tx()){
@@ -57,7 +57,7 @@
     tx.success();
   }
  catch (  FrameworkException fex) {
-    fex.printStackTrace();
+    logger.log(Level.WARNING,"",fex);
     fail("Unexpected exception");
   }
   RestAssured.given().header("X-User","superadmin").header("X-Password","sehrgeheim").body("{ mode: import, file: '" + fileName + "' }").filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(201)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(400)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(401)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(403)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(404)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(422)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(500)).expect().response().contentType("application/json").statusCode(200).when().post("/maintenance/syncUi");
@@ -69,7 +69,7 @@
     tx.success();
   }
  catch (  FrameworkException fex) {
-    fex.printStackTrace();
+    logger.log(Level.WARNING,"",fex);
     fail("Unexpected exception");
   }
 }

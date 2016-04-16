@@ -149,14 +149,14 @@ threadPool.submit(new Runnable(){
       tx.success();
     }
  catch (    Throwable t) {
-      t.printStackTrace();
+      logger.log(Level.WARNING,"",t);
       final String errorMsg=t.getMessage();
       try {
         response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,errorMsg);
         finished.set(true);
       }
  catch (      IOException ex) {
-        ex.printStackTrace();
+        logger.log(Level.WARNING,"",ex);
       }
     }
   }
@@ -187,11 +187,11 @@ synchronized (queue) {
       }
     }
  catch (    Throwable t) {
-      t.printStackTrace();
+      logger.log(Level.WARNING,"",t);
     }
   }
   @Override public void onError(  Throwable t){
-    t.printStackTrace();
+    logger.log(Level.WARNING,"",t);
   }
 }
 );
@@ -206,7 +206,7 @@ try {
   response.getOutputStream().close();
 }
  catch (IOException ioex) {
-  ioex.printStackTrace();
+  logger.log(Level.WARNING,"",ioex);
 }
 }
 }
@@ -214,12 +214,12 @@ try {
 tx.success();
 }
  catch (FrameworkException fex) {
-fex.printStackTrace();
+logger.log(Level.WARNING,"",fex);
 logger.log(Level.SEVERE,"Exception while processing request",fex);
 }
 }
  catch (IOException|FrameworkException t) {
-t.printStackTrace();
+logger.log(Level.WARNING,"",t);
 logger.log(Level.SEVERE,"Exception while processing request",t);
 UiAuthenticator.writeInternalServerError(response);
 }

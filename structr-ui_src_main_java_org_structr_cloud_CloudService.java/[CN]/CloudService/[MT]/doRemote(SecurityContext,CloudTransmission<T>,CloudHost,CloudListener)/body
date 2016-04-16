@@ -6,7 +6,7 @@
     maxKeyLen=Cipher.getMaxAllowedKeyLength(CloudService.STREAM_CIPHER);
   }
  catch (  NoSuchAlgorithmException nsaex) {
-    nsaex.printStackTrace();
+    logger.log(Level.WARNING,"",nsaex);
   }
   try {
     client=new CloudConnection(securityContext,new Socket(host.getHostName(),host.getPort()),listener);
@@ -26,7 +26,7 @@
     }
   }
  catch (  IOException ioex) {
-    ioex.printStackTrace();
+    logger.log(Level.WARNING,"",ioex);
     throw new FrameworkException(504,"Unable to connect to remote server: " + ioex.getMessage());
   }
  finally {

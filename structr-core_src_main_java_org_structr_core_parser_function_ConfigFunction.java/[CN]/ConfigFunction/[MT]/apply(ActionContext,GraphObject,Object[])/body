@@ -1,6 +1,9 @@
 {
-  if (arrayHasMinLengthAndAllElementsNotNull(sources,1)) {
+  if (arrayHasMinLengthAndMaxLengthAndAllElementsNotNull(sources,1,2)) {
     final String configKey=sources[0].toString();
+    if (Services.SUPERUSER_PASSWORD.equals(configKey)) {
+      return AbstractUser.HIDDEN;
+    }
     final String defaultValue=sources.length >= 2 ? sources[1].toString() : "";
     return StructrApp.getConfigurationValue(configKey,defaultValue);
   }

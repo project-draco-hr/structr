@@ -1,5 +1,5 @@
 {
-  if (sources != null && sources.length > 0) {
+  if (arrayHasMinLengthAndMaxLengthAndAllElementsNotNull(sources,1,3)) {
     final SecurityContext securityContext=entity != null ? entity.getSecurityContext() : ctx.getSecurityContext();
     if (sources[0] instanceof GraphObject) {
       try {
@@ -19,7 +19,7 @@
         return writer.getBuffer().toString();
       }
  catch (      Throwable t) {
-        logger.log(Level.WARNING,"",t);
+        logException(t,"{0}: Exception for parameter: {1}",new Object[]{getName(),getParametersAsString(sources)});
       }
     }
  else     if (sources[0] instanceof List) {
@@ -41,10 +41,13 @@
         return writer.getBuffer().toString();
       }
  catch (      Throwable t) {
-        logger.log(Level.WARNING,"",t);
+        logException(t,"{0}: Exception for parameter: {1}",new Object[]{getName(),getParametersAsString(sources)});
       }
     }
     return "";
   }
-  return usage(ctx.isJavaScriptContext());
+ else {
+    logParameterError(sources,ctx.isJavaScriptContext());
+    return usage(ctx.isJavaScriptContext());
+  }
 }

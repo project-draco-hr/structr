@@ -4,40 +4,42 @@
     final String body=sources[1].toString();
     String contentType="application/json";
     String charset="utf-8";
-    if (sources.length >= 3 && sources[2] != null) {
-      contentType=sources[2].toString();
-    }
-    if (sources.length >= 4 && sources[3] != null) {
+switch (sources.length) {
+case 4:
       charset=sources[3].toString();
-    }
-    final HttpClientParams params=new HttpClientParams(HttpClientParams.getDefaultParams());
-    final HttpClient client=new HttpClient(params);
-    final PostMethod postMethod=new PostMethod(uri);
-    for (    final Map.Entry<String,String> header : ctx.getHeaders().entrySet()) {
-      postMethod.addRequestHeader(header.getKey(),header.getValue());
-    }
-    try {
-      postMethod.setRequestEntity(new StringRequestEntity(body,contentType,charset));
-      final int statusCode=client.executeMethod(postMethod);
-      final String responseBody=postMethod.getResponseBodyAsString();
-      final GraphObjectMap response=new GraphObjectMap();
-      if ("application/json".equals(contentType)) {
-        final FromJsonFunction fromJsonFunction=new FromJsonFunction();
-        response.setProperty(new StringProperty("body"),fromJsonFunction.apply(ctx,entity,new Object[]{responseBody}));
-      }
+case 3:
+    contentType=sources[2].toString();
+  break;
+}
+final HttpClientParams params=new HttpClientParams(HttpClientParams.getDefaultParams());
+final HttpClient client=new HttpClient(params);
+final PostMethod postMethod=new PostMethod(uri);
+for (final Map.Entry<String,String> header : ctx.getHeaders().entrySet()) {
+postMethod.addRequestHeader(header.getKey(),header.getValue());
+}
+try {
+postMethod.setRequestEntity(new StringRequestEntity(body,contentType,charset));
+final int statusCode=client.executeMethod(postMethod);
+final String responseBody=postMethod.getResponseBodyAsString();
+final GraphObjectMap response=new GraphObjectMap();
+if ("application/json".equals(contentType)) {
+  final FromJsonFunction fromJsonFunction=new FromJsonFunction();
+  response.setProperty(new StringProperty("body"),fromJsonFunction.apply(ctx,entity,new Object[]{responseBody}));
+}
  else {
-        response.setProperty(new StringProperty("body"),responseBody);
-      }
-      response.setProperty(new IntProperty("status"),statusCode);
-      response.setProperty(new StringProperty("headers"),extractHeaders(postMethod.getResponseHeaders()));
-      return response;
-    }
- catch (    IOException ioex) {
-      logger.log(Level.WARNING,"",ioex);
-    }
-  }
+  response.setProperty(new StringProperty("body"),responseBody);
+}
+response.setProperty(new IntProperty("status"),statusCode);
+response.setProperty(new StringProperty("headers"),extractHeaders(postMethod.getResponseHeaders()));
+return response;
+}
+ catch (IOException ioex) {
+logException(ioex,"{0}: Exception for parameter: {1}",new Object[]{getName(),getParametersAsString(sources)});
+}
+}
  else {
-    return usage(ctx.isJavaScriptContext());
-  }
-  return null;
+logParameterError(sources,ctx.isJavaScriptContext());
+return usage(ctx.isJavaScriptContext());
+}
+return null;
 }

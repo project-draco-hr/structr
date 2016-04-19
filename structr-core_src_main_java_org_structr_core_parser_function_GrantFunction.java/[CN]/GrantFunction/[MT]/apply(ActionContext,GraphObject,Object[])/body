@@ -1,5 +1,5 @@
 {
-  if (arrayHasMinLengthAndAllElementsNotNull(sources,3)) {
+  if (arrayHasLengthAndAllElementsNotNull(sources,3)) {
     if (sources[0] instanceof Principal) {
       final Principal principal=(Principal)sources[0];
       if (sources[1] instanceof AbstractNode) {
@@ -14,6 +14,7 @@
                 node.grant(permission,principal);
               }
  else {
+                logger.log(Level.WARNING,"Error: unknown permission \"{0}\". Parameters: {1}",new Object[]{trimmedPart,getParametersAsString(sources)});
                 return "Error: unknown permission " + trimmedPart;
               }
             }
@@ -21,18 +22,22 @@
           return "";
         }
  else {
+          logger.log(Level.WARNING,"Error: third argument is not a string. Parameters: {0}",getParametersAsString(sources));
           return "Error: third argument is not a string.";
         }
       }
  else {
+        logger.log(Level.WARNING,"Error: second argument is not a node. Parameters: {0}",getParametersAsString(sources));
         return "Error: second argument is not a node.";
       }
     }
  else {
+      logger.log(Level.WARNING,"Error: first argument is not of type Principal. Parameters: {0}",getParametersAsString(sources));
       return "Error: first argument is not of type Principal.";
     }
   }
  else {
+    logParameterError(sources,ctx.isJavaScriptContext());
     return usage(ctx.isJavaScriptContext());
   }
 }

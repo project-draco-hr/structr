@@ -1,12 +1,20 @@
 {
-  if (arrayHasMinLengthAndAllElementsNotNull(sources,1)) {
-    final int level=parseInt(sources[0]);
-    ctx.incrementCounter(level);
-    if (sources.length == 2 && "true".equals(sources[1].toString())) {
-      for (int i=level + 1; i < 10; i++) {
-        ctx.resetCounter(i);
+  if (arrayHasMinLengthAndMaxLengthAndAllElementsNotNull(sources,1,2)) {
+    try {
+      final int level=parseInt(sources[0]);
+      ctx.incrementCounter(level);
+      if (sources.length == 2 && "true".equals(sources[1].toString())) {
+        for (int i=level + 1; i < 10; i++) {
+          ctx.resetCounter(i);
+        }
       }
     }
+ catch (    NumberFormatException nfe) {
+      logException(nfe,"{0}: NumberFormatException parsing counter level \"{1}\". Parameters: {2}",new Object[]{getName(),sources[0].toString(),getParametersAsString(sources)});
+    }
+  }
+ else {
+    logParameterError(sources,ctx.isJavaScriptContext());
   }
   return "";
 }

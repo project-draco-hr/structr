@@ -5,8 +5,11 @@
       return xpath.evaluate(sources[1].toString(),sources[0],XPathConstants.STRING);
     }
  catch (    XPathExpressionException ioex) {
-      logger.log(Level.WARNING,"",ioex);
+      logException(ioex,"{0}: Exception for parameters: {1}",new Object[]{getName(),getParametersAsString(sources)});
     }
+  }
+ else {
+    logParameterError(sources,ctx.isJavaScriptContext());
   }
   return "";
 }

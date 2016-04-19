@@ -1,5 +1,5 @@
 {
-  if (arrayHasMinLengthAndAllElementsNotNull(sources,6)) {
+  if (arrayHasMinLengthAndMaxLengthAndAllElementsNotNull(sources,6,7)) {
     final String from=sources[0].toString();
     final String fromName=sources[1].toString();
     final String to=sources[2].toString();
@@ -14,8 +14,11 @@
       return MailHelper.sendHtmlMail(from,fromName,to,toName,null,null,from,subject,htmlContent,textContent);
     }
  catch (    EmailException eex) {
-      logger.log(Level.WARNING,"",eex);
+      logException(eex,"{0}: Exception for parameters: {1}",new Object[]{getName(),getParametersAsString(sources)});
     }
+  }
+ else {
+    logParameterError(sources,ctx.isJavaScriptContext());
   }
   return "";
 }

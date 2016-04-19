@@ -1,5 +1,5 @@
 {
-  if (arrayHasMinLengthAndAllElementsNotNull(sources,2)) {
+  if (arrayHasMinLengthAndMaxLengthAndAllElementsNotNull(sources,2,4)) {
     final String action=sources[0].toString();
     final String message=sources[1].toString();
     final LogEvent logEvent=StructrApp.getInstance().create(LogEvent.class,new NodeAttribute(LogEvent.actionProperty,action),new NodeAttribute(LogEvent.messageProperty,message),new NodeAttribute(LogEvent.timestampProperty,new Date()));
@@ -21,6 +21,9 @@ final String message=DOMNode.objectToString(map.get("message"));
 final String subject=DOMNode.objectToString(map.get("subject"));
 final String object=DOMNode.objectToString(map.get("object"));
 return StructrApp.getInstance().create(LogEvent.class,new NodeAttribute(LogEvent.actionProperty,action),new NodeAttribute(LogEvent.messageProperty,message),new NodeAttribute(LogEvent.timestampProperty,new Date()),new NodeAttribute(LogEvent.subjectProperty,subject),new NodeAttribute(LogEvent.objectProperty,object));
+}
+ else {
+logParameterError(sources,ctx.isJavaScriptContext());
 }
 return "";
 }

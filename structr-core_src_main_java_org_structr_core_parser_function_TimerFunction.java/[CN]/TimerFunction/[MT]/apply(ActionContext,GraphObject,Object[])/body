@@ -7,7 +7,7 @@
       return null;
     }
  else     if (action.equals("get")) {
-      Date begin=ctx.getTimer(name);
+      final Date begin=ctx.getTimer(name);
       if (begin == null) {
         logger.log(Level.WARNING,"Timer {0} has not been started yet. Starting it.",name);
         ctx.addTimer(name);
@@ -20,6 +20,9 @@
  else {
       logger.log(Level.WARNING,"Unknown action for timer function: {0}",action);
     }
+  }
+ else {
+    logParameterError(sources,ctx.isJavaScriptContext());
   }
   return usage(ctx.isJavaScriptContext());
 }

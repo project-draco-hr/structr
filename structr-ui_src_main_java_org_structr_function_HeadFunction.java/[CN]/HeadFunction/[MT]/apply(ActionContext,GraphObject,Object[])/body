@@ -1,21 +1,25 @@
 {
-  if (sources != null && sources.length > 0) {
+  if (arrayHasMinLengthAndMaxLengthAndAllElementsNotNull(sources,1,3)) {
     try {
       String address=sources[0].toString();
       String username=null;
       String password=null;
-      if (sources.length > 1) {
-        username=sources[1].toString();
-      }
-      if (sources.length > 2) {
+switch (sources.length) {
+case 3:
         password=sources[2].toString();
-      }
-      return headFromUrl(ctx,address,username,password);
-    }
- catch (    Throwable t) {
-      logger.log(Level.WARNING,"",t);
-    }
-    return "";
-  }
-  return usage(ctx.isJavaScriptContext());
+case 2:
+      username=sources[1].toString();
+    break;
+}
+return headFromUrl(ctx,address,username,password);
+}
+ catch (Throwable t) {
+logException(t,"{0}: Exception for parameter: {1}",new Object[]{getName(),getParametersAsString(sources)});
+}
+return "";
+}
+ else {
+logParameterError(sources,ctx.isJavaScriptContext());
+}
+return usage(ctx.isJavaScriptContext());
 }

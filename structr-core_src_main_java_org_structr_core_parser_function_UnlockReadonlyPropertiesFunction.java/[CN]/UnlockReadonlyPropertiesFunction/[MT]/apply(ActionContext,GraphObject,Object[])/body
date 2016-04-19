@@ -1,11 +1,15 @@
 {
-  if (arrayHasMinLengthAndAllElementsNotNull(sources,1)) {
+  if (arrayHasLengthAndAllElementsNotNull(sources,1)) {
     if (sources[0] instanceof AbstractNode) {
       ((AbstractNode)sources[0]).unlockReadOnlyPropertiesOnce();
     }
  else {
+      logger.log(Level.WARNING,"Parameter 1 is not a node. Parameters: {0}",getParametersAsString(sources));
       return usage(ctx.isJavaScriptContext());
     }
+  }
+ else {
+    logParameterError(sources,ctx.isJavaScriptContext());
   }
   return "";
 }

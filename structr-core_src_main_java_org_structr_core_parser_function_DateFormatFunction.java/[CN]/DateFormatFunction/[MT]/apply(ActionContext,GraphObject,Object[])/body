@@ -1,7 +1,4 @@
 {
-  if (sources == null || sources != null && sources.length != 2) {
-    return usage(ctx.isJavaScriptContext());
-  }
   if (arrayHasLengthAndAllElementsNotNull(sources,2)) {
     Date date=null;
     if (sources[0] instanceof Date) {
@@ -17,10 +14,13 @@
         date=new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").parse(sources[0].toString());
       }
  catch (      ParseException ex) {
-        logger.log(Level.WARNING,"",ex);
+        logException(ex,sources);
       }
     }
     return new SimpleDateFormat(sources[1].toString()).format(date);
   }
-  return "";
+ else {
+    logParameterError(sources,ctx.isJavaScriptContext());
+    return usage(ctx.isJavaScriptContext());
+  }
 }

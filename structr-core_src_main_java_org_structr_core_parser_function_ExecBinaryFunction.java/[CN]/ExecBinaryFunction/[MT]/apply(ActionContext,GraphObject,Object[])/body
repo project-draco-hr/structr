@@ -18,15 +18,18 @@
         return executorService.submit(process).get();
       }
  catch (      InterruptedException|ExecutionException iex) {
-        logger.log(Level.WARNING,"",iex);
+        logException(iex,sources);
       }
  finally {
         executorService.shutdown();
       }
     }
  else {
-      logger.log(Level.WARNING,"No script found for key {0} in structr.conf, nothing executed.",scriptKey);
+      logger.log(Level.WARNING,"No script found for key \"{0}\" in structr.conf, nothing executed.",scriptKey);
     }
+  }
+ else {
+    logParameterError(sources,ctx.isJavaScriptContext());
   }
   return "";
 }

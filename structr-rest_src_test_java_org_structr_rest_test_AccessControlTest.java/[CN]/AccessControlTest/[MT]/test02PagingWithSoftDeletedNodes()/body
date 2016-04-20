@@ -16,15 +16,6 @@
       t.setProperty(TestOne.owner,users.get(0));
       t.setProperty(TestOne.visibleToAuthenticatedUsers,true);
     }
-    tx.success();
-  }
- catch (  FrameworkException ex) {
-    logger.log(Level.WARNING,"",ex);
-    fail(ex.getMessage());
-  }
-  RestAssured.given().contentType("application/json; charset=UTF-8").filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(200)).header("X-User","user1").header("X-Password","user1").expect().statusCode(200).body("result",hasSize(1)).body("result_count",equalTo(3)).when().get("/test_ones?pageSize=1&page=1");
-  RestAssured.given().contentType("application/json; charset=UTF-8").filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(200)).header("X-User","user2").header("X-Password","user2").expect().statusCode(200).body("result",hasSize(1)).body("result_count",equalTo(3)).when().get("/test_ones?pageSize=1&page=1");
-  try (final Tx tx=StructrApp.getInstance().tx()){
     testOnes.get(0).setProperty(TestOne.name,"deleted");
     testOnes.get(0).setProperty(TestOne.deleted,true);
     tx.success();
@@ -34,4 +25,5 @@
     fail(ex.getMessage());
   }
   RestAssured.given().contentType("application/json; charset=UTF-8").filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(200)).header("X-User","user2").header("X-Password","user2").expect().statusCode(200).body("result",hasSize(1)).body("result_count",equalTo(3)).when().get("/test_ones?sort=name&pageSize=1&page=1");
+  RestAssured.given().contentType("application/json; charset=UTF-8").filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(200)).header("X-User","user2").header("X-Password","user2").expect().statusCode(200).body("result",hasSize(1)).body("result_count",equalTo(2)).when().get("/test_ones?deleted=false&sort=name&pageSize=1&page=1");
 }

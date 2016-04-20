@@ -1,23 +1,24 @@
 {
-  if (sources != null && sources.length > 0) {
-    if (sources[0] != null) {
-      try {
-        final GraphObjectMap result=new GraphObjectMap();
-        final XmlFunction xml=new XmlFunction();
-        final Document document=(Document)xml.apply(ctx,entity,sources);
-        if (document != null) {
-          convertNode(result,document);
-          return result;
-        }
- else {
-          logger.log(Level.WARNING,"Unable to parse XML document: {0}",sources[0].toString());
-        }
+  if (arrayHasLengthAndAllElementsNotNull(sources,1)) {
+    try {
+      final GraphObjectMap result=new GraphObjectMap();
+      final XmlFunction xml=new XmlFunction();
+      final Document document=(Document)xml.apply(ctx,entity,sources);
+      if (document != null) {
+        convertNode(result,document);
+        return result;
       }
- catch (      Throwable t) {
-        logger.log(Level.WARNING,"",t);
+ else {
+        logger.log(Level.WARNING,"Unable to parse XML document: {0}",sources[0].toString());
       }
     }
+ catch (    Throwable t) {
+      logException(t,"{0}: Exception for parameter: {1}",new Object[]{getName(),getParametersAsString(sources)});
+    }
     return "";
+  }
+ else {
+    logParameterError(sources,ctx.isJavaScriptContext());
   }
   return usage(ctx.isJavaScriptContext());
 }

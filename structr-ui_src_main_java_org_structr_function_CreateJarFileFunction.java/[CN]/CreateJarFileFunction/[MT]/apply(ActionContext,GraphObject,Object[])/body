@@ -50,12 +50,16 @@
         jos.finish();
       }
  catch (      Throwable t) {
-        logger.log(Level.WARNING,"",t);
+        logException(t,"{0}: Exception for parameter: {1}",new Object[]{getName(),getParametersAsString(sources)});
       }
     }
  else {
+      logger.log(Level.WARNING,"First parameter of create_jar_file() must be an output stream. Parameters: {0}",getParametersAsString(sources));
       return "First parameter of create_jar_file() must be an output stream.";
     }
+  }
+ else {
+    logParameterError(sources,ctx.isJavaScriptContext());
   }
   return "";
 }

@@ -5,10 +5,19 @@
     final Query query=StructrApp.getInstance(securityContext).nodeQuery();
     Class type=null;
     if (sources.length >= 1 && sources[0] != null) {
-      type=config.getNodeEntityClass(sources[0].toString());
+      final String typeString=sources[0].toString();
+      type=config.getNodeEntityClass(typeString);
       if (type != null) {
         query.andTypes(type);
       }
+ else {
+        logger.log(Level.WARNING,"Error in search(): type {0} not found.",typeString);
+        return "Error in search(): type " + typeString + " not found.";
+      }
+    }
+    if (type == null) {
+      logger.log(Level.WARNING,"Error in search(): no type specified. Parameters: {0}",getParametersAsString(sources));
+      return "Error in search(): no type specified.";
     }
     securityContext.ignoreResultCount(true);
     if (sources.length == 2 && sources[1] instanceof Map) {
@@ -20,7 +29,7 @@
  else {
       final Integer parameter_count=sources.length;
       if (parameter_count % 2 == 0) {
-        throw new FrameworkException(400,"Invalid number of parameters: " + parameter_count + ". Should be uneven: "+ ERROR_MESSAGE_FIND);
+        throw new FrameworkException(400,"Invalid number of parameters: " + parameter_count + ". Should be uneven: "+ ERROR_MESSAGE_SEARCH);
       }
       for (Integer c=1; c < parameter_count; c+=2) {
         final PropertyKey key=config.getPropertyKeyForJSONName(type,sources[c].toString());

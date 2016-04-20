@@ -1,5 +1,5 @@
 {
-  if (sources != null && sources.length == 1) {
+  if (arrayHasLengthAndAllElementsNotNull(sources,1)) {
     RenderContext innerCtx=new RenderContext((RenderContext)ctx);
     if (sources[0] instanceof DOMNode) {
       ((DOMNode)sources[0]).render(innerCtx,0);
@@ -11,7 +11,13 @@
         }
       }
     }
+ else {
+      logger.log(Level.WARNING,"Error: Parameter 1 is neither node nor collection. Parameters: {0}",getParametersAsString(sources));
+    }
     return StringUtils.join(innerCtx.getBuffer().getQueue(),"");
   }
-  return usage(ctx.isJavaScriptContext());
+ else {
+    logParameterError(sources,ctx.isJavaScriptContext());
+    return usage(ctx.isJavaScriptContext());
+  }
 }

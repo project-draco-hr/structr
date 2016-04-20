@@ -1,15 +1,13 @@
 {
   boolean result=true;
-  if (sources != null) {
-    if (sources.length < 2) {
-      return usage(ctx.isJavaScriptContext());
-    }
+  if (arrayHasMinLengthAndAllElementsNotNull(sources,2)) {
     for (    Object i : sources) {
       if (i != null) {
         try {
           result&="true".equals(i.toString()) || Boolean.TRUE.equals(i);
         }
  catch (        Throwable t) {
+          logException(t,sources);
           return t.getMessage();
         }
       }
@@ -17,6 +15,10 @@
         return false;
       }
     }
+  }
+ else {
+    logParameterError(sources,ctx.isJavaScriptContext());
+    result=false;
   }
   return result;
 }

@@ -1,39 +1,42 @@
 {
-  if (sources != null && sources.length > 0 && sources[0] != null) {
+  if (arrayHasMinLengthAndMaxLengthAndAllElementsNotNull(sources,1,4)) {
     try {
       String address=sources[0].toString();
       String contentType=null;
       String username=null;
       String password=null;
-      if (sources.length > 1) {
-        contentType=sources[1].toString();
-      }
-      if (sources.length > 2) {
-        username=sources[2].toString();
-      }
-      if (sources.length > 3) {
+switch (sources.length) {
+case 4:
         password=sources[3].toString();
-      }
-      if ("text/html".equals(contentType)) {
-        final Connection connection=Jsoup.connect(address);
-        for (        final Map.Entry<String,String> header : ctx.getHeaders().entrySet()) {
-          connection.header(header.getKey(),header.getValue());
-        }
-        if (sources.length > 2) {
-          return connection.get().select(sources[2].toString()).html();
-        }
+case 3:
+      username=sources[2].toString();
+case 2:
+    contentType=sources[1].toString();
+  break;
+}
+if ("text/html".equals(contentType)) {
+final Connection connection=Jsoup.connect(address);
+for (final Map.Entry<String,String> header : ctx.getHeaders().entrySet()) {
+  connection.header(header.getKey(),header.getValue());
+}
+if (sources.length > 2) {
+  return connection.get().select(sources[2].toString()).html();
+}
  else {
-          return connection.get().html();
-        }
-      }
+  return connection.get().html();
+}
+}
  else {
-        return getFromUrl(ctx,address,username,password);
-      }
-    }
- catch (    Throwable t) {
-      logger.log(Level.WARNING,"",t);
-    }
-    return "";
-  }
-  return usage(ctx.isJavaScriptContext());
+return getFromUrl(ctx,address,username,password);
+}
+}
+ catch (Throwable t) {
+logException(t,"{0}: Exception for parameter: {1}",new Object[]{getName(),getParametersAsString(sources)});
+}
+return "";
+}
+ else {
+logParameterError(sources,ctx.isJavaScriptContext());
+}
+return usage(ctx.isJavaScriptContext());
 }

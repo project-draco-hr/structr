@@ -1,5 +1,5 @@
 {
-  if (arrayHasMinLengthAndAllElementsNotNull(sources,1)) {
+  if (arrayHasMinLengthAndMaxLengthAndAllElementsNotNull(sources,1,2)) {
     final RelationshipFactory factory=new RelationshipFactory(entity != null ? entity.getSecurityContext() : ctx.getSecurityContext());
     final Object source=sources[0];
     if (source instanceof NodeInterface) {
@@ -16,8 +16,12 @@
       }
     }
  else {
+      logger.log(Level.WARNING,"Error: entity is not a node. Parameters: {0}",getParametersAsString(sources));
       return "Error: entity is not a node.";
     }
+  }
+ else {
+    logParameterError(sources,ctx.isJavaScriptContext());
   }
   return "";
 }

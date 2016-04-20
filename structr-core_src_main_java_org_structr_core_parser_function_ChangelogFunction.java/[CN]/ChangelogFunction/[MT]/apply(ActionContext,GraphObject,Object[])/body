@@ -6,6 +6,7 @@
       dataObject=(GraphObject)sources[0];
     }
  else {
+      logger.log(Level.WARNING,"First parameter must be of type GraphObject: \"{0}\"",sources[0]);
       return usage(ctx.isJavaScriptContext());
     }
     final String changelog=dataObject.getProperty(GraphObject.structrChangeLog);
@@ -46,7 +47,7 @@
             list.add(obj);
           }
  else {
-            logger.log(Level.WARNING,"Unknown verb in changelog: '{0}'",verb);
+            logger.log(Level.WARNING,"Unknown verb in changelog: \"{0}\"",verb);
           }
         }
       }
@@ -54,6 +55,7 @@
     return list;
   }
  else {
+    logParameterError(sources,ctx.isJavaScriptContext());
     return usage(ctx.isJavaScriptContext());
   }
 }

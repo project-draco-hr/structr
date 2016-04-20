@@ -1,41 +1,42 @@
 {
-  if (sources != null && sources.length > 0) {
-    if (sources[0] != null) {
-      try {
-        final String source=sources[0].toString();
-        final Gson gson=new GsonBuilder().create();
-        List<Map<String,Object>> objects=new LinkedList<>();
-        if (StringUtils.startsWith(source,"[")) {
-          final List<Map<String,Object>> list=gson.fromJson(source,new TypeToken<List<Map<String,Object>>>(){
-          }
-.getType());
-          final List<GraphObjectMap> elements=new LinkedList<>();
-          if (list != null) {
-            objects.addAll(list);
-          }
-          for (          final Map<String,Object> src : objects) {
-            final GraphObjectMap destination=new GraphObjectMap();
-            elements.add(destination);
-            recursivelyConvertMapToGraphObjectMap(destination,src,0);
-          }
-          return elements;
+  if (arrayHasLengthAndAllElementsNotNull(sources,1)) {
+    try {
+      final String source=sources[0].toString();
+      final Gson gson=new GsonBuilder().create();
+      List<Map<String,Object>> objects=new LinkedList<>();
+      if (StringUtils.startsWith(source,"[")) {
+        final List<Map<String,Object>> list=gson.fromJson(source,new TypeToken<List<Map<String,Object>>>(){
         }
- else         if (StringUtils.startsWith(source,"{")) {
-          final Map<String,Object> value=gson.fromJson(source,new TypeToken<Map<String,Object>>(){
-          }
 .getType());
+        final List<GraphObjectMap> elements=new LinkedList<>();
+        if (list != null) {
+          objects.addAll(list);
+        }
+        for (        final Map<String,Object> src : objects) {
           final GraphObjectMap destination=new GraphObjectMap();
-          if (value != null) {
-            recursivelyConvertMapToGraphObjectMap(destination,value,0);
-          }
-          return destination;
+          elements.add(destination);
+          recursivelyConvertMapToGraphObjectMap(destination,src,0);
         }
+        return elements;
       }
- catch (      Throwable t) {
-        logger.log(Level.WARNING,"",t);
+ else       if (StringUtils.startsWith(source,"{")) {
+        final Map<String,Object> value=gson.fromJson(source,new TypeToken<Map<String,Object>>(){
+        }
+.getType());
+        final GraphObjectMap destination=new GraphObjectMap();
+        if (value != null) {
+          recursivelyConvertMapToGraphObjectMap(destination,value,0);
+        }
+        return destination;
       }
     }
+ catch (    Throwable t) {
+      logException(t,"{0}: Exception for parameter: {1}",new Object[]{getName(),getParametersAsString(sources)});
+    }
     return "";
+  }
+ else {
+    logParameterError(sources,ctx.isJavaScriptContext());
   }
   return usage(ctx.isJavaScriptContext());
 }

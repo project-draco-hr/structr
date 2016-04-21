@@ -2,11 +2,9 @@
   final Set<String> classes=module.getClasses();
   for (  final String name : classes) {
     String className=StringUtils.removeStart(name,".");
-    logger.log(Level.FINE,"Instantiating class {0} ",className);
     try {
-      Class clazz=Class.forName(className);
-      int modifiers=clazz.getModifiers();
-      logger.log(Level.FINE,"Class {0} instantiated: {1}",new Object[]{className,clazz});
+      final Class clazz=Class.forName(className);
+      final int modifiers=clazz.getModifiers();
       if (NodeInterface.class.isAssignableFrom(clazz)) {
         registerEntityType(clazz);
       }
@@ -17,13 +15,22 @@
         Services.getInstance().registerServiceClass(clazz);
       }
       if (Agent.class.isAssignableFrom(clazz) && !(Modifier.isAbstract(modifiers))) {
-        String simpleName=clazz.getSimpleName();
-        String fullName=clazz.getName();
+        final String simpleName=clazz.getSimpleName();
+        final String fullName=clazz.getName();
         agentClassCache.put(simpleName,clazz);
         agentPackages.add(fullName.substring(0,fullName.lastIndexOf(".")));
       }
+      if (StructrModule.class.isAssignableFrom(clazz) && !(Modifier.isAbstract(modifiers))) {
+        try {
+          final StructrModule structrModule=(StructrModule)clazz.newInstance();
+          modules.put(structrModule.getName(),structrModule);
+        }
+ catch (        Throwable t) {
+          logger.log(Level.WARNING,"Unable to instantiate module " + clazz.getName(),t);
+        }
+      }
     }
- catch (    Throwable t) {
+ catch (    Throwable ignore) {
     }
   }
 }

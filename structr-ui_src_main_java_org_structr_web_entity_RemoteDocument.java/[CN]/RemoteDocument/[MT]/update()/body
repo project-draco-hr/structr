@@ -1,7 +1,9 @@
 {
   try {
-    StructrApp.getInstance(securityContext).processTasks(new FulltextIndexingTask(this));
+    final FulltextIndexer indexer=StructrApp.getInstance(securityContext).getFulltextIndexer();
+    indexer.addToFulltextIndex(this);
   }
- catch (  Throwable t) {
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"Unable to index " + this,fex);
   }
 }

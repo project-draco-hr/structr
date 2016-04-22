@@ -1,3 +1,22 @@
 {
-  return false;
+  boolean isValid=false;
+  if (key == null) {
+    return isValid;
+  }
+  try (final Tx tx=StructrApp.getInstance().tx()){
+    final Principal principal=StructrApp.getInstance().nodeQuery(Principal.class).andName(username).getFirst();
+    if (principal != null) {
+      final String pubKeyData=principal.getProperty(Principal.publicKey);
+      if (pubKeyData != null) {
+        final PublicKey pubKey=PublicKeyEntry.parsePublicKeyEntry(pubKeyData).resolvePublicKey(PublicKeyEntryResolver.FAILING);
+        isValid=KeyUtils.compareKeys(pubKey,key);
+      }
+    }
+    tx.success();
+  }
+ catch (  Throwable t) {
+    logger.log(Level.WARNING,"",t);
+    isValid=false;
+  }
+  return isValid;
 }

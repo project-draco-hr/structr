@@ -96,8 +96,10 @@
     @Override public void createDirectory(    Path dir,    FileAttribute<?>... attrs) throws IOException {
       final StructrSSHFile parent=(StructrSSHFile)dir.getParent();
       final App app=StructrApp.getInstance(securityContext);
+      final String name=dir.getFileName().toString();
       try (final Tx tx=app.tx()){
-        app.create(Folder.class,new NodeAttribute(AbstractNode.name,dir.getFileName().toString()),new NodeAttribute(AbstractFile.parent,parent != null ? parent.getActualFile() : null));
+        final Folder folder=app.create(Folder.class,new NodeAttribute(AbstractNode.name,name),new NodeAttribute(AbstractFile.parent,parent != null ? parent.getActualFile() : null));
+        ((StructrSSHFile)dir).setActualFile(folder);
         tx.success();
       }
  catch (      FrameworkException fex) {

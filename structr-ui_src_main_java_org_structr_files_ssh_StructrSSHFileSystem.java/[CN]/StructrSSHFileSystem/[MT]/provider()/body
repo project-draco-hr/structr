@@ -3,7 +3,7 @@
     @Override public OutputStream newOutputStream(    Path path,    OpenOption... options) throws IOException {
       OutputStream os=null;
       FileBase actualFile=(FileBase)((StructrSSHFile)path).getActualFile();
-      try (final Tx tx=StructrApp.getInstance().tx()){
+      try (final Tx tx=StructrApp.getInstance(securityContext).tx()){
         if (actualFile == null) {
           actualFile=(FileBase)create(path);
         }
@@ -20,7 +20,7 @@
     }
     @Override public InputStream newInputStream(    Path path,    OpenOption... options) throws IOException {
       InputStream inputStream=null;
-      try (final Tx tx=StructrApp.getInstance().tx()){
+      try (final Tx tx=StructrApp.getInstance(securityContext).tx()){
         final FileBase fileNode=(FileBase)((StructrSSHFile)path).getActualFile();
         inputStream=fileNode.getInputStream();
         tx.success();
@@ -51,7 +51,7 @@
       SeekableByteChannel channel=null;
       final FileBase fileNode=(FileBase)((StructrSSHFile)path).getActualFile();
       if (fileNode != null) {
-        try (Tx tx=StructrApp.getInstance().tx()){
+        try (Tx tx=StructrApp.getInstance(securityContext).tx()){
           final Path filePath=FileHelper.getPath(fileNode);
           channel=Files.newByteChannel(filePath);
           tx.success();
@@ -68,7 +68,7 @@
         boolean closed=false;
         @Override public Iterator iterator(){
           if (!closed) {
-            final App app=StructrApp.getInstance();
+            final App app=StructrApp.getInstance(securityContext);
             final List<StructrSSHFile> files=new LinkedList<>();
             final StructrSSHFile thisDir=(StructrSSHFile)dir;
             try (final Tx tx=app.tx()){
@@ -95,7 +95,7 @@
     }
     @Override public void createDirectory(    Path dir,    FileAttribute<?>... attrs) throws IOException {
       final StructrSSHFile parent=(StructrSSHFile)dir.getParent();
-      final App app=StructrApp.getInstance(parent.getSecurityContext());
+      final App app=StructrApp.getInstance(securityContext);
       try (final Tx tx=app.tx()){
         app.create(Folder.class,new NodeAttribute(AbstractNode.name,dir.getFileName().toString()),new NodeAttribute(AbstractFile.parent,parent != null ? parent.getActualFile() : null));
         tx.success();
@@ -179,7 +179,7 @@
     private AbstractFile create(    final Path path) throws IOException {
       final StructrSSHFile parent=(StructrSSHFile)path.getParent();
       AbstractFile newFile=null;
-      final App app=StructrApp.getInstance(parent.getSecurityContext());
+      final App app=StructrApp.getInstance(securityContext);
       try (final Tx tx=app.tx()){
         final String fileName=path.getFileName().toString();
         final Folder parentFolder=(Folder)parent.getActualFile();

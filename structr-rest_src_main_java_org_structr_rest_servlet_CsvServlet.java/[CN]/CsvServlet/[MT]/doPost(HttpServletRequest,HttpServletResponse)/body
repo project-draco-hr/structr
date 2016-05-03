@@ -7,6 +7,7 @@
     request.setCharacterEncoding("UTF-8");
     response.setCharacterEncoding("UTF-8");
     response.setContentType("application/json; charset=utf-8");
+    final String input=IOUtils.toString(request.getReader());
     try (final Tx tx=StructrApp.getInstance().tx()){
       authenticator=config.getAuthenticator();
       securityContext=authenticator.initializeAndExamineRequest(request,response);
@@ -15,7 +16,7 @@
      final App app=StructrApp.getInstance(securityContext);
     if (securityContext != null) {
       try (final Tx tx=app.tx()){
-        resource=ResourceHelper.applyViewTransformation(request,securityContext,ResourceHelper.optimizeNestedResourceChain(ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView)),propertyView);
+        resource=ResourceHelper.applyViewTransformation(request,securityContext,ResourceHelper.optimizeNestedResourceChain(securityContext,request,resourceMap,propertyView),propertyView);
         authenticator.checkResourceAccess(securityContext,request,resource.getResourceSignature(),propertyView.get(securityContext));
         tx.success();
       }
@@ -23,7 +24,7 @@
       while (retry) {
         if (resource.createPostTransaction()) {
           try (final Tx tx=app.tx()){
-            for (            JsonInput propertySet : this.cleanAndParseCSV(request.getInputStream())) {
+            for (            final JsonInput propertySet : cleanAndParseCSV(input)) {
               results.add(resource.doPost(convertPropertySetToMap(propertySet)));
             }
             tx.success();
@@ -35,7 +36,7 @@
         }
  else {
           try {
-            for (            JsonInput propertySet : this.cleanAndParseCSV(request.getInputStream())) {
+            for (            final JsonInput propertySet : cleanAndParseCSV(input)) {
               results.add(resource.doPost(convertPropertySetToMap(propertySet)));
             }
             retry=false;

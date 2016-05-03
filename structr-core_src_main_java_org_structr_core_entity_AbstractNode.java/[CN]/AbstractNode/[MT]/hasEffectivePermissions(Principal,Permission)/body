@@ -1,0 +1,126 @@
+{
+  final boolean doLog=securityContext.hasParameter("debugLoggingEnabled");
+  if (SchemaRelationshipNode.getPropagatingRelationshipTypes().isEmpty()) {
+    return false;
+  }
+  if (doLog) {
+    System.out.println("\n#######################################################\nResolving " + permission.name() + " for user "+ principal.getName()+ " to "+ this.getType()+ " ("+ this.getUuid()+ ")");
+  }
+  final SecurityContext superUserContext=SecurityContext.getSuperUserInstance();
+  final RelationshipFactory relFactory=new RelationshipFactory(superUserContext);
+  PermissionResolutionMask mask=AccessPathCache.get(principal,this);
+  if (rawPathSegment != null) {
+    final boolean result=checkPathSegment(principal,permission,relFactory);
+    if (doLog) {
+      if (result) {
+        System.out.println("        " + permission.name() + " ALLOWED by path segment "+ rawPathSegment.getType());
+      }
+ else {
+        System.out.println("        " + permission.name() + " DENIED by path segment "+ rawPathSegment.getType());
+      }
+    }
+    if (result) {
+      return true;
+    }
+  }
+  if (mask != null && mask.alreadyChecked(permission)) {
+    final boolean result=mask.allowsPermission(permission);
+    if (doLog) {
+      if (result) {
+        System.out.println("        " + permission.name() + " ALLOWED by cached mask "+ mask);
+      }
+ else {
+        System.out.println("        " + permission.name() + " DENIED by cached mask "+ mask);
+      }
+    }
+    return result;
+  }
+  try {
+    if (mask == null) {
+      mask=new PermissionResolutionMask();
+      AccessPathCache.put(principal,this,mask);
+      if (doLog) {
+        System.out.println("        Storing initial mask: " + mask);
+      }
+    }
+    mask.setChecked(permission);
+    final DatabaseService db=StructrApp.getInstance().getDatabaseService();
+    final String relTypes=getPermissionPropagationRelTypes();
+    final Map<String,Object> params=new HashMap<>();
+    final long principalId=principal.getId();
+    params.put("id1",principalId);
+    params.put("id2",this.getId());
+    for (int i=1; i < 10; i++) {
+      final String query="MATCH n, m, p = allShortestPaths(n-[" + relTypes + "*.."+ i+ "]-m) WHERE id(n) = {id1} AND id(m) = {id2} RETURN p";
+      final NativeResult result=db.execute(query,params);
+      while (result.hasNext()) {
+        final Map<String,Object> row=result.next();
+        final Path path=(Path)row.get("p");
+        Node previousNode=null;
+        boolean arrived=true;
+        for (        final PropertyContainer container : path) {
+          if (container instanceof Node) {
+            previousNode=(Node)container;
+            AccessPathCache.update(principal,this,previousNode);
+          }
+ else {
+            final Relationship rel=(Relationship)container;
+            final RelationshipInterface r=relFactory.instantiate(rel);
+            if (r instanceof PermissionPropagation) {
+              AccessPathCache.update(principal,this,rel);
+              final PermissionPropagation propagation=(PermissionPropagation)r;
+              final long startNodeId=rel.getStartNode().getId();
+              final long thisId=previousNode.getId();
+              final SchemaRelationshipNode.Direction relDirection=thisId == startNodeId ? SchemaRelationshipNode.Direction.Out : SchemaRelationshipNode.Direction.In;
+              final SchemaRelationshipNode.Direction propagationDirection=propagation.getPropagationDirection();
+              if (!propagationDirection.equals(SchemaRelationshipNode.Direction.Both)) {
+                if (propagationDirection.equals(SchemaRelationshipNode.Direction.None)) {
+                  mask.clear();
+                  arrived=false;
+                  break;
+                }
+                if (!relDirection.equals(propagationDirection)) {
+                  mask.clear();
+                  arrived=false;
+                  break;
+                }
+              }
+              applyCurrentStep(propagation,mask);
+              if (!mask.allowsPermission(permission)) {
+                if (doLog) {
+                  System.out.println("        " + permission.name() + " DENIED by "+ path);
+                }
+                arrived=false;
+                break;
+              }
+            }
+ else {
+              if (doLog) {
+                System.out.println("        " + permission.name() + " DENIED by "+ path);
+              }
+              arrived=false;
+              break;
+            }
+          }
+        }
+        if (arrived && mask.allowsPermission(permission)) {
+          if (doLog) {
+            System.out.println("        " + permission.name() + " ALLOWED by "+ path);
+            System.out.println("        Storing mask from path: " + mask);
+          }
+          AccessPathCache.put(principal,this,mask);
+          return true;
+        }
+      }
+    }
+  }
+ catch (  Throwable t) {
+    logger.log(Level.WARNING,"",t);
+  }
+  mask.setPermission(permission,false);
+  AccessPathCache.put(principal,this,mask);
+  if (doLog) {
+    System.out.println("        Storing mask from unsuccessful path: " + mask);
+  }
+  return false;
+}

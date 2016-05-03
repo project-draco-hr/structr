@@ -13,16 +13,19 @@
     try (final Tx tx=app.tx()){
       GraphObject searchRes=app.getNodeById(testSix.getUuid());
       assertNotNull(searchRes);
+      tx.success();
     }
      try (final Tx tx=app.tx()){
       testSix.getRelationships().iterator().next().getRelationship().delete();
       tx.success();
     }
      try (final Tx tx=app.tx()){
-      String uuid=rel.getUuid();
-      assertNull("UUID of deleted relationship should be null",uuid);
+      rel.getUuid();
+      fail("Accessing a deleted relationship should thow an exception.");
+      tx.success();
     }
- catch (    IllegalStateException iex) {
+ catch (    NotFoundException nfex) {
+      assertNotNull(nfex.getMessage());
     }
   }
  catch (  FrameworkException ex) {

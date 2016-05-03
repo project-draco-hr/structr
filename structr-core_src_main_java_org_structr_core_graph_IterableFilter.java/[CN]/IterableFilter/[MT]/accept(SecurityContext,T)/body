@@ -1,7 +1,8 @@
 {
   boolean ret=true;
-  for (  Predicate<T> predicate : filters) {
-    ret&=predicate.evaluate(securityContext,element);
+  for (  Filter<T> predicate : filters) {
+    predicate.setSecurityContext(securityContext);
+    ret&=predicate.accept(element);
   }
   return (ret);
 }

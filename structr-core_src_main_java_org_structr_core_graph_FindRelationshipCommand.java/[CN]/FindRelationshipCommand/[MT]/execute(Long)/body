@@ -1,14 +1,8 @@
 {
-  GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
-  RelationshipFactory<T> relationshipFactory=new RelationshipFactory<T>(securityContext);
+  DatabaseService graphDb=(DatabaseService)arguments.get("graphDb");
+  RelationshipFactory<T> relationshipFactory=new RelationshipFactory<>(securityContext);
   if (graphDb != null) {
-    try {
-      return relationshipFactory.instantiate(graphDb.getRelationshipById(id));
-    }
- catch (    NotFoundException nfe) {
-      logger.log(Level.WARNING,"Node with id {0} not found in database!",id);
-      throw new FrameworkException(404,new IdNotFoundToken("FindRelationshipCommand",id));
-    }
+    return relationshipFactory.instantiate(graphDb.getRelationshipById(id));
   }
   return null;
 }

@@ -1,0 +1,29 @@
+{
+  try {
+    final TestOne testOne=createTestNode(TestOne.class);
+    final TestSix testSix=createTestNode(TestSix.class);
+    String relId=null;
+    SixOneOneToOne rel=null;
+    assertNotNull(testOne);
+    assertNotNull(testSix);
+    try (final Tx tx=app.tx()){
+      rel=app.create(testSix,testOne,SixOneOneToOne.class);
+      relId=rel.getUuid();
+      tx.success();
+    }
+     assertNotNull(rel);
+    try (final Tx tx=app.tx()){
+      testOne.getRelationships().iterator().next().getRelationship().delete();
+    }
+     try (final Tx tx=app.tx()){
+      assertEquals("UUID of relationship should be readable after rollback",relId,rel.getUuid());
+      tx.success();
+    }
+ catch (    NotFoundException iex) {
+    }
+  }
+ catch (  FrameworkException ex) {
+    logger.log(Level.SEVERE,ex.toString());
+    fail("Unexpected exception");
+  }
+}

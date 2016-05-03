@@ -32,6 +32,7 @@
       notionPropertyMap=new HashMap<>();
       securityContext.setAttribute("notionProperties",notionPropertyMap);
     }
+    String errorMessage=null;
     final int size=result.size();
 switch (size) {
 case 0:
@@ -42,19 +43,21 @@ case 0:
           return newNode;
         }
       }
-    break;
+    errorMessage="No node found for the given properties and auto-creation not enabled";
+  break;
 case 1:
-  final T typedResult=getTypedResult(result,type);
+final T typedResult=getTypedResult(result,type);
 notionPropertyMap.put(getStorageKey(relationProperty,typedResult,sourceTypeName),foreignProperties);
 for (final Entry<PropertyKey,Object> entry : attributes.entrySet()) {
 typedResult.setProperty(entry.getKey(),entry.getValue());
 }
 return typedResult;
 default :
+errorMessage="Found " + size + " nodes for given type and properties, property set is ambiguous";
 logger.log(Level.SEVERE,"Found {0} nodes for given type and properties, property set is ambiguous!\n" + "This is often due to wrong modeling, or you should consider creating a uniquness constraint for " + type.getName(),size);
 break;
 }
-throw new FrameworkException(404,new PropertiesNotFoundToken(type.getSimpleName(),AbstractNode.base,attributes));
+throw new FrameworkException(404,errorMessage,new PropertiesNotFoundToken(type.getSimpleName(),AbstractNode.base,attributes));
 }
 return null;
 }

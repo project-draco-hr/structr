@@ -10,6 +10,13 @@
       }
       return list;
     }
+ else     if (source instanceof StructrArray) {
+      final List list=new ArrayList();
+      for (      final Object obj : ((StructrArray)source).toArray()) {
+        list.add(unwrap(obj));
+      }
+      return list;
+    }
  else     if (source.getClass().getName().equals("org.mozilla.javascript.NativeDate")) {
       try {
         final Class type=source.getClass();
@@ -19,7 +26,7 @@
         return new Date(value.longValue());
       }
  catch (      Throwable t) {
-        t.printStackTrace();
+        logger.log(Level.WARNING,"",t);
       }
     }
  else {

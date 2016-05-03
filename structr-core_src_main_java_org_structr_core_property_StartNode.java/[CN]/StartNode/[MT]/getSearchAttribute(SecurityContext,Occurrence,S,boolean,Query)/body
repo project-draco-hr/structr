@@ -1,0 +1,34 @@
+{
+  final Predicate<GraphObject> predicate=query != null ? query.toPredicate() : null;
+  final SourceSearchAttribute attr=new SourceSearchAttribute(occur);
+  final Set<GraphObject> intersectionResult=new LinkedHashSet<>();
+  boolean alreadyAdded=false;
+  if (searchValue != null && !StringUtils.isBlank(searchValue.toString())) {
+    if (exactMatch) {
+switch (occur) {
+case REQUIRED:
+        if (!alreadyAdded) {
+          intersectionResult.addAll(getRelatedNodesReverse(securityContext,searchValue,declaringClass,predicate));
+          alreadyAdded=true;
+        }
+ else {
+          intersectionResult.retainAll(getRelatedNodesReverse(securityContext,searchValue,declaringClass,predicate));
+        }
+      break;
+case OPTIONAL:
+    intersectionResult.addAll(getRelatedNodesReverse(securityContext,searchValue,declaringClass,predicate));
+  break;
+case FORBIDDEN:
+break;
+}
+}
+ else {
+intersectionResult.addAll(getRelatedNodesReverse(securityContext,searchValue,declaringClass,predicate));
+}
+attr.setResult(intersectionResult);
+}
+ else {
+return new EmptySearchAttribute(this,null);
+}
+return attr;
+}

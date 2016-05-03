@@ -1,6 +1,20 @@
 {
   final CreateNodeCommand<T> command=command(CreateNodeCommand.class);
   final PropertyMap properties=new PropertyMap(source);
-  properties.put(AbstractNode.type,type.getSimpleName());
+  String finalType=type.getSimpleName();
+  final String typeFromInput=properties.get(NodeInterface.type);
+  if (typeFromInput != null) {
+    Class actualType=StructrApp.getConfiguration().getNodeEntityClass(typeFromInput);
+    if (actualType == null) {
+      properties.put(AbstractNode.type,type.getSimpleName());
+    }
+ else     if (actualType.isInterface()) {
+      throw new FrameworkException(422,"Invalid interface type " + type.getSimpleName() + ", please supply a non-interface class name in the type property");
+    }
+ else {
+      finalType=actualType.getSimpleName();
+    }
+  }
+  properties.put(AbstractNode.type,finalType);
   return command.execute(properties);
 }

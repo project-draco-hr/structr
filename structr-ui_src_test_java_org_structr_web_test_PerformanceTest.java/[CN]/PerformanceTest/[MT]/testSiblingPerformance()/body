@@ -12,8 +12,8 @@
         }
       }
 ,new Predicate<Long>(){
-        @Override public boolean evaluate(        SecurityContext securityContext,        Long... obj){
-          return obj[0].longValue() > 100;
+        @Override public boolean accept(        Long obj){
+          return obj.longValue() > 100;
         }
       }
 );
@@ -32,7 +32,7 @@
     tx.success();
   }
  catch (  FrameworkException fex) {
-    fex.printStackTrace();
+    logger.log(Level.WARNING,"",fex);
     fail("Unexpected exception");
   }
 }

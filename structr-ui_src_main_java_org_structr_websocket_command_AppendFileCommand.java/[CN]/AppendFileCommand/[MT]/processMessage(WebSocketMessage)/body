@@ -7,7 +7,11 @@
     return;
   }
   if (parentId == null) {
-    getWebSocket().send(MessageBuilder.status().code(422).message("Cannot add node without parentId").build(),true);
+    getWebSocket().send(MessageBuilder.status().code(422).message("Cannot append node without parentId").build(),true);
+    return;
+  }
+  if (parentId.equals(id)) {
+    getWebSocket().send(MessageBuilder.status().code(422).message("Cannot append node as its own child.").build(),true);
     return;
   }
   AbstractNode parentNode=getNode(parentId);
@@ -25,6 +29,7 @@
           currentParent.treeRemoveChild(file);
         }
         folder.treeAppendChild(file);
+        TransactionCommand.registerNodeCallback(file,callback);
       }
  catch (      FrameworkException ex) {
         logger.log(Level.SEVERE,null,ex);

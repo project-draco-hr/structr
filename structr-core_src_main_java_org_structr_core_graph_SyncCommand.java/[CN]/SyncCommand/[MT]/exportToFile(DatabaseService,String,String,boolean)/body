@@ -1,0 +1,32 @@
+{
+  final App app=StructrApp.getInstance();
+  try (final Tx tx=app.tx()){
+    Set<AbstractNode> nodes=new HashSet<>();
+    Set<AbstractRelationship> rels=new HashSet<>();
+    boolean conditionalIncludeFiles=includeFiles;
+    if (query != null) {
+      logger.log(Level.INFO,"Using Cypher query {0} to determine export set, disabling export of files",query);
+      conditionalIncludeFiles=false;
+      final List<GraphObject> result=StructrApp.getInstance().cypher(query,null);
+      for (      final GraphObject obj : result) {
+        if (obj.isNode()) {
+          nodes.add((AbstractNode)obj.getSyncNode());
+        }
+ else {
+          rels.add((AbstractRelationship)obj.getSyncRelationship());
+        }
+      }
+      logger.log(Level.INFO,"Query returned {0} nodes and {1} relationships.",new Object[]{nodes.size(),rels.size()});
+    }
+ else {
+      nodes.addAll(app.nodeQuery(AbstractNode.class).includeDeletedAndHidden().getAsList());
+      rels.addAll(app.relationshipQuery(AbstractRelationship.class).includeDeletedAndHidden().getAsList());
+    }
+    exportToStream(new FileOutputStream(fileName),nodes,rels,null,conditionalIncludeFiles);
+    tx.success();
+  }
+ catch (  Throwable t) {
+    logger.log(Level.WARNING,"",t);
+    throw new FrameworkException(500,t.getMessage());
+  }
+}

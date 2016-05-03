@@ -1,5 +1,5 @@
 {
-  final GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
+  final DatabaseService graphDb=(DatabaseService)arguments.get("graphDb");
   final RelationshipFactory relationshipFactory=new RelationshipFactory(securityContext);
   if (graphDb != null) {
     Iterator<AbstractRelationship> relIterator=null;
@@ -13,7 +13,7 @@
     }
  else {
       try (final Tx tx=StructrApp.getInstance().tx()){
-        relIterator=Iterables.map(relationshipFactory,GlobalGraphOperations.at(graphDb).getAllRelationships()).iterator();
+        relIterator=Iterables.map(relationshipFactory,graphDb.getAllRelationships()).iterator();
         tx.success();
       }
      }

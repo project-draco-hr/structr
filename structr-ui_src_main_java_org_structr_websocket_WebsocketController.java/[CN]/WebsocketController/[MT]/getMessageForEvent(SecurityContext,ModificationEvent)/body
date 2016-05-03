@@ -1,19 +1,20 @@
 {
+  final String callbackId=modificationEvent.getCallbackId();
   if (modificationEvent.isNode()) {
     final NodeInterface node=(NodeInterface)modificationEvent.getGraphObject();
     if (modificationEvent.isDeleted()) {
-      final WebSocketMessage message=createMessage("DELETE");
+      final WebSocketMessage message=createMessage("DELETE",callbackId);
       message.setId(modificationEvent.getRemovedProperties().get(GraphObject.id));
       return message;
     }
     if (modificationEvent.isCreated()) {
-      final WebSocketMessage message=createMessage("CREATE");
+      final WebSocketMessage message=createMessage("CREATE",callbackId);
       message.setGraphObject(node);
       message.setResult(Arrays.asList(new GraphObject[]{node}));
       return message;
     }
     if (modificationEvent.isModified()) {
-      final WebSocketMessage message=createMessage("UPDATE");
+      final WebSocketMessage message=createMessage("UPDATE",callbackId);
       message.setGraphObject(node);
       message.setResult(Arrays.asList(new GraphObject[]{node}));
       message.setId(node.getUuid());
@@ -26,43 +27,47 @@
  else {
     final RelationshipInterface relationship=(RelationshipInterface)modificationEvent.getGraphObject();
     final RelationshipType relType=modificationEvent.getRelationshipType();
-    if (!("CONTAINS".equals(relType.name()))) {
-      return null;
+    if ("CONTAINS".equals(relType.name())) {
+      if (modificationEvent.isDeleted()) {
+        final WebSocketMessage message=createMessage("REMOVE_CHILD",callbackId);
+        message.setNodeData("parentId",relationship.getSourceNodeId());
+        message.setId(relationship.getTargetNodeId());
+        return message;
+      }
+      if (modificationEvent.isCreated()) {
+        final WebSocketMessage message=new WebSocketMessage();
+        final NodeInterface startNode=relationship.getSourceNode();
+        final NodeInterface endNode=relationship.getTargetNode();
+        message.setResult(Arrays.asList(new GraphObject[]{endNode}));
+        message.setId(endNode.getUuid());
+        message.setNodeData("parentId",startNode.getUuid());
+        message.setCommand("APPEND_CHILD");
+        if (endNode instanceof DOMNode) {
+          org.w3c.dom.Node refNode=((DOMNode)endNode).getNextSibling();
+          if (refNode != null) {
+            message.setCommand("INSERT_BEFORE");
+            message.setNodeData("refId",((AbstractNode)refNode).getUuid());
+          }
+        }
+ else         if (endNode instanceof User) {
+          message.setCommand("APPEND_USER");
+          message.setNodeData("refId",startNode.getUuid());
+        }
+        return message;
+      }
     }
     if (modificationEvent.isDeleted()) {
-      final WebSocketMessage message=createMessage("REMOVE_CHILD");
-      message.setNodeData("parentId",relationship.getSourceNodeId());
-      message.setId(relationship.getTargetNodeId());
-      return message;
-    }
-    if (modificationEvent.isCreated()) {
-      final WebSocketMessage message=new WebSocketMessage();
-      final NodeInterface startNode=relationship.getSourceNode();
-      final NodeInterface endNode=relationship.getTargetNode();
-      message.setResult(Arrays.asList(new GraphObject[]{endNode}));
-      message.setId(endNode.getUuid());
-      message.setNodeData("parentId",startNode.getUuid());
-      message.setCommand("APPEND_CHILD");
-      if (endNode instanceof DOMNode) {
-        org.w3c.dom.Node refNode=((DOMNode)endNode).getNextSibling();
-        if (refNode != null) {
-          message.setCommand("INSERT_BEFORE");
-          message.setNodeData("refId",((AbstractNode)refNode).getUuid());
-        }
-      }
- else       if (endNode instanceof User) {
-        message.setCommand("APPEND_USER");
-        message.setNodeData("refId",startNode.getUuid());
-      }
+      final WebSocketMessage message=createMessage("DELETE",callbackId);
+      message.setId(modificationEvent.getRemovedProperties().get(GraphObject.id));
       return message;
     }
     if (modificationEvent.isModified()) {
-      final WebSocketMessage message=createMessage("UPDATE");
-      message.setGraphObject(relationship);
-      message.setId(relationship.getUuid());
+      final WebSocketMessage message=createMessage("UPDATE",callbackId);
       message.getModifiedProperties().addAll(modificationEvent.getModifiedProperties().keySet());
       message.getRemovedProperties().addAll(modificationEvent.getRemovedProperties().keySet());
       message.setNodeData(modificationEvent.getData(securityContext));
+      message.setGraphObject(relationship);
+      message.setId(relationship.getUuid());
       final PropertyMap relProperties=relationship.getProperties();
       final NodeInterface startNode=relationship.getSourceNode();
       final NodeInterface endNode=relationship.getTargetNode();

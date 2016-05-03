@@ -5,13 +5,12 @@
     tx.success();
   }
  catch (  FrameworkException t) {
-    t.printStackTrace();
+    logger.log(Level.WARNING,"",t);
   }
   message.setSessionValid(isAuthenticated);
   if (clearSessionId) {
     message.setSessionId(null);
   }
-  message.setCallback(callback);
   if ("LOGIN".equals(message.getCommand()) && !isAuthenticated) {
     message.setMessage("User has no backend access.");
     message.setCode(403);

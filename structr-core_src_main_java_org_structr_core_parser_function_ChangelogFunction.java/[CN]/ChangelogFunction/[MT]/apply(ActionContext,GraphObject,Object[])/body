@@ -1,0 +1,61 @@
+{
+  if (arrayHasMinLengthAndMaxLengthAndAllElementsNotNull(sources,1,2)) {
+    final App app=StructrApp.getInstance();
+    GraphObject dataObject;
+    if (sources[0] instanceof GraphObject) {
+      dataObject=(GraphObject)sources[0];
+    }
+ else {
+      logger.log(Level.WARNING,"First parameter must be of type GraphObject: \"{0}\"",sources[0]);
+      return usage(ctx.isJavaScriptContext());
+    }
+    final String changelog=dataObject.getProperty(GraphObject.structrChangeLog);
+    final List list=new ArrayList();
+    if (changelog != null) {
+      final String[] entries=changelog.split("\n");
+      if (entries.length > 0) {
+        final boolean resolveTargets=(sources.length >= 2 && Boolean.TRUE.equals(sources[1]));
+        final Gson gson=new GsonBuilder().disableHtmlEscaping().create();
+        final JsonParser parser=new JsonParser();
+        for (        String entry : entries) {
+          final JsonObject jsonObj=parser.parse(entry).getAsJsonObject();
+          final String verb=jsonObj.get("verb").getAsString();
+          final TreeMap<String,Object> obj=new TreeMap<>();
+          obj.put("verb",verb);
+          obj.put("time",jsonObj.get("time").getAsLong());
+          obj.put("userId",jsonObj.get("userId").getAsString());
+          obj.put("userName",jsonObj.get("userName").getAsString());
+          if (verb.equals("create") || verb.equals("delete")) {
+            obj.put("target",jsonObj.get("target").getAsString());
+            if (resolveTargets) {
+              obj.put("targetObj",app.get(jsonObj.get("target").getAsString()));
+            }
+            list.add(obj);
+          }
+ else           if (verb.equals("link") || verb.equals("unlink")) {
+            obj.put("rel",jsonObj.get("rel").getAsString());
+            obj.put("target",jsonObj.get("target").getAsString());
+            if (resolveTargets) {
+              obj.put("targetObj",app.get(jsonObj.get("target").getAsString()));
+            }
+            list.add(obj);
+          }
+ else           if (verb.equals("change")) {
+            obj.put("key",jsonObj.get("key").getAsString());
+            obj.put("prev",gson.toJson(jsonObj.get("prev")));
+            obj.put("val",gson.toJson(jsonObj.get("val")));
+            list.add(obj);
+          }
+ else {
+            logger.log(Level.WARNING,"Unknown verb in changelog: \"{0}\"",verb);
+          }
+        }
+      }
+    }
+    return list;
+  }
+ else {
+    logParameterError(entity,sources,ctx.isJavaScriptContext());
+    return usage(ctx.isJavaScriptContext());
+  }
+}

@@ -2,7 +2,7 @@
   long t0=System.nanoTime();
   RestWriter writer=getRestWriter(securityContext,output);
   if (indent) {
-    writer.setIndent("   ");
+    writer.setIndent("	");
   }
   List<? extends GraphObject> results=result.getResults();
   Integer page=result.getPage();
@@ -32,18 +32,42 @@
     writer.name("result_count").value(resultCount);
   }
   if (results != null) {
-    if (results.isEmpty()) {
+    if (results.isEmpty() && result.isPrimitiveArray()) {
+      writer.name(resultKeyName).nullValue();
+    }
+ else     if (results.isEmpty() && !result.isPrimitiveArray()) {
       writer.name(resultKeyName).beginArray().endArray();
     }
  else     if (result.isPrimitiveArray()) {
-      writer.name(resultKeyName).beginArray();
-      for (      GraphObject graphObject : results) {
-        Object value=graphObject.getProperty(GraphObject.id);
-        if (value != null) {
-          writer.value(value.toString());
+      writer.name(resultKeyName);
+      if (results.size() > 1) {
+        writer.beginArray();
+      }
+      for (      final Object object : results) {
+        if (object != null) {
+          if (object instanceof GraphObject) {
+            long startTime=System.currentTimeMillis();
+            String localPropertyView=propertyView.get(null);
+            GraphObject obj=(GraphObject)object;
+            Iterator<PropertyKey> keyIt=obj.getPropertyKeys(localPropertyView).iterator();
+            while (keyIt.hasNext()) {
+              PropertyKey k=keyIt.next();
+              Object value=obj.getProperty(k);
+              root.serializeProperty(writer,k,value,localPropertyView,0);
+            }
+            if (System.currentTimeMillis() > startTime + MAX_SERIALIZATION_TIME) {
+              logger.log(Level.SEVERE,"JSON serialization of {0} with {1} results took more than {2} ms, aborted. Please review output view size or adjust timeout.",new Object[]{securityContext.getCompoundRequestURI(),results.size(),MAX_SERIALIZATION_TIME});
+              break;
+            }
+          }
+ else {
+            writer.value(object.toString());
+          }
         }
       }
-      writer.endArray();
+      if (results.size() > 1) {
+        writer.endArray();
+      }
     }
  else {
       if (results.size() > 1 && !result.isCollection()) {
@@ -56,7 +80,7 @@
         for (        GraphObject graphObject : results) {
           root.serialize(writer,graphObject,localPropertyView,0);
           if (System.currentTimeMillis() > startTime + MAX_SERIALIZATION_TIME) {
-            logger.log(Level.SEVERE,"JSON serialization took more than {0} ms, aborted. Please review output view size or adjust timeout.",MAX_SERIALIZATION_TIME);
+            logger.log(Level.SEVERE,"JSON serialization of {0} with {1} results took more than {2} ms, aborted. Please review output view size or adjust timeout.",new Object[]{securityContext.getRequest().getRequestURI().concat((securityContext.getRequest().getQueryString() == null) ? "" : "?".concat(securityContext.getRequest().getQueryString())),results.size(),MAX_SERIALIZATION_TIME});
             break;
           }
         }

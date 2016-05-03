@@ -1,0 +1,14 @@
+{
+  if (pages == null) {
+    pages=StructrApp.getInstance(securityContext).nodeQuery(Page.class).getAsList();
+    Collections.sort(pages,new GraphObjectComparator(Page.position,GraphObjectComparator.ASCENDING));
+  }
+  for (  final Page page : pages) {
+    final String pagePath=page.getPath();
+    final String name=PathHelper.getName(path);
+    if (((pagePath != null && pagePath.equals(path)) || name.equals(page.getName()) || name.equals(page.getUuid())) && (EditMode.CONTENT.equals(edit) || isVisibleForSite(securityContext.getRequest(),page))) {
+      return page;
+    }
+  }
+  return null;
+}

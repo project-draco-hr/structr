@@ -1,8 +1,10 @@
 {
   Principal user=null;
-  final HttpSession session=request.getSession(false);
-  if (session != null) {
-    user=AuthHelper.getPrincipalForSessionId(session.getId());
+  if (request.getAttribute(SessionHelper.SESSION_IS_NEW) != null) {
+    final HttpSession session=request.getSession(false);
+    if (session != null) {
+      user=AuthHelper.getPrincipalForSessionId(session.getId());
+    }
   }
   if (user == null) {
     String userName=request.getHeader("X-User");

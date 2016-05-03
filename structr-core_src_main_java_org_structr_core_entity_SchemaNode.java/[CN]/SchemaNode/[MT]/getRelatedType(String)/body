@@ -1,21 +1,27 @@
 {
-  final Set<String> existingPropertyNames=new LinkedHashSet<>();
-  final String _className=getProperty(name);
-  for (  final SchemaRelationshipNode outRel : getProperty(SchemaNode.relatedTo)) {
-    if (propertyNameToCheck.equals(outRel.getPropertyName(_className,existingPropertyNames,true))) {
-      return outRel.getSchemaNodeTargetType();
+  String relatedType=getRelatedType(this,propertyNameToCheck);
+  if (relatedType == null) {
+    try {
+      final String parentClass=getProperty(SchemaNode.extendsClass);
+      if (parentClass != null) {
+        final SchemaNode parentSchemaNode=StructrApp.getInstance().nodeQuery(SchemaNode.class).andName(StringUtils.substringAfterLast(parentClass,".")).getFirst();
+        if (parentSchemaNode != null) {
+          relatedType=getRelatedType(parentSchemaNode,propertyNameToCheck);
+        }
+      }
+    }
+ catch (    FrameworkException ex) {
+      logger.log(Level.WARNING,"Can't find schema node for parent class!",ex);
     }
   }
-  for (  final SchemaRelationshipNode inRel : getProperty(SchemaNode.relatedFrom)) {
-    if (propertyNameToCheck.equals(inRel.getPropertyName(_className,existingPropertyNames,false))) {
-      return inRel.getSchemaNodeSourceType();
-    }
+  if (relatedType != null) {
+    return relatedType;
   }
   final PropertyKey key=StructrApp.getConfiguration().getPropertyKeyForJSONName(NodeInterface.class,propertyNameToCheck,false);
   if (key != null) {
-    final Class relatedType=key.relatedType();
-    if (relatedType != null) {
-      return relatedType.getSimpleName();
+    final Class relatedTypeClass=key.relatedType();
+    if (relatedTypeClass != null) {
+      return relatedTypeClass.getSimpleName();
     }
   }
   return null;

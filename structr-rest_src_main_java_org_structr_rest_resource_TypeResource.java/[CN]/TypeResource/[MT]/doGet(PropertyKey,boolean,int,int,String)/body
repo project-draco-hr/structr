@@ -1,11 +1,11 @@
 {
-  boolean includeDeletedAndHidden=false;
+  boolean includeDeletedAndHidden=true;
   boolean publicOnly=false;
   PropertyKey actualSortKey=sortKey;
   boolean actualSortOrder=sortDescending;
   if (rawType != null) {
     if (entityClass == null) {
-      throw new NotFoundException();
+      throw new NotFoundException("Type " + rawType + " does not exist");
     }
     collectSearchAttributes(query);
     if (actualSortKey == null) {
@@ -24,7 +24,14 @@
         actualSortKey=AbstractNode.name;
       }
     }
-    return query.includeDeletedAndHidden(includeDeletedAndHidden).publicOnly(publicOnly).sort(actualSortKey).order(actualSortOrder).pageSize(pageSize).page(page).offsetId(offsetId).getResult();
+    if (virtualType != null) {
+      final Result untransformedResult=query.includeDeletedAndHidden(includeDeletedAndHidden).publicOnly(publicOnly).sort(actualSortKey).order(actualSortOrder).offsetId(offsetId).getResult();
+      final Result result=virtualType.transformOutput(securityContext,entityClass,untransformedResult);
+      return PagingHelper.subResult(result,pageSize,page,offsetId);
+    }
+ else {
+      return query.includeDeletedAndHidden(includeDeletedAndHidden).publicOnly(publicOnly).sort(actualSortKey).order(actualSortOrder).pageSize(pageSize).page(page).offsetId(offsetId).getResult();
+    }
   }
  else {
     logger.log(Level.WARNING,"type was null");

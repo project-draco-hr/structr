@@ -1,0 +1,23 @@
+{
+  if (sources == null || sources != null && sources.length != 2) {
+    logParameterError(entity,sources,ctx.isJavaScriptContext());
+    return usage(ctx.isJavaScriptContext());
+  }
+  if (arrayHasLengthAndAllElementsNotNull(sources,2)) {
+    final String dateString=sources[0].toString();
+    if (StringUtils.isBlank(dateString)) {
+      return "";
+    }
+    final String pattern=sources[1].toString();
+    try {
+      return new SimpleDateFormat(pattern).parse(dateString);
+    }
+ catch (    ParseException ex) {
+      logException(ex,"{0}: Could not parse date and format it to pattern in element: \"{1}\". Parameters: {2}",new Object[]{getName(),entity,getParametersAsString(sources)});
+    }
+  }
+ else {
+    logParameterError(entity,sources,ctx.isJavaScriptContext());
+  }
+  return "";
+}

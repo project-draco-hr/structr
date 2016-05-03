@@ -1,5 +1,5 @@
 {
-  final GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
+  final DatabaseService graphDb=(DatabaseService)arguments.get("graphDb");
   final SecurityContext superUserContext=SecurityContext.getSuperUserInstance();
   final NodeFactory nodeFactory=new NodeFactory(superUserContext);
   final String type=(String)properties.get("type");
@@ -21,7 +21,7 @@
     }
  else {
       try (final Tx tx=StructrApp.getInstance().tx()){
-        nodeIterator=Iterables.map(nodeFactory,GlobalGraphOperations.at(graphDb).getAllNodes()).iterator();
+        nodeIterator=Iterables.map(nodeFactory,graphDb.getAllNodes()).iterator();
         tx.success();
       }
      }
@@ -50,7 +50,7 @@
             PropertyKey propertyKey=StructrApp.getConfiguration().getPropertyKeyForDatabaseName(node.getClass(),key);
             if (propertyKey != null) {
               try {
-                node.unlockReadOnlyPropertiesOnce();
+                node.unlockSystemPropertiesOnce();
                 node.setProperty(propertyKey,val);
               }
  catch (              FrameworkException fex) {

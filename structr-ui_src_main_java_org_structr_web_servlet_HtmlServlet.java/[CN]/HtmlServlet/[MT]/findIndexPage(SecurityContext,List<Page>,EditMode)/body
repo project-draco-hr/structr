@@ -1,0 +1,12 @@
+{
+  if (pages == null) {
+    pages=StructrApp.getInstance(securityContext).nodeQuery(Page.class).getAsList();
+    Collections.sort(pages,new GraphObjectComparator(Page.position,GraphObjectComparator.ASCENDING));
+  }
+  for (  Page page : pages) {
+    if (securityContext.isVisible(page) && page.getProperty(Page.position) != null && ((EditMode.CONTENT.equals(edit) || isVisibleForSite(securityContext.getRequest(),page)) || (page.getProperty(Page.enableBasicAuth) && page.getProperty(Page.visibleToAuthenticatedUsers)))) {
+      return page;
+    }
+  }
+  return null;
+}

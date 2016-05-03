@@ -1,0 +1,23 @@
+{
+  if (arrayHasLengthAndAllElementsNotNull(sources,2)) {
+    final int pos=Double.valueOf(sources[1].toString()).intValue();
+    if (sources[0] instanceof List && !((List)sources[0]).isEmpty()) {
+      final List list=(List)sources[0];
+      final int size=list.size();
+      if (pos >= size) {
+        return null;
+      }
+      return list.get(Math.min(Math.max(0,pos),size - 1));
+    }
+    if (sources[0].getClass().isArray()) {
+      final Object[] arr=(Object[])sources[0];
+      if (pos <= arr.length) {
+        return arr[pos];
+      }
+    }
+  }
+ else {
+    logParameterError(entity,sources,ctx.isJavaScriptContext());
+  }
+  return null;
+}

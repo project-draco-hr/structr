@@ -1,6 +1,8 @@
 {
-  final Authenticator auth=config.getAuthenticator();
-  final SecurityContext securityContext;
+  final Authenticator auth=getConfig().getAuthenticator();
+  SecurityContext securityContext;
+  List<Page> pages=null;
+  boolean requestUriContainsUuids=false;
   final App app;
   try {
     String path=request.getPathInfo();
@@ -17,6 +19,7 @@
       boolean dontCache=false;
       logger.log(Level.FINE,"Path info {0}",path);
       if (response.getStatus() == 302) {
+        tx.success();
         return;
       }
       final Principal user=securityContext.getUser(false);
@@ -30,12 +33,12 @@
       AbstractNode dataNode=null;
       String[] uriParts=PathHelper.getParts(path);
       if ((uriParts == null) || (uriParts.length == 0)) {
-        rootElement=findIndexPage(securityContext,edit);
+        rootElement=findIndexPage(securityContext,pages,edit);
         logger.log(Level.FINE,"No path supplied, trying to find index page");
       }
  else {
         if (rootElement == null) {
-          rootElement=findPage(securityContext,request,path,edit);
+          rootElement=findPage(securityContext,pages,path,edit);
         }
  else {
           dontCache=true;
@@ -44,10 +47,10 @@
       if (rootElement == null) {
         File file=findFile(securityContext,request,path);
         if (file != null) {
+          tx.success();
           return;
         }
         Matcher matcher=threadLocalUUIDMatcher.get();
-        boolean requestUriContainsUuids=false;
         for (int i=0; i < uriParts.length; i++) {
           request.setAttribute(uriParts[i],i);
           matcher.reset(uriParts[i]);
@@ -61,7 +64,7 @@
         }
         if (dataNode != null && !(dataNode instanceof Linkable)) {
           request.removeAttribute(POSSIBLE_ENTRY_POINTS_KEY);
-          rootElement=findPage(securityContext,request,StringUtils.substringBeforeLast(path,PathHelper.PATH_SEP),edit);
+          rootElement=findPage(securityContext,pages,StringUtils.substringBeforeLast(path,PathHelper.PATH_SEP),edit);
           renderContext.setDetailsDataObject(dataNode);
           if (rootElement == null && dataNode instanceof DOMNode) {
             rootElement=((DOMNode)dataNode);
@@ -69,64 +72,84 @@
         }
       }
       if (rootElement == null) {
-        if (response.getStatus() == HttpServletResponse.SC_UNAUTHORIZED) {
-          try {
-            UiAuthenticator.writeUnauthorized(response);
-          }
- catch (          IllegalStateException ise) {
-          }
+        final HttpBasicAuthResult authResult=checkHttpBasicAuth(request,response,path);
+switch (authResult.authState()) {
+case Authenticated:
+          final Linkable result=authResult.getRootElement();
+        if (result instanceof Page) {
+          rootElement=(DOMNode)result;
+          renderContext.pushSecurityContext(authResult.getSecurityContext());
         }
- else {
-          rootElement=notFound(response,securityContext);
-        }
-      }
-      if (rootElement == null) {
-        response.setContentLength(0);
-        response.getOutputStream().close();
-        return;
-      }
-      dontCache|=rootElement.getProperty(Page.dontCache);
-      if (EditMode.WIDGET.equals(edit) || dontCache) {
-        setNoCacheHeaders(response);
-      }
-      if (!securityContext.isVisible(rootElement)) {
-        rootElement=notFound(response,securityContext);
-        if (rootElement == null) {
+ else         if (result instanceof File) {
+          tx.success();
           return;
         }
-      }
-      if (securityContext.isVisible(rootElement)) {
-        if (!EditMode.WIDGET.equals(edit) && !dontCache && notModifiedSince(request,response,rootElement,dontCache)) {
-          response.getOutputStream().close();
-        }
+      break;
+case MustAuthenticate:
+    return;
+case NoBasicAuth:
+  break;
+}
+}
+if (rootElement == null) {
+if (response.getStatus() == HttpServletResponse.SC_UNAUTHORIZED) {
+try {
+  UiAuthenticator.writeUnauthorized(response);
+}
+ catch (IllegalStateException ise) {
+}
+}
  else {
-          response.setCharacterEncoding("UTF-8");
-          String contentType=rootElement.getProperty(Page.contentType);
-          if (contentType == null) {
-            contentType="text/html;charset=UTF-8";
-          }
-          if (contentType.equals("text/html")) {
-            contentType=contentType.concat(";charset=UTF-8");
-          }
-          response.setContentType(contentType);
-          setCustomResponseHeaders(response);
-          response.getOutputStream().close();
-        }
-      }
+rootElement=notFound(response,securityContext);
+}
+}
+if (rootElement == null) {
+response.setContentLength(0);
+response.getOutputStream().close();
+tx.success();
+return;
+}
+dontCache|=rootElement.getProperty(Page.dontCache);
+if (EditMode.WIDGET.equals(edit) || dontCache) {
+setNoCacheHeaders(response);
+}
+if (!securityContext.isVisible(rootElement)) {
+rootElement=notFound(response,securityContext);
+if (rootElement == null) {
+tx.success();
+return;
+}
+}
+if (securityContext.isVisible(rootElement)) {
+if (!EditMode.WIDGET.equals(edit) && !dontCache && notModifiedSince(request,response,rootElement,dontCache)) {
+response.getOutputStream().close();
+}
  else {
-        notFound(response,securityContext);
-        response.getOutputStream().close();
-      }
-      tx.success();
-    }
- catch (    Throwable fex) {
-      fex.printStackTrace();
-      logger.log(Level.SEVERE,"Exception while processing request",fex);
-    }
-  }
- catch (  FrameworkException t) {
-    t.printStackTrace();
-    logger.log(Level.SEVERE,"Exception while processing request",t);
-    UiAuthenticator.writeInternalServerError(response);
-  }
+response.setCharacterEncoding("UTF-8");
+String contentType=rootElement.getProperty(Page.contentType);
+if (contentType == null) {
+  contentType="text/html;charset=UTF-8";
+}
+if (contentType.equals("text/html")) {
+  contentType=contentType.concat(";charset=UTF-8");
+}
+response.setContentType(contentType);
+setCustomResponseHeaders(response);
+response.getOutputStream().close();
+}
+}
+ else {
+notFound(response,securityContext);
+response.getOutputStream().close();
+}
+tx.success();
+}
+ catch (Throwable fex) {
+logger.log(Level.SEVERE,"Exception while processing request",fex);
+}
+}
+ catch (FrameworkException t) {
+logger.log(Level.SEVERE,"Exception while processing request",t);
+UiAuthenticator.writeInternalServerError(response);
+}
 }

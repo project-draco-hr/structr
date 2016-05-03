@@ -1,0 +1,35 @@
+{
+  if (arrayHasMinLengthAndAllElementsNotNull(sources,1)) {
+    final String scriptKey=sources[1].toString();
+    final String script=StructrApp.getConfigurationValue(scriptKey);
+    final OutputStream out=(OutputStream)sources[0];
+    if (StringUtils.isNotBlank(script)) {
+      final StringBuilder scriptBuilder=new StringBuilder(script);
+      if (sources.length > 2) {
+        for (int i=2; i < sources.length; i++) {
+          if (sources[i] != null) {
+            scriptBuilder.append(" ").append(sources[i].toString());
+          }
+        }
+      }
+      final ExecutorService executorService=Executors.newSingleThreadExecutor();
+      final ScriptingProcess process=new ScriptingProcess(ctx.getSecurityContext(),scriptBuilder.toString(),out);
+      try {
+        return executorService.submit(process).get();
+      }
+ catch (      InterruptedException|ExecutionException iex) {
+        logException(entity,iex,sources);
+      }
+ finally {
+        executorService.shutdown();
+      }
+    }
+ else {
+      logger.log(Level.WARNING,"No script found for key \"{0}\" in structr.conf, nothing executed.",scriptKey);
+    }
+  }
+ else {
+    logParameterError(entity,sources,ctx.isJavaScriptContext());
+  }
+  return "";
+}

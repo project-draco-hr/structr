@@ -1,0 +1,34 @@
+{
+  final long t0=System.currentTimeMillis();
+  long t1=t0;
+  Item<S> item;
+  do {
+    item=source.poll();
+    if (item != null) {
+      processedItems.incrementAndGet();
+      T n=null;
+      try {
+        n=instantiate(item.item);
+      }
+ catch (      NotFoundException nfe) {
+synchronized (failed) {
+          failed.add(item);
+        }
+      }
+      if (n != null) {
+        overallCount.incrementAndGet();
+synchronized (nodes) {
+          nodes.add(new Item<>(item.index,n));
+        }
+        if (dontCheckCount && overallCount.get() > offset + pageSize) {
+          keepRunning.set(false);
+        }
+      }
+    }
+    if (doLogOutput && System.currentTimeMillis() - t1 > 2000) {
+      t1=System.currentTimeMillis();
+      logger.log(Level.INFO,"Parallel instantiation: checked {0} nodes so far",processedItems.get());
+    }
+  }
+ while (item != null && keepRunning.get());
+}

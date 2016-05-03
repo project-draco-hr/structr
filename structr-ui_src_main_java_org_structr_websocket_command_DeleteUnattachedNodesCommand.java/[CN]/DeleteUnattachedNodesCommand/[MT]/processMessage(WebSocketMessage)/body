@@ -2,7 +2,7 @@
   final SecurityContext securityContext=getWebSocket().getSecurityContext();
   final App app=StructrApp.getInstance(securityContext);
   final List<AbstractNode> filteredResults=new LinkedList<>();
-  try (final Tx tx=app.tx()){
+  try (final Tx tx=app.tx(false,false,false)){
     final List<AbstractNode> topNodes=ListUnattachedNodesCommand.getUnattachedNodes(app,securityContext,webSocketData);
     for (    final AbstractNode topNode : topNodes) {
       filteredResults.add(topNode);

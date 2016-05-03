@@ -17,8 +17,7 @@ synchronized (taskQueue) {
             tx.success();
           }
  catch (          Throwable t) {
-            logger.log(Level.SEVERE,"Processing task {0} failed. Maybe someone killed us?",currentTask.getType());
-            t.printStackTrace();
+            logger.log(Level.SEVERE,t,LogMessageSupplier.create("Processing task {0} failed. Maybe someone killed us?",currentTask.getType()));
           }
         }
  else {
@@ -26,8 +25,7 @@ synchronized (taskQueue) {
             ret=processTask(currentTask);
           }
  catch (          Throwable t) {
-            logger.log(Level.SEVERE,"Processing task {0} failed. Maybe someone killed us?",currentTask.getType());
-            t.printStackTrace();
+            logger.log(Level.SEVERE,t,LogMessageSupplier.create("Processing task {0} failed. Maybe someone killed us?",currentTask.getType()));
           }
         }
       }

@@ -1,0 +1,25 @@
+{
+  if (sources != null && sources.length >= 1 && sources.length <= 3) {
+    try {
+      String address=sources[0].toString();
+      String username=null;
+      String password=null;
+switch (sources.length) {
+case 3:
+        password=sources[2].toString();
+case 2:
+      username=sources[1].toString();
+    break;
+}
+return headFromUrl(ctx,address,username,password);
+}
+ catch (Throwable t) {
+logException(entity,t,sources);
+}
+return "";
+}
+ else {
+logParameterError(entity,sources,ctx.isJavaScriptContext());
+}
+return usage(ctx.isJavaScriptContext());
+}

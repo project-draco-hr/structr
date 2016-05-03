@@ -1,6 +1,20 @@
 {
   final Principal user=AuthHelper.getPrincipalForSessionId(sessionId);
   if (user != null) {
-    this.setAuthenticated(sessionId,user);
+    try {
+      final boolean sessionValid=!SessionHelper.isSessionTimedOut(SessionHelper.getSessionBySessionId(sessionId));
+      if (sessionValid) {
+        this.setAuthenticated(sessionId,user);
+      }
+ else {
+        logger.log(Level.WARNING,"Session {0} timed out - last accessed by {1}",new Object[]{sessionId,user});
+        SessionHelper.clearSession(sessionId);
+        SessionHelper.invalidateSession(SessionHelper.getSessionBySessionId(sessionId));
+        AuthHelper.sendLogoutNotification(user);
+      }
+    }
+ catch (    FrameworkException ex) {
+      logger.log(Level.WARNING,"FXE",ex);
+    }
   }
 }

@@ -1,5 +1,5 @@
 {
-  final StructrConf config=getBaseConfiguration();
+  final Properties config=getBaseConfiguration();
   final String configTemplateFileName="structr.conf_templ";
   final String configFileName="structr.conf";
   final File configTemplateFile=new File(configTemplateFileName);
@@ -21,12 +21,11 @@
   logger.log(Level.INFO,"Reading {0}..",configFileName);
   try {
     PropertiesConfiguration.setDefaultListDelimiter('\0');
-    final PropertiesConfiguration propConf=new PropertiesConfiguration(configFileName);
-    structrConf.load(propConf);
+    StructrServices.loadConfiguration(config,new PropertiesConfiguration(configFileName));
   }
  catch (  ConfigurationException ex) {
     logger.log(Level.SEVERE,null,ex);
   }
-  mergeConfiguration(config,structrConf);
+  StructrServices.mergeConfiguration(config,structrConf);
   initialize(config);
 }

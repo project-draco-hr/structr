@@ -10,6 +10,8 @@
     logger.log(Level.WARNING,"Trying to delete a node which is already deleted",ise.getMessage());
     return null;
   }
+catch (  org.structr.api.NotFoundException nfex) {
+  }
   deletedNodes.add(node);
   App app=StructrApp.getInstance(securityContext);
   try {
@@ -41,14 +43,10 @@
       }
     }
     node.onNodeDeletion();
-    try {
-      for (      AbstractRelationship r : node.getRelationships()) {
-        if (r != null) {
-          app.delete(r);
-        }
+    for (    AbstractRelationship r : node.getRelationships()) {
+      if (r != null) {
+        app.delete(r);
       }
-    }
- catch (    NotFoundException nfex) {
     }
     node.removeFromIndex();
     TransactionCommand.nodeDeleted(securityContext.getCachedUser(),node);
@@ -62,7 +60,7 @@
     }
   }
  catch (  Throwable t) {
-    logger.log(Level.WARNING,"Exception while deleting node: {0}",t);
+    logger.log(Level.WARNING,t,LogMessageSupplier.create("Exception while deleting node: {0}",node));
   }
   return null;
 }

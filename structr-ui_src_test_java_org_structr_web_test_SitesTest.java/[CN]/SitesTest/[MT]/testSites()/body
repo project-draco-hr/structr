@@ -1,0 +1,50 @@
+{
+  try (final Tx tx=app.tx()){
+    final Page pageOne=app.create(Page.class,"page-one");
+    try {
+      final Element html=pageOne.createElement("html");
+      ((DOMNode)html).setProperty(DOMNode.visibleToPublicUsers,true);
+      final Text textNode=pageOne.createTextNode("page-1");
+      ((DOMNode)textNode).setProperty(DOMNode.visibleToPublicUsers,true);
+      pageOne.appendChild(html);
+      html.appendChild(textNode);
+    }
+ catch (    DOMException dex) {
+      logger.log(Level.WARNING,"",dex);
+      throw new FrameworkException(422,dex.getMessage());
+    }
+    final Page pageTwo=app.create(Page.class,"page-two");
+    try {
+      final Element html=pageTwo.createElement("html");
+      ((DOMNode)html).setProperty(DOMNode.visibleToPublicUsers,true);
+      final Text textNode=pageTwo.createTextNode("page-2");
+      ((DOMNode)textNode).setProperty(DOMNode.visibleToPublicUsers,true);
+      pageTwo.appendChild(html);
+      html.appendChild(textNode);
+    }
+ catch (    DOMException dex) {
+      logger.log(Level.WARNING,"",dex);
+      throw new FrameworkException(422,dex.getMessage());
+    }
+    final Site siteOne=app.create(Site.class,"site-one");
+    siteOne.setProperty(Site.visibleToPublicUsers,true);
+    final Site siteTwo=app.create(Site.class,"site-two");
+    siteTwo.setProperty(Site.visibleToPublicUsers,true);
+    pageOne.setProperty(Page.site,siteOne);
+    pageOne.setProperty(Page.visibleToPublicUsers,true);
+    pageOne.setProperty(Page.position,10);
+    pageTwo.setProperty(Page.site,siteTwo);
+    pageTwo.setProperty(Page.visibleToPublicUsers,true);
+    pageTwo.setProperty(Page.position,10);
+    siteOne.setProperty(Site.hostname,"localhost");
+    siteOne.setProperty(Site.port,8875);
+    siteTwo.setProperty(Site.hostname,"127.0.0.1");
+    siteTwo.setProperty(Site.port,8875);
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"",fex);
+  }
+  RestAssured.given().filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(200)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(201)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(400)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(401)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(403)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(404)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(422)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(500)).expect().response().contentType("text/html").statusCode(200).body(Matchers.containsString("page-1")).when().get("http://localhost:8875/");
+  RestAssured.given().filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(200)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(201)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(400)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(401)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(403)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(404)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(422)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(500)).expect().response().contentType("text/html").statusCode(200).body(Matchers.containsString("page-2")).when().get("http://127.0.0.1:8875/");
+}

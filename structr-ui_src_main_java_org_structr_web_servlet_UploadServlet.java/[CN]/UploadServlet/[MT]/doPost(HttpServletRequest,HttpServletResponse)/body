@@ -5,10 +5,18 @@
       response.getOutputStream().write("ERROR (400): Request does not contain multipart content.\n".getBytes("UTF-8"));
       return;
     }
-    final SecurityContext securityContext=getConfig().getAuthenticator().initializeAndExamineRequest(request,response);
+    final SecurityContext securityContext;
+    try {
+      securityContext=getConfig().getAuthenticator().initializeAndExamineRequest(request,response);
+    }
+ catch (    AuthenticationException ae) {
+      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+      response.getOutputStream().write("ERROR (401): Invalid user or password.\n".getBytes("UTF-8"));
+      return;
+    }
     if (securityContext.getUser(false) == null && Boolean.FALSE.equals(Boolean.parseBoolean(StructrApp.getConfigurationValue("UploadServlet.allowAnonymousUploads","false")))) {
-      response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-      response.getOutputStream().write("ERROR (403): Anonymous uploads forbidden.\n".getBytes("UTF-8"));
+      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+      response.getOutputStream().write("ERROR (401): Anonymous uploads forbidden.\n".getBytes("UTF-8"));
       return;
     }
     securityContext.setAccessMode(AccessMode.Frontend);
@@ -50,6 +58,9 @@
           for (          PropertyKey key : additionalProperties.keySet()) {
             newFile.setProperty(key,additionalProperties.get(key));
           }
+          if (!newFile.validatePath(securityContext,null)) {
+            newFile.setProperty(AbstractNode.name,name.concat("_").concat(FileHelper.getDateString()));
+          }
           newFile.notifyUploadCompletion();
           out.write(newFile.getUuid());
         }
@@ -61,7 +72,6 @@
     tx.success();
   }
  catch (  FrameworkException|IOException|FileUploadException t) {
-    t.printStackTrace();
     logger.log(Level.SEVERE,"Exception while processing request",t);
     UiAuthenticator.writeInternalServerError(response);
   }

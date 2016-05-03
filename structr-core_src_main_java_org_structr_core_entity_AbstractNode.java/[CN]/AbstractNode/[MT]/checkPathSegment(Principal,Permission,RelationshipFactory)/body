@@ -1,0 +1,31 @@
+{
+  final boolean doLog=securityContext.hasParameter("debugLoggingEnabled");
+  final RelationshipInterface r=relFactory.instantiate(rawPathSegment);
+  if (r instanceof PermissionPropagation) {
+    final PermissionPropagation propagation=(PermissionPropagation)r;
+    final long startNodeId=rawPathSegment.getStartNode().getId();
+    final long thisId=getId();
+    final SchemaRelationshipNode.Direction relDirection=thisId == startNodeId ? SchemaRelationshipNode.Direction.In : SchemaRelationshipNode.Direction.Out;
+    final SchemaRelationshipNode.Direction propagationDirection=propagation.getPropagationDirection();
+    final PermissionResolutionMask mask=new PermissionResolutionMask();
+    if (!propagationDirection.equals(SchemaRelationshipNode.Direction.Both)) {
+      if (propagationDirection.equals(SchemaRelationshipNode.Direction.None)) {
+        return false;
+      }
+      if (!relDirection.equals(propagationDirection)) {
+        return false;
+      }
+    }
+    mask.setPermission(Permission.read,true);
+    applyCurrentStep(propagation,mask);
+    if (mask.allowsPermission(permission)) {
+      mask.setChecked(permission);
+      AccessPathCache.put(principal,this,mask);
+      if (doLog) {
+        System.out.println("Storing mask from path segment: " + mask);
+      }
+      return true;
+    }
+  }
+  return false;
+}

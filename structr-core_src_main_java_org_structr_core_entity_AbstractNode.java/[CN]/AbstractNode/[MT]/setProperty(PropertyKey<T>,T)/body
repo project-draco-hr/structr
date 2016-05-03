@@ -1,17 +1,16 @@
 {
-  try {
-    if (!key.equals(GraphObject.id)) {
-      if (!isGranted(Permission.write,securityContext)) {
-        throw new FrameworkException(403,"Modification not permitted.");
-      }
-    }
-    T oldValue=getProperty(key);
-    if (((oldValue == null) && (value != null)) || ((oldValue != null) && !oldValue.equals(value))) {
-      return setPropertyInternal(key,value);
+  if (!key.equals(GraphObject.id)) {
+    if (!isGranted(Permission.write,securityContext)) {
+      internalSystemPropertiesUnlocked=false;
+      readOnlyPropertiesUnlocked=false;
+      throw new FrameworkException(403,"Modification not permitted.");
     }
   }
-  finally {
-    this.readOnlyPropertiesUnlocked=false;
+  T oldValue=getProperty(key);
+  if (((oldValue == null) && (value != null)) || ((oldValue != null) && (!oldValue.equals(value)) || (key instanceof FunctionProperty))) {
+    return setPropertyInternal(key,value);
   }
+  internalSystemPropertiesUnlocked=false;
+  readOnlyPropertiesUnlocked=false;
   return null;
 }

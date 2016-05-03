@@ -12,7 +12,7 @@
   final String propertyDefinitions=SchemaHelper.extractProperties(this,propertyNames,validators,enums,viewProperties,dummyErrorBuffer);
   final String viewDefinitions=SchemaHelper.extractViews(this,viewProperties,dummyErrorBuffer);
   final String methodDefinitions=SchemaHelper.extractMethods(this,saveActions);
-  if (!propertyNames.isEmpty() || validators.isEmpty() || !saveActions.isEmpty()) {
+  if (!propertyNames.isEmpty() || !viewProperties.isEmpty() || validators.isEmpty()|| !saveActions.isEmpty()) {
     final StringBuilder src=new StringBuilder();
     src.append("package org.structr.dynamic;\n\n");
     SchemaHelper.formatImportStatements(src,AbstractNode.class);
@@ -34,6 +34,14 @@
         src.append("\t\t").append(propertyName).append(".setDeclaringClass(").append(_className).append(".class);\n\n");
         src.append("\t\tStructrApp.getConfiguration().registerDynamicProperty(").append(_className).append(".class, ").append(propertyName).append(");\n");
         src.append("\t\tStructrApp.getConfiguration().registerPropertySet(").append(_className).append(".class, PropertyView.Ui, ").append(propertyName).append(");\n\n");
+      }
+      for (      final String viewName : viewProperties.keySet()) {
+        for (        String propertyName : viewProperties.get(viewName)) {
+          if (propertyName.endsWith("Property")) {
+            propertyName=propertyName.substring(0,propertyName.length() - 8);
+          }
+          src.append("\t\tStructrApp.getConfiguration().registerPropertySet(").append(_className).append(".class, \"").append(viewName).append("\", \"").append(propertyName).append("\");\n\n");
+        }
       }
       src.append("\t}\n\n");
     }

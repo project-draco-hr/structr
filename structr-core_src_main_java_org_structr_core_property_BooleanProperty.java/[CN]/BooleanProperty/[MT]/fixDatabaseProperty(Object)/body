@@ -1,10 +1,20 @@
 {
+  final Boolean fixedValue;
   if (value != null) {
     if (value instanceof Boolean) {
       return value;
     }
     if (value instanceof String) {
-      return TRUE_VALUES.contains(value.toString().toLowerCase());
+      fixedValue=TRUE_VALUES.contains(value.toString().toLowerCase());
+      if (entity != null) {
+        try {
+          setProperty(securityContext,entity,fixedValue);
+        }
+ catch (        FrameworkException fex) {
+          logger.log(Level.SEVERE,"Cound not set fixed property {0} on graph object {1}",new Object[]{fixedValue,entity});
+        }
+      }
+      return fixedValue;
     }
   }
   return false;

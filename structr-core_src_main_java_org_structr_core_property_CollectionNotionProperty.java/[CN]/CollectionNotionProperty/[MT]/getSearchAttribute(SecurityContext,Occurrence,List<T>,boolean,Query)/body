@@ -1,0 +1,71 @@
+{
+  final Predicate<GraphObject> predicate=query != null ? query.toPredicate() : null;
+  final SourceSearchAttribute attr=new SourceSearchAttribute(occur);
+  final Set<GraphObject> intersectionResult=new LinkedHashSet<>();
+  boolean alreadyAdded=false;
+  try {
+    if (searchValues != null && !searchValues.isEmpty()) {
+      final PropertyKey key=notion.getPrimaryPropertyKey();
+      final PropertyConverter inputConverter=key.inputConverter(securityContext);
+      final List<Object> transformedValues=new LinkedList<>();
+      boolean allBlank=true;
+      for (      T searchValue : searchValues) {
+        if (inputConverter != null) {
+          transformedValues.add(inputConverter.convert(searchValue));
+        }
+ else {
+          transformedValues.add(searchValue);
+        }
+      }
+      for (      Object searchValue : transformedValues) {
+        if (StringUtils.isBlank(searchValue.toString())) {
+          continue;
+        }
+ else {
+          allBlank=false;
+        }
+        final App app=StructrApp.getInstance(securityContext);
+        if (exactMatch) {
+          Result<AbstractNode> result=app.nodeQuery(collectionProperty.relatedType()).and(notion.getPrimaryPropertyKey(),searchValue).getResult();
+          for (          AbstractNode node : result.getResults()) {
+switch (occur) {
+case REQUIRED:
+              if (!alreadyAdded) {
+                intersectionResult.addAll(collectionProperty.getRelatedNodesReverse(securityContext,node,declaringClass,predicate));
+                alreadyAdded=true;
+              }
+ else {
+                intersectionResult.retainAll(collectionProperty.getRelatedNodesReverse(securityContext,node,declaringClass,predicate));
+              }
+            break;
+case OPTIONAL:
+          intersectionResult.addAll(collectionProperty.getRelatedNodesReverse(securityContext,node,declaringClass,predicate));
+        break;
+case FORBIDDEN:
+      break;
+  }
+}
+}
+ else {
+Result<AbstractNode> result=app.nodeQuery(collectionProperty.relatedType(),false).and(notion.getPrimaryPropertyKey(),searchValue,false).getResult();
+for (AbstractNode node : result.getResults()) {
+  intersectionResult.addAll(collectionProperty.getRelatedNodesReverse(securityContext,node,declaringClass,predicate));
+}
+}
+}
+if (allBlank) {
+return new EmptySearchAttribute(this,Collections.emptyList());
+}
+ else {
+attr.setResult(intersectionResult);
+}
+}
+ else {
+return new EmptySearchAttribute(this,Collections.emptyList());
+}
+}
+ catch (FrameworkException fex) {
+logger.log(Level.WARNING,"",fex);
+}
+return attr;
+}

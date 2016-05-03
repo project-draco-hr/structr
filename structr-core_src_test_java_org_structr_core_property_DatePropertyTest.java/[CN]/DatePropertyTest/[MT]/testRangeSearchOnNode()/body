@@ -1,0 +1,28 @@
+{
+  try {
+    final PropertyMap properties=new PropertyMap();
+    final PropertyKey<Date> key=TestFour.dateProperty;
+    final Date minValue=new Date(1234567880L);
+    final Date value=new Date(1234567890L);
+    final Date maxValue=new Date(1234567900L);
+    final Date maxMaxValue=new Date(1234567910L);
+    properties.put(key,value);
+    final TestFour testEntity=createTestNode(TestFour.class,properties);
+    assertNotNull(testEntity);
+    try (final Tx tx=app.tx()){
+      assertEquals(value,testEntity.getProperty(key));
+      Result<TestFour> result=app.nodeQuery(TestFour.class).andRange(key,minValue,maxValue).getResult();
+      assertEquals(1,result.size());
+      assertEquals(testEntity,result.get(0));
+      tx.success();
+    }
+     try (final Tx tx=app.tx()){
+      Result<TestFour> result=app.nodeQuery(TestFour.class).andRange(key,maxValue,maxMaxValue).getResult();
+      assertEquals(0,result.size());
+      tx.success();
+    }
+   }
+ catch (  FrameworkException fex) {
+    fail("Unable to store array");
+  }
+}

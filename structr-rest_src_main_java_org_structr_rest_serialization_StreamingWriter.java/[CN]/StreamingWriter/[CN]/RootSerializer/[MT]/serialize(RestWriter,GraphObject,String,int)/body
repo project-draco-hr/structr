@@ -12,15 +12,23 @@
       if (compactNestedProperties && depth > 0 && PropertyView.Ui.equals(localPropertyView)) {
         keys=idNameOnly;
       }
-      for (      PropertyKey key : keys) {
+      for (      final PropertyKey key : keys) {
         if (permissionResolutionMask == null || permissionResolutionMask.allowsProperty(key)) {
-          final Predicate predicate=writer.getSecurityContext().getRange(key.jsonName());
-          final Object value=source.getProperty(key,predicate);
-          final PropertyKey localKey=key;
+          final QueryRange range=writer.getSecurityContext().getRange(key.jsonName());
+          if (range != null) {
+            range.resetCount();
+          }
+          PropertyKey localKey=key;
+          if (View.INTERNAL_GRAPH_VIEW.equals(localPropertyView)) {
+            if (AbstractNode.name.equals(localKey)) {
+              localKey=StructrApp.getConfiguration().getPropertyKeyForJSONName(source.getClass(),AbstractNode.name.jsonName(),false);
+            }
+          }
+          final Object value=source.getProperty(localKey,range);
           if (value != null) {
             if (!(reduceRedundancy && visitedObjects.contains(value.hashCode()))) {
-              writer.name(localKey.jsonName());
-              serializeProperty(writer,key,value,localPropertyView,depth + 1);
+              writer.name(key.jsonName());
+              serializeProperty(writer,localKey,value,localPropertyView,depth + 1);
             }
           }
  else {

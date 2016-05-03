@@ -1,0 +1,28 @@
+{
+  try {
+    final List<DynamicResourceAccess> existingDynamicGrants=StructrApp.getInstance().nodeQuery(DynamicResourceAccess.class).getAsList();
+    for (    final DynamicResourceAccess grant : existingDynamicGrants) {
+      String sig;
+      try {
+        sig=grant.getResourceSignature();
+      }
+ catch (      NotFoundException nfe) {
+        logger.log(Level.FINE,"Unable to get signature from grant");
+        continue;
+      }
+      boolean exists=false;
+      for (      final SchemaNode schemaNode : existingSchemaNodes) {
+        if (schemaNode.getResourceSignature().equals(sig)) {
+          exists=true;
+          break;
+        }
+      }
+      if (!exists) {
+        removeDynamicGrants(sig);
+      }
+    }
+  }
+ catch (  Throwable t) {
+    logger.log(Level.WARNING,"",t);
+  }
+}

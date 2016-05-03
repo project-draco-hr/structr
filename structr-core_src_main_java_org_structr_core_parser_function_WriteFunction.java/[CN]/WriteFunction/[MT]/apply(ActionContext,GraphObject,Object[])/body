@@ -1,0 +1,30 @@
+{
+  if (arrayHasMinLengthAndAllElementsNotNull(sources,1)) {
+    try {
+      final String sandboxFilename=getSandboxFileName(sources[0].toString());
+      if (sandboxFilename != null) {
+        final File file=new File(sandboxFilename);
+        if (!file.exists()) {
+          try (final Writer writer=new OutputStreamWriter(new FileOutputStream(file,false))){
+            for (int i=1; i < sources.length; i++) {
+              if (sources[i] != null) {
+                IOUtils.write(sources[i].toString(),writer);
+              }
+            }
+            writer.flush();
+          }
+         }
+ else {
+          logger.log(Level.SEVERE,"Trying to overwrite an existing file, please use append() for that purpose.");
+        }
+      }
+    }
+ catch (    IOException ioex) {
+      logException(entity,ioex,sources);
+    }
+  }
+ else {
+    logParameterError(entity,sources,ctx.isJavaScriptContext());
+  }
+  return "";
+}

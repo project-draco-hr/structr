@@ -1,6 +1,9 @@
 {
   try {
-    for (    final SchemaNode schemaNode : StructrApp.getInstance().nodeQuery(SchemaNode.class).getAsList()) {
+    final App app=StructrApp.getInstance();
+    final List<SchemaNode> existingSchemaNodes=app.nodeQuery(SchemaNode.class).getAsList();
+    cleanUnusedDynamicGrants(existingSchemaNodes);
+    for (    final SchemaNode schemaNode : existingSchemaNodes) {
       createDynamicGrants(schemaNode.getResourceSignature());
     }
     for (    final SchemaRelationshipNode schemaRelationship : StructrApp.getInstance().nodeQuery(SchemaRelationshipNode.class).getAsList()) {
@@ -9,7 +12,7 @@
     }
   }
  catch (  Throwable t) {
-    t.printStackTrace();
+    logger.log(Level.WARNING,"",t);
   }
   return SchemaService.reloadSchema(errorBuffer);
 }

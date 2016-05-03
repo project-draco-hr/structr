@@ -6,6 +6,7 @@
     final PropertyMap properties=PropertyMap.inputTypeToJavaType(securityContext,nodeData);
     Class type=SchemaHelper.getEntityClassForRawType(properties.get(AbstractNode.type));
     final NodeInterface newNode=app.create(type,properties);
+    TransactionCommand.registerNodeCallback(newNode,callback);
     if (newNode instanceof FileBase) {
       Long size=(Long)webSocketData.getNodeData().get("size");
       String contentType=(String)webSocketData.getNodeData().get("contentType");
@@ -14,6 +15,9 @@
       fileNode.setProperty(File.size,size != null ? size : 0L);
       fileNode.setProperty(File.contentType,contentType);
       fileNode.setProperty(AbstractNode.name,name);
+      if (!fileNode.validatePath(securityContext,null)) {
+        fileNode.setProperty(AbstractNode.name,name.concat("_").concat(FileHelper.getDateString()));
+      }
       getWebSocket().createFileUploadHandler(fileNode);
     }
   }

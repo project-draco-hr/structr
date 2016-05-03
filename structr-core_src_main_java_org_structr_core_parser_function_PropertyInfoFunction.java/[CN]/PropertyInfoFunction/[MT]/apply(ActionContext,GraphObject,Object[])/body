@@ -1,0 +1,29 @@
+{
+  if (arrayHasLengthAndAllElementsNotNull(sources,2)) {
+    final ConfigurationProvider config=StructrApp.getConfiguration();
+    final String typeName=sources[0].toString();
+    final String keyName=sources[1].toString();
+    Class type=config.getNodeEntityClass(typeName);
+    if (type == null) {
+      type=config.getRelationshipEntityClass(typeName);
+    }
+    if (type != null) {
+      final PropertyKey key=config.getPropertyKeyForJSONName(type,keyName,false);
+      if (key != null) {
+        return SchemaHelper.getPropertyInfo(ctx.getSecurityContext(),key);
+      }
+ else {
+        logger.log(Level.WARNING,"Error: Unknown property \"{0}.{1}\". Parameters: {2}",new Object[]{typeName,keyName,getParametersAsString(sources)});
+        return "Unknown property " + typeName + "."+ keyName;
+      }
+    }
+ else {
+      logger.log(Level.WARNING,"Error: Unknown type \"{0}\". Parameters: {1}",new Object[]{typeName,getParametersAsString(sources)});
+      return "Unknown type " + typeName;
+    }
+  }
+ else {
+    logParameterError(entity,sources,ctx.isJavaScriptContext());
+    return usage(ctx.isJavaScriptContext());
+  }
+}

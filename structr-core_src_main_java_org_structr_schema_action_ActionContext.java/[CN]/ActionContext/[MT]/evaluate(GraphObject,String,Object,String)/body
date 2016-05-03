@@ -28,11 +28,42 @@ case "size":
 switch (key) {
 case "request":
   return securityContext.getRequest();
+case "host":
+return securityContext.getRequest().getServerName();
+case "port":
+return securityContext.getRequest().getServerPort();
+case "pathInfo":
+case "path_info":
+return securityContext.getRequest().getPathInfo();
+case "parameterMap":
+case "parameter_map":
+return securityContext.getRequest().getParameterMap();
+case "remoteAddress":
+case "remote_address":
+final String remoteAddress=securityContext.getRequest().getHeader("X-FORWARDED-FOR");
+if (remoteAddress == null) {
+return securityContext.getRequest().getRemoteAddr();
+}
+return remoteAddress;
+case "response":
+if (securityContext != null) {
+final HttpServletResponse response=securityContext.getResponse();
+if (response != null) {
+try {
+return response.getOutputStream();
+}
+ catch (IOException ioex) {
+logger.log(Level.WARNING,"",ioex);
+}
+}
+}
+return null;
 case "now":
 return DatePropertyParser.format(new Date(),DateProperty.DEFAULT_FORMAT);
 case "me":
 return securityContext.getUser(false);
 case "element":
+logger.log(Level.WARNING,"The \"element\" keyword is deprecated! Please use \"this\" instead. Used in {0}",entity.getProperty(GraphObject.id));
 case "this":
 return entity;
 case "locale":
@@ -41,7 +72,7 @@ return locale != null ? locale.toString() : null;
 }
 }
 if (value == null && defaultValue != null) {
-return Functions.numberOrString(defaultValue);
+return Function.numberOrString(defaultValue);
 }
 return value;
 }

@@ -1,0 +1,19 @@
+{
+  if (sources == null || sources.length != 3 || sources[1] == null || sources[2] == null) {
+    logParameterError(entity,sources,ctx.isJavaScriptContext());
+    return usage(ctx.isJavaScriptContext());
+  }
+  if (arrayHasLengthAndAllElementsNotNull(sources,3)) {
+    try {
+      final Double val=Double.parseDouble(sources[0].toString());
+      final String langCode=sources[1].toString();
+      final String pattern=sources[2].toString();
+      return new DecimalFormat(pattern,DecimalFormatSymbols.getInstance(Locale.forLanguageTag(langCode))).format(val);
+    }
+ catch (    Throwable t) {
+      logException(entity,t,sources);
+    }
+    logParameterError(entity,sources,ctx.isJavaScriptContext());
+  }
+  return "";
+}

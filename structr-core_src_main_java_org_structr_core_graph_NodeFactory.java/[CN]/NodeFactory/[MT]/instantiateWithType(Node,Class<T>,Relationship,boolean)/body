@@ -1,0 +1,23 @@
+{
+  if (nodeClass == null) {
+    return null;
+  }
+  SecurityContext securityContext=factoryProfile.getSecurityContext();
+  T newNode=null;
+  try {
+    newNode=nodeClass.newInstance();
+  }
+ catch (  InstantiationException|IllegalAccessException itex) {
+    newNode=null;
+  }
+  if (newNode == null) {
+    newNode=(T)factoryDefinition.createGenericNode();
+  }
+  newNode.init(factoryProfile.getSecurityContext(),node,nodeClass,isCreation);
+  newNode.setRawPathSegment(pathSegment);
+  newNode.onNodeInstantiation();
+  if (isCreation || securityContext.isReadable(newNode,factoryProfile.includeDeletedAndHidden(),factoryProfile.publicOnly())) {
+    return newNode;
+  }
+  return null;
+}

@@ -2,13 +2,28 @@
   if ("get".equals(name)) {
     return new IdFunctionObject(new IdFunctionCall(){
       @Override public Object execIdCall(      final IdFunctionObject info,      final Context context,      final Scriptable scope,      final Scriptable thisObject,      final Object[] parameters){
-        if (parameters.length > 0 && parameters[0] != null) {
+        if (parameters.length == 1 && parameters[0] != null) {
           try {
             return wrap(context,thisObject,null,actionContext.evaluate(entity,parameters[0].toString(),null,null));
           }
  catch (          FrameworkException ex) {
             exception=ex;
           }
+        }
+ else         if (parameters.length > 1) {
+          final Function<Object,Object> function=Functions.functions.get("get");
+          try {
+            final Object[] unwrappedParameters=new Object[parameters.length];
+            int i=0;
+            for (            final Object param : parameters) {
+              unwrappedParameters[i++]=unwrap(param);
+            }
+            return wrap(context,scope,null,function.apply(actionContext,entity,unwrappedParameters));
+          }
+ catch (          FrameworkException fex) {
+            exception=fex;
+          }
+          return null;
         }
         return null;
       }
@@ -81,7 +96,7 @@ default :
   }
 }
  catch (FrameworkException fex) {
-  fex.printStackTrace();
+  logger.log(Level.WARNING,"",fex);
 }
 return null;
 }

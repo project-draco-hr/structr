@@ -1,0 +1,50 @@
+{
+  final int nodeCount=1000;
+  SchemaNode createTestType=null;
+  try (final Tx tx=app.tx()){
+    createTestType=createTestNode(SchemaNode.class,"CreateTest");
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"",fex);
+    fail("Unexpected exception.");
+  }
+  Class testType=StructrApp.getConfiguration().getNodeEntityClass("CreateTest");
+  assertNotNull("Type CreateTest should have been created",testType);
+  try (final Tx tx=app.tx()){
+    createTestNodes(testType,nodeCount);
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"",fex);
+    fail("Unexpected exception.");
+  }
+  try (final Tx tx=app.tx()){
+    createTestType.setProperty(new StringProperty("testCount"),"Integer");
+    createTestType.setProperty(new StringProperty("___onCreate"),"set(this, 'testCount', size(find('CreateTest')))");
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"",fex);
+    fail("Unexpected exception.");
+  }
+  testType=StructrApp.getConfiguration().getNodeEntityClass("CreateTest");
+  NodeInterface node=null;
+  try (final Tx tx=app.tx()){
+    node=createTestNode(testType,"Tester");
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"",fex);
+    fail("Unexpected exception.");
+  }
+  try (final Tx tx=app.tx()){
+    final Integer testCount=node.getProperty(new IntProperty("testCount"));
+    assertEquals("Invalid node count, check parallel instantiation!",(int)nodeCount + 1,(int)testCount);
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"",fex);
+    fail("Unexpected exception.");
+  }
+}

@@ -1,0 +1,24 @@
+{
+  try {
+    try {
+      app.command(SyncCommand.class).execute(toMap("mode","non-existing-mode","file",EXPORT_FILENAME));
+      fail("Using SyncCommand with a non-existing mode should throw an exception.");
+    }
+ catch (    FrameworkException fex) {
+      assertEquals(400,fex.getStatus());
+      assertEquals("Please specify sync mode (import|export).",fex.getMessage());
+    }
+    try {
+      app.command(SyncCommand.class).execute(toMap("mode","export"));
+      fail("Using SyncCommand without file parameter should throw an exception.");
+    }
+ catch (    FrameworkException fex) {
+      assertEquals(400,fex.getStatus());
+      assertEquals("Please specify sync file.",fex.getMessage());
+    }
+  }
+ catch (  Exception ex) {
+    logger.log(Level.WARNING,"",ex);
+    fail("Unexpected exception.");
+  }
+}

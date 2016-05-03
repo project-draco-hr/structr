@@ -3,7 +3,7 @@
   T command=null;
   try {
     command=commandType.newInstance();
-    command.setSecurityContext(securityContext);
+    command.setArgument("securityContext",securityContext);
     serviceClass=command.getServiceClass();
     if ((serviceClass != null) && configuredServiceClasses.contains(serviceClass.getSimpleName())) {
       Service service=serviceCache.get(serviceClass);
@@ -23,10 +23,10 @@
       logger.log(Level.FINEST,"Initializing command ",commandType.getName());
       service.injectArguments(command);
     }
+    command.initialized();
   }
  catch (  Throwable t) {
-    t.printStackTrace();
-    logger.log(Level.SEVERE,"Exception while creating command " + commandType.getName(),t);
+    logger.log(Level.SEVERE,t,LogMessageSupplier.create("Exception while creating command {0}",commandType.getName()));
   }
   return (command);
 }

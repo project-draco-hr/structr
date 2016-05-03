@@ -1,0 +1,14 @@
+{
+synchronized (entity) {
+    final SecurityContext previousSecurityContext=entity.getSecurityContext();
+    entity.setSecurityContext(SecurityContext.getSuperUserInstance());
+    try {
+      final SetFunction set=new SetFunction();
+      set.apply(ctx,entity,sources);
+    }
+  finally {
+      entity.setSecurityContext(previousSecurityContext);
+    }
+  }
+  return "";
+}

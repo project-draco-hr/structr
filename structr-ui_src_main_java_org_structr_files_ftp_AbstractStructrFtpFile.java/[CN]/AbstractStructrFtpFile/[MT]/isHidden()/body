@@ -1,6 +1,8 @@
 {
   try (Tx tx=StructrApp.getInstance().tx()){
-    return structrFile.getProperty(File.hidden);
+    final boolean hidden=structrFile.getProperty(File.hidden);
+    tx.success();
+    return hidden;
   }
  catch (  FrameworkException fex) {
     logger.log(Level.SEVERE,"Error in isHidden() of abstract ftp file",fex);

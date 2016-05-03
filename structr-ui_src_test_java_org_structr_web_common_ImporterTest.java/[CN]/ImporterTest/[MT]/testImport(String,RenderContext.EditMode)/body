@@ -1,0 +1,16 @@
+{
+  String sourceHtml=null;
+  try {
+    try (final Tx tx=app.tx()){
+      final Importer importer=new Importer(securityContext,null,address,"testpage",true,true);
+      importer.parse();
+      final Page sourcePage=importer.readPage();
+      sourceHtml=sourcePage.getContent(editMode);
+      tx.success();
+    }
+   }
+ catch (  Throwable t) {
+    logger.log(Level.WARNING,"",t);
+  }
+  return sourceHtml;
+}

@@ -1,6 +1,8 @@
 {
   try (Tx tx=StructrApp.getInstance().tx()){
-    return ((File)structrFile).getInputStream();
+    final InputStream inputStream=((File)structrFile).getInputStream();
+    tx.success();
+    return inputStream;
   }
  catch (  FrameworkException fex) {
     logger.log(Level.SEVERE,null,fex);

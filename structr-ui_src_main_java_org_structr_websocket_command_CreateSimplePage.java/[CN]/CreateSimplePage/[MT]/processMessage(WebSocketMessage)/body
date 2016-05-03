@@ -2,10 +2,10 @@
   final String pageName=(String)webSocketData.getNodeData().get(Page.name.dbName());
   final SecurityContext securityContext=getWebSocket().getSecurityContext();
   try {
-    Page.createSimplePage(securityContext,pageName);
+    final Page page=Page.createSimplePage(securityContext,pageName);
+    TransactionCommand.registerNodeCallback(page,callback);
   }
  catch (  FrameworkException fex) {
-    fex.printStackTrace();
     logger.log(Level.WARNING,"Could not create node.",fex);
     getWebSocket().send(MessageBuilder.status().code(fex.getStatus()).message(fex.toString()).build(),true);
   }

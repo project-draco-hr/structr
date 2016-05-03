@@ -9,10 +9,18 @@
     }
     if (key.isReadOnly()) {
       if (readOnlyPropertiesUnlocked || securityContext.isSuperUser()) {
-        readOnlyPropertiesUnlocked=false;
+        internalSystemPropertiesUnlocked=false;
       }
  else {
-        throw new FrameworkException(404,new ReadOnlyPropertyToken(getType(),key));
+        throw new FrameworkException(404,"Property " + key.jsonName() + " is read-only",new ReadOnlyPropertyToken(getType(),key));
+      }
+    }
+    if (key.isSystemInternal()) {
+      if (internalSystemPropertiesUnlocked) {
+        internalSystemPropertiesUnlocked=false;
+      }
+ else {
+        throw new FrameworkException(404,"Property " + key.jsonName() + " is read-only",new InternalSystemPropertyToken(getType(),key));
       }
     }
     dbNode.removeProperty(key.dbName());

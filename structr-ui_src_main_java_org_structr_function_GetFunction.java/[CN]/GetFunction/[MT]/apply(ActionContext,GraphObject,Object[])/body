@@ -1,0 +1,42 @@
+{
+  if (sources != null && sources.length >= 1 && sources.length <= 4 && sources[0] != null) {
+    try {
+      String address=sources[0].toString();
+      String contentType=null;
+      String username=null;
+      String password=null;
+switch (sources.length) {
+case 4:
+        password=sources[3].toString();
+case 3:
+      username=sources[2].toString();
+case 2:
+    contentType=sources[1].toString();
+  break;
+}
+if ("text/html".equals(contentType)) {
+final Connection connection=Jsoup.connect(address);
+for (final Map.Entry<String,String> header : ctx.getHeaders().entrySet()) {
+  connection.header(header.getKey(),header.getValue());
+}
+if (sources.length > 2) {
+  return connection.get().select(sources[2].toString()).html();
+}
+ else {
+  return connection.get().html();
+}
+}
+ else {
+return getFromUrl(ctx,address,username,password);
+}
+}
+ catch (Throwable t) {
+logException(entity,t,sources);
+}
+return "";
+}
+ else {
+logParameterError(entity,sources,ctx.isJavaScriptContext());
+}
+return usage(ctx.isJavaScriptContext());
+}

@@ -8,25 +8,31 @@
     logger.log(Level.SEVERE,null,ex);
   }
   try (final Tx tx=app.tx()){
-    String[] args={"/bin/sh","-c","cd src/test/javascript ; PATH=./bin/`uname`/:$PATH casperjs/bin/casperjs --httpPort=" + httpPort + " --local-storage-path="+ basePath+ " test "+ testName+ ".js"};
+    String[] args={"/bin/sh","-c","cd src/test/javascript ; PATH=./bin/`uname`/:$PATH casperjs/bin/casperjs --httpPort=" + httpPort + " test "+ testName+ ".js"};
     Process proc=Runtime.getRuntime().exec(args);
     logger.log(Level.INFO,IOUtils.toString(proc.getInputStream()));
     String warnings=IOUtils.toString(proc.getErrorStream());
     if (StringUtils.isNotBlank(warnings)) {
       logger.log(Level.WARNING,warnings);
     }
+    final int maxRetries=60;
     Integer exitValue=1;
     try {
+      int r=0;
+      while (proc.isAlive() && r < maxRetries) {
+        Thread.sleep(1000);
+        r++;
+      }
       exitValue=proc.exitValue();
+      makeVideo(testName);
+      return exitValue;
     }
  catch (    IllegalThreadStateException ex) {
       logger.log(Level.WARNING,"Subprocess has not properly exited",ex);
-      ex.printStackTrace();
+      logger.log(Level.WARNING,"",ex);
     }
     logger.log(Level.INFO,"casperjs subprocess returned with {0}",exitValue);
     tx.success();
-    makeVideo(testName);
-    return exitValue;
   }
  catch (  Exception ex) {
     logger.log(Level.SEVERE,null,ex);

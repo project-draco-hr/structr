@@ -5,12 +5,16 @@
   }
   final ServletOutputStream out=response.getOutputStream();
   final String downloadAsFilename=request.getParameter(DOWNLOAD_AS_FILENAME_KEY);
+  final Map<String,Object> callbackMap=new LinkedHashMap<>();
+  callbackMap.put("editMode",edit);
   if (downloadAsFilename != null) {
     response.addHeader("Content-Disposition","attachment; filename=\"" + downloadAsFilename + "\"");
+    callbackMap.put("requestedFileName",downloadAsFilename);
   }
   if (!EditMode.WIDGET.equals(edit) && notModifiedSince(request,response,file,false)) {
     out.flush();
     out.close();
+    callbackMap.put("statusCode",HttpServletResponse.SC_NOT_MODIFIED);
   }
  else {
     final String downloadAsDataUrl=request.getParameter(DOWNLOAD_AS_DATA_URL_KEY);
@@ -20,6 +24,7 @@
       response.setStatus(HttpServletResponse.SC_OK);
       out.flush();
       out.close();
+      callbackMap.put("statusCode",HttpServletResponse.SC_OK);
     }
  else {
       final InputStream in=file.getInputStream();
@@ -30,9 +35,34 @@
  else {
         response.setContentType("application/octet-stream");
       }
-      response.setStatus(HttpServletResponse.SC_OK);
+      final String range=request.getHeader("Range");
       try {
-        IOUtils.copy(in,out);
+        if (StringUtils.isNotEmpty(range)) {
+          final long len=file.getSize();
+          long start=0;
+          long end=len - 1;
+          final Matcher matcher=Pattern.compile("bytes=(?<start>\\d*)-(?<end>\\d*)").matcher(range);
+          if (matcher.matches()) {
+            String startGroup=matcher.group("start");
+            start=startGroup.isEmpty() ? start : Long.valueOf(startGroup);
+            start=Math.max(0,start);
+            String endGroup=matcher.group("end");
+            end=endGroup.isEmpty() ? end : Long.valueOf(endGroup);
+            end=end > len - 1 ? len - 1 : end;
+          }
+          long contentLength=end - start + 1;
+          response.setHeader("Accept-Ranges","bytes");
+          response.setHeader("Content-Range",String.format("bytes %s-%s/%s",start,end,len));
+          response.setHeader("Content-Length",String.format("%s",contentLength));
+          response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
+          callbackMap.put("statusCode",HttpServletResponse.SC_PARTIAL_CONTENT);
+          IOUtils.copyLarge(in,out,start,contentLength);
+        }
+ else {
+          response.setStatus(HttpServletResponse.SC_OK);
+          callbackMap.put("statusCode",HttpServletResponse.SC_OK);
+          IOUtils.copyLarge(in,out);
+        }
       }
  catch (      Throwable t) {
       }
@@ -50,6 +80,14 @@
         }
         response.setStatus(HttpServletResponse.SC_OK);
       }
+    }
+  }
+  if (!EditMode.WIDGET.equals(edit)) {
+    try {
+      file.invokeMethod("onDownload",Collections.EMPTY_MAP,false);
+    }
+ catch (    FrameworkException fex) {
+      logger.log(Level.WARNING,"",fex);
     }
   }
 }

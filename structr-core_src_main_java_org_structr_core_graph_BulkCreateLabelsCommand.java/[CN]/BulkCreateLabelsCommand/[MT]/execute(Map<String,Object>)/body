@@ -1,16 +1,15 @@
 {
   final String entityType=(String)attributes.get("type");
-  final GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
+  final DatabaseService graphDb=(DatabaseService)arguments.get("graphDb");
   final SecurityContext superUserContext=SecurityContext.getSuperUserInstance();
   final NodeFactory nodeFactory=new NodeFactory(superUserContext);
   Iterator<AbstractNode> nodeIterator=null;
   try (final Tx tx=StructrApp.getInstance().tx()){
-    nodeIterator=Iterables.filter(new TypePredicate<>(entityType),Iterables.map(nodeFactory,Iterables.filter(new StructrAndSpatialPredicate(true,false,false),GlobalGraphOperations.at(graphDb).getAllNodes()))).iterator();
+    nodeIterator=Iterables.filter(new TypePredicate<>(entityType),Iterables.map(nodeFactory,Iterables.filter(new StructrAndSpatialPredicate(true,false,false),graphDb.getAllNodes()))).iterator();
     tx.success();
   }
  catch (  FrameworkException fex) {
-    logger.log(Level.WARNING,"Exception while creating all nodes iterator.");
-    fex.printStackTrace();
+    logger.log(Level.WARNING,"Exception while creating all nodes iterator.",fex);
   }
   if (entityType == null) {
     logger.log(Level.INFO,"Node type not set or no entity class found. Starting creation of labels for all nodes.");
@@ -18,18 +17,31 @@
  else {
     logger.log(Level.INFO,"Starting creation of labels for all nodes of type {0}",entityType);
   }
-  final long count=NodeServiceCommand.bulkGraphOperation(securityContext,nodeIterator,1000,"CreateLabels",new BulkGraphOperation<AbstractNode>(){
+  final long count=NodeServiceCommand.bulkGraphOperation(securityContext,nodeIterator,10000,"CreateLabels",new BulkGraphOperation<AbstractNode>(){
     @Override public void handleGraphObject(    SecurityContext securityContext,    AbstractNode node){
-      final String type=node.getProperty(GraphObject.type);
-      if (type != null) {
-        try {
-          node.unlockReadOnlyPropertiesOnce();
-          GraphObject.type.setProperty(securityContext,node,type);
-        }
- catch (        FrameworkException fex) {
+      final Set<Label> intersection=new LinkedHashSet<>();
+      final Set<Label> toRemove=new LinkedHashSet<>();
+      final Set<Label> toAdd=new LinkedHashSet<>();
+      final Node dbNode=node.getNode();
+      for (      final Label label : dbNode.getLabels()) {
+        toRemove.add(label);
+      }
+      for (      final Class supertype : SearchCommand.typeAndAllSupertypes(node.getClass())) {
+        final String supertypeName=supertype.getName();
+        if (supertypeName.startsWith("org.structr.") || supertypeName.startsWith("com.structr.")) {
+          toAdd.add(graphDb.forName(Label.class,supertype.getSimpleName()));
         }
       }
-      node.updateInIndex();
+      intersection.addAll(toAdd);
+      intersection.retainAll(toRemove);
+      toAdd.removeAll(intersection);
+      toRemove.removeAll(intersection);
+      for (      final Label remove : toRemove) {
+        dbNode.removeLabel(remove);
+      }
+      for (      final Label add : toAdd) {
+        dbNode.addLabel(add);
+      }
     }
     @Override public void handleThrowable(    SecurityContext securityContext,    Throwable t,    AbstractNode node){
       logger.log(Level.WARNING,"Unable to create labels for node {0}: {1}",new Object[]{node,t.getMessage()});

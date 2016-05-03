@@ -10,19 +10,20 @@
       tx.success();
     }
      assertNotNull(rel);
-    GraphDatabaseService graphDb=graphDbCommand.execute();
+    DatabaseService graphDb=graphDbCommand.execute();
     try (final Tx tx=app.tx()){
-      Result result=graphDb.execute("start n = node(*) match (n)<-[r:ONE_TO_ONE]-() return r");
+      NativeResult<Relationship> result=graphDb.execute("start n = node(*) match (n)<-[r:ONE_TO_ONE]-() return r");
       final Iterator<Relationship> rels=result.columnAs("r");
       assertTrue(rels.hasNext());
       rels.next().delete();
       tx.success();
     }
      try (final Tx tx=app.tx()){
-      String uuid=rel.getUuid();
-      assertNull("UUID of deleted relationship should be null",uuid);
+      rel.getUuid();
+      fail("Accessing a deleted relationship should thow an exception.");
+      tx.success();
     }
- catch (    IllegalStateException iex) {
+ catch (    NotFoundException iex) {
     }
   }
  catch (  FrameworkException ex) {

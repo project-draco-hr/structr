@@ -1,0 +1,53 @@
+{
+  if (sources != null && sources.length >= 1 && sources.length <= 3) {
+    final SecurityContext securityContext=entity != null ? entity.getSecurityContext() : ctx.getSecurityContext();
+    if (sources[0] instanceof GraphObject) {
+      try {
+        final Value<String> view=new StaticValue<>("public");
+        if (sources.length > 1) {
+          view.set(securityContext,sources[1].toString());
+        }
+        int outputDepth=3;
+        if (sources.length > 2) {
+          if (sources[2] instanceof Number) {
+            outputDepth=((Number)sources[2]).intValue();
+          }
+        }
+        final StreamingJsonWriter jsonStreamer=new StreamingJsonWriter(view,true,outputDepth);
+        final StringWriter writer=new StringWriter();
+        jsonStreamer.streamSingle(securityContext,writer,(GraphObject)sources[0]);
+        return writer.getBuffer().toString();
+      }
+ catch (      Throwable t) {
+        logException(entity,t,sources);
+      }
+    }
+ else     if (sources[0] instanceof List) {
+      try {
+        final Value<String> view=new StaticValue<>("public");
+        if (sources.length > 1) {
+          view.set(securityContext,sources[1].toString());
+        }
+        int outputDepth=3;
+        if (sources.length > 2) {
+          if (sources[2] instanceof Number) {
+            outputDepth=((Number)sources[2]).intValue();
+          }
+        }
+        final StreamingJsonWriter jsonStreamer=new StreamingJsonWriter(view,true,outputDepth);
+        final StringWriter writer=new StringWriter();
+        final List list=(List)sources[0];
+        jsonStreamer.stream(securityContext,writer,new Result(list,list.size(),true,false),null);
+        return writer.getBuffer().toString();
+      }
+ catch (      Throwable t) {
+        logException(entity,t,sources);
+      }
+    }
+    return "";
+  }
+ else {
+    logParameterError(entity,sources,ctx.isJavaScriptContext());
+  }
+  return usage(ctx.isJavaScriptContext());
+}

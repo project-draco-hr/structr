@@ -8,19 +8,13 @@
       if (index != null) {
         try {
           index.remove(dbNode,dbName);
-          if (value != null && !StringUtils.isBlank(value.toString())) {
-            index.add(dbNode,dbName,value);
-          }
- else           if (isIndexedWhenEmpty()) {
-            value=getValueForEmptyFields();
-            if (value != null) {
-              index.add(dbNode,dbName,value);
-            }
+          if (value != null || isIndexedWhenEmpty()) {
+            index.add(dbNode,dbName,value,valueType());
           }
         }
  catch (        Throwable t) {
           logger.log(Level.INFO,"Unable to index property with dbName {0} and value {1} of type {2} on {3}: {4}",new Object[]{dbName,value,this.getClass().getSimpleName(),entity,t});
-          t.printStackTrace();
+          logger.log(Level.WARNING,"",t);
         }
       }
     }
@@ -34,14 +28,8 @@
       if (index != null) {
         try {
           index.remove(dbRel,dbName);
-          if (value != null && !StringUtils.isBlank(value.toString())) {
-            index.add(dbRel,dbName,value);
-          }
- else           if (isIndexedWhenEmpty()) {
-            value=getValueForEmptyFields();
-            if (value != null) {
-              index.add(dbRel,dbName,value);
-            }
+          if (value != null || isIndexedWhenEmpty()) {
+            index.add(dbRel,dbName,value,valueType());
           }
         }
  catch (        Throwable t) {

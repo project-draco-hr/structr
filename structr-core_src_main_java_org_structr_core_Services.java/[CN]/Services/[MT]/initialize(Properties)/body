@@ -1,0 +1,54 @@
+{
+  this.structrConf=properties;
+  configurationClass=properties.getProperty(Services.CONFIGURATION);
+  configuredServiceNames=properties.getProperty(Services.CONFIGURED_SERVICES);
+  configuredServiceClasses.addAll(Arrays.asList(configuredServiceNames.split("[ ,]+")));
+  getConfigurationProvider();
+  logger.log(Level.INFO,"Starting services");
+  for (  final String serviceClassName : configuredServiceClasses) {
+    Class serviceClass=getServiceClassForName(serviceClassName);
+    if (serviceClass != null) {
+      try {
+        final Service service=createService(serviceClass);
+        if (service != null) {
+          service.initialized();
+        }
+ else {
+          logger.log(Level.WARNING,"Service {0} was not started!",serviceClassName);
+        }
+      }
+ catch (      Throwable t) {
+        logger.log(Level.WARNING,t,LogMessageSupplier.create("Exception while registering service {0}",serviceClassName));
+      }
+    }
+  }
+  logger.log(Level.INFO,"{0} service(s) processed",serviceCache.size());
+  registeredServiceClasses.clear();
+  logger.log(Level.INFO,"Registering shutdown hook.");
+  Runtime.getRuntime().addShutdownHook(new Thread(){
+    @Override public void run(){
+      shutdown();
+    }
+  }
+);
+  final String configForOwnerlessNodes=this.structrConf.getProperty(Services.APPLICATION_SECURITY_OWNERLESS_NODES,"read");
+  if (StringUtils.isNotBlank(configForOwnerlessNodes)) {
+    for (    final String permission : configForOwnerlessNodes.split("[, ]+")) {
+      final String trimmed=permission.trim();
+      if (StringUtils.isNotBlank(trimmed)) {
+        final Permission val=Permissions.valueOf(trimmed);
+        if (val != null) {
+          permissionsForOwnerlessNodes.add(val);
+        }
+ else {
+          logger.log(Level.WARNING,"Invalid permisson {0}, ignoring.",trimmed);
+        }
+      }
+    }
+  }
+ else {
+    permissionsForOwnerlessNodes.add(Permission.read);
+  }
+  System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.ms").format(new Date()) + "  ---------------- Initialization complete ----------------");
+  initializationDone=true;
+}

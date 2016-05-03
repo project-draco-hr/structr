@@ -10,7 +10,7 @@
     final App app=StructrApp.getInstance();
     try (final Tx tx=app.tx()){
       final StructrWebSocket webSocket=getWebSocket();
-      final List<SyncableInfo> syncables=CloudService.doRemote(webSocket.getSecurityContext(),new SingleTransmission<>(new ListSyncables(type)),new HostInfo(username,password,host,port.intValue()),new WebsocketProgressListener(getWebSocket(),key));
+      final List<SyncableInfo> syncables=CloudService.doRemote(webSocket.getSecurityContext(),new SingleTransmission<>(new ListSyncables(type)),new HostInfo(username,password,host,port.intValue()),new WebsocketProgressListener(getWebSocket(),key,callback));
       if (syncables != null) {
         final List<GraphObject> result=new LinkedList<>();
         for (        final SyncableInfo info : syncables) {

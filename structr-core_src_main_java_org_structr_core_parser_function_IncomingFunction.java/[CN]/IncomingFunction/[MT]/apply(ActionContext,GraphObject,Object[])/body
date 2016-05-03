@@ -1,0 +1,27 @@
+{
+  if (arrayHasMinLengthAndMaxLengthAndAllElementsNotNull(sources,1,2)) {
+    final RelationshipFactory factory=new RelationshipFactory(entity != null ? entity.getSecurityContext() : ctx.getSecurityContext());
+    final Object source=sources[0];
+    if (source instanceof NodeInterface) {
+      final NodeInterface node=(NodeInterface)source;
+      if (sources.length > 1) {
+        final Object relType=sources[1];
+        if (relType != null && relType instanceof String) {
+          final String relTypeName=(String)relType;
+          return factory.instantiate(node.getNode().getRelationships(Direction.INCOMING,RelationshipType.forName(relTypeName)));
+        }
+      }
+ else {
+        return factory.instantiate(node.getNode().getRelationships(Direction.INCOMING));
+      }
+    }
+ else {
+      logger.log(Level.WARNING,"Error: entity is not a node. Parameters: {0}",getParametersAsString(sources));
+      return "Error: entity is not a node.";
+    }
+  }
+ else {
+    logParameterError(entity,sources,ctx.isJavaScriptContext());
+  }
+  return "";
+}

@@ -1,8 +1,8 @@
 {
-  final GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
+  final DatabaseService graphDb=(DatabaseService)arguments.get("graphDb");
   final RelationshipFactory relFactory=new RelationshipFactory(securityContext);
   if (graphDb != null) {
-    final Iterator<AbstractRelationship> relIterator=Iterables.map(relFactory,relFactory.instantiate(GlobalGraphOperations.at(graphDb).getAllRelationships())).iterator();
+    final Iterator<AbstractRelationship> relIterator=Iterables.map(relFactory,relFactory.instantiate(graphDb.getAllRelationships())).iterator();
     final long counter=bulkGraphOperation(securityContext,relIterator,1000,"MigrateRelationships",new BulkGraphOperation<AbstractRelationship>(){
       @Override public void handleGraphObject(      SecurityContext securityContext,      AbstractRelationship rel){
         if (rel.getProperty(GraphObject.id) != null) {
@@ -11,7 +11,7 @@
           try {
             String relType=rel.getType();
             rel.getRelationship().removeProperty("combinedType");
-            rel.unlockReadOnlyPropertiesOnce();
+            rel.unlockSystemPropertiesOnce();
             if ("CONTAINS".equals(relType)) {
               rel.setProperty(AbstractRelationship.type,DOMChildren.class.getSimpleName());
             }

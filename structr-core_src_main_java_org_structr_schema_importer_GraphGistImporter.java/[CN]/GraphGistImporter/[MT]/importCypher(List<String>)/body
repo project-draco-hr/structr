@@ -1,0 +1,16 @@
+{
+  final App app=StructrApp.getInstance();
+  final DatabaseService graphDb=app.getDatabaseService();
+  if (sources.isEmpty()) {
+    return;
+  }
+  for (  final String source : sources) {
+    try (final Transaction tx=graphDb.beginTx()){
+      graphDb.execute(source);
+      tx.success();
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"",t);
+    }
+  }
+}

@@ -16,8 +16,8 @@
  else       if (obj instanceof AbstractNode) {
         final AbstractNode node=(AbstractNode)obj;
         if (!node.isGranted(Permission.delete,securityContext)) {
-          logger.log(Level.WARNING,"Could not delete {0} because {1} has no delete permission",new Object[]{obj,securityContext.getUser(true)});
-          throw new NotAllowedException();
+          logger.log(Level.WARNING,"Could not delete {0} because {1} has no delete permission",new Object[]{obj,securityContext.getUser(false)});
+          throw new NotAllowedException("Could not delete " + obj + " because "+ securityContext.getUser(false)+ " has no delete permission");
         }
         app.delete(node);
       }

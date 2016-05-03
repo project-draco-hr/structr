@@ -1,9 +1,9 @@
 {
-  final File seedFile=new File(Services.trim(basePath) + "/" + Services.INITIAL_SEED_FILE);
+  final File seedFile=new File(StructrServices.trim(basePath) + "/" + Services.INITIAL_SEED_FILE);
   if (seedFile.exists()) {
     boolean hasApplicationNodes=false;
     try (final Tx tx=StructrApp.getInstance().tx()){
-      final Iterator<Node> allNodes=GlobalGraphOperations.at(graphDb).getAllNodes().iterator();
+      final Iterator<Node> allNodes=graphDb.getAllNodes().iterator();
       final String idName=GraphObject.id.dbName();
       while (allNodes.hasNext()) {
         if (allNodes.next().hasProperty(idName)) {

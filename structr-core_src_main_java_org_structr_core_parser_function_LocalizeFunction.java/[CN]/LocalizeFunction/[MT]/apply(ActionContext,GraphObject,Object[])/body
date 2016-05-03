@@ -1,0 +1,41 @@
+{
+  if (arrayHasMinLengthAndMaxLengthAndAllElementsNotNull(sources,1,2)) {
+    final SecurityContext superUserSecurityContext=SecurityContext.getSuperUserInstance();
+    Query query=StructrApp.getInstance(superUserSecurityContext).nodeQuery(Localization.class).and(Localization.locale,ctx.getLocale().toString()).and(Localization.name,sources[0].toString());
+    List<Localization> localizations;
+    if (sources.length == 2) {
+      query.and(Localization.domain,sources[1].toString());
+      localizations=query.getAsList();
+      if (localizations.isEmpty()) {
+        query=StructrApp.getInstance(superUserSecurityContext).nodeQuery(Localization.class).and(Localization.locale,ctx.getLocale().toString()).and(Localization.name,sources[0].toString()).blank(Localization.domain);
+        localizations=query.getAsList();
+      }
+    }
+ else {
+      query.blank(Localization.domain);
+      localizations=query.getAsList();
+    }
+    if (localizations.size() > 1) {
+      if (sources.length > 1) {
+        logger.log(Level.WARNING,"Found ambiguous localization for key \"{0}\" and domain \"{1}\". Please fix. Parameters: {2}",new Object[]{sources[0].toString(),sources[1].toString(),getParametersAsString(sources)});
+        return localizations.get(0).getProperty(Localization.localizedName);
+      }
+ else {
+        logger.log(Level.WARNING,"Found ambiguous localization for key \"{0}\". Please fix. Parameters: {1}",new Object[]{sources[0].toString(),getParametersAsString(sources)});
+        return localizations.get(0).getProperty(Localization.localizedName);
+      }
+    }
+ else     if (localizations.size() == 1) {
+      return localizations.get(0).getProperty(Localization.localizedName);
+    }
+    return sources[0];
+  }
+ else   if (sources.length == 1 || sources.length == 2) {
+    logParameterError(entity,sources,ctx.isJavaScriptContext());
+    return "";
+  }
+ else {
+    logParameterError(entity,sources,ctx.isJavaScriptContext());
+    return usage(ctx.isJavaScriptContext());
+  }
+}

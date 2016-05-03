@@ -1,14 +1,13 @@
 {
   final NodeFactory nodeFactory=new NodeFactory(SecurityContext.getSuperUserInstance());
-  final GraphDatabaseService graphDb=(GraphDatabaseService)arguments.get("graphDb");
+  final DatabaseService graphDb=(DatabaseService)arguments.get("graphDb");
   Iterator<AbstractNode> nodeIterator=null;
   try (final Tx tx=StructrApp.getInstance().tx()){
-    nodeIterator=Iterables.filter(new TypePredicate<>(entityType),Iterables.map(nodeFactory,Iterables.filter(new StructrAndSpatialPredicate(true,false,false),GlobalGraphOperations.at(graphDb).getAllNodes()))).iterator();
+    nodeIterator=Iterables.filter(new TypePredicate<>(entityType),Iterables.map(nodeFactory,Iterables.filter(new StructrAndSpatialPredicate(true,false,false),graphDb.getAllNodes()))).iterator();
     tx.success();
   }
  catch (  FrameworkException fex) {
-    logger.log(Level.WARNING,"Exception while creating all nodes iterator.");
-    fex.printStackTrace();
+    logger.log(Level.WARNING,"Exception while creating all nodes iterator.",fex);
   }
   if (entityType == null) {
     logger.log(Level.INFO,"Node type not set or no entity class found. Starting (re-)indexing all nodes");

@@ -1,10 +1,14 @@
 {
-  IJsonInput jsonInput;
+  IJsonInput jsonInput=null;
   try (final Tx tx=app.tx()){
     jsonInput=gson.get().fromJson(input,IJsonInput.class);
     tx.success();
   }
-   if (jsonInput == null) {
+ catch (  JsonSyntaxException jsx) {
+    logger.log(Level.WARNING,"",jsx);
+    throw new FrameworkException(400,jsx.getMessage());
+  }
+  if (jsonInput == null) {
     if (StringUtils.isBlank(input)) {
       try (final Tx tx=app.tx()){
         jsonInput=gson.get().fromJson("{}",IJsonInput.class);

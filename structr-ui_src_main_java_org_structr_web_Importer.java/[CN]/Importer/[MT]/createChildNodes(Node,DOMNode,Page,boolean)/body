@@ -45,11 +45,13 @@
         continue;
       }
     }
- else     if (type.equals("#text")) {
-      tag="";
-      content=((TextNode)node).text();
-      if (!("p".equals(startNode.nodeName().toLowerCase())) && StringUtils.isWhitespace(content)) {
-        continue;
+ else {
+      if (type.equals("#text")) {
+        tag="";
+        content=((TextNode)node).text();
+        if (!("p".equals(startNode.nodeName().toLowerCase())) && StringUtils.isWhitespace(content)) {
+          continue;
+        }
       }
     }
     org.structr.web.entity.dom.DOMNode newNode;
@@ -80,22 +82,9 @@
       for (      Attribute nodeAttr : node.attributes()) {
         final String key=nodeAttr.getKey();
         if (!key.equals("text")) {
+          final String value=nodeAttr.getValue();
           if (key.startsWith("data-")) {
-            String value=nodeAttr.getValue();
-            if (!key.startsWith(DATA_META_PREFIX)) {
-              if (value != null) {
-                if (value.equalsIgnoreCase("true")) {
-                  newNode.setProperty(new BooleanProperty(key),true);
-                }
- else                 if (value.equalsIgnoreCase("false")) {
-                  newNode.setProperty(new BooleanProperty(key),false);
-                }
- else {
-                  newNode.setProperty(new StringProperty(key),nodeAttr.getValue());
-                }
-              }
-            }
- else {
+            if (key.startsWith(DATA_META_PREFIX)) {
               int l=DATA_META_PREFIX.length();
               String upperCaseKey=WordUtils.capitalize(key.substring(l),new char[]{'-'}).replaceAll("-","");
               String camelCaseKey=key.substring(l,l + 1).concat(upperCaseKey.substring(1));
@@ -111,13 +100,24 @@
                 }
               }
             }
+ else             if (key.startsWith(DATA_STRUCTR_PREFIX)) {
+              PropertyKey propertyKey=config.getPropertyKeyForJSONName(newNode.getClass(),key);
+              if (propertyKey != null) {
+                final PropertyConverter inputConverter=propertyKey.inputConverter(securityContext);
+                if (value != null && inputConverter != null) {
+                  newNode.setProperty(propertyKey,propertyKey.inputConverter(securityContext).convert(value));
+                }
+ else {
+                  newNode.setProperty(propertyKey,value);
+                }
+              }
+            }
           }
  else {
-            final String value=nodeAttr.getValue();
             boolean notBlank=StringUtils.isNotBlank(value);
             boolean isAnchor=notBlank && value.startsWith("#");
             boolean isLocal=notBlank && !value.startsWith("http");
-            boolean isActive=notBlank && (value.startsWith("${") || value.startsWith("/${"));
+            boolean isActive=notBlank && value.contains("${");
             boolean isStructrLib=notBlank && value.startsWith("/structr/js/");
             if ("link".equals(tag) && "href".equals(key) && isLocal&& !isActive) {
               newNode.setProperty(new StringProperty(PropertyView.Html.concat(key)),"${link.path}?${link.version}");
@@ -132,8 +132,17 @@
         }
       }
       final StringProperty typeKey=new StringProperty(PropertyView.Html.concat("type"));
-      if ("script".equals(tag) && newNode.getProperty(typeKey) == null) {
-        newNode.setProperty(typeKey,"text/javascript");
+      if ("script".equals(tag)) {
+        final String contentType=newNode.getProperty(typeKey);
+        if (contentType == null) {
+          newNode.setProperty(typeKey,"text/javascript");
+        }
+ else         if (contentType.equals("application/schema+json")) {
+          for (          final Node scriptContentNode : node.childNodes()) {
+            final String source=scriptContentNode.toString();
+            SchemaJsonImporter.importSchemaJson(source);
+          }
+        }
       }
       parent.appendChild(newNode);
       createChildNodes(node,newNode,page,removeHashAttribute);

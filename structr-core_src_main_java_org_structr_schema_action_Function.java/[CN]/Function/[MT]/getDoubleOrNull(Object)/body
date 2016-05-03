@@ -1,0 +1,21 @@
+{
+  try {
+    if (obj instanceof Date) {
+      return (double)((Date)obj).getTime();
+    }
+ else     if (obj instanceof Number) {
+      return ((Number)obj).doubleValue();
+    }
+ else {
+      Date date=DatePropertyParser.parseISO8601DateString(obj.toString());
+      if (date != null) {
+        return (double)(date).getTime();
+      }
+      return Double.parseDouble(obj.toString());
+    }
+  }
+ catch (  Throwable t) {
+    logException(t,"{0}: Exception parsing \"1\"",new Object[]{getName(),obj});
+  }
+  return null;
+}

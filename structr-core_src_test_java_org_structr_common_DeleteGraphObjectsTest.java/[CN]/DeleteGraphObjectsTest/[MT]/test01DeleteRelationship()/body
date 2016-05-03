@@ -14,7 +14,7 @@
       rel.getRelationship().delete();
       fail("Should have raised an org.neo4j.graphdb.NotInTransactionException");
     }
- catch (    org.neo4j.graphdb.NotInTransactionException e) {
+ catch (    NotInTransactionException e) {
     }
     assertNotNull(rel);
     try (final Tx tx=app.tx()){
@@ -25,11 +25,11 @@
       String uuid=rel.getUuid();
       fail("Deleted entity should have thrown an exception on access.");
     }
- catch (    IllegalStateException iex) {
+ catch (    NotFoundException iex) {
     }
   }
  catch (  FrameworkException ex) {
-    ex.printStackTrace();
+    logger.log(Level.WARNING,"",ex);
     logger.log(Level.SEVERE,ex.toString());
     fail("Unexpected exception");
   }

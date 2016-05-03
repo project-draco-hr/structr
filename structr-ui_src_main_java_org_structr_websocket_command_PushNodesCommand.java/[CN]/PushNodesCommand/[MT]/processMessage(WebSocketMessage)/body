@@ -16,7 +16,7 @@
         if (recursiveSource != null) {
           recursive="true".equals(recursiveSource.toString());
         }
-        CloudService.doRemote(webSocket.getSecurityContext(),new PushTransmission(root,recursive),new HostInfo(username,password,host,port.intValue()),new WebsocketProgressListener(getWebSocket(),key));
+        CloudService.doRemote(webSocket.getSecurityContext(),new PushTransmission(root,recursive),new HostInfo(username,password,host,port.intValue()),new WebsocketProgressListener(getWebSocket(),key,callback));
       }
  else {
         getWebSocket().send(MessageBuilder.status().code(404).message("Entity with ID " + sourceId + " not found.").build(),true);
@@ -24,7 +24,7 @@
       tx.success();
     }
  catch (    FrameworkException fex) {
-      fex.printStackTrace();
+      logger.log(Level.WARNING,"",fex);
       getWebSocket().send(MessageBuilder.status().code(400).message(fex.getMessage()).build(),true);
     }
   }

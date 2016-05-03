@@ -1,5 +1,8 @@
 {
-  if (predicate.evaluate(securityContext,startNode)) {
+  if (predicate instanceof Filter) {
+    ((Filter)predicate).setSecurityContext(securityContext);
+  }
+  if (predicate.accept(startNode)) {
     results.add(startNode);
     if (stopOnFirstHit) {
       return;

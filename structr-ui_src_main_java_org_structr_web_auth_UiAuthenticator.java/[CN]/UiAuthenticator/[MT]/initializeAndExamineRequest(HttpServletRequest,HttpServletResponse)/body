@@ -1,7 +1,7 @@
 {
   getUserClass();
   SecurityContext securityContext;
-  Principal user=checkSessionAuthentication(request);
+  Principal user=SessionHelper.checkSessionAuthentication(request);
   if (user == null) {
     user=checkExternalAuthentication(request,response);
   }
@@ -46,5 +46,6 @@
     }
   }
   examined=true;
+  securityContext.setResponse(response);
   return securityContext;
 }

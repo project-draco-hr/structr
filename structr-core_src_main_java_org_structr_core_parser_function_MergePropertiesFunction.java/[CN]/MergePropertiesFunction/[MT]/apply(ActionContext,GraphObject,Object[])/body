@@ -1,0 +1,24 @@
+{
+  if (arrayHasMinLengthAndAllElementsNotNull(sources,2) && sources[0] instanceof GraphObject && sources[1] instanceof GraphObject) {
+    final ConfigurationProvider config=StructrApp.getConfiguration();
+    final Set<PropertyKey> mergeKeys=new LinkedHashSet<>();
+    final GraphObject source=(GraphObject)sources[0];
+    final GraphObject target=(GraphObject)sources[1];
+    final int paramCount=sources.length;
+    for (int i=2; i < paramCount; i++) {
+      final String keyName=sources[i].toString();
+      final PropertyKey key=config.getPropertyKeyForJSONName(target.getClass(),keyName);
+      mergeKeys.add(key);
+    }
+    for (    final PropertyKey key : mergeKeys) {
+      final Object sourceValue=source.getProperty(key);
+      if (sourceValue != null) {
+        target.setProperty(key,sourceValue);
+      }
+    }
+  }
+ else {
+    logParameterError(entity,sources,ctx.isJavaScriptContext());
+  }
+  return "";
+}

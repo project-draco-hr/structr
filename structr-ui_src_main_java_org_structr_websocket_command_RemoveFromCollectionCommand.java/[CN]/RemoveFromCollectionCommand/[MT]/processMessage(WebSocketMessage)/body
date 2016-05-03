@@ -28,6 +28,12 @@
         List collection=(List)obj.getProperty(key);
         collection.remove(objToRemove);
         obj.setProperty(key,collection);
+        if (obj instanceof NodeInterface) {
+          TransactionCommand.registerNodeCallback((NodeInterface)obj,callback);
+        }
+ else         if (obj instanceof RelationshipInterface) {
+          TransactionCommand.registerRelCallback((RelationshipInterface)obj,callback);
+        }
       }
     }
  catch (    FrameworkException ex) {

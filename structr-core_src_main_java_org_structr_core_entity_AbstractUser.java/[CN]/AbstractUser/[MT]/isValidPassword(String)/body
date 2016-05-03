@@ -1,14 +1,7 @@
 {
   final String encryptedPasswordFromDatabase=getEncryptedPassword();
   if (encryptedPasswordFromDatabase != null) {
-    final String salt=getSalt();
-    String encryptedPasswordToCheck=null;
-    if (salt != null) {
-      encryptedPasswordToCheck=getHash(password,salt);
-    }
- else {
-      encryptedPasswordToCheck=getSimpleHash(password);
-    }
+    final String encryptedPasswordToCheck=HashHelper.getHash(password,getSalt());
     if (encryptedPasswordFromDatabase.equals(encryptedPasswordToCheck)) {
       return true;
     }

@@ -1,0 +1,24 @@
+{
+  try {
+    final TestUser user=createTestNode(TestUser.class);
+    TestOne t1=createTestNode(TestOne.class,user);
+    final SecurityContext userContext=SecurityContext.getInstance(user,AccessMode.Frontend);
+    final App userApp=StructrApp.getInstance(userContext);
+    try (final Tx tx=userApp.tx()){
+      final ActionContext userActionContext=new ActionContext(userContext,null);
+      assertEquals("node should be of type TestOne","TestOne",Scripting.replaceVariables(userActionContext,t1,"${(get(this, 'type'))}"));
+      try {
+        assertEquals("setting the type should fail","TestTwo",Scripting.replaceVariables(userActionContext,t1,"${(set(this, 'type', 'TestThree'), get(this, 'type'))}"));
+        fail("setting a system property should fail");
+      }
+ catch (      FrameworkException fx) {
+      }
+      assertEquals("setting the type should work after setting it with unlock_system_properties_once","TestFour",Scripting.replaceVariables(userActionContext,t1,"${(unlock_system_properties_once(this), set(this, 'type', 'TestFour'), get(this, 'type'))}"));
+      tx.success();
+    }
+   }
+ catch (  FrameworkException ex) {
+    logger.log(Level.WARNING,"",ex);
+    fail("Unexpected exception");
+  }
+}

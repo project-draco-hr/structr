@@ -1,0 +1,11 @@
+{
+  try (final Tx tx=app.tx()){
+    final List<User> users=app.nodeQuery(User.class).getAsList();
+    assertEquals("Expected no users to be created because of constraints",0,users.size());
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fail("Unexpected exception");
+    logger.log(Level.WARNING,"",fex);
+  }
+}

@@ -1,0 +1,13 @@
+{
+  logger.log(Level.INFO,"Clearing invalid sessions for user {0}",user);
+  final HashSessionManager sessionManager=Services.getInstance().getService(HttpService.class).getHashSessionManager();
+  final String[] sessionIds=user.getProperty(Principal.sessionIds);
+  if (sessionIds != null && sessionIds.length > 0) {
+    for (    String sessionId : user.getProperty(Principal.sessionIds)) {
+      final HttpSession session=sessionManager.getSession(sessionId);
+      if (session == null || SessionHelper.isSessionTimedOut(session)) {
+        SessionHelper.clearSession(sessionId);
+      }
+    }
+  }
+}

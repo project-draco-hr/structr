@@ -7,6 +7,7 @@
   Page modifiedNode=null;
   DOMNode sourceNode=(DOMNode)getNode(nodeId);
   if (sourceNode != null) {
+    TransactionCommand.registerNodeCallback(sourceNode,callback);
     try {
       modifiedNode=Importer.parsePageFromSource(securityContext,modifiedHtml,"__SaveNodeCommand_Temporary_Page__");
       DOMNode targetNode=modifiedNode;
@@ -19,15 +20,14 @@
       }
     }
  catch (    Throwable t) {
-      logger.log(Level.WARNING,t.toString());
-      t.printStackTrace();
+      logger.log(Level.WARNING,"",t);
       getWebSocket().send(MessageBuilder.status().code(422).message(t.toString()).build(),true);
     }
     try {
       app.delete(modifiedNode);
     }
  catch (    FrameworkException ex) {
-      ex.printStackTrace();
+      logger.log(Level.WARNING,"",ex);
     }
   }
  else {

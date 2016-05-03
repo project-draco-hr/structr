@@ -1,7 +1,7 @@
 {
-  List<FtpFile> ftpFiles=new ArrayList();
+  final List<FtpFile> ftpFiles=new ArrayList();
   final App app=StructrApp.getInstance();
-  try (Tx tx=app.tx()){
+  try (final Tx tx=app.tx()){
     String requestedPath=getAbsolutePath();
     logger.log(Level.INFO,"Children of {0} requested",requestedPath);
     if ("/".equals(requestedPath)) {
@@ -51,6 +51,7 @@
       logger.log(Level.INFO,"File found: {0}",ftpFile.getAbsolutePath());
       ftpFiles.add(ftpFile);
     }
+    tx.success();
     return ftpFiles;
   }
  catch (  FrameworkException fex) {

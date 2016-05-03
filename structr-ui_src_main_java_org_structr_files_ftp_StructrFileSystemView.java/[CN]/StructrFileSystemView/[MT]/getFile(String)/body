@@ -24,17 +24,21 @@
     AbstractFile file=FileHelper.getFileByAbsolutePath(SecurityContext.getSuperUserInstance(),requestedPath);
     if (file != null) {
       if (file instanceof Folder) {
+        tx.success();
         return new StructrFtpFolder((Folder)file);
       }
  else {
+        tx.success();
         return new StructrFtpFile((File)file);
       }
     }
     Page page=StructrApp.getInstance().nodeQuery(Page.class).andName(PathHelper.getName(requestedPath)).getFirst();
     if (page != null) {
+      tx.success();
       return page;
     }
     logger.log(Level.WARNING,"No existing file found: {0}",requestedPath);
+    tx.success();
     return new FileOrFolder(requestedPath,user);
   }
  catch (  FrameworkException fex) {

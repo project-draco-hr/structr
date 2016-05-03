@@ -1,0 +1,19 @@
+{
+  server=SshServer.setUpDefaultServer();
+  server.setKeyPairProvider(new SimpleGeneratorHostKeyProvider(Paths.get("db/structr_hostkey")));
+  server.setPort(Services.parseInt(APPLICATION_SSH_PORT,8022));
+  server.setPasswordAuthenticator(this);
+  server.setPublickeyAuthenticator(this);
+  server.setFileSystemFactory(this);
+  server.setSubsystemFactories(getSftpSubsystem());
+  server.setShellFactory(this);
+  final ScpCommandFactory scp=new ScpCommandFactory.Builder().build();
+  server.setCommandFactory(scp);
+  try {
+    server.start();
+    running=true;
+  }
+ catch (  IOException ex) {
+    logger.log(Level.SEVERE,null,ex);
+  }
+}

@@ -17,13 +17,12 @@
     }
   }
  catch (  Throwable t) {
-    t.printStackTrace();
     if (service.isVital()) {
-      logger.log(Level.SEVERE,"Vital service {0} failed to start: {1}. Aborting",new Object[]{service.getClass().getSimpleName(),t.getMessage()});
+      logger.log(Level.SEVERE,t,LogMessageSupplier.create("Vital service {0} failed to start. Aborting",service.getClass().getSimpleName()));
       System.exit(1);
     }
  else {
-      logger.log(Level.SEVERE,"Service {0} failed to start: {1}.",new Object[]{service.getClass().getSimpleName(),t.getMessage()});
+      logger.log(Level.SEVERE,t,LogMessageSupplier.create("Service {0} failed to start",service.getClass().getSimpleName()));
     }
   }
   return service;

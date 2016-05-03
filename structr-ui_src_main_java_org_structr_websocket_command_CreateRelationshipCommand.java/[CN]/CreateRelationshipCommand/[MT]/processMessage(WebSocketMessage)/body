@@ -11,6 +11,7 @@
     try {
       final Class relationClass=StructrApp.getConfiguration().getRelationClassForCombinedType(sourceNode.getType(),relType,targetNode.getType());
       final RelationshipInterface rel=app.create(sourceNode,targetNode,relationClass);
+      TransactionCommand.registerRelCallback(rel,callback);
       if (rel != null) {
         webSocketData.setResult(Arrays.asList(rel));
         getWebSocket().send(webSocketData,true);

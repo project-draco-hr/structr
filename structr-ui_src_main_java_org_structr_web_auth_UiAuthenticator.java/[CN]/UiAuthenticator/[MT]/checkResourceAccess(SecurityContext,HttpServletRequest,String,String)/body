@@ -1,13 +1,13 @@
 {
   final ResourceAccess resourceAccess=ResourceAccess.findGrant(securityContext,rawResourceSignature);
   final Method method=methods.get(request.getMethod());
-  final Principal user=getUser(request,true);
+  final Principal user=securityContext.getUser(false);
   final boolean validUser=(user != null);
   if (validUser && (user instanceof SuperUser || user.getProperty(Principal.isAdmin))) {
     return;
   }
   if (resourceAccess == null) {
-    logger.log(Level.INFO,"No resource access grant found for signature {0}.",rawResourceSignature);
+    logger.log(Level.INFO,"No resource access grant found for signature {0}. (URI: {1})",new Object[]{rawResourceSignature,securityContext.getCompoundRequestURI()});
     throw new UnauthorizedException("Forbidden");
   }
  else {

@@ -6,7 +6,7 @@
   try {
     request.setCharacterEncoding("UTF-8");
     response.setCharacterEncoding("UTF-8");
-    response.setContentType("application/json; charset=utf-8");
+    response.setContentType("application/json; charset=utf-8;");
     try (final Tx tx=StructrApp.getInstance().tx()){
       authenticator=config.getAuthenticator();
       securityContext=authenticator.initializeAndExamineRequest(request,response);
@@ -14,7 +14,7 @@
     }
      final App app=StructrApp.getInstance(securityContext);
     try (final Tx tx=app.tx()){
-      resource=ResourceHelper.applyViewTransformation(request,securityContext,ResourceHelper.optimizeNestedResourceChain(ResourceHelper.parsePath(securityContext,request,resourceMap,propertyView)),propertyView);
+      resource=ResourceHelper.applyViewTransformation(request,securityContext,ResourceHelper.optimizeNestedResourceChain(securityContext,request,resourceMap,propertyView),propertyView);
       authenticator.checkResourceAccess(securityContext,request,resource.getResourceSignature(),propertyView.get(securityContext));
       tx.success();
     }
@@ -25,7 +25,7 @@
         tx.success();
         retry=false;
       }
- catch (      DeadlockDetectedException ddex) {
+ catch (      DeadlockException ddex) {
         retry=true;
       }
     }

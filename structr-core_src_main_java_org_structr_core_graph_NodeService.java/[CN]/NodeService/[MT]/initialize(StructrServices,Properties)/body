@@ -1,0 +1,30 @@
+{
+  final String databaseDriver=config.getProperty(Structr.DATABASE_DRIVER,"org.structr.neo4j.Neo4jDatabaseService");
+  graphDb=(DatabaseService)Class.forName(databaseDriver).newInstance();
+  if (graphDb != null) {
+    graphDb.initialize(config);
+    filesPath=config.getProperty(Services.FILES_PATH);
+    File files=new File(filesPath);
+    if (!files.exists()) {
+      files.mkdir();
+    }
+    logger.log(Level.INFO,"Database ready.");
+    try (final Transaction tx=graphDb.beginTx()){
+      fulltextIndex=graphDb.nodeIndexer().fulltext();
+      nodeIndices.put(NodeIndex.fulltext,fulltextIndex);
+      keywordIndex=graphDb.nodeIndexer().exact();
+      nodeIndices.put(NodeIndex.keyword,keywordIndex);
+      layerIndex=graphDb.nodeIndexer().spatial();
+      nodeIndices.put(NodeIndex.layer,layerIndex);
+      relFulltextIndex=graphDb.relationshipIndexer().fulltext();
+      relIndices.put(RelationshipIndex.rel_fulltext,relFulltextIndex);
+      relKeywordIndex=graphDb.relationshipIndexer().exact();
+      relIndices.put(RelationshipIndex.rel_keyword,relKeywordIndex);
+      tx.success();
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"Error while initializing indexes.",t);
+    }
+    isInitialized=true;
+  }
+}

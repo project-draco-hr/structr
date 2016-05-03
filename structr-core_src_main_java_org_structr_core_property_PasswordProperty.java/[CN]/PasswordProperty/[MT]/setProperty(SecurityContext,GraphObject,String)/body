@@ -5,12 +5,12 @@
       PropertyKey errorKey=validationInfo.getErrorKey();
       int minLength=validationInfo.getMinLength();
       if (minLength > 0 && clearTextPassword.length() < minLength) {
-        throw new FrameworkException(422,new TooShortToken(errorType,errorKey,minLength));
+        throw new FrameworkException(422,"Validation of entity with ID " + obj.getUuid() + " failed",new TooShortToken(errorType,errorKey,minLength));
       }
     }
     String salt=RandomStringUtils.randomAlphanumeric(16);
     obj.setProperty(Principal.salt,salt);
-    return super.setProperty(securityContext,obj,AuthHelper.getHash(clearTextPassword,salt));
+    return super.setProperty(securityContext,obj,HashHelper.getHash(clearTextPassword,salt));
   }
  else {
     return super.setProperty(securityContext,obj,null);

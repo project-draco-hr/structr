@@ -1,6 +1,11 @@
 {
   if (super.onModification(securityContext,errorBuffer)) {
-    setProperty(hasParent,getProperty(parentId) != null);
+synchronized (this) {
+      final SecurityContext previousSecurityContext=securityContext;
+      this.securityContext=SecurityContext.getSuperUserInstance();
+      setProperty(hasParent,getProperty(parentId) != null);
+      this.securityContext=previousSecurityContext;
+    }
     return true;
   }
   return false;

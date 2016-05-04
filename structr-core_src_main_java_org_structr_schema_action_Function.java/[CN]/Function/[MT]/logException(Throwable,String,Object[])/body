@@ -1,6 +1,8 @@
 {
-  final LogRecord lr=new LogRecord(Level.WARNING,msg);
-  lr.setParameters(messageParams);
-  lr.setThrown(t);
-  logger.log(lr);
+  logger.log(Level.WARNING,t,new Supplier<String>(){
+    @Override public String get(){
+      return MessageFormat.format(msg,messageParams);
+    }
+  }
+);
 }

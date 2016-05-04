@@ -1,0 +1,43 @@
+{
+  final BufferedReader reader=new BufferedReader(new StringReader(input));
+  final String headerLine=reader.readLine();
+  final CSVParser parser=new CSVParser();
+  final String[] propertyNames=parser.parseLine(headerLine);
+  return new Iterable<JsonInput>(){
+    @Override public Iterator<JsonInput> iterator(){
+      return new Iterator<JsonInput>(){
+        String line=null;
+        @Override public boolean hasNext(){
+          try {
+            line=reader.readLine();
+            return StringUtils.isNotBlank(line);
+          }
+ catch (          IOException ioex) {
+            ioex.printStackTrace();
+          }
+          return false;
+        }
+        @Override public JsonInput next(){
+          try {
+            if (StringUtils.isNotBlank(line)) {
+              final JsonInput jsonInput=new JsonInput();
+              final String[] columns=parser.parseLine(line);
+              final int len=columns.length;
+              for (int i=0; i < len; i++) {
+                final String key=propertyNames[i];
+                jsonInput.add(key,columns[i]);
+              }
+              return jsonInput;
+            }
+          }
+ catch (          IOException ioex) {
+            ioex.printStackTrace();
+          }
+          return null;
+        }
+      }
+;
+    }
+  }
+;
+}

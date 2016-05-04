@@ -1,0 +1,114 @@
+{
+  final List<RestMethodResult> results=new LinkedList<>();
+  final SecurityContext securityContext;
+  final Authenticator authenticator;
+  final Resource resource;
+  try {
+    request.setCharacterEncoding("UTF-8");
+    response.setCharacterEncoding("UTF-8");
+    response.setContentType("application/json; charset=utf-8");
+    final String input=IOUtils.toString(request.getReader());
+    try (final Tx tx=StructrApp.getInstance().tx()){
+      authenticator=config.getAuthenticator();
+      securityContext=authenticator.initializeAndExamineRequest(request,response);
+      tx.success();
+    }
+     final App app=StructrApp.getInstance(securityContext);
+    if (securityContext != null) {
+      try (final Tx tx=app.tx()){
+        resource=ResourceHelper.applyViewTransformation(request,securityContext,ResourceHelper.optimizeNestedResourceChain(securityContext,request,resourceMap,propertyView),propertyView);
+        authenticator.checkResourceAccess(securityContext,request,resource.getResourceSignature(),propertyView.get(securityContext));
+        tx.success();
+      }
+       boolean retry=true;
+      while (retry) {
+        if (resource.createPostTransaction()) {
+          try (final Tx tx=app.tx()){
+            for (            final JsonInput propertySet : cleanAndParseCSV(input)) {
+              results.add(resource.doPost(convertPropertySetToMap(propertySet)));
+            }
+            tx.success();
+            retry=false;
+          }
+ catch (          DeadlockDetectedException ddex) {
+            retry=true;
+          }
+        }
+ else {
+          try {
+            for (            final JsonInput propertySet : cleanAndParseCSV(input)) {
+              results.add(resource.doPost(convertPropertySetToMap(propertySet)));
+            }
+            retry=false;
+          }
+ catch (          DeadlockDetectedException ddex) {
+            retry=true;
+          }
+        }
+      }
+      propertyView.set(securityContext,config.getDefaultPropertyView());
+      try (final Tx tx=app.tx()){
+        if (!results.isEmpty()) {
+          final RestMethodResult result=results.get(0);
+          final int resultCount=results.size();
+          if (result != null) {
+            if (resultCount > 1) {
+              for (              final RestMethodResult r : results) {
+                final GraphObject objectCreated=r.getContent().get(0);
+                if (!result.getContent().contains(objectCreated)) {
+                  result.addContent(objectCreated);
+                }
+              }
+              result.addHeader("Location",null);
+            }
+            result.commitResponse(gson.get(),response);
+          }
+        }
+        tx.success();
+      }
+     }
+ else {
+      try (final Tx tx=app.tx()){
+        new RestMethodResult(HttpServletResponse.SC_FORBIDDEN).commitResponse(gson.get(),response);
+        tx.success();
+      }
+     }
+  }
+ catch (  FrameworkException frameworkException) {
+    response.setStatus(frameworkException.getStatus());
+    gson.get().toJson(frameworkException,response.getWriter());
+    response.getWriter().println();
+  }
+catch (  JsonSyntaxException jsex) {
+    logger.log(Level.WARNING,"POST: Invalid JSON syntax",jsex.getMessage());
+    int code=HttpServletResponse.SC_BAD_REQUEST;
+    response.setStatus(code);
+    response.getWriter().append(RestMethodResult.jsonError(code,"JsonSyntaxException in POST: " + jsex.getMessage()));
+  }
+catch (  JsonParseException jpex) {
+    logger.log(Level.WARNING,"Unable to parse JSON string",jpex.getMessage());
+    int code=HttpServletResponse.SC_BAD_REQUEST;
+    response.setStatus(code);
+    response.getWriter().append(RestMethodResult.jsonError(code,"JsonParseException in POST: " + jpex.getMessage()));
+  }
+catch (  UnsupportedOperationException uoe) {
+    logger.log(Level.WARNING,"POST not supported");
+    int code=HttpServletResponse.SC_BAD_REQUEST;
+    response.setStatus(code);
+    response.getWriter().append(RestMethodResult.jsonError(code,"POST not supported: " + uoe.getMessage()));
+  }
+catch (  Throwable t) {
+    logger.log(Level.WARNING,"Exception in POST",t);
+    int code=HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+    response.setStatus(code);
+    response.getWriter().append(RestMethodResult.jsonError(code,"JsonSyntaxException in POST: " + t.getMessage()));
+  }
+ finally {
+    try {
+      response.getWriter().close();
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"Unable to flush and close response: {0}",t.getMessage());
+    }
+  }
+}

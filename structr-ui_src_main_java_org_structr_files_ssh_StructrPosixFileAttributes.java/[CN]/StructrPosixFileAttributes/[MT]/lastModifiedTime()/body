@@ -1,0 +1,11 @@
+{
+  FileTime time=null;
+  try (Tx tx=StructrApp.getInstance().tx()){
+    time=FileTime.fromMillis(file.getLastModifiedDate().getTime());
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.SEVERE,"",fex);
+  }
+  return time;
+}

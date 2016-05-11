@@ -5,8 +5,8 @@
   final RelationshipFactory relFactory=new RelationshipFactory(SecurityContext.getSuperUserInstance());
   for (  final Node neo4jNode : graphDb.getAllNodes()) {
     final NodeInterface node=nodeFactory.instantiate(neo4jNode);
-    if (node instanceof File) {
-      PushTransmission.sendFile(client,(File)node,CloudService.CHUNK_SIZE);
+    if (node instanceof FileBase) {
+      PushTransmission.sendFile(client,(FileBase)node,CloudService.CHUNK_SIZE);
     }
  else {
       client.send(new NodeDataContainer(node,0));

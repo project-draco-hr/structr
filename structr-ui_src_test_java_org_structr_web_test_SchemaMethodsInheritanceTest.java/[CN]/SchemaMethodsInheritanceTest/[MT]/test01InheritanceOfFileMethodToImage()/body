@@ -1,0 +1,37 @@
+{
+  User admin=null;
+  try (final Tx tx=app.tx()){
+    admin=createAdminUser();
+    tx.success();
+  }
+ catch (  Exception ex) {
+    logger.log(Level.SEVERE,null,ex);
+  }
+  try (final Tx tx=app.tx()){
+    SchemaNode fileNodeDef=app.nodeQuery(SchemaNode.class).andName("File").getFirst();
+    SchemaMethod testFileMethod=app.create(SchemaMethod.class,"testFileMethod");
+    testFileMethod.setProperty(SchemaMethod.source,"()");
+    testFileMethod.setProperty(SchemaMethod.schemaNode,fileNodeDef);
+    tx.success();
+  }
+ catch (  Exception ex) {
+    logger.log(Level.SEVERE,null,ex);
+  }
+  FileBase testFile=null;
+  try (final Tx tx=app.tx()){
+    testFile=app.create(File.class,"Test File");
+    testFile.setProperty(File.owner,admin);
+    tx.success();
+  }
+ catch (  Exception ex) {
+    logger.log(Level.SEVERE,null,ex);
+  }
+  try (final Tx tx=app.tx()){
+    RestAssured.given().contentType("application/json; charset=UTF-8").filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(200)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(201)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(400)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(404)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(422)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(500)).headers("X-User",ADMIN_USERNAME,"X-Password",ADMIN_PASSWORD).body("{}").expect().statusCode(200).when().post("/File/" + testFile.getUuid() + "/testFileMethod");
+    tx.success();
+  }
+ catch (  FrameworkException ex) {
+    logger.log(Level.SEVERE,ex.toString());
+    fail("Unexpected exception");
+  }
+}

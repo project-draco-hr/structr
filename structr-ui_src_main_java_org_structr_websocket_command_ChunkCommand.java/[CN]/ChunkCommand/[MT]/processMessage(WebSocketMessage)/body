@@ -14,7 +14,7 @@
         logger.log(Level.FINEST,"Decoded data: {0}",data);
       }
     }
-    final File file=(File)getNode(uuid);
+    final FileBase file=(FileBase)getNode(uuid);
     if (!file.isGranted(Permission.write,securityContext)) {
       logger.log(Level.WARNING,"No write permission for {0} on {1}",new Object[]{getWebSocket().getCurrentUser().toString(),file.toString()});
       getWebSocket().send(MessageBuilder.status().message("No write permission").code(400).build(),true);
@@ -25,9 +25,9 @@
       final long checksum=FileHelper.getChecksum(file);
       final long size=FileHelper.getSize(file);
       file.unlockSystemPropertiesOnce();
-      file.setProperty(File.checksum,checksum);
+      file.setProperty(FileBase.checksum,checksum);
       file.unlockSystemPropertiesOnce();
-      file.setProperty(File.size,size);
+      file.setProperty(FileBase.size,size);
       file.increaseVersion();
       getWebSocket().removeFileUploadHandler(uuid);
       logger.log(Level.FINE,"File upload finished. Checksum: {0}, size: {1}",new Object[]{checksum,size});

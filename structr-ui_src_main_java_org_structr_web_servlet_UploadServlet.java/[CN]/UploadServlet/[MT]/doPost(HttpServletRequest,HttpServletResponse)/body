@@ -52,7 +52,7 @@
           }
           final Class cls=type != null ? SchemaHelper.getEntityClassForRawType(type) : (isImage ? Image.class : (isVideo ? VideoFile.class : org.structr.dynamic.File.class));
           final String name=item.getName().replaceAll("\\\\","/");
-          final org.structr.dynamic.File newFile=FileHelper.createFile(securityContext,IOUtils.toByteArray(item.getInputStream()),contentType,cls);
+          final FileBase newFile=FileHelper.createFile(securityContext,IOUtils.toByteArray(item.getInputStream()),contentType,cls);
           newFile.setProperty(AbstractNode.name,PathHelper.getName(name));
           PropertyMap additionalProperties=PropertyMap.inputTypeToJavaType(securityContext,cls,params);
           for (          PropertyKey key : additionalProperties.keySet()) {

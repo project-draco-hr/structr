@@ -3,10 +3,10 @@
   Map<String,Object> properties=webSocketData.getNodeData();
   String patch=(String)properties.get("patch");
   if (node != null) {
-    diff_match_patch dmp=new diff_match_patch();
+    DiffMatchPatch dmp=new DiffMatchPatch();
     String oldText=node.getProperty(Content.content);
-    LinkedList<Patch> patches=(LinkedList<Patch>)dmp.patch_fromText(patch);
-    final Object[] results=dmp.patch_apply(patches,oldText);
+    LinkedList<Patch> patches=(LinkedList<Patch>)dmp.patchFromText(patch);
+    final Object[] results=dmp.patchApply(patches,oldText);
     try {
       node.setProperty(Content.content,results[0].toString());
       TransactionCommand.registerNodeCallback(node,callback);

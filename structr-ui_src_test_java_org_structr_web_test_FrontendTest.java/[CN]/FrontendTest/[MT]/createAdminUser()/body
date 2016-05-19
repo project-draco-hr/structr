@@ -1,14 +1,16 @@
 {
   final PropertyMap properties=new PropertyMap();
-  properties.put(User.name,"admin");
-  properties.put(User.password,"admin");
+  properties.put(User.name,ADMIN_USERNAME);
+  properties.put(User.password,ADMIN_PASSWORD);
   properties.put(User.isAdmin,true);
   properties.put(User.backendUser,true);
+  User user=null;
   try (final Tx tx=app.tx()){
-    User user=app.create(User.class,properties);
+    user=app.create(User.class,properties);
     tx.success();
   }
  catch (  Throwable t) {
     logger.log(Level.WARNING,"",t);
   }
+  return user;
 }

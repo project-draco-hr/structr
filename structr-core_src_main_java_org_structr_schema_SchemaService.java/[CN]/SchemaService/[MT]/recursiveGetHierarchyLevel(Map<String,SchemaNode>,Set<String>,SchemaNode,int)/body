@@ -1,4 +1,7 @@
 {
+  if (depth > 20) {
+    return 20;
+  }
   String superclass=schemaNode.getProperty(SchemaNode.extendsClass);
   if (superclass == null) {
     return 0;
@@ -7,7 +10,7 @@
     superclass=superclass.substring(superclass.lastIndexOf(".") + 1);
     final SchemaNode superSchemaNode=map.get(superclass);
     if (superSchemaNode != null) {
-      return recursiveGetHierarchyLevel(map,alreadyCalculated,superSchemaNode) + 1;
+      return recursiveGetHierarchyLevel(map,alreadyCalculated,superSchemaNode,depth + 1) + 1;
     }
   }
   return 0;

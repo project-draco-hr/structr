@@ -39,12 +39,13 @@ synchronized (SchemaService.class) {
         for (        final SchemaNode schemaNode : StructrApp.getInstance().nodeQuery(SchemaNode.class).getAsList()) {
           schemaNode.createBuiltInSchemaEntities(errorBuffer);
         }
-        SearchCommand.clearInheritanceMap();
-        NodeFactory.invalidateCache();
-        RelationshipFactory.invalidateCache();
-        AccessPathCache.invalidate();
         success=!errorBuffer.hasError();
         if (success) {
+          SearchCommand.clearInheritanceMap();
+          NodeFactory.invalidateCache();
+          RelationshipFactory.invalidateCache();
+          AccessPathCache.invalidate();
+          AbstractNode.clearRelationshipTemplateInstanceCache();
           config.registerDynamicViews(dynamicViews);
           tx.success();
         }

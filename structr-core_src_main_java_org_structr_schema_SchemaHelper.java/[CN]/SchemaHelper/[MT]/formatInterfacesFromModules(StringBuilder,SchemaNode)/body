@@ -1,0 +1,15 @@
+{
+  final Set<String> interfaces=new LinkedHashSet<>();
+  boolean firstInterface=true;
+  for (  final StructrModule module : StructrApp.getConfiguration().getModules().values()) {
+    final Set<String> moduleInterfacesForType=module.getInterfacesForType(schemaNode);
+    if (moduleInterfacesForType != null) {
+      interfaces.addAll(moduleInterfacesForType);
+    }
+  }
+  for (  final String iface : interfaces) {
+    src.append(firstInterface ? " implements " : ", ");
+    src.append(iface);
+    firstInterface=false;
+  }
+}

@@ -1,10 +1,10 @@
 {
-  JsonInput wrapper=new JsonInput();
+  final JsonInput wrapper=new JsonInput();
   if (json.isJsonObject()) {
-    JsonObject obj=json.getAsJsonObject();
-    for (    Entry<String,JsonElement> entry : obj.entrySet()) {
-      String key=entry.getKey();
-      JsonElement elem=entry.getValue();
+    final JsonObject obj=json.getAsJsonObject();
+    for (    final Entry<String,JsonElement> entry : obj.entrySet()) {
+      final String key=entry.getKey();
+      final JsonElement elem=entry.getValue();
       if (elem.isJsonNull()) {
         wrapper.add(key,null);
       }
@@ -14,7 +14,7 @@
  else       if (elem.isJsonArray()) {
         final JsonArray array=elem.getAsJsonArray();
         final List list=new LinkedList();
-        for (        JsonElement element : array) {
+        for (        final JsonElement element : array) {
           if (element.isJsonPrimitive()) {
             list.add(fromPrimitive((element.getAsJsonPrimitive())));
           }
@@ -30,8 +30,8 @@
     }
   }
  else   if (json.isJsonArray()) {
-    JsonArray array=json.getAsJsonArray();
-    for (    JsonElement elem : array) {
+    final JsonArray array=json.getAsJsonArray();
+    for (    final JsonElement elem : array) {
       if (elem.isJsonPrimitive()) {
         wrapper.add(elem.toString(),fromPrimitive(elem.getAsJsonPrimitive()));
       }

@@ -1,5 +1,5 @@
 {
-  if (arrayHasMinLengthAndMaxLengthAndAllElementsNotNull(sources,6,7)) {
+  if (arrayHasMinLengthAndMaxLengthAndAllElementsNotNull(sources,6,8)) {
     final String from=sources[0].toString();
     final String fromName=sources[1].toString();
     final String to=sources[2].toString();
@@ -7,14 +7,26 @@
     final String subject=sources[4].toString();
     final String htmlContent=sources[5].toString();
     String textContent="";
-    if (sources.length == 7) {
+    if (sources.length >= 7) {
       textContent=sources[6].toString();
     }
+    List<FileBase> fileNodes=null;
+    List<EmailAttachment> attachments=new ArrayList<>();
     try {
-      return MailHelper.sendHtmlMail(from,fromName,to,toName,null,null,from,subject,htmlContent,textContent);
+      if (sources.length == 8 && sources[7] instanceof List && ((List)sources[7]).size() > 0 && ((List)sources[7]).get(0) instanceof FileBase) {
+        fileNodes=(List<FileBase>)sources[7];
+        for (        FileBase fileNode : fileNodes) {
+          final EmailAttachment attachment=new EmailAttachment();
+          attachment.setURL(fileNode.getFileOnDisk().toURI().toURL());
+          attachment.setName(fileNode.getProperty(FileBase.name));
+          attachment.setDisposition(EmailAttachment.ATTACHMENT);
+          attachments.add(attachment);
+        }
+      }
+      return MailHelper.sendHtmlMail(from,fromName,to,toName,null,null,from,subject,htmlContent,textContent,attachments.isEmpty() ? null : attachments.toArray(new EmailAttachment[attachments.size()]));
     }
- catch (    EmailException eex) {
-      logException(entity,eex,sources);
+ catch (    EmailException|MalformedURLException ex) {
+      logException(entity,ex,sources);
     }
   }
  else {

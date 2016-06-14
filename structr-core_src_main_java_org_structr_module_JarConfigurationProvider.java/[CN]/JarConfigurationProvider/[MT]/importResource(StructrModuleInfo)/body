@@ -23,8 +23,11 @@
       if (StructrModule.class.isAssignableFrom(clazz) && !(Modifier.isAbstract(modifiers))) {
         try {
           final StructrModule structrModule=(StructrModule)clazz.newInstance();
-          modules.put(structrModule.getName(),structrModule);
-          logger.log(Level.INFO,"Activating module {0}",structrModule.getName());
+          final String moduleName=structrModule.getName();
+          if (!modules.containsKey(moduleName)) {
+            modules.put(structrModule.getName(),structrModule);
+            logger.log(Level.INFO,"Activating module {0}",structrModule.getName());
+          }
         }
  catch (        Throwable t) {
           logger.log(Level.WARNING,"Unable to instantiate module " + clazz.getName(),t);

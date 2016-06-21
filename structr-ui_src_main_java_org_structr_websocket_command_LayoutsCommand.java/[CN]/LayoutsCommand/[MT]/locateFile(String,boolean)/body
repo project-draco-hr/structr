@@ -1,0 +1,22 @@
+{
+  String fileName=name;
+  if (StringUtils.isBlank(fileName)) {
+    fileName="schema.json";
+  }
+  if (fileName.contains(System.getProperty("dir.separator","/"))) {
+    throw new FrameworkException(422,"Only relative file names are allowed, please use the snapshot.path configuration setting to supply a custom path for snapshots.");
+  }
+  if (addTimestamp) {
+    final SimpleDateFormat format=new SimpleDateFormat("yyyyMMdd-HHmmss");
+    fileName=format.format(System.currentTimeMillis()) + "-" + fileName;
+  }
+  if (!fileName.endsWith(".json")) {
+    fileName=fileName + ".json";
+  }
+  final File path=new File(getBasePath() + fileName);
+  final File parent=path.getParentFile();
+  if (!parent.exists()) {
+    parent.mkdirs();
+  }
+  return path;
+}

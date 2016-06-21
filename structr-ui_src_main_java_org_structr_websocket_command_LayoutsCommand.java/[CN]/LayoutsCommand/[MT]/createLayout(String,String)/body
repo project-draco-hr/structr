@@ -1,0 +1,15 @@
+{
+  final App app=StructrApp.getInstance();
+  try (final Tx tx=app.tx()){
+    final File layoutFile=locateFile(name,false);
+    try (final Writer writer=new FileWriter(layoutFile)){
+      writer.append(positions);
+      writer.append("\n");
+      writer.flush();
+    }
+     tx.success();
+  }
+ catch (  IOException ioex) {
+    logger.log(Level.WARNING,"",ioex);
+  }
+}

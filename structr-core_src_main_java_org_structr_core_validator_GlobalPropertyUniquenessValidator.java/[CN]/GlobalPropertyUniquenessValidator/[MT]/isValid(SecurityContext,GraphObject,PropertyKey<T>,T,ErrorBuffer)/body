@@ -5,23 +5,22 @@
   }
   if (key != null && value != null) {
     String id=null;
-    GraphObject existingNode=null;
+    List<AbstractNode> result=null;
+    boolean nodeExists=false;
     try {
-      if (key.equals(GraphObject.id)) {
-        existingNode=StructrApp.getInstance().getNodeById(value.toString());
-      }
- else {
-        existingNode=StructrApp.getInstance().nodeQuery(AbstractNode.class).and(key,value).getFirst();
-      }
+      result=StructrApp.getInstance().nodeQuery(AbstractNode.class).and(key,value).getAsList();
+      nodeExists=!result.isEmpty();
     }
  catch (    FrameworkException fex) {
+      Logger.getLogger(GlobalPropertyUniquenessValidator.class.getName()).log(Level.WARNING,"Unable to fetch list of nodes for uniqueness check",fex);
     }
-    if (existingNode != null) {
-      GraphObject foundNode=existingNode;
-      if (foundNode.getId() != object.getId()) {
-        id=foundNode.getUuid();
-        errorBuffer.add(new UniqueToken(object.getType(),key,id));
-        return false;
+    if (nodeExists) {
+      for (      final AbstractNode foundNode : result) {
+        if (foundNode.getId() != object.getId()) {
+          id=foundNode.getUuid();
+          errorBuffer.add(new UniqueToken(object.getType(),key,id));
+          return false;
+        }
       }
     }
   }

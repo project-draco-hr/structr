@@ -2,7 +2,7 @@
   List<GraphObjectMap> resultList=new LinkedList<>();
   if (type != null) {
     if (propertyView != null) {
-      for (      final Map.Entry<String,Object> entry : getPropertiesForView(securityContext,type).entrySet()) {
+      for (      final Map.Entry<String,Object> entry : getPropertiesForView(securityContext,type,propertyView).entrySet()) {
         final GraphObjectMap property=new GraphObjectMap();
         for (        final Map.Entry<String,Object> prop : ((Map<String,Object>)entry.getValue()).entrySet()) {
           property.setProperty(new GenericProperty(prop.getKey()),prop.getValue());
@@ -22,9 +22,9 @@
       Set<String> propertyViews=new LinkedHashSet<>(StructrApp.getConfiguration().getPropertyViewsForType(type));
       Map<String,Map<String,Object>> views=new TreeMap();
       schema.setProperty(new GenericProperty("views"),views);
-      for (      String view : propertyViews) {
+      for (      final String view : propertyViews) {
         if (!View.INTERNAL_GRAPH_VIEW.equals(view)) {
-          views.put(view,getPropertiesForView(securityContext,type));
+          views.put(view,getPropertiesForView(securityContext,type,view));
         }
       }
     }

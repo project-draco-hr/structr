@@ -4,9 +4,9 @@
   final App app=StructrApp.getInstance(securityContext);
   try {
     final String id=(String)webSocketData.getId();
-    final File file;
+    final FileBase file;
     try (final Tx tx=app.tx()){
-      file=app.get(File.class,id);
+      file=app.get(FileBase.class,id);
       if (file == null) {
         getWebSocket().send(MessageBuilder.status().code(400).message("File not found: ".concat(id)).build(),true);
         return;

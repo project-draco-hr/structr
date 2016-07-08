@@ -4,6 +4,7 @@
   final App app=StructrApp.getInstance(securityContext);
   try {
     final String id=(String)webSocketData.getId();
+    final String parentFolderId=(String)webSocketData.getNodeData().get("parentFolderId");
     final FileBase file;
     try (final Tx tx=app.tx()){
       file=app.get(FileBase.class,id);
@@ -18,7 +19,7 @@
       }
       tx.success();
     }
-     unarchive(securityContext,file);
+     unarchive(securityContext,file,parentFolderId);
   }
  catch (  Throwable t) {
     logger.log(Level.WARNING,"",t);

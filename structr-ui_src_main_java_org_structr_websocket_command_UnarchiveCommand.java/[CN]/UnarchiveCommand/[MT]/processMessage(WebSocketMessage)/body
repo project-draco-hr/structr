@@ -26,6 +26,7 @@
     String msg=t.toString();
     try (final Tx tx=app.tx()){
       getWebSocket().send(MessageBuilder.status().code(400).message("Could not unarchive file: ".concat((msg != null) ? msg : "")).build(),true);
+      getWebSocket().send(MessageBuilder.finished().callback(callback).data("success",false).build(),true);
       tx.success();
     }
  catch (    FrameworkException ignore) {

@@ -2,6 +2,7 @@
   final App app=StructrApp.getInstance(securityContext);
   final InputStream is;
   Folder existingParentFolder=null;
+  final String fileName=file.getName();
   try (final Tx tx=app.tx()){
     existingParentFolder=app.get(Folder.class,parentFolderId);
     String parentFolderName=null;
@@ -10,7 +11,6 @@
       parentFolderName=existingParentFolder.getName();
       msgString+=" into existing folder {1}.";
     }
-    final String fileName=file.getName();
     logger.log(Level.INFO,msgString,new Object[]{fileName,parentFolderName});
     is=file.getInputStream();
     tx.success();
@@ -50,9 +50,9 @@
       }
       logger.log(Level.INFO,"Committing transaction after {0} files.",overallCount);
       tx.success();
-      getWebSocket().send(MessageBuilder.finished().callback(callback).data("success",true).build(),true);
       logger.log(Level.INFO,"Unarchived {0} files.",overallCount);
     }
    }
+  getWebSocket().send(MessageBuilder.finished().callback(callback).data("success",true).data("filename",fileName).build(),true);
   in.close();
 }

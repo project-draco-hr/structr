@@ -1,17 +1,26 @@
 {
   final List list=new ArrayList();
-  for (  final Object source : sources) {
-    if (source != null) {
-      if (source instanceof Collection) {
-        list.addAll((Collection)source);
-      }
- else       if (source.getClass().isArray()) {
-        list.addAll(Arrays.asList((Object[])source));
-      }
+  try {
+    if (sources == null) {
+      throw new IllegalArgumentException();
+    }
+    for (    final Object source : sources) {
+      if (source != null) {
+        if (source instanceof Collection) {
+          list.addAll((Collection)source);
+        }
+ else         if (source.getClass().isArray()) {
+          list.addAll(Arrays.asList((Object[])source));
+        }
  else {
-        list.add(source);
+          list.add(source);
+        }
       }
     }
+    return StringUtils.join(list,"");
   }
-  return StringUtils.join(list,"");
+ catch (  final IllegalArgumentException e) {
+    logParameterError(entity,sources,ctx.isJavaScriptContext());
+    return usage(ctx.isJavaScriptContext());
+  }
 }

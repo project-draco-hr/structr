@@ -1,5 +1,8 @@
 {
-  if (arrayHasMinLengthAndMaxLengthAndAllElementsNotNull(sources,1,2)) {
+  try {
+    if (!arrayHasMinLengthAndMaxLengthAndAllElementsNotNull(sources,1,2)) {
+      return null;
+    }
     final String configKey=sources[0].toString();
     if (Services.SUPERUSER_PASSWORD.equals(configKey)) {
       return AbstractUser.HIDDEN;
@@ -7,8 +10,8 @@
     final String defaultValue=sources.length >= 2 ? sources[1].toString() : "";
     return StructrApp.getConfigurationValue(configKey,defaultValue);
   }
- else {
+ catch (  final IllegalArgumentException e) {
     logParameterError(entity,sources,ctx.isJavaScriptContext());
+    return usage(ctx.isJavaScriptContext());
   }
-  return "";
 }

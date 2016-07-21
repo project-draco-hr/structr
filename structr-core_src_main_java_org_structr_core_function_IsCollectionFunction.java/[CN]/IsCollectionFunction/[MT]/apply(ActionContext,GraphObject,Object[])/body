@@ -1,8 +1,12 @@
 {
-  if (arrayHasLengthAndAllElementsNotNull(sources,1)) {
+  try {
+    if (!arrayHasLengthAndAllElementsNotNull(sources,1)) {
+      return false;
+    }
     return (sources[0] instanceof Collection);
   }
- else {
-    return false;
+ catch (  final IllegalArgumentException e) {
+    logParameterError(entity,sources,ctx.isJavaScriptContext());
+    return usage(ctx.isJavaScriptContext());
   }
 }

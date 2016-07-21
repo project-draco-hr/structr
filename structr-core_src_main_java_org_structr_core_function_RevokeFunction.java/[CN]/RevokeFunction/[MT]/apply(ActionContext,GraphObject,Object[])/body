@@ -1,5 +1,8 @@
 {
-  if (arrayHasLengthAndAllElementsNotNull(sources,3)) {
+  try {
+    if (!arrayHasLengthAndAllElementsNotNull(sources,3)) {
+      return null;
+    }
     if (sources[0] instanceof Principal) {
       final Principal principal=(Principal)sources[0];
       if (sources[1] instanceof AbstractNode) {
@@ -36,7 +39,7 @@
       return "Error: first argument is not of type Principal.";
     }
   }
- else {
+ catch (  final IllegalArgumentException e) {
     logParameterError(entity,sources,ctx.isJavaScriptContext());
     return usage(ctx.isJavaScriptContext());
   }

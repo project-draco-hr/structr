@@ -3,7 +3,10 @@
     logParameterError(entity,sources,ctx.isJavaScriptContext());
     return usage(ctx.isJavaScriptContext());
   }
-  if (arrayHasLengthAndAllElementsNotNull(sources,3) && sources[2] instanceof AbstractNode) {
+  try {
+    if (!(arrayHasLengthAndAllElementsNotNull(sources,3) && sources[2] instanceof AbstractNode)) {
+      return null;
+    }
     final App app=StructrApp.getInstance(entity != null ? entity.getSecurityContext() : ctx.getSecurityContext());
     final String name=sources[0].toString();
     final String locale=sources[1].toString();
@@ -19,8 +22,9 @@
       logger.log(Level.WARNING,"No MailTemplate found for parameters: {0}",getParametersAsString(sources));
     }
   }
- else {
+ catch (  final IllegalArgumentException e) {
     logParameterError(entity,sources,ctx.isJavaScriptContext());
+    return usage(ctx.isJavaScriptContext());
   }
   return "";
 }

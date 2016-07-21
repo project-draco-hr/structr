@@ -1,5 +1,8 @@
 {
-  if (arrayHasLengthAndAllElementsNotNull(sources,1) && sources[0] instanceof String) {
+  try {
+    if (!(arrayHasLengthAndAllElementsNotNull(sources,1) && sources[0] instanceof String)) {
+      return null;
+    }
     final SecurityContext securityContext=entity != null ? entity.getSecurityContext() : ctx.getSecurityContext();
     final App app=StructrApp.getInstance(securityContext);
     final RenderContext innerCtx=new RenderContext((RenderContext)ctx);
@@ -61,8 +64,8 @@
     }
     return StringUtils.join(innerCtx.getBuffer().getQueue(),"");
   }
- else {
+ catch (  final IllegalArgumentException e) {
     logParameterError(entity,sources,ctx.isJavaScriptContext());
+    return usage(ctx.isJavaScriptContext());
   }
-  return usage(ctx.isJavaScriptContext());
 }

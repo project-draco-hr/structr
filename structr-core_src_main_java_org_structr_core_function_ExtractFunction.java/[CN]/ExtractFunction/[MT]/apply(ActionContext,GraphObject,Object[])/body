@@ -1,6 +1,9 @@
 {
   try {
-    if (arrayHasLengthAndAllElementsNotNull(sources,1)) {
+    if (sources == null) {
+      throw new IllegalArgumentException();
+    }
+    if (sources.length == 1) {
       if (sources[0] instanceof Collection) {
         final List extraction=new LinkedList();
         for (        final Object obj : (Collection)sources[0]) {
@@ -11,7 +14,10 @@
         return extraction;
       }
     }
- else     if (arrayHasLengthAndAllElementsNotNull(sources,2)) {
+    if (sources.length == 2) {
+      if (sources[0] == null) {
+        return null;
+      }
       if (sources[0] instanceof Collection && sources[1] instanceof String) {
         final ConfigurationProvider config=StructrApp.getConfiguration();
         final List extraction=new LinkedList();

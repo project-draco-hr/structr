@@ -1,10 +1,17 @@
 {
-  if (sources != null) {
+  try {
+    if (sources == null) {
+      throw new IllegalArgumentException();
+    }
     final StringBuilder buf=new StringBuilder();
     for (    final Object obj : sources) {
       buf.append(obj);
     }
     logger.log(Level.INFO,buf.toString());
+    return "";
   }
-  return "";
+ catch (  final IllegalArgumentException e) {
+    logParameterError(entity,sources,ctx.isJavaScriptContext());
+    return usage(ctx.isJavaScriptContext());
+  }
 }

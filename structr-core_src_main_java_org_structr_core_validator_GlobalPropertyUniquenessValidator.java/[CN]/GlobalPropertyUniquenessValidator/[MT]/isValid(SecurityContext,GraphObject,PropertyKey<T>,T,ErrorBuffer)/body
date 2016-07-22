@@ -3,22 +3,47 @@
     errorBuffer.add(new EmptyPropertyToken(object.getType(),key));
     return false;
   }
-  if (key != null && value != null) {
-    String id=null;
-    List<AbstractNode> result=null;
+  if (key != null) {
+    List<? extends GraphObject> result=null;
     boolean nodeExists=false;
     try {
-      result=StructrApp.getInstance().nodeQuery(AbstractNode.class).and(key,value).getAsList();
+      if (key instanceof UuidProperty) {
+        long t0=System.nanoTime();
+        result=Collections.EMPTY_LIST;
+        GraphObject obj=StructrApp.getInstance().get(value.toString());
+        if (obj != null) {
+          result=Arrays.asList(obj);
+        }
+        long t1=System.nanoTime() - t0;
+        logger.log(Level.FINE,"get(): {0} ns, {1} results",new Object[]{t1,result.size()});
+      }
+ else {
+        result=Collections.EMPTY_LIST;
+        if (object instanceof NodeInterface) {
+          long t0=System.nanoTime();
+          result=StructrApp.getInstance().nodeQuery().and(key,value).getAsList();
+          long t1=System.nanoTime() - t0;
+          logger.log(Level.FINE,"instanceOf NodeInterface => nodeQuery: {0} ns, {1} result(s)",new Object[]{t1,result.size()});
+        }
+ else         if (object instanceof RelationshipInterface) {
+          long t0=System.nanoTime();
+          result=StructrApp.getInstance().relationshipQuery().and(key,value).getAsList();
+          long t1=System.nanoTime() - t0;
+          logger.log(Level.FINE,"instanceOf RelationshipInterface => nodeQuery: {0} ns, {1} result(s)",new Object[]{t1,result.size()});
+        }
+ else {
+          logger.log(Level.SEVERE,"GraphObject is neither NodeInterface nor RelationshipInterface");
+        }
+      }
       nodeExists=!result.isEmpty();
     }
  catch (    FrameworkException fex) {
-      Logger.getLogger(GlobalPropertyUniquenessValidator.class.getName()).log(Level.WARNING,"Unable to fetch list of nodes for uniqueness check",fex);
+      logger.log(Level.WARNING,"Unable to fetch list of nodes for uniqueness check",fex);
     }
     if (nodeExists) {
-      for (      final AbstractNode foundNode : result) {
+      for (      final GraphObject foundNode : result) {
         if (foundNode.getId() != object.getId()) {
-          id=foundNode.getUuid();
-          errorBuffer.add(new UniqueToken(object.getType(),key,id));
+          errorBuffer.add(new UniqueToken(object.getType(),key,foundNode.getUuid()));
           return false;
         }
       }

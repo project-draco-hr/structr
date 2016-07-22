@@ -2,7 +2,7 @@
   final Importer importer=new Importer(securityContext,source,null,"source",false,false);
   final App localAppCtx=StructrApp.getInstance(securityContext);
   Page page=null;
-  try (final Tx tx=localAppCtx.tx()){
+  try (final Tx tx=localAppCtx.tx(true,false,false)){
     page=localAppCtx.create(Page.class,new NodeAttribute<>(Page.name,name));
     if (importer.parse()) {
       importer.createChildNodesWithHtml(page,page,removeHashAttribute);

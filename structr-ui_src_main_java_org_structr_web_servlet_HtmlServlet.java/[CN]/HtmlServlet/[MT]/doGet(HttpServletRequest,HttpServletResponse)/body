@@ -50,7 +50,11 @@
         }
       }
       if (rootElement == null) {
-        final FileBase file=findFile(securityContext,request,path);
+        final String queryString=request.getQueryString();
+        FileBase file=findFile(securityContext,request,path + (queryString != null ? "?" + queryString : ""));
+        if (file == null) {
+          file=findFile(securityContext,request,path);
+        }
         if (file != null) {
           streamFile(securityContext,file,request,response,edit);
           tx.success();

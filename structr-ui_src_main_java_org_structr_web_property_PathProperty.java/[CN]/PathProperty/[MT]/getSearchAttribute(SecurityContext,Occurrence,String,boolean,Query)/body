@@ -1,35 +1,18 @@
 {
-  final String[] parts=PathHelper.getParts(searchValue);
   final App app=StructrApp.getInstance(securityContext);
   final SourceSearchAttribute attr=new SourceSearchAttribute(occur);
   final Set<GraphObject> result=new LinkedHashSet<>();
-  Folder parentFolder=null;
-  for (  final String part : parts) {
-    try {
-      logger.log(Level.FINE,"PathProperty path part: {0} (parent folder path: {1})",new Object[]{part,parentFolder == null ? "/" : parentFolder.getPath()});
-      final Query<AbstractFile> q=app.nodeQuery(AbstractFile.class).and(AbstractFile.name,part);
-      if (parentFolder != null) {
-        q.and(AbstractFile.parent,parentFolder);
-      }
-      for (      final AbstractFile fileOrFolder : q.getAsList()) {
-        final String currentPath=(parentFolder != null ? FileHelper.getFolderPath(parentFolder) : "") + PathHelper.PATH_SEP + part;
-        if (fileOrFolder != null && FileHelper.getFolderPath(fileOrFolder).equals(currentPath)) {
-          if (fileOrFolder instanceof Folder) {
-            parentFolder=(Folder)fileOrFolder;
-          }
- else {
-            result.add(fileOrFolder);
-          }
-        }
+  final Query<AbstractFile> q=app.nodeQuery(AbstractFile.class).and(AbstractFile.name,PathHelper.getName(searchValue));
+  try {
+    for (    final AbstractFile fileOrFolder : q.getAsList()) {
+      if (fileOrFolder != null && FileHelper.getFolderPath(fileOrFolder).equals(searchValue)) {
+        attr.addToResult(fileOrFolder);
+        return attr;
       }
     }
- catch (    FrameworkException ex) {
-      logger.log(Level.SEVERE,null,ex);
-    }
   }
-  if (result.isEmpty() && parentFolder != null && FileHelper.getFolderPath(parentFolder).equals(searchValue)) {
-    result.add(parentFolder);
+ catch (  FrameworkException ex) {
+    logger.log(Level.SEVERE,null,ex);
   }
-  attr.setResult(result);
   return attr;
 }

@@ -1,0 +1,20 @@
+{
+  try {
+    if (!arrayHasMinLengthAndMaxLengthAndAllElementsNotNull(sources,1,2)) {
+      return null;
+    }
+    final String toSplit=sources[0].toString();
+    String splitExpr="[,;\\s]+";
+    if (sources.length >= 2) {
+      splitExpr=sources[1].toString();
+      return Arrays.asList(StringUtils.split(toSplit,splitExpr));
+    }
+ else {
+      return Arrays.asList(toSplit.split(splitExpr));
+    }
+  }
+ catch (  final IllegalArgumentException e) {
+    logParameterError(entity,sources,ctx.isJavaScriptContext());
+    return usage(ctx.isJavaScriptContext());
+  }
+}

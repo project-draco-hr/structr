@@ -20,6 +20,7 @@
           final Set<PropertyKey> viewProperties=config.getPropertySet(type,view);
           final Set<PropertyKey> parentProperties=config.getPropertySet(type.getSuperclass(),view);
           for (          final PropertyKey key : allProperties) {
+            final String declaringClass=key.getDeclaringClass() != null ? key.getDeclaringClass().getSimpleName() : "GraphObject";
             final String propertyName=key.jsonName();
             final GraphObjectMap property=new GraphObjectMap();
             final Class valueType=key.valueType();
@@ -38,6 +39,7 @@
             property.put(SchemaProperty.notNull,key.isNotNull());
             property.put(SchemaProperty.unique,key.isUnique());
             property.put(SchemaProperty.isDynamic,key.isDynamic());
+            property.put(SchemaProperty.declaringClass,declaringClass);
             result.add(property);
           }
         }

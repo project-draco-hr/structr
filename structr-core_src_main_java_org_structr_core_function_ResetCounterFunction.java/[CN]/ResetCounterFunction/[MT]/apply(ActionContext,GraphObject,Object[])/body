@@ -1,0 +1,18 @@
+{
+  try {
+    if (!arrayHasLengthAndAllElementsNotNull(sources,1)) {
+      return null;
+    }
+    try {
+      ctx.resetCounter(parseInt(sources[0]));
+    }
+ catch (    NumberFormatException nfe) {
+      logException(nfe,"{0}: NumberFormatException parsing counter level \"{1}\" in element \"{2}\". Parameters: {3}",new Object[]{getName(),sources[0].toString(),entity,getParametersAsString(sources)});
+    }
+  }
+ catch (  final IllegalArgumentException e) {
+    logParameterError(entity,sources,ctx.isJavaScriptContext());
+    return usage(ctx.isJavaScriptContext());
+  }
+  return "";
+}

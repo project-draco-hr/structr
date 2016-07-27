@@ -1,0 +1,41 @@
+{
+  final Set<String> classes=module.getClasses();
+  for (  final String name : classes) {
+    String className=StringUtils.removeStart(name,".");
+    try {
+      final Class clazz=Class.forName(className);
+      final int modifiers=clazz.getModifiers();
+      if (NodeInterface.class.isAssignableFrom(clazz)) {
+        registerEntityType(clazz);
+      }
+      if (AbstractRelationship.class.isAssignableFrom(clazz) && !(Modifier.isAbstract(modifiers))) {
+        registerEntityType(clazz);
+      }
+      if (Service.class.isAssignableFrom(clazz) && !(Modifier.isAbstract(modifiers))) {
+        Services.getInstance().registerServiceClass(clazz);
+      }
+      if (Agent.class.isAssignableFrom(clazz) && !(Modifier.isAbstract(modifiers))) {
+        final String simpleName=clazz.getSimpleName();
+        final String fullName=clazz.getName();
+        agentClassCache.put(simpleName,clazz);
+        agentPackages.add(fullName.substring(0,fullName.lastIndexOf(".")));
+      }
+      if (StructrModule.class.isAssignableFrom(clazz) && !(Modifier.isAbstract(modifiers))) {
+        try {
+          final StructrModule structrModule=(StructrModule)clazz.newInstance();
+          final String moduleName=structrModule.getName();
+          if (!modules.containsKey(moduleName)) {
+            modules.put(moduleName,structrModule);
+            logger.log(Level.INFO,"Activating module {0}",moduleName);
+            structrModule.onLoad();
+          }
+        }
+ catch (        Throwable t) {
+          logger.log(Level.WARNING,"Unable to instantiate module " + clazz.getName(),t);
+        }
+      }
+    }
+ catch (    Throwable ignore) {
+    }
+  }
+}

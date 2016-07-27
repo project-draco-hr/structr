@@ -1,0 +1,56 @@
+{
+  if (sources != null) {
+    final SecurityContext securityContext=entity != null ? entity.getSecurityContext() : ctx.getSecurityContext();
+    final ConfigurationProvider config=StructrApp.getConfiguration();
+    final Query query=StructrApp.getInstance(securityContext).nodeQuery();
+    Class type=null;
+    if (sources.length >= 1 && sources[0] != null) {
+      final String typeString=sources[0].toString();
+      type=config.getNodeEntityClass(typeString);
+      if (type != null) {
+        query.andTypes(type);
+      }
+ else {
+        logger.log(Level.WARNING,"Error in search(): type {0} not found.",typeString);
+        return "Error in search(): type " + typeString + " not found.";
+      }
+    }
+    if (type == null) {
+      logger.log(Level.WARNING,"Error in search(): no type specified. Parameters: {0}",getParametersAsString(sources));
+      return "Error in search(): no type specified.";
+    }
+    securityContext.ignoreResultCount(true);
+    if (sources.length == 2 && sources[1] instanceof Map) {
+      final PropertyMap map=PropertyMap.inputTypeToJavaType(securityContext,type,(Map)sources[1]);
+      for (      final Map.Entry<PropertyKey,Object> entry : map.entrySet()) {
+        query.and(entry.getKey(),entry.getValue(),false);
+      }
+    }
+ else {
+      final Integer parameter_count=sources.length;
+      if (parameter_count % 2 == 0) {
+        throw new FrameworkException(400,"Invalid number of parameters: " + parameter_count + ". Should be uneven: "+ ERROR_MESSAGE_SEARCH);
+      }
+      for (Integer c=1; c < parameter_count; c+=2) {
+        final PropertyKey key=config.getPropertyKeyForJSONName(type,sources[c].toString());
+        if (key != null) {
+          if (!key.isSearchable()) {
+            throw new FrameworkException(400,"Search key " + key.jsonName() + " is not indexed.");
+          }
+          final PropertyConverter inputConverter=key.inputConverter(securityContext);
+          Object value=sources[c + 1];
+          if (inputConverter != null) {
+            value=inputConverter.convert(value);
+          }
+          query.and(key,value,false);
+        }
+      }
+    }
+    final Object x=query.getAsList();
+    return x;
+  }
+ else {
+    logParameterError(entity,sources,ctx.isJavaScriptContext());
+    return usage(ctx.isJavaScriptContext());
+  }
+}

@@ -4,7 +4,7 @@
     try (final Tx tx=begin()){
       if (doCallbacks && modificationQueue != null) {
         modificationQueue.doOuterCallbacks(securityContext);
-        if ((securityContext == null) ? doNotifications : securityContext.isDoTransactionNotifications()) {
+        if ((securityContext == null) ? doNotifications : doNotifications && securityContext.isDoTransactionNotifications()) {
           final Collection<ModificationEvent> modificationEvents=modificationQueue.getModificationEvents();
           for (          final StructrTransactionListener listener : TransactionCommand.getTransactionListeners()) {
             listener.afterCommit(securityContext,modificationEvents,cmd.getSource());

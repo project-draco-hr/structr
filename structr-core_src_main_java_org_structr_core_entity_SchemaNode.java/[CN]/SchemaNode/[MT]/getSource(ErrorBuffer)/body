@@ -1,4 +1,5 @@
 {
+  final Collection<StructrModule> modules=StructrApp.getConfiguration().getModules().values();
   final App app=StructrApp.getInstance(securityContext);
   final Map<Actions.Type,List<ActionEntry>> saveActions=new EnumMap<>(Actions.Type.class);
   final Map<String,Set<String>> viewProperties=new LinkedHashMap<>();
@@ -10,10 +11,15 @@
   final Class baseType=AbstractNode.class;
   final String _className=getProperty(name);
   final String _extendsClass=getProperty(extendsClass);
+  final String superClass=_extendsClass != null ? _extendsClass : baseType.getSimpleName();
   src.append("package org.structr.dynamic;\n\n");
-  SchemaHelper.formatImportStatements(src,baseType);
-  String superClass=_extendsClass != null ? _extendsClass : baseType.getSimpleName();
-  src.append("public class ").append(_className).append(" extends ").append(superClass).append(" {\n\n");
+  SchemaHelper.formatImportStatements(this,src,baseType);
+  src.append("public class ");
+  src.append(_className);
+  src.append(" extends ");
+  src.append(superClass);
+  SchemaHelper.formatInterfacesFromModules(src,this);
+  src.append(" {\n\n");
   for (  final SchemaRelationship outRel : getOutgoingRelationships(SchemaRelationship.class)) {
     final PropertyMap relNodeProperties=new PropertyMap();
     relNodeProperties.put(SchemaRelationshipNode.sourceNode,outRel.getSourceNode());
@@ -92,7 +98,13 @@
     src.append("\t}\n");
   }
   SchemaHelper.formatValidators(src,validators);
-  SchemaHelper.formatSaveActions(src,saveActions);
+  SchemaHelper.formatSaveActions(this,src,saveActions);
+  for (  final StructrModule module : modules) {
+    src.append("\n\n// ----- dynamic code inserted by ");
+    src.append(module.getName());
+    src.append(" -----\n");
+    module.insertSourceCode(this,src);
+  }
   src.append("}\n");
   return src.toString();
 }

@@ -1,8 +1,13 @@
 {
   try {
     final List<DynamicResourceAccess> existingDynamicGrants=StructrApp.getInstance().nodeQuery(DynamicResourceAccess.class).getAsList();
+    final Set<String> existingSchemaNodeNames=new HashSet<>();
+    for (    final SchemaNode schemaNode : existingSchemaNodes) {
+      existingSchemaNodeNames.add(schemaNode.getResourceSignature());
+    }
     for (    final DynamicResourceAccess grant : existingDynamicGrants) {
-      String sig;
+      boolean foundAllParts=true;
+      final String sig;
       try {
         sig=grant.getResourceSignature();
       }
@@ -10,14 +15,17 @@
         logger.log(Level.FINE,"Unable to get signature from grant");
         continue;
       }
-      boolean exists=false;
-      for (      final SchemaNode schemaNode : existingSchemaNodes) {
-        if (schemaNode.getResourceSignature().equals(sig)) {
-          exists=true;
-          break;
+      final String[] parts=StringUtils.split(sig,"/");
+      if (parts != null) {
+        for (        final String sigPart : parts) {
+          if ("/".equals(sigPart) || sigPart.startsWith("_")) {
+            continue;
+          }
+          foundAllParts&=existingSchemaNodeNames.contains(sigPart);
         }
       }
-      if (!exists) {
+      if (!foundAllParts) {
+        logger.log(Level.INFO,"Did not find all parts of signature, will be removed: {0}, ",new Object[]{sig});
         removeDynamicGrants(sig);
       }
     }

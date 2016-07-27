@@ -1,0 +1,60 @@
+{
+  final Map<String,Object> data=webSocketData.getNodeData();
+  final String mode=(String)data.get("mode");
+  final String name=(String)data.get("name");
+  if (mode != null) {
+    final List<GraphObject> result=new LinkedList<>();
+switch (mode) {
+case "list":
+      final List<String> layouts=LayoutsCommand.listLayouts();
+    if (layouts != null) {
+      final GraphObjectMap layoutContainer=new GraphObjectMap();
+      layoutContainer.put(layoutsProperty,layouts);
+      result.add(layoutContainer);
+      webSocketData.setResult(result);
+      webSocketData.setRawResultCount(1);
+      getWebSocket().send(webSocketData,true);
+    }
+  break;
+case "get":
+try {
+  final String content=new String(Files.readAllBytes(locateFile(name,false).toPath()));
+  getWebSocket().send(MessageBuilder.finished().callback(callback).data("schemaLayout",content).build(),true);
+}
+ catch (IOException|FrameworkException ex) {
+  Logger.getLogger(LayoutsCommand.class.getName()).log(Level.SEVERE,null,ex);
+}
+break;
+case "add":
+final String positions=(String)data.get("schemaLayout");
+try {
+final File layoutFile=locateFile(name,false);
+if (layoutFile.exists()) {
+getWebSocket().send(MessageBuilder.status().code(422).message("Layout already exists!").build(),true);
+}
+ else {
+createLayout(name,positions);
+}
+getWebSocket().send(MessageBuilder.finished().callback(callback).build(),true);
+}
+ catch (FrameworkException ex) {
+Logger.getLogger(LayoutsCommand.class.getName()).log(Level.SEVERE,null,ex);
+}
+break;
+case "delete":
+try {
+deleteLayout(name);
+getWebSocket().send(MessageBuilder.finished().callback(callback).build(),true);
+}
+ catch (FrameworkException ex) {
+Logger.getLogger(LayoutsCommand.class.getName()).log(Level.SEVERE,null,ex);
+}
+break;
+default :
+getWebSocket().send(MessageBuilder.status().code(422).message("Mode must be one of list, get, add or delete.").build(),true);
+}
+}
+ else {
+getWebSocket().send(MessageBuilder.status().code(422).message("Mode must be one of list, get, add or delete.").build(),true);
+}
+}

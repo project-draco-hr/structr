@@ -1,0 +1,18 @@
+{
+  try {
+    if (!(arrayHasLengthAndAllElementsNotNull(sources,1) && sources[0] instanceof Number)) {
+      return null;
+    }
+    try {
+      return new Random(System.currentTimeMillis()).nextInt(((Number)sources[0]).intValue());
+    }
+ catch (    Throwable t) {
+      logException(entity,t,sources);
+    }
+  }
+ catch (  final IllegalArgumentException e) {
+    logParameterError(entity,sources,ctx.isJavaScriptContext());
+    return usage(ctx.isJavaScriptContext());
+  }
+  return "";
+}

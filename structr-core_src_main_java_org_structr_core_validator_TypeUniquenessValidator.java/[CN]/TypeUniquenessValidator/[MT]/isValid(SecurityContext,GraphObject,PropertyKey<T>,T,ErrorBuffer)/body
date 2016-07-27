@@ -18,11 +18,12 @@
       logger.log(Level.WARNING,"",fex);
     }
     if (nodeExists) {
-      AbstractNode foundNode=result.get(0);
-      if (foundNode.getId() != object.getId()) {
-        id=((AbstractNode)result.get(0)).getUuid();
-        errorBuffer.add(new UniqueToken(object.getType(),key,id));
-        return false;
+      for (      final AbstractNode foundNode : result.getResults()) {
+        if (foundNode.getId() != object.getId()) {
+          id=foundNode.getUuid();
+          errorBuffer.add(new UniqueToken(object.getType(),key,id));
+          return false;
+        }
       }
     }
   }

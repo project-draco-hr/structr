@@ -1,0 +1,24 @@
+{
+  try {
+    if (!arrayHasLengthAndAllElementsNotNull(sources,2)) {
+      return false;
+    }
+    if (sources[0] instanceof String && sources[1] instanceof String) {
+      final String source=sources[0].toString();
+      final String part=sources[1].toString();
+      return source.contains(part);
+    }
+ else     if (sources[0] instanceof Collection) {
+      final Collection collection=(Collection)sources[0];
+      return collection.contains(sources[1]);
+    }
+ else     if (sources[0].getClass().isArray()) {
+      return ArrayUtils.contains((Object[])sources[0],sources[1]);
+    }
+  }
+ catch (  final IllegalArgumentException e) {
+    logParameterError(entity,sources,ctx.isJavaScriptContext());
+    return usage(ctx.isJavaScriptContext());
+  }
+  return false;
+}

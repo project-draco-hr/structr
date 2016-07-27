@@ -1,0 +1,16 @@
+{
+  final Class<? extends AbstractNode> virtualTypeClass=StructrApp.getConfiguration().getNodeEntityClass("VirtualType");
+  if (virtualTypeClass != null) {
+    final PropertyKey<Integer> positionProperty=StructrApp.getConfiguration().getPropertyKeyForJSONName(virtualTypeClass,"position");
+    virtualType=(ResultTransformer)app.nodeQuery(virtualTypeClass).andName(rawType).sort(positionProperty).getFirst();
+    if (virtualType != null) {
+      final String sourceType=virtualType.getSourceType();
+      if (sourceType != null) {
+        rawType=sourceType;
+      }
+ else {
+        throw new FrameworkException(500,"Invalid virtual type " + rawType + ", missing value for sourceType");
+      }
+    }
+  }
+}

@@ -1,22 +1,20 @@
 {
-  Map<Integer,Class> candidates=new TreeMap<>();
-  Class sourceType=getNodeEntityClass(sourceTypeName);
-  Class targetType=getNodeEntityClass(targetTypeName);
+  final Class sourceType=getNodeEntityClass(sourceTypeName);
+  final Class targetType=getNodeEntityClass(targetTypeName);
+  final Map<Integer,Class> candidates=new TreeMap<>();
   for (  final Class candidate : getRelationClassCandidatesForRelType(relType)) {
-    Relation rel=instantiate(candidate);
-    int distance=getDistance(rel.getSourceType(),sourceType,-1) + getDistance(rel.getTargetType(),targetType,-1);
+    final Relation rel=instantiate(candidate);
+    final int distance=getDistance(rel.getSourceType(),sourceType,-1) + getDistance(rel.getTargetType(),targetType,-1);
     if (distance >= 2000) {
       candidates.put(distance - 2000,candidate);
-    }
- else {
     }
   }
   if (candidates.isEmpty()) {
     return null;
   }
  else {
-    Entry<Integer,Class> candidateEntry=candidates.entrySet().iterator().next();
-    Class c=candidateEntry.getValue();
+    final Entry<Integer,Class> candidateEntry=candidates.entrySet().iterator().next();
+    final Class c=candidateEntry.getValue();
     combinedTypeRelationClassCache.put(getCombinedType(sourceTypeName,relType,targetTypeName),c);
     return c;
   }

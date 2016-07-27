@@ -12,12 +12,12 @@
     rootGroup.add(new PropertySearchAttribute(NodeInterface.hidden,true,Occurrence.FORBIDDEN,true));
     rootGroup.add(new PropertySearchAttribute(NodeInterface.deleted,true,Occurrence.FORBIDDEN,true));
   }
-  List<SourceSearchAttribute> sources=new ArrayList<>();
+  final List<SourceSearchAttribute> sources=new ArrayList<>();
   boolean hasEmptySearchFields=false;
   boolean allExactMatch=true;
   Result intermediateResult=null;
-  for (Iterator<SearchAttribute> it=rootGroup.getSearchAttributes().iterator(); it.hasNext(); ) {
-    SearchAttribute attr=it.next();
+  for (final Iterator<SearchAttribute> it=rootGroup.getSearchAttributes().iterator(); it.hasNext(); ) {
+    final SearchAttribute attr=it.next();
     if (attr instanceof SearchAttributeGroup) {
       for (final Iterator<SearchAttribute> groupIterator=((SearchAttributeGroup)attr).getSearchAttributes().iterator(); groupIterator.hasNext(); ) {
         final SearchAttribute item=groupIterator.next();
@@ -64,8 +64,8 @@
     intermediateResult=factory.instantiate(hits);
   }
   if (intermediateResult != null && (hasEmptySearchFields || hasGraphSources || hasSpatialSource)) {
-    Set<GraphObject> intermediateResultSet=new LinkedHashSet<>(intermediateResult.getResults());
-    List<GraphObject> finalResult=new ArrayList<>();
+    final Set<GraphObject> intermediateResultSet=new LinkedHashSet<>(intermediateResult.getResults());
+    final List<GraphObject> finalResult=new ArrayList<>();
     int resultCount=0;
     if (hasGraphSources) {
       final Set<GraphObject> mergedSources=mergeSources(sources);
@@ -76,7 +76,7 @@
         intermediateResultSet.addAll(mergedSources);
       }
     }
-    for (    GraphObject obj : intermediateResultSet) {
+    for (    final GraphObject obj : intermediateResultSet) {
       boolean addToResult=true;
       for (      SearchAttribute attr : rootGroup.getSearchAttributes()) {
         addToResult&=attr.includeInResult(obj);

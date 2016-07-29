@@ -1,0 +1,16 @@
+{
+  final App app=StructrApp.getInstance();
+  try (final Tx tx=app.tx()){
+    final Folder currentFolder=parent.getCurrentFolder();
+    if (currentFolder != null) {
+      listFolder(parent,currentFolder.getProperty(AbstractFile.children));
+    }
+ else {
+      listFolder(parent,app.nodeQuery(AbstractFile.class).and(AbstractFile.parent,null).getAsList());
+    }
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"",fex);
+  }
+}

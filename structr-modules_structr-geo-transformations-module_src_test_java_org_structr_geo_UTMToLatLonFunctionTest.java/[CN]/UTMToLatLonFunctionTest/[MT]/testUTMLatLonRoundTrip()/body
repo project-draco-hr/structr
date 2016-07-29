@@ -1,0 +1,14 @@
+{
+  final LatLonToUTMFunction latLonUtm=new LatLonToUTMFunction();
+  final UTMToLatLonFunction utmLatLon=new UTMToLatLonFunction();
+  final String sourceUTM="32U 439596 5967780";
+  try {
+    final GraphObjectMap result1=(GraphObjectMap)utmLatLon.apply(null,null,new Object[]{sourceUTM});
+    final String result2=(String)latLonUtm.apply(null,null,new Object[]{result1.getProperty(UTMToLatLonFunction.latitudeProperty),result1.getProperty(UTMToLatLonFunction.longitudeProperty)});
+    Assert.assertEquals("Invalid UTM to lat/lon roundtrip result",sourceUTM,result2);
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+    fail("Unexpected exception");
+  }
+}

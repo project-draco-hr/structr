@@ -1,0 +1,13 @@
+{
+  final App app=StructrApp.getInstance();
+  final Set<Choice> choices=getChoices();
+  final String[] names=new String[choices.size()];
+  int i=0;
+  for (  final Choice choice : choices) {
+    names[i++]=choice.getIdentifier();
+    for (    final Map.Entry<String,String> translation : choice.getTranslations().entrySet()) {
+      app.create(Localization.class,new NodeAttribute(Localization.domain,domain),new NodeAttribute(Localization.name,choice.getIdentifier()),new NodeAttribute(Localization.locale,translation.getKey()),new NodeAttribute(Localization.localizedName,translation.getValue()));
+    }
+  }
+  return names;
+}

@@ -1,0 +1,38 @@
+{
+  final int pos=name.indexOf("-");
+  String componentName=null;
+  String componentTag=null;
+  if (pos == -1) {
+    throw new InvalidPathException(name,"Component name must contain tag and name, e.g. div-test");
+  }
+  componentTag=name.substring(0,pos);
+  componentName=name.substring(pos + 1);
+  if (componentName.isEmpty() || componentTag.isEmpty()) {
+    throw new InvalidPathException(name,"Component name must contain tag and name, e.g. div-test");
+  }
+  final App app=StructrApp.getInstance(fs.getSecurityContext());
+  try (final Tx tx=app.tx()){
+    final ShadowDocument doc=StructrApp.getInstance(fs.getSecurityContext()).nodeQuery(ShadowDocument.class).includeDeletedAndHidden().getFirst();
+    for (    final DOMNode child : doc.getProperty(Page.elements)) {
+      if (!child.hasIncomingRelationships(DOMChildren.class)) {
+        if (componentName.equals(child.getName()) && componentTag.equals(child.getProperty(DOMElement.tag))) {
+          throw new FileAlreadyExistsException(name);
+        }
+      }
+    }
+    final StructrPath.HiddenFileEntry entry=new StructrPath.HiddenFileEntry();
+    final DOMElement element=(DOMElement)doc.createElement(componentTag);
+    element.setProperty(AbstractNode.name,componentName);
+    for (    final PropertyKey key : element.getPropertyKeys(PropertyView.Ui)) {
+      entry.add(key.jsonName());
+    }
+    for (    final PropertyKey key : element.getPropertyKeys(PropertyView.Html)) {
+      entry.add(key.jsonName());
+    }
+    StructrPath.HIDDEN_PROPERTY_FILES.put(element.getUuid(),entry);
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"",fex);
+  }
+}

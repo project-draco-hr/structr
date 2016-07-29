@@ -1,0 +1,45 @@
+{
+  final LdapConnection connection=new LdapNetworkConnection(host,port,useSsl);
+  final App app=StructrApp.getInstance();
+  if (connection != null) {
+    connection.setTimeOut(0);
+    if (connection.connect()) {
+      logger.log(Level.INFO,"Updating user/group information from LDAP server {0}:{1}..",new Object[]{host,port});
+      if (StringUtils.isNotBlank(binddn) && StringUtils.isNotBlank(secret)) {
+        connection.bind(binddn,secret);
+      }
+ else       if (StringUtils.isNotBlank(binddn)) {
+        connection.bind(binddn);
+      }
+      final EntryCursor cursor=connection.search(baseDn,filter,SearchScope.valueOf(scope));
+      while (cursor.next()) {
+        final Entry entry=cursor.get();
+        synchronizeUserEntry(connection,entry);
+      }
+      try (final Tx tx=app.tx()){
+        for (        final LDAPUser user : app.nodeQuery(LDAPUser.class).getAsList()) {
+          final String dn=user.getProperty(LDAPUser.distinguishedName);
+          if (dn != null) {
+            final Entry userEntry=connection.lookup(dn);
+            if (userEntry != null) {
+              user.initializeFrom(userEntry);
+            }
+ else {
+              logger.log(Level.INFO,"User {0} doesn't exist in LDAP directory, deleting.",user);
+              app.delete(user);
+            }
+          }
+ else {
+            logger.log(Level.WARNING,"User {0} doesn't have an LDAP distinguished name, ignoring.",user);
+          }
+        }
+        tx.success();
+      }
+       cursor.close();
+      connection.close();
+    }
+ else {
+      logger.log(Level.INFO,"Connection to LDAP server {0} failed",host);
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  final App app=StructrApp.getInstance(fs.getSecurityContext());
+  SchemaMethod method=null;
+  try (final Tx tx=app.tx()){
+    for (    final SchemaMethod schemaMethod : schemaNode.getProperty(SchemaNode.schemaMethods)) {
+      final String fileName=schemaMethod.getProperty(SchemaMethod.virtualFileName);
+      final String methodName=schemaMethod.getProperty(AbstractNode.name);
+      if (fileName != null && fileName.equals(name)) {
+        method=schemaMethod;
+        break;
+      }
+      if (methodName != null && methodName.equals(name)) {
+        method=schemaMethod;
+        break;
+      }
+    }
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"",fex);
+  }
+  return method;
+}

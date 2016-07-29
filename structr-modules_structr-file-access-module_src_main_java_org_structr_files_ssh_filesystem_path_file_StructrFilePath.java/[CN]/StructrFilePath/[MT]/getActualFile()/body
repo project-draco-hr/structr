@@ -1,0 +1,14 @@
+{
+  if (cachedActualFile == null) {
+    final String filePath=toString().substring(StructrPath.FILES_DIRECTORY.length() + 1);
+    final App app=StructrApp.getInstance(fs.getSecurityContext());
+    try (final Tx tx=app.tx()){
+      cachedActualFile=app.nodeQuery(AbstractFile.class).and(AbstractFile.path,filePath).getFirst();
+      tx.success();
+    }
+ catch (    FrameworkException fex) {
+      logger.log(Level.WARNING,"Unable to load actual file for path {0}: {1}",new Object[]{toString(),fex.getMessage()});
+    }
+  }
+  return cachedActualFile;
+}

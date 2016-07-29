@@ -1,0 +1,17 @@
+{
+  if (file == null) {
+    return 0L;
+  }
+  long size=0;
+  try (Tx tx=StructrApp.getInstance(securityContext).tx()){
+    final Number s=file.getProperty(FileBase.size);
+    if (s != null) {
+      size=s.longValue();
+    }
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.SEVERE,"",fex);
+  }
+  return size;
+}

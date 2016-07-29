@@ -1,0 +1,34 @@
+{
+  if (filter instanceof SimpleNode) {
+    return evaluateSimpleNode(node,(SimpleNode)filter);
+  }
+ else   if (filter instanceof SubstringNode) {
+    return evaluateSubstringNode(node,(SubstringNode)filter);
+  }
+ else   if (filter instanceof PresenceNode) {
+    final PresenceNode presence=(PresenceNode)filter;
+    final Attribute attribute=new DefaultAttribute(presence.getAttributeType());
+    return findAttribute(node,attribute.getId()) != null;
+  }
+ else   if (filter instanceof OrNode) {
+    final OrNode orNode=(OrNode)filter;
+    for (    final ExprNode child : orNode.getChildren()) {
+      if (matches(node,child)) {
+        return true;
+      }
+    }
+    return false;
+  }
+ else   if (filter instanceof AndNode) {
+    final AndNode andNode=(AndNode)filter;
+    boolean result=true;
+    for (    final ExprNode child : andNode.getChildren()) {
+      result&=matches(node,child);
+    }
+    return result;
+  }
+ else {
+    System.out.println("Unsupported filter type " + filter.getClass());
+  }
+  return false;
+}

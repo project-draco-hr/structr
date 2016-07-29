@@ -1,0 +1,22 @@
+{
+  final PropertyConverter converter=key.inputConverter(securityContext);
+  final String previousUuid=graphObject.getUuid();
+  Object actualValue=value;
+  if (converter != null) {
+    actualValue=converter.convert(actualValue);
+  }
+  if (key.isReadOnly()) {
+    graphObject.unlockReadOnlyPropertiesOnce();
+  }
+  if (key.isSystemInternal()) {
+    graphObject.unlockSystemPropertiesOnce();
+  }
+  graphObject.setProperty(key,actualValue);
+  if (GraphObject.id.equals(key)) {
+    final HiddenFileEntry entry=StructrPath.HIDDEN_PROPERTY_FILES.get(previousUuid);
+    if (entry != null) {
+      StructrPath.HIDDEN_PROPERTY_FILES.remove(previousUuid);
+      StructrPath.HIDDEN_PROPERTY_FILES.put(value,entry);
+    }
+  }
+}

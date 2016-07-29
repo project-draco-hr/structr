@@ -1,0 +1,10 @@
+{
+  if (file == null) {
+    return false;
+  }
+  final SecurityContext securityContext=SecurityContext.getInstance(user,AccessMode.Backend);
+  if (Permission.read.equals(permission) && !explicit) {
+    return file.isVisibleToAuthenticatedUsers() || file.isVisibleToPublicUsers() || file.isGranted(permission,securityContext);
+  }
+  return file.isGranted(permission,securityContext);
+}

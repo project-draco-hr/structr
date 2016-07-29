@@ -1,0 +1,26 @@
+{
+  if (schemaNode != null) {
+    return new DirectoryStream(){
+      boolean closed=false;
+      @Override public Iterator iterator(){
+        final App app=StructrApp.getInstance(fs.getSecurityContext());
+        final List<StructrPath> nodes=new LinkedList<>();
+        try (final Tx tx=app.tx()){
+          for (          final SchemaView schemaView : schemaNode.getProperty(SchemaNode.schemaViews)) {
+            nodes.add(new StructrSchemaViewPath(fs,StructrSchemaViewsPath.this,schemaNode,schemaView));
+          }
+          tx.success();
+        }
+ catch (        FrameworkException fex) {
+          logger.log(Level.WARNING,"",fex);
+        }
+        return nodes.iterator();
+      }
+      @Override public void close() throws IOException {
+        closed=true;
+      }
+    }
+;
+  }
+  return null;
+}

@@ -1,0 +1,26 @@
+{
+  return new DirectoryStream(){
+    boolean closed=false;
+    @Override public Iterator iterator(){
+      if (!closed) {
+        final App app=StructrApp.getInstance(fs.getSecurityContext());
+        final List<StructrPath> nodes=new LinkedList<>();
+        try (final Tx tx=app.tx()){
+          for (          final Page page : app.nodeQuery(Page.class).getAsList()) {
+            nodes.add(new StructrDOMNodePath(fs,StructrPagesPath.this,page,null,page,page.getName()));
+          }
+          tx.success();
+        }
+ catch (        FrameworkException fex) {
+          logger.log(Level.WARNING,"",fex);
+        }
+        return nodes.iterator();
+      }
+      return Collections.emptyIterator();
+    }
+    @Override public void close() throws IOException {
+      closed=true;
+    }
+  }
+;
+}

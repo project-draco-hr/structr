@@ -1,0 +1,20 @@
+{
+  OdfDocument templateOdt;
+  final FileBase template=getProperty(documentTemplate);
+  FileBase output=getProperty(resultDocument);
+  try {
+    if (output == null) {
+      output=FileHelper.createFile(securityContext,new byte[]{},template.getContentType(),FileBase.class,getName().concat("_").concat(template.getName()));
+      output.setProperty(FileBase.parent,template.getProperty(FileBase.parent));
+      output.unlockSystemPropertiesOnce();
+      output.setProperty(AbstractNode.type,File.class.getSimpleName());
+      setProperty(resultDocument,output);
+    }
+    templateOdt=OdfDocument.loadDocument(template.getFileOnDisk().getAbsolutePath());
+    templateOdt.save(output.getOutputStream());
+    templateOdt.close();
+  }
+ catch (  Exception e) {
+    logger.log(Level.SEVERE,"Error while creating ODS from template",e);
+  }
+}

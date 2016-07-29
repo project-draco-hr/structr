@@ -1,0 +1,17 @@
+{
+  final boolean base=SearchScope.OBJECT.equals(scope);
+  final boolean oneLevel=SearchScope.ONELEVEL.equals(scope);
+  final boolean subtree=SearchScope.SUBTREE.equals(scope);
+  final List<Entry> list=new LinkedList<>();
+  if (base || !(depth == 0 && oneLevel)) {
+    if (matches(node,filter)) {
+      list.add(getEntry(node));
+    }
+  }
+  if (!base && (subtree || (depth == 0 && oneLevel))) {
+    for (    final LDAPNode child : node.getChildren()) {
+      list.addAll(filter(child,filter,scope,depth + 1));
+    }
+  }
+  return list;
+}

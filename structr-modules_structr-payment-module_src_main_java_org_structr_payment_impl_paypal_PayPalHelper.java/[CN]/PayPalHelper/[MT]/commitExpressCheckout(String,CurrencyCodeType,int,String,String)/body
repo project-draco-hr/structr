@@ -1,0 +1,18 @@
+{
+  final PaymentDetailsType paymentDetail=new PaymentDetailsType();
+  paymentDetail.setNotifyURL(notifyUrl);
+  paymentDetail.setOrderTotal(getAmountForCurrency(currencyCode.name(),amountInCents));
+  paymentDetail.setPaymentAction(PaymentActionCodeType.SALE);
+  final List<PaymentDetailsType> paymentDetails=new ArrayList<>();
+  paymentDetails.add(paymentDetail);
+  final DoExpressCheckoutPaymentRequestDetailsType doExpressCheckoutPaymentRequestDetails=new DoExpressCheckoutPaymentRequestDetailsType();
+  doExpressCheckoutPaymentRequestDetails.setToken(token);
+  doExpressCheckoutPaymentRequestDetails.setPayerID(payerId);
+  doExpressCheckoutPaymentRequestDetails.setPaymentDetails(paymentDetails);
+  final DoExpressCheckoutPaymentRequestType doExpressCheckoutPaymentRequest=new DoExpressCheckoutPaymentRequestType(doExpressCheckoutPaymentRequestDetails);
+  doExpressCheckoutPaymentRequest.setVersion("104.0");
+  final DoExpressCheckoutPaymentReq doExpressCheckoutPaymentReq=new DoExpressCheckoutPaymentReq();
+  doExpressCheckoutPaymentReq.setDoExpressCheckoutPaymentRequest(doExpressCheckoutPaymentRequest);
+  final PayPalAPIInterfaceServiceService service=new PayPalAPIInterfaceServiceService(getPayPalConfig());
+  return service.doExpressCheckoutPayment(doExpressCheckoutPaymentReq);
+}

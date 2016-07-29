@@ -1,0 +1,25 @@
+{
+  logger.log(Level.INFO,"New object with UUID {0} created in repository",object.getUuid());
+  final ConfigurationProvider config=StructrApp.getConfiguration();
+  final Class type=config.getNodeEntityClass(object.getType());
+  if (type != null) {
+    final App app=StructrApp.getInstance(getUserContext(object));
+    try (final Tx tx=app.tx()){
+      final SharedNodeInterface newNode=app.create(type,new NodeAttribute<>(GraphObject.id,object.getUuid()),new NodeAttribute<>(SharedNodeInterface.lastModifiedPseudoTime,object.getLastModificationTime().toString()),new NodeAttribute<>(SharedNodeInterface.createdPseudoTime,object.getCreationTime().toString()));
+      for (      final Entry<String,Object> entry : data.entrySet()) {
+        final PropertyKey key=config.getPropertyKeyForJSONName(type,entry.getKey(),false);
+        if (key != null) {
+          newNode.setProperty(app,key,entry.getValue());
+        }
+      }
+      object.addListener(new ObjectUpdater(object.getUuid()));
+      tx.success();
+    }
+ catch (    FrameworkException fex) {
+      fex.printStackTrace();
+    }
+  }
+ else {
+    System.out.println("Type " + object.getType() + " not found, NOT creating object with ID "+ object.getUuid());
+  }
+}

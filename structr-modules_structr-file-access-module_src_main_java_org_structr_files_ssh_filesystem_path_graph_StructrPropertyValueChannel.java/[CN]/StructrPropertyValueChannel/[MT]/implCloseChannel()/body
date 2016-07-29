@@ -1,0 +1,19 @@
+{
+  if (dataWasWritten && graphObject != null) {
+    try {
+      buffer.flip();
+      final byte[] data=new byte[buffer.remaining()];
+      buffer.get(data);
+      final String value=new String(data,Charset.forName("utf-8"));
+      final StringBuilder buf=new StringBuilder();
+      if (append) {
+        buf.append(getConvertedPropertyValue(securityContext,graphObject,key));
+      }
+      buf.append(value);
+      setConvertedPropertyValue(securityContext,graphObject,key,value);
+    }
+ catch (    FrameworkException fex) {
+      fex.printStackTrace();
+    }
+  }
+}

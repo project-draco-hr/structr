@@ -1,0 +1,28 @@
+{
+  final String tagName=child.getTagName();
+  final Property property=fieldMapping.get(tagName);
+  if (property != null) {
+    final Class valueType=property.valueType();
+    if (valueType != null) {
+switch (valueType.getSimpleName()) {
+case "Double":
+        storeDouble(child,item,property);
+      break;
+case "String":
+    storeString(child,item,property);
+  break;
+case "Integer":
+storeInt(child,item,property);
+break;
+}
+}
+}
+ else {
+if ("author".equals(tagName)) {
+final GraphObjectMap author=readPoint(child);
+if (!author.isEmpty()) {
+item.put(authorProperty,author);
+}
+}
+}
+}

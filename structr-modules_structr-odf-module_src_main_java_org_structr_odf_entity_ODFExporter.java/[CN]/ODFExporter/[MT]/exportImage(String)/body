@@ -1,0 +1,34 @@
+{
+  FileBase output=getProperty(resultDocument);
+  try {
+    final App app=StructrApp.getInstance();
+    final Image result=app.nodeQuery(Image.class).and(GraphObject.id,uuid).getFirst();
+    String imageName=result.getProperty(new StringProperty("name"));
+    String contentType=result.getProperty(new StringProperty("contentType"));
+    String templateImagePath=null;
+    OdfDocument doc=OdfDocument.loadDocument(output.getFileOnDisk().getAbsolutePath());
+    NodeList nodes=doc.getContentRoot().getElementsByTagName(ODF_IMAGE_PARENT_NAME);
+    for (int i=0; i < nodes.getLength(); i++) {
+      Node currentNode=nodes.item(i);
+      NamedNodeMap attrs=currentNode.getAttributes();
+      Node fieldName=attrs.getNamedItem(ODF_IMAGE_ATTRIBUTE_PARENT_IMAGE_NAME);
+      if (fieldName != null && fieldName.getTextContent().equals(imageName)) {
+        NamedNodeMap childAttrs=currentNode.getFirstChild().getAttributes();
+        Node filePath=childAttrs.getNamedItem(ODF_IMAGE_ATTRIBUTE_FILE_PATH);
+        templateImagePath=filePath.getTextContent();
+        filePath.setTextContent(ODF_IMAGE_DIRECTORY + imageName);
+      }
+    }
+    OdfPackage pkg=doc.getPackage();
+    if (templateImagePath != null && templateImagePath.length() > 0) {
+      pkg.remove(templateImagePath);
+    }
+    pkg.insert(new URI(result.getFileOnDisk().getAbsolutePath()),ODF_IMAGE_DIRECTORY + imageName,contentType);
+    pkg.save(output.getFileOnDisk().getAbsolutePath());
+    pkg.close();
+    doc.close();
+  }
+ catch (  Exception e) {
+    logger.log(Level.SEVERE,"Error while exporting image to document",e);
+  }
+}

@@ -1,0 +1,27 @@
+{
+  if (firstPassword == null) {
+    if (StringUtils.isEmpty(line)) {
+      term.println("Empty password not permitted.");
+    }
+ else {
+      firstPassword=line;
+    }
+  }
+ else   if (secondPassword == null) {
+    secondPassword=line;
+    if (firstPassword.equals(secondPassword)) {
+      try (final Tx tx=StructrApp.getInstance().tx()){
+        user.setProperty(User.password,firstPassword);
+        tx.success();
+        term.println("Password changed.");
+      }
+ catch (      FrameworkException fex) {
+        term.println("Password NOT changed: " + fex.getMessage());
+      }
+    }
+ else {
+      term.println("Password NOT changed, passwords don't match.");
+    }
+    term.restoreRootTerminalHandler();
+  }
+}

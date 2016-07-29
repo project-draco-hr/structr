@@ -1,0 +1,14 @@
+{
+  if (file == null) {
+    return false;
+  }
+  boolean isDirectory=false;
+  try (Tx tx=StructrApp.getInstance(securityContext).tx()){
+    isDirectory=file.getProperty(Folder.isFolder);
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.SEVERE,"",fex);
+  }
+  return isDirectory;
+}

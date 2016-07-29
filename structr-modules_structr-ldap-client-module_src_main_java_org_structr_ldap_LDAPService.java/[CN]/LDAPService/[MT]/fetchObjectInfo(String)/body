@@ -1,0 +1,28 @@
+{
+  final LdapConnection connection=new LdapNetworkConnection(host,port,useSsl);
+  final StringBuilder buf=new StringBuilder();
+  if (connection != null) {
+    try {
+      if (connection.connect()) {
+        if (StringUtils.isNotBlank(binddn) && StringUtils.isNotBlank(secret)) {
+          connection.bind(binddn,secret);
+        }
+ else         if (StringUtils.isNotBlank(binddn)) {
+          connection.bind(binddn);
+        }
+        final EntryCursor cursor=connection.search(dn,"(objectclass=*)",SearchScope.OBJECT);
+        while (cursor.next()) {
+          buf.append(cursor.get());
+          buf.append("\n");
+        }
+        cursor.close();
+        connection.close();
+      }
+      connection.close();
+    }
+ catch (    CursorException|LdapException|IOException ex) {
+      ex.printStackTrace();
+    }
+  }
+  return buf.toString();
+}

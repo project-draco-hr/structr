@@ -1,0 +1,25 @@
+{
+  List<Authority> authorities=getAuthorities();
+  if (authorities == null) {
+    return null;
+  }
+  boolean someoneCouldAuthorize=false;
+  for (  Authority authority : authorities) {
+    if (authority.canAuthorize(request)) {
+      logger.log(Level.INFO,"Authority {0} can authorize {1}",new Object[]{authority,request});
+      someoneCouldAuthorize=true;
+      request=authority.authorize(request);
+      if (request == null) {
+        logger.log(Level.INFO,"Authorization of request {0} failed",new Object[]{request});
+        return null;
+      }
+    }
+  }
+  if (someoneCouldAuthorize) {
+    logger.log(Level.INFO,"Request {0} successfully authorized",new Object[]{request});
+    return request;
+  }
+ else {
+    return null;
+  }
+}

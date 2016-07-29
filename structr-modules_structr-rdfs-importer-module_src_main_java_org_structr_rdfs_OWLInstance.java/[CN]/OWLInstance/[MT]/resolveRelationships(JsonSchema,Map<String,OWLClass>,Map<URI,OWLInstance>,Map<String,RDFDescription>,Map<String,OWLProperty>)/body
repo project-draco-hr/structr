@@ -1,0 +1,70 @@
+{
+  if (instance != null && type != null) {
+    OWLParserv2.logger.println("#################################################################################################");
+    OWLParserv2.logger.println("Resolving relationships of " + type.getStructrName(true) + ": "+ getId());
+    final ConfigurationProvider config=StructrApp.getConfiguration();
+    final NodeList propertyElements=getElement().getChildNodes();
+    if (propertyElements != null) {
+      final int len=propertyElements.getLength();
+      for (int i=0; i < len; i++) {
+        final Node propertyElement=propertyElements.item(i);
+        if (propertyElement instanceof Element) {
+          final Element element=(Element)propertyElement;
+          final String tagName=RDFItem.cleanName(element.getTagName());
+          final String reference=getAttribute(element,"rdf:resource");
+          if (reference != null) {
+            final OWLInstance relatedInstance=instances.get(URI.create(reference));
+            if (relatedInstance != null) {
+              final OWLClass relationshipType=owlClassesByFragment.get(tagName);
+              if (relationshipType != null) {
+                final List<OWLClass> sourceTypes=relationshipType.getActualSourceTypes();
+                final List<OWLClass> targetTypes=relationshipType.getActualTargetTypes();
+                final Class hyperRelationshipType=config.getNodeEntityClass(tagName);
+                if (hyperRelationshipType != null) {
+                  if (sourceTypes.size() == 1 && targetTypes.size() == 1) {
+                    final OWLClass sourceType=sourceTypes.get(0);
+                    final OWLClass targetType=targetTypes.get(0);
+                    final String sourcePropertyName=sourceType.getStructrName(false);
+                    final String targetPropertyName=targetType.getStructrName(false);
+                    final PropertyKey sourceKey=config.getPropertyKeyForJSONName(hyperRelationshipType,sourcePropertyName,false);
+                    final PropertyKey targetKey=config.getPropertyKeyForJSONName(hyperRelationshipType,targetPropertyName,false);
+                    if (sourceKey != null && targetKey != null) {
+                      if (this.instance != null && relatedInstance.instance != null) {
+                        final NodeInterface hyperNode=StructrApp.getInstance().create(hyperRelationshipType,new NodeAttribute(sourceKey,this.instance),new NodeAttribute(targetKey,relatedInstance.instance));
+                        final String referenceId=getAttribute(element,"rdf:ID");
+                        if (referenceId != null && hyperNode != null) {
+                          final RDFDescription description=descriptions.get(referenceId);
+                          if (description != null) {
+                            description.resolveProperties(hyperNode,owlClassesByFragment,properties);
+                          }
+                        }
+                      }
+ else {
+                        System.out.println("!!!!!!!! No instance found to set on " + getId());
+                      }
+                    }
+ else {
+                      System.out.println("        No property keys found for " + sourcePropertyName + ", "+ targetPropertyName);
+                    }
+                  }
+ else {
+                    System.out.println("        Ambiguous source or target types: " + sourceTypes + ", "+ targetTypes);
+                  }
+                }
+ else {
+                  System.out.println("        Relationship type " + tagName + " not found for "+ getId());
+                }
+              }
+ else {
+                System.out.println("No type found for " + tagName);
+              }
+            }
+ else {
+              System.out.println("        No instance found for " + reference);
+            }
+          }
+        }
+      }
+    }
+  }
+}

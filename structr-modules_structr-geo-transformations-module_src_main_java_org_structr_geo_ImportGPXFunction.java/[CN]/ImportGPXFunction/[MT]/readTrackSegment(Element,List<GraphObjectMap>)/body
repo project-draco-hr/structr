@@ -1,0 +1,19 @@
+{
+  final List<GraphObjectMap> points=new LinkedList<>();
+  final GraphObjectMap result=new GraphObjectMap();
+  for (  final Element elem : getChildren(trackSegment)) {
+switch (elem.getTagName()) {
+case "trkpt":
+      final GraphObjectMap item=readPoint(elem);
+    if (item != null) {
+      points.add(item);
+    }
+  break;
+}
+readProperties(elem,result);
+}
+if (!points.isEmpty()) {
+result.put(pointsProperty,points);
+}
+resultList.add(result);
+}

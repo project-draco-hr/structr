@@ -1,0 +1,14 @@
+{
+  if (node == null) {
+    return null;
+  }
+  FileTime time=null;
+  try (Tx tx=StructrApp.getInstance(securityContext).tx()){
+    time=FileTime.fromMillis(node.getProperty(GraphObject.lastModifiedDate).getTime());
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.SEVERE,"",fex);
+  }
+  return time;
+}

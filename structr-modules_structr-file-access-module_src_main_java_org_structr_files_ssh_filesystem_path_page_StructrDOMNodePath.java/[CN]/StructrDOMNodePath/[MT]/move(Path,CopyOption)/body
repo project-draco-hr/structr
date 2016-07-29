@@ -1,0 +1,62 @@
+{
+  if (target instanceof StructrDOMNodePath) {
+    final App app=StructrApp.getInstance(fs.getSecurityContext());
+    final StructrDOMNodePath targetPath=(StructrDOMNodePath)target;
+    try (final Tx tx=app.tx()){
+      if (targetPath.parentNode != null && targetPath.parentNode.getUuid().equals(parentNode.getUuid())) {
+        final String targetName=target.getFileName().toString();
+        final ElementName targetElementName=new ElementName(targetName);
+        final ElementName sourceElementName=new ElementName(name);
+        if (targetElementName.getTagName().equals(sourceElementName.getTagName())) {
+          final int newPosition=targetElementName.getPosition();
+          parentNode.removeChild(domNode);
+          insertDOMNodeAt(domNode,newPosition);
+        }
+ else {
+          throw new InvalidPathException(targetName,"Cannot change element type.");
+        }
+      }
+ else {
+      }
+      tx.success();
+    }
+ catch (    FrameworkException fex) {
+      logger.log(Level.WARNING,"Unable to move {0} to {1}: {2}",new Object[]{this,target,fex.getMessage()});
+    }
+  }
+ else   if (target instanceof StructrNonexistingComponentPath & domNode != null) {
+    if (!(domNode.getOwnerDocument() instanceof ShadowDocument)) {
+      throw new AccessDeniedException("Cannot move DOM node to shared components");
+    }
+ else {
+      final String targetName=target.getFileName().toString();
+      final int pos=targetName.indexOf("-");
+      String componentName=null;
+      String componentTag=null;
+      if (pos == -1) {
+        throw new InvalidPathException(targetName,"Component name must contain tag and name, e.g. div-test");
+      }
+      componentTag=targetName.substring(0,pos);
+      componentName=targetName.substring(pos + 1);
+      if (componentName.isEmpty() || componentTag.isEmpty()) {
+        throw new InvalidPathException(targetName,"Component name must contain tag and name, e.g. div-test");
+      }
+      final App app=StructrApp.getInstance(fs.getSecurityContext());
+      try (final Tx tx=app.tx()){
+        final ShadowDocument doc=StructrApp.getInstance(fs.getSecurityContext()).nodeQuery(ShadowDocument.class).includeDeletedAndHidden().getFirst();
+        for (        final DOMNode child : doc.getProperty(Page.elements)) {
+          if (!child.hasIncomingRelationships(DOMChildren.class)) {
+            if (componentName.equals(child.getName()) && componentTag.equals(child.getProperty(DOMElement.tag))) {
+              throw new FileAlreadyExistsException(targetName);
+            }
+          }
+        }
+        domNode.setProperty(DOMElement.name,componentName);
+        tx.success();
+      }
+ catch (      FrameworkException fex) {
+        logger.log(Level.WARNING,"",fex);
+      }
+    }
+  }
+}

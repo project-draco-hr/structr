@@ -1,0 +1,11 @@
+{
+  final LDAPService ldapService=Services.getInstance().getService(LDAPService.class);
+  final String dn=getProperty(distinguishedName);
+  if (ldapService != null) {
+    return ldapService.canSuccessfullyBind(dn,password);
+  }
+ else {
+    Logger.getLogger(LDAPUser.class.getName()).log(Level.WARNING,"Unable to reach LDAP server for authentication of {0}",dn);
+  }
+  return false;
+}

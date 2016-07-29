@@ -1,0 +1,22 @@
+{
+  final App app=StructrApp.getInstance();
+  Folder folder=baseFolder;
+  boolean found=false;
+  for (  final String part : path.split("[/]+")) {
+    if (folder == null) {
+      folder=app.nodeQuery(Folder.class).and(Folder.name,part).getFirst();
+    }
+ else {
+      for (      final Folder child : folder.getProperty(Folder.folders)) {
+        if (part.equals(child.getName())) {
+          folder=child;
+          found=true;
+        }
+      }
+      if (!found) {
+        return null;
+      }
+    }
+  }
+  return folder;
+}

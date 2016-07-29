@@ -1,0 +1,40 @@
+{
+  final String privateKeyFileName=config.getProperty(PRIVATE_KEY_CONFIG_KEY);
+  final String publicKeyFileName=config.getProperty(PUBLIC_KEY_CONFIG_KEY);
+  if (privateKeyFileName == null) {
+    logger.log(Level.WARNING,"No private key file name set for PeerToPeerService, aborting. Please set a value for {0} in structr.conf.",PRIVATE_KEY_CONFIG_KEY);
+    return null;
+  }
+  if (publicKeyFileName == null) {
+    logger.log(Level.WARNING,"No public key file name set for PeerToPeerService, aborting. Please set  value for {0} in structr.conf.",PUBLIC_KEY_CONFIG_KEY);
+    return null;
+  }
+  try {
+    final File privateKeyFile=new File(privateKeyFileName);
+    final File publicKeyFile=new File(publicKeyFileName);
+    if (!privateKeyFile.exists()) {
+      logger.log(Level.WARNING,"Private key file {0} not found, aborting.",privateKeyFileName);
+      return null;
+    }
+    if (!publicKeyFile.exists()) {
+      logger.log(Level.WARNING,"Public key file {0} not found, aborting.",publicKeyFileName);
+      return null;
+    }
+    final String privkeyBase64=getKey(Files.readAllLines(privateKeyFile.toPath()));
+    final String pubkeyBase64=getKey(Files.readAllLines(publicKeyFile.toPath()));
+    if (privkeyBase64 == null || privkeyBase64.isEmpty()) {
+      logger.log(Level.WARNING,"No private key found in file {0}, aborting",privateKeyFileName);
+      return null;
+    }
+    if (pubkeyBase64 == null || pubkeyBase64.isEmpty()) {
+      logger.log(Level.WARNING,"No public key found in file {0}, aborting",publicKeyFileName);
+      return null;
+    }
+    final Decoder decoder=Base64.getDecoder();
+    return KeyHelper.fromBytes("RSA",decoder.decode(privkeyBase64),decoder.decode(pubkeyBase64));
+  }
+ catch (  IOException ex) {
+    Logger.getLogger(PeerToPeerService.class.getName()).log(Level.SEVERE,null,ex);
+  }
+  return null;
+}

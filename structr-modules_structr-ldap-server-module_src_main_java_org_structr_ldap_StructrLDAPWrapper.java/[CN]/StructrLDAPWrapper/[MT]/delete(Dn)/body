@@ -1,0 +1,13 @@
+{
+  final App app=app();
+  try (final Tx tx=app.tx()){
+    final LDAPNode entry=find(dn);
+    if (entry != null) {
+      entry.delete();
+    }
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    handleException(fex);
+  }
+}

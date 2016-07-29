@@ -1,0 +1,33 @@
+{
+  Stripe.apiKey=StructrApp.getConfigurationValue("stripe.apikey");
+  try {
+    final Map<String,Object> chargeParams=new HashMap<>();
+    chargeParams.put("amount",payment.getTotal());
+    chargeParams.put("currency",payment.getCurrencyCode());
+    chargeParams.put("source",token);
+    chargeParams.put("description",payment.getDescription());
+    Charge.create(chargeParams);
+    payment.setPaymentState(PaymentState.completed);
+    return new ConfirmResponse(CheckoutState.Success);
+  }
+ catch (  APIException ex) {
+    payment.setPaymentState(PaymentState.error);
+    return new ConfirmResponse(CheckoutState.Failure,"1","APIException",ex.getMessage());
+  }
+catch (  APIConnectionException ex) {
+    payment.setPaymentState(PaymentState.error);
+    return new ConfirmResponse(CheckoutState.Failure,"1","APIConnectionException",ex.getMessage());
+  }
+catch (  InvalidRequestException ex) {
+    payment.setPaymentState(PaymentState.error);
+    return new ConfirmResponse(CheckoutState.Failure,"1","InvalidRequestException",ex.getMessage());
+  }
+catch (  AuthenticationException ex) {
+    payment.setPaymentState(PaymentState.error);
+    return new ConfirmResponse(CheckoutState.Failure,"1","AuthenticationException",ex.getMessage());
+  }
+catch (  CardException e) {
+    payment.setPaymentState(PaymentState.error);
+    return new ConfirmResponse(CheckoutState.Failure,e.getCode(),e.getCharge(),e.getMessage());
+  }
+}

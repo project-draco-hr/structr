@@ -1,0 +1,11 @@
+{
+  ByteArrayInputStream bis=null;
+  try (Tx tx=StructrApp.getInstance().tx()){
+    bis=new ByteArrayInputStream(page.getContent(RenderContext.EditMode.RAW).getBytes("UTF-8"));
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"",fex);
+  }
+  return bis;
+}

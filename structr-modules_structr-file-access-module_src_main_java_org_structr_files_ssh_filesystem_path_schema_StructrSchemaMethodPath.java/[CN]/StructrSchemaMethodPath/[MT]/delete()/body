@@ -1,0 +1,16 @@
+{
+  final SchemaMethod schemaMethod=getSchemaMethodNode();
+  if (schemaMethod != null) {
+    final App app=StructrApp.getInstance(fs.getSecurityContext());
+    try (final Tx tx=app.tx()){
+      app.delete(schemaMethod);
+      tx.success();
+    }
+ catch (    FrameworkException fex) {
+      logger.log(Level.WARNING,"",fex);
+    }
+  }
+ else {
+    throw new NoSuchFileException(name);
+  }
+}

@@ -1,0 +1,21 @@
+{
+  if (protocolVersion != CloudService.PROTOCOL_VERSION) {
+    serverConnection.send(new Error(400,"Unsupported protocol version " + protocolVersion + ", server needs "+ CloudService.PROTOCOL_VERSION));
+    return;
+  }
+  final Principal user=serverConnection.getUser(userName);
+  if (user != null) {
+    try {
+      this.keyLength=Math.min(keyLength,Cipher.getMaxAllowedKeyLength(CloudService.STREAM_CIPHER));
+      this.salt=user.getSalt();
+      serverConnection.impersonateUser(user);
+      serverConnection.send(new AuthenticationResponse(userName,user.getEncryptedPassword(),salt,keyLength));
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"",t);
+    }
+  }
+ else {
+    serverConnection.send(new Error(401,"Authentication failed."));
+  }
+}

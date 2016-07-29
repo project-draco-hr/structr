@@ -1,0 +1,33 @@
+{
+  final Folder folder=(Folder)getActualFile();
+  if (folder != null) {
+    return new DirectoryStream(){
+      boolean closed=false;
+      @Override public Iterator iterator(){
+        if (!closed) {
+          final App app=StructrApp.getInstance(fs.getSecurityContext());
+          final List<StructrPath> files=new LinkedList<>();
+          try (final Tx tx=app.tx()){
+            for (            final Folder folder : folder.getProperty(Folder.folders)) {
+              files.add(new StructrFilePath(fs,StructrFilePath.this,folder.getName()));
+            }
+            for (            final FileBase file : folder.getProperty(Folder.files)) {
+              files.add(new StructrFilePath(fs,StructrFilePath.this,file.getName()));
+            }
+            tx.success();
+          }
+ catch (          FrameworkException fex) {
+            logger.log(Level.WARNING,"",fex);
+          }
+          return files.iterator();
+        }
+        return Collections.emptyIterator();
+      }
+      @Override public void close() throws IOException {
+        closed=true;
+      }
+    }
+;
+  }
+  return null;
+}

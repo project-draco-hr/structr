@@ -1,0 +1,28 @@
+{
+  if (arrayHasLengthAndAllElementsNotNull(sources,1)) {
+    final String utmString=(String)sources[0];
+    if (utmString != null) {
+      final String[] parts=utmString.split("[\\s]+");
+      if (parts.length < 3) {
+        logger.log(Level.WARNING,"Unsupported UTM string: this implementation only supports the full UTM format with spaces, e.g. 32U 439596 5967780 or 32 N 439596 5967780.");
+      }
+ else       if (parts.length == 3) {
+        final String zone=parts[0];
+        final String east=parts[1];
+        final String north=parts[2];
+        return utmToLatLon(zone,getHemisphereFromZone(zone),east,north);
+      }
+ else       if (parts.length == 4) {
+        final String zone=parts[0];
+        final String hemisphere=parts[1];
+        final String east=parts[2];
+        final String north=parts[3];
+        return utmToLatLon(zone,hemisphere,east,north);
+      }
+    }
+ else {
+      logger.log(Level.WARNING,"Invalid argument(s), cannot convert to double: {0}, {1}",new Object[]{sources[0],sources[1]});
+    }
+  }
+  return "Unsupported UTM string";
+}

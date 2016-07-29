@@ -1,0 +1,14 @@
+{
+  if (file == null) {
+    return false;
+  }
+  boolean isRegularFile=false;
+  try (Tx tx=StructrApp.getInstance(securityContext).tx()){
+    isRegularFile=file.getProperty(FileBase.isFile);
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.SEVERE,"",fex);
+  }
+  return isRegularFile;
+}

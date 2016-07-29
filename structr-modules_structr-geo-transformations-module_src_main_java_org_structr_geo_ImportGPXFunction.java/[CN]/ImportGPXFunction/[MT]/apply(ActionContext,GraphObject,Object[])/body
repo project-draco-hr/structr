@@ -1,0 +1,53 @@
+{
+  if (arrayHasLengthAndAllElementsNotNull(sources,1)) {
+    if (sources[0] instanceof String) {
+      final String source=(String)sources[0];
+      if (source != null) {
+        final GraphObjectMap result=new GraphObjectMap();
+        final XmlFunction xmlParser=new XmlFunction();
+        final Document doc=(Document)xmlParser.apply(ctx,entity,sources);
+        final List<GraphObjectMap> waypoints=new LinkedList<>();
+        final List<GraphObjectMap> routes=new LinkedList<>();
+        final List<GraphObjectMap> tracks=new LinkedList<>();
+        if (doc != null) {
+          final Element root=doc.getDocumentElement();
+          final List<Element> children=getChildren(root);
+          for (          final Element child : children) {
+switch (child.getTagName()) {
+case "metadata":
+              final GraphObjectMap metadata=readPoint(child);
+            if (metadata != null) {
+              result.put(metadataProperty,metadata);
+            }
+          break;
+case "rte":
+        readRoute(child,routes);
+      break;
+case "wpt":
+    readWaypoint(child,waypoints);
+  break;
+case "trk":
+readTrack(child,tracks);
+break;
+}
+}
+if (!waypoints.isEmpty()) {
+result.put(waypointsProperty,waypoints);
+}
+if (!routes.isEmpty()) {
+result.put(routesProperty,routes);
+}
+if (!tracks.isEmpty()) {
+result.put(tracksProperty,tracks);
+}
+}
+return result;
+}
+}
+ else {
+logger.log(Level.WARNING,"Invalid parameter for GPX import, expected string, got {0}",sources[0].getClass().getSimpleName());
+}
+return "Invalid parameters";
+}
+return usage(ctx != null ? ctx.isJavaScriptContext() : false);
+}

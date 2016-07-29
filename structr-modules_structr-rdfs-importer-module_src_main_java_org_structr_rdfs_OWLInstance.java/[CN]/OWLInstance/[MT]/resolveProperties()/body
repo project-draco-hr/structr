@@ -1,0 +1,52 @@
+{
+  if (instance != null && type != null) {
+    OWLParserv2.logger.println("#################################################################################################");
+    OWLParserv2.logger.println("Resolving properties of " + type.getStructrName(true) + ": "+ getId());
+    final App app=StructrApp.getInstance();
+    final ConfigurationProvider config=StructrApp.getConfiguration();
+    final Class baseNodeType=config.getNodeEntityClass("BaseNode");
+    final Class localizedNameType=config.getNodeEntityClass("LocalizedName");
+    final PropertyKey namesKey=config.getPropertyKeyForJSONName(baseNodeType,"names");
+    final PropertyKey langKey=config.getPropertyKeyForJSONName(localizedNameType,"locale");
+    if (localizedNameType != null && namesKey != null) {
+      final List<NodeInterface> localizedNames=new LinkedList<>();
+      for (      final Name name : names) {
+        localizedNames.add(app.create(localizedNameType,new NodeAttribute<>(AbstractNode.name,name.name),new NodeAttribute<>(langKey,name.lang)));
+      }
+      instance.setProperty(namesKey,localizedNames);
+    }
+    try {
+      setProperty(nodeType,instance,"createdAt",isoFormat.format(dateFormat.parse(createdAt)));
+    }
+ catch (    Throwable ignore) {
+    }
+    try {
+      setProperty(nodeType,instance,"modifiedAt",isoFormat.format(dateFormat.parse(modifiedAt)));
+    }
+ catch (    Throwable ignore) {
+    }
+    for (    final OWLProperty property : type.getAllProperties()) {
+      final String rawPropertyName=property.getId().getFragment();
+      final String cleanPropertyName=property.getFragmentName(false);
+      if (property.multipleOccurrences()) {
+        final NodeList values=getElements(getElement(),rawPropertyName);
+        final int len=values.getLength();
+        final ArrayList<String> array=new ArrayList<>();
+        for (int i=0; i < len; i++) {
+          final Object value=getValue(values.item(i));
+          if (value != null) {
+            array.add(value.toString());
+          }
+        }
+        final String[] value=array.toArray(new String[0]);
+        OWLParserv2.logger.println(cleanPropertyName + " = " + value);
+        setProperty(nodeType,instance,cleanPropertyName,value);
+      }
+ else {
+        Object value=getValue(getFirstElement(getElement(),rawPropertyName));
+        OWLParserv2.logger.println(cleanPropertyName + " = " + value);
+        setProperty(nodeType,instance,cleanPropertyName,property.convertValue(value));
+      }
+    }
+  }
+}

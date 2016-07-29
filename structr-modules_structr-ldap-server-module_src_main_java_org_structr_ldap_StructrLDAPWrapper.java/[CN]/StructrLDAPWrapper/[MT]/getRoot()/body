@@ -1,0 +1,8 @@
+{
+  final App app=app();
+  LDAPNode root=(LDAPNode)app.nodeQuery(type).andName(partitionId).getFirst();
+  if (root == null) {
+    root=app.create(LDAPNodeImpl.class,new NodeAttribute<>(AbstractNode.name,partitionId),new NodeAttribute<>(LDAPNodeImpl.isRoot,true));
+  }
+  return root;
+}

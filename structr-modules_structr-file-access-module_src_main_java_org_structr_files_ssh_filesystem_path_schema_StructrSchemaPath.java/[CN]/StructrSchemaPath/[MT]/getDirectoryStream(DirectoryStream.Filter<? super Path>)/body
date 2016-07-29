@@ -1,0 +1,29 @@
+{
+  return new DirectoryStream(){
+    boolean closed=false;
+    @Override public Iterator iterator(){
+      if (!closed) {
+        final App app=StructrApp.getInstance(fs.getSecurityContext());
+        final List<StructrPath> nodes=new LinkedList<>();
+        try (final Tx tx=app.tx()){
+          for (          final SchemaNode schemaNode : app.nodeQuery(SchemaNode.class).getAsList()) {
+            nodes.add(new StructrSchemaNodePath(fs,StructrSchemaPath.this,schemaNode.getName()));
+          }
+          for (          final SchemaRelationshipNode rel : app.nodeQuery(SchemaRelationshipNode.class).getAsList()) {
+            nodes.add(new StructrSchemaNodePath(fs,StructrSchemaPath.this,rel.getName()));
+          }
+          tx.success();
+        }
+ catch (        FrameworkException fex) {
+          logger.log(Level.WARNING,"",fex);
+        }
+        return nodes.iterator();
+      }
+      return Collections.emptyIterator();
+    }
+    @Override public void close() throws IOException {
+      closed=true;
+    }
+  }
+;
+}

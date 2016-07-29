@@ -1,0 +1,17 @@
+{
+  if (file == null) {
+    return null;
+  }
+  FileTime time=null;
+  try (Tx tx=StructrApp.getInstance(securityContext).tx()){
+    final Date date=file.getLastModifiedDate();
+    if (date != null) {
+      time=FileTime.fromMillis(date.getTime());
+    }
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.SEVERE,"",fex);
+  }
+  return time;
+}

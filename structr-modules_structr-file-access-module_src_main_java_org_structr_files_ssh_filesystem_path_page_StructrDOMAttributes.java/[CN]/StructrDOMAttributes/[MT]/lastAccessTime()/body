@@ -1,0 +1,14 @@
+{
+  if (domNode == null) {
+    return null;
+  }
+  FileTime time=null;
+  try (Tx tx=StructrApp.getInstance(securityContext).tx()){
+    time=FileTime.fromMillis(domNode.getLastModifiedDate().getTime());
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.SEVERE,"",fex);
+  }
+  return time;
+}

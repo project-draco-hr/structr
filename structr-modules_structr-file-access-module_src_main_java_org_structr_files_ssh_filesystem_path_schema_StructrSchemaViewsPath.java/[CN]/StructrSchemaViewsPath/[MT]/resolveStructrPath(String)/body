@@ -1,0 +1,16 @@
+{
+  final App app=StructrApp.getInstance(fs.getSecurityContext());
+  StructrPath path=null;
+  try (final Tx tx=app.tx()){
+    for (    final SchemaView schemaView : schemaNode.getProperty(SchemaNode.schemaViews)) {
+      if (pathComponent.equals(schemaView.getName())) {
+        path=new StructrSchemaViewPath(fs,StructrSchemaViewsPath.this,schemaNode,schemaView);
+      }
+    }
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"",fex);
+  }
+  return path;
+}

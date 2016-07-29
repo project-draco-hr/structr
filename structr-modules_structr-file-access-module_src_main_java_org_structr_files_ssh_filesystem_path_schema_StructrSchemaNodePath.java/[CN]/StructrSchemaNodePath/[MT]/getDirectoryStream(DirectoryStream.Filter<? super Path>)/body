@@ -1,0 +1,22 @@
+{
+  final AbstractSchemaNode schemaNode=getSchemaNode();
+  if (schemaNode != null) {
+    return new DirectoryStream(){
+      boolean closed=false;
+      @Override public Iterator iterator(){
+        if (!closed) {
+          final List<StructrPath> children=new LinkedList<>();
+          children.add(new StructrSchemaMethodsPath(fs,StructrSchemaNodePath.this,schemaNode));
+          children.add(resolveStructrPath("extendsClass"));
+          return children.iterator();
+        }
+        return Collections.emptyIterator();
+      }
+      @Override public void close() throws IOException {
+        closed=true;
+      }
+    }
+;
+  }
+  return null;
+}

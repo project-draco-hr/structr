@@ -1,0 +1,52 @@
+{
+  final String elementType=element.getTagName();
+switch (elementType) {
+case "owl:Class":
+case "owl:ObjectProperty":
+    final OWLClass owlClass=new OWLClass(element);
+  owlClassesByURI.put(owlClass.getId(),owlClass);
+final String fragment=owlClass.getFragmentName(true);
+if (fragment != null) {
+owlClassesByFragment.put(fragment,owlClass);
+}
+return;
+case "rdf:Property":
+break;
+case "rdf:Description":
+final RDFDescription description=new RDFDescription(element);
+rdfDescriptions.put(description.getReferenceId(),description);
+return;
+case "owl:DatatypeProperty":
+final OWLProperty owlProperty=new OWLProperty(element);
+owlPropertiesByURI.put(owlProperty.getId(),owlProperty);
+final String rawFragmentName=owlProperty.getRawFragmentName();
+if (rawFragmentName != null) {
+owlPropertiesByName.put(rawFragmentName,owlProperty);
+}
+return;
+default :
+if (importData) {
+final OWLInstance instance=new OWLInstance(element);
+final URI id=instance.getId();
+if (id != null) {
+final String type=instance.getTypeName();
+if (type != null) {
+final OWLClass owlType=owlClassesByFragment.get(type);
+if (owlType != null) {
+instance.setType(owlType);
+}
+}
+owlInstances.put(instance.getId(),instance);
+}
+}
+break;
+}
+if (depth >= 1) {
+return;
+}
+for (Node child=element.getFirstChild(); child != null; child=child.getNextSibling()) {
+if (child instanceof Element) {
+parseDocument((Element)child,depth + 1);
+}
+}
+}

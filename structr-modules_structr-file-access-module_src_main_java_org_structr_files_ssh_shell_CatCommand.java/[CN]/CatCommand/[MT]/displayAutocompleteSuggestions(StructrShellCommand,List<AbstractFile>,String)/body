@@ -1,0 +1,20 @@
+{
+  if (!files.isEmpty()) {
+    final StringBuilder buf=new StringBuilder();
+    for (    final AbstractFile file : files) {
+      if (parent.isAllowed(file,Permission.read,false)) {
+        buf.append(file.getName());
+        if (file instanceof Folder) {
+          buf.append("/  ");
+        }
+      }
+    }
+    if (buf.length() > 0) {
+      term.println();
+      term.print(buf.toString());
+      term.println();
+      parent.displayPrompt();
+      term.print(line);
+    }
+  }
+}

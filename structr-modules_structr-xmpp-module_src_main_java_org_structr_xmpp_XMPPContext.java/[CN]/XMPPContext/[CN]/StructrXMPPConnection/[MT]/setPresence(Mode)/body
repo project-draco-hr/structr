@@ -1,0 +1,15 @@
+{
+  if (isConnected) {
+    try {
+      final Presence presence=new Presence(Presence.Type.available);
+      presence.setMode(mode);
+      connection.sendStanza(presence);
+    }
+ catch (    NotConnectedException nex) {
+      throw new FrameworkException(422,"Not connected");
+    }
+  }
+ else {
+    throw new FrameworkException(422,"Not connected");
+  }
+}

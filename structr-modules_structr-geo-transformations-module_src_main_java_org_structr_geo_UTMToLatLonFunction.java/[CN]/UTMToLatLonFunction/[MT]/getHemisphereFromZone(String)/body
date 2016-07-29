@@ -1,0 +1,21 @@
+{
+  String band=null;
+switch (zone.length()) {
+case 3:
+    band=zone.substring(2);
+  break;
+case 2:
+if (zone.matches("\\d\\D")) {
+  band=zone.substring(1);
+}
+break;
+}
+if (band != null) {
+final int pos=UTMzdlChars.indexOf(band);
+if (pos >= 0) {
+return UTMHemisphere.substring(pos,pos + 1);
+}
+}
+logger.log(Level.WARNING,"Unable to determine hemisphere from UTM zone, assuming NORTHERN hemisphere.");
+return "N";
+}

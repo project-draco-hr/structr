@@ -1,0 +1,21 @@
+{
+  final ConfigurationProvider config=StructrApp.getConfiguration();
+  Object convertedValue=value;
+  if (convertedValue != null) {
+    final PropertyKey key=config.getPropertyKeyForJSONName(nodeType,propertyName,false);
+    if (key != null) {
+      final PropertyConverter inputConverter=key.inputConverter(SecurityContext.getSuperUserInstance());
+      if (inputConverter != null) {
+        convertedValue=inputConverter.convert(convertedValue);
+      }
+      if (convertedValue == null) {
+        OWLParserv2.logger.println("Invalid converted value " + convertedValue + ", source was "+ value);
+      }
+      return instance.setProperty(key,convertedValue);
+    }
+ else {
+      System.out.println("Key " + propertyName + " not found on "+ nodeType.getSimpleName());
+    }
+  }
+  return null;
+}

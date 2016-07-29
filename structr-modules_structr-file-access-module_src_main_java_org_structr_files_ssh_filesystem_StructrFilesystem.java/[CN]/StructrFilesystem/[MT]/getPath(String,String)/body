@@ -1,0 +1,36 @@
+{
+  final StringBuilder pathBuilder=new StringBuilder(first);
+  for (  final String component : more) {
+    pathBuilder.append("/");
+    pathBuilder.append(component);
+  }
+  final String fullPath=pathBuilder.toString();
+  StructrPath path=last;
+  if (fullPath.equals(lastFullPath) && last != null && !last.dontCache()) {
+    return last;
+  }
+  try (final Tx tx=StructrApp.getInstance(securityContext).tx()){
+    final String[] parts=fullPath.split("/");
+    if (fullPath.startsWith("/")) {
+      path=root;
+    }
+    for (int i=0; i < parts.length; i++) {
+      final String component=parts[i];
+      if (!component.isEmpty()) {
+        if (path != null) {
+          path=path.resolveStructrPath(component);
+        }
+ else {
+          path=new StructrFilePath(this,null,component);
+        }
+      }
+    }
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+  }
+  lastFullPath=fullPath;
+  last=path;
+  return path;
+}

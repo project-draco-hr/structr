@@ -1,0 +1,20 @@
+{
+  final ConfigurationProvider config=StructrApp.getConfiguration();
+  final String className=type.getStructrName(true);
+  nodeType=config.getNodeEntityClass(className);
+  if (nodeType != null) {
+    originIdKey=config.getPropertyKeyForJSONName(nodeType,"originId",false);
+    if (originIdKey != null) {
+      instance=app.create(nodeType,new NodeAttribute(originIdKey,getId().toString()));
+      if (instance != null) {
+        instances.put(getId(),instance);
+      }
+    }
+ else {
+      OWLParserv2.logger.println("NOT creating instance for " + getId() + ", no originId property key found.");
+    }
+  }
+ else {
+    OWLParserv2.logger.println("NOT creating instance for " + getId() + ", no node type found.");
+  }
+}

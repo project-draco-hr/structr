@@ -1,0 +1,7 @@
+{
+  if (reset) {
+    RestAssured.given().contentType("application/json; charset=UTF-8").header("X-User","superadmin").header("X-Password","sehrgeheim").filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(422)).expect().statusCode(200).when().delete("/resource_access");
+  }
+  RestAssured.given().contentType("application/json; charset=UTF-8").header("X-User","superadmin").header("X-Password","sehrgeheim").filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(200)).when().get("/resource_access");
+  RestAssured.given().contentType("application/json; charset=UTF-8").header("X-User","superadmin").header("X-Password","sehrgeheim").filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(422)).body(" { 'signature' : '" + signature + "', 'flags': "+ flags+ ", 'visibleToPublicUsers': true } ").expect().statusCode(201).when().post("/resource_access");
+}

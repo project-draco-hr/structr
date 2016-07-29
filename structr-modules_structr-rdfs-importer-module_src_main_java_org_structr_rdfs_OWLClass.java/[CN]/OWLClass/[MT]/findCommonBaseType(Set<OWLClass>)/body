@@ -1,0 +1,24 @@
+{
+  if (!source.isEmpty()) {
+    if (source.size() > 1) {
+      Set<OWLClass> commonSuperclasses=null;
+      for (      final OWLClass sourceClass : source) {
+        final Set<OWLClass> superclasses=sourceClass.getTypeAndSuperclasses();
+        if (commonSuperclasses == null) {
+          commonSuperclasses=new LinkedHashSet<>();
+          commonSuperclasses.addAll(superclasses);
+        }
+ else {
+          commonSuperclasses.retainAll(superclasses);
+        }
+      }
+      if (!commonSuperclasses.isEmpty()) {
+        return commonSuperclasses.iterator().next();
+      }
+    }
+ else {
+      return source.iterator().next();
+    }
+  }
+  return null;
+}

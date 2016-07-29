@@ -1,0 +1,55 @@
+{
+  try {
+    final GetExpressCheckoutDetailsResponseType response=PayPalHelper.getExpressCheckoutResponse(token);
+    if (AckCodeType.SUCCESS.equals(response.getAck())) {
+      final GetExpressCheckoutDetailsResponseDetailsType details=response.getGetExpressCheckoutDetailsResponseDetails();
+      final CurrencyCodeType currencyCode=CurrencyCodeType.fromValue(payment.getCurrencyCode());
+      final DoExpressCheckoutPaymentResponseType confirmationResponse=PayPalHelper.commitExpressCheckout(notifyUrl,currencyCode,payment.getTotal(),token,payerId);
+      if (AckCodeType.SUCCESS.equals(confirmationResponse.getAck())) {
+        final PayPalConfirmCheckoutResponse checkoutResponse=new PayPalConfirmCheckoutResponse(confirmationResponse);
+        final DoExpressCheckoutPaymentResponseDetailsType confirmation=confirmationResponse.getDoExpressCheckoutPaymentResponseDetails();
+        final String billingAgreementId=confirmation.getBillingAgreementID();
+        final String note=confirmation.getNote();
+        final AddressType billingAddress=details.getBillingAddress();
+        if (billingAddress != null) {
+          final String billingAddressName=billingAddress.getName();
+          final String billingAddressStreet1=billingAddress.getStreet1();
+          final String billingAddressStreet2=billingAddress.getStreet2();
+          final String billingAddressZip=billingAddress.getPostalCode();
+          final String billingAddressCity=billingAddress.getCityName();
+          final String billingAddressCountry=billingAddress.getCountryName();
+          payment.setBillingAddressName(billingAddressName);
+          payment.setBillingAddressStreet1(billingAddressStreet1);
+          payment.setBillingAddressStreet2(billingAddressStreet2);
+          payment.setBillingAddressZip(billingAddressZip);
+          payment.setBillingAddressCity(billingAddressCity);
+          payment.setBillingAddressCountry(billingAddressCountry);
+        }
+        final PayerInfoType payerInfo=details.getPayerInfo();
+        if (payerInfo != null) {
+          payment.setPayer(payerInfo.getPayer());
+          payment.setPayerBusiness(payerInfo.getPayerBusiness());
+          final AddressType payerAddress=payerInfo.getAddress();
+          if (payerAddress != null) {
+            payment.setPayerAddressName(payerAddress.getName());
+            payment.setPayerAddressStreet1(payerAddress.getStreet1());
+            payment.setPayerAddressStreet2(payerAddress.getStreet1());
+            payment.setPayerAddressZip(payerAddress.getPostalCode());
+            payment.setPayerAddressCity(payerAddress.getCityName());
+            payment.setPayerAddressCountry(payerAddress.getCountryName());
+          }
+        }
+        payment.setBillingAgreementId(billingAgreementId);
+        payment.setNote(note);
+        payment.setInvoiceId(details.getInvoiceID());
+        payment.setPaymentState(PaymentState.completed);
+        payment.setToken(null);
+        return checkoutResponse;
+      }
+    }
+  }
+ catch (  Throwable t) {
+    throw new FrameworkException(422,t.getMessage());
+  }
+  throw new FrameworkException(422,"Unknown error.");
+}

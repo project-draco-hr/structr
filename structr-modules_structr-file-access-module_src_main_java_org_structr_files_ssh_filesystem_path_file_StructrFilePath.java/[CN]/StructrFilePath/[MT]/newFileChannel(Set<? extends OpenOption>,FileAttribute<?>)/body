@@ -1,0 +1,46 @@
+{
+  AbstractFile actualFile=getActualFile();
+  FileChannel channel=null;
+  final boolean create=options.contains(StandardOpenOption.CREATE);
+  final boolean createNew=options.contains(StandardOpenOption.CREATE_NEW);
+  final boolean write=options.contains(StandardOpenOption.WRITE);
+  final boolean truncate=options.contains(StandardOpenOption.TRUNCATE_EXISTING);
+  final boolean append=options.contains(StandardOpenOption.APPEND);
+  if (write) {
+    try (final Tx tx=StructrApp.getInstance(fs.getSecurityContext()).tx()){
+      if (create || createNew) {
+        if (createNew && actualFile != null) {
+          throw new java.nio.file.FileAlreadyExistsException(toString());
+        }
+        try {
+          actualFile=createNewFile();
+          setParentFolder(actualFile);
+        }
+ catch (        FrameworkException fex) {
+          fex.printStackTrace();
+        }
+      }
+      if (actualFile != null && actualFile instanceof FileBase) {
+        final FileBase file=(FileBase)actualFile;
+        channel=new StructrFileChannel(file.getOutputStream(true,!truncate || append));
+      }
+      tx.success();
+    }
+ catch (    FrameworkException fex) {
+      logger.log(Level.WARNING,"Unable to open file channel for writing of {0}: {1}",new Object[]{path,fex.getMessage()});
+    }
+  }
+  if (actualFile != null && actualFile instanceof FileBase) {
+    try (final Tx tx=StructrApp.getInstance(fs.getSecurityContext()).tx()){
+      channel=FileChannel.open(((FileBase)actualFile).getFileOnDisk().toPath(),options);
+      tx.success();
+    }
+ catch (    FrameworkException fex) {
+      logger.log(Level.WARNING,"Unable to open file channel for reading of {0}: {1}",new Object[]{path,fex.getMessage()});
+    }
+  }
+ else {
+    throw new FileNotFoundException("File " + path.toString() + " does not exist.");
+  }
+  return channel;
+}

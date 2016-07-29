@@ -1,0 +1,29 @@
+{
+  if (isShared(schemaNode)) {
+switch (type) {
+case Create:
+      buf.append("\n");
+    buf.append("\t\tfinal org.structr.net.PeerToPeerService service = getService();\n");
+  buf.append("\t\tif (service != null) {\n");
+buf.append("\n");
+buf.append("\t\t\tfinal org.structr.net.data.time.PseudoTime time = service.getTime();\n");
+buf.append("\n");
+buf.append("\t\t\tsuper.setProperty(lastModifiedPseudoTime, time.toString());\n");
+buf.append("\t\t\tsuper.setProperty(createdPseudoTime,      time.toString());\n");
+buf.append("\t\t}\n");
+buf.append("\n");
+break;
+case Save:
+buf.append("\n");
+buf.append("\t\tfinal org.structr.net.PeerToPeerService service = getService();\n");
+buf.append("\t\tif (service != null) {\n");
+buf.append("\n");
+buf.append("\t\t\tservice.update(this);\n");
+buf.append("\t\t}\n");
+buf.append("\n");
+break;
+default :
+break;
+}
+}
+}

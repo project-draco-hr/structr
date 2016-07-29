@@ -1,0 +1,12 @@
+{
+  final Iterator<FileNodeChunk> chunkIterator=(Iterator<FileNodeChunk>)serverConnection.getValue(containerId);
+  if (chunkIterator != null) {
+    if (chunkIterator.hasNext()) {
+      serverConnection.send(chunkIterator.next());
+    }
+ else {
+      serverConnection.removeValue(containerId);
+      serverConnection.send(new FileNodeEndChunk(containerId,fileSize));
+    }
+  }
+}

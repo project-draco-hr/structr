@@ -1,0 +1,47 @@
+{
+  final SimpleDateFormat dateFormat=new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+  final String instanceId=StructrApp.getInstance().getInstanceId();
+  for (Iterator<SyncHostInfo> it=syncHosts.iterator(); it.hasNext(); ) {
+    final SyncHostInfo host=it.next();
+    boolean reachable=true;
+    try {
+      final SingleTransmission<ReplicationStatus> transmission=new SingleTransmission<>(new ReplicationStatus(instanceId));
+      final ReplicationStatus status=CloudService.doRemote(SecurityContext.getSuperUserInstance(),transmission,host,new LoggingListener());
+      if (status != null) {
+        final String slaveId=status.getSlaveId();
+        if (slaveId != null) {
+          final long syncTimestamp=status.getLastSync();
+          String lastSyncString="not synced yet";
+          if (syncTimestamp != 0L) {
+            lastSyncString="last sync was " + dateFormat.format(syncTimestamp);
+          }
+          logger.log(Level.INFO,"Determined instance ID of {0} to be {1}, {2}.",new Object[]{host,slaveId,lastSyncString});
+          host.setReplicationStatus(status);
+        }
+ else {
+          reachable=false;
+        }
+      }
+ else {
+        reachable=false;
+      }
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"",t);
+      reachable=false;
+    }
+    if (!reachable) {
+      logger.log(Level.WARNING,"Synchronization slave {0} not reachable, removing from list.",host);
+      it.remove();
+    }
+  }
+  final int numSyncHosts=syncHosts.size();
+  requiredSyncCount=Integer.valueOf(minimum);
+  if (numSyncHosts < requiredSyncCount) {
+    throw new IllegalStateException("synchronization policy requires at least " + requiredSyncCount + " hosts, but only "+ numSyncHosts+ " are reachable.");
+  }
+  logger.log(Level.INFO,"Synchronization to {0} host{1} required.",new Object[]{requiredSyncCount,requiredSyncCount == 1 ? "" : "s"});
+  for (  final SyncHostInfo host : syncHosts) {
+    checkAndInitializeSyncHost(host);
+  }
+}

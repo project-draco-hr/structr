@@ -1,0 +1,30 @@
+{
+  final Map<String,Object> map=new HashMap<>();
+  final String prefix=filter.substring(0,filter.indexOf(":"));
+  if ("dos".equals(prefix)) {
+    map.put("hidden",isHidden());
+    map.put("archive",isArchive());
+    map.put("system",isSystem());
+    map.put("readonly",isReadOnly());
+  }
+  if (!"owner".equals(prefix)) {
+    map.put("lastModifiedTime",lastModifiedTime());
+    map.put("lastAccessTime",lastAccessTime());
+    map.put("creationTime",creationTime());
+    map.put("size",size());
+    map.put("isRegularFile",isRegularFile());
+    map.put("isDirectory",isDirectory());
+    map.put("isSymbolicLink",isSymbolicLink());
+    map.put("isOther",isOther());
+    map.put("fileKey",fileKey());
+  }
+  if ("posix".equals(prefix)) {
+    map.put("permissions",permissions());
+    map.put("group",group());
+    map.put("owner",owner());
+  }
+  if ("owner".equals(prefix)) {
+    map.put("owner",owner());
+  }
+  return map;
+}

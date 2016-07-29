@@ -1,0 +1,15 @@
+{
+  if (predicate instanceof GroupQuery) {
+    final BooleanQuery query=new BooleanQuery();
+    final GroupQuery group=(GroupQuery)predicate;
+    for (    final QueryPredicate attr : group.getQueryPredicates()) {
+      final Query subQuery=parent.getQuery(parent,attr);
+      if (subQuery != null) {
+        final Occurrence occur=attr.getOccurrence();
+        query.add(subQuery,getOccur(occur));
+      }
+    }
+    return query;
+  }
+  return null;
+}

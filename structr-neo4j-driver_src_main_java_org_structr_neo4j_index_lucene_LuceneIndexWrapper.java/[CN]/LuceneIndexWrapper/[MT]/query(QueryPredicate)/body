@@ -1,0 +1,17 @@
+{
+  final Query query=getQuery(this,predicate);
+  if (query != null) {
+    final QueryContext queryContext=new QueryContext(query);
+    final String key=predicate.getSortKey();
+    final SortType sortType=predicate.getSortType();
+    final boolean sortDescending=predicate.sortDescending();
+    if (sortType != null) {
+      queryContext.sort(new Sort(new SortField(key,getSortType(sortType),sortDescending)));
+    }
+ else {
+      queryContext.sort(new Sort(new SortField(key,Locale.getDefault(),sortDescending)));
+    }
+    return new IndexHitsWrapper<>(graphDb,index.query(queryContext));
+  }
+  return null;
+}

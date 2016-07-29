@@ -1,0 +1,15 @@
+{
+  assertNotDeleted();
+  try {
+    TransactionWrapper.getCurrentTransaction().registerModified(this);
+    entity.setProperty(name,value);
+    cache.put(name,value);
+    hasCache.put(name,Boolean.TRUE);
+  }
+ catch (  org.neo4j.graphdb.NotInTransactionException t) {
+    throw new NotInTransactionException(t);
+  }
+catch (  Throwable t) {
+    throw new NotFoundException(t);
+  }
+}

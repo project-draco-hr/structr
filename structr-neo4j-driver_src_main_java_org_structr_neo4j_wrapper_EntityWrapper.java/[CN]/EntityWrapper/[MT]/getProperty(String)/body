@@ -1,0 +1,19 @@
+{
+  assertNotDeleted();
+  Object value=cache.get(name);
+  if (value == null) {
+    try {
+      value=entity.getProperty(name);
+      if (value != null) {
+        cache.put(name,value);
+      }
+    }
+ catch (    org.neo4j.graphdb.NotInTransactionException t) {
+      throw new NotInTransactionException(t);
+    }
+catch (    Throwable t) {
+      throw new NotFoundException(t);
+    }
+  }
+  return value;
+}

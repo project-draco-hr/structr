@@ -1,0 +1,17 @@
+{
+  assertNotDeleted();
+  Boolean hasProperty=hasCache.get(name);
+  if (hasProperty == null) {
+    try {
+      hasProperty=entity.hasProperty(name);
+      hasCache.put(name,hasProperty);
+    }
+ catch (    org.neo4j.graphdb.NotInTransactionException t) {
+      throw new NotInTransactionException(t);
+    }
+catch (    Throwable t) {
+      throw new NotFoundException(t);
+    }
+  }
+  return hasProperty;
+}

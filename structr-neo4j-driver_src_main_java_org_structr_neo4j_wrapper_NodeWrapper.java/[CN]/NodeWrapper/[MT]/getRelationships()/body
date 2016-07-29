@@ -1,0 +1,13 @@
+{
+  Set<Relationship> allRelationships=relationshipCache.get("*");
+  if (allRelationships == null) {
+    try {
+      allRelationships=Iterables.toSet(Iterables.map(new RelationshipMapper(graphDb),entity.getRelationships()));
+      relationshipCache.put("*",allRelationships);
+    }
+ catch (    org.neo4j.graphdb.NotInTransactionException t) {
+      throw new NotInTransactionException(t);
+    }
+  }
+  return allRelationships;
+}

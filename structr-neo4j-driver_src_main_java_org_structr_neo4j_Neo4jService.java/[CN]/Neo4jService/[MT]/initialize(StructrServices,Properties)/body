@@ -1,0 +1,24 @@
+{
+  final DatabaseService databaseService=services.getDatabaseService();
+  if (databaseService != null && databaseService instanceof Neo4jDatabaseService) {
+    this.graphDb=((Neo4jDatabaseService)databaseService).getGraphDb();
+  }
+ else {
+    throw new IllegalStateException("Cannot start Neo4jService when DatabaseService is not Neo4jDatabaseService");
+  }
+  final Properties finalConfig=new Properties();
+  finalConfig.setProperty(NEO4J_BROWSER_PORT,"7474");
+  StructrServices.mergeConfiguration(finalConfig,config);
+  final String configuredPort=finalConfig.getProperty(NEO4J_BROWSER_PORT);
+  host=finalConfig.getProperty(NEO4J_BROWSER_HOST);
+  try {
+    port=Integer.parseInt(configuredPort);
+  }
+ catch (  Throwable t) {
+    logger.log(Level.SEVERE,"Unable to parse Neo4j Browser port {0}",configuredPort);
+    port=-1;
+  }
+  if (port == -1) {
+    logger.log(Level.SEVERE,"Unable to start Neo4j service.");
+  }
+}

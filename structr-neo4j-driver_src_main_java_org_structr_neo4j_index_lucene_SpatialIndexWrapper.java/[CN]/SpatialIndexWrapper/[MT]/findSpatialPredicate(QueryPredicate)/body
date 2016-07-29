@@ -1,0 +1,20 @@
+{
+  if (predicate != null) {
+    if (predicate instanceof SpatialQuery) {
+      return (SpatialQuery)predicate;
+    }
+    if (predicate instanceof GroupQuery) {
+      final GroupQuery group=(GroupQuery)predicate;
+      final List<QueryPredicate> children=group.getQueryPredicates();
+      if (children != null) {
+        for (        final QueryPredicate child : children) {
+          final QueryPredicate candidate=findSpatialPredicate(child);
+          if (candidate != null) {
+            return (SpatialQuery)candidate;
+          }
+        }
+      }
+    }
+  }
+  return null;
+}

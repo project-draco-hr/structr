@@ -1,0 +1,25 @@
+{
+  while (running) {
+    try {
+      while (!outputQueue.isEmpty()) {
+        final Envelope envelope=outputQueue.poll();
+        if (envelope != null) {
+          final AbstractMessage message=envelope.getMessage();
+          final PeerInfo recipient=envelope.getPeer();
+          message.setSenderTimestamp(System.currentTimeMillis() + timeOffset);
+          message.onSend(Peer.this);
+          serverSocket.send(AbstractMessage.forSending(Peer.this.getUuid(),recipient,message));
+          sent++;
+        }
+      }
+      Thread.sleep(10L);
+    }
+ catch (    IOException ignore1) {
+    }
+catch (    InterruptedException ignore2) {
+    }
+catch (    Throwable t) {
+      t.printStackTrace();
+    }
+  }
+}

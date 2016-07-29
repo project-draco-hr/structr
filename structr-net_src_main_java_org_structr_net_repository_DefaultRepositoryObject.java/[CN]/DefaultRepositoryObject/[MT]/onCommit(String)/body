@@ -1,0 +1,15 @@
+{
+  final List<PossibleValue> values=new LinkedList<>();
+  for (  final PossibleValue val : history.values()) {
+    if (transactionId != null && transactionId.equals(val.getTransactionId())) {
+      values.add(val);
+    }
+  }
+  for (  final ObjectListener listener : listeners) {
+    for (    final PossibleValue value : values) {
+      for (      final Entry<String,Object> entry : value.getData().entrySet()) {
+        listener.onPropertyChange(this,entry.getKey(),entry.getValue());
+      }
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  RepositoryObject obj=getObject(id);
+  if (obj == null) {
+    obj=new DefaultRepositoryObject(this,id,type,deviceId,userId,created);
+synchronized (objects) {
+      final String transactionId=UUID.randomUUID().toString().replaceAll("\\-","");
+      for (      final Entry<String,Object> entry : data.entrySet()) {
+        obj.setProperty(created,transactionId,entry.getKey(),entry.getValue());
+      }
+      complete(transactionId);
+      objects.put(id,obj);
+    }
+    for (    final InternalChangeListener listener : internalChangeListeners) {
+      listener.onObjectCreation(obj,data);
+    }
+    notifyCreation(obj,data);
+  }
+  return obj;
+}

@@ -1,0 +1,26 @@
+{
+  try {
+    final File publicKeyFile=new File(publicKeyFileName);
+    final File privateKeyFile=new File(privateKeyFileName);
+    final KeyPairGenerator kpg=KeyPairGenerator.getInstance(algorithm);
+    kpg.initialize(keyLength);
+    final KeyPair keyPair=kpg.genKeyPair();
+    final PublicKey publicKey=keyPair.getPublic();
+    final PrivateKey privateKey=keyPair.getPrivate();
+    if (!publicKeyFile.exists() || !privateKeyFile.exists()) {
+      try (final FileOutputStream fos=new FileOutputStream(publicKeyFile)){
+        fos.write(publicKey.getEncoded());
+        fos.flush();
+      }
+       try (final FileOutputStream fos=new FileOutputStream(privateKeyFile)){
+        fos.write(privateKey.getEncoded());
+        fos.flush();
+      }
+     }
+    return keyPair;
+  }
+ catch (  Throwable t) {
+    t.printStackTrace();
+  }
+  return null;
+}

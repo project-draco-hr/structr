@@ -1,0 +1,15 @@
+{
+  super.serialize(dos);
+  serializeUUID(dos,recipient);
+  serializeUUID(dos,objectId);
+  dos.writeUTF(userId);
+  dos.writeUTF(type);
+  creationTime.serialize(dos);
+  lastModified.serialize(dos);
+  final int size=data.size();
+  dos.writeInt(size);
+  for (  final Entry<String,Object> entry : data.entrySet()) {
+    dos.writeUTF(entry.getKey());
+    serializeObject(dos,entry.getValue());
+  }
+}

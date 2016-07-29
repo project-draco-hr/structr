@@ -1,0 +1,25 @@
+{
+  final ByteArrayOutputStream finalBuffer=new ByteArrayOutputStream();
+  final GZIPOutputStream zos=new GZIPOutputStream(finalBuffer,1024);
+  final DataOutputStream dos=new DataOutputStream(zos);
+  dos.writeInt(message.getCommand());
+  serializeUUID(dos,message.getId());
+  serializeUUID(dos,peerId);
+  dos.writeLong(message.getSenderTimestamp());
+  message.serialize(dos);
+  dos.flush();
+  dos.close();
+  final PublicKey publicKey=recipient.getPublicKey();
+  if (publicKey != null) {
+    final Cipher cipher=getCipher();
+    cipher.init(Cipher.ENCRYPT_MODE,publicKey);
+    final byte[] data=encryptBlocks(finalBuffer.toByteArray(),cipher,245);
+    final String address=recipient.getAddress();
+    final int port=recipient.getPort();
+    return new DatagramPacket(data,data.length,InetAddress.getByName(address),port);
+  }
+ else {
+    System.out.println("Unable to encrypt packet, aborting.");
+  }
+  return null;
+}

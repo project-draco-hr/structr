@@ -1,0 +1,18 @@
+{
+  System.out.println("#########################################");
+  System.out.println("Peer " + serverSocket.getLocalAddress() + ":"+ localPort);
+  System.out.println("UUID: " + getUuid());
+  System.out.println("Time offset: " + timeOffset);
+  System.out.println(received + " messages received, " + sent+ " messages sent");
+  System.out.println(peers.size() + " peers");
+  for (  final PeerInfo info : peers.values()) {
+    System.out.println("    " + info);
+  }
+  for (  final RepositoryObject obj : repository.getObjects()) {
+    System.out.println("        ##### " + obj.getUuid());
+    System.out.println("        " + obj.getType() + "("+ obj.getUserId()+ "): "+ obj.getProperties(pte.next()));
+    ((DefaultRepositoryObject)obj).printHistory();
+  }
+  System.out.println(outputQueue);
+  System.out.flush();
+}

@@ -1,0 +1,47 @@
+{
+  long currentTime=0L;
+  long lastCleanup=0L;
+  long lastDiscovery=0L;
+  while (running) {
+    try {
+      currentTime=System.currentTimeMillis();
+      while (!inputQueue.isEmpty() && currentTime < lastDiscovery + discoveryInterval && currentTime < lastCleanup + discoveryIntervalStep) {
+        currentTime=System.currentTimeMillis();
+        final Envelope envelope=inputQueue.poll();
+        if (envelope != null) {
+          final AbstractMessage message=envelope.getMessage();
+          onMessage(message);
+          final String ackKey=message.getId() + "-ack";
+          if (getData(ackKey) == null) {
+            message.onMessage(this,envelope.getPeer());
+            broadcast(message);
+            setData(ackKey,true);
+          }
+        }
+      }
+      if (currentTime > lastDiscovery + discoveryInterval) {
+        lastDiscovery=currentTime;
+        send(new PeerInfo(getPublicKey(),repository.getUuid(),initialPeer,START_PORT),new Discovery(getContentHash()));
+        if (discoveryInterval < finalDiscoveryInterval) {
+          discoveryInterval+=discoveryIntervalStep;
+        }
+      }
+      if (currentTime > lastCleanup + discoveryIntervalStep) {
+        lastCleanup=currentTime;
+        for (final Iterator<PeerInfo> it=peers.values().iterator(); it.hasNext(); ) {
+          final PeerInfo peer=it.next();
+          final long time=peer.getLastSeen() + finalDiscoveryInterval + (discoveryIntervalStep * 2);
+          if (currentTime > time) {
+            onRemovePeer(peer);
+            it.remove();
+          }
+        }
+      }
+      Thread.sleep(10L);
+    }
+ catch (    Throwable t) {
+      t.printStackTrace();
+    }
+  }
+  executorService.shutdownNow();
+}

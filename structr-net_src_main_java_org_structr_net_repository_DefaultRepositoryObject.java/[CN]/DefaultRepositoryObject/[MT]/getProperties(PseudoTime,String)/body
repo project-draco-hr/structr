@@ -1,0 +1,21 @@
+{
+  final Map<String,Object> map=new HashMap<>();
+  final List<PseudoTime> times=new LinkedList<>(history.keySet());
+  Collections.reverse(times);
+  for (  final PseudoTime time : times) {
+    if (time.equals(instant) || time.before(instant)) {
+      final PossibleValue val=history.get(time);
+      if (val.isComplete(transactionId)) {
+        for (        final Entry<String,Object> entry : val.getData().entrySet()) {
+          if (!map.containsKey(entry.getKey())) {
+            map.put(entry.getKey(),entry.getValue());
+          }
+        }
+      }
+ else       if (val.isAborted()) {
+        history.remove(time);
+      }
+    }
+  }
+  return map;
+}

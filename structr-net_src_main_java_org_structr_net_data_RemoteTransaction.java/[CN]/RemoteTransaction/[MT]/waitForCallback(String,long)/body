@@ -1,0 +1,16 @@
+{
+synchronized (lock) {
+    this.message=null;
+    this.hasTimeout=true;
+    try {
+      lock.wait(timeout);
+    }
+ catch (    InterruptedException iex) {
+      iex.printStackTrace();
+    }
+    if (this.hasTimeout) {
+      peer.unregisterCallback(uuid);
+      throw new TimeoutException();
+    }
+  }
+}

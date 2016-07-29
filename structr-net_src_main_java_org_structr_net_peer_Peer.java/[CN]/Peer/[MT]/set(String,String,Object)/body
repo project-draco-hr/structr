@@ -1,0 +1,15 @@
+{
+  final RepositoryObject sharedObject=repository.getObject(objectId);
+  if (sharedObject != null) {
+    try (final RemoteTransaction tx=beginTx(sharedObject)){
+      tx.setProperty(sharedObject,key,value);
+      tx.commit();
+    }
+ catch (    Exception tex) {
+      System.out.println("Failed");
+    }
+  }
+ else {
+    System.out.println("No such object " + objectId);
+  }
+}

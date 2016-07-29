@@ -1,0 +1,15 @@
+{
+  final ByteArrayOutputStream bos=new ByteArrayOutputStream(data.length);
+  final int count=(data.length / dataSize) + 1;
+  int remaining=data.length;
+  for (int i=0; i < count; i++) {
+    final int offset=i * dataSize;
+    final int length=Math.min(dataSize,remaining);
+    final CipherOutputStream cos=new CipherOutputStream(bos,cipher);
+    cos.write(data,offset,length);
+    cos.flush();
+    cos.close();
+    remaining-=length;
+  }
+  return bos.toByteArray();
+}

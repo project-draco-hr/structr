@@ -1,0 +1,12 @@
+{
+  this.transactionOwner=sharedObject.getDeviceId();
+  peer.log("BeginTx()");
+  final BeginTx beginTx=new BeginTx(peer.getUuid(),transactionOwner,timeoutValue);
+  peer.registerCallback(beginTx.getId(),this);
+  peer.broadcast(beginTx);
+  waitForCallback(beginTx.getId(),timeoutValue);
+  if (message != null && message instanceof Ack) {
+    final Ack ack=(Ack)message;
+    this.transactionId=ack.getData();
+  }
+}

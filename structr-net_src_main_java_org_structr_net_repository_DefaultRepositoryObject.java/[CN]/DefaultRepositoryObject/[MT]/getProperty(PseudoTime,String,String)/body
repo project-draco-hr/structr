@@ -1,0 +1,22 @@
+{
+  PossibleValue value=history.get(instant);
+  if (value != null && value.isComplete(transactionId) && value.hasValue(key)) {
+    return value.get(key);
+  }
+ else {
+    final List<PseudoTime> times=new LinkedList<>(history.keySet());
+    Collections.reverse(times);
+    for (    final PseudoTime time : times) {
+      if (time.equals(instant) || time.before(instant)) {
+        final PossibleValue val=history.get(time);
+        if (val.isComplete(transactionId) && val.hasValue(key)) {
+          return val.get(key);
+        }
+ else         if (val.isAborted()) {
+          history.remove(time);
+        }
+      }
+    }
+  }
+  return null;
+}

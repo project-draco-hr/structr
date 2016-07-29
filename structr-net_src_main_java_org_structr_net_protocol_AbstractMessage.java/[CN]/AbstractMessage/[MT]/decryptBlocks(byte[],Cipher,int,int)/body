@@ -1,0 +1,23 @@
+{
+  final ByteArrayOutputStream bos=new ByteArrayOutputStream(data.length);
+  final int count=(data.length / dataSize);
+  final byte[] buffer=new byte[dataSize];
+  int remaining=data.length;
+  for (int i=0; i < count; i++) {
+    final int offset=i * blockSize;
+    final int length=Math.min(blockSize,remaining);
+    final byte[] range=Arrays.copyOfRange(data,offset,offset + length);
+    final ByteArrayInputStream bis=new ByteArrayInputStream(range);
+    final CipherInputStream cis=new CipherInputStream(bis,cipher);
+    try {
+      Arrays.fill(buffer,0,dataSize,(byte)0);
+      cis.read(buffer,0,dataSize);
+      bos.write(buffer);
+      remaining-=Math.min(blockSize,remaining);
+    }
+ catch (    IOException ignore) {
+      break;
+    }
+  }
+  return bos.toByteArray();
+}

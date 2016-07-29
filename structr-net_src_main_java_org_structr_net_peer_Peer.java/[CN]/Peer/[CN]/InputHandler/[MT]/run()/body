@@ -1,0 +1,24 @@
+{
+  while (running) {
+    try {
+      final DatagramPacket packet=new DatagramPacket(buffer,2048);
+      serverSocket.receive(packet);
+      final Envelope envelope=AbstractMessage.receive(Peer.this,packet);
+      if (envelope != null) {
+        final AbstractMessage msg=envelope.getMessage();
+        final long senderTimestamp=msg.getSenderTimestamp();
+        final long current=System.currentTimeMillis();
+        final long delta=senderTimestamp - current;
+        if (delta > timeOffset) {
+          timeOffset=delta;
+        }
+        updatePeer(envelope.getPeer().getUuid(),(current + timeOffset) - senderTimestamp);
+        inputQueue.add(envelope);
+        received++;
+      }
+    }
+ catch (    Throwable t) {
+      t.printStackTrace();
+    }
+  }
+}

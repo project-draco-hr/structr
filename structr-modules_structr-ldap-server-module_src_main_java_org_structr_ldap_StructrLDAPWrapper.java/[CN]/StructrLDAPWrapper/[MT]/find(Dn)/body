@@ -1,0 +1,15 @@
+{
+  final List<Rdn> rdns=new LinkedList<>(dn.getRdns());
+  Collections.reverse(rdns);
+  LDAPNode current=getRoot();
+  for (  final Rdn rdn : rdns) {
+    if (!rdn.isSchemaAware()) {
+      rdn.apply(schemaManager);
+    }
+    current=current.getChild(rdn.getNormName());
+    if (current == null) {
+      return null;
+    }
+  }
+  return current;
+}

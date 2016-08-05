@@ -1,0 +1,40 @@
+{
+  final URL url=SchemaEntityFactory.class.getProtectionDomain().getCodeSource().getLocation();
+  final JarFile jarFile=new JarFile(new File(url.toURI()));
+  final List<String> names=new LinkedList<>();
+  for (final Enumeration<JarEntry> e=jarFile.entries(); e.hasMoreElements(); ) {
+    final ZipEntry zipEntry=e.nextElement();
+    final String name=zipEntry.getName();
+    if (name.startsWith("schema/") && name.endsWith(".ldif")) {
+      names.add(name);
+    }
+  }
+  Collections.sort(names,new Comparator<String>(){
+    @Override public int compare(    String o1,    String o2){
+      Integer s1=StringUtils.countMatches(o1,"/");
+      Integer s2=StringUtils.countMatches(o2,"/");
+      if (s1.equals(s2)) {
+        Integer l1=o1.length();
+        Integer l2=o2.length();
+        if (l1.equals(l2)) {
+          return o1.compareTo(o2);
+        }
+        return l1.compareTo(l2);
+      }
+      return s1.compareTo(s2);
+    }
+  }
+);
+  for (  final String name : names) {
+    try (final LdifReader reader=new LdifReader(jarFile.getInputStream(jarFile.getEntry(name)))){
+      for (      final LdifEntry entry : reader) {
+        final Entry schemaEntry=new DefaultEntry(schemaManager,entry.getEntry());
+        final Dn dn=schemaEntry.getDn();
+        if (!partition.hasEntry(new EntryOperationContext(adminSession,dn))) {
+          logger.log(Level.INFO,"Importing {0}...",name);
+          partition.add(new AddOperationContext(adminSession,schemaEntry));
+        }
+      }
+    }
+   }
+}

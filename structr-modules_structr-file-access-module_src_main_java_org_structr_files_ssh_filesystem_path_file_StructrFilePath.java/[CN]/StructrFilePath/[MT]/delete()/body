@@ -1,0 +1,17 @@
+{
+  final App app=StructrApp.getInstance(fs.getSecurityContext());
+  final AbstractFile actualFile=getActualFile();
+  try (final Tx tx=app.tx()){
+    if (!actualFile.getProperty(AbstractFile.children).isEmpty()) {
+      throw new DirectoryNotEmptyException(path.toString());
+    }
+ else {
+      app.delete(actualFile);
+      this.cachedActualFile=null;
+    }
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"Unable to delete file {0}: {1}",new Object[]{path,fex.getMessage()});
+  }
+}

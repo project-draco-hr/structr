@@ -1,0 +1,15 @@
+{
+  boolean result=true;
+  if (uuid != null) {
+    final StructrPath.HiddenFileEntry entry=StructrPath.HIDDEN_PROPERTY_FILES.get(uuid);
+    if (entry != null) {
+      if (entry.has(name)) {
+        result=false;
+      }
+ else       if (name.startsWith("data-")) {
+        result=entry.hasDynamicWithValue(name);
+      }
+    }
+  }
+  return result;
+}

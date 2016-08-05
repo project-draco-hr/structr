@@ -1,0 +1,56 @@
+{
+  try (final Tx tx=app().tx()){
+    final Dn dn=entry.getDn();
+    final LDAPNode parent=find(dn.getParent());
+    if (parent != null) {
+      final Attribute objectClasses=entry.get(schemaManager.getAttributeType(SchemaConstants.OBJECT_CLASS_AT_OID));
+      final ObjectClassRegistry reg=schemaManager.getObjectClassRegistry();
+      final Set<String> classes=new LinkedHashSet<>();
+      final Rdn rdn=dn.getRdn();
+      String mainClass=null;
+      if (!rdn.isSchemaAware()) {
+        rdn.apply(schemaManager);
+      }
+      if (objectClasses != null) {
+        for (        final Value<?> value : objectClasses) {
+          final String cls=value.getString();
+          final String objectClassOid=reg.getOidByName(cls);
+          if (reg.get(objectClassOid).isStructural()) {
+            mainClass=cls;
+          }
+ else {
+            classes.add(cls);
+          }
+        }
+        final LDAPNode newChild=parent.createChild(rdn.getNormName(),rdn.getName(),mainClass,classes);
+        if (newChild != null) {
+          for (          final Attribute attr : entry) {
+            AttributeType type=attr.getAttributeType();
+            String oid=null;
+            if (type != null) {
+              oid=type.getOid();
+            }
+ else {
+              type=schemaManager.getAttributeType(attr.getUpId());
+              oid=type.getOid();
+            }
+            newChild.createAttribute(oid,attr.getUpId(),attr);
+          }
+        }
+ else {
+          logger.log(Level.WARNING,"Unable to add entry {0}, could not create new instance",entry);
+        }
+      }
+ else {
+        logger.log(Level.WARNING,"Unable to add entry {0}, could not determine object class(es)",entry);
+      }
+    }
+ else {
+      logger.log(Level.WARNING,"Unable to add entry {0}, parent not found",entry);
+    }
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    handleException(fex);
+  }
+}

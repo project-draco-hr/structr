@@ -1,0 +1,388 @@
+{
+  boolean success=true;
+  try (final App app=StructrApp.getInstance()){
+    final Document doc=DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File(fileName));
+    System.out.println("Parsing XML document..");
+    logger.println("Parsing XML document..");
+    parseDocument(doc.getDocumentElement(),0);
+    System.out.println("Filtering unwanted classes..");
+    logger.println("Filtering unwanted classes..");
+    filter(owlClassesByURI.values());
+    filter(owlPropertiesByURI.values());
+    if (importSchema) {
+      System.out.println("Resolving " + owlClassesByURI.size() + " OWL superclasses..");
+      logger.println("Resolving " + owlClassesByURI.size() + " OWL superclasses..");
+      for (      final OWLClass owlClass : owlClassesByURI.values()) {
+        owlClass.resolveSuperclasses(owlClassesByURI);
+      }
+      for (      final OWLClass owlClass : owlClassesByURI.values()) {
+        owlClass.resolveRelatedTypes(owlClassesByURI);
+      }
+      for (      final OWLClass owlClass : owlClassesByURI.values()) {
+        owlClass.resolveRelationshipTypes(owlClassesByURI);
+      }
+      System.out.println("Resolving " + owlPropertiesByURI.size() + " datatype properties..");
+      logger.println("Resolving " + owlPropertiesByURI.size() + " datatype properties..");
+      for (      final OWLProperty owlProperty : owlPropertiesByURI.values()) {
+        owlProperty.resolveSuperclasses(owlPropertiesByURI);
+        owlProperty.resolveClassProperties(owlClassesByURI);
+      }
+      final JsonSchema schema=StructrSchema.newInstance(URI.create("http://localhost/test/#"));
+      final JsonType baseType=schema.addType("BaseNode");
+      final JsonType nameType=schema.addType("LocalizedName");
+      nameType.addStringProperty("locale").setIndexed(true);
+      nameType.addStringProperty("name").setIndexed(true);
+      baseType.addStringProperty("originId").setIndexed(true);
+      baseType.addDateProperty("createdAt").setIndexed(true);
+      baseType.addDateProperty("modifiedAt").setIndexed(true);
+      baseType.addFunctionProperty("isFallbackLang","ui").setContentType("text/structrscript").setReadFunction("(empty(get_or_null(first(filter(this.names, equal(data.locale, substring(locale, 0, 2)))), 'name')))").setIndexed(true);
+      baseType.addFunctionProperty("localizedName","ui").setContentType("text/structrscript").setReadFunction("(if (equal('zh', substring(locale, 0, 2)),(if (empty(first(filter(this.names, equal(data.locale, 'zh')))),if (empty(first(filter(this.names, equal(data.locale, 'en')))),get_or_null(first(filter(this.names, equal(data.locale, 'de'))), 'name'),get(first(filter(this.names, equal(data.locale, 'en'))), 'name')),get(first(filter(this.names, equal(data.locale, 'zh'))), 'name'))),if (equal('de', substring(locale, 0, 2)),(if (empty(first(filter(this.names, equal(data.locale, 'de')))),if (empty(first(filter(this.names, equal(data.locale, 'en')))),get_or_null(first(filter(this.names, equal(data.locale, 'zh'))), 'name'),get(first(filter(this.names, equal(data.locale, 'en'))), 'name')),get(first(filter(this.names, equal(data.locale, 'de'))), 'name'))),(if (empty(first(filter(this.names, equal(data.locale, 'en')))),if (empty(first(filter(this.names, equal(data.locale, 'de')))),get_or_null(first(filter(this.names, equal(data.locale, 'zh'))), 'name'),get(first(filter(this.names, equal(data.locale, 'de'))), 'name')),get(first(filter(this.names, equal(data.locale, 'en'))), 'name'))))))").setIndexed(true);
+      baseType.addFunctionProperty("nameDE","ui").setContentType("text/structrscript").setReadFunction("get_or_null(first(filter(this.names, equal(data.locale, 'de'))), 'name')").setWriteFunction("(store('node', first(filter(this.names, equal(data.locale, 'de')))),if (empty(retrieve('node')),set(this, 'names', merge(this.names, create('LocalizedName', 'locale', 'de', 'name', value))),(if (empty(value),delete(retrieve('node')),set(retrieve('node'), 'name', value)))))").setIndexed(true);
+      baseType.addFunctionProperty("nameEN","ui").setContentType("text/structrscript").setReadFunction("get_or_null(first(filter(this.names, equal(data.locale, 'en'))), 'name')").setWriteFunction("(store('node', first(filter(this.names, equal(data.locale, 'en')))),if (empty(retrieve('node')),set(this, 'names', merge(this.names, create('LocalizedName', 'locale', 'en', 'name', value))),(if (empty(value),delete(retrieve('node')),set(retrieve('node'), 'name', value)))))").setIndexed(true);
+      baseType.addFunctionProperty("nameZH","ui").setContentType("text/structrscript").setReadFunction("get_or_null(first(filter(this.names, equal(data.locale, 'zh'))), 'name')").setWriteFunction("(store('node', first(filter(this.names, equal(data.locale, 'zh')))),if (empty(retrieve('node')),set(this, 'names', merge(this.names, create('LocalizedName', 'locale', 'zh', 'name', value))),(if (empty(value),delete(retrieve('node')),set(retrieve('node'), 'name', value)))))").setIndexed(true);
+      final JsonReferenceType names=((JsonObjectType)baseType).relate((JsonObjectType)nameType,"HasName",Cardinality.OneToMany);
+      names.setSourcePropertyName("isNameOf");
+      names.setTargetPropertyName("names");
+      final JsonReferenceType extensions=((JsonObjectType)baseType).relate((JsonObjectType)baseType,"ExtendedBy",Cardinality.ManyToMany);
+      extensions.setSourcePropertyName("extends");
+      extensions.setTargetPropertyName("extendedBy");
+      baseType.addStringProperty("name").setIndexed(true);
+      System.out.println("Creating schema..");
+      logger.println("Creating schema..");
+      try (final Tx tx=StructrApp.getInstance().tx()){
+        for (        final OWLClass owlClass : owlClassesByURI.values()) {
+          final String name=owlClass.getStructrName(true);
+          if (name != null && schema.getType(name) == null && owlClass.isPrimary()) {
+            logger.println("Creating type " + name + "..");
+            schema.addType(name);
+          }
+        }
+        StructrSchema.replaceDatabaseSchema(app,schema);
+        tx.success();
+      }
+ catch (      FrameworkException fex) {
+        System.out.println(fex.getErrorBuffer().getErrorTokens());
+      }
+      System.out.println("Resolving class inheritance..");
+      logger.println("Resolving class inheritance..");
+      try (final Tx tx=StructrApp.getInstance().tx()){
+        for (        final OWLClass owlClass : owlClassesByURI.values()) {
+          final String name=owlClass.getStructrName(true);
+          final JsonType type=schema.getType(name);
+          final OWLClass superclass=owlClass.getSuperclass();
+          if (type != null) {
+            if (superclass != null) {
+              final JsonType superType=schema.getType(superclass.getStructrName(true));
+              if (superType != null) {
+                type.setExtends(superType);
+              }
+ else {
+                type.setExtends(baseType);
+              }
+            }
+ else {
+              type.setExtends(baseType);
+            }
+            for (            final Name localizedName : owlClass.getNames()) {
+              app.create(Localization.class,new NodeAttribute(Localization.name,name),new NodeAttribute(Localization.localizedName,localizedName.name),new NodeAttribute(Localization.locale,localizedName.lang));
+            }
+          }
+        }
+        StructrSchema.replaceDatabaseSchema(app,schema);
+        tx.success();
+      }
+ catch (      FrameworkException fex) {
+        System.out.println(fex.getErrorBuffer().getErrorTokens());
+      }
+      System.out.println("Resolving relationship types..");
+      logger.println("Resolving relationship types..");
+      try (final Tx tx=StructrApp.getInstance().tx()){
+        for (        final OWLClass possibleOutgoingRelationshipType : owlClassesByURI.values()) {
+          final OWLClass possibleIncomingRelationshipType=possibleOutgoingRelationshipType.getInverse();
+          if (possibleOutgoingRelationshipType.isPrimary() && possibleIncomingRelationshipType != null) {
+            final List<OWLClass> sourceTypes=possibleOutgoingRelationshipType.getActualSourceTypes();
+            final List<OWLClass> targetTypes=possibleOutgoingRelationshipType.getActualTargetTypes();
+            for (            final OWLClass sourceType : sourceTypes) {
+              for (              final OWLClass targetType : targetTypes) {
+                final String sourceName=possibleOutgoingRelationshipType.getStructrName(false);
+                final String targetName=possibleIncomingRelationshipType.getStructrName(false);
+                final String sourceTypeName=sourceType.getStructrName(true);
+                final String targetTypeName=targetType.getStructrName(true);
+                final JsonType sourceJsonType=schema.getType(sourceTypeName);
+                final JsonType targetJsonType=schema.getType(targetTypeName);
+                if (sourceJsonType != null && targetJsonType != null) {
+                  final String relationshipTypeName=possibleOutgoingRelationshipType.getStructrName(true);
+                  final JsonObjectType relType=schema.addType(relationshipTypeName);
+                  final JsonObjectType srcType=(JsonObjectType)sourceJsonType;
+                  final JsonObjectType tgtType=(JsonObjectType)targetJsonType;
+                  srcType.relate(relType,sourceName,Cardinality.OneToMany,sourceType.getStructrName(false),sourceName);
+                  relType.relate(tgtType,targetName,Cardinality.ManyToOne,targetName,targetType.getStructrName(false));
+                  possibleOutgoingRelationshipType.setIsRelationship(true);
+                }
+              }
+            }
+          }
+        }
+        StructrSchema.replaceDatabaseSchema(app,schema);
+        tx.success();
+      }
+ catch (      FrameworkException fex) {
+        System.out.println(fex.getErrorBuffer().getErrorTokens());
+      }
+      System.out.println("Adding properties to types");
+      logger.println("Adding properties to types");
+      try (final Tx tx=StructrApp.getInstance().tx()){
+        for (        final OWLClass owlClass : owlClassesByURI.values()) {
+          final String typeName=owlClass.getStructrName(true);
+          JsonType type=schema.getType(typeName);
+          if (type == null) {
+            final OWLClass inverse=owlClass.getInverse();
+            if (inverse != null) {
+              type=schema.getType(inverse.getStructrName(true));
+            }
+          }
+          if (type != null) {
+            for (            final OWLProperty prop : owlClass.getAllProperties()) {
+              addProperty(type,prop,prop.getStructrName(false));
+            }
+          }
+ else {
+            System.out.println("Class: no type found for " + owlClass.getId());
+          }
+        }
+        StructrSchema.replaceDatabaseSchema(app,schema);
+        tx.success();
+      }
+       System.out.println("Adding metdata to node types");
+      logger.println("Adding metdata to node types");
+      try (final Tx tx=StructrApp.getInstance().tx()){
+        for (        final OWLClass owlClass : owlClassesByURI.values()) {
+          final String name=owlClass.getStructrName(true);
+          final SchemaNode schemaNode=app.nodeQuery(SchemaNode.class).andName(name).getFirst();
+          String icon=owlClass.getIcon();
+          if (schemaNode != null) {
+            if (icon != null && icon.contains("-")) {
+              final int pos=icon.indexOf("-",7);
+              if (pos > -1) {
+                icon=icon.substring(pos + 1);
+              }
+            }
+            schemaNode.setProperty(SchemaNode.icon,icon);
+          }
+        }
+        tx.success();
+      }
+ catch (      FrameworkException fex) {
+        System.out.println(fex.getErrorBuffer().getErrorTokens());
+      }
+      System.out.println("Resolving instances..");
+      logger.println("Resolving instances..");
+      final Iterator<OWLInstance> instancesIterator=owlInstances.values().iterator();
+      final List<OWLInstance> newInstances=new LinkedList<>();
+      int count=0;
+      while (instancesIterator.hasNext()) {
+        try (final Tx tx=StructrApp.getInstance().tx()){
+          while (instancesIterator.hasNext()) {
+            final OWLInstance instance=instancesIterator.next();
+            final OWLClass owlType=instance.getType();
+            if (owlType != null) {
+              instance.createDatabaseNode(app);
+              instance.resolveProperties();
+              instance.resolveExtensions(app,owlClassesByFragment,owlInstances,newInstances);
+            }
+            if (++count == 100) {
+              count=0;
+              break;
+            }
+          }
+          tx.success();
+        }
+       }
+      for (      final OWLInstance newInstance : newInstances) {
+        owlInstances.put(newInstance.getId(),newInstance);
+      }
+      System.out.println("Resolving instance relationships..");
+      logger.println("Resolving instance relationships..");
+      final Iterator<OWLInstance> relationshipsIterator=owlInstances.values().iterator();
+      count=0;
+      while (relationshipsIterator.hasNext()) {
+        try (final Tx tx=StructrApp.getInstance().tx()){
+          while (relationshipsIterator.hasNext()) {
+            final OWLInstance instance=relationshipsIterator.next();
+            final OWLClass owlType=instance.getType();
+            if (owlType != null) {
+              instance.resolveRelationships(schema,owlClassesByFragment,owlInstances,rdfDescriptions,owlPropertiesByName);
+            }
+            if (++count == 100) {
+              count=0;
+              break;
+            }
+          }
+          tx.success();
+        }
+       }
+    }
+    final File blobs=new File(blobsDirectory);
+    if (blobs.exists()) {
+      final ConfigurationProvider config=StructrApp.getConfiguration();
+      final List<Tuple<Class,PropertyKey>> mapping=createPropertyKeyMapping(config);
+      final Set<Path> files=new LinkedHashSet<>();
+      int count=0;
+      Files.walkFileTree(blobs.toPath(),new Visitor(files));
+      if (createFileRelationships) {
+        System.out.println("Resolving file relationships..");
+        logger.println("Resolving file relationships..");
+        final Iterator<Path> pathIteratorForSchemaExtension=files.iterator();
+        try (final Tx tx=StructrApp.getInstance().tx()){
+          while (pathIteratorForSchemaExtension.hasNext()) {
+            final Path file=pathIteratorForSchemaExtension.next();
+            final String name=file.getFileName().toString();
+            final int pos=name.indexOf(".",7);
+            final String idPart=name.substring(6,pos == -1 ? name.length() : pos);
+            if (name.startsWith("KBlob-") && name.length() > 23) {
+              for (              final Tuple<Class,PropertyKey> entry : mapping) {
+                final Class type=entry.getKey();
+                final PropertyKey key=entry.getValue();
+                Object value=idPart;
+                if (key instanceof ArrayProperty) {
+                  value=new String[]{idPart};
+                }
+                final Query<NodeInterface> query=app.nodeQuery(false).andType(type).and(key,value,false);
+                final List<NodeInterface> nodes=query.getAsList();
+                if (nodes.size() == 1) {
+                  System.out.println("                ##########: " + nodes.size() + " results..");
+                  final SchemaNode schemaNode=app.nodeQuery(SchemaNode.class).andName(type.getSimpleName()).getFirst();
+                  if (schemaNode != null) {
+                    System.out.println("                ##########: found SchemaNode " + schemaNode.getUuid() + " ("+ schemaNode.getName()+ ")");
+                    final SchemaNode fileSchemaNode=app.nodeQuery(SchemaNode.class).andName(org.structr.dynamic.File.class.getSimpleName()).getFirst();
+                    if (fileSchemaNode != null) {
+                      final String capitalJsonName=StringUtils.capitalize(key.jsonName());
+                      final String targetJsonName="has" + capitalJsonName;
+                      final String sourceJsonName="is" + capitalJsonName + "Of"+ type.getSimpleName();
+                      final SchemaRelationshipNode link=app.nodeQuery(SchemaRelationshipNode.class).and(SchemaRelationshipNode.sourceNode,schemaNode).and(SchemaRelationshipNode.targetNode,fileSchemaNode).and(SchemaRelationshipNode.relationshipType,key.jsonName()).getFirst();
+                      if (link == null) {
+                        System.out.println("Creating link from " + schemaNode + " to "+ fileSchemaNode+ ", "+ sourceJsonName+ ", "+ targetJsonName);
+                        app.create(SchemaRelationshipNode.class,new NodeAttribute(SchemaRelationshipNode.sourceNode,schemaNode),new NodeAttribute(SchemaRelationshipNode.targetNode,fileSchemaNode),new NodeAttribute(SchemaRelationshipNode.relationshipType,key.jsonName()),new NodeAttribute(SchemaRelationshipNode.sourceMultiplicity,"1"),new NodeAttribute(SchemaRelationshipNode.targetMultiplicity,key instanceof ArrayProperty ? "*" : "1"),new NodeAttribute(SchemaRelationshipNode.sourceJsonName,sourceJsonName),new NodeAttribute(SchemaRelationshipNode.targetJsonName,targetJsonName));
+                      }
+ else {
+                        System.out.println("Link relationship already exists: " + link);
+                      }
+                    }
+ else {
+                      System.out.println("NO SchemaNode found for type File!");
+                    }
+                  }
+ else {
+                    System.out.println("NO SchemaNode found for type " + type.getSimpleName() + "!");
+                  }
+                }
+              }
+            }
+          }
+          tx.success();
+        }
+       }
+      if (importFiles) {
+        System.out.println("Importing files..");
+        logger.println("Importing files..");
+        final SecurityContext superUserSecurityContext=SecurityContext.getSuperUserInstance();
+        final Iterator<Path> pathIteratorForRelationshipCreation=files.iterator();
+        while (pathIteratorForRelationshipCreation.hasNext()) {
+          try (final Tx tx=StructrApp.getInstance().tx()){
+            while (pathIteratorForRelationshipCreation.hasNext()) {
+              final Path file=pathIteratorForRelationshipCreation.next();
+              final String name=file.getFileName().toString();
+              final int pos=name.indexOf(".",7);
+              final String idPart=name.substring(6,pos == -1 ? name.length() : pos);
+              boolean found=false;
+              if (name.startsWith("KBlob-") && name.length() > 23) {
+                for (                final Tuple<Class,PropertyKey> entry : mapping) {
+                  final Class type=entry.getKey();
+                  final PropertyKey key=entry.getValue();
+                  final boolean isMultiple=(key instanceof ArrayProperty);
+                  Object value=idPart;
+                  if (isMultiple) {
+                    value=new String[]{idPart};
+                  }
+                  final Query<NodeInterface> query=app.nodeQuery(false).andType(type).and(key,value,false);
+                  final List<NodeInterface> nodes=query.getAsList();
+                  if (nodes.size() == 1) {
+                    final String capitalJsonName=StringUtils.capitalize(key.jsonName());
+                    final String targetJsonName="has" + capitalJsonName;
+                    final NodeInterface node=nodes.get(0);
+                    final PropertyKey fileRelationshipKey=config.getPropertyKeyForJSONName(type,targetJsonName,false);
+                    if (fileRelationshipKey != null) {
+                      try (final InputStream is=new FileInputStream(file.toFile())){
+                        final Class fileType=ImageHelper.isImageType(name) ? Image.class : org.structr.dynamic.File.class;
+                        if (isMultiple) {
+                          final String[] possibleNames=(String[])node.getProperty(key);
+                          String actualName=name;
+                          for (                          final String possibleName : possibleNames) {
+                            if (possibleName.startsWith(name)) {
+                              actualName=possibleName.substring(name.length() + 1);
+                              break;
+                            }
+                          }
+                          logger.println("        Importing " + name + " => "+ actualName);
+                          final FileBase importedFile=FileHelper.createFile(superUserSecurityContext,is,null,fileType,actualName);
+                          final List<FileBase> fileList=(List<FileBase>)node.getProperty(fileRelationshipKey);
+                          fileList.add(importedFile);
+                          node.setProperty(fileRelationshipKey,fileList);
+                        }
+ else {
+                          final String possibleName=(String)node.getProperty(key);
+                          String actualName=name;
+                          if (possibleName != null) {
+                            actualName=possibleName.substring(name.length() + 1);
+                          }
+                          logger.println("        Importing " + name + " => "+ actualName);
+                          final FileBase importedFile=FileHelper.createFile(superUserSecurityContext,is,null,fileType,actualName);
+                          node.setProperty(fileRelationshipKey,importedFile);
+                        }
+                      }
+ catch (                      Throwable t) {
+                        t.printStackTrace();
+                      }
+                    }
+ else {
+                      System.out.println("############################# INVALID KEY " + type.getSimpleName() + "."+ targetJsonName+ ", not found??!");
+                      logger.println("############################# INVALID KEY " + type.getSimpleName() + "."+ targetJsonName+ ", not found??!");
+                    }
+                    found=true;
+                    break;
+                  }
+                }
+              }
+              if (!found) {
+                System.out.println("Found NO document for file " + name + ", importing without association");
+                logger.println("Found NO document for file " + name + ", importing without association");
+                try (final InputStream is=new FileInputStream(file.toFile())){
+                  final Class fileType=ImageHelper.isImageType(name) ? Image.class : org.structr.dynamic.File.class;
+                  FileHelper.createFile(superUserSecurityContext,is,null,fileType,name);
+                }
+ catch (                Throwable t) {
+                  t.printStackTrace();
+                }
+              }
+              if (++count == 100) {
+                count=0;
+                break;
+              }
+            }
+            tx.success();
+          }
+         }
+      }
+    }
+  }
+ catch (  Throwable t) {
+    t.printStackTrace();
+    success=false;
+  }
+  if (success) {
+    System.out.println("Import successful");
+    logger.println("Import successful");
+  }
+  logger.flush();
+  logger.close();
+}

@@ -1,0 +1,12 @@
+{
+  final SpatialQuery spatialPredicate=findSpatialPredicate(predicate);
+  if (spatialPredicate != null) {
+    final Map<String,Object> params=new HashMap<>();
+    final Double[] coords=spatialPredicate.getCoords();
+    final Double dist=spatialPredicate.getDistance();
+    params.put(LayerNodeIndex.POINT_PARAMETER,coords);
+    params.put(LayerNodeIndex.DISTANCE_IN_KM_PARAMETER,dist);
+    return new IndexHitsWrapper<>(graphDb,index.query(LayerNodeIndex.WITHIN_DISTANCE_QUERY,params));
+  }
+  return null;
+}

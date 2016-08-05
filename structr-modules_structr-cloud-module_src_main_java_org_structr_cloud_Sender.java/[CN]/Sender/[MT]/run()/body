@@ -1,0 +1,22 @@
+{
+  while (connection.isConnected()) {
+    try {
+      while (!outputQueue.isEmpty()) {
+        final Message message=outputQueue.poll();
+        if (message != null) {
+          message.serialize(outputStream);
+          message.afterSend(connection);
+        }
+      }
+      outputStream.flush();
+    }
+ catch (    Throwable t) {
+      connection.close();
+    }
+    try {
+      Thread.yield();
+    }
+ catch (    Throwable t) {
+    }
+  }
+}

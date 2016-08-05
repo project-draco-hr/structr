@@ -1,0 +1,15 @@
+{
+  final App app=StructrApp.getInstance(fs.getSecurityContext());
+  try (final Tx tx=app.tx()){
+    final StructrPath.HiddenFileEntry entry=new StructrPath.HiddenFileEntry();
+    newPage=app.create(Page.class,name);
+    for (    final PropertyKey key : newPage.getPropertyKeys(PropertyView.Ui)) {
+      entry.add(key.jsonName());
+    }
+    StructrPath.HIDDEN_PROPERTY_FILES.put(newPage.getUuid(),entry);
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"",fex);
+  }
+}

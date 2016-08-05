@@ -1,0 +1,14 @@
+{
+  if (!initialized) {
+    throw new IllegalStateException("Peer not initialized, did you call initializeServer?!");
+  }
+  try {
+    executorService.submit(new InputHandler());
+    executorService.submit(new OutputHandler());
+    executorService.submit(this);
+  }
+ catch (  RejectedExecutionException rex) {
+    Logger.getLogger(Peer.class.getName()).log(Level.WARNING,"Unable to start peer, aborting.");
+    executorService.shutdown();
+  }
+}

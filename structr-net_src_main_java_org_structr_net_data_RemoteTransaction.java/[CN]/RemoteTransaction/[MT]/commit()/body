@@ -1,0 +1,7 @@
+{
+  peer.log("Commit(",transactionId,")");
+  final Commit commit=new Commit(peer.getUuid(),transactionOwner,transactionId);
+  peer.registerCallback(commit.getId(),this);
+  peer.broadcast(commit);
+  waitForCallback(commit.getId(),timeoutValue);
+}

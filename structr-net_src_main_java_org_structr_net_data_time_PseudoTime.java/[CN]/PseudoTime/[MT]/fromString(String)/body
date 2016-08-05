@@ -1,0 +1,21 @@
+{
+  final PseudoTime time=new PseudoTime();
+  if (src != null) {
+    final String[] parts=src.split("[\\.]+");
+switch (parts.length) {
+case 4:
+      time.tick=Long.valueOf(parts[3]);
+case 3:
+    time.timeDerived=Long.valueOf(parts[2]);
+case 2:
+  time.uuid=parts[1];
+case 1:
+time.instant=Long.valueOf(parts[0]);
+}
+}
+ else {
+time.instant=System.currentTimeMillis();
+time.uuid=UUID.randomUUID().toString().replaceAll("\\-","");
+}
+return time;
+}

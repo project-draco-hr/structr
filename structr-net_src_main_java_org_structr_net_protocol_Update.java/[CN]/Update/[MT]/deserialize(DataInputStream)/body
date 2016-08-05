@@ -1,0 +1,19 @@
+{
+  super.deserialize(dis);
+  this.objectId=deserializeUUID(dis);
+  this.userId=dis.readUTF();
+  this.type=dis.readUTF();
+  this.created=PseudoTime.fromStream(dis);
+  this.lastModified=PseudoTime.fromStream(dis);
+  final int size=dis.readInt();
+  for (int i=0; i < size; i++) {
+    try {
+      final String key=dis.readUTF();
+      final Object value=deserializeObject(dis);
+      data.put(key,value);
+    }
+ catch (    Throwable t) {
+      t.printStackTrace();
+    }
+  }
+}

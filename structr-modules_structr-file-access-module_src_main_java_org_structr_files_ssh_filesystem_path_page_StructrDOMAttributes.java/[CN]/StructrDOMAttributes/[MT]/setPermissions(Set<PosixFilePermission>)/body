@@ -1,0 +1,13 @@
+{
+  if (domNode == null) {
+    return;
+  }
+  try (Tx tx=StructrApp.getInstance(securityContext).tx()){
+    domNode.setProperty(AbstractNode.visibleToAuthenticatedUsers,perms.contains(PosixFilePermission.GROUP_READ));
+    domNode.setProperty(AbstractNode.visibleToPublicUsers,perms.contains(PosixFilePermission.OTHERS_READ));
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.SEVERE,"Unable to set mapped file permissions for " + domNode,fex);
+  }
+}

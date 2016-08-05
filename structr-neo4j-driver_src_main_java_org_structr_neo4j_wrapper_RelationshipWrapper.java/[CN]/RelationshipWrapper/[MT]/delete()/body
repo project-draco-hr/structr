@@ -1,0 +1,18 @@
+{
+  try {
+    final TransactionWrapper tx=TransactionWrapper.getCurrentTransaction();
+    final NodeWrapper startNode=NodeWrapper.getWrapper(graphDb,entity.getStartNode());
+    final NodeWrapper endNode=NodeWrapper.getWrapper(graphDb,entity.getEndNode());
+    tx.registerModified(startNode);
+    tx.registerModified(endNode);
+    tx.registerModified(this);
+    entity.delete();
+    deleted=true;
+    graphDb.removeRelationshipFromCache(getId());
+    startNode.clearCaches();
+    endNode.clearCaches();
+  }
+ catch (  org.neo4j.graphdb.NotInTransactionException t) {
+    throw new NotInTransactionException(t);
+  }
+}

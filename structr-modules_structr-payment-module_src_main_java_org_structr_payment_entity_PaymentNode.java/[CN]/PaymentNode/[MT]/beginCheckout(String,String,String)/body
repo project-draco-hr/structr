@@ -1,0 +1,18 @@
+{
+  final PaymentProvider provider=getPaymentProvider(providerName);
+  if (provider != null) {
+    final BeginCheckoutResponse response=provider.beginCheckout(this,successUrl,cancelUrl);
+    if (CheckoutState.Success.equals(response.getCheckoutState())) {
+      final GraphObjectMap data=new GraphObjectMap();
+      data.put(tokenProperty,response.getToken());
+      return data;
+    }
+ else {
+      throwErrors("Unable to begin checkout.",response);
+    }
+  }
+ else {
+    throw new FrameworkException(422,"Payment provider " + providerName + " not found.");
+  }
+  return null;
+}

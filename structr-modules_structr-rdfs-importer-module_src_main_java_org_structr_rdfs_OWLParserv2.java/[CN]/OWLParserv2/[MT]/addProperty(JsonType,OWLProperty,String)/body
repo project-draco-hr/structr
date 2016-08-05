@@ -1,0 +1,53 @@
+{
+  final String id=property.getId().toString();
+  if (blacklistedProperties.contains(id)) {
+    System.out.println("DatatypeProperty " + property.getId().toString() + " is blacklisted, igoring!");
+    logger.println("DatatypeProperty " + property.getId().toString() + " is blacklisted, igoring!");
+    return;
+  }
+  final String propertyType=property.getStructrType();
+  if (propertyType != null) {
+    final String propertyName=property.getStructrName(false);
+    if (propertyName != null) {
+switch (propertyType) {
+case "String":
+        if (property.multipleOccurrences()) {
+          type.addStringArrayProperty(propertyName);
+        }
+ else {
+          type.addStringProperty(propertyName).setIndexed(true);
+        }
+      break;
+case "Boolean":
+    type.addBooleanProperty(propertyName).setIndexed(true);
+  break;
+case "Integer":
+type.addIntegerProperty(propertyName).setIndexed(true);
+break;
+case "Double":
+type.addNumberProperty(propertyName).setIndexed(true);
+break;
+case "Date":
+final JsonDateProperty dateProperty=type.addDateProperty(propertyName);
+final String additionalFormat=property.getAdditionalFormat();
+if (additionalFormat != null) {
+dateProperty.setDatePattern(additionalFormat);
+}
+dateProperty.setIndexed(true);
+break;
+case "Enum":
+if (property.multipleOccurrences()) {
+type.addStringArrayProperty(propertyName);
+}
+ else {
+final JsonEnumProperty enumProperty=type.addEnumProperty(propertyName);
+enumProperty.setEnums(property.getEnums(name));
+enumProperty.setIndexed(true);
+}
+break;
+case "File":
+break;
+}
+}
+}
+}

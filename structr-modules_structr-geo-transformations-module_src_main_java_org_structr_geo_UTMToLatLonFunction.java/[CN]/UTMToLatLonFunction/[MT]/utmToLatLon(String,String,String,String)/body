@@ -1,0 +1,30 @@
+{
+  final GraphObjectMap obj=new GraphObjectMap();
+  final String cleanedZone=zone.replaceAll("[\\D]+","");
+  final StringBuilder epsg=new StringBuilder("EPSG:32");
+switch (hemisphere) {
+case "N":
+    epsg.append("6");
+  break;
+case "S":
+epsg.append("7");
+break;
+}
+if (cleanedZone.length() == 1) {
+epsg.append("0");
+}
+epsg.append(cleanedZone);
+try {
+final CoordinateReferenceSystem src=CRS.decode(epsg.toString());
+final CoordinateReferenceSystem dst=CRS.decode("EPSG:4326");
+final MathTransform transform=CRS.findMathTransform(src,dst,true);
+final DirectPosition sourcePt=new DirectPosition2D(getDoubleOrNull(east),getDoubleOrNull(north));
+final DirectPosition targetPt=transform.transform(sourcePt,null);
+obj.put(latitudeProperty,targetPt.getOrdinate(0));
+obj.put(longitudeProperty,targetPt.getOrdinate(1));
+}
+ catch (Throwable t) {
+t.printStackTrace();
+}
+return obj;
+}

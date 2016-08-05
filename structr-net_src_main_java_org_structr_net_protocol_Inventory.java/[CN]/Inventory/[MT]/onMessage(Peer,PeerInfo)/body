@@ -1,0 +1,9 @@
+{
+  if (!peer.getUuid().equals(getSender())) {
+    final RepositoryObject obj=peer.getRepository().getObject(objectId);
+    if (obj == null || obj.getLastModificationTime().before(lastModificationDate)) {
+      peer.log("GetHistory(",objectId,")");
+      peer.broadcast(new GetHistory(peer.getUuid(),getSender(),objectId,PseudoTime.now(peer)));
+    }
+  }
+}

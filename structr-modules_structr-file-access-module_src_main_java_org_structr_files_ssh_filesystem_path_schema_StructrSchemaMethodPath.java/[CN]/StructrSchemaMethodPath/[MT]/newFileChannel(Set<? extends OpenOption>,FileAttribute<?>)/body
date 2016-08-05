@@ -1,0 +1,23 @@
+{
+  SchemaMethod method=getSchemaMethodNode();
+  final boolean read=options.contains(StandardOpenOption.READ);
+  final boolean create=options.contains(StandardOpenOption.CREATE);
+  final boolean createNew=options.contains(StandardOpenOption.CREATE_NEW);
+  final boolean write=options.contains(StandardOpenOption.WRITE);
+  final boolean truncate=options.contains(StandardOpenOption.TRUNCATE_EXISTING);
+  final boolean append=options.contains(StandardOpenOption.APPEND);
+  if (create || createNew) {
+    if (createNew && method != null) {
+      throw new java.nio.file.FileAlreadyExistsException(toString());
+    }
+    final App app=StructrApp.getInstance(fs.getSecurityContext());
+    try (final Tx tx=app.tx()){
+      method=app.create(SchemaMethod.class,new NodeAttribute<>(SchemaMethod.schemaNode,schemaNode),new NodeAttribute<>(SchemaMethod.virtualFileName,name),new NodeAttribute<>(AbstractNode.name,normalizeFileNameForJavaIdentifier(name)),new NodeAttribute<>(SchemaMethod.source,""));
+      tx.success();
+    }
+ catch (    FrameworkException fex) {
+      fex.printStackTrace();
+    }
+  }
+  return new StructrPropertyValueChannel(fs.getSecurityContext(),method,SchemaMethod.source,truncate,append);
+}

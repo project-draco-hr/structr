@@ -1,0 +1,19 @@
+{
+  if (target instanceof StructrSchemaMethodPath) {
+    final App app=StructrApp.getInstance(fs.getSecurityContext());
+    final StructrSchemaMethodPath other=(StructrSchemaMethodPath)target;
+    final AbstractSchemaNode otherNode=other.getSchemaNode();
+    final SchemaMethod method=getSchemaMethodNode();
+    final String targetName=target.getFileName().toString();
+    try (final Tx tx=app.tx()){
+      if (otherNode.getUuid().equals(schemaNode.getUuid())) {
+        method.setProperty(SchemaMethod.name,normalizeFileNameForJavaIdentifier(targetName));
+        method.setProperty(SchemaMethod.virtualFileName,targetName);
+      }
+      tx.success();
+    }
+ catch (    FrameworkException fex) {
+      fex.printStackTrace();
+    }
+  }
+}

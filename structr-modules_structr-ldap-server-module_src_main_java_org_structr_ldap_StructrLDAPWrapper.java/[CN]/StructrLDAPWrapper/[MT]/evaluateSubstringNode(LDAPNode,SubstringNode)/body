@@ -1,0 +1,24 @@
+{
+  final Attribute attribute=new DefaultAttribute(substringNode.getAttributeType());
+  final String oid=attribute.getId();
+  final String initialPart=substringNode.getInitial();
+  final String finalPart=substringNode.getFinal();
+  final List<String> any=new LinkedList<>();
+  final List<String> fromNode=substringNode.getAny();
+  if (fromNode != null) {
+    any.addAll(fromNode);
+  }
+  final Pattern pattern=SubstringNode.getRegex(initialPart,any.toArray(new String[0]),finalPart);
+  for (  final LDAPAttribute attr : node.getAttributes()) {
+    if (oid.equals(attr.getOid())) {
+      for (      final LDAPValue value : attr.getValues()) {
+        final String stringValue=value.getStringValue().toLowerCase();
+        final Matcher matcher=pattern.matcher(stringValue);
+        if (matcher.matches()) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}

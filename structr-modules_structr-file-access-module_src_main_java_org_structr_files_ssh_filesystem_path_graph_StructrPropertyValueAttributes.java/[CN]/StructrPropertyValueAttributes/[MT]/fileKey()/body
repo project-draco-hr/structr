@@ -1,0 +1,14 @@
+{
+  if (node == null) {
+    return null;
+  }
+  String uuid=null;
+  try (Tx tx=StructrApp.getInstance(securityContext).tx()){
+    uuid=node.getUuid();
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.SEVERE,"",fex);
+  }
+  return uuid;
+}

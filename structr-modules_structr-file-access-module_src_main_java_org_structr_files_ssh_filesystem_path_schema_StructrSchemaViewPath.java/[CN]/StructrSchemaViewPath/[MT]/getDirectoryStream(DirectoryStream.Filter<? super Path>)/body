@@ -1,0 +1,19 @@
+{
+  if (schemaNode != null) {
+    return new DirectoryStream(){
+      boolean closed=false;
+      @Override public Iterator iterator(){
+        if (!closed) {
+          final List<StructrPath> children=new LinkedList<>();
+          return children.iterator();
+        }
+        return Collections.emptyIterator();
+      }
+      @Override public void close() throws IOException {
+        closed=true;
+      }
+    }
+;
+  }
+  return null;
+}

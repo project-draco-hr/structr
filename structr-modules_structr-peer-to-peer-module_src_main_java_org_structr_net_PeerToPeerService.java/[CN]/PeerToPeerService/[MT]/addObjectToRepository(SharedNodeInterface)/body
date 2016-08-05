@@ -1,0 +1,13 @@
+{
+  final String objectId=node.getProperty(GraphObject.id);
+  final String objectType=node.getProperty(GraphObject.type);
+  final PseudoTime modified=node.getLastModificationPseudoTime();
+  final PseudoTime created=node.getCreationPseudoTime();
+  final String transactionId=NodeServiceCommand.getNextUuid();
+  final RepositoryObject obj=repository.add(objectId,objectType,peer.getUuid(),node.getUserId(),created);
+  for (  final Entry<String,Object> entry : node.getData().entrySet()) {
+    obj.setProperty(modified,transactionId,entry.getKey(),entry.getValue());
+  }
+  repository.complete(transactionId);
+  obj.addListener(new ObjectUpdater(objectId));
+}

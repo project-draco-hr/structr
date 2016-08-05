@@ -1,0 +1,14 @@
+{
+  if (structrFile == null) {
+    return newPath;
+  }
+  try (Tx tx=StructrApp.getInstance().tx()){
+    String path=FileHelper.getFolderPath(structrFile);
+    tx.success();
+    return path;
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.SEVERE,"Error in getName() of abstract ftp file",fex);
+  }
+  return null;
+}

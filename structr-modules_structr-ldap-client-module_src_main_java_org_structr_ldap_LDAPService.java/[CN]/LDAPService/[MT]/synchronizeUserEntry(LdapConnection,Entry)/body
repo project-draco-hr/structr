@@ -1,0 +1,28 @@
+{
+  final App app=StructrApp.getInstance();
+  final Dn dn=entry.getDn();
+  final String dnString=dn.toString();
+  try (final Tx tx=app.tx()){
+    LDAPUser user=app.nodeQuery(LDAPUser.class).and(LDAPUser.distinguishedName,dnString).getFirst();
+    if (user == null) {
+      user=app.create(LDAPUser.class,new NodeAttribute(LDAPUser.distinguishedName,dnString));
+      user.initializeFrom(entry);
+      final String uuid=user.getUuid();
+      if (user.getProperty(LDAPUser.entryUuid) == null) {
+        try {
+          final Modification addUuid=new DefaultModification(ModificationOperation.ADD_ATTRIBUTE,"entryUUID",normalizeUUID(uuid));
+          connection.modify(dn,addUuid);
+        }
+ catch (        LdapException ex) {
+          logger.log(Level.WARNING,"Unable to set entryUUID: {0}",ex.getMessage());
+        }
+      }
+    }
+    tx.success();
+    return user.getUuid();
+  }
+ catch (  FrameworkException|LdapInvalidAttributeValueException fex) {
+    logger.log(Level.WARNING,"Unable to update LDAP information",fex);
+  }
+  return null;
+}

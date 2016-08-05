@@ -1,0 +1,11 @@
+{
+  try {
+    TransactionWrapper.getCurrentTransaction().registerModified(this);
+    entity.delete();
+    deleted=true;
+    graphDb.removeNodeFromCache(getId());
+  }
+ catch (  org.neo4j.graphdb.NotInTransactionException t) {
+    throw new NotInTransactionException(t);
+  }
+}

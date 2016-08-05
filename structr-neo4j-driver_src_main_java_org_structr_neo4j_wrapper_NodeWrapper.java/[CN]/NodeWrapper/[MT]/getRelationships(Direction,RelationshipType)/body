@@ -1,0 +1,13 @@
+{
+  Set<Relationship> relationships=relationshipCache.get(direction.name() + relationshipType.name());
+  if (relationships == null) {
+    try {
+      relationships=Iterables.toSet(Iterables.map(new RelationshipMapper(graphDb),entity.getRelationships(unwrap(direction),unwrap(relationshipType))));
+      relationshipCache.put(direction.name() + relationshipType.name(),relationships);
+    }
+ catch (    org.neo4j.graphdb.NotInTransactionException t) {
+      throw new NotInTransactionException(t);
+    }
+  }
+  return relationships;
+}

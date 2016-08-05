@@ -1,0 +1,17 @@
+{
+  String _id=getAttribute(element,"rdf:about");
+  if (_id != null) {
+    setId(_id);
+  }
+  initializeRDFSLabels(element.getElementsByTagName("rdfs:label"));
+  internalName=getValue(getFirstElement(getElement(),"krdf:internalName"));
+  for (  final String inheritanceIdentifier : getInheritanceIdentifiers()) {
+    initializeSuperclass(element.getElementsByTagName(inheritanceIdentifier));
+    if (superclassId != null) {
+      break;
+    }
+  }
+  createdAt=getValue(getFirstElement(getElement(),"createdAt"));
+  modifiedAt=getValue(getFirstElement(getElement(),"modifiedAt"));
+  rdfReferenceId=getAttribute(getElement(),"rdf:ID");
+}

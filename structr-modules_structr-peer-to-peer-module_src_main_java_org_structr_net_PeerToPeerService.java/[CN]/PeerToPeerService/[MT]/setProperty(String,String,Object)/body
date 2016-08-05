@@ -1,0 +1,17 @@
+{
+  logger.log(Level.INFO,"Attempting to modify shared node with UUID {0}: {1} = {2} in Structr",new Object[]{uuid,key,value});
+  final RepositoryObject sharedObject=repository.getObject(uuid);
+  if (sharedObject != null) {
+    try (final RemoteTransaction tx=peer.beginTx(sharedObject)){
+      tx.setProperty(sharedObject,key,value);
+      tx.commit();
+    }
+ catch (    Exception ex) {
+      System.out.println("timeout");
+      throw new FrameworkException(500,ex.getMessage());
+    }
+  }
+ else {
+    System.out.println("No such object " + uuid);
+  }
+}

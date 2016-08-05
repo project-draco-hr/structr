@@ -1,0 +1,18 @@
+{
+switch (tagName) {
+case "content":
+    return (DOMNode)doc.createTextNode("#text");
+case "comment":
+  return (DOMNode)doc.createComment("#comment");
+case "template":
+Template newNode=null;
+try {
+newNode=StructrApp.getInstance().create(Template.class,new NodeAttribute<>(Template.parent,(Page)doc),new NodeAttribute<>(Template.ownerDocument,(Page)doc),new NodeAttribute<>(Template.content,"#template"));
+}
+ catch (FrameworkException fex) {
+logger.log(Level.WARNING,"Unable to create new template node",fex);
+}
+return newNode;
+}
+return (DOMNode)doc.createElement(tagName);
+}

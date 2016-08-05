@@ -1,0 +1,17 @@
+{
+  final App app=StructrApp.getInstance();
+  try (final Tx tx=app.tx()){
+    final XMPPClient client=StructrApp.getInstance().get(XMPPClient.class,uuid);
+    if (client != null) {
+      final String callbackName="onXMPP" + message.getClass().getSimpleName();
+      final Map<String,Object> properties=new HashMap<>();
+      properties.put("sender",message.getFrom());
+      properties.put("message",message.getBody());
+      client.invokeMethod(callbackName,properties,false);
+    }
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"",fex);
+  }
+}

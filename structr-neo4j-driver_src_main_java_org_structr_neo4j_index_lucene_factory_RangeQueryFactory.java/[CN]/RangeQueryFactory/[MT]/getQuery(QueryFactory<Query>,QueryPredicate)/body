@@ -1,0 +1,20 @@
+{
+  if (predicate instanceof RangeQuery) {
+    final RangeQuery rangeQuery=(RangeQuery)predicate;
+    final Object rangeStart=rangeQuery.getRangeStart();
+    final Object rangeEnd=rangeQuery.getRangeEnd();
+    if (rangeStart == null && rangeEnd == null) {
+      return null;
+    }
+    if ((rangeStart != null && rangeStart instanceof Date) || (rangeEnd != null && rangeEnd instanceof Date)) {
+      return LuceneUtil.rangeQuery(predicate.getName(),rangeStart == null ? null : ((Date)rangeStart).getTime(),rangeEnd == null ? null : ((Date)rangeEnd).getTime(),true,true);
+    }
+ else     if ((rangeStart != null && rangeStart instanceof Number) || (rangeEnd != null && rangeEnd instanceof Number)) {
+      return LuceneUtil.rangeQuery(predicate.getName(),rangeStart == null ? null : (Number)rangeStart,rangeEnd == null ? null : (Number)rangeEnd,true,true);
+    }
+ else {
+      return new TermRangeQuery(predicate.getName(),rangeStart == null ? null : rangeStart.toString(),rangeEnd == null ? null : rangeEnd.toString(),true,true);
+    }
+  }
+  return null;
+}

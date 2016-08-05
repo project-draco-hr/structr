@@ -1,0 +1,43 @@
+{
+  final List<PaymentDetailsType> paymentDetailList=new LinkedList<>();
+  final List<PaymentDetailsItemType> lineItems=new LinkedList<>();
+  final PaymentDetailsType paymentDetails=new PaymentDetailsType();
+  for (  final PaymentItem item : payment.getItems()) {
+    final PaymentDetailsItemType paymentDetailsItem=new PaymentDetailsItemType();
+    paymentDetailsItem.setAmount(PayPalHelper.getAmountForCurrency(payment.getCurrencyCode(),item.getAmount()));
+    paymentDetailsItem.setQuantity(item.getQuantity());
+    final String name=item.getName();
+    if (name != null) {
+      paymentDetailsItem.setName(name);
+    }
+    final String description=item.getDescription();
+    if (description != null) {
+      paymentDetailsItem.setDescription(description);
+    }
+    final String itemUrl=item.getItemUrl();
+    if (itemUrl != null) {
+      paymentDetailsItem.setItemURL(itemUrl);
+    }
+    final String itemNumber=item.getItemNumber();
+    if (itemNumber != null) {
+      paymentDetailsItem.setNumber(itemNumber);
+    }
+    lineItems.add(paymentDetailsItem);
+  }
+  paymentDetails.setPaymentAction(PaymentActionCodeType.SALE);
+  paymentDetails.setPaymentDetailsItem(lineItems);
+  paymentDetails.setOrderTotal(PayPalHelper.getAmountForCurrency(payment.getCurrencyCode(),payment.getTotal()));
+  paymentDetailList.add(paymentDetails);
+  try {
+    final SetExpressCheckoutResponseType response=PayPalHelper.getExpressCheckoutToken(paymentDetailList,successUrl,cancelUrl);
+    if (AckCodeType.SUCCESS.equals(response.getAck())) {
+      payment.setToken(response.getToken());
+      payment.setPaymentState(PaymentState.open);
+      return new PayPalBeginCheckoutResponse(response,response.getToken());
+    }
+  }
+ catch (  Throwable t) {
+    throw new FrameworkException(422,t.getMessage());
+  }
+  throw new FrameworkException(422,"Unknown error.");
+}

@@ -1,0 +1,33 @@
+{
+  while (isConnected()) {
+    try {
+      final Message request=receiver.receive();
+      if (request != null) {
+        logDebug("RECEIVED ",request);
+        refreshTransmissionTimeout();
+        if (request.wasSentFromHere()) {
+          request.onResponse(this);
+        }
+ else {
+          request.onRequest(this);
+        }
+      }
+      if (count >= 100) {
+        final String message="Committing batch..";
+        sender.send(new Ping(message));
+        if (listener != null) {
+          listener.transmissionProgress(message);
+        }
+        this.commitTransaction();
+        this.endTransaction();
+        this.beginTransaction();
+        count=0;
+      }
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"",t);
+    }
+  }
+  shutdown();
+  logger.log(Level.INFO,"Transmission finished");
+}

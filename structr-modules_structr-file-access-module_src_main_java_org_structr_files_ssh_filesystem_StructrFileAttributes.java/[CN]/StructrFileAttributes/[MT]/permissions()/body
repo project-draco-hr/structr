@@ -1,0 +1,22 @@
+{
+  final Set<PosixFilePermission> permissions=new HashSet<>();
+  permissions.add(PosixFilePermission.OWNER_READ);
+  permissions.add(PosixFilePermission.OWNER_WRITE);
+  if (file != null) {
+    try (Tx tx=StructrApp.getInstance(securityContext).tx()){
+      if (file.isVisibleToPublicUsers()) {
+        permissions.add(PosixFilePermission.OTHERS_READ);
+        permissions.add(PosixFilePermission.OTHERS_WRITE);
+      }
+      if (file.isVisibleToAuthenticatedUsers()) {
+        permissions.add(PosixFilePermission.GROUP_READ);
+        permissions.add(PosixFilePermission.GROUP_WRITE);
+      }
+      tx.success();
+    }
+ catch (    FrameworkException fex) {
+      logger.log(Level.SEVERE,"",fex);
+    }
+  }
+  return permissions;
+}

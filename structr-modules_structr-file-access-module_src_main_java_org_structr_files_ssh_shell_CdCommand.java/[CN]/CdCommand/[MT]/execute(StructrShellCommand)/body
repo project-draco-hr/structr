@@ -1,0 +1,41 @@
+{
+  final App app=StructrApp.getInstance();
+  final Folder currentFolder=parent.getCurrentFolder();
+  try (final Tx tx=app.tx()){
+    if (target != null) {
+switch (target) {
+case "..":
+        if (currentFolder != null) {
+          final Folder parentFolder=currentFolder.getProperty(AbstractFile.parent);
+          if (parentFolder != null) {
+            if (parent.isAllowed(parentFolder,Permission.read,true)) {
+              parent.setCurrentFolder(parentFolder);
+            }
+          }
+ else {
+            parent.setCurrentFolder(null);
+          }
+        }
+      break;
+case ".":
+    break;
+case "/":
+  parent.setCurrentFolder(null);
+break;
+case "~":
+parent.setCurrentFolder(user.getProperty(User.homeDirectory));
+break;
+default :
+setFolder(parent,currentFolder,target);
+break;
+}
+}
+ else {
+parent.setCurrentFolder(user.getProperty(User.homeDirectory));
+}
+tx.success();
+}
+ catch (FrameworkException fex) {
+logger.log(Level.WARNING,"",fex);
+}
+}

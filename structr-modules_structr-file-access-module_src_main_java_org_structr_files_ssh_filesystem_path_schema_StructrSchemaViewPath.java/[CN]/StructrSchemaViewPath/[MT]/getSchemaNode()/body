@@ -1,0 +1,13 @@
+{
+  if (schemaNode == null) {
+    final App app=StructrApp.getInstance(fs.getSecurityContext());
+    try (final Tx tx=app.tx()){
+      schemaNode=app.nodeQuery(AbstractSchemaNode.class).and(AbstractNode.name,name).getFirst();
+      tx.success();
+    }
+ catch (    FrameworkException fex) {
+      logger.log(Level.WARNING,"Unable to load actual file for path {0}: {1}",new Object[]{toString(),fex.getMessage()});
+    }
+  }
+  return schemaNode;
+}

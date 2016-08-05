@@ -1,0 +1,61 @@
+{
+  final List<FtpFile> ftpFiles=new ArrayList();
+  final App app=StructrApp.getInstance();
+  try (final Tx tx=app.tx()){
+    String requestedPath=getAbsolutePath();
+    logger.log(Level.INFO,"Children of {0} requested",requestedPath);
+    if ("/".equals(requestedPath)) {
+      try {
+        Result<Folder> folders=app.nodeQuery(Folder.class).getResult();
+        logger.log(Level.INFO,"{0} folders found",folders.size());
+        for (        Folder f : folders.getResults()) {
+          if (f.getProperty(AbstractFile.parent) != null) {
+            continue;
+          }
+          FtpFile ftpFile=new StructrFtpFolder(f);
+          logger.log(Level.INFO,"Folder found: {0}",ftpFile.getAbsolutePath());
+          ftpFiles.add(ftpFile);
+        }
+        Result<FileBase> files=app.nodeQuery(FileBase.class).getResult();
+        logger.log(Level.INFO,"{0} files found",files.size());
+        for (        FileBase f : files.getResults()) {
+          if (f.getProperty(AbstractFile.parent) != null) {
+            continue;
+          }
+          logger.log(Level.FINEST,"Structr file found: {0}",f);
+          FtpFile ftpFile=new StructrFtpFile(f);
+          logger.log(Level.FINE,"File found: {0}",ftpFile.getAbsolutePath());
+          ftpFiles.add(ftpFile);
+        }
+        Result<Page> pages=app.nodeQuery(Page.class).getResult();
+        logger.log(Level.INFO,"{0} pages found",pages.size());
+        for (        Page p : pages.getResults()) {
+          logger.log(Level.FINEST,"Structr page found: {0}",p);
+          ftpFiles.add(new FtpFilePageWrapper(p));
+        }
+        return ftpFiles;
+      }
+ catch (      FrameworkException ex) {
+        logger.log(Level.SEVERE,null,ex);
+      }
+    }
+    List<Folder> folders=((Folder)structrFile).getProperty(Folder.folders);
+    for (    Folder f : folders) {
+      FtpFile ftpFile=new StructrFtpFolder(f);
+      logger.log(Level.INFO,"Subfolder found: {0}",ftpFile.getAbsolutePath());
+      ftpFiles.add(ftpFile);
+    }
+    List<FileBase> files=((Folder)structrFile).getProperty(Folder.files);
+    for (    FileBase f : files) {
+      FtpFile ftpFile=new StructrFtpFile(f);
+      logger.log(Level.INFO,"File found: {0}",ftpFile.getAbsolutePath());
+      ftpFiles.add(ftpFile);
+    }
+    tx.success();
+    return ftpFiles;
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.SEVERE,"Error in listFiles()",fex);
+  }
+  return null;
+}

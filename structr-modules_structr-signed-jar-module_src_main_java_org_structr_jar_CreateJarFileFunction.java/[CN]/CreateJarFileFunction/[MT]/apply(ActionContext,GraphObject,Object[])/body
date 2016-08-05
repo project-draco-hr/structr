@@ -1,0 +1,65 @@
+{
+  if (arrayHasMinLengthAndAllElementsNotNull(sources,2)) {
+    if (sources[0] instanceof OutputStream) {
+      try {
+        final String algorithm="SHA1";
+        final String signAlgorithm="SHA1withRSA";
+        final String keygenAlgorithm="RSA";
+        final String srngAlgorithm="SHA1PRNG";
+        final JarOutputStream jos=new JarOutputStream((OutputStream)sources[0]);
+        final MessageDigest md=MessageDigest.getInstance(algorithm);
+        final Manifest manifest=new Manifest();
+        final Attributes mainAttributes=manifest.getMainAttributes();
+        final PrivateKey privateKey=getOrCreatePrivateKey(keygenAlgorithm,srngAlgorithm,signAlgorithm);
+        final X509Certificate cert=getOrCreateCertificate(keygenAlgorithm,srngAlgorithm,signAlgorithm);
+        System.out.println("This is the fingerprint of the keystore: " + hex(cert));
+        jos.setLevel(9);
+        mainAttributes.put(Attributes.Name.MANIFEST_VERSION,"1.0");
+        for (        final Object source : sources) {
+          if (source != null && source instanceof NameAndContent) {
+            final NameAndContent content=(NameAndContent)source;
+            final JarEntry entry=new JarEntry(content.getName());
+            final byte[] data=content.getContent().getBytes("utf-8");
+            entry.setTime(System.currentTimeMillis());
+            jos.putNextEntry(entry);
+            jos.write(data);
+            jos.closeEntry();
+            jos.flush();
+            md.update(data);
+            Attributes attr=manifest.getAttributes(entry.getName());
+            if (attr == null) {
+              attr=new Attributes();
+              manifest.getEntries().put(entry.getName(),attr);
+            }
+            attr.putValue(algorithm + "-Digest",new String(Base64.encode(md.digest()),"ASCII"));
+          }
+        }
+        jos.putNextEntry(new JarEntry(JarFile.MANIFEST_NAME));
+        manifest.write(jos);
+        final byte[] signedData=getSignatureForManifest(manifest,algorithm);
+        jos.putNextEntry(new JarEntry("META-INF/CERT.SF"));
+        jos.write(signedData);
+        if (privateKey != null && cert != null) {
+          jos.putNextEntry(new JarEntry("META-INF/CERT." + privateKey.getAlgorithm()));
+          writeSignatureBlock(jos,algorithm,new CMSProcessableByteArray(signedData),cert,privateKey);
+        }
+ else {
+          System.out.println("No certificate / key found, signinig disabled.");
+        }
+        jos.flush();
+        jos.finish();
+      }
+ catch (      Throwable t) {
+        logException(entity,t,sources);
+      }
+    }
+ else {
+      logger.log(Level.WARNING,"First parameter of create_jar_file() must be an output stream. Parameters: {0}",getParametersAsString(sources));
+      return "First parameter of create_jar_file() must be an output stream.";
+    }
+  }
+ else {
+    logParameterError(entity,sources,ctx.isJavaScriptContext());
+  }
+  return "";
+}

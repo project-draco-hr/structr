@@ -1,0 +1,25 @@
+{
+  try (Tx tx=StructrApp.getInstance().tx()){
+    if (structrFile == null) {
+      final Folder parentFolder=(Folder)FileHelper.getFileByAbsolutePath(SecurityContext.getSuperUserInstance(),StringUtils.substringBeforeLast(newPath,"/"));
+      try {
+        structrFile=FileHelper.createFile(SecurityContext.getSuperUserInstance(),new byte[0],null,File.class,getName());
+        structrFile.setProperty(AbstractNode.type,File.class.getSimpleName());
+        structrFile.setProperty(AbstractNode.owner,owner.getStructrUser());
+        if (parentFolder != null) {
+          structrFile.setProperty(AbstractFile.parent,parentFolder);
+        }
+      }
+ catch (      FrameworkException ex) {
+        logger.log(Level.SEVERE,null,ex);
+        return null;
+      }
+    }
+    tx.success();
+    return ((FileBase)structrFile).getOutputStream();
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.SEVERE,null,fex);
+  }
+  return null;
+}

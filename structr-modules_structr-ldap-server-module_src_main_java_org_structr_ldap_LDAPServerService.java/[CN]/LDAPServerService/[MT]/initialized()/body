@@ -1,0 +1,29 @@
+{
+  try {
+    final DirectoryService service=server.getDirectoryService();
+    final SchemaManager schemaManager=service.getSchemaManager();
+    final Dn structrDn=new Dn(schemaManager,"dc=org");
+    final Partition apachePartition=new StructrPartition(schemaManager,"structr",structrDn);
+    apachePartition.initialize();
+    service.addPartition(apachePartition);
+    try {
+      service.getAdminSession().lookup(structrDn);
+    }
+ catch (    LdapException lnnfe) {
+      Entry structrEntry=service.newEntry(structrDn);
+      structrEntry.add("objectClass","top","domain","extensibleObject");
+      structrEntry.add("dc","structr");
+      service.getAdminSession().add(structrEntry);
+    }
+    try {
+      System.out.println("######: " + service.getAdminSession().lookup(structrDn));
+      System.out.flush();
+    }
+ catch (    LdapException lnnfe) {
+      lnnfe.printStackTrace();
+    }
+  }
+ catch (  Throwable t) {
+    t.printStackTrace();
+  }
+}

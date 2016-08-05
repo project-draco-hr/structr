@@ -1,0 +1,46 @@
+{
+  if (arrayHasLengthAndAllElementsNotNull(sources,2)) {
+    final Double lat=getDoubleOrNull(sources[0]);
+    final Double lon=getDoubleOrNull(sources[1]);
+    if (lat != null && lon != null) {
+      try {
+        final StringBuilder epsg=new StringBuilder("EPSG:32");
+        final int utmZone=getUTMZone(lat,lon);
+        if (lat < 0.0) {
+          epsg.append("7");
+        }
+ else {
+          epsg.append("6");
+        }
+        if (utmZone < 10) {
+          epsg.append("0");
+        }
+        epsg.append(utmZone);
+        final CoordinateReferenceSystem src=CRS.decode("EPSG:4326");
+        final CoordinateReferenceSystem dst=CRS.decode(epsg.toString());
+        final MathTransform transform=CRS.findMathTransform(src,dst,true);
+        final DirectPosition sourcePt=new DirectPosition2D(lat,lon);
+        final DirectPosition targetPt=transform.transform(sourcePt,null);
+        final String code=dst.getName().getCode();
+        final int pos=code.lastIndexOf(" ") + 1;
+        final String zoneName=code.substring(pos,code.length() - 1);
+        final String band=getLatitudeBand(lat,lon);
+        final StringBuilder buf=new StringBuilder();
+        buf.append(zoneName);
+        buf.append(band);
+        buf.append(" ");
+        buf.append((int)Math.rint(targetPt.getOrdinate(0)));
+        buf.append(" ");
+        buf.append((int)Math.rint(targetPt.getOrdinate(1)));
+        return buf.toString();
+      }
+ catch (      Throwable t) {
+        t.printStackTrace();
+      }
+    }
+ else {
+      logger.log(Level.WARNING,"Invalid argument(s), cannot convert to double: {0}, {1}",new Object[]{sources[0],sources[1]});
+    }
+  }
+  return usage(ctx != null ? ctx.isJavaScriptContext() : false);
+}

@@ -1,0 +1,10 @@
+{
+  Logger.getLogger(StructrPartition.class.getName()).log(Level.INFO,"{0}",searchContext);
+  final LdapPrincipal principal=searchContext.getEffectivePrincipal();
+  final Dn dn=searchContext.getDn();
+  final ExprNode filter=searchContext.getFilter();
+  final SearchScope scope=searchContext.getScope();
+  final List<Entry> list=getWrapper(principal).filter(dn,filter,scope);
+  final Cursor<Entry> cursor=new ListCursor<>(list);
+  return new BaseEntryFilteringCursor(cursor,searchContext);
+}

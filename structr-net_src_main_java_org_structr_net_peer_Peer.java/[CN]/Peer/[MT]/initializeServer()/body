@@ -1,0 +1,22 @@
+{
+  boolean success=false;
+  while (!success && localPort < START_PORT + 10) {
+    try {
+      serverSocket=new DatagramSocket(localPort,InetAddress.getByName(bindAddress));
+      success=true;
+    }
+ catch (    IOException ioex) {
+      localPort++;
+    }
+catch (    Throwable t) {
+      t.printStackTrace();
+    }
+  }
+  if (!success) {
+    System.out.println("Unable to bind to " + bindAddress + ", aborting.");
+    running=false;
+  }
+ else {
+    initialized=true;
+  }
+}

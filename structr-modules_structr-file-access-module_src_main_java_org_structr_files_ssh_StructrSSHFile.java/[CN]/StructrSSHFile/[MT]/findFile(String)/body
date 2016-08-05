@@ -1,0 +1,49 @@
+{
+  if ("/".equals(path)) {
+    return getRootFolder();
+  }
+  final App app=StructrApp.getInstance(getRootFolder().getSecurityContext());
+  final boolean isAbsolute=path.startsWith("/");
+  final String localPath=isAbsolute ? path.substring(1) : path;
+  final String[] parts=localPath.split("[/]+");
+  final String localPart=parts[0];
+  if (".".equals(path)) {
+    return this;
+  }
+  if ("..".equals(path)) {
+    return parent;
+  }
+  if (isAbsolute && parent != null) {
+    return getRootFolder().findFile(path);
+  }
+ else {
+    try (final Tx tx=app.tx()){
+      for (      final Folder folder : getFolders()) {
+        final String folderName=folder.getName();
+        if (localPart.equals(folderName)) {
+          final StructrSSHFile matchingFolder=new StructrSSHFile(this,folderName,folder);
+          if (parts.length > 1) {
+            return matchingFolder.findFile(localPath.substring(folderName.length() + 1));
+          }
+ else {
+            return matchingFolder;
+          }
+        }
+      }
+      for (      final FileBase file : getFiles()) {
+        final String fileName=file.getName();
+        if (localPart.equals(fileName)) {
+          if (parts.length > 1) {
+            throw new IllegalStateException("Found file where folder was expected, aborting.");
+          }
+          return new StructrSSHFile(this,fileName,file);
+        }
+      }
+      tx.success();
+    }
+ catch (    FrameworkException fex) {
+      logger.log(Level.WARNING,"",fex);
+    }
+  }
+  return new StructrSSHFile(this,path,null);
+}

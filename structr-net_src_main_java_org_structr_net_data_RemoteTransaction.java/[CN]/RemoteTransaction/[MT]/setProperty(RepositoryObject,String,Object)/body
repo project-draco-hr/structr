@@ -1,0 +1,7 @@
+{
+  peer.log("Set(",sharedObject.getUuid(),", ",key,", ",value,")");
+  final Set set=new Set(peer.getUuid(),sharedObject,pte.next(),transactionId,key,value);
+  peer.registerCallback(set.getId(),this);
+  peer.broadcast(set);
+  waitForCallback(set.getId(),timeoutValue);
+}

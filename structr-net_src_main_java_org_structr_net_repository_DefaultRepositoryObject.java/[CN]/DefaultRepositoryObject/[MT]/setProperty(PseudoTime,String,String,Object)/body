@@ -1,0 +1,23 @@
+{
+  final Object existingValue=getProperty(instant,transactionId,key);
+  if (existingValue != null && existingValue.equals(value)) {
+    return;
+  }
+  final PossibleValue possibleValue=history.get(instant);
+  if (possibleValue != null) {
+    if (possibleValue.hasValue(key)) {
+      System.out.println("###### instant: " + instant.toString());
+      System.out.println("REDEFINE: " + uuid + ": "+ key+ " = "+ value+ ", NOT set! "+ instant+ ": "+ history.get(instant).getData());
+    }
+ else {
+      possibleValue.set(key,value);
+    }
+  }
+ else {
+    final DefaultPossibility poss=parent.getPossibility(transactionId);
+    if (poss != null) {
+      poss.addObject(this);
+    }
+    history.put(instant,new PossibleValue(transactionId,key,value));
+  }
+}

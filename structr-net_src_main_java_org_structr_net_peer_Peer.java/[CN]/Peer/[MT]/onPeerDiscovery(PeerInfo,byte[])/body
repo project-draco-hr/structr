@@ -1,0 +1,20 @@
+{
+  if (newPeer != null && !newPeer.getUuid().equals(getUuid())) {
+    final boolean isNew=addPeer(newPeer);
+    final byte[] contentHash=getContentHash();
+    final boolean hasChanged=!Arrays.equals(hash,contentHash);
+    if (isNew || hasChanged) {
+      if (isNew) {
+        System.out.println("Peer is new, sending inventory..");
+      }
+      if (hasChanged) {
+        System.out.println("Peer has different content hash, sending inventory..");
+        System.out.println(printHash(hash) + " / " + printHash(contentHash));
+      }
+      for (      final RepositoryObject obj : repository.getObjects()) {
+        log("Inventory(",obj.getUuid(),", ",obj.getUserId(),")");
+        send(newPeer,new Inventory(repository.getUuid(),obj.getUuid(),obj.getDeviceId(),obj.getLastModificationTime()));
+      }
+    }
+  }
+}

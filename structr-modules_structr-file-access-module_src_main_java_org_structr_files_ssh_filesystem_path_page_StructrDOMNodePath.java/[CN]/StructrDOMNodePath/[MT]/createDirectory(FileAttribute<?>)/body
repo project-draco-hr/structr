@@ -1,0 +1,41 @@
+{
+  final App app=StructrApp.getInstance(fs.getSecurityContext());
+  final ElementName en=new ElementName(name);
+  if (!en.hasTagName() || !en.hasPosition()) {
+    throw new InvalidPathException(name,"New element needs tag and position, e.g. 001-div");
+  }
+  try (final Tx tx=app.tx()){
+    if (ownerDocument != null) {
+      int index=0;
+      if (parentNode != null) {
+        for (        final DOMNode child : parentNode.treeGetChildren()) {
+          final int childPosition=getDomPosition(child,index++);
+          if (childPosition == en.getPosition()) {
+            throw new InvalidPathException(name,"A child with position " + childPosition + " already exists.");
+          }
+        }
+      }
+      final DOMNode newChild=createNode(ownerDocument,en.getTagName());
+      final int newPosition=en.getPosition();
+      if (parentNode != null) {
+        insertDOMNodeAt(newChild,newPosition);
+      }
+      if (newChild instanceof DOMNode) {
+        this.domNode=newChild;
+        final StructrPath.HiddenFileEntry entry=new StructrPath.HiddenFileEntry();
+        for (        final PropertyKey key : domNode.getPropertyKeys(PropertyView.Ui)) {
+          entry.add(key.jsonName());
+        }
+        for (        final PropertyKey key : domNode.getPropertyKeys(PropertyView.Html)) {
+          entry.add(key.jsonName());
+        }
+        hidePropertyKeys(entry);
+        StructrPath.HIDDEN_PROPERTY_FILES.put(domNode.getUuid(),entry);
+      }
+    }
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+  }
+}

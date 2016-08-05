@@ -1,0 +1,16 @@
+{
+  final String scriptNameFromConfig=StructrApp.getConfigurationValue("VideoFile." + scriptName);
+  if (scriptNameFromConfig != null) {
+    final StringBuilder commandLine=new StringBuilder(scriptNameFromConfig);
+    commandLine.append(" ");
+    commandLine.append(inputFile.getDiskFilePath(securityContext));
+    commandLine.append(" ");
+    commandLine.append(outputFileName);
+    commandLine.append(fileExtension);
+    return commandLine;
+  }
+ else {
+    logger.log(Level.WARNING,"No VideoFile.{0} registered in structr.conf.",scriptName);
+  }
+  return null;
+}

@@ -1,0 +1,40 @@
+{
+  final NodeList extensions=getElements(getElement(),"krdf:KExtendedByRelation");
+  final ConfigurationProvider config=StructrApp.getConfiguration();
+  final Class baseType=config.getNodeEntityClass("BaseNode");
+  final PropertyKey extensionsKey=config.getPropertyKeyForJSONName(baseType,"extendedBy",false);
+  if (extensions != null && extensionsKey != null) {
+    int len=extensions.getLength();
+    for (int i=0; i < len; i++) {
+      final Element ext=(Element)extensions.item(i);
+      final NodeList contents=ext.getChildNodes();
+      if (contents != null) {
+        int contentLen=contents.getLength();
+        for (int j=0; j < contentLen; j++) {
+          final Node node=contents.item(j);
+          if (node instanceof Element) {
+            final Element content=(Element)node;
+            final OWLInstance inst=new OWLInstance(content);
+            final URI id=inst.getId();
+            if (id != null) {
+              final String type=inst.getTypeName();
+              if (type != null) {
+                final OWLClass owlType=owlClassesByFragment.get(type);
+                if (owlType != null) {
+                  inst.setType(owlType);
+                  newInstances.add(inst);
+                  inst.createDatabaseNode(app);
+                  if (instance != null) {
+                    final Set extendedBySet=new HashSet<>((List)instance.getProperty(extensionsKey));
+                    extendedBySet.add(inst.instance);
+                    instance.setProperty(extensionsKey,new LinkedList<>(extendedBySet));
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

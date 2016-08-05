@@ -1,0 +1,43 @@
+{
+  if (blacklist.contains(pathComponent)) {
+    return null;
+  }
+  if ("name".equals(pathComponent)) {
+    if (domNode instanceof Page) {
+      return null;
+    }
+    if (domNode.getOwnerDocument() instanceof ShadowDocument) {
+      return null;
+    }
+  }
+  if (domNode != null) {
+    if (pathComponent != null && pathComponent.startsWith("data-")) {
+      final PropertyKey key=StructrApp.getConfiguration().getPropertyKeyForJSONName(domNode.getClass(),pathComponent);
+      if (key != null) {
+        return new StructrNodePropertyPath(fs,this,domNode,key);
+      }
+    }
+    final PropertyKey key=StructrApp.getConfiguration().getPropertyKeyForJSONName(domNode.getClass(),pathComponent,false);
+    if (key != null) {
+      return new StructrNodePropertyPath(fs,this,domNode,key);
+    }
+ else {
+      final ElementName en=new ElementName(pathComponent);
+      final int pos=en.getPosition();
+      if (pos >= 0) {
+        int childPosition=0;
+        DOMNode node=null;
+        for (        final DOMNode child : domNode.treeGetChildren()) {
+          final int domSortPosition=getDomPosition(child,childPosition);
+          if (pos == domSortPosition) {
+            node=child;
+            break;
+          }
+          childPosition+=1;
+        }
+        return new StructrDOMNodePath(fs,StructrDOMNodePath.this,ownerDocument,domNode,node,pathComponent);
+      }
+    }
+  }
+  return new StructrDOMNodePath(fs,this,ownerDocument,domNode,null,pathComponent);
+}

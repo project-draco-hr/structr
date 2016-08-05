@@ -1,0 +1,19 @@
+{
+  final App app=StructrApp.getInstance(fs.getSecurityContext());
+  try (final Tx tx=app.tx()){
+    if (domNode.treeGetChildren().isEmpty()) {
+      if (parentNode != null) {
+        parentNode.removeChild(domNode);
+      }
+      app.delete(domNode);
+      this.domNode=null;
+    }
+ else {
+      throw new DirectoryNotEmptyException(name);
+    }
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+  }
+}

@@ -1,0 +1,25 @@
+{
+  final ByteArrayOutputStream bos=new ByteArrayOutputStream();
+  final Manifest signatureFile=new Manifest();
+  final Attributes main=signatureFile.getMainAttributes();
+  final MessageDigest md=MessageDigest.getInstance(algorithm);
+  final PrintStream print=new PrintStream(new DigestOutputStream(new ByteArrayOutputStream(),md),true,"UTF-8");
+  main.putValue("Signature-Version","1.0");
+  forManifest.write(print);
+  print.flush();
+  main.putValue(algorithm + "-Digest-Manifest",new String(Base64.encode(md.digest()),"ASCII"));
+  final Map<String,Attributes> entries=forManifest.getEntries();
+  for (  Map.Entry<String,Attributes> entry : entries.entrySet()) {
+    print.print("Name: " + entry.getKey() + "\r\n");
+    for (    Map.Entry<Object,Object> att : entry.getValue().entrySet()) {
+      print.print(att.getKey() + ": " + att.getValue()+ "\r\n");
+    }
+    print.print("\r\n");
+    print.flush();
+    final Attributes sfAttr=new Attributes();
+    sfAttr.putValue(algorithm + "-Digest",new String(Base64.encode(md.digest()),"ASCII"));
+    signatureFile.getEntries().put(entry.getKey(),sfAttr);
+  }
+  signatureFile.write(bos);
+  return bos.toByteArray();
+}

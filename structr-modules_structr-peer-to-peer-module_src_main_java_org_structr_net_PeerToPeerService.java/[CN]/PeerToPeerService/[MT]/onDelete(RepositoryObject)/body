@@ -1,0 +1,13 @@
+{
+  final App app=StructrApp.getInstance(getUserContext(object));
+  try (final Tx tx=app.tx()){
+    final SharedNodeInterface node=app.get(SharedNodeInterface.class,object.getUuid());
+    if (node != null) {
+      app.delete(node);
+    }
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+  }
+}

@@ -1,0 +1,28 @@
+{
+  logger.log(Level.INFO,"Initializing..");
+  try {
+    final KeyPair keyPair=getOrCreateKeyPair(config);
+    if (keyPair != null) {
+      final String initialPeer=config.getProperty(INITIAL_PEER_KEY,"255.255.255.255");
+      final String bindAddress=config.getProperty(BIND_ADDRESS_KEY,"0.0.0.0");
+      final String peerId=config.getProperty(PEER_UUID_KEY,StructrApp.getInstance().getInstanceId());
+      final boolean verbose="true".equals(config.getProperty(VERBOSE_KEY));
+      logger.log(Level.INFO,"{0}: {1}",new Object[]{BIND_ADDRESS_KEY,bindAddress});
+      logger.log(Level.INFO,"{0}: {1}",new Object[]{INITIAL_PEER_KEY,initialPeer});
+      logger.log(Level.INFO,"{0}: {1}",new Object[]{PRIVATE_KEY_CONFIG_KEY,config.getProperty(PRIVATE_KEY_CONFIG_KEY)});
+      logger.log(Level.INFO,"{0}: {1}",new Object[]{PUBLIC_KEY_CONFIG_KEY,config.getProperty(PUBLIC_KEY_CONFIG_KEY)});
+      logger.log(Level.INFO,"{0}: {1}",new Object[]{PEER_UUID_KEY,peerId});
+      logger.log(Level.INFO,"{0}: {1}",new Object[]{VERBOSE_KEY,verbose});
+      this.repository=new DefaultRepository(peerId);
+      this.peer=new Peer(getOrCreateKeyPair(config),repository,bindAddress,initialPeer);
+      this.peer.initializeServer();
+      this.peer.setVerbose(verbose);
+      this.repository.addExternalChangeListener(this);
+      this.repository.setPeer(peer);
+      initialized=true;
+    }
+  }
+ catch (  Throwable t) {
+    logger.log(Level.WARNING,"Unable to initialize PeerToPeerService",t);
+  }
+}

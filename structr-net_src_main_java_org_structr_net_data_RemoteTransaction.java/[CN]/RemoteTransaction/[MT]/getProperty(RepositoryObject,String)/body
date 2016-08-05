@@ -1,0 +1,11 @@
+{
+  final Get get=new Get(peer.getUuid(),sharedObject,pte.current(),transactionId,key);
+  peer.registerCallback(get.getId(),this);
+  peer.broadcast(get);
+  waitForCallback(get.getId(),timeoutValue);
+  if (message != null && message instanceof Value) {
+    final Value value=(Value)message;
+    return value.getValue();
+  }
+  return null;
+}

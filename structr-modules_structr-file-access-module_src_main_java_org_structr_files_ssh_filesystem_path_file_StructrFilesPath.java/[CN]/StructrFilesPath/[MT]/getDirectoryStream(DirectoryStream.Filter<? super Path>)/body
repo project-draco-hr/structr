@@ -1,0 +1,29 @@
+{
+  return new DirectoryStream(){
+    boolean closed=false;
+    @Override public Iterator iterator(){
+      if (!closed) {
+        final App app=StructrApp.getInstance(fs.getSecurityContext());
+        final List<StructrPath> files=new LinkedList<>();
+        try (final Tx tx=app.tx()){
+          for (          final Folder folder : app.nodeQuery(Folder.class).and(AbstractFile.hasParent,false).getAsList()) {
+            files.add(new StructrFilePath(fs,StructrFilesPath.this,folder.getName()));
+          }
+          for (          final FileBase file : app.nodeQuery(FileBase.class).and(AbstractFile.hasParent,false).getAsList()) {
+            files.add(new StructrFilePath(fs,StructrFilesPath.this,file.getName()));
+          }
+          tx.success();
+        }
+ catch (        FrameworkException fex) {
+          logger.log(Level.WARNING,"",fex);
+        }
+        return files.iterator();
+      }
+      return Collections.emptyIterator();
+    }
+    @Override public void close() throws IOException {
+      closed=true;
+    }
+  }
+;
+}

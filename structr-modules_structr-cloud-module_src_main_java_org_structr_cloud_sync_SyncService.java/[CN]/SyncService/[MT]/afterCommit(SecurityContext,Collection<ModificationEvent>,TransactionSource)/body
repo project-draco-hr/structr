@@ -1,0 +1,23 @@
+{
+  if (source != null && source.isRemote()) {
+    return;
+  }
+  if (active && running && !modificationEvents.isEmpty()) {
+    try {
+      final App app=StructrApp.getInstance();
+      app.setGlobalSetting(app.getInstanceId() + ".lastModified",System.currentTimeMillis());
+    }
+ catch (    FrameworkException fex) {
+      logger.log(Level.SEVERE,"Unable to store last modified date for current instance.",fex);
+    }
+    try {
+      syncQueue.put(new ArrayList<>(modificationEvents));
+synchronized (syncQueue) {
+        syncQueue.notify();
+      }
+    }
+ catch (    InterruptedException iex) {
+      logger.log(Level.WARNING,"",iex);
+    }
+  }
+}

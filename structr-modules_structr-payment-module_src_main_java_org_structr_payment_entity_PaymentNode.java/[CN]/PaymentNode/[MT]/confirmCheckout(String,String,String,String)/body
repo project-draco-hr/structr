@@ -1,0 +1,16 @@
+{
+  final PaymentProvider provider=getPaymentProvider(providerName);
+  if (provider != null) {
+    final ConfirmCheckoutResponse response=provider.confirmCheckout(this,notifyUrl,token,payerId);
+    if (CheckoutState.Success.equals(response.getCheckoutState())) {
+      return null;
+    }
+ else {
+      throwErrors("Unable to confirm checkout.",response);
+    }
+  }
+ else {
+    throw new FrameworkException(422,"Payment provider " + providerName + " not found.");
+  }
+  return null;
+}

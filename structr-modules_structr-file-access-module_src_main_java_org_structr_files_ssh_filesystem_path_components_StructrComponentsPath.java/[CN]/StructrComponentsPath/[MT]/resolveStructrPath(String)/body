@@ -1,0 +1,14 @@
+{
+  int pos=0;
+  final ShadowDocument doc=StructrApp.getInstance(fs.getSecurityContext()).nodeQuery(ShadowDocument.class).includeDeletedAndHidden().getFirst();
+  if (doc != null) {
+    for (    final DOMNode child : doc.getProperty(Page.elements)) {
+      if (!child.hasIncomingRelationships(DOMChildren.class)) {
+        if (pathComponent.equals(createComponentName(child,pos++))) {
+          return new StructrDOMNodePath(fs,this,doc,null,child,pathComponent);
+        }
+      }
+    }
+  }
+  return new StructrNonexistingComponentPath(fs,this,pathComponent);
+}

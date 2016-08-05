@@ -1,0 +1,17 @@
+{
+  try (final Tx tx=app().tx()){
+    final LDAPNode entry=find(dn);
+    List<Entry> result=null;
+    if (entry != null) {
+      result=filter(entry,filter,scope,0);
+    }
+    tx.success();
+    if (result != null) {
+      return result;
+    }
+  }
+ catch (  FrameworkException fex) {
+    handleException(fex);
+  }
+  return Collections.emptyList();
+}

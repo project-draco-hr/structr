@@ -1,0 +1,16 @@
+{
+  final List<Tuple<Class,PropertyKey>> mapping=new LinkedList<>();
+  final String[][] sourceMapping={{"UploadedDocument","dok"},{"Pruefung","pruefbericht"},{"Pruefauftrag","pruefbericht"},{"Article","bild"},{"ProductVersion","bild"},{"Pers","bild"},{"Product","bildKlein"},{"Component","bildKlein"},{"Product","bildGross"},{"Component","bos"},{"ProductVersion","erpLink"},{"FckFile","fckBlob"},{"UserAccount","nnState"},{"Regulation","anhang"},{"HistoryVersions","dokumentDateiVersion"}};
+  for (  final String[] entry : sourceMapping) {
+    final String className=entry[0];
+    final String propertyName=entry[1];
+    final Class<NodeInterface> type=config.getNodeEntityClass(className);
+    if (type != null) {
+      final PropertyKey key=config.getPropertyKeyForJSONName(type,propertyName,false);
+      if (key != null) {
+        mapping.add(new Tuple(type,key));
+      }
+    }
+  }
+  return mapping;
+}

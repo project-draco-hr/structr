@@ -1,0 +1,57 @@
+{
+  final Tx tx=StructrApp.getInstance(fs.getSecurityContext()).tx();
+  return new DirectoryStream(){
+    boolean closed=false;
+    @Override public Iterator iterator(){
+      if (!closed) {
+        final StructrPath.HiddenFileEntry hiddenFiles=StructrPath.HIDDEN_PROPERTY_FILES.get(domNode.getUuid());
+        final List<StructrPath> nodes=new LinkedList<>();
+        int pos=0;
+        try {
+          for (          final DOMNode child : domNode.treeGetChildren()) {
+            final int domPosition=getDomPosition(child,pos);
+            child.setProperty(DOMNode.domSortPosition,domPosition);
+            nodes.add(new StructrDOMNodePath(fs,StructrDOMNodePath.this,ownerDocument,domNode,child,getName(null,child,pos)));
+            pos+=1;
+          }
+          final Set<PropertyKey> exportedKeys=new LinkedHashSet<>();
+          Iterables.addAll(exportedKeys,domNode.getPropertyKeys(PropertyView.Ui));
+          Iterables.addAll(exportedKeys,domNode.getPropertyKeys(PropertyView.Html));
+          hidePropertyKeys(hiddenFiles);
+          for (          final PropertyKey key : exportedKeys) {
+            final Object value=domNode.getProperty(key);
+            Object defaultValue=key.defaultValue();
+            if (key instanceof BooleanProperty) {
+              defaultValue=Boolean.FALSE;
+            }
+            if (value != null && !(value.equals(defaultValue))) {
+              final StructrPath path=resolveStructrPath(key.jsonName());
+              if (path != null) {
+                if (hiddenFiles != null) {
+                  hiddenFiles.remove(key.jsonName());
+                }
+                nodes.add(path);
+              }
+            }
+          }
+        }
+ catch (        FrameworkException fex) {
+          logger.log(Level.WARNING,"",fex);
+        }
+        return nodes.iterator();
+      }
+      return Collections.emptyIterator();
+    }
+    @Override public void close() throws IOException {
+      closed=true;
+      try {
+        tx.success();
+        tx.close();
+      }
+ catch (      FrameworkException fex) {
+        fex.printStackTrace();
+      }
+    }
+  }
+;
+}

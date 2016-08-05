@@ -1,0 +1,17 @@
+{
+  final long abortTime=System.currentTimeMillis() + CloudService.AUTH_TIMEOUT;
+  while (!authenticated) {
+    if (errorMessage != null) {
+      throw new FrameworkException(errorCode,errorMessage);
+    }
+    if (System.currentTimeMillis() > abortTime) {
+      throw new FrameworkException(401,"Authentication failed.");
+    }
+    try {
+      Thread.sleep(10);
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"",t);
+    }
+  }
+}

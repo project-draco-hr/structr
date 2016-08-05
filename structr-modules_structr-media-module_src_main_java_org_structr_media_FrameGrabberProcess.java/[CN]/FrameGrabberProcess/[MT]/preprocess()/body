@@ -1,0 +1,10 @@
+{
+  try (final Tx tx=StructrApp.getInstance(securityContext).tx()){
+    newFile=FileHelper.createFile(securityContext,new byte[0],null,Image.class,imageName);
+    outputFileName=newFile.getFileOnDisk().getAbsolutePath();
+    tx.success();
+  }
+ catch (  FrameworkException|IOException fex) {
+    logger.log(Level.WARNING,"",fex);
+  }
+}

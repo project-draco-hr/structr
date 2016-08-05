@@ -1,0 +1,25 @@
+{
+  final NodeList hasChoiceElements=getElements(getElement(),"krdf:hasChoice");
+  final Set<Choice> choices=new TreeSet<>();
+  final int len=hasChoiceElements.getLength();
+  for (int i=0; i < len; i++) {
+    final Element hasChoice=(Element)hasChoiceElements.item(i);
+    final Element choice=getFirstElement(hasChoice,"krdf:Choice");
+    if (choice != null) {
+      final Node choiceNameElement=getFirstElement(choice,"krdf:choiceName");
+      if (choiceNameElement != null) {
+        final String choiceName=getValue(choiceNameElement);
+        if (choiceName != null) {
+          final Choice choiceObject=new Choice(choiceName,convertValue(choiceName).toString());
+          final String orderString=getValue(getFirstElement(choice,"krdf:order"));
+          if (orderString != null && StringUtils.isNumeric(orderString)) {
+            choiceObject.setPosition(Integer.parseInt(orderString));
+          }
+          choiceObject.setTranslations(getElements(choice,"krdf:choiceTranslation"));
+          choices.add(choiceObject);
+        }
+      }
+    }
+  }
+  return choices;
+}

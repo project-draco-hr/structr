@@ -1,0 +1,21 @@
+{
+  final String userId=obj.getUserId();
+  Principal principal=null;
+  if (userId != null) {
+    final App app=StructrApp.getInstance();
+    try (final Tx tx=app.tx()){
+      principal=app.nodeQuery(Principal.class).and(Principal.name,userId).getFirst();
+      tx.success();
+    }
+ catch (    FrameworkException fex) {
+      fex.printStackTrace();
+    }
+  }
+ else {
+    System.out.println("Object without userId!");
+  }
+  if (principal != null) {
+    return SecurityContext.getInstance(principal,AccessMode.Backend);
+  }
+  return SecurityContext.getSuperUserInstance();
+}

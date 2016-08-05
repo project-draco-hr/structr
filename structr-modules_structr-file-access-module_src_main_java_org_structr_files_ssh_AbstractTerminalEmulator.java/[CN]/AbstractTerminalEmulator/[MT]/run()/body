@@ -1,0 +1,108 @@
+{
+  running=true;
+  while (running) {
+    try {
+      int c=reader.read();
+      if (c == 9) {
+        tabCount++;
+      }
+ else {
+        tabCount=0;
+      }
+switch (c) {
+case 9:
+        handleTab(tabCount);
+      break;
+case 13:
+    handleNewline();
+  break;
+case 27:
+c=reader.read();
+switch (c) {
+case 91:
+c=reader.read();
+switch (c) {
+case 50:
+c=reader.read();
+switch (c) {
+case 126:
+handleInsert();
+break;
+}
+break;
+case 51:
+c=reader.read();
+switch (c) {
+case 126:
+handleDelete();
+break;
+}
+break;
+case 53:
+c=reader.read();
+switch (c) {
+case 126:
+handlePageUp();
+break;
+}
+break;
+case 54:
+c=reader.read();
+switch (c) {
+case 126:
+handlePageDown();
+break;
+}
+break;
+case 65:
+handleCursorUp();
+break;
+case 66:
+handleCursorDown();
+break;
+case 67:
+handleCursorRight();
+break;
+case 68:
+handleCursorLeft();
+break;
+case 70:
+handleEnd();
+break;
+case 72:
+handleHome();
+break;
+}
+break;
+}
+break;
+case 127:
+handleBackspace();
+break;
+default :
+if (c < 27) {
+handleCtrlKey(c);
+}
+ else {
+handleCharacter(c);
+}
+break;
+}
+writer.flush();
+}
+ catch (Throwable t) {
+logger.log(Level.WARNING,"",t);
+if (writer != null) {
+try {
+writer.write('\n');
+writer.write(t.getMessage());
+writer.write('\n');
+}
+ catch (Throwable t2) {
+logger.log(Level.WARNING,"",t);
+}
+}
+}
+}
+terminalHandler.handleExit();
+}

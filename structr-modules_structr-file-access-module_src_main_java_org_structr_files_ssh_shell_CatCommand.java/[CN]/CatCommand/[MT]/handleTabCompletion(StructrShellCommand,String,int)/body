@@ -1,0 +1,90 @@
+{
+  if (line.contains(" ") && line.length() >= 3) {
+    String incompletePath=line.substring(line.indexOf(" ") + 1);
+    Folder baseFolder=null;
+    String lastPathPart=null;
+    if (incompletePath.startsWith("\"")) {
+      incompletePath=incompletePath.substring(1);
+    }
+    final App app=StructrApp.getInstance();
+    if ("..".equals(incompletePath)) {
+      term.handleCharacter('/');
+      return;
+    }
+    if (incompletePath.startsWith("/")) {
+      incompletePath=incompletePath.substring(1);
+    }
+ else {
+      baseFolder=parent.getCurrentFolder();
+    }
+    final String[] parts=incompletePath.split("[/]+");
+    final int partCount=parts.length;
+    try (final Tx tx=app.tx()){
+      if (partCount == 1) {
+        lastPathPart=parts[0];
+      }
+ else {
+        lastPathPart=parts[partCount - 1];
+        for (int i=0; i < partCount - 1; i++) {
+          if (StringUtils.isNotBlank(parts[i])) {
+            baseFolder=app.nodeQuery(Folder.class).and(AbstractFile.parent,baseFolder).and(Folder.name,parts[i]).getFirst();
+            if (baseFolder == null) {
+              return;
+            }
+          }
+        }
+      }
+      final List<AbstractFile> allFiles=new LinkedList<>();
+      final List<AbstractFile> files=new LinkedList<>();
+      if (baseFolder != null) {
+        allFiles.addAll(baseFolder.getProperty(AbstractFile.children));
+      }
+ else {
+        allFiles.addAll(app.nodeQuery(AbstractFile.class).and(File.parent,null).getAsList());
+      }
+      for (      final AbstractFile file : allFiles) {
+        if (file.getName().startsWith(lastPathPart)) {
+          files.add(file);
+        }
+      }
+      if (files.size() > 1) {
+        if (tabCount > 1) {
+          displayAutocompleteSuggestions(parent,files,line);
+        }
+      }
+ else       if (!files.isEmpty()) {
+        final AbstractFile file=files.get(0);
+        if (file instanceof Folder) {
+          final Folder folder=(Folder)file;
+          if (parent.isAllowed(folder,Permission.read,false)) {
+            if (lastPathPart.equals(folder.getName())) {
+              if (tabCount > 1) {
+                displayAutocompleteSuggestions(parent,folder.getProperty(Folder.children),line);
+              }
+ else {
+                if (!line.endsWith("/")) {
+                  term.handleCharacter('/');
+                }
+              }
+            }
+ else {
+              displayAutocompleteItem(folder,lastPathPart);
+            }
+          }
+        }
+ else {
+          final AbstractFile existingFile=files.get(0);
+          if (parent.isAllowed(existingFile,Permission.read,false)) {
+            if (!lastPathPart.equals(existingFile.getName())) {
+              displayAutocompleteItem(existingFile,lastPathPart);
+            }
+          }
+        }
+      }
+      tx.success();
+    }
+ catch (    FrameworkException fex) {
+      logger.log(Level.WARNING,"",fex);
+    }
+  }
+}

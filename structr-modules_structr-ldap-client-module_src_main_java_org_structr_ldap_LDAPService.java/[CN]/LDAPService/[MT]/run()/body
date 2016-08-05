@@ -1,0 +1,23 @@
+{
+  doRun=true;
+  while (!Services.getInstance().isInitialized()) {
+    try {
+      Thread.sleep(1000);
+    }
+ catch (    InterruptedException itex) {
+    }
+  }
+  while (doRun) {
+    try {
+      doUpdate();
+    }
+ catch (    Throwable t) {
+      logger.log(Level.WARNING,"Unable to update LDAP information",t);
+    }
+    try {
+      Thread.sleep(updateInterval);
+    }
+ catch (    InterruptedException itex) {
+    }
+  }
+}

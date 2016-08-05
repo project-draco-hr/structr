@@ -1,0 +1,20 @@
+{
+  DOMNode refChild=null;
+  int position=0;
+  for (  final DOMNode child : parentNode.treeGetChildren()) {
+    final int domPosition=getDomPosition(child,position++);
+    if (domPosition > newPosition && refChild == null) {
+      refChild=child;
+    }
+    if (child.getProperty(DOMNode.domSortPosition) == null) {
+      child.setProperty(DOMNode.domSortPosition,domPosition);
+    }
+  }
+  if (refChild != null) {
+    parentNode.insertBefore(newChild,refChild);
+  }
+ else {
+    parentNode.appendChild(newChild);
+  }
+  newChild.setProperty(DOMNode.domSortPosition,newPosition);
+}

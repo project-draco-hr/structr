@@ -1,0 +1,12 @@
+{
+  if (key.isSystemInternal() || key.isReadOnly() || key.isWriteOnce()) {
+    return;
+  }
+  try (final Tx tx=StructrApp.getInstance(fs.getSecurityContext()).tx()){
+    node.setProperty(key,null);
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"Unable to set property {0} to null: {1}",new Object[]{key.jsonName(),fex.getMessage()});
+  }
+}

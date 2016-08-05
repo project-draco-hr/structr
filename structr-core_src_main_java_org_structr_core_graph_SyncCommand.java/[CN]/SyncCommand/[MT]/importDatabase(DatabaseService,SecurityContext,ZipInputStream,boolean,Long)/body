@@ -21,6 +21,7 @@
       final List<Node> nodes=new LinkedList<>();
       long nodeCount=0;
       long relCount=0;
+      boolean skipProperties=false;
       do {
         try {
           dis.mark(4);
@@ -50,6 +51,7 @@
             if (startNode != null && endNode != null) {
               if (deletedNodes.contains(startNode.getId()) || deletedNodes.contains(endNode.getId())) {
                 System.out.println("NOT creating relationship between deleted nodes..");
+                skipProperties=true;
               }
  else {
                 RelationshipType relType=RelationshipType.forName(relTypeName);
@@ -60,9 +62,13 @@
             }
  else {
               System.out.println("NOT creating relationship of type " + relTypeName + ", start: "+ startId+ ", end: "+ endId);
+              skipProperties=true;
             }
           }
  else {
+            if (skipProperties) {
+              continue;
+            }
             dis.reset();
             if (currentKey == null) {
               currentKey=(String)deserialize(dis);

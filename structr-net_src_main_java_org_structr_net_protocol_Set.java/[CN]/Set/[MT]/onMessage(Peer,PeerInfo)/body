@@ -1,0 +1,13 @@
+{
+  final RepositoryObject obj=peer.getRepository().getObject(objectId);
+  if (obj != null) {
+    obj.setProperty(time,transactionId,key,value);
+    if (peer.getUuid().equals(recipient)) {
+      peer.broadcast(new Ack(peer.getUuid(),getSender(),getId()));
+    }
+  }
+ else {
+    peer.log("Unknown object ",objectId,", requesting full history..");
+    peer.broadcast(new GetHistory(peer.getUuid(),recipient,objectId,PseudoTime.now(peer)));
+  }
+}

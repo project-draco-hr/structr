@@ -1,0 +1,20 @@
+{
+  domainIds.addAll(getResourceIds("rdfs:domain"));
+  rangeIds.addAll(getResourceIds("rdfs:range"));
+  allowsInstances="true".equals(getValue(getFirstElement(getElement(),"krdf:allowsInstances")));
+  multipleOccurrences="true".equals(getValue(getFirstElement(getElement(),"krdf:multipleOccurrences")));
+  isMixedIn="true".equals(getValue(getFirstElement(getElement(),"krdf:isMixedIn")));
+  oneWay="true".equals(getValue(getFirstElement(getElement(),"krdf:oneWay")));
+  icon=getValue(getFirstElement(getElement(),"krdf:icon"));
+  final Object isPrimaryValue=getValue(getFirstElement(getElement(),"krdf:primary"));
+  if (isPrimaryValue == null || "true".equals(isPrimaryValue)) {
+    primary=true;
+  }
+  final Node node=getFirstElement(getElement(),"owl:inverseOf");
+  if (node != null) {
+    final String inverse=getResourceId(node);
+    if (inverse != null) {
+      this.inverseId=URI.create(inverse);
+    }
+  }
+}

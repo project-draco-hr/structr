@@ -1,0 +1,14 @@
+{
+  if (domNode == null) {
+    return null;
+  }
+  String name=null;
+  try (Tx tx=StructrApp.getInstance(securityContext).tx()){
+    name=domNode.getName();
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.SEVERE,"",fex);
+  }
+  return name;
+}

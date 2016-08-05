@@ -1,0 +1,18 @@
+{
+  final ConfigurationProvider config=StructrApp.getConfiguration();
+  final App app=StructrApp.getInstance(getUserContext(obj));
+  try (final Tx tx=app.tx()){
+    final SharedNodeInterface node=app.get(SharedNodeInterface.class,uuid);
+    if (node != null) {
+      final PropertyKey propertyKey=config.getPropertyKeyForJSONName(node.getClass(),key,false);
+      if (propertyKey != null) {
+        node.setProperty(app,propertyKey,value);
+      }
+      node.setProperty(app,SharedNodeInterface.lastModifiedPseudoTime,obj.getLastModificationTime().toString());
+      tx.success();
+    }
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+  }
+}

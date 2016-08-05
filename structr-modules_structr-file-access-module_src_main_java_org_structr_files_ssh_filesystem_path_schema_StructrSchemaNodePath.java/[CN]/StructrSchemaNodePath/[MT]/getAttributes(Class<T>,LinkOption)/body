@@ -1,0 +1,16 @@
+{
+  final AbstractSchemaNode schemaNode=getSchemaNode();
+  if (schemaNode != null) {
+    final App app=StructrApp.getInstance(fs.getSecurityContext());
+    String name=null;
+    try (final Tx tx=app.tx()){
+      name=schemaNode.getName();
+      tx.success();
+    }
+ catch (    FrameworkException fex) {
+      logger.log(Level.WARNING,"",fex);
+    }
+    return (T)new StructrRootAttributes(name);
+  }
+  throw new NoSuchFileException(toString());
+}

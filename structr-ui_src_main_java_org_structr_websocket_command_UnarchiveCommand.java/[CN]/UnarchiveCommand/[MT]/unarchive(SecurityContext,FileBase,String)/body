@@ -1,0 +1,58 @@
+{
+  final App app=StructrApp.getInstance(securityContext);
+  final InputStream is;
+  Folder existingParentFolder=null;
+  final String fileName=file.getName();
+  try (final Tx tx=app.tx()){
+    existingParentFolder=app.get(Folder.class,parentFolderId);
+    String parentFolderName=null;
+    String msgString="Unarchiving file {0}";
+    if (existingParentFolder != null) {
+      parentFolderName=existingParentFolder.getName();
+      msgString+=" into existing folder {1}.";
+    }
+    logger.log(Level.INFO,msgString,new Object[]{fileName,parentFolderName});
+    is=file.getInputStream();
+    tx.success();
+    if (is == null) {
+      getWebSocket().send(MessageBuilder.status().code(400).message("Could not get input stream from file ".concat(fileName)).build(),true);
+      return;
+    }
+    tx.success();
+  }
+   final ArchiveInputStream in=new ArchiveStreamFactory().createArchiveInputStream(new BufferedInputStream(is));
+  ArchiveEntry entry=in.getNextEntry();
+  int overallCount=0;
+  while (entry != null) {
+    try (final Tx tx=app.tx(true,true,false)){
+      int count=0;
+      while (entry != null && count++ < 50) {
+        final String entryPath="/" + PathHelper.clean(entry.getName());
+        logger.log(Level.INFO,"Entry path: {0}",entryPath);
+        if (entry.isDirectory()) {
+          final String folderPath=(existingParentFolder != null ? existingParentFolder.getPath() : "") + PathHelper.PATH_SEP + entryPath;
+          final Folder newFolder=FileHelper.createFolderPath(securityContext,folderPath);
+          logger.log(Level.INFO,"Created folder {0} with path {1}",new Object[]{newFolder,FileHelper.getFolderPath(newFolder)});
+        }
+ else {
+          final String filePath=(existingParentFolder != null ? existingParentFolder.getPath() : "") + PathHelper.PATH_SEP + entryPath;
+          final String name=PathHelper.getName(entryPath);
+          AbstractFile newFile=ImageHelper.isImageType(name) ? ImageHelper.createImage(securityContext,in,null,Image.class,name,false) : FileHelper.createFile(securityContext,in,null,File.class,name);
+          final String folderPath=StringUtils.substringBeforeLast(filePath,PathHelper.PATH_SEP);
+          final Folder parentFolder=FileHelper.createFolderPath(securityContext,folderPath);
+          if (parentFolder != null) {
+            newFile.setProperty(AbstractFile.parent,parentFolder);
+          }
+          logger.log(Level.INFO,"Created {0} file {1} with path {2}",new Object[]{newFile.getType(),newFile,FileHelper.getFolderPath(newFile)});
+        }
+        entry=in.getNextEntry();
+        overallCount++;
+      }
+      logger.log(Level.INFO,"Committing transaction after {0} files.",overallCount);
+      tx.success();
+      logger.log(Level.INFO,"Unarchived {0} files.",overallCount);
+    }
+   }
+  getWebSocket().send(MessageBuilder.finished().callback(callback).data("success",true).data("filename",fileName).build(),true);
+  in.close();
+}

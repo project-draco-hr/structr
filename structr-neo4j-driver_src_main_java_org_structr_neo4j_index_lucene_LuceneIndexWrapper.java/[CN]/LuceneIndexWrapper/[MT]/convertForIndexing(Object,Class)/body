@@ -1,0 +1,16 @@
+{
+  Object indexValue=value;
+  if (indexValue != null) {
+    final TypeConverter conv=CONVERTERS.get(indexValue.getClass());
+    if (conv != null) {
+      indexValue=conv.getWriteValue(indexValue);
+    }
+  }
+ else   if (typeHint != null) {
+    final TypeConverter conv=CONVERTERS.get(typeHint);
+    if (conv != null) {
+      indexValue=conv.getWriteValue(null);
+    }
+  }
+  return indexValue != null && indexValue.toString() == null ? null : indexValue;
+}

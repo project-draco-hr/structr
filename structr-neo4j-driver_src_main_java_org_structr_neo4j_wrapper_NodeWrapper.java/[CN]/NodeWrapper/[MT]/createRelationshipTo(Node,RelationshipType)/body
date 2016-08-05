@@ -1,0 +1,11 @@
+{
+  try {
+    TransactionWrapper.getCurrentTransaction().registerModified(this);
+    ((NodeWrapper)endNode).relationshipCache.clear();
+    relationshipCache.clear();
+    return RelationshipWrapper.getWrapper(graphDb,entity.createRelationshipTo(unwrap(endNode),unwrap(relationshipType)));
+  }
+ catch (  org.neo4j.graphdb.NotInTransactionException t) {
+    throw new NotInTransactionException(t);
+  }
+}

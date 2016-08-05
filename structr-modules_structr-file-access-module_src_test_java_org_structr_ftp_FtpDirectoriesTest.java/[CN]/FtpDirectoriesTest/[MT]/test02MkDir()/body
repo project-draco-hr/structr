@@ -1,0 +1,43 @@
+{
+  FTPClient ftp=setupFTPClient();
+  FTPFile[] dirs=null;
+  final String name1="FTPdir1";
+  final String name2="FTPdir2";
+  boolean success=false;
+  try (final Tx tx=StructrApp.getInstance(securityContext).tx()){
+    assertEmptyDirectory(ftp);
+    success=ftp.makeDirectory(name1);
+    assertTrue(success);
+    tx.success();
+  }
+ catch (  IOException|FrameworkException ex) {
+    logger.log(Level.WARNING,"",ex);
+    fail("Unexpected exception: " + ex.getMessage());
+  }
+  try (final Tx tx=app.tx()){
+    dirs=ftp.listDirectories();
+    assertNotNull(dirs);
+    assertEquals(1,dirs.length);
+    assertEquals(name1,dirs[0].getName());
+    success=ftp.makeDirectory(name2);
+    assertTrue(success);
+    tx.success();
+  }
+ catch (  IOException|FrameworkException ex) {
+    logger.log(Level.WARNING,"",ex);
+    fail("Unexpected exception: " + ex.getMessage());
+  }
+  try (final Tx tx=app.tx()){
+    dirs=ftp.listDirectories();
+    assertNotNull(dirs);
+    assertEquals(2,dirs.length);
+    assertEquals(name1,dirs[0].getName());
+    assertEquals(name2,dirs[1].getName());
+    ftp.disconnect();
+    tx.success();
+  }
+ catch (  IOException|FrameworkException ex) {
+    logger.log(Level.WARNING,"",ex);
+    fail("Unexpected exception: " + ex.getMessage());
+  }
+}

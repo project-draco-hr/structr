@@ -1,0 +1,14 @@
+{
+  if (file == null) {
+    return null;
+  }
+  String uuid=null;
+  try (Tx tx=StructrApp.getInstance(securityContext).tx()){
+    uuid=file.getUuid();
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.SEVERE,"",fex);
+  }
+  return uuid;
+}

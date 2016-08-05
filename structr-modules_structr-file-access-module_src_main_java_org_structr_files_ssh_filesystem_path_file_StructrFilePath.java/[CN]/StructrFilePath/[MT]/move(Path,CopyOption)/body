@@ -1,0 +1,32 @@
+{
+  if (target instanceof StructrFilePath) {
+    final App app=StructrApp.getInstance(fs.getSecurityContext());
+    final StructrFilePath other=(StructrFilePath)target;
+    final AbstractFile otherFile=other.getActualFile();
+    final AbstractFile thisFile=getActualFile();
+    final String targetName=target.getFileName().toString();
+    try (final Tx tx=app.tx()){
+      final Path otherParent=other.getParent();
+      if (otherParent instanceof StructrFilesPath) {
+        thisFile.setProperty(AbstractFile.parent,null);
+        thisFile.setProperty(AbstractNode.name,targetName);
+        if (otherFile != null) {
+          app.delete(otherFile);
+        }
+      }
+ else {
+        final StructrFilePath parent=(StructrFilePath)other.getParent();
+        final Folder newParentFolder=(Folder)parent.getActualFile();
+        thisFile.setProperty(AbstractFile.parent,newParentFolder);
+        thisFile.setProperty(AbstractNode.name,targetName);
+        if (otherFile != null) {
+          app.delete(otherFile);
+        }
+      }
+      tx.success();
+    }
+ catch (    FrameworkException fex) {
+      fex.printStackTrace();
+    }
+  }
+}

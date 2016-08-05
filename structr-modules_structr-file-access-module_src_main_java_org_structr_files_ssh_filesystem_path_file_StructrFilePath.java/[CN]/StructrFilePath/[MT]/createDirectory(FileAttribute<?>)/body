@@ -1,0 +1,12 @@
+{
+  final App app=StructrApp.getInstance(fs.getSecurityContext());
+  try (final Tx tx=app.tx()){
+    final String name=getFileName().toString();
+    final Folder newFolder=app.create(Folder.class,new NodeAttribute<>(AbstractNode.name,name));
+    setParentFolder(newFolder);
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"Unable to delete file {0}: {1}",new Object[]{path,fex.getMessage()});
+  }
+}

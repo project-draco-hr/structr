@@ -1,0 +1,11 @@
+{
+  try {
+    return Iterables.map(new RelationshipMapper(this),GlobalGraphOperations.at(graphDb).getAllRelationships());
+  }
+ catch (  org.neo4j.graphdb.NotInTransactionException t) {
+    throw new NotInTransactionException(t);
+  }
+catch (  org.neo4j.graphdb.NotFoundException t) {
+    throw new NotFoundException(t);
+  }
+}

@@ -1,0 +1,13 @@
+{
+  final String name=PathHelper.getName(path);
+  final String relativeFilePath=File.getDirectoryPath(uuid) + "/" + uuid;
+  final FileBase fileNode=app.create(fileClass != null ? fileClass : File.class,new NodeAttribute(GraphObject.id,uuid),new NodeAttribute(AbstractNode.name,name),new NodeAttribute(File.relativeFilePath,relativeFilePath),new NodeAttribute(File.contentType,contentType),new NodeAttribute(File.size,size),new NodeAttribute(File.checksum,checksum),new NodeAttribute(File.version,1),new NodeAttribute(AbstractNode.visibleToPublicUsers,publicVisible),new NodeAttribute(AbstractNode.visibleToAuthenticatedUsers,authVisible));
+  final Folder parentFolder=FileHelper.createFolderPath(securityContext,PathHelper.getFolderPath(path));
+  fileNode.setProperty(FileBase.parent,parentFolder);
+  if (!fileNode.validatePath(securityContext,new ErrorBuffer())) {
+    final String newName=name.concat("_").concat(FileHelper.getDateString());
+    logger.log(Level.WARNING,"File {0} already exists, renaming to {1}",new Object[]{path,newName});
+    fileNode.setProperty(AbstractNode.name,newName);
+  }
+  return fileNode;
+}

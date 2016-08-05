@@ -1,0 +1,39 @@
+{
+  final PrivateKey privateKey=peer.getPrivateKey();
+  if (privateKey != null) {
+    final Cipher cipher=AbstractMessage.getCipher();
+    cipher.init(Cipher.DECRYPT_MODE,peer.getPrivateKey());
+    final byte[] data=decryptBlocks(packet.getData(),cipher,256,245);
+    if (data.length == 0) {
+      System.out.println("Decryption failed");
+    }
+ else {
+      final DataInputStream dis=new DataInputStream(new GZIPInputStream(new ByteArrayInputStream(data),1024));
+      final int command=dis.readInt();
+      final String messageId=deserializeUUID(dis);
+      final String peerId=deserializeUUID(dis);
+      final long timestamp=dis.readLong();
+      AbstractMessage msg=null;
+      final Class<? extends AbstractMessage> type=CommandMap.get(command);
+      if (type != null) {
+        try {
+          msg=type.newInstance();
+          msg.setSenderTimestamp(timestamp);
+          msg.setId(messageId);
+          msg.deserialize(dis);
+          return new Envelope(new PeerInfo(peer.getPublicKey(),peerId,packet.getAddress().getHostAddress(),packet.getPort()),msg);
+        }
+ catch (        Throwable t) {
+          t.printStackTrace();
+        }
+      }
+ else {
+        System.out.println("Unknown command " + command);
+      }
+    }
+  }
+ else {
+    System.out.println("Unable to decrypt packet, aborting");
+  }
+  return null;
+}

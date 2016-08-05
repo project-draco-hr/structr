@@ -1,0 +1,22 @@
+{
+  logger.log(Level.INFO,"Authentication: {0}",auth);
+  String userName=null;
+  String password=null;
+  if (auth instanceof UsernamePasswordAuthentication) {
+    org.structr.web.entity.User user=null;
+    try (Tx tx=StructrApp.getInstance().tx()){
+      UsernamePasswordAuthentication authentication=(UsernamePasswordAuthentication)auth;
+      userName=authentication.getUsername();
+      password=authentication.getPassword();
+      user=(org.structr.web.entity.User)AuthHelper.getPrincipalForPassword(AbstractUser.name,userName,password);
+      tx.success();
+    }
+ catch (    FrameworkException ex) {
+      logger.log(Level.WARNING,"FTP authentication attempt failed with username {0} and password {1}",new Object[]{userName,password});
+    }
+    if (user != null) {
+      return new StructrFtpUser(user);
+    }
+  }
+  throw new AuthenticationFailedException("No structr user found for credentials " + userName + "/"+ password);
+}

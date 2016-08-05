@@ -1,0 +1,17 @@
+{
+  final Properties properties=new Properties();
+  final File propertiesFile=new File(databasePath + "/graph.properties");
+  try (final Reader reader=new FileReader(propertiesFile)){
+    properties.load(reader);
+  }
+ catch (  IOException ioex) {
+  }
+  properties.setProperty(name,value.toString());
+  try (final Writer writer=new FileWriter(propertiesFile)){
+    properties.store(writer,"Created by Structr at " + new Date());
+  }
+ catch (  IOException ioex) {
+    ioex.printStackTrace();
+    logger.log(Level.WARNING,"Unable to write properties file");
+  }
+}

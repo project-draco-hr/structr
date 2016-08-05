@@ -1,0 +1,31 @@
+{
+  MessageDigest digest=null;
+  try {
+    digest=MessageDigest.getInstance("MD5");
+  }
+ catch (  NoSuchAlgorithmException nex) {
+    nex.printStackTrace();
+  }
+  if (digest != null) {
+    final long t0=System.currentTimeMillis();
+    final List<RepositoryObject> objects=new LinkedList<>(repository.getObjects());
+    Collections.sort(objects,new UuidComparator());
+    for (    final RepositoryObject node : objects) {
+      final String uuid=node.getUuid();
+      final String type=node.getType();
+      final String last=node.getLastModificationTime().toString();
+      digest.update(uuid.getBytes(utf8));
+      digest.update(type.getBytes(utf8));
+      digest.update(last.getBytes(utf8));
+    }
+    final long t1=System.currentTimeMillis();
+    if ((t1 - t0) > 100) {
+      System.out.println("Creation of content hash took " + (System.currentTimeMillis() - t0) + " ms!");
+    }
+    return digest.digest();
+  }
+ else {
+    System.out.println("Cannot create hash value, algorithms not available.");
+  }
+  return new byte[0];
+}

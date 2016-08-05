@@ -1,0 +1,19 @@
+{
+  if (peer.getUuid().equals(recipient)) {
+    final RepositoryObject obj=peer.getRepository().getObject(objectId);
+    if (obj != null) {
+      final PseudoTime lastModified=obj.getLastModificationTime();
+      if (lastModified.before(instant)) {
+        final Map<String,Object> data=obj.getProperties(instant);
+        peer.log("History(",objectId,")");
+        peer.broadcast(new History(peer.getUuid(),getSender(),objectId,obj.getType(),obj.getUserId(),obj.getCreationTime(),lastModified,data));
+      }
+ else {
+        peer.log("GetHistory(",objectId,"): not modified");
+      }
+    }
+ else {
+      peer.log("GetHistory(",objectId,"): object not found");
+    }
+  }
+}

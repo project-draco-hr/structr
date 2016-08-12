@@ -1,0 +1,14 @@
+{
+  if (stale) {
+    final SessionTransaction tx=db.getCurrentTransaction();
+    final Map<String,Object> map=new HashMap<>();
+    map.put("id",entity.id());
+    try {
+      entity=(T)tx.getEntity(getQueryPrefix() + " WHERE ID(n) = {id} RETURN n",map);
+    }
+ catch (    NoSuchRecordException nex) {
+      throw new NotFoundException(nex);
+    }
+    stale=false;
+  }
+}

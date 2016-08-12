@@ -1,0 +1,19 @@
+{
+  final SessionTransaction tx=db.getCurrentTransaction();
+  final List<org.neo4j.driver.v1.types.Node> nodes=tx.getNodeList(query.getStatement(),query.getParameters());
+  final List<Node> result=new LinkedList<>();
+  for (  final org.neo4j.driver.v1.types.Node node : nodes) {
+    result.add(NodeWrapper.newInstance(db,node));
+  }
+  return new QueryResult<Node>(){
+    @Override public int size(){
+      return result.size();
+    }
+    @Override public void close(){
+    }
+    @Override public Iterator<Node> iterator(){
+      return result.iterator();
+    }
+  }
+;
+}

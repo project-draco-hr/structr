@@ -21,7 +21,7 @@
     try (final Tx tx=app.tx()){
       assertEquals(user1,t1.getProperty(AbstractNode.owner));
       final App user1App=StructrApp.getInstance(SecurityContext.getInstance(user1,AccessMode.Backend));
-      assertEquals(t1,user1App.nodeQuery(type,false).getFirst());
+      assertEquals(t1,user1App.nodeQuery(type).getFirst());
     }
      try (final Tx tx=app.tx()){
       t1.setProperty(AbstractNode.owner,user2);
@@ -32,7 +32,7 @@
     }
     try (final Tx tx=app.tx()){
       final App user2App=StructrApp.getInstance(SecurityContext.getInstance(user2,AccessMode.Backend));
-      assertEquals(t1,user2App.nodeQuery(type,false).getFirst());
+      assertEquals(t1,user2App.nodeQuery(type).getFirst());
       assertEquals(user2,t1.getProperty(AbstractNode.owner));
     }
    }

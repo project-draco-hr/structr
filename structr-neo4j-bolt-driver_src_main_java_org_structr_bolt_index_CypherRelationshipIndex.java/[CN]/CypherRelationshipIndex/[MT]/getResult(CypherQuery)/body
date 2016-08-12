@@ -1,0 +1,19 @@
+{
+  final SessionTransaction tx=db.getCurrentTransaction();
+  final List<org.neo4j.driver.v1.types.Relationship> rels=tx.getRelationshipList(context.getStatement(),context.getParameters());
+  final List<Relationship> result=new LinkedList<>();
+  for (  final org.neo4j.driver.v1.types.Relationship rel : rels) {
+    result.add(RelationshipWrapper.newInstance(db,rel));
+  }
+  return new QueryResult<Relationship>(){
+    @Override public int size(){
+      return result.size();
+    }
+    @Override public void close(){
+    }
+    @Override public Iterator<Relationship> iterator(){
+      return result.iterator();
+    }
+  }
+;
+}

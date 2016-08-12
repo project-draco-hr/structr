@@ -1,0 +1,22 @@
+{
+  assertNotStale();
+  final SessionTransaction tx=db.getCurrentTransaction();
+  final Map<String,Object> map=new HashMap<>();
+  final List<Relationship> result=new LinkedList<>();
+  map.put("id",entity.id());
+switch (direction) {
+case BOTH:
+    return getRelationships();
+case OUTGOING:
+  for (  final org.neo4j.driver.v1.types.Relationship rel : tx.getRelationshipList("MATCH (n)-[r:" + relationshipType.name() + "]->(m) WHERE ID(n) = {id} RETURN r",map)) {
+    result.add(RelationshipWrapper.newInstance(db,rel));
+  }
+break;
+case INCOMING:
+for (final org.neo4j.driver.v1.types.Relationship rel : tx.getRelationshipList("MATCH (n)<-[r:" + relationshipType.name() + "]-(m) WHERE ID(n) = {id} RETURN r",map)) {
+result.add(RelationshipWrapper.newInstance(db,rel));
+}
+break;
+}
+return result;
+}

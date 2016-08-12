@@ -1,0 +1,6 @@
+{
+  this.databasePath=configuration.getProperty(Structr.DATABASE_PATH);
+  GraphDatabaseSettings.BoltConnector bolt=GraphDatabaseSettings.boltConnector("0");
+  graphDb=new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(new File(databasePath)).setConfig(bolt.enabled,"true").setConfig(bolt.address,"localhost:7688").newGraphDatabase();
+  driver=GraphDatabase.driver("bolt://localhost:7688",AuthTokens.basic("neo4j","test"),Config.build().withEncryptionLevel(Config.EncryptionLevel.NONE).toConfig());
+}

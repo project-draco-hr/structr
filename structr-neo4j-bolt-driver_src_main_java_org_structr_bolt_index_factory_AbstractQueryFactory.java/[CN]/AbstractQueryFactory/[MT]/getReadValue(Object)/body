@@ -1,0 +1,12 @@
+{
+  if (value != null) {
+    final TypeConverter converter=AbstractCypherIndex.CONVERTERS.get(value.getClass());
+    if (converter != null) {
+      return converter.getReadValue(value);
+    }
+    if (value.getClass().isEnum()) {
+      return value.toString();
+    }
+  }
+  return value;
+}

@@ -1,0 +1,15 @@
+{
+  final Object value=getReadValue(predicate.getValue());
+  final String name=predicate.getName();
+  if (predicate.isExactMatch()) {
+    query.addParameter(name,value != null ? "=" : "is",value);
+  }
+ else {
+    if (value != null) {
+      query.addParameter(name,"=~","(?i).*" + escape(value) + ".*");
+    }
+ else {
+      query.addParameter(name,"is",null);
+    }
+  }
+}

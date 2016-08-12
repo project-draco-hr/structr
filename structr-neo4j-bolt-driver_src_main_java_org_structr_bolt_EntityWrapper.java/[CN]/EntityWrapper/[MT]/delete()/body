@@ -1,0 +1,9 @@
+{
+  assertNotStale();
+  final SessionTransaction tx=db.getCurrentTransaction();
+  final Map<String,Object> map=new HashMap<>();
+  map.put("id",entity.id());
+  tx.set(getQueryPrefix() + " WHERE ID(n) = {id} DELETE n",map);
+  tx.modified(this);
+  stale=true;
+}

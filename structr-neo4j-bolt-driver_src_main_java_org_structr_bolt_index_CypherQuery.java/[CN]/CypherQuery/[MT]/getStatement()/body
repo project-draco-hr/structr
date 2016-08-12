@@ -1,0 +1,23 @@
+{
+  final StringBuilder buf=new StringBuilder();
+  buf.append(prefix);
+  buf.append(buffer);
+  buf.append(suffix);
+  if (sortKey != null) {
+    buf.append(" ORDER BY COALESCE(n.`");
+    buf.append(sortKey);
+    buf.append("`, ");
+switch (sortType) {
+case Default:
+      buf.append("''");
+    break;
+default :
+  buf.append("-1");
+}
+buf.append(")");
+if (sortDescending) {
+buf.append(" DESC");
+}
+}
+return buf.toString();
+}

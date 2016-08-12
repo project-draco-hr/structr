@@ -1,0 +1,8 @@
+{
+  assertNotStale();
+  final SessionTransaction tx=db.getCurrentTransaction();
+  final Map<String,Object> map=new HashMap<>();
+  map.put("id",entity.id());
+  tx.set("MATCH (n) WHERE ID(n) = {id} REMOVE n:" + label.name(),map);
+  tx.modified(this);
+}

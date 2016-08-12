@@ -1,0 +1,12 @@
+{
+  try {
+    final StatementResult result=tx.run(statement,map);
+    if (result.hasNext()) {
+      return result.next().get(0).asObject();
+    }
+  }
+ catch (  NoSuchRecordException nex) {
+    throw new NotFoundException(nex);
+  }
+  return null;
+}

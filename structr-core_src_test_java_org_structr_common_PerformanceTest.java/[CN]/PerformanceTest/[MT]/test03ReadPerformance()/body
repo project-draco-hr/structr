@@ -8,19 +8,17 @@
       try (final Tx tx=app.tx()){
         final List<TestOne> res=app.nodeQuery(TestOne.class).getAsList();
         for (        final TestOne t : res) {
-          for (          final PropertyKey key : t.getPropertyKeys(PropertyView.Ui)) {
-            t.getProperty(key);
-          }
+          final String name=t.getProperty(AbstractNode.name);
         }
         tx.success();
       }
      }
     long t1=System.nanoTime();
     DecimalFormat decimalFormat=new DecimalFormat("0.000000000",DecimalFormatSymbols.getInstance(Locale.ENGLISH));
-    Double time=(t1 - t0) / 1000000000.0;
-    Double rate=number * loop / ((t1 - t0) / 1000000000.0);
+    double time=(t1 - t0) / 1000000000.0;
+    double rate=number * loop / ((t1 - t0) / 1000000000.0);
     logger.log(Level.INFO,"Read {0} nodes in {1} seconds ({2} per s)",new Object[]{number,decimalFormat.format(time),decimalFormat.format(rate)});
-    assertTrue(rate > 10000);
+    assertTrue("Invalid read performance result",rate > 10000);
   }
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,ex.toString());

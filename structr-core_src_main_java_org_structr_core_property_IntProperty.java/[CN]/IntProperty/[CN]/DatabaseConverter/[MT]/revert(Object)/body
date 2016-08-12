@@ -1,0 +1,14 @@
+{
+  if (source instanceof Number) {
+    return ((Number)source).intValue();
+  }
+  if (source instanceof String && StringUtils.isNotBlank((String)source)) {
+    try {
+      return Double.valueOf(source.toString()).intValue();
+    }
+ catch (    Throwable t) {
+      throw new FrameworkException(422,"Cannot parse input for property " + jsonName(),new NumberToken(declaringClass.getSimpleName(),IntProperty.this));
+    }
+  }
+  return null;
+}

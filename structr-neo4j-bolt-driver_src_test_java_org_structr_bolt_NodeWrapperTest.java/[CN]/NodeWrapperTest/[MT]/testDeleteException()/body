@@ -1,0 +1,19 @@
+{
+  final BoltDatabaseService s=new BoltDatabaseService();
+  final Properties config=new Properties();
+  try {
+    config.put(Structr.DATABASE_PATH,Files.createTempDirectory("structr-test").toFile().getAbsolutePath());
+  }
+ catch (  IOException ioex) {
+    ioex.printStackTrace();
+  }
+  s.initialize(config);
+  try (final Transaction tx=s.beginTx()){
+    final Node node1=s.createNode();
+    final Node node2=s.createNode();
+    final Relationship rel=node1.createRelationshipTo(node2,s.forName(RelationshipType.class,"TEST"));
+    rel.delete();
+    tx.success();
+  }
+   s.shutdown();
+}

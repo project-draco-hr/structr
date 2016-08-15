@@ -39,15 +39,15 @@
     if (multiValueSplitAllowed()) {
       query.and();
       for (      final String part : requestParameter.split("[;]+")) {
-        query.or(this,convertSearchValue(securityContext,part));
+        query.or(this,convertSearchValue(securityContext,part),exactMatch);
       }
       query.parent();
     }
  else {
-      query.or(this,convertSearchValue(securityContext,requestParameter));
+      query.or(this,convertSearchValue(securityContext,requestParameter),exactMatch);
     }
   }
  else {
-    query.and(this,convertSearchValue(securityContext,requestParameter));
+    query.and(this,convertSearchValue(securityContext,requestParameter),exactMatch);
   }
 }

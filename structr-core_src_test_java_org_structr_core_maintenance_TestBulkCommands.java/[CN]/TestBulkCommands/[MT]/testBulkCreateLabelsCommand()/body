@@ -18,11 +18,7 @@
       }
       tx.success();
     }
-     try (final Tx tx=app.tx()){
-      assertEquals(0,app.nodeQuery(Group.class).getResult().size());
-    }
-     app.command(BulkRebuildIndexCommand.class).execute(new LinkedHashMap<>());
-    app.command(BulkCreateLabelsCommand.class).execute(new LinkedHashMap<>());
+     app.command(BulkCreateLabelsCommand.class).execute(new LinkedHashMap<>());
     try (final Tx tx=app.tx()){
       assertEquals(100,app.nodeQuery(Group.class).getResult().size());
       for (      final Group group : app.nodeQuery(Group.class)) {

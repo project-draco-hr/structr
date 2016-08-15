@@ -3,6 +3,6 @@
   final SessionTransaction tx=db.getCurrentTransaction();
   final Map<String,Object> map=new HashMap<>();
   map.put("id",entity.id());
-  tx.set("MATCH (n) WHERE ID(n) = {id} REMOVE n:" + label.name(),map);
+  entity=tx.getNode("MATCH (n) WHERE ID(n) = {id} REMOVE n:" + label.name() + " RETURN n",map);
   tx.modified(this);
 }

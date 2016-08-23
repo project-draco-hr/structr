@@ -25,13 +25,22 @@ get.setFollowRedirects(true);
 client.executeMethod(get);
 final InputStream response=get.getResponseBodyAsStream();
 String code=IOUtils.toString(response,"UTF-8");
-System.out.println(code);
 if (code.charAt(0) == 65279) {
   code=code.substring(1);
 }
 final Document doc=Jsoup.parse(code);
 if (sources.length > 2) {
-  return doc.select(sources[2].toString()).html();
+  Elements elements=doc.select(sources[2].toString());
+  if (elements.size() > 1) {
+    final List<String> parts=new ArrayList<>();
+    for (    final Element el : elements) {
+      parts.add(el.html());
+    }
+    return parts;
+  }
+ else {
+    return elements.html();
+  }
 }
  else {
   return doc.html();

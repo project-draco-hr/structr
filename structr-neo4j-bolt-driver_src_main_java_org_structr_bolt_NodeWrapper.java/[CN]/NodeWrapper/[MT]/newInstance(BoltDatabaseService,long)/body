@@ -1,0 +1,13 @@
+{
+synchronized (nodeCache) {
+    NodeWrapper wrapper=nodeCache.get(id);
+    if (wrapper == null || wrapper.isStale()) {
+      final SessionTransaction tx=db.getCurrentTransaction();
+      final Map<String,Object> map=new HashMap<>();
+      map.put("id",id);
+      wrapper=new NodeWrapper(db,tx.getNode("MATCH (n) WHERE ID(n) = {id} RETURN n",map));
+      nodeCache.put(id,wrapper);
+    }
+    return wrapper;
+  }
+}

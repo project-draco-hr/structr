@@ -1,0 +1,20 @@
+{
+  final String filename=getProperty(name);
+  final Compiler compiler=new Compiler();
+  final CompilerOptions options=new CompilerOptions();
+  final SourceFile input=SourceFile.fromCode(filename,getConcatenatedSource());
+  final CompilationLevel selectedLevel=getProperty(optimizationLevel);
+  selectedLevel.setOptionsForCompilationLevel(options);
+  compiler.compile(CommandLineRunner.getBuiltinExterns(options),ImmutableList.of(input),options);
+  FileHelper.setFileData(this,compiler.toSource().getBytes(),null);
+  final StringBuilder warningsSB=new StringBuilder();
+  for (  JSError warning : compiler.getWarnings()) {
+    warningsSB.append(warning.toString());
+  }
+  setProperty(warnings,warningsSB.toString());
+  final StringBuilder errorsSB=new StringBuilder();
+  for (  JSError error : compiler.getErrors()) {
+    errorsSB.append(error.toString());
+  }
+  setProperty(errors,errorsSB.toString());
+}

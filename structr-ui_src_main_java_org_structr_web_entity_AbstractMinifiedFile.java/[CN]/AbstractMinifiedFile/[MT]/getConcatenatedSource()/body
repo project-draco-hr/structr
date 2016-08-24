@@ -1,0 +1,10 @@
+{
+  final StringBuilder concatenatedSource=new StringBuilder();
+  int cnt=0;
+  for (  MinificationNeighbor rel : getSortedRelationships()) {
+    final FileBase src=rel.getTargetNode();
+    concatenatedSource.append(FileUtils.readFileToString(src.getFileOnDisk()));
+    rel.setProperty(MinificationNeighbor.position,cnt++);
+  }
+  return concatenatedSource.toString();
+}

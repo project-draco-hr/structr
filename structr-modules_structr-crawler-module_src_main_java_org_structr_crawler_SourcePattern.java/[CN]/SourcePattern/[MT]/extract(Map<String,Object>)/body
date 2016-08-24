@@ -1,0 +1,50 @@
+{
+  final SourcePage page=getProperty(sourcePageProperty);
+  if (page == null) {
+    throw new FrameworkException(422,"Pattern has no source page, exiting.");
+  }
+  final String selector=getProperty(selectorProperty);
+  if (selector == null) {
+    throw new FrameworkException(422,"Pattern has no selector, exiting.");
+  }
+  final Long from=getProperty(fromProperty);
+  final Long to=getProperty(toProperty);
+  final List<SourcePattern> subPatterns=getProperty(subPatternsProperty);
+  Document doc=null;
+  NodeInterface parentObj=null;
+  if (parameters.containsKey("object")) {
+    parentObj=(NodeInterface)parameters.get("object");
+  }
+  if (parameters.containsKey("document")) {
+    doc=(Document)parameters.get("document");
+  }
+ else {
+    final String url=page.getProperty(SourcePage.url);
+    final String cookie=page.getProperty(SourcePage.cookie);
+    if (url == null) {
+      throw new FrameworkException(422,"This pattern's source page has no URL, exiting.");
+    }
+    final String content=getContent(url,cookie);
+    doc=Jsoup.parse(content);
+  }
+  final String mappedType=getProperty(mappedTypeProperty);
+  if (mappedType == null) {
+    throw new FrameworkException(422,"No mapped type given, exiting.");
+  }
+  final Elements parts=doc.select(selector);
+  for (int i=(from != null ? from.intValue() : 1); i <= (to != null ? to : parts.size()); i++) {
+    final NodeInterface obj=(parentObj == null ? create(mappedType) : parentObj);
+    if (subPatterns.size() > 0) {
+      for (      final SourcePattern subPattern : subPatterns) {
+        final String subSelector=selector + ":nth-child(" + i+ ") > "+ subPattern.getProperty(SourcePattern.selectorProperty);
+        final String subPatternMappedAttribute=subPattern.getProperty(SourcePattern.mappedAttributeProperty);
+        final SourcePage subPatternSubPage=subPattern.getProperty(SourcePattern.subPageProperty);
+        extractAndSetValue(obj,doc,subSelector,mappedType,subPatternMappedAttribute,subPatternSubPage);
+      }
+    }
+ else {
+      final String mappedAttribute=getProperty(mappedAttributeProperty);
+      extractAndSetValue(obj,doc,selector,mappedType,mappedAttribute,null);
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  FileHelper.setFileData(this,getConcatenatedSource().getBytes(),null);
+  try (FileReader in=new FileReader(this.getFileOnDisk())){
+    final java.io.File temp=java.io.File.createTempFile("structr-minify",".tmp");
+    final OutputStreamWriter out=new OutputStreamWriter(new FileOutputStream(temp));
+    final CssCompressor compressor=new CssCompressor(in);
+    compressor.compress(out,getProperty(lineBreak));
+    out.close();
+    FileHelper.setFileData(this,FileUtils.readFileToString(temp).getBytes(),null);
+  }
+ }

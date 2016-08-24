@@ -75,6 +75,14 @@
           for (          PropertyKey key : additionalProperties.keySet()) {
             newFile.setProperty(key,additionalProperties.get(key));
           }
+          final String defaultUploadFolderConfigValue=StructrApp.getConfigurationValue(Services.APPLICATION_DEFAULT_UPLOAD_FOLDER,null);
+          if (defaultUploadFolderConfigValue != null) {
+            final Folder defaultUploadFolder=FileHelper.createFolderPath(SecurityContext.getSuperUserInstance(),defaultUploadFolderConfigValue);
+            if (defaultUploadFolder != null) {
+              newFile.setProperty(FileBase.hasParent,true);
+              newFile.setProperty(FileBase.parent,defaultUploadFolder);
+            }
+          }
           if (!newFile.validatePath(securityContext,null)) {
             newFile.setProperty(AbstractNode.name,name.concat("_").concat(FileHelper.getDateString()));
           }

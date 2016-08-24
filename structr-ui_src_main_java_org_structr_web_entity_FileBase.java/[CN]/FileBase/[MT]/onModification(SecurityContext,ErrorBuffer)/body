@@ -6,6 +6,15 @@ synchronized (this) {
       setProperty(hasParent,getProperty(parentId) != null);
       this.securityContext=previousSecurityContext;
     }
+    final AbstractMinifiedFile minifiedFile=getProperty(FileBase.minificationTarget);
+    if (minifiedFile != null) {
+      try {
+        minifiedFile.minify();
+      }
+ catch (      IOException ex) {
+        logger.log(Level.WARNING,"Could not automatically update minification target",ex);
+      }
+    }
     return true;
   }
   return false;

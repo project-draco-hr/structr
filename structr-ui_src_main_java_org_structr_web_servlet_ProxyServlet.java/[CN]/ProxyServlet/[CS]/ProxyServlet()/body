@@ -1,0 +1,17 @@
+{
+  String customResponseHeadersString=Services.getBaseConfiguration().getProperty(CUSTOM_RESPONSE_HEADERS);
+  if (StringUtils.isBlank(customResponseHeadersString)) {
+    customResponseHeadersString=defaultCustomResponseHeaders;
+  }
+  if (StringUtils.isNotBlank(customResponseHeadersString)) {
+    customResponseHeaders=Arrays.asList(customResponseHeadersString.split("[ ,]+"));
+  }
+  final String resolvePropertiesSource=StructrApp.getConfigurationValue(OBJECT_RESOLUTION_PROPERTIES,"AbstractNode.name");
+  for (  final String src : resolvePropertiesSource.split("[, ]+")) {
+    final String name=src.trim();
+    if (StringUtils.isNotBlank(name)) {
+      possiblePropertyNamesForEntityResolving.add(name);
+    }
+  }
+  this.isAsync=Services.parseBoolean(Services.getBaseConfiguration().getProperty(HttpService.ASYNC),true);
+}

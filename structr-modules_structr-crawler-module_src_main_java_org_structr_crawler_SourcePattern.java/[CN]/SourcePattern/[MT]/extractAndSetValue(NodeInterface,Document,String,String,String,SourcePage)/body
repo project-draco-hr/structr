@@ -1,0 +1,30 @@
+{
+  if (StringUtils.isNotEmpty(mappedAttribute)) {
+    final String ex=doc.select(selector).text();
+    final ConfigurationProvider config=StructrApp.getConfiguration();
+    final PropertyKey key=config.getPropertyKeyForJSONName(type(mappedType),mappedAttribute);
+    if (key != null) {
+      obj.setProperty(key,ex);
+    }
+  }
+ else   if (subPage != null) {
+    final String pageUrl=subPage.getProperty(SourcePage.url);
+    final URI uri;
+    try {
+      uri=new URI(pageUrl);
+    }
+ catch (    URISyntaxException ex) {
+      throw new FrameworkException(422,"Unable to parse sub page url: " + pageUrl);
+    }
+    final String subUrl=uri.getScheme() + "://" + uri.getAuthority()+ doc.select(selector).attr("href");
+    final String subContent=getContent(subUrl,null);
+    final Document subDoc=Jsoup.parse(subContent);
+    final List<SourcePattern> subPagePatterns=subPage.getProperty(SourcePage.patterns);
+    for (    final SourcePattern subPagePattern : subPagePatterns) {
+      final Map<String,Object> params=new HashMap<>();
+      params.put("document",subDoc);
+      params.put("object",obj);
+      subPagePattern.extract(params);
+    }
+  }
+}

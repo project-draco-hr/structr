@@ -1,0 +1,22 @@
+{
+  final HttpClientParams params=new HttpClientParams(HttpClientParams.getDefaultParams());
+  final HttpClient client=new HttpClient(params);
+  final GetMethod get=new GetMethod(url);
+  get.addRequestHeader("User-Agent","curl/7.35.0");
+  get.addRequestHeader("Connection","close");
+  get.getParams().setParameter("http.protocol.single-cookie-header",true);
+  get.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
+  get.setFollowRedirects(true);
+  if (StringUtils.isNotBlank(cookie)) {
+    get.addRequestHeader("Cookie",cookie);
+  }
+  String content="";
+  try {
+    client.executeMethod(get);
+    content=get.getResponseBodyAsString().replace("<head>","<head>\n  <base href=\"" + url + "\">");
+  }
+ catch (  IOException ex) {
+    throw new FrameworkException(422,"Unable to extract content from " + url + ".");
+  }
+  return content;
+}

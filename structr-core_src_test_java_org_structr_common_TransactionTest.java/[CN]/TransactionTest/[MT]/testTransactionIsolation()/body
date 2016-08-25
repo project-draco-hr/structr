@@ -1,0 +1,22 @@
+{
+  try {
+    final TestOne test=createTestNode(TestOne.class);
+    final ExecutorService executor=Executors.newCachedThreadPool();
+    final List<TestRunner> tests=new LinkedList<>();
+    final List<Future> futures=new LinkedList<>();
+    for (int i=0; i < 10; i++) {
+      final TestRunner runner=new TestRunner(app,test);
+      futures.add(executor.submit(runner));
+      tests.add(runner);
+    }
+    for (    final Future future : futures) {
+      future.get();
+    }
+    for (    final TestRunner runner : tests) {
+      assertTrue("Could not validate transaction isolation",runner.success());
+    }
+  }
+ catch (  Throwable fex) {
+    fail("Unexpected exception");
+  }
+}

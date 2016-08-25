@@ -1,22 +1,22 @@
 {
   assertNotStale();
-  final SessionTransaction tx=db.getCurrentTransaction();
-  final Map<String,Object> map=new HashMap<>();
-  final List<Relationship> result=new LinkedList<>();
-  map.put("id",entity.id());
+  final RelationshipRelationshipMapper mapper=new RelationshipRelationshipMapper(db);
+  List<Relationship> list=getList(direction,null);
+  if (list == null) {
+    final SessionTransaction tx=db.getCurrentTransaction();
+    final Map<String,Object> map=new HashMap<>();
+    map.put("id",entity.id());
 switch (direction) {
 case BOTH:
-    return getRelationships();
+      return getRelationships();
 case OUTGOING:
-  for (  final org.neo4j.driver.v1.types.Relationship rel : tx.getRelationshipList("MATCH (n)-[r]->(m) WHERE ID(n) = {id} RETURN r",map)) {
-    result.add(RelationshipWrapper.newInstance(db,rel));
-  }
-break;
+    list=Iterables.toList(Iterables.map(mapper,tx.getRelationships("MATCH (n)-[r]->(m) WHERE ID(n) = {id} RETURN r",map)));
+  break;
 case INCOMING:
-for (final org.neo4j.driver.v1.types.Relationship rel : tx.getRelationshipList("MATCH (n)<-[r]-(m) WHERE ID(n) = {id} RETURN r",map)) {
-result.add(RelationshipWrapper.newInstance(db,rel));
-}
+list=Iterables.toList(Iterables.map(mapper,tx.getRelationships("MATCH (n)<-[r]-(m) WHERE ID(n) = {id} RETURN r",map)));
 break;
 }
-return result;
+setList(direction,null,list);
+}
+return list;
 }

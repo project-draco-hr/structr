@@ -1,13 +1,16 @@
 {
   if (input != null) {
-    try (final QueryResult<S> closeable=input){
-      if (factoryProfile.getOffsetId() != null) {
-        return resultWithOffsetId(closeable);
-      }
- else {
-        return resultWithoutOffsetId(closeable);
-      }
+    if (factoryProfile.getOffsetId() != null) {
+      final Result result=resultWithOffsetId(input);
+      return result;
     }
-   }
+ else {
+      final long t0=System.currentTimeMillis();
+      final Result result=resultWithoutOffsetId(input);
+      final long t1=System.currentTimeMillis();
+      System.out.println((t1 - t0) + " ms");
+      return result;
+    }
+  }
   return Result.EMPTY_RESULT;
 }

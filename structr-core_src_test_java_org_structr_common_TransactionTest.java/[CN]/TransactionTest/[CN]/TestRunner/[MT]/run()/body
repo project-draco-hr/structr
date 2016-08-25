@@ -1,0 +1,21 @@
+{
+  final String name=Thread.currentThread().getName();
+  try (final Tx tx=app.tx()){
+    test.setProperty(TestOne.name,name);
+    for (int i=0; i < 10; i++) {
+      try {
+        Thread.sleep((long)(Math.random() * 10L) + 10);
+      }
+ catch (      Throwable t) {
+      }
+      final String testName=test.getProperty(TestOne.name);
+      if (!name.equals(testName)) {
+        success=false;
+      }
+    }
+    tx.success();
+  }
+ catch (  Throwable t) {
+    success=false;
+  }
+}

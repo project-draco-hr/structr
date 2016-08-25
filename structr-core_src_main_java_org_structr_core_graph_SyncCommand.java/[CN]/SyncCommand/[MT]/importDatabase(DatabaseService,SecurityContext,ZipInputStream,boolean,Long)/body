@@ -21,7 +21,6 @@
       final List<Node> nodes=new LinkedList<>();
       long nodeCount=0;
       long relCount=0;
-      boolean skipProperties=false;
       do {
         try {
           dis.mark(4);
@@ -51,7 +50,8 @@
             if (startNode != null && endNode != null) {
               if (deletedNodes.contains(startNode.getId()) || deletedNodes.contains(endNode.getId())) {
                 System.out.println("NOT creating relationship between deleted nodes..");
-                skipProperties=true;
+                currentObject=null;
+                currentKey=null;
               }
  else {
                 RelationshipType relType=RelationshipType.forName(relTypeName);
@@ -62,22 +62,25 @@
             }
  else {
               System.out.println("NOT creating relationship of type " + relTypeName + ", start: "+ startId+ ", end: "+ endId);
-              skipProperties=true;
+              currentObject=null;
+              currentKey=null;
             }
           }
  else {
-            if (skipProperties) {
-              continue;
-            }
             dis.reset();
             if (currentKey == null) {
-              currentKey=(String)deserialize(dis);
+              try {
+                currentKey=(String)deserialize(dis);
+              }
+ catch (              Throwable t) {
+                t.printStackTrace();
+              }
             }
  else {
-              if (currentObject != null) {
-                Object obj=deserialize(dis);
+              final Object obj=deserialize(dis);
+              if (obj != null && currentObject != null) {
                 if (uuidPropertyName.equals(currentKey) && currentObject instanceof Node) {
-                  String uuid=(String)obj;
+                  final String uuid=(String)obj;
                   uuidMap.put(uuid,(Node)currentObject);
                 }
                 if (currentKey.length() != 0) {
@@ -89,11 +92,11 @@
  else {
                   logger.log(Level.SEVERE,"Invalid property key for value {0}, ignoring",obj);
                 }
-                currentKey=null;
               }
  else {
                 logger.log(Level.WARNING,"No current object to store property in.");
               }
+              currentKey=null;
             }
           }
         }

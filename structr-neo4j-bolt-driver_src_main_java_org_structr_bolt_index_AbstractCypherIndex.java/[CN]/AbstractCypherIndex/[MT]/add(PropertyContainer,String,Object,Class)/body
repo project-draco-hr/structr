@@ -1,12 +1,14 @@
 {
-  Object indexValue=value;
-  if (value != null) {
-    if (value.getClass().isEnum()) {
-      indexValue=indexValue.toString();
+  if (!t.hasProperty(key)) {
+    Object indexValue=value;
+    if (value != null) {
+      if (value.getClass().isEnum()) {
+        indexValue=indexValue.toString();
+      }
+      if (!INDEXABLE.contains(value.getClass())) {
+        return;
+      }
     }
-    if (!INDEXABLE.contains(value.getClass())) {
-      return;
-    }
+    t.setProperty(key,indexValue);
   }
-  t.setProperty(key,indexValue);
 }

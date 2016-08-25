@@ -1,0 +1,13 @@
+{
+synchronized (relationshipCache) {
+    RelationshipWrapper wrapper=relationshipCache.get(id);
+    if (wrapper == null) {
+      final SessionTransaction tx=db.getCurrentTransaction();
+      final Map<String,Object> map=new HashMap<>();
+      map.put("id",id);
+      wrapper=new RelationshipWrapper(db,tx.getRelationship("MATCH ()-[n]-() WHERE ID(n) = {id} RETURN n",map));
+      relationshipCache.put(id,wrapper);
+    }
+    return wrapper;
+  }
+}

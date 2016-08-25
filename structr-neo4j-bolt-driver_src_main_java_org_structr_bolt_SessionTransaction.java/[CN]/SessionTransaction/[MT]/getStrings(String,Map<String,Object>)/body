@@ -1,0 +1,11 @@
+{
+  try {
+    final StatementResult result=tx.run(statement,map);
+    final Record record=result.next();
+    final Value value=record.get(0);
+    return value.asList(Values.ofString());
+  }
+ catch (  NoSuchRecordException nex) {
+    throw new NotFoundException(nex);
+  }
+}

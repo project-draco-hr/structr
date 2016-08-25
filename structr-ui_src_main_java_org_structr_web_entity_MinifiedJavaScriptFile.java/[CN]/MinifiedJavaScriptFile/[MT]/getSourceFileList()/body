@@ -1,0 +1,13 @@
+{
+  ArrayList<SourceFile> sourceList=new ArrayList();
+  int cnt=0;
+  for (  MinificationNeighbor rel : getSortedRelationships()) {
+    final FileBase src=rel.getTargetNode();
+    sourceList.add(SourceFile.fromCode(src.getProperty(FileBase.name),FileUtils.readFileToString(src.getFileOnDisk())));
+    if (rel.getProperty(MinificationNeighbor.position) != cnt) {
+      rel.setProperty(MinificationNeighbor.position,cnt);
+    }
+    cnt++;
+  }
+  return sourceList;
+}

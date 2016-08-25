@@ -1,0 +1,25 @@
+{
+  final Compiler compiler=new Compiler();
+  final CompilerOptions options=new CompilerOptions();
+  final CompilationLevel selectedLevel=getProperty(optimizationLevel);
+  selectedLevel.setOptionsForCompilationLevel(options);
+  compiler.setErrorManager(new BasicErrorManager(){
+    @Override public void println(    CheckLevel level,    JSError error){
+    }
+    @Override protected void printSummary(){
+      final Level level=(getErrorCount() + getWarningCount() == 0) ? Level.INFO : Level.WARNING;
+      if (getTypedPercent() > 0) {
+        logger.log(level,SimpleFormat.format("%d error(s), %d warning(s), %.1f%% typed",getErrorCount(),getWarningCount(),getTypedPercent()));
+      }
+ else       if (getErrorCount() + getWarningCount() > 0) {
+        logger.log(level,SimpleFormat.format("%d error(s), %d warning(s)",getErrorCount(),getWarningCount()));
+      }
+    }
+  }
+);
+  compiler.compile(CommandLineRunner.getBuiltinExterns(options),getSourceFileList(),options);
+  FileHelper.setFileData(this,compiler.toSource().getBytes(),null);
+  final String separator=System.lineSeparator().concat("----").concat(System.lineSeparator());
+  setProperty(warnings,StringUtils.join(compiler.getWarnings(),separator));
+  setProperty(errors,StringUtils.join(compiler.getErrors(),separator));
+}

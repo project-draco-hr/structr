@@ -10,10 +10,10 @@ switch (direction) {
 case BOTH:
       return getRelationships();
 case OUTGOING:
-    list=Iterables.toList(Iterables.map(mapper,tx.getRelationships("MATCH (n)-[r]->(m) WHERE ID(n) = {id} RETURN r",map)));
+    list=Iterables.toList(Iterables.map(mapper,tx.getRelationships("CYPHER planner=rule MATCH (n)-[r]->(m) WHERE ID(n) = {id} RETURN r",map)));
   break;
 case INCOMING:
-list=Iterables.toList(Iterables.map(mapper,tx.getRelationships("MATCH (n)<-[r]-(m) WHERE ID(n) = {id} RETURN r",map)));
+list=Iterables.toList(Iterables.map(mapper,tx.getRelationships("CYPHER planner=rule MATCH (n)<-[r]-(m) WHERE ID(n) = {id} RETURN r",map)));
 break;
 }
 setList(direction,null,list);

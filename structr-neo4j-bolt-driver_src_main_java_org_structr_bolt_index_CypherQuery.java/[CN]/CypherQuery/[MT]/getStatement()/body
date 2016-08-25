@@ -1,18 +1,47 @@
 {
   final StringBuilder buf=new StringBuilder();
-  buf.append(prefix);
-  buf.append(buffer);
-  buf.append(suffix);
-  if (sortKey != null) {
-    buf.append(" ORDER BY COALESCE(n.`");
-    buf.append(sortKey);
-    buf.append("`, ");
+  final int typeCount=typeLabels.size();
+switch (typeCount) {
+case 0:
+    buf.append(index.getQueryPrefix(null));
+  if (buffer.length() > 0) {
+    buf.append(" WHERE ");
+    buf.append(buffer);
+  }
+buf.append(index.getQuerySuffix());
+break;
+case 1:
+buf.append(index.getQueryPrefix(typeLabels.get(0)));
+if (buffer.length() > 0) {
+buf.append(" WHERE ");
+buf.append(buffer);
+}
+buf.append(index.getQuerySuffix());
+break;
+default :
+for (final Iterator<String> it=typeLabels.iterator(); it.hasNext(); ) {
+buf.append(index.getQueryPrefix(it.next()));
+if (buffer.length() > 0) {
+buf.append(" WHERE ");
+buf.append(buffer);
+}
+buf.append(index.getQuerySuffix());
+if (it.hasNext()) {
+buf.append(" UNION ");
+}
+}
+break;
+}
+if (sortKey != null) {
+buf.append(" ORDER BY COALESCE(n.`");
+buf.append(sortKey);
+buf.append("`, ");
 switch (sortType) {
 case Default:
-      buf.append("''");
-    break;
+buf.append("''");
+break;
 default :
-  buf.append("-1");
+buf.append("-1");
 }
 buf.append(")");
 if (sortDescending) {

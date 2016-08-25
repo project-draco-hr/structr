@@ -1,0 +1,16 @@
+{
+  if (predicate instanceof SpatialQuery) {
+    checkOccur(query,predicate.getOccurrence(),isFirst);
+    final SpatialQuery spatial=(SpatialQuery)predicate;
+    final StringBuilder buf=new StringBuilder();
+    final Double[] coords=spatial.getCoords();
+    buf.append("distance(point({latitude:");
+    buf.append(coords[0]);
+    buf.append(",longitude:");
+    buf.append(coords[1]);
+    buf.append("}), point(n))");
+    query.addSimpleParameter(buf.toString(),"<",spatial.getDistance() * 1000.0,false);
+    return true;
+  }
+  return false;
+}

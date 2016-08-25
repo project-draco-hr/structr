@@ -1,0 +1,13 @@
+{
+  final Class type=predicate.getQueryType();
+  if (type != null) {
+    final QueryFactory factory=FACTORIES.get(type);
+    if (factory != null) {
+      return factory.createQuery(this,predicate,query,isFirst);
+    }
+ else {
+      logger.log(Level.WARNING,"No query factory registered for type {0}",type);
+    }
+  }
+  return false;
+}

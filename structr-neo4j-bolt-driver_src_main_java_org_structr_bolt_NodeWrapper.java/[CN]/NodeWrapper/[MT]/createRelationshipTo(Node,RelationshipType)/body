@@ -4,7 +4,7 @@
   final Map<String,Object> map=new HashMap<>();
   map.put("id1",entity.id());
   map.put("id2",endNode.getId());
-  final org.neo4j.driver.v1.types.Relationship rel=tx.getRelationship("MATCH (n), (m) WHERE ID(n) = {id1} AND ID(m) = {id2} CREATE (n)-[r:" + relationshipType.name() + "]->(m) RETURN r",map);
+  final org.neo4j.driver.v1.types.Relationship rel=tx.getRelationship("CYPHER planner=rule MATCH (n), (m) WHERE ID(n) = {id1} AND ID(m) = {id2} CREATE (n)-[r:" + relationshipType.name() + "]->(m) RETURN r",map);
   tx.modified(this);
   ((NodeWrapper)endNode).relationshipCache.clear();
   relationshipCache.clear();

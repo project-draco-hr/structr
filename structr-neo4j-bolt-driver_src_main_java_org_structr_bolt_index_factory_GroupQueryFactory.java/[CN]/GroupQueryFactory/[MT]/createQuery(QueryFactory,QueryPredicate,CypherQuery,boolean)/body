@@ -1,0 +1,16 @@
+{
+  if (predicate instanceof GroupQuery) {
+    if (predicate.getOccurrence().equals(Occurrence.FORBIDDEN)) {
+      query.not();
+    }
+    final GroupQuery group=(GroupQuery)predicate;
+    boolean first=isFirst;
+    for (    final QueryPredicate attr : group.getQueryPredicates()) {
+      if (parent.createQuery(parent,attr,query,first)) {
+        first=false;
+      }
+    }
+    return !first;
+  }
+  return false;
+}

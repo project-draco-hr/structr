@@ -3,6 +3,6 @@
   final SessionTransaction tx=db.getCurrentTransaction();
   final Map<String,Object> map=new HashMap<>();
   map.put("id",entity.id());
-  entity=(T)tx.getEntity(getQueryPrefix() + " WHERE ID(n) = {id} SET n.`" + key+ "` = Null RETURN n",map);
+  entity=(T)tx.getEntity("CYPHER planner=rule " + getQueryPrefix() + " WHERE ID(n) = {id} SET n.`"+ key+ "` = Null RETURN n",map);
   tx.modified(this);
 }

@@ -1,0 +1,15 @@
+{
+  if (predicate instanceof RangeQuery) {
+    checkOccur(query,predicate.getOccurrence(),isFirst);
+    final RangeQuery rangeQuery=(RangeQuery)predicate;
+    final Object rangeStart=getReadValue(rangeQuery.getRangeStart());
+    final Object rangeEnd=getReadValue(rangeQuery.getRangeEnd());
+    final String name=predicate.getName();
+    if (rangeStart == null && rangeEnd == null) {
+      return false;
+    }
+    query.addParameters(name,">=",rangeStart,"<=",rangeEnd);
+    return true;
+  }
+  return false;
+}

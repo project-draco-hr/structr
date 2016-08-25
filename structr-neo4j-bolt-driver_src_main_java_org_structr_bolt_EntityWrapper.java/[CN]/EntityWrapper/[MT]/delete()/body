@@ -3,7 +3,7 @@
   final SessionTransaction tx=db.getCurrentTransaction();
   final Map<String,Object> map=new HashMap<>();
   map.put("id",entity.id());
-  tx.set(getQueryPrefix() + " WHERE ID(n) = {id} DELETE n",map);
+  tx.set("CYPHER planner=rule " + getQueryPrefix() + " WHERE ID(n) = {id} DELETE n",map);
   tx.modified(this);
   invalidate();
   stale=true;

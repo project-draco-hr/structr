@@ -1,10 +1,11 @@
 {
-  final CypherQuery query=new CypherQuery(getQueryPrefix(),getQuerySuffix());
-  createQuery(this,predicate,query);
+  final CypherQuery query=new CypherQuery(this);
+  createQuery(this,predicate,query,true);
   final String sortKey=predicate.getSortKey();
   if (sortKey != null) {
     query.sort(predicate.getSortType(),sortKey,predicate.sortDescending());
   }
+  final QueryResult<T> result=getResult(query);
   System.out.println(query);
-  return getResult(query);
+  return result;
 }

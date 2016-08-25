@@ -8,13 +8,13 @@
     map.put("id",entity.id());
 switch (direction) {
 case BOTH:
-      list=Iterables.toList(Iterables.map(mapper,tx.getRelationships("MATCH (n)-[r:" + relationshipType.name() + "]-(m) WHERE ID(n) = {id} RETURN r",map)));
+      list=Iterables.toList(Iterables.map(mapper,tx.getRelationships("CYPHER planner=rule MATCH (n)-[r:" + relationshipType.name() + "]-(m) WHERE ID(n) = {id} RETURN r",map)));
     break;
 case OUTGOING:
-  list=Iterables.toList(Iterables.map(mapper,tx.getRelationships("MATCH (n)-[r:" + relationshipType.name() + "]->(m) WHERE ID(n) = {id} RETURN r",map)));
+  list=Iterables.toList(Iterables.map(mapper,tx.getRelationships("CYPHER planner=rule MATCH (n)-[r:" + relationshipType.name() + "]->(m) WHERE ID(n) = {id} RETURN r",map)));
 break;
 case INCOMING:
-list=Iterables.toList(Iterables.map(mapper,tx.getRelationships("MATCH (n)<-[r:" + relationshipType.name() + "]-(m) WHERE ID(n) = {id} RETURN r",map)));
+list=Iterables.toList(Iterables.map(mapper,tx.getRelationships("CYPHER planner=rule MATCH (n)<-[r:" + relationshipType.name() + "]-(m) WHERE ID(n) = {id} RETURN r",map)));
 break;
 }
 setList(direction,relationshipType,list);

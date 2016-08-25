@@ -1,3 +1,10 @@
 {
-  return command(SearchRelationshipCommand.class).andTypes(type);
+  try {
+    final RelationshipType relType=(RelationshipType)type.newInstance();
+    return command(SearchRelationshipCommand.class).andType(relType.name());
+  }
+ catch (  Throwable t) {
+    t.printStackTrace();
+  }
+  return command(SearchRelationshipCommand.class).andType(type);
 }

@@ -4,7 +4,10 @@
   for (  MinificationNeighbor rel : getSortedRelationships()) {
     final FileBase src=rel.getTargetNode();
     concatenatedSource.append(FileUtils.readFileToString(src.getFileOnDisk()));
-    rel.setProperty(MinificationNeighbor.position,cnt++);
+    if (rel.getProperty(MinificationNeighbor.position) != cnt) {
+      rel.setProperty(MinificationNeighbor.position,cnt);
+    }
+    cnt++;
   }
   return concatenatedSource.toString();
 }

@@ -1,0 +1,18 @@
+{
+  boolean shouldMinify=false;
+  final String myUUID=getUuid();
+  for (  ModificationEvent modState : modificationQueue.getModificationEvents()) {
+    if (myUUID.equals(modState.getUuid())) {
+      shouldMinify=shouldMinify || shouldModificationTriggerMinifcation(modState);
+    }
+  }
+  if (shouldMinify) {
+    try {
+      this.minify();
+    }
+ catch (    IOException ex) {
+      logger.log(Level.WARNING,"Could not automatically minify file",ex);
+    }
+  }
+  return super.onModification(securityContext,errorBuffer,modificationQueue);
+}

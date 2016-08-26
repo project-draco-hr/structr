@@ -1,6 +1,10 @@
 {
   this.databasePath=configuration.getProperty(Structr.DATABASE_PATH);
+  this.debugLogging="true".equalsIgnoreCase(configuration.getProperty(Structr.LOG_CYPHER_DEBUG,"false"));
+  final String url=configuration.getProperty(Structr.DATABASE_CONNECTION_URL,"bolt://localhost:7689");
+  final String username=configuration.getProperty(Structr.DATABASE_CONNECTION_USERNAME,"neo4j");
+  final String password=configuration.getProperty(Structr.DATABASE_CONNECTION_PASSWORD,"neo4j");
   GraphDatabaseSettings.BoltConnector bolt=GraphDatabaseSettings.boltConnector("0");
-  graphDb=new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(new File(databasePath)).setConfig(bolt.enabled,"true").setConfig(bolt.address,"localhost:7689").newGraphDatabase();
-  driver=GraphDatabase.driver("bolt://localhost:7689",AuthTokens.basic("neo4j","test"),Config.build().withEncryptionLevel(Config.EncryptionLevel.NONE).toConfig());
+  graphDb=new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(new File(databasePath)).setConfig(bolt.enabled,"true").setConfig(bolt.address,url).newGraphDatabase();
+  driver=GraphDatabase.driver(url,AuthTokens.basic(username,password),Config.build().withEncryptionLevel(Config.EncryptionLevel.NONE).toConfig());
 }

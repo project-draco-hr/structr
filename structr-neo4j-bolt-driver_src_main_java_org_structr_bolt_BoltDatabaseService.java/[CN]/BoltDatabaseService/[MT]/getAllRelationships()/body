@@ -1,8 +1,5 @@
 {
+  final RelationshipRelationshipMapper mapper=new RelationshipRelationshipMapper(this);
   final SessionTransaction tx=getCurrentTransaction();
-  final List<Relationship> rels=new LinkedList<>();
-  for (  final org.neo4j.driver.v1.types.Relationship rel : tx.getRelationships("MATCH ()-[r]-() RETURN r",Collections.emptyMap())) {
-    rels.add(RelationshipWrapper.newInstance(this,rel));
-  }
-  return rels;
+  return Iterables.map(mapper,tx.getRelationships("MATCH ()-[r]-() RETURN r",Collections.emptyMap()));
 }

@@ -3,17 +3,27 @@
     final SecurityContext superUserSecurityContext=SecurityContext.getSuperUserInstance();
     Query query=StructrApp.getInstance(superUserSecurityContext).nodeQuery(Localization.class).and(Localization.locale,ctx.getLocale().toString()).and(Localization.name,sources[0].toString());
     List<Localization> localizations;
+    final Locale ctxLocale=ctx.getLocale();
+    final String fullLocale=ctxLocale.toString();
+    final String lang=ctxLocale.getLanguage();
     if (sources.length == 2) {
       query.and(Localization.domain,sources[1].toString());
       localizations=query.getAsList();
-      if (localizations.isEmpty()) {
-        query=StructrApp.getInstance(superUserSecurityContext).nodeQuery(Localization.class).and(Localization.locale,ctx.getLocale().toString()).and(Localization.name,sources[0].toString()).blank(Localization.domain);
+      if (localizations.isEmpty() && fullLocale.contains("_")) {
+        query=StructrApp.getInstance(superUserSecurityContext).nodeQuery(Localization.class).and(Localization.locale,lang).and(Localization.name,sources[0].toString()).and(Localization.domain,sources[1].toString());
         localizations=query.getAsList();
       }
     }
  else {
       query.blank(Localization.domain);
       localizations=query.getAsList();
+      if (localizations.isEmpty() && fullLocale.contains("_")) {
+        query=StructrApp.getInstance(superUserSecurityContext).nodeQuery(Localization.class).and(Localization.locale,lang).and(Localization.name,sources[0].toString()).blank(Localization.domain);
+        localizations=query.getAsList();
+      }
+    }
+    if (localizations.isEmpty()) {
+      query=StructrApp.getInstance(superUserSecurityContext).nodeQuery(Localization.class).and(Localization.locale,fullLocale).and(Localization.name,sources[0].toString()).blank(Localization.domain);
     }
     if (localizations.size() > 1) {
       if (sources.length > 1) {

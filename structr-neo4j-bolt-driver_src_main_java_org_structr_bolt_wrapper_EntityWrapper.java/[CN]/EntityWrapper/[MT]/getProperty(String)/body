@@ -1,0 +1,20 @@
+{
+  assertNotStale();
+  try {
+    final Value src=entity.get(name);
+    if (src.isNull()) {
+      return null;
+    }
+    final Object value=src.asObject();
+    if (value instanceof List) {
+      return ((List)value).toArray(new String[0]);
+    }
+    return value;
+  }
+ catch (  org.neo4j.graphdb.NotInTransactionException t) {
+    throw new NotInTransactionException(t);
+  }
+catch (  Throwable t) {
+    throw new NotFoundException(t);
+  }
+}

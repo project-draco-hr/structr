@@ -1,23 +1,17 @@
 {
   dbNode=this.getNode();
   EditMode editMode=renderContext.getEditMode(securityContext.getUser(false));
-  Iterable<String> props=dbNode.getPropertyKeys();
-  for (  String key : props) {
-    if (key.startsWith("data-")) {
-      String value=getPropertyWithVariableReplacement(renderContext,new GenericProperty(key)).trim();
-      if (!(EditMode.RAW.equals(editMode) || EditMode.WIDGET.equals(editMode))) {
-        value=escapeForHtmlAttributes(value);
-      }
-      if (StringUtils.isNotBlank(value)) {
-        out.append(" ").append(key).append("=\"").append(value).append("\"");
-      }
+  for (  PropertyKey key : getDataPropertyKeys()) {
+    String value=getPropertyWithVariableReplacement(renderContext,key).trim();
+    if (!(EditMode.RAW.equals(editMode) || EditMode.WIDGET.equals(editMode))) {
+      value=escapeForHtmlAttributes(value);
+    }
+    if (StringUtils.isNotBlank(value)) {
+      out.append(" ").append(key.dbName()).append("=\"").append(value).append("\"");
     }
   }
   if (EditMode.RAW.equals(editMode) || EditMode.WIDGET.equals(editMode)) {
-    Property[] rawProps=new Property[]{dataKey,restQuery,cypherQuery,xpathQuery,functionQuery,hideOnIndex,hideOnDetail,showForLocales,hideForLocales,showConditions,hideConditions};
-    for (    Property p : rawProps) {
-      if (p instanceof BooleanProperty) {
-      }
+    for (    final Property p : rawProps) {
       String htmlName="data-structr-meta-" + CaseHelper.toUnderscore(p.jsonName(),false).replaceAll("_","-");
       Object value=getProperty(p);
       if ((p instanceof BooleanProperty && (boolean)value) || (!(p instanceof BooleanProperty) && value != null && StringUtils.isNotBlank(value.toString()))) {

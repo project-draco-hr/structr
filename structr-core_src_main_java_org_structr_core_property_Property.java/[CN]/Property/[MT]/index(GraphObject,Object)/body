@@ -3,19 +3,17 @@
     NodeService nodeService=Services.getInstance().getService(NodeService.class);
     AbstractNode node=(AbstractNode)entity;
     Node dbNode=node.getNode();
-    for (    NodeIndex indexName : nodeIndices()) {
-      Index<Node> index=nodeService.getNodeIndex(indexName);
-      if (index != null) {
-        try {
-          index.remove(dbNode,dbName);
-          if (value != null || isIndexedWhenEmpty()) {
-            index.add(dbNode,dbName,value,valueType());
-          }
+    Index<Node> index=nodeService.getNodeIndex();
+    if (index != null) {
+      try {
+        index.remove(dbNode,dbName);
+        if (value != null || isIndexedWhenEmpty()) {
+          index.add(dbNode,dbName,value,valueType());
         }
- catch (        Throwable t) {
-          logger.log(Level.INFO,"Unable to index property with dbName {0} and value {1} of type {2} on {3}: {4}",new Object[]{dbName,value,this.getClass().getSimpleName(),entity,t});
-          logger.log(Level.WARNING,"",t);
-        }
+      }
+ catch (      Throwable t) {
+        logger.log(Level.INFO,"Unable to index property with dbName {0} and value {1} of type {2} on {3}: {4}",new Object[]{dbName,value,this.getClass().getSimpleName(),entity,t});
+        logger.log(Level.WARNING,"",t);
       }
     }
   }
@@ -23,18 +21,16 @@
     NodeService nodeService=Services.getInstance().getService(NodeService.class);
     AbstractRelationship rel=(AbstractRelationship)entity;
     Relationship dbRel=rel.getRelationship();
-    for (    RelationshipIndex indexName : relationshipIndices()) {
-      Index<Relationship> index=nodeService.getRelationshipIndex(indexName);
-      if (index != null) {
-        try {
-          index.remove(dbRel,dbName);
-          if (value != null || isIndexedWhenEmpty()) {
-            index.add(dbRel,dbName,value,valueType());
-          }
+    Index<Relationship> index=nodeService.getRelationshipIndex();
+    if (index != null) {
+      try {
+        index.remove(dbRel,dbName);
+        if (value != null || isIndexedWhenEmpty()) {
+          index.add(dbRel,dbName,value,valueType());
         }
- catch (        Throwable t) {
-          logger.log(Level.INFO,"Unable to index property with dbName {0} and value {1} of type {2} on {3}: {4}",new Object[]{dbName,value,this.getClass().getSimpleName(),entity,t});
-        }
+      }
+ catch (      Throwable t) {
+        logger.log(Level.INFO,"Unable to index property with dbName {0} and value {1} of type {2} on {3}: {4}",new Object[]{dbName,value,this.getClass().getSimpleName(),entity,t});
       }
     }
   }

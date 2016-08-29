@@ -10,16 +10,8 @@
     }
     logger.log(Level.INFO,"Database ready.");
     try (final Transaction tx=graphDb.beginTx()){
-      fulltextIndex=graphDb.nodeIndexer().fulltext();
-      nodeIndices.put(NodeIndex.fulltext,fulltextIndex);
-      keywordIndex=graphDb.nodeIndexer().exact();
-      nodeIndices.put(NodeIndex.keyword,keywordIndex);
-      layerIndex=graphDb.nodeIndexer().spatial();
-      nodeIndices.put(NodeIndex.layer,layerIndex);
-      relFulltextIndex=graphDb.relationshipIndexer().fulltext();
-      relIndices.put(RelationshipIndex.rel_fulltext,relFulltextIndex);
-      relKeywordIndex=graphDb.relationshipIndexer().exact();
-      relIndices.put(RelationshipIndex.rel_keyword,relKeywordIndex);
+      nodeIndex=graphDb.nodeIndex();
+      relIndex=graphDb.relationshipIndex();
       tx.success();
     }
  catch (    Throwable t) {

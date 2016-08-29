@@ -14,7 +14,6 @@
   }
   final List<SourceSearchAttribute> sources=new ArrayList<>();
   boolean hasEmptySearchFields=false;
-  boolean allExactMatch=true;
   Result intermediateResult=null;
   for (final Iterator<SearchAttribute> it=rootGroup.getSearchAttributes().iterator(); it.hasNext(); ) {
     final SearchAttribute attr=it.next();
@@ -37,7 +36,6 @@
       if (coords != null) {
         distanceSearch.setCoords(coords.toArray());
       }
-      indexType=IndexType.Spatial;
       hasSpatialSource=true;
     }
     if (attr instanceof SourceSearchAttribute) {
@@ -47,10 +45,6 @@
     if (attr instanceof EmptySearchAttribute) {
       hasEmptySearchFields=true;
     }
-    allExactMatch&=attr.isExactMatch();
-  }
-  if (!allExactMatch) {
-    indexType=IndexType.Fulltext;
   }
   if (!hasSpatialSource && !sources.isEmpty()) {
     intermediateResult=new Result(new ArrayList<>(),null,false,false);

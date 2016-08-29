@@ -1,15 +1,9 @@
 {
   final List<PropertyKey> allProperties=new LinkedList();
   final Iterable<PropertyKey> htmlAttrs=super.getPropertyKeys(propertyView);
-  for (  PropertyKey attr : htmlAttrs) {
+  for (  final PropertyKey attr : htmlAttrs) {
     allProperties.add(attr);
   }
-  dbNode=this.getNode();
-  Iterable<String> props=dbNode.getPropertyKeys();
-  for (  String key : props) {
-    if (key.startsWith("data-")) {
-      allProperties.add(new GenericProperty(key));
-    }
-  }
+  allProperties.addAll(getDataPropertyKeys());
   return allProperties;
 }

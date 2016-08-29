@@ -1,5 +1,5 @@
 {
-  logger.log(Level.INFO,"Running minify: {0}",this.getType());
+  logger.log(Level.INFO,"Running minify: {0}",this.getUuid());
   final Compiler compiler=new Compiler();
   final CompilerOptions options=new CompilerOptions();
   final CompilationLevel selectedLevel=getProperty(optimizationLevel);
@@ -20,7 +20,6 @@
 );
   compiler.compile(CommandLineRunner.getBuiltinExterns(options),getSourceFileList(),options);
   FileHelper.setFileData(this,compiler.toSource().getBytes(),null);
-  final String separator=System.lineSeparator().concat("----").concat(System.lineSeparator());
-  setProperty(warnings,StringUtils.join(compiler.getWarnings(),separator));
-  setProperty(errors,StringUtils.join(compiler.getErrors(),separator));
+  setProperty(warnings,StringUtils.join(compiler.getWarnings(),System.lineSeparator()));
+  setProperty(errors,StringUtils.join(compiler.getErrors(),System.lineSeparator()));
 }

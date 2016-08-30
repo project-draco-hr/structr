@@ -1,0 +1,18 @@
+{
+  final List<String> messages=collectMessages(t);
+  if (contains(messages,"Legacy index migration failed")) {
+    logger.log(Level.INFO,"Legacy index migration failed, moving offending index files out of the way.");
+    final SimpleDateFormat df=new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
+    final File indexDbFile=new File(databasePath + "/index.db");
+    final File indexDir=new File(databasePath + "/index");
+    if (indexDbFile.exists()) {
+      indexDbFile.renameTo(new File(databasePath + "/index.db.orig-" + df.format(System.currentTimeMillis())));
+    }
+    if (indexDir.exists()) {
+      indexDir.renameTo(new File(databasePath + "/index.orig-" + df.format(System.currentTimeMillis())));
+    }
+    this.needsIndexRebuild=true;
+    return true;
+  }
+  throw new RuntimeException(t);
+}

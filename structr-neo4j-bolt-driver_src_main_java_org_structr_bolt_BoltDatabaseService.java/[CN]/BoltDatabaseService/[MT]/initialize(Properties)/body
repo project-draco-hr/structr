@@ -2,15 +2,24 @@
   this.databasePath=configuration.getProperty(Structr.DATABASE_PATH);
   this.debugLogging="true".equalsIgnoreCase(configuration.getProperty(Structr.LOG_CYPHER_DEBUG,"false"));
   final GraphDatabaseSettings.BoltConnector bolt=GraphDatabaseSettings.boltConnector("0");
-  final String url=configuration.getProperty(Structr.DATABASE_CONNECTION_URL,"bolt://localhost:7689");
+  final String url=configuration.getProperty(Structr.DATABASE_CONNECTION_URL,Structr.DEFAULT_DATABASE_URL);
   final String username=configuration.getProperty(Structr.DATABASE_CONNECTION_USERNAME,"neo4j");
   final String password=configuration.getProperty(Structr.DATABASE_CONNECTION_PASSWORD,"neo4j");
   final String confPath=databasePath + "/neo4j.conf";
   final File confFile=new File(confPath);
-  final GraphDatabaseBuilder builder=new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(new File(databasePath)).setConfig(bolt.enabled,"true").setConfig(bolt.address,url);
+  boolean tryAgain=true;
+  final GraphDatabaseBuilder builder=new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(new File(databasePath)).setConfig(GraphDatabaseSettings.allow_store_upgrade,"true").setConfig("dbms.allow_format_migration","true").setConfig(bolt.enabled,"true").setConfig(bolt.address,url);
   if (confFile.exists()) {
     builder.loadPropertiesFromFile(confPath);
   }
-  graphDb=builder.newGraphDatabase();
+  while (tryAgain) {
+    try {
+      graphDb=builder.newGraphDatabase();
+      tryAgain=false;
+    }
+ catch (    Throwable t) {
+      tryAgain=handleException(t);
+    }
+  }
   driver=GraphDatabase.driver(url,AuthTokens.basic(username,password),Config.build().withEncryptionLevel(Config.EncryptionLevel.NONE).toConfig());
 }

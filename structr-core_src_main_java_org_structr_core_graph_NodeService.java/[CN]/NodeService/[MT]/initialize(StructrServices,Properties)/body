@@ -18,5 +18,16 @@
       logger.log(Level.WARNING,"Error while initializing indexes.",t);
     }
     isInitialized=true;
+    if (graphDb.needsIndexRebuild()) {
+      services.registerInitializationCallback(new InitializationCallback(){
+        @Override public void initializationDone(){
+          Services.getInstance().command(SecurityContext.getSuperUserInstance(),BulkRebuildIndexCommand.class).execute(Collections.EMPTY_MAP);
+        }
+        @Override public int priority(){
+          return 10;
+        }
+      }
+);
+    }
   }
 }

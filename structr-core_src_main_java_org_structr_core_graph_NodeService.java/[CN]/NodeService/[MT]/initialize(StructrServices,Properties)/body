@@ -18,10 +18,13 @@
       logger.log(Level.WARNING,"Error while initializing indexes.",t);
     }
     isInitialized=true;
-    if (graphDb.needsIndexRebuild()) {
+    final boolean firstInitialization=graphDb.getGlobalProperties().getProperty("initialized") == null;
+    if (graphDb.needsIndexRebuild() || firstInitialization) {
+      logger.log(Level.INFO,"Scheduling index rebuild to happen after startup..");
       services.registerInitializationCallback(new InitializationCallback(){
         @Override public void initializationDone(){
           Services.getInstance().command(SecurityContext.getSuperUserInstance(),BulkRebuildIndexCommand.class).execute(Collections.EMPTY_MAP);
+          graphDb.getGlobalProperties().setProperty("initialized",true);
         }
         @Override public int priority(){
           return 10;

@@ -1,6 +1,6 @@
 {
-  final AbstractMinifiedFile minifiedFile=getProperty(FileBase.minificationTarget);
-  if (minifiedFile != null) {
+  final List<AbstractMinifiedFile> targets=getProperty(minificationTargets);
+  if (!targets.isEmpty()) {
     boolean versionChanged=false;
     for (    ModificationEvent modState : modificationQueue.getModificationEvents()) {
       if (getUuid().equals(modState.getUuid())) {
@@ -8,11 +8,13 @@
       }
     }
     if (versionChanged) {
-      try {
-        minifiedFile.minify();
-      }
- catch (      IOException ex) {
-        logger.log(Level.WARNING,"Could not automatically update minification target",ex);
+      for (      AbstractMinifiedFile minifiedFile : targets) {
+        try {
+          minifiedFile.minify();
+        }
+ catch (        IOException ex) {
+          logger.log(Level.WARNING,"Could not automatically update minification target: ".concat(minifiedFile.getName()),ex);
+        }
       }
     }
   }

@@ -1,0 +1,40 @@
+{
+  int maxIndex=css.length() - 1;
+  int appendIndex=0;
+  StringBuffer sb=new StringBuffer();
+  Pattern p=Pattern.compile("(?i)url\\(\\s*([\"']?)data\\:");
+  Matcher m=p.matcher(css);
+  while (m.find()) {
+    int startIndex=m.start() + 4;
+    String terminator=m.group(1);
+    if (terminator.length() == 0) {
+      terminator=")";
+    }
+    boolean foundTerminator=false;
+    int endIndex=m.end() - 1;
+    while (foundTerminator == false && endIndex + 1 <= maxIndex) {
+      endIndex=css.indexOf(terminator,endIndex + 1);
+      if ((endIndex > 0) && (css.charAt(endIndex - 1) != '\\')) {
+        foundTerminator=true;
+        if (!")".equals(terminator)) {
+          endIndex=css.indexOf(")",endIndex);
+        }
+      }
+    }
+    sb.append(css.substring(appendIndex,m.start()));
+    if (foundTerminator) {
+      String token=css.substring(startIndex,endIndex);
+      token=token.replaceAll("\\s+","");
+      preservedTokens.add(token);
+      String preserver="url(___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___)";
+      sb.append(preserver);
+      appendIndex=endIndex + 1;
+    }
+ else {
+      sb.append(css.substring(m.start(),m.end()));
+      appendIndex=m.end();
+    }
+  }
+  sb.append(css.substring(appendIndex));
+  return sb.toString();
+}

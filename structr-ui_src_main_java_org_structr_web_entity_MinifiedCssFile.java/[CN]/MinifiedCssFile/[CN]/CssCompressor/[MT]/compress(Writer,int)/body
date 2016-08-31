@@ -1,0 +1,240 @@
+{
+  Pattern p;
+  Matcher m;
+  String css=srcsb.toString();
+  int startIndex=0;
+  int endIndex=0;
+  int i=0;
+  int max=0;
+  ArrayList preservedTokens=new ArrayList(0);
+  ArrayList comments=new ArrayList(0);
+  String token;
+  int totallen=css.length();
+  String placeholder;
+  css=this.extractDataUrls(css,preservedTokens);
+  StringBuffer sb=new StringBuffer(css);
+  while ((startIndex=sb.indexOf("/*",startIndex)) >= 0) {
+    endIndex=sb.indexOf("*/",startIndex + 2);
+    if (endIndex < 0) {
+      endIndex=totallen;
+    }
+    token=sb.substring(startIndex + 2,endIndex);
+    comments.add(token);
+    sb.replace(startIndex + 2,endIndex,"___YUICSSMIN_PRESERVE_CANDIDATE_COMMENT_" + (comments.size() - 1) + "___");
+    startIndex+=2;
+  }
+  css=sb.toString();
+  sb=new StringBuffer();
+  p=Pattern.compile("(\"([^\\\\\"]|\\\\.|\\\\)*\")|(\'([^\\\\\']|\\\\.|\\\\)*\')");
+  m=p.matcher(css);
+  while (m.find()) {
+    token=m.group();
+    char quote=token.charAt(0);
+    token=token.substring(1,token.length() - 1);
+    if (token.indexOf("___YUICSSMIN_PRESERVE_CANDIDATE_COMMENT_") >= 0) {
+      for (i=0, max=comments.size(); i < max; i+=1) {
+        token=token.replace("___YUICSSMIN_PRESERVE_CANDIDATE_COMMENT_" + i + "___",comments.get(i).toString());
+      }
+    }
+    token=token.replaceAll("(?i)progid:DXImageTransform.Microsoft.Alpha\\(Opacity=","alpha(opacity=");
+    preservedTokens.add(token);
+    String preserver=quote + "___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1)+ "___"+ quote;
+    m.appendReplacement(sb,preserver);
+  }
+  m.appendTail(sb);
+  css=sb.toString();
+  for (i=0, max=comments.size(); i < max; i+=1) {
+    token=comments.get(i).toString();
+    placeholder="___YUICSSMIN_PRESERVE_CANDIDATE_COMMENT_" + i + "___";
+    if (token.startsWith("!")) {
+      preservedTokens.add(token);
+      css=css.replace(placeholder,"___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___");
+      continue;
+    }
+    if (token.endsWith("\\")) {
+      preservedTokens.add("\\");
+      css=css.replace(placeholder,"___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___");
+      i=i + 1;
+      preservedTokens.add("");
+      css=css.replace("___YUICSSMIN_PRESERVE_CANDIDATE_COMMENT_" + i + "___","___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___");
+      continue;
+    }
+    if (token.length() == 0) {
+      startIndex=css.indexOf(placeholder);
+      if (startIndex > 2) {
+        if (css.charAt(startIndex - 3) == '>') {
+          preservedTokens.add("");
+          css=css.replace(placeholder,"___YUICSSMIN_PRESERVED_TOKEN_" + (preservedTokens.size() - 1) + "___");
+        }
+      }
+    }
+    css=css.replace("/*" + placeholder + "*/","");
+  }
+  css=css.replaceAll("\\s+"," ");
+  sb=new StringBuffer();
+  p=Pattern.compile("(^|\\})(([^\\{:])+:)+([^\\{]*\\{)");
+  m=p.matcher(css);
+  while (m.find()) {
+    String s=m.group();
+    s=s.replaceAll(":","___YUICSSMIN_PSEUDOCLASSCOLON___");
+    s=s.replaceAll("\\\\","\\\\\\\\").replaceAll("\\$","\\\\\\$");
+    m.appendReplacement(sb,s);
+  }
+  m.appendTail(sb);
+  css=sb.toString();
+  css=css.replaceAll("\\s+([!{};:>+\\(\\)\\],])","$1");
+  css=css.replaceAll("!important"," !important");
+  css=css.replaceAll("___YUICSSMIN_PSEUDOCLASSCOLON___",":");
+  sb=new StringBuffer();
+  p=Pattern.compile("(?i):first\\-(line|letter)(\\{|,)");
+  m=p.matcher(css);
+  while (m.find()) {
+    m.appendReplacement(sb,":first-" + m.group(1).toLowerCase() + " "+ m.group(2));
+  }
+  m.appendTail(sb);
+  css=sb.toString();
+  css=css.replaceAll("\\*/ ","*/");
+  sb=new StringBuffer();
+  p=Pattern.compile("(?i)^(.*)(@charset)( \"[^\"]*\";)");
+  m=p.matcher(css);
+  while (m.find()) {
+    m.appendReplacement(sb,m.group(2).toLowerCase() + m.group(3) + m.group(1));
+  }
+  m.appendTail(sb);
+  css=sb.toString();
+  sb=new StringBuffer();
+  p=Pattern.compile("(?i)^((\\s*)(@charset)( [^;]+;\\s*))+");
+  m=p.matcher(css);
+  while (m.find()) {
+    m.appendReplacement(sb,m.group(2) + m.group(3).toLowerCase() + m.group(4));
+  }
+  m.appendTail(sb);
+  css=sb.toString();
+  sb=new StringBuffer();
+  p=Pattern.compile("(?i)@(font-face|import|(?:-(?:atsc|khtml|moz|ms|o|wap|webkit)-)?keyframe|media|page|namespace)");
+  m=p.matcher(css);
+  while (m.find()) {
+    m.appendReplacement(sb,'@' + m.group(1).toLowerCase());
+  }
+  m.appendTail(sb);
+  css=sb.toString();
+  sb=new StringBuffer();
+  p=Pattern.compile("(?i):(active|after|before|checked|disabled|empty|enabled|first-(?:child|of-type)|focus|hover|last-(?:child|of-type)|link|only-(?:child|of-type)|root|:selection|target|visited)");
+  m=p.matcher(css);
+  while (m.find()) {
+    m.appendReplacement(sb,':' + m.group(1).toLowerCase());
+  }
+  m.appendTail(sb);
+  css=sb.toString();
+  sb=new StringBuffer();
+  p=Pattern.compile("(?i):(lang|not|nth-child|nth-last-child|nth-last-of-type|nth-of-type|(?:-(?:moz|webkit)-)?any)\\(");
+  m=p.matcher(css);
+  while (m.find()) {
+    m.appendReplacement(sb,':' + m.group(1).toLowerCase() + '(');
+  }
+  m.appendTail(sb);
+  css=sb.toString();
+  sb=new StringBuffer();
+  p=Pattern.compile("(?i)([:,\\( ]\\s*)(attr|color-stop|from|rgba|to|url|(?:-(?:atsc|khtml|moz|ms|o|wap|webkit)-)?(?:calc|max|min|(?:repeating-)?(?:linear|radial)-gradient)|-webkit-gradient)");
+  m=p.matcher(css);
+  while (m.find()) {
+    m.appendReplacement(sb,m.group(1) + m.group(2).toLowerCase());
+  }
+  m.appendTail(sb);
+  css=sb.toString();
+  css=css.replaceAll("(?i)\\band\\(","and (");
+  css=css.replaceAll("([!{}:;>+\\(\\[,])\\s+","$1");
+  css=css.replaceAll(";+}","}");
+  css=css.replaceAll("(?i)(^|[^0-9])(?:0?\\.)?0(?:px|em|%|in|cm|mm|pc|pt|ex|deg|g?rad|m?s|k?hz)","$10");
+  css=css.replaceAll(":0 0 0 0(;|})",":0$1");
+  css=css.replaceAll(":0 0 0(;|})",":0$1");
+  css=css.replaceAll(":0 0(;|})",":0$1");
+  sb=new StringBuffer();
+  p=Pattern.compile("(?i)(background-position|webkit-mask-position|transform-origin|webkit-transform-origin|moz-transform-origin|o-transform-origin|ms-transform-origin):0(;|})");
+  m=p.matcher(css);
+  while (m.find()) {
+    m.appendReplacement(sb,m.group(1).toLowerCase() + ":0 0" + m.group(2));
+  }
+  m.appendTail(sb);
+  css=sb.toString();
+  css=css.replaceAll("(:|\\s)0+\\.(\\d+)","$1.$2");
+  p=Pattern.compile("rgb\\s*\\(\\s*([0-9,\\s]+)\\s*\\)");
+  m=p.matcher(css);
+  sb=new StringBuffer();
+  while (m.find()) {
+    String[] rgbcolors=m.group(1).split(",");
+    StringBuffer hexcolor=new StringBuffer("#");
+    for (i=0; i < rgbcolors.length; i++) {
+      int val=Integer.parseInt(rgbcolors[i]);
+      if (val < 16) {
+        hexcolor.append("0");
+      }
+      hexcolor.append(Integer.toHexString(val));
+    }
+    m.appendReplacement(sb,hexcolor.toString());
+  }
+  m.appendTail(sb);
+  css=sb.toString();
+  p=Pattern.compile("(\\=\\s*?[\"']?)?" + "#([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])" + "(:?\\}|[^0-9a-fA-F{][^{]*?\\})");
+  m=p.matcher(css);
+  sb=new StringBuffer();
+  int index=0;
+  while (m.find(index)) {
+    sb.append(css.substring(index,m.start()));
+    boolean isFilter=(m.group(1) != null && !"".equals(m.group(1)));
+    if (isFilter) {
+      sb.append(m.group(1) + "#" + m.group(2)+ m.group(3)+ m.group(4)+ m.group(5)+ m.group(6)+ m.group(7));
+    }
+ else {
+      if (m.group(2).equalsIgnoreCase(m.group(3)) && m.group(4).equalsIgnoreCase(m.group(5)) && m.group(6).equalsIgnoreCase(m.group(7))) {
+        sb.append("#" + (m.group(3) + m.group(5) + m.group(7)).toLowerCase());
+      }
+ else {
+        sb.append("#" + (m.group(2) + m.group(3) + m.group(4)+ m.group(5)+ m.group(6)+ m.group(7)).toLowerCase());
+      }
+    }
+    index=m.end(7);
+  }
+  sb.append(css.substring(index));
+  css=sb.toString();
+  css=css.replaceAll("(:|\\s)(#f00)(;|})","$1red$3");
+  css=css.replaceAll("(:|\\s)(#000080)(;|})","$1navy$3");
+  css=css.replaceAll("(:|\\s)(#808080)(;|})","$1gray$3");
+  css=css.replaceAll("(:|\\s)(#808000)(;|})","$1olive$3");
+  css=css.replaceAll("(:|\\s)(#800080)(;|})","$1purple$3");
+  css=css.replaceAll("(:|\\s)(#c0c0c0)(;|})","$1silver$3");
+  css=css.replaceAll("(:|\\s)(#008080)(;|})","$1teal$3");
+  css=css.replaceAll("(:|\\s)(#ffa500)(;|})","$1orange$3");
+  css=css.replaceAll("(:|\\s)(#800000)(;|})","$1maroon$3");
+  sb=new StringBuffer();
+  p=Pattern.compile("(?i)(border|border-top|border-right|border-bottom|border-left|outline|background):none(;|})");
+  m=p.matcher(css);
+  while (m.find()) {
+    m.appendReplacement(sb,m.group(1).toLowerCase() + ":0" + m.group(2));
+  }
+  m.appendTail(sb);
+  css=sb.toString();
+  css=css.replaceAll("(?i)progid:DXImageTransform.Microsoft.Alpha\\(Opacity=","alpha(opacity=");
+  css=css.replaceAll("\\(([\\-A-Za-z]+):([0-9]+)\\/([0-9]+)\\)","($1:$2___YUI_QUERY_FRACTION___$3)");
+  css=css.replaceAll("[^\\}\\{/;]+\\{\\}","");
+  css=css.replaceAll("___YUI_QUERY_FRACTION___","/");
+  if (linebreakpos >= 0) {
+    i=0;
+    int linestartpos=0;
+    sb=new StringBuffer(css);
+    while (i < sb.length()) {
+      char c=sb.charAt(i++);
+      if (c == '}' && i - linestartpos > linebreakpos) {
+        sb.insert(i,'\n');
+        linestartpos=i;
+      }
+    }
+    css=sb.toString();
+  }
+  css=css.replaceAll(";;+",";");
+  for (i=0, max=preservedTokens.size(); i < max; i++) {
+    css=css.replace("___YUICSSMIN_PRESERVED_TOKEN_" + i + "___",preservedTokens.get(i).toString());
+  }
+  css=css.trim();
+  out.write(css);
+}

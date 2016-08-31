@@ -1,10 +1,9 @@
 {
+  FTPClient ftp1=setupFTPClient("ftpuser1");
   final String name1="FTPdir1";
-  final String name2="FTPdir2";
-  FTPClient ftp=setupFTPClient("ftpuser1");
   FTPFile[] dirs=null;
   try (final Tx tx=app.tx()){
-    dirs=ftp.listDirectories();
+    dirs=ftp1.listDirectories();
     assertNotNull(dirs);
     assertEquals(0,dirs.length);
     createFTPDirectory(null,name1);
@@ -15,24 +14,21 @@
     fail("Unexpected exception: " + ex.getMessage());
   }
   try (final Tx tx=app.tx()){
-    dirs=ftp.listDirectories();
+    dirs=ftp1.listDirectories();
     assertNotNull(dirs);
     assertEquals(1,dirs.length);
     assertEquals(name1,dirs[0].getName());
-    createFTPDirectory(null,name2);
     tx.success();
   }
  catch (  IOException|FrameworkException ex) {
     logger.log(Level.WARNING,"",ex);
     fail("Unexpected exception: " + ex.getMessage());
   }
+  FTPClient ftp2=setupFTPClient("ftpuser2");
   try (final Tx tx=app.tx()){
-    dirs=ftp.listDirectories();
+    dirs=ftp2.listDirectories();
     assertNotNull(dirs);
-    assertEquals(2,dirs.length);
-    assertEquals(name1,dirs[0].getName());
-    assertEquals(name2,dirs[1].getName());
-    ftp.disconnect();
+    assertEquals(0,dirs.length);
     tx.success();
   }
  catch (  IOException|FrameworkException ex) {

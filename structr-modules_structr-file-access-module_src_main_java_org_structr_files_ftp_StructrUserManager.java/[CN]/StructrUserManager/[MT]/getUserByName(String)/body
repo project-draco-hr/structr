@@ -1,9 +1,9 @@
 {
-  try (Tx tx=StructrApp.getInstance().tx()){
+  try (Tx tx=StructrApp.getInstance(securityContext).tx()){
     org.structr.web.entity.User structrUser=getStructrUser(userName);
     tx.success();
     if (structrUser != null) {
-      return new StructrFtpUser(structrUser);
+      return new StructrFtpUser(securityContext,structrUser);
     }
  else {
       return null;

@@ -1,6 +1,6 @@
 {
   logger.log(Level.INFO,"Requested path: {0}",requestedPath);
-  try (Tx tx=StructrApp.getInstance().tx()){
+  try (Tx tx=StructrApp.getInstance(securityContext).tx()){
     if (StringUtils.isBlank(requestedPath) || "/".equals(requestedPath)) {
       return getHomeDirectory();
     }
@@ -9,7 +9,7 @@
       return cur;
     }
     if ("..".equals(requestedPath) || "../".equals(requestedPath)) {
-      return new StructrFtpFolder(cur.getStructrFile().getProperty(AbstractFile.parent));
+      return new StructrFtpFolder(securityContext,cur.getStructrFile().getProperty(AbstractFile.parent));
     }
     if (!requestedPath.startsWith("/")) {
       String basePath=cur.getAbsolutePath();
@@ -25,14 +25,14 @@
     if (file != null) {
       if (file instanceof Folder) {
         tx.success();
-        return new StructrFtpFolder((Folder)file);
+        return new StructrFtpFolder(securityContext,(Folder)file);
       }
  else {
         tx.success();
-        return new StructrFtpFile((FileBase)file);
+        return new StructrFtpFile(securityContext,(FileBase)file);
       }
     }
-    Page page=StructrApp.getInstance().nodeQuery(Page.class).andName(PathHelper.getName(requestedPath)).getFirst();
+    Page page=StructrApp.getInstance(securityContext).nodeQuery(Page.class).andName(PathHelper.getName(requestedPath)).getFirst();
     if (page != null) {
       tx.success();
       return new FtpFilePageWrapper(page);

@@ -1,9 +1,9 @@
 {
-  try (Tx tx=StructrApp.getInstance().tx()){
+  try (Tx tx=StructrApp.getInstance(securityContext).tx()){
     org.structr.web.entity.User structrUser=(org.structr.web.entity.User)AuthHelper.getPrincipalForCredential(AbstractUser.name,user.getName());
     final Folder homeDir=structrUser.getProperty(org.structr.web.entity.User.homeDirectory);
     tx.success();
-    return new StructrFtpFolder(homeDir);
+    return new StructrFtpFolder(securityContext,homeDir);
   }
  catch (  FrameworkException fex) {
     logger.log(Level.SEVERE,"Error while getting home directory",fex);

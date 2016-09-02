@@ -49,6 +49,25 @@
  else {
     permissionsForOwnerlessNodes.add(Permission.read);
   }
+  try {
+    final ExecutorService service=Executors.newSingleThreadExecutor();
+    service.submit(new Runnable(){
+      @Override public void run(){
+        try {
+          Thread.sleep(100);
+        }
+ catch (        Throwable ignore) {
+        }
+        for (        final InitializationCallback callback : singletonInstance.callbacks) {
+          callback.initializationDone();
+        }
+      }
+    }
+).get();
+  }
+ catch (  Throwable t) {
+    logger.log(Level.WARNING,"Exception while executing post-initialization tasks",t);
+  }
   System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.ms").format(new Date()) + "  ---------------- Initialization complete ----------------");
   initializationDone=true;
 }

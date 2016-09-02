@@ -2,21 +2,6 @@
   if (singletonInstance == null) {
     singletonInstance=new Services();
     singletonInstance.initialize();
-    final Thread thread=new Thread(new Runnable(){
-      @Override public void run(){
-        try {
-          Thread.sleep(100);
-        }
- catch (        Throwable ignore) {
-        }
-        for (        final InitializationCallback callback : singletonInstance.callbacks) {
-          callback.initializationDone();
-        }
-      }
-    }
-);
-    thread.setDaemon(true);
-    thread.start();
   }
   return singletonInstance;
 }

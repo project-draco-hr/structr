@@ -1,18 +1,24 @@
 {
+  final List<TestOne> nodes=new LinkedList<>();
+  final long t0=System.currentTimeMillis();
+  final long number=1000;
   try {
-    int number=1000;
-    long t0=System.nanoTime();
-    List<GenericNode> nodes=createTestNodes(GenericNode.class,number);
-    long t1=System.nanoTime();
-    assertTrue(nodes.size() == number);
-    DecimalFormat decimalFormat=new DecimalFormat("0.000000000",DecimalFormatSymbols.getInstance(Locale.ENGLISH));
-    Double time=(t1 - t0) / 1000000000.0;
-    Double rate=number / ((t1 - t0) / 1000000000.0);
-    logger.log(Level.INFO,"Created {0} nodes in {1} seconds ({2} per s)",new Object[]{number,decimalFormat.format(time),decimalFormat.format(rate)});
-    assertTrue(rate > 10);
-  }
+    try (final Tx tx=app.tx()){
+      for (int i=0; i < number; i++) {
+        nodes.add(createTestNode(TestOne.class,new NodeAttribute(TestOne.name,"TestOne" + i),new NodeAttribute(TestOne.aBoolean,true),new NodeAttribute(TestOne.aDate,new Date()),new NodeAttribute(TestOne.aDouble,1.234),new NodeAttribute(TestOne.aLong,12345L),new NodeAttribute(TestOne.anEnum,TestOne.Status.One),new NodeAttribute(TestOne.anInt,123)));
+      }
+      tx.success();
+    }
+   }
  catch (  FrameworkException ex) {
     logger.log(Level.SEVERE,ex.toString());
     fail("Unexpected exception");
   }
+  final long t1=System.currentTimeMillis();
+  assertTrue(nodes.size() == number);
+  DecimalFormat decimalFormat=new DecimalFormat("0.000000000",DecimalFormatSymbols.getInstance(Locale.ENGLISH));
+  Double time=(t1 - t0) / 1000.0;
+  Double rate=number / ((t1 - t0) / 1000.0);
+  logger.log(Level.INFO,"Created {0} nodes in {1} seconds ({2} per s)",new Object[]{number,decimalFormat.format(time),decimalFormat.format(rate)});
+  assertTrue("Creation rate of nodes too low, expected > 100, was " + rate,rate > 100);
 }

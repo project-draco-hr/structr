@@ -16,14 +16,17 @@
   if (request != null) {
     if (!userHasLocaleString) {
       locale=request.getLocale();
-      for (      Cookie c : request.getCookies()) {
-        if (c.getName().equals(LOCALE_KEY)) {
-          final String cookieLocaleString=c.getValue();
-          try {
-            locale=LocaleUtils.toLocale(cookieLocaleString);
-          }
- catch (          IllegalArgumentException e) {
-            locale=Locale.forLanguageTag(cookieLocaleString);
+      final Cookie[] cookies=request.getCookies();
+      if (cookies != null) {
+        for (        Cookie c : cookies) {
+          if (c.getName().equals(LOCALE_KEY)) {
+            final String cookieLocaleString=c.getValue();
+            try {
+              locale=LocaleUtils.toLocale(cookieLocaleString);
+            }
+ catch (            IllegalArgumentException e) {
+              locale=Locale.forLanguageTag(cookieLocaleString);
+            }
           }
         }
       }

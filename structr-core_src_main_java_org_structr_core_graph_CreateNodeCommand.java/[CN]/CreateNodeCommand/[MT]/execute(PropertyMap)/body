@@ -25,15 +25,10 @@
     properties.remove(AbstractNode.createdDate);
     properties.remove(AbstractNode.createdBy);
     final Set<String> labels=TypeProperty.getLabelsForType(nodeType);
-    node=(T)nodeFactory.instantiateWithType(graphDb.createNode(labels,tmp.getData()),nodeType,null,isCreation);
+    final Node dbNode=createNode(graphDb,user,nodeType,labels,tmp.getData());
+    node=(T)nodeFactory.instantiateWithType(dbNode,nodeType,null,isCreation);
     if (node != null) {
       TransactionCommand.nodeCreated(user,node);
-      if (user != null && !(user instanceof SuperUser) && node.canHaveOwner()) {
-        final App app=StructrApp.getInstance(securityContext);
-        app.create(user,(NodeInterface)node,PrincipalOwnsNode.class);
-        Security securityRel=app.create(user,(NodeInterface)node,Security.class);
-        securityRel.setAllowed(Permission.allPermissions);
-      }
       for (      final Entry<PropertyKey,Object> attr : properties.entrySet()) {
         node.setProperty(attr.getKey(),attr.getValue());
       }

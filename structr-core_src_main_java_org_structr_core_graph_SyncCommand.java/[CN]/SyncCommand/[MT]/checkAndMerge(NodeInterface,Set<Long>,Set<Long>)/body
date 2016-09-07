@@ -1,11 +1,14 @@
 {
   final Class type=node.getClass();
   final String name=node.getName();
-  final NodeInterface existingNode=(NodeInterface)StructrApp.getInstance().nodeQuery(type).andName(name).getFirst();
-  if (existingNode != null) {
-    logger.log(Level.INFO,"Found existing schema node {0}, merging!",name);
+  final List<NodeInterface> existingNodes=StructrApp.getInstance().nodeQuery(type).andName(name).getAsList();
+  for (  NodeInterface existingNode : existingNodes) {
     final Node sourceNode=node.getNode();
     final Node targetNode=existingNode.getNode();
+    if (sourceNode.getId() == targetNode.getId()) {
+      continue;
+    }
+    logger.log(Level.INFO,"Found existing schema node {0}, merging!",name);
     copyProperties(sourceNode,targetNode);
     for (    final Relationship outRel : sourceNode.getRelationships(Direction.OUTGOING)) {
       final Node otherNode=outRel.getEndNode();

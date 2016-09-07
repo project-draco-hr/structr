@@ -1,0 +1,20 @@
+{
+  Map<String,Object> databaseTypedProperties=new LinkedHashMap<>();
+  for (  Entry<PropertyKey,Object> entry : properties.entrySet()) {
+    PropertyKey propertyKey=entry.getKey();
+    PropertyConverter converter=propertyKey.databaseConverter(securityContext);
+    if (converter != null) {
+      try {
+        Object propertyValue=converter.convert(entry.getValue());
+        databaseTypedProperties.put(propertyKey.jsonName(),propertyValue);
+      }
+ catch (      ClassCastException cce) {
+        throw new FrameworkException(422,"Invalid JSON input for key " + propertyKey.jsonName() + ", expected a JSON "+ propertyKey.typeName()+ ".");
+      }
+    }
+ else {
+      databaseTypedProperties.put(propertyKey.jsonName(),entry.getValue());
+    }
+  }
+  return databaseTypedProperties;
+}

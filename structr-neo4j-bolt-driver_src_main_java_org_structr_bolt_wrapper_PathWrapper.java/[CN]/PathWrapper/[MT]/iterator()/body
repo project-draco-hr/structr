@@ -1,11 +1,35 @@
 {
+  final Iterator<Segment> it=path.iterator();
   return new Iterator<PropertyContainer>(){
+    private Segment current=null;
+    private int state=0;
     @Override public boolean hasNext(){
-      throw new UnsupportedOperationException("Not supported yet.");
+      return it.hasNext() || state < 2;
     }
     @Override public PropertyContainer next(){
-      throw new UnsupportedOperationException("Not supported yet.");
-    }
-  }
+      if (current == null) {
+        current=it.next();
+      }
+ else       if (state == 2) {
+        current=it.next();
+        state=1;
+      }
+switch (state) {
+case 0:
+        state=1;
+      return NodeWrapper.newInstance(db,current.start());
+case 1:
+    state=2;
+  return RelationshipWrapper.newInstance(db,current.relationship());
+case 2:
+state=0;
+return NodeWrapper.newInstance(db,current.end());
+}
+throw new NotFoundException("No such element.");
+}
+@Override public void remove(){
+throw new UnsupportedOperationException("Removal not supported.");
+}
+}
 ;
 }

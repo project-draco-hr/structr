@@ -3,8 +3,8 @@
   final Map<String,Object> ownsProperties=new HashMap<>();
   final Map<String,Object> securityProperties=new HashMap<>();
   final StringBuilder buf=new StringBuilder();
-  final NodeInterface template=getTemplate(nodeType);
-  if (user != null && !(user instanceof SuperUser) && template.canHaveOwner()) {
+  final boolean canHaveOwner=canHaveOwner(nodeType);
+  if (canHaveOwner && user != null && !(user instanceof SuperUser)) {
     buf.append("MATCH (u:Principal) WHERE id(u) = {userId}");
     buf.append(" CREATE (u)-[o:OWNS {ownsProperties}]->(n");
     for (    final String label : labels) {

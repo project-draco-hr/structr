@@ -71,10 +71,7 @@
           final String name=item.getName().replaceAll("\\\\","/");
           final FileBase newFile=FileHelper.createFile(securityContext,IOUtils.toByteArray(item.getInputStream()),contentType,cls);
           newFile.setProperty(AbstractNode.name,PathHelper.getName(name));
-          PropertyMap additionalProperties=PropertyMap.inputTypeToJavaType(securityContext,cls,params);
-          for (          PropertyKey key : additionalProperties.keySet()) {
-            newFile.setProperty(key,additionalProperties.get(key));
-          }
+          newFile.setProperties(newFile.getSecurityContext(),PropertyMap.inputTypeToJavaType(securityContext,cls,params));
           final String defaultUploadFolderConfigValue=StructrApp.getConfigurationValue(Services.APPLICATION_DEFAULT_UPLOAD_FOLDER,null);
           if (defaultUploadFolderConfigValue != null) {
             final Folder defaultUploadFolder=FileHelper.createFolderPath(SecurityContext.getSuperUserInstance(),defaultUploadFolderConfigValue);

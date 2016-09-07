@@ -1,10 +1,9 @@
 {
   FileHelper.writeToFile(file,fileData);
-  file.setProperty(FileBase.contentType,contentType != null ? contentType : getContentMimeType(file));
-  file.unlockSystemPropertiesOnce();
-  file.setProperty(FileBase.checksum,FileHelper.getChecksum(file));
-  file.unlockSystemPropertiesOnce();
-  file.setProperty(FileBase.size,FileHelper.getSize(file));
-  file.unlockSystemPropertiesOnce();
-  file.setProperty(FileBase.version,1);
+  final PropertyMap map=new PropertyMap();
+  map.put(FileBase.contentType,contentType != null ? contentType : getContentMimeType(file));
+  map.put(FileBase.checksum,FileHelper.getChecksum(file));
+  map.put(FileBase.size,FileHelper.getSize(file));
+  map.put(FileBase.version,1);
+  file.setProperties(file.getSecurityContext(),map);
 }

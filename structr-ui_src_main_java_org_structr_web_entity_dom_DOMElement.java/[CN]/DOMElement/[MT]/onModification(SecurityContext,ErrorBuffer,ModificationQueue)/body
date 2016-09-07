@@ -1,22 +1,27 @@
 {
+  final PropertyMap map=new PropertyMap();
   if (dataProperties != null) {
     dataProperties.clear();
   }
   for (  Sync rel : getOutgoingRelationships(Sync.class)) {
-    DOMElement syncedNode=(DOMElement)rel.getTargetNode();
+    final DOMElement syncedNode=(DOMElement)rel.getTargetNode();
+    map.clear();
     for (    Property htmlProp : syncedNode.getHtmlAttributes()) {
-      syncedNode.setProperty(htmlProp,getProperty(htmlProp));
+      map.put(htmlProp,getProperty(htmlProp));
     }
-    syncedNode.setProperty(name,getProperty(name));
+    map.put(name,getProperty(name));
+    syncedNode.setProperties(securityContext,map);
   }
   final Sync rel=getIncomingRelationship(Sync.class);
   if (rel != null) {
     final DOMElement otherNode=(DOMElement)rel.getSourceNode();
     if (otherNode != null) {
+      map.clear();
       for (      Property htmlProp : otherNode.getHtmlAttributes()) {
-        otherNode.setProperty(htmlProp,getProperty(htmlProp));
+        map.put(htmlProp,getProperty(htmlProp));
       }
-      otherNode.setProperty(name,getProperty(name));
+      map.put(name,getProperty(name));
+      otherNode.setProperties(securityContext,map);
     }
   }
   try {

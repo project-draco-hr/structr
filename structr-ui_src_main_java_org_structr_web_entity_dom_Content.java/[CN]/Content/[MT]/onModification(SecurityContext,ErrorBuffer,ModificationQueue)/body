@@ -1,17 +1,21 @@
 {
   for (  final Sync rel : getOutgoingRelationships(Sync.class)) {
-    Content syncedNode=(Content)rel.getTargetNode();
-    syncedNode.setProperty(content,getProperty(content));
-    syncedNode.setProperty(contentType,getProperty(contentType));
-    syncedNode.setProperty(name,getProperty(name));
+    final Content syncedNode=(Content)rel.getTargetNode();
+    final PropertyMap map=new PropertyMap();
+    map.put(content,getProperty(content));
+    map.put(contentType,getProperty(contentType));
+    map.put(name,getProperty(name));
+    syncedNode.setProperties(securityContext,map);
   }
   final Sync rel=getIncomingRelationship(Sync.class);
   if (rel != null) {
     final Content otherNode=(Content)rel.getSourceNode();
     if (otherNode != null) {
-      otherNode.setProperty(content,getProperty(content));
-      otherNode.setProperty(contentType,getProperty(contentType));
-      otherNode.setProperty(name,getProperty(name));
+      final PropertyMap map=new PropertyMap();
+      map.put(content,getProperty(content));
+      map.put(contentType,getProperty(contentType));
+      map.put(name,getProperty(name));
+      otherNode.setProperties(otherNode.getSecurityContext(),map);
     }
   }
   try {

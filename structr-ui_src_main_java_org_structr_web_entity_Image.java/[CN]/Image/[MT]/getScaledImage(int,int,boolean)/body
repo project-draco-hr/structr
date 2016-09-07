@@ -56,20 +56,22 @@
           logger.log(Level.WARNING,"Could not create thumbnail image",ex);
         }
         if (thumbnail != null && data != null) {
-          final Thumbnails thumbnailRelationship=app.create(originalImage,thumbnail,Thumbnails.class);
-          thumbnail.unlockSystemPropertiesOnce();
-          thumbnail.setProperty(File.size,Long.valueOf(data.length));
-          thumbnail.setProperty(Image.width,tnWidth);
-          thumbnail.setProperty(Image.height,tnHeight);
-          thumbnail.setProperty(AbstractNode.hidden,originalImage.getProperty(AbstractNode.hidden));
-          thumbnail.setProperty(AbstractNode.visibleToAuthenticatedUsers,originalImage.getProperty(AbstractNode.visibleToAuthenticatedUsers));
-          thumbnail.setProperty(AbstractNode.visibleToPublicUsers,originalImage.getProperty(AbstractNode.visibleToPublicUsers));
+          final PropertyMap relProperties=new PropertyMap();
+          relProperties.put(Image.width,tnWidth);
+          relProperties.put(Image.height,tnHeight);
+          relProperties.put(Image.checksum,newChecksum);
+          app.create(originalImage,thumbnail,Thumbnails.class,relProperties);
+          final PropertyMap properties=new PropertyMap();
+          properties.put(Image.width,tnWidth);
+          properties.put(Image.height,tnHeight);
+          properties.put(AbstractNode.hidden,originalImage.getProperty(AbstractNode.hidden));
+          properties.put(AbstractNode.visibleToAuthenticatedUsers,originalImage.getProperty(AbstractNode.visibleToAuthenticatedUsers));
+          properties.put(AbstractNode.visibleToPublicUsers,originalImage.getProperty(AbstractNode.visibleToPublicUsers));
+          thumbnail.setProperties(securityContext,properties);
           thumbnail.setProperty(AbstractNode.owner,originalImage.getProperty(AbstractNode.owner));
           thumbnail.setProperty(File.parent,originalImage.getProperty(File.parent));
-          thumbnailRelationship.setProperty(Image.width,tnWidth);
-          thumbnailRelationship.setProperty(Image.height,tnHeight);
-          thumbnailRelationship.unlockSystemPropertiesOnce();
-          thumbnailRelationship.setProperty(Image.checksum,newChecksum);
+          thumbnail.unlockSystemPropertiesOnce();
+          thumbnail.setProperty(File.size,Long.valueOf(data.length));
           for (          final Image tn : oldThumbnails) {
             app.delete(tn);
           }

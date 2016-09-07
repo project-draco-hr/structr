@@ -2,18 +2,8 @@
   assertNotStale();
   final SessionTransaction tx=db.getCurrentTransaction();
   final Map<String,Object> map=new HashMap<>(values);
-  final StringBuilder buf=new StringBuilder();
   map.put("id",entity.id());
-  for (Iterator<String> it=values.keySet().iterator(); it.hasNext(); ) {
-    final String key=it.next();
-    buf.append("n.`");
-    buf.append(key);
-    buf.append("` = {");
-    buf.append(key);
-    if (it.hasNext()) {
-      buf.append(", ");
-    }
-  }
-  entity=(T)tx.getEntity(getQueryPrefix() + " WHERE ID(n) = {id} SET " + buf+ " RETURN n",map);
+  map.put("properties",values);
+  entity=(T)tx.getEntity(getQueryPrefix() + " WHERE ID(n) = {id} SET n += {properties} RETURN n",map);
   tx.modified(this);
 }

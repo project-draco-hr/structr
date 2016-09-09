@@ -51,7 +51,7 @@
     params.put("id1",principalId);
     params.put("id2",this.getId());
     for (int i=1; i < 10; i++) {
-      final String query="MATCH n, m, p = allShortestPaths(n-[" + relTypes + "*.."+ i+ "]-m) WHERE id(n) = {id1} AND id(m) = {id2} RETURN p";
+      final String query="MATCH (n), (m), p = allShortestPaths((n)-[" + relTypes + "*.."+ i+ "]-(m)) WHERE id(n) = {id1} AND id(m) = {id2} RETURN p";
       final NativeResult result=db.execute(query,params);
       while (result.hasNext()) {
         final Map<String,Object> row=result.next();

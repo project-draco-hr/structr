@@ -1,5 +1,7 @@
 {
   try {
+    final NodeFactory nodeFactory=new NodeFactory(SecurityContext.getSuperUserInstance());
+    final RelationshipFactory relFactory=new RelationshipFactory(SecurityContext.getSuperUserInstance());
     final App app=StructrApp.getInstance();
     final String fileName=(String)attributes.get("name");
     if (fileName == null || fileName.isEmpty()) {
@@ -8,7 +10,7 @@
     try (final Tx tx=app.tx()){
       final File file=FileHelper.createFile(securityContext,new byte[0],"application/zip",File.class,fileName);
       file.setProperty(File.visibleToAuthenticatedUsers,true);
-      SyncCommand.exportToStream(file.getOutputStream(),app.nodeQuery(NodeInterface.class).getAsList(),app.relationshipQuery(RelationshipInterface.class).getAsList(),null,false);
+      SyncCommand.exportToStream(file.getOutputStream(),nodeFactory.bulkInstantiate(app.getDatabaseService().getAllNodes()),relFactory.bulkInstantiate(app.getDatabaseService().getAllRelationships()),null,false);
       tx.success();
     }
    }

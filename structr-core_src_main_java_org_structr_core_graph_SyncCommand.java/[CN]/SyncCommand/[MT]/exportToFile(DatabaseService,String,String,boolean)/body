@@ -1,8 +1,10 @@
 {
   final App app=StructrApp.getInstance();
   try (final Tx tx=app.tx()){
-    Set<AbstractNode> nodes=new HashSet<>();
-    Set<AbstractRelationship> rels=new HashSet<>();
+    final NodeFactory nodeFactory=new NodeFactory(SecurityContext.getSuperUserInstance());
+    final RelationshipFactory relFactory=new RelationshipFactory(SecurityContext.getSuperUserInstance());
+    final Set<AbstractNode> nodes=new HashSet<>();
+    final Set<AbstractRelationship> rels=new HashSet<>();
     boolean conditionalIncludeFiles=includeFiles;
     if (query != null) {
       logger.log(Level.INFO,"Using Cypher query {0} to determine export set, disabling export of files",query);
@@ -19,8 +21,8 @@
       logger.log(Level.INFO,"Query returned {0} nodes and {1} relationships.",new Object[]{nodes.size(),rels.size()});
     }
  else {
-      nodes.addAll(app.nodeQuery(AbstractNode.class).includeDeletedAndHidden().getAsList());
-      rels.addAll(app.relationshipQuery(AbstractRelationship.class).includeDeletedAndHidden().getAsList());
+      nodes.addAll(nodeFactory.bulkInstantiate(graphDb.getAllNodes()));
+      rels.addAll(relFactory.bulkInstantiate(graphDb.getAllRelationships()));
     }
     exportToStream(new FileOutputStream(fileName),nodes,rels,null,conditionalIncludeFiles);
     tx.success();

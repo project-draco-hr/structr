@@ -4,7 +4,12 @@
     final ConfigurationProvider config=StructrApp.getConfiguration();
     final PropertyKey key=config.getPropertyKeyForJSONName(type(mappedType),mappedAttribute);
     if (key != null) {
-      obj.setProperty(key,ex);
+      final PropertyConverter inputConverter=key.inputConverter(securityContext);
+      Object convertedValue=ex;
+      if (inputConverter != null) {
+        convertedValue=inputConverter.convert(ex);
+      }
+      obj.setProperty(key,convertedValue);
     }
   }
  else   if (subPage != null) {

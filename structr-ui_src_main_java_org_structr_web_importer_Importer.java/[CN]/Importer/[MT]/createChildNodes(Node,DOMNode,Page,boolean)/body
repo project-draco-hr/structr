@@ -31,8 +31,10 @@
       }
     }
     if (type.equals("#comment")) {
-      tag="";
       comment=((Comment)node).getData();
+      processComment=false;
+      lastComment=comment;
+      tag="";
       if (StringUtils.isBlank(comment)) {
         continue;
       }
@@ -145,6 +147,11 @@
         }
       }
       parent.appendChild(newNode);
+      if (processComment && commentHandler != null && StringUtils.isNotBlank(lastComment)) {
+        commentHandler.handleComment(page,newNode,lastComment);
+        lastComment=null;
+      }
+      processComment=true;
       createChildNodes(node,newNode,page,removeHashAttribute);
     }
   }

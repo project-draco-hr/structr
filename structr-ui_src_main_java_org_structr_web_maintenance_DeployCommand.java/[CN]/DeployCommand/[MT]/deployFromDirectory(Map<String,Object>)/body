@@ -1,0 +1,22 @@
+{
+  final String path=(String)data.get("source");
+  if (StringUtils.isBlank(path)) {
+    throw new FrameworkException(422,"Please provide source path for deployment.");
+  }
+  final Path source=Paths.get(path);
+  if (!Files.exists(source)) {
+    throw new FrameworkException(422,"Source path " + path + " does not exist.");
+  }
+  if (!Files.isDirectory(source)) {
+    throw new FrameworkException(422,"Source path " + path + " is not a directory.");
+  }
+  final Path pages=source.resolve("pages");
+  final Path files=source.resolve("files");
+  logger.log(Level.INFO,"Deploying pages from {0}..",pages);
+  try {
+    Files.walkFileTree(pages,new PageImportVisitor());
+  }
+ catch (  IOException ioex) {
+    logger.log(Level.WARNING,"Exception while importing pages",ioex);
+  }
+}

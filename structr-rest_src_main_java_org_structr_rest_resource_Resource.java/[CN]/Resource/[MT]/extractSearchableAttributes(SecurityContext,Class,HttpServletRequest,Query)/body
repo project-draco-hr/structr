@@ -6,15 +6,10 @@
     for (    final String name : request.getParameterMap().keySet()) {
       final PropertyKey key=conf.getPropertyKeyForJSONName(type,getFirstPartOfString(name),false);
       if (key != null) {
-        if (key.isSearchable()) {
-          searchKeys.add(key);
-        }
- else         if (!JsonRestServlet.commonRequestParameters.contains(name)) {
-          throw new FrameworkException(400,"Search key " + name + " is not indexed.");
-        }
+        searchKeys.add(key);
       }
  else       if (!JsonRestServlet.commonRequestParameters.contains(name)) {
-        throw new FrameworkException(400,"Invalid search key " + name);
+        throw new FrameworkException(400,"Unknown search key " + name);
       }
     }
     Collections.sort(searchKeys,new PropertyKeyProcessingOrderComparator());

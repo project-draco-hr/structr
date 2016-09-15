@@ -1,0 +1,23 @@
+{
+  String content="";
+  try {
+    final URI url=URI.create(address);
+    final HttpGet req=new HttpGet(url);
+    configure(req,proxyUrl,proxyUsername,proxyPassword,cookie,headers,true);
+    final CloseableHttpResponse resp=client.execute(req);
+    final Header contentType=resp.getFirstHeader("Content-Type");
+    String charset=StringUtils.substringAfterLast(contentType.getValue(),"; charset=");
+    if (StringUtils.isBlank(charset)) {
+      charset="UTF-8";
+    }
+    content=IOUtils.toString(resp.getEntity().getContent(),charset);
+    if (content.charAt(0) == 65279) {
+      content=content.substring(1);
+    }
+  }
+ catch (  final Throwable t) {
+    logger.log(Level.SEVERE,"Unable to fetch content from address " + address + ": ",t.getMessage());
+    return t.getMessage();
+  }
+  return content;
+}

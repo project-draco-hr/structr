@@ -4,10 +4,25 @@
     final ConfigurationProvider config=StructrApp.getConfiguration();
     final PropertyKey key=config.getPropertyKeyForJSONName(type(mappedType),mappedAttribute);
     if (key != null) {
-      final PropertyConverter inputConverter=key.inputConverter(securityContext);
       Object convertedValue=ex;
+      final PropertyConverter inputConverter=key.inputConverter(securityContext);
       if (inputConverter != null) {
-        convertedValue=inputConverter.convert(ex);
+        final String locale=getProperty(mappedAttributeLocaleProperty);
+        DecimalFormat decimalFormat=null;
+        if (key instanceof DoubleProperty) {
+          if (StringUtils.isNotBlank(locale)) {
+            decimalFormat=(DecimalFormat)NumberFormat.getNumberInstance(new Locale(locale));
+          }
+ else           if (StringUtils.isNotBlank(mappedAttributeFormat)) {
+            decimalFormat=new DecimalFormat(mappedAttributeFormat);
+          }
+          if (decimalFormat != null) {
+            convertedValue=decimalFormat.format(convertedValue);
+          }
+        }
+ else {
+          convertedValue=inputConverter.convert(ex);
+        }
       }
       obj.setProperty(key,convertedValue);
     }

@@ -15,20 +15,7 @@ case 2:
   break;
 }
 if ("text/html".equals(contentType)) {
-HttpClient client=getHttpClient();
-GetMethod get=new GetMethod(address);
-get.addRequestHeader("User-Agent","curl/7.35.0");
-get.addRequestHeader("Connection","close");
-get.getParams().setParameter("http.protocol.single-cookie-header",true);
-get.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
-get.setFollowRedirects(true);
-client.executeMethod(get);
-final InputStream response=get.getResponseBodyAsStream();
-String code=IOUtils.toString(response,"UTF-8");
-if (code.charAt(0) == 65279) {
-  code=code.substring(1);
-}
-final Document doc=Jsoup.parse(code);
+final Document doc=Jsoup.parse(HttpHelper.get(address));
 if (sources.length > 2) {
   Elements elements=doc.select(sources[2].toString());
   if (elements.size() > 1) {

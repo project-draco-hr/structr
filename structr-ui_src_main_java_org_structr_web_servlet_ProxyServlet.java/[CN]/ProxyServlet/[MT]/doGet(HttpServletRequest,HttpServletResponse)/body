@@ -1,24 +1,13 @@
 {
   try {
-    final String path=request.getPathInfo();
     final ServletOutputStream out=response.getOutputStream();
     String address=request.getParameter("url");
-    String username=request.getParameter("username");
-    String password=request.getParameter("password");
+    final URI url=URI.create(address);
+    String proxyUrl=request.getParameter("proxyUrl");
+    String proxyUsername=request.getParameter("proxyUsername");
+    String proxyPassword=request.getParameter("proxyPassword");
     String cookie=request.getParameter("cookie");
-    final HttpClientParams params=new HttpClientParams(HttpClientParams.getDefaultParams());
-    final HttpClient client=new HttpClient(params);
-    final GetMethod get=new GetMethod(address);
-    get.addRequestHeader("User-Agent","curl/7.35.0");
-    get.addRequestHeader("Connection","close");
-    get.getParams().setParameter("http.protocol.single-cookie-header",true);
-    get.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
-    get.setFollowRedirects(true);
-    if (StringUtils.isNotBlank(cookie)) {
-      get.addRequestHeader("Cookie",cookie);
-    }
-    client.executeMethod(get);
-    final String content=get.getResponseBodyAsString().replace("<head>","<head>\n  <base href=\"" + address + "\">");
+    final String content=HttpHelper.get(address,proxyUrl,proxyUsername,proxyPassword,cookie,Collections.EMPTY_MAP).replace("<head>","<head>\n  <base href=\"" + url + "\">");
     IOUtils.write(content,out);
   }
  catch (  Throwable t) {

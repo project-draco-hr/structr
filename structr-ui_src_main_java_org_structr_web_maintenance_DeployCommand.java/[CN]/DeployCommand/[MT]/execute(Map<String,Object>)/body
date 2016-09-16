@@ -58,14 +58,24 @@
       logger.log(Level.WARNING,"Exception while importing shared components",ioex);
     }
   }
-  final Path data=source.resolve("data");
-  if (Files.exists(data)) {
+  final Path files=source.resolve("files");
+  if (Files.exists(files)) {
     try {
-      logger.log(Level.INFO,"Importing files and pages..");
-      Files.walkFileTree(data,new FileImportVisitor(data,pagesConf));
+      logger.log(Level.INFO,"Importing files...");
+      Files.walkFileTree(files,new FileImportVisitor(files,pagesConf));
     }
  catch (    IOException ioex) {
       logger.log(Level.WARNING,"Exception while importing files",ioex);
+    }
+  }
+  final Path pages=source.resolve("pages");
+  if (Files.exists(pages)) {
+    try {
+      logger.log(Level.INFO,"Importing pages..");
+      Files.walkFileTree(pages,new PageImportVisitor(pages,pagesConf));
+    }
+ catch (    IOException ioex) {
+      logger.log(Level.WARNING,"Exception while importing pages",ioex);
     }
   }
   final Path conf=source.resolve("deploy.conf");

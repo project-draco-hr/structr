@@ -1,0 +1,20 @@
+{
+  if (attrs.isDirectory()) {
+    createFolder(file);
+  }
+ else   if (attrs.isRegularFile()) {
+    final String fileName=file.getFileName().toString();
+    if (fileName.endsWith(".html")) {
+      try {
+        createPage(file,fileName);
+      }
+ catch (      FrameworkException fex) {
+        logger.log(Level.WARNING,"Exception while importing page {0}: {1}",new Object[]{name,fex.getMessage()});
+      }
+    }
+ else {
+      createFile(file,fileName);
+    }
+  }
+  return FileVisitResult.CONTINUE;
+}

@@ -1,4 +1,21 @@
 {
-  System.out.println("###########################################");
-  System.out.println(comment);
+  final String trimmedComment=comment.trim();
+  if (StringUtils.isNotBlank(trimmedComment)) {
+    if (trimmedComment.contains("@structr:private")) {
+      node.setProperty(AbstractNode.visibleToPublicUsers,false);
+      node.setProperty(AbstractNode.visibleToAuthenticatedUsers,false);
+    }
+    if (trimmedComment.contains("@structr:protected")) {
+      node.setProperty(AbstractNode.visibleToPublicUsers,false);
+      node.setProperty(AbstractNode.visibleToAuthenticatedUsers,true);
+    }
+    if (trimmedComment.contains("@structr:public")) {
+      node.setProperty(AbstractNode.visibleToPublicUsers,true);
+      node.setProperty(AbstractNode.visibleToAuthenticatedUsers,true);
+    }
+    if (trimmedComment.contains("@structr:public-only")) {
+      node.setProperty(AbstractNode.visibleToPublicUsers,true);
+      node.setProperty(AbstractNode.visibleToAuthenticatedUsers,false);
+    }
+  }
 }

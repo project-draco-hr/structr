@@ -1,4 +1,5 @@
 {
+  DOMNode rootElement=null;
   Linkable res=null;
   final List<Node> children=startNode.childNodes();
   for (  Node node : children) {
@@ -56,7 +57,7 @@
         }
       }
     }
-    org.structr.web.entity.dom.DOMNode newNode;
+    org.structr.web.entity.dom.DOMNode newNode=null;
     if (StringUtils.isBlank(tag)) {
       if (!StringUtils.isBlank(comment)) {
         newNode=(DOMNode)page.createComment(comment);
@@ -66,10 +67,30 @@
         newNode=(Content)page.createTextNode(content);
       }
     }
+ else     if ("template".equals(tag)) {
+      final String src=node.attr("src");
+      if (src != null) {
+        final DOMNode component=Importer.findSharedComponentByName(src);
+        if (component != null) {
+          newNode=(DOMNode)component.cloneNode(false);
+          newNode.setProperty(DOMNode.sharedComponent,component);
+          newNode.setProperty(DOMNode.ownerDocument,page);
+        }
+ else {
+          logger.log(Level.WARNING,"Unable to find shared component {0}, template ignored!",src);
+        }
+      }
+ else {
+        logger.log(Level.WARNING,"Invalid template definition, missing src attribute!");
+      }
+    }
  else {
       newNode=(org.structr.web.entity.dom.DOMElement)page.createElement(tag);
     }
     if (newNode != null) {
+      if (rootElement == null) {
+        rootElement=newNode;
+      }
       newNode.setProperty(AbstractNode.visibleToPublicUsers,publicVisible);
       newNode.setProperty(AbstractNode.visibleToAuthenticatedUsers,authVisible);
       if (res != null) {
@@ -121,10 +142,10 @@
             boolean isLocal=notBlank && !value.startsWith("http");
             boolean isActive=notBlank && value.contains("${");
             boolean isStructrLib=notBlank && value.startsWith("/structr/js/");
-            if ("link".equals(tag) && "href".equals(key) && isLocal&& !isActive) {
+            if ("link".equals(tag) && "href".equals(key) && isLocal&& !isActive&& !isImport) {
               newNode.setProperty(new StringProperty(PropertyView.Html.concat(key)),"${link.path}?${link.version}");
             }
- else             if (("href".equals(key) || "src".equals(key)) && isLocal && !isActive&& !isAnchor&& !isStructrLib) {
+ else             if (("href".equals(key) || "src".equals(key)) && isLocal && !isActive&& !isAnchor&& !isStructrLib&& !isImport) {
               newNode.setProperty(new StringProperty(PropertyView.Html.concat(key)),"${link.path}");
             }
  else {
@@ -146,7 +167,9 @@
           }
         }
       }
-      parent.appendChild(newNode);
+      if (parent != null) {
+        parent.appendChild(newNode);
+      }
       if (processComment && commentHandler != null && StringUtils.isNotBlank(lastComment)) {
         commentHandler.handleComment(page,newNode,lastComment);
         lastComment=null;
@@ -155,4 +178,5 @@
       createChildNodes(node,newNode,page,removeHashAttribute);
     }
   }
+  return rootElement;
 }

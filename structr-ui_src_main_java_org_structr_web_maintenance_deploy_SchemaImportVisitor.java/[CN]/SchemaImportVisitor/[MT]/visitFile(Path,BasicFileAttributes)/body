@@ -1,0 +1,15 @@
+{
+  if (attrs.isRegularFile()) {
+    final String fileName=file.getFileName().toString();
+    if (fileName.endsWith(".json")) {
+      final App app=StructrApp.getInstance();
+      try (final FileReader reader=new FileReader(file.toFile())){
+        StructrSchema.replaceDatabaseSchema(app,StructrSchema.createFromSource(reader));
+      }
+ catch (      Throwable t) {
+        t.printStackTrace();
+      }
+    }
+  }
+  return FileVisitResult.CONTINUE;
+}

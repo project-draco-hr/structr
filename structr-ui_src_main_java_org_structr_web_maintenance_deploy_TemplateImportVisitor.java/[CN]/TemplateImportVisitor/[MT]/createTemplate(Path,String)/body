@@ -1,0 +1,19 @@
+{
+  final String name=StringUtils.substringBeforeLast(fileName,".html");
+  final PropertyMap properties=getPropertiesForTemplate(name);
+  final DOMNode existingComponent=getExistingTemplate(name);
+  try (final Tx tx=app.tx()){
+    if (existingComponent != null) {
+      deleteComponent(app,name);
+    }
+    logger.log(Level.INFO,"Importing page {0} from {1}..",new Object[]{name,fileName});
+    final String src=new String(Files.readAllBytes(file),Charset.forName("UTF-8"));
+    final ShadowDocument shadowDocument=CreateComponentCommand.getOrCreateHiddenDocument();
+    final Template template=app.create(Template.class,new NodeAttribute(Template.ownerDocument,shadowDocument),new NodeAttribute(AbstractNode.name,name),new NodeAttribute(Template.content,src));
+    template.setProperty(AbstractNode.name,name);
+    if (properties != null) {
+      template.setProperties(securityContext,properties);
+    }
+    tx.success();
+  }
+ }

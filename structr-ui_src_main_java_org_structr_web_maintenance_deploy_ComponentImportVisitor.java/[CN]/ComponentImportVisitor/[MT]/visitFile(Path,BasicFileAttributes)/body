@@ -1,0 +1,17 @@
+{
+  if (attrs.isRegularFile()) {
+    final String fileName=file.getFileName().toString();
+    if (fileName.endsWith(".html")) {
+      try {
+        createComponent(file,fileName);
+      }
+ catch (      FrameworkException fex) {
+        logger.log(Level.WARNING,"Exception while importing shared component {0}: {1}",new Object[]{name,fex.getMessage()});
+      }
+    }
+  }
+ else {
+    logger.log(Level.WARNING,"Unexpected directory {0} found in components/ directory, ignoring",file.getFileName().toString());
+  }
+  return FileVisitResult.CONTINUE;
+}

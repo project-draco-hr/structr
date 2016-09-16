@@ -1,14 +1,84 @@
 {
-  String mode=(String)attributes.get("mode");
-  if (mode == null) {
-    mode="dir";
+  final String path=(String)attributes.get("source");
+  final Map<String,Object> componentsConf=new HashMap<>();
+  final Map<String,Object> templatesConf=new HashMap<>();
+  final Map<String,Object> pagesConf=new HashMap<>();
+  if (StringUtils.isBlank(path)) {
+    throw new FrameworkException(422,"Please provide source path for deployment.");
   }
-switch (mode) {
-case "dir":
-    deployFromDirectory(attributes);
-  break;
-case "file":
-deployFromFile(attributes);
-break;
-}
+  final Path source=Paths.get(path);
+  if (!Files.exists(source)) {
+    throw new FrameworkException(422,"Source path " + path + " does not exist.");
+  }
+  if (!Files.isDirectory(source)) {
+    throw new FrameworkException(422,"Source path " + path + " is not a directory.");
+  }
+  final Path pagesConfFile=source.resolve("pages.json");
+  if (Files.exists(pagesConfFile)) {
+    logger.log(Level.INFO,"Reading {0}..",pagesConfFile);
+    pagesConf.putAll(readConfig(pagesConfFile));
+  }
+  final Path componentsConfFile=source.resolve("components.json");
+  if (Files.exists(componentsConfFile)) {
+    logger.log(Level.INFO,"Reading {0}..",componentsConfFile);
+    componentsConf.putAll(readConfig(componentsConfFile));
+  }
+  final Path templatesConfFile=source.resolve("templates.json");
+  if (Files.exists(templatesConfFile)) {
+    logger.log(Level.INFO,"Reading {0}..",templatesConfFile);
+    templatesConf.putAll(readConfig(templatesConfFile));
+  }
+  final Path schema=source.resolve("schema");
+  if (Files.exists(schema)) {
+    try {
+      logger.log(Level.INFO,"Importing data from schema/ directory..");
+      Files.walkFileTree(schema,new SchemaImportVisitor(schema));
+    }
+ catch (    IOException ioex) {
+      logger.log(Level.WARNING,"Exception while importing schema",ioex);
+    }
+  }
+  final Path templates=source.resolve("templates");
+  if (Files.exists(templates)) {
+    try {
+      logger.log(Level.INFO,"Importing templates..");
+      Files.walkFileTree(templates,new TemplateImportVisitor(templatesConf));
+    }
+ catch (    IOException ioex) {
+      logger.log(Level.WARNING,"Exception while importing templates",ioex);
+    }
+  }
+  final Path components=source.resolve("components");
+  if (Files.exists(components)) {
+    try {
+      logger.log(Level.INFO,"Importing shared components..");
+      Files.walkFileTree(components,new ComponentImportVisitor(componentsConf));
+    }
+ catch (    IOException ioex) {
+      logger.log(Level.WARNING,"Exception while importing shared components",ioex);
+    }
+  }
+  final Path data=source.resolve("data");
+  if (Files.exists(data)) {
+    try {
+      logger.log(Level.INFO,"Importing files and pages..");
+      Files.walkFileTree(data,new FileImportVisitor(data,pagesConf));
+    }
+ catch (    IOException ioex) {
+      logger.log(Level.WARNING,"Exception while importing files",ioex);
+    }
+  }
+  final Path conf=source.resolve("deploy.conf");
+  if (Files.exists(conf)) {
+    try (final Tx tx=StructrApp.getInstance().tx()){
+      logger.log(Level.INFO,"Applying configuration from {0}..",conf);
+      final String confSource=new String(Files.readAllBytes(conf),Charset.forName("utf-8"));
+      Scripting.evaluate(new ActionContext(SecurityContext.getSuperUserInstance()),null,confSource.trim());
+      tx.success();
+    }
+ catch (    Throwable t) {
+      t.printStackTrace();
+    }
+  }
+  logger.log(Level.INFO,"Import from {0} done.",source.toString());
 }

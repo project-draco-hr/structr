@@ -1,22 +1,28 @@
 {
-  final HttpClientParams params=new HttpClientParams(HttpClientParams.getDefaultParams());
-  final HttpClient client=new HttpClient(params);
-  final GetMethod get=new GetMethod(url);
-  get.addRequestHeader("User-Agent","curl/7.35.0");
-  get.addRequestHeader("Connection","close");
-  get.getParams().setParameter("http.protocol.single-cookie-header",true);
-  get.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
-  get.setFollowRedirects(true);
+  final CloseableHttpClient client=HttpClients.custom().setDefaultConnectionConfig(ConnectionConfig.DEFAULT).setUserAgent("curl/7.35.0").build();
+  final SourceSite site=getSite();
+  final HttpHost target=HttpHost.create(url);
+  final HttpHost proxy=HttpHost.create(site.getProperty(SourceSite.proxyUrl));
+  final RequestConfig config=RequestConfig.custom().setProxy(proxy).setRedirectsEnabled(true).setCookieSpec(CookieSpecs.DEFAULT).build();
+  final HttpGet request=new HttpGet("/");
+  request.setConfig(config);
   if (StringUtils.isNotBlank(cookie)) {
-    get.addRequestHeader("Cookie",cookie);
+    request.addHeader("Cookie",cookie);
+    request.getParams().setParameter("http.protocol.single-cookie-header",true);
   }
+  request.addHeader("Connection","close");
   String content="";
   try {
-    client.executeMethod(get);
-    content=get.getResponseBodyAsString().replace("<head>","<head>\n  <base href=\"" + url + "\">");
+    final CloseableHttpResponse response=client.execute(target,request);
+    final Header contentType=response.getFirstHeader("Content-Type");
+    String charset=StringUtils.substringAfterLast(contentType.getValue(),"; charset=");
+    if (StringUtils.isBlank(charset)) {
+      charset="UTF-8";
+    }
+    content=IOUtils.toString(response.getEntity().getContent(),charset).replace("<head>","<head>\n  <base href=\"" + url + "\">");
   }
  catch (  IOException ex) {
-    throw new FrameworkException(422,"Unable to extract content from " + url + ".");
+    logger.log(Level.SEVERE,null,ex);
   }
   return content;
 }

@@ -2,8 +2,12 @@
   assertNotStale();
   final SessionTransaction tx=db.getCurrentTransaction();
   final Map<String,Object> map=new HashMap<>();
+  final String query=getQueryPrefix() + " WHERE ID(n) = {id} SET n.`" + key+ "` = {value} RETURN n";
   map.put("id",entity.id());
   map.put("value",value);
-  entity=(T)tx.getEntity(getQueryPrefix() + " WHERE ID(n) = {id} SET n.`" + key+ "` = {value} RETURN n",map);
+  if (db.logQueries()) {
+    System.out.println(query);
+  }
+  entity=(T)tx.getEntity(query,map);
   tx.modified(this);
 }

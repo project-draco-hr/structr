@@ -62,11 +62,15 @@ catch (    IOException ex) {
   final String path;
   final String httpPrefix="http://";
   final String httpsPrefix="https://";
+  final String flexiblePrefix="//";
   if (downloadAddress.startsWith(httpsPrefix)) {
     path=StringUtils.substringBefore((StringUtils.substringAfter(downloadAddress,httpsPrefix)),fileName);
   }
  else   if (downloadAddress.startsWith(httpPrefix)) {
     path=StringUtils.substringBefore((StringUtils.substringAfter(downloadAddress,httpPrefix)),fileName);
+  }
+ else   if (downloadAddress.startsWith(flexiblePrefix)) {
+    path=StringUtils.substringBefore((StringUtils.substringAfter(downloadAddress,flexiblePrefix)),fileName);
   }
  else {
     path=StringUtils.substringBefore(relativePath,fileName);

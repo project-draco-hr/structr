@@ -1,0 +1,20 @@
+{
+  try (final ZipFile zipFile=new ZipFile(file)){
+    final Enumeration<? extends ZipEntry> entries=zipFile.entries();
+    while (entries.hasMoreElements()) {
+      final ZipEntry entry=entries.nextElement();
+      final File targetFile=new File(outputDir,entry.getName());
+      if (entry.isDirectory()) {
+        targetFile.mkdirs();
+      }
+ else {
+        targetFile.getParentFile().mkdirs();
+        InputStream in=zipFile.getInputStream(entry);
+        try (OutputStream out=new FileOutputStream(targetFile)){
+          IOUtils.copy(in,out);
+          IOUtils.closeQuietly(in);
+        }
+       }
+    }
+  }
+ }

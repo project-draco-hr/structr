@@ -1,0 +1,66 @@
+{
+  try (final Tx tx=StructrApp.getInstance().tx()){
+    if (!ServletFileUpload.isMultipartContent(request)) {
+      response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+      response.getOutputStream().write("ERROR (400): Request does not contain multipart content.\n".getBytes("UTF-8"));
+      return;
+    }
+    final SecurityContext securityContext;
+    try {
+      securityContext=getConfig().getAuthenticator().initializeAndExamineRequest(request,response);
+    }
+ catch (    AuthenticationException ae) {
+      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+      response.getOutputStream().write("ERROR (401): Invalid user or password.\n".getBytes("UTF-8"));
+      return;
+    }
+    if (securityContext.getUser(false) == null && Boolean.FALSE.equals(Boolean.parseBoolean(StructrApp.getConfigurationValue("DeploymentServlet.allowAnonymousUploads","false")))) {
+      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+      response.getOutputStream().write("ERROR (401): Anonymous uploads forbidden.\n".getBytes("UTF-8"));
+      return;
+    }
+    securityContext.setAccessMode(AccessMode.Frontend);
+    request.setCharacterEncoding("UTF-8");
+    response.setCharacterEncoding("UTF-8");
+    if (response.getStatus() == 302) {
+      return;
+    }
+    final String pathInfo=request.getPathInfo();
+    String type=null;
+    if (StringUtils.isNotBlank(pathInfo)) {
+      type=SchemaHelper.normalizeEntityName(StringUtils.stripStart(pathInfo.trim(),"/"));
+    }
+    uploader.setFileSizeMax(MEGABYTE * Long.parseLong(StructrApp.getConfigurationValue("DeploymentServlet.maxFileSize",MAX_FILE_SIZE)));
+    uploader.setSizeMax(MEGABYTE * Long.parseLong(StructrApp.getConfigurationValue("DeploymentServlet.maxRequestSize",MAX_REQUEST_SIZE)));
+    response.setContentType("text/html");
+    final PrintWriter out=response.getWriter();
+    List<FileItem> fileItemsList=uploader.parseRequest(request);
+    Iterator<FileItem> fileItemsIterator=fileItemsList.iterator();
+    final Map<String,Object> params=new HashMap<>();
+    while (fileItemsIterator.hasNext()) {
+      final FileItem item=fileItemsIterator.next();
+      try {
+        final String directoryPath="/tmp/" + UUID.randomUUID();
+        final String filePath=directoryPath + ".zip";
+        File file=new File(filePath);
+        Files.write(IOUtils.toByteArray(item.getInputStream()),file);
+        unzip(file,directoryPath);
+        DeployCommand deployCommand=StructrApp.getInstance(securityContext).command(DeployCommand.class);
+        final Map<String,Object> attributes=new HashMap<>();
+        attributes.put("source",directoryPath + "/" + StringUtils.substringBeforeLast(item.getName(),"."));
+        deployCommand.execute(attributes);
+        file.deleteOnExit();
+        File dir=new File(directoryPath);
+        dir.deleteOnExit();
+      }
+ catch (      IOException ex) {
+        logger.log(Level.WARNING,"Could not upload file",ex);
+      }
+    }
+    tx.success();
+  }
+ catch (  FrameworkException|IOException|FileUploadException t) {
+    logger.log(Level.SEVERE,"Exception while processing request",t);
+    UiAuthenticator.writeInternalServerError(response);
+  }
+}

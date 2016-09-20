@@ -1,10 +1,10 @@
 {
   final String name=StringUtils.substringBeforeLast(fileName,".html");
   final PropertyMap properties=getPropertiesForTemplate(name);
-  final DOMNode existingComponent=getExistingTemplate(name);
+  final DOMNode existingTemplate=getExistingTemplate(name);
   try (final Tx tx=app.tx()){
-    if (existingComponent != null) {
-      deleteComponent(app,name);
+    if (existingTemplate != null) {
+      deleteTemplate(app,name);
     }
     logger.log(Level.INFO,"Importing page {0} from {1}..",new Object[]{name,fileName});
     final String src=new String(Files.readAllBytes(file),Charset.forName("UTF-8"));

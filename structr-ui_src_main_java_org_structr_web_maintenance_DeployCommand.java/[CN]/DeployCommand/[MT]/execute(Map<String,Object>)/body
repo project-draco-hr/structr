@@ -13,20 +13,30 @@
   if (!Files.isDirectory(source)) {
     throw new FrameworkException(422,"Source path " + path + " is not a directory.");
   }
+  final Path usersConf=source.resolve("security/users.json");
+  if (Files.exists(usersConf)) {
+    logger.log(Level.INFO,"Reading {0}..",usersConf);
+    importMapData(User.class,readConfigMap(usersConf));
+  }
+  final Path grantsConf=source.resolve("security/grants.json");
+  if (Files.exists(grantsConf)) {
+    logger.log(Level.INFO,"Reading {0}..",grantsConf);
+    importListData(ResourceAccess.class,readConfigList(grantsConf));
+  }
   final Path pagesConfFile=source.resolve("pages.json");
   if (Files.exists(pagesConfFile)) {
     logger.log(Level.INFO,"Reading {0}..",pagesConfFile);
-    pagesConf.putAll(readConfig(pagesConfFile));
+    pagesConf.putAll(readConfigMap(pagesConfFile));
   }
   final Path componentsConfFile=source.resolve("components.json");
   if (Files.exists(componentsConfFile)) {
     logger.log(Level.INFO,"Reading {0}..",componentsConfFile);
-    componentsConf.putAll(readConfig(componentsConfFile));
+    componentsConf.putAll(readConfigMap(componentsConfFile));
   }
   final Path templatesConfFile=source.resolve("templates.json");
   if (Files.exists(templatesConfFile)) {
     logger.log(Level.INFO,"Reading {0}..",templatesConfFile);
-    templatesConf.putAll(readConfig(templatesConfFile));
+    templatesConf.putAll(readConfigMap(templatesConfFile));
   }
   final Path schema=source.resolve("schema");
   if (Files.exists(schema)) {

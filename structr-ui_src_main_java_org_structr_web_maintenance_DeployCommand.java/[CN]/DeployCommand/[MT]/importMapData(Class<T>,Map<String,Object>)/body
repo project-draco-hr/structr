@@ -1,0 +1,20 @@
+{
+  final SecurityContext context=SecurityContext.getSuperUserInstance();
+  final App app=StructrApp.getInstance();
+  try (final Tx tx=app.tx()){
+    for (    final T toDelete : app.nodeQuery(type).getAsList()) {
+      app.delete(toDelete);
+    }
+    for (    final Entry<String,Object> entry : data.entrySet()) {
+      final String key=entry.getKey();
+      final Object val=entry.getValue();
+      if (val instanceof Map) {
+        final Map<String,Object> values=(Map<String,Object>)val;
+        final PropertyMap properties=PropertyMap.inputTypeToJavaType(context,type,values);
+        properties.put(AbstractNode.name,key);
+        app.create(type,properties);
+      }
+    }
+    tx.success();
+  }
+ }

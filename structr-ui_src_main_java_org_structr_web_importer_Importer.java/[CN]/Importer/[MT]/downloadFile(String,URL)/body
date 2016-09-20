@@ -1,4 +1,7 @@
 {
+  if (alreadyDownloaded.containsKey(downloadAddress)) {
+    return alreadyDownloaded.get(downloadAddress);
+  }
   final String uuid=UUID.randomUUID().toString().replaceAll("[\\-]+","");
   String contentType;
   final String relativeFilePath=File.getDirectoryPath(uuid) + "/" + uuid;
@@ -93,12 +96,12 @@ catch (    IOException ex) {
       if (contentType.equals("text/css")) {
         processCssFileNode(fileNode,downloadUrl);
       }
-      return fileNode;
     }
  else {
       fileOnDisk.delete();
-      return fileNode;
     }
+    alreadyDownloaded.put(downloadAddress,fileNode);
+    return fileNode;
   }
  catch (  final FrameworkException|IOException ex) {
     logger.log(Level.WARNING,"Could not create file node.",ex);

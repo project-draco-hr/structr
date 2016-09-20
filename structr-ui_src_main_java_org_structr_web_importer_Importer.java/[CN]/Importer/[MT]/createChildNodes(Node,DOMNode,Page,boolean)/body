@@ -168,7 +168,13 @@
         }
       }
       if (parent != null) {
-        parent.appendChild(newNode);
+        if (newNode instanceof Head && parent instanceof Body) {
+          final org.w3c.dom.Node html=parent.getParentNode();
+          html.insertBefore(newNode,parent);
+        }
+ else {
+          parent.appendChild(newNode);
+        }
       }
       if (processComment && commentHandler != null && StringUtils.isNotBlank(lastComment)) {
         commentHandler.handleComment(page,newNode,lastComment);

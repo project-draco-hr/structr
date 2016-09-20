@@ -10,16 +10,18 @@
     boolean visibleToPublic=get(properties,GraphObject.visibleToPublicUsers,false);
     boolean visibleToAuth=get(properties,GraphObject.visibleToPublicUsers,false);
     final Importer importer=new Importer(securityContext,src,null,name,visibleToPublic,visibleToAuth);
-    final boolean parseOk=importer.parse(true);
+    final boolean parseOk=importer.parse(false);
     if (parseOk) {
       logger.log(Level.INFO,"Importing page {0} from {1}..",new Object[]{name,fileName});
       importer.setCommentHandler(new DeploymentCommentHandler());
       importer.setIsImport(true);
       final ShadowDocument shadowDocument=CreateComponentCommand.getOrCreateHiddenDocument();
-      final DOMNode rootElement=importer.createChildNodes(null,shadowDocument);
-      rootElement.setProperty(AbstractNode.name,name);
-      if (properties != null) {
-        rootElement.setProperties(securityContext,properties);
+      final DOMNode rootElement=importer.createComponentChildNodes(shadowDocument);
+      if (rootElement != null) {
+        rootElement.setProperty(AbstractNode.name,name);
+        if (properties != null) {
+          rootElement.setProperties(securityContext,properties);
+        }
       }
     }
     tx.success();

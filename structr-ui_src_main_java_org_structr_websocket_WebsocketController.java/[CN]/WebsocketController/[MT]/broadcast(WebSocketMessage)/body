@@ -1,22 +1,33 @@
 {
   webSocketData.setSessionValid(true);
+  final String pagePath=(String)webSocketData.getNodeData().get("pagePath");
+  final String encodedPath=URIUtil.encodePath(pagePath);
+  final List<StructrWebSocket> clientsToRemove=new LinkedList<>();
+  final List<? extends GraphObject> result=webSocketData.getResult();
+  final String command=webSocketData.getCommand();
+  final GraphObject obj=webSocketData.getGraphObject();
   String message;
-  String pagePath=(String)webSocketData.getNodeData().get("pagePath");
-  List<StructrWebSocket> clientsToRemove=new LinkedList<>();
   for (  StructrWebSocket socket : clients) {
     String clientPagePath=socket.getPagePath();
-    if (clientPagePath != null && !clientPagePath.equals(URIUtil.encodePath(pagePath))) {
+    if (clientPagePath != null && !clientPagePath.equals(encodedPath)) {
       continue;
     }
     Session session=socket.getSession();
     if (session != null && socket.isAuthenticated()) {
-      List<? extends GraphObject> result=webSocketData.getResult();
-      SecurityContext securityContext=socket.getSecurityContext();
-      if ((!(webSocketData.getGraphObject() instanceof AbstractNode) && !socket.isPrivilegedUser(socket.getCurrentUser())) || (webSocketData.getGraphObject() instanceof AbstractNode && !securityContext.isVisible((AbstractNode)webSocketData.getGraphObject()))) {
-        continue;
+      final SecurityContext securityContext=socket.getSecurityContext();
+      if (obj instanceof AbstractNode) {
+        final AbstractNode node=(AbstractNode)obj;
+        if (node.isHidden() || !securityContext.isVisible(node)) {
+          continue;
+        }
       }
-      if ((result != null) && (result.size() > 0) && (webSocketData.getCommand().equals("UPDATE") || webSocketData.getCommand().equals("ADD") || webSocketData.getCommand().equals("CREATE"))) {
-        WebSocketMessage clientData=webSocketData.copy();
+ else {
+        if (!socket.isPrivilegedUser(socket.getCurrentUser())) {
+          continue;
+        }
+      }
+      if (result != null && !result.isEmpty() && BroadcastCommands.contains(command)) {
+        final WebSocketMessage clientData=webSocketData.copy();
         clientData.setResult(filter(securityContext,result));
         message=gson.toJson(clientData,WebSocketMessage.class);
       }

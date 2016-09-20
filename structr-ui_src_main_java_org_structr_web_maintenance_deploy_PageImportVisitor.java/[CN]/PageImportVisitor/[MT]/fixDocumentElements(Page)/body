@@ -1,0 +1,26 @@
+{
+  final NodeList heads=page.getElementsByTagName("head");
+  if (heads.getLength() > 1) {
+    final Node head1=heads.item(0);
+    final Node head2=heads.item(1);
+    final Node parent=head1.getParentNode();
+    final boolean h1=head1.hasChildNodes();
+    final boolean h2=head2.hasChildNodes();
+    if (h1 && h2) {
+      for (Node child=head2.getFirstChild(); child != null; child=child.getNextSibling()) {
+        head2.removeChild(child);
+        head1.appendChild(child);
+      }
+      parent.removeChild(head2);
+    }
+ else     if (h1 && !h2) {
+      parent.removeChild(head2);
+    }
+ else     if (!h1 && h2) {
+      parent.removeChild(head1);
+    }
+ else {
+      parent.removeChild(head1);
+    }
+  }
+}

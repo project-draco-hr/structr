@@ -4,7 +4,17 @@
       entity.stale();
     }
   }
-  tx.close();
-  session.close();
   closed=true;
+  try {
+    tx.close();
+    session.close();
+  }
+ catch (  TransientException tex) {
+    throw new RetryException(tex);
+  }
+ finally {
+    if (session.isOpen()) {
+      session.close();
+    }
+  }
 }

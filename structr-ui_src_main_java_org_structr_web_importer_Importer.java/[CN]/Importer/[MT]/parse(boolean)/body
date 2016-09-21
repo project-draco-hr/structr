@@ -1,7 +1,9 @@
 {
   init();
   if (StringUtils.isNotBlank(code)) {
-    logger.log(Level.INFO,"##### Start parsing code for page {0} #####",new Object[]{name});
+    if (!isDeployment) {
+      logger.log(Level.INFO,"##### Start parsing code for page {0} #####",new Object[]{name});
+    }
     if (fragment) {
       parsedDocument=Jsoup.parseBodyFragment(code);
     }
@@ -10,7 +12,9 @@
     }
   }
  else {
-    logger.log(Level.INFO,"##### Start fetching {0} for page {1} #####",new Object[]{address,name});
+    if (!isDeployment) {
+      logger.log(Level.INFO,"##### Start fetching {0} for page {1} #####",new Object[]{address,name});
+    }
     code=HttpHelper.get(address);
     parsedDocument=Jsoup.parse(code);
   }

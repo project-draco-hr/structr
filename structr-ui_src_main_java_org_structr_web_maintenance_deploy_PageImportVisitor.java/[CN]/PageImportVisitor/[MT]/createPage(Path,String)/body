@@ -12,11 +12,11 @@
       boolean visibleToPublic=get(properties,GraphObject.visibleToPublicUsers,false);
       boolean visibleToAuth=get(properties,GraphObject.visibleToAuthenticatedUsers,false);
       final Importer importer=new Importer(securityContext,src,null,name,visibleToPublic,visibleToAuth);
+      importer.setIsDeployment(true);
       final boolean parseOk=importer.parse();
       if (parseOk) {
         logger.log(Level.INFO,"Importing page {0} from {1}..",new Object[]{name,fileName});
         importer.setCommentHandler(new DeploymentCommentHandler());
-        importer.setIsImport(true);
         final Page newPage=importer.readPage();
         fixDocumentElements(newPage);
         if (properties != null) {
@@ -33,7 +33,7 @@
       if (parseOk) {
         logger.log(Level.INFO,"Importing page {0} from {1}..",new Object[]{name,fileName});
         importer.setCommentHandler(new DeploymentCommentHandler());
-        importer.setIsImport(true);
+        importer.setIsDeployment(true);
         final Page newPage=app.create(Page.class,name);
         importer.createChildNodes(newPage,newPage);
         if (properties != null) {

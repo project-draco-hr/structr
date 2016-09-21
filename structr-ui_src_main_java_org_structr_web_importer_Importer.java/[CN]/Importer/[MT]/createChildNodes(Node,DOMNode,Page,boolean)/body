@@ -22,10 +22,12 @@
         classString.append(cls).append(" ");
       }
       id=el.id();
-      String downloadAddressAttr=(ArrayUtils.contains(srcElements,tag) ? "src" : ArrayUtils.contains(hrefElements,tag) ? "href" : null);
-      if (downloadAddressAttr != null && StringUtils.isNotBlank(node.attr(downloadAddressAttr))) {
-        String downloadAddress=node.attr(downloadAddressAttr);
-        res=downloadFile(downloadAddress,originalUrl);
+      if (!isDeployment) {
+        String downloadAddressAttr=(ArrayUtils.contains(srcElements,tag) ? "src" : ArrayUtils.contains(hrefElements,tag) ? "href" : null);
+        if (downloadAddressAttr != null && StringUtils.isNotBlank(node.attr(downloadAddressAttr))) {
+          String downloadAddress=node.attr(downloadAddressAttr);
+          res=downloadFile(downloadAddress,originalUrl);
+        }
       }
       if (removeHashAttribute) {
         node.removeAttr(DOMNode.dataHashProperty.jsonName());
@@ -142,10 +144,10 @@
             boolean isLocal=notBlank && !value.startsWith("http");
             boolean isActive=notBlank && value.contains("${");
             boolean isStructrLib=notBlank && value.startsWith("/structr/js/");
-            if ("link".equals(tag) && "href".equals(key) && isLocal&& !isActive&& !isImport) {
+            if ("link".equals(tag) && "href".equals(key) && isLocal&& !isActive&& !isDeployment) {
               newNode.setProperty(new StringProperty(PropertyView.Html.concat(key)),"${link.path}?${link.version}");
             }
- else             if (("href".equals(key) || "src".equals(key)) && isLocal && !isActive&& !isAnchor&& !isStructrLib&& !isImport) {
+ else             if (("href".equals(key) || "src".equals(key)) && isLocal && !isActive&& !isAnchor&& !isStructrLib&& !isDeployment) {
               newNode.setProperty(new StringProperty(PropertyView.Html.concat(key)),"${link.path}");
             }
  else {

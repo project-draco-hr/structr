@@ -1,11 +1,16 @@
 {
-  try (final Tx tx=StructrApp.getInstance().tx()){
+  try {
     if (!ServletFileUpload.isMultipartContent(request)) {
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
       response.getOutputStream().write("ERROR (400): Request does not contain multipart content.\n".getBytes("UTF-8"));
       return;
     }
-    final SecurityContext securityContext;
+  }
+ catch (  IOException ioex) {
+    logger.log(Level.WARNING,"Unable to send response",ioex);
+  }
+  SecurityContext securityContext=null;
+  try (final Tx tx=StructrApp.getInstance().tx()){
     try {
       securityContext=getConfig().getAuthenticator().initializeAndExamineRequest(request,response);
     }
@@ -14,6 +19,19 @@
       response.getOutputStream().write("ERROR (401): Invalid user or password.\n".getBytes("UTF-8"));
       return;
     }
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"Unable to examine request",fex);
+  }
+catch (  IOException ioex) {
+    logger.log(Level.WARNING,"Unable to send response",ioex);
+  }
+  if (securityContext == null) {
+    logger.log(Level.WARNING,"No SecurityContext, aborting.");
+    return;
+  }
+  try {
     if (securityContext.getUser(false) == null && Boolean.FALSE.equals(Boolean.parseBoolean(StructrApp.getConfigurationValue("UploadServlet.allowAnonymousUploads","false")))) {
       response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
       response.getOutputStream().write("ERROR (401): Anonymous uploads forbidden.\n".getBytes("UTF-8"));
@@ -69,31 +87,41 @@
             }
           }
           final String name=item.getName().replaceAll("\\\\","/");
-          final FileBase newFile=FileHelper.createFile(securityContext,IOUtils.toByteArray(item.getInputStream()),contentType,cls);
-          newFile.setProperty(AbstractNode.name,PathHelper.getName(name));
-          newFile.setProperties(newFile.getSecurityContext(),PropertyMap.inputTypeToJavaType(securityContext,cls,params));
-          final String defaultUploadFolderConfigValue=StructrApp.getConfigurationValue(Services.APPLICATION_DEFAULT_UPLOAD_FOLDER,null);
-          if (defaultUploadFolderConfigValue != null) {
-            final Folder defaultUploadFolder=FileHelper.createFolderPath(SecurityContext.getSuperUserInstance(),defaultUploadFolderConfigValue);
-            if (defaultUploadFolder != null) {
-              newFile.setProperty(FileBase.hasParent,true);
-              newFile.setProperty(FileBase.parent,defaultUploadFolder);
+          boolean retry=true;
+          int retryCount=0;
+          while (retry && retryCount++ < 3) {
+            retry=false;
+            try (final Tx tx=StructrApp.getInstance().tx()){
+              final FileBase newFile=FileHelper.createFile(securityContext,IOUtils.toByteArray(item.getInputStream()),contentType,cls);
+              newFile.setProperty(AbstractNode.name,PathHelper.getName(name));
+              newFile.setProperties(newFile.getSecurityContext(),PropertyMap.inputTypeToJavaType(securityContext,cls,params));
+              final String defaultUploadFolderConfigValue=StructrApp.getConfigurationValue(Services.APPLICATION_DEFAULT_UPLOAD_FOLDER,null);
+              if (defaultUploadFolderConfigValue != null) {
+                final Folder defaultUploadFolder=FileHelper.createFolderPath(SecurityContext.getSuperUserInstance(),defaultUploadFolderConfigValue);
+                if (defaultUploadFolder != null) {
+                  newFile.setProperty(FileBase.hasParent,true);
+                  newFile.setProperty(FileBase.parent,defaultUploadFolder);
+                }
+              }
+              if (!newFile.validatePath(securityContext,null)) {
+                newFile.setProperty(AbstractNode.name,name.concat("_").concat(FileHelper.getDateString()));
+              }
+              newFile.notifyUploadCompletion();
+              out.write(newFile.getUuid());
+              tx.success();
+            }
+ catch (            RetryException rex) {
+              retry=true;
             }
           }
-          if (!newFile.validatePath(securityContext,null)) {
-            newFile.setProperty(AbstractNode.name,name.concat("_").concat(FileHelper.getDateString()));
-          }
-          newFile.notifyUploadCompletion();
-          out.write(newFile.getUuid());
         }
  catch (        IOException ex) {
           logger.log(Level.WARNING,"Could not upload file",ex);
         }
       }
     }
-    tx.success();
   }
- catch (  FrameworkException|IOException|FileUploadException t) {
+ catch (  Throwable t) {
     logger.log(Level.SEVERE,"Exception while processing request",t);
     UiAuthenticator.writeInternalServerError(response);
   }

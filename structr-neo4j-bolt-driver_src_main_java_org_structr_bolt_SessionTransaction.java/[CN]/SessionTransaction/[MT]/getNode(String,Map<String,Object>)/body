@@ -2,7 +2,10 @@
   try {
     return tx.run(statement,map).next().get(0).asNode();
   }
- catch (  NoSuchRecordException nex) {
+ catch (  TransientException tex) {
+    throw new RetryException(tex);
+  }
+catch (  NoSuchRecordException nex) {
     throw new NotFoundException(nex);
   }
 }

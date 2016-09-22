@@ -5,7 +5,10 @@
     final Value value=record.get(0);
     return value.asList(Values.ofString());
   }
- catch (  NoSuchRecordException nex) {
+ catch (  TransientException tex) {
+    throw new RetryException(tex);
+  }
+catch (  NoSuchRecordException nex) {
     throw new NotFoundException(nex);
   }
 }

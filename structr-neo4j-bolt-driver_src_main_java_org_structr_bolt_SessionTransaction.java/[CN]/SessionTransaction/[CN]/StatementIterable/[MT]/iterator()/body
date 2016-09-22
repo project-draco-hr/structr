@@ -4,7 +4,12 @@
       return result.hasNext();
     }
     @Override public Record next(){
-      return result.next();
+      try {
+        return result.next();
+      }
+ catch (      TransientException tex) {
+        throw new RetryException(tex);
+      }
     }
     @Override public void remove(){
       throw new UnsupportedOperationException("Removal not supported.");

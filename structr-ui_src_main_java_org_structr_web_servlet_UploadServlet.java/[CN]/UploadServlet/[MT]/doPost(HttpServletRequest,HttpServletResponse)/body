@@ -87,12 +87,13 @@ catch (  IOException ioex) {
             }
           }
           final String name=item.getName().replaceAll("\\\\","/");
+          FileBase newFile=null;
+          String uuid=null;
           boolean retry=true;
-          int retryCount=0;
-          while (retry && retryCount++ < 3) {
+          while (retry) {
             retry=false;
             try (final Tx tx=StructrApp.getInstance().tx()){
-              final FileBase newFile=FileHelper.createFile(securityContext,IOUtils.toByteArray(item.getInputStream()),contentType,cls);
+              newFile=FileHelper.createFile(securityContext,IOUtils.toByteArray(item.getInputStream()),contentType,cls);
               newFile.setProperty(AbstractNode.name,PathHelper.getName(name));
               newFile.setProperties(newFile.getSecurityContext(),PropertyMap.inputTypeToJavaType(securityContext,cls,params));
               final String defaultUploadFolderConfigValue=StructrApp.getConfigurationValue(Services.APPLICATION_DEFAULT_UPLOAD_FOLDER,null);
@@ -106,13 +107,16 @@ catch (  IOException ioex) {
               if (!newFile.validatePath(securityContext,null)) {
                 newFile.setProperty(AbstractNode.name,name.concat("_").concat(FileHelper.getDateString()));
               }
-              newFile.notifyUploadCompletion();
-              out.write(newFile.getUuid());
+              uuid=newFile.getUuid();
               tx.success();
             }
  catch (            RetryException rex) {
               retry=true;
             }
+          }
+          if (newFile != null) {
+            newFile.notifyUploadCompletion();
+            out.write(uuid);
           }
         }
  catch (        IOException ex) {

@@ -1,30 +1,12 @@
 {
-  boolean retry=true;
-  int count=0;
-  while (retry && count++ < 3) {
-    retry=false;
-    try (final Tx tx=StructrApp.getInstance(securityContext).tx()){
-      for (      final ModificationEvent event : modificationEvents) {
-        try {
-          final WebSocketMessage message=getMessageForEvent(securityContext,event);
-          if (message != null) {
-            logger.log(Level.FINE,"################### Broadcast message: {0}",message.getCommand());
-            broadcast(message);
-          }
-        }
- catch (        FrameworkException ignore) {
-        }
+  for (  final ModificationEvent event : modificationEvents) {
+    try {
+      final WebSocketMessage message=getMessageForEvent(securityContext,event);
+      if (message != null) {
+        broadcast(message);
       }
-      tx.success();
     }
- catch (    RetryException rex) {
-      retry=true;
-    }
-catch (    FrameworkException ex) {
-      logger.log(Level.WARNING,"Exception during websocket broadcast.",ex);
-    }
-catch (    Throwable t) {
-      logger.log(Level.WARNING,"Exception during websocket broadcast.",t);
+ catch (    FrameworkException ignore) {
     }
   }
 }

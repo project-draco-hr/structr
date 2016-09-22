@@ -22,13 +22,13 @@
       }
        boolean retry=true;
       while (retry) {
+        retry=false;
         if (resource.createPostTransaction()) {
           try (final Tx tx=app.tx()){
             for (            final JsonInput propertySet : cleanAndParseCSV(input)) {
               results.add(resource.doPost(convertPropertySetToMap(propertySet)));
             }
             tx.success();
-            retry=false;
           }
  catch (          RetryException ddex) {
             retry=true;
@@ -39,7 +39,6 @@
             for (            final JsonInput propertySet : cleanAndParseCSV(input)) {
               results.add(resource.doPost(convertPropertySetToMap(propertySet)));
             }
-            retry=false;
           }
  catch (          RetryException ddex) {
             retry=true;

@@ -1,20 +1,27 @@
 {
   final ModificationQueue modificationQueue=cmd.finishTx();
   if (success && guard.compareAndSet(false,true)) {
-    try (final Tx tx=begin()){
-      if (doCallbacks && modificationQueue != null) {
-        modificationQueue.doOuterCallbacks(securityContext);
-        if ((securityContext == null) ? doNotifications : doNotifications && securityContext.isDoTransactionNotifications()) {
-          final Collection<ModificationEvent> modificationEvents=modificationQueue.getModificationEvents();
-          for (          final StructrTransactionListener listener : TransactionCommand.getTransactionListeners()) {
-            listener.afterCommit(securityContext,modificationEvents,cmd.getSource());
+    boolean retry=true;
+    while (retry) {
+      retry=false;
+      try (final Tx tx=begin()){
+        if (doCallbacks && modificationQueue != null) {
+          modificationQueue.doOuterCallbacks(securityContext);
+          if ((securityContext == null) ? doNotifications : doNotifications && securityContext.isDoTransactionNotifications()) {
+            final Collection<ModificationEvent> modificationEvents=modificationQueue.getModificationEvents();
+            for (            final StructrTransactionListener listener : TransactionCommand.getTransactionListeners()) {
+              listener.afterCommit(securityContext,modificationEvents,cmd.getSource());
+            }
           }
+          modificationQueue.updateAuditLog();
+          modificationQueue.clear();
         }
-        modificationQueue.updateAuditLog();
-        modificationQueue.clear();
+        tx.success();
       }
-      tx.success();
+ catch (      RetryException rex) {
+        retry=true;
+      }
     }
-     guard.set(false);
+    guard.set(false);
   }
 }

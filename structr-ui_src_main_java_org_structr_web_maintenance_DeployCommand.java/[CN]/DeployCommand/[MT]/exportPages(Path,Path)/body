@@ -1,0 +1,33 @@
+{
+  final Map<String,Object> pagesConfig=new LinkedHashMap<>();
+  final App app=StructrApp.getInstance();
+  try (final Tx tx=app.tx()){
+    for (    final Page page : app.nodeQuery(Page.class).getAsList()) {
+      if (!(page instanceof ShadowDocument)) {
+        final String content=page.getContent(RenderContext.EditMode.DEPLOYMENT);
+        if (content != null) {
+          final Map<String,Object> properties=new LinkedHashMap<>();
+          final String name=page.getName();
+          final Path pageFile=target.resolve(name + ".html");
+          pagesConfig.put(name,properties);
+          exportConfiguration(page,properties);
+          try (final OutputStreamWriter writer=new OutputStreamWriter(new FileOutputStream(pageFile.toFile()))){
+            writer.write(content);
+            writer.flush();
+            writer.close();
+          }
+ catch (          IOException ioex) {
+            ioex.printStackTrace();
+          }
+        }
+      }
+    }
+    tx.success();
+  }
+   try (final Writer fos=new OutputStreamWriter(new FileOutputStream(configTarget.toFile()))){
+    getGson().toJson(pagesConfig,fos);
+  }
+ catch (  IOException ioex) {
+    ioex.printStackTrace();
+  }
+}

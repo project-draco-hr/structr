@@ -1,0 +1,38 @@
+{
+  final Map<String,Object> configuration=new LinkedHashMap<>();
+  final App app=StructrApp.getInstance();
+  try (final Tx tx=app.tx()){
+    final ShadowDocument shadowDocument=app.nodeQuery(ShadowDocument.class).getFirst();
+    if (shadowDocument != null) {
+      for (      final DOMNode node : shadowDocument.getProperty(Page.elements)) {
+        if (node.isSynced()) {
+          final Map<String,Object> properties=new LinkedHashMap<>();
+          final String content=node.getContent(RenderContext.EditMode.DEPLOYMENT);
+          final String name=node.getName();
+          if (name != null) {
+            configuration.put(name,properties);
+            exportConfiguration(node,properties);
+          }
+          if (content != null) {
+            final Path pageFile=target.resolve(name + ".html");
+            try (final OutputStreamWriter writer=new OutputStreamWriter(new FileOutputStream(pageFile.toFile()))){
+              writer.write(content);
+              writer.flush();
+              writer.close();
+            }
+ catch (            IOException ioex) {
+              ioex.printStackTrace();
+            }
+          }
+        }
+      }
+    }
+    tx.success();
+  }
+   try (final Writer fos=new OutputStreamWriter(new FileOutputStream(configTarget.toFile()))){
+    getGson().toJson(configuration,fos);
+  }
+ catch (  IOException ioex) {
+    ioex.printStackTrace();
+  }
+}

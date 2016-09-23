@@ -1,7 +1,7 @@
 {
   try (final Tx tx=app.tx()){
     final Path parentPath=basePath.relativize(file).getParent();
-    final Folder parent=parentPath != null ? FileHelper.createFolderPath(securityContext,parentPath.toString()) : null;
+    final Folder parent=createFolders(parentPath);
     final FileBase existing=app.nodeQuery(FileBase.class).and(FileBase.parent,parent).and(FileBase.name,fileName).getFirst();
     final String fullPath=(parentPath != null ? "/" + parentPath.toString() : "") + "/" + fileName;
     if (existing != null) {
@@ -22,6 +22,10 @@
         newFile.setProperty(NodeInterface.type,Image.class.getSimpleName());
       }
       newFile.setProperty(FileBase.parent,parent);
+      final PropertyMap properties=getPropertiesForFileOrFolder(newFile.getPath());
+      if (properties != null) {
+        newFile.setProperties(securityContext,properties);
+      }
     }
      tx.success();
   }

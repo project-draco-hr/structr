@@ -1,0 +1,16 @@
+{
+  final Map<String,Object> properties=new LinkedHashMap<>();
+  final String name=folder.getName();
+  final Path path=target.resolve(name);
+  Files.createDirectories(path);
+  exportFileConfiguration(folder,properties);
+  if (!properties.isEmpty()) {
+    config.put(folder.getPath(),properties);
+  }
+  for (  final Folder child : folder.getProperty(Folder.folders)) {
+    exportFilesAndFolders(path,child,config);
+  }
+  for (  final FileBase file : folder.getProperty(Folder.files)) {
+    exportFile(path,file,config);
+  }
+}

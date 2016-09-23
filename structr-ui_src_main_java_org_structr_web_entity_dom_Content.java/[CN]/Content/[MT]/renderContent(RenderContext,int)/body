@@ -1,10 +1,14 @@
 {
   try {
+    final EditMode edit=renderContext.getEditMode(securityContext.getUser(false));
+    if (EditMode.DEPLOYMENT.equals(edit)) {
+      renderContext.getBuffer().append(getProperty(Content.content));
+      return;
+    }
     if (isDeleted() || isHidden() || !displayForLocale(renderContext)|| !displayForConditions(renderContext)) {
       return;
     }
     final String id=getUuid();
-    final EditMode edit=renderContext.getEditMode(securityContext.getUser(false));
     final boolean inBody=renderContext.inBody();
     final AsyncBuffer out=renderContext.getBuffer();
     String _contentType=getProperty(contentType);

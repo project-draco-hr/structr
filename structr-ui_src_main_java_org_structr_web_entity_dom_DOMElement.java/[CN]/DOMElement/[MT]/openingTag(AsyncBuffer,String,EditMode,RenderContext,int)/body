@@ -1,7 +1,13 @@
 {
   out.append("<").append(tag);
   for (  PropertyKey attribute : StructrApp.getConfiguration().getPropertySet(entityType,PropertyView.Html)) {
-    String value=getPropertyWithVariableReplacement(renderContext,attribute);
+    String value=null;
+    if (EditMode.DEPLOYMENT.equals(editMode)) {
+      value=(String)getProperty(attribute);
+    }
+ else {
+      value=getPropertyWithVariableReplacement(renderContext,attribute);
+    }
     if (!(EditMode.RAW.equals(editMode) || EditMode.WIDGET.equals(editMode))) {
       value=escapeForHtmlAttributes(value);
     }

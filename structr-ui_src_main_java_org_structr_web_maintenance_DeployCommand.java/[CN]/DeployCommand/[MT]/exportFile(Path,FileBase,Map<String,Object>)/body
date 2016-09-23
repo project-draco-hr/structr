@@ -1,0 +1,11 @@
+{
+  final Map<String,Object> properties=new LinkedHashMap<>();
+  final String name=file.getName();
+  final Path path=target.resolve(name);
+  final Path src=file.getFileOnDisk().toPath();
+  Files.copy(src,path);
+  exportFileConfiguration(file,properties);
+  if (!properties.isEmpty()) {
+    config.put(file.getPath(),properties);
+  }
+}

@@ -1,0 +1,19 @@
+{
+  final List<Map<String,Object>> grants=new LinkedList<>();
+  final App app=StructrApp.getInstance();
+  try (final Tx tx=app.tx()){
+    for (    final ResourceAccess res : app.nodeQuery(ResourceAccess.class).getAsList()) {
+      final Map<String,Object> grant=new LinkedHashMap<>();
+      grants.add(grant);
+      grant.put("signature",res.getProperty(ResourceAccess.signature));
+      grant.put("flags",res.getProperty(ResourceAccess.flags));
+    }
+    tx.success();
+  }
+   try (final Writer fos=new OutputStreamWriter(new FileOutputStream(target.toFile()))){
+    getGson().toJson(grants,fos);
+  }
+ catch (  IOException ioex) {
+    ioex.printStackTrace();
+  }
+}

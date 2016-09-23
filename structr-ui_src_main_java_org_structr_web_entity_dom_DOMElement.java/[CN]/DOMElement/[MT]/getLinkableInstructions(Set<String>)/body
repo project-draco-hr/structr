@@ -1,0 +1,15 @@
+{
+  if (this instanceof LinkSource) {
+    final LinkSource linkSourceElement=(LinkSource)this;
+    final Linkable linkable=linkSourceElement.getProperty(LinkSource.linkable);
+    if (linkable != null) {
+      final String path=linkable.getPath();
+      if (path != null) {
+        instructions.add("@structr:link(" + path + ")");
+      }
+ else {
+        logger.log(Level.WARNING,"Cannot export linkable relationship, no path.");
+      }
+    }
+  }
+}

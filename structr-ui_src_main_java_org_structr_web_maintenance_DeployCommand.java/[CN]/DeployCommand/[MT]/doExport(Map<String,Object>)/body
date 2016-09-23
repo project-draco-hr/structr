@@ -1,0 +1,31 @@
+{
+  final String path=(String)attributes.get("target");
+  final Path target=Paths.get(path);
+  if (Files.exists(target)) {
+    throw new FrameworkException(422,"Target directory already exists, aborting.");
+  }
+  try {
+    Files.createDirectories(target);
+    final Path components=Files.createDirectory(target.resolve("components"));
+    final Path files=Files.createDirectory(target.resolve("files"));
+    final Path pages=Files.createDirectory(target.resolve("pages"));
+    final Path schema=Files.createDirectory(target.resolve("schema"));
+    final Path security=Files.createDirectory(target.resolve("security"));
+    final Path templates=Files.createDirectory(target.resolve("templates"));
+    final Path schemaJson=schema.resolve("schema.json");
+    final Path grants=security.resolve("grants.json");
+    final Path filesConf=target.resolve("files.json");
+    final Path pagesConf=target.resolve("pages.json");
+    final Path componentsConf=target.resolve("components.json");
+    final Path templatesConf=target.resolve("templates.json");
+    exportFiles(files,filesConf);
+    exportPages(pages,pagesConf);
+    exportComponents(components,componentsConf);
+    exportTemplates(templates,templatesConf);
+    exportSecurity(grants);
+    exportSchema(schemaJson);
+  }
+ catch (  IOException ex) {
+    ex.printStackTrace();
+  }
+}

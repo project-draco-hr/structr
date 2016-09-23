@@ -64,6 +64,7 @@
       if (!StringUtils.isBlank(comment)) {
         newNode=(DOMNode)page.createComment(comment);
         newNode.setProperty(org.structr.web.entity.dom.Comment.contentType,"text/html");
+        lastCommentNode=newNode;
       }
  else {
         newNode=(Content)page.createTextNode(content);
@@ -179,7 +180,12 @@
         }
       }
       if (processComment && commentHandler != null && StringUtils.isNotBlank(lastComment)) {
-        commentHandler.handleComment(page,newNode,lastComment);
+        if (commentHandler.handleComment(page,newNode,lastComment)) {
+          if (lastCommentNode != null) {
+            parent.removeChild(lastCommentNode);
+          }
+        }
+        lastCommentNode=null;
         lastComment=null;
       }
       processComment=true;

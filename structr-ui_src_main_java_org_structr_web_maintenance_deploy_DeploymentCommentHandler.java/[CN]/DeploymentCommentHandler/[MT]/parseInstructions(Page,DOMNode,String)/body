@@ -1,0 +1,36 @@
+{
+  this.source=src.toCharArray();
+  this.sourceLength=src.length();
+  this.currentPosition=0;
+  boolean hit=false;
+  while (currentPosition < sourceLength) {
+    if (findSequence("@structr:")) {
+      hit=true;
+      final String token=getNextToken();
+      final Handler handler=handlers.get(token);
+      String parameters=null;
+      if (handler != null) {
+        if (hasMore()) {
+          final char c=source[currentPosition++];
+switch (c) {
+case '(':
+            parameters=getUntil(')');
+          break;
+case ',':
+        break;
+    }
+  }
+  handler.apply(page,node,parameters);
+}
+ else {
+  logger.log(Level.WARNING,"Unknown token {0}, expected one of {1}.",new Object[]{token,handlers.keySet()});
+  break;
+}
+}
+ else {
+logger.log(Level.WARNING,"Invalid sequence in instruction comment, expected @structr:");
+break;
+}
+}
+return hit;
+}

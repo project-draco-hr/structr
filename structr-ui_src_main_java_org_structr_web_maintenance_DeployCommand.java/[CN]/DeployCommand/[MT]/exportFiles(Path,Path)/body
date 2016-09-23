@@ -1,0 +1,21 @@
+{
+  final Map<String,Object> config=new LinkedHashMap<>();
+  final App app=StructrApp.getInstance();
+  try (final Tx tx=app.tx()){
+    for (    final Folder folder : app.nodeQuery(Folder.class).and(Folder.parent,null).getAsList()) {
+      exportFilesAndFolders(target,folder,config);
+    }
+    for (    final FileBase file : app.nodeQuery(FileBase.class).and(Folder.parent,null).getAsList()) {
+      exportFile(target,file,config);
+    }
+    tx.success();
+  }
+ catch (  IOException ioex) {
+  }
+  try (final Writer fos=new OutputStreamWriter(new FileOutputStream(configTarget.toFile()))){
+    getGson().toJson(config,fos);
+  }
+ catch (  IOException ioex) {
+    ioex.printStackTrace();
+  }
+}

@@ -1,0 +1,24 @@
+{
+  if (folder != null) {
+    final App app=StructrApp.getInstance();
+    Folder current=null;
+    Folder parent=null;
+    for (final Iterator<Path> it=folder.iterator(); it.hasNext(); ) {
+      final Path part=it.next();
+      final String name=part.toString();
+      current=app.nodeQuery(Folder.class).andName(name).and(FileBase.parent,parent).getFirst();
+      if (current == null) {
+        current=app.create(Folder.class,new NodeAttribute(AbstractNode.name,name),new NodeAttribute(Folder.parent,parent));
+      }
+      if (current != null) {
+        final PropertyMap properties=getPropertiesForFileOrFolder(current.getPath());
+        if (properties != null) {
+          current.setProperties(securityContext,properties);
+        }
+      }
+      parent=current;
+    }
+    return current;
+  }
+  return null;
+}

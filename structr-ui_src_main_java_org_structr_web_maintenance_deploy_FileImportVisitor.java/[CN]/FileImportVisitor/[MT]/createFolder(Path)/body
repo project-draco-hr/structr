@@ -1,6 +1,12 @@
 {
   try (final Tx tx=app.tx()){
-    FileHelper.createFolderPath(securityContext,basePath.relativize(file).toString());
+    final Folder folder=createFolders(basePath.relativize(file));
+    if (folder != null) {
+      final PropertyMap properties=getPropertiesForFileOrFolder(folder.getPath());
+      if (properties != null) {
+        folder.setProperties(securityContext,properties);
+      }
+    }
     tx.success();
   }
  catch (  FrameworkException fex) {

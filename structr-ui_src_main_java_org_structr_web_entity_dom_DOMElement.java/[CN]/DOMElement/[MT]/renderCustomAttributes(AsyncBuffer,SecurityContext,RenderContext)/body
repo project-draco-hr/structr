@@ -2,7 +2,19 @@
   dbNode=this.getNode();
   EditMode editMode=renderContext.getEditMode(securityContext.getUser(false));
   for (  PropertyKey key : getDataPropertyKeys()) {
-    String value=getPropertyWithVariableReplacement(renderContext,key).trim();
+    String value="";
+    if (EditMode.DEPLOYMENT.equals(editMode)) {
+      final Object obj=getProperty(key);
+      if (obj != null) {
+        value=obj.toString();
+      }
+    }
+ else {
+      value=getPropertyWithVariableReplacement(renderContext,key);
+      if (value != null) {
+        value=value.trim();
+      }
+    }
     if (!(EditMode.RAW.equals(editMode) || EditMode.WIDGET.equals(editMode))) {
       value=escapeForHtmlAttributes(value);
     }
@@ -10,7 +22,7 @@
       out.append(" ").append(key.dbName()).append("=\"").append(value).append("\"");
     }
   }
-  if (EditMode.RAW.equals(editMode) || EditMode.WIDGET.equals(editMode)) {
+  if (EditMode.DEPLOYMENT.equals(editMode) || EditMode.RAW.equals(editMode) || EditMode.WIDGET.equals(editMode)) {
     for (    final Property p : rawProps) {
       String htmlName="data-structr-meta-" + CaseHelper.toUnderscore(p.jsonName(),false).replaceAll("_","-");
       Object value=getProperty(p);

@@ -1,0 +1,50 @@
+{
+  final Path tmp=createTempDir();
+  if (tmp != null) {
+    try {
+      final Path pages=tmp.resolve("pages");
+      Files.createDirectories(pages);
+      try (final Writer writer=new OutputStreamWriter(new FileOutputStream(pages.resolve("test.html").toFile()))){
+        writer.append(source);
+        writer.flush();
+        writer.close();
+      }
+       final Map<String,Object> initialImportParams=new HashMap<>();
+      initialImportParams.put("source",tmp.toString());
+      app.command(DeployCommand.class).execute(initialImportParams);
+      Files.walkFileTree(tmp,new DeletingFileVisitor());
+      final Map<String,Object> firstExportParams=new HashMap<>();
+      firstExportParams.put("mode","export");
+      firstExportParams.put("target",tmp.toString());
+      app.command(DeployCommand.class).execute(firstExportParams);
+      final String firstExportedSource=new String(Files.readAllBytes(pages.resolve("test.html")),Charset.forName("utf-8")).trim();
+      final Map<String,Object> secondImportParams=new HashMap<>();
+      secondImportParams.put("source",tmp.toString());
+      app.command(DeployCommand.class).execute(secondImportParams);
+      Files.walkFileTree(tmp,new DeletingFileVisitor());
+      final Map<String,Object> secondExportParams=new HashMap<>();
+      secondExportParams.put("mode","export");
+      secondExportParams.put("target",tmp.toString());
+      app.command(DeployCommand.class).execute(secondExportParams);
+      final String secondExportedSource=new String(Files.readAllBytes(pages.resolve("test.html")),Charset.forName("utf-8")).trim();
+      assertEquals("Invalid import/export roundtrip for DeployCommand from source to first export",source,firstExportedSource);
+      assertEquals("Invalid import/export roundtrip for DeployCommand from first to second export",firstExportedSource,secondExportedSource);
+      assertEquals("Invalid import/export roundtrip for DeployCommand from second export to source",secondExportedSource,source);
+    }
+ catch (    IOException|FrameworkException t) {
+      t.printStackTrace();
+      fail("Unexpected exception.");
+    }
+ finally {
+      try {
+        Files.walkFileTree(tmp,new DeletingFileVisitor());
+        Files.delete(tmp);
+      }
+ catch (      IOException ignore) {
+      }
+    }
+  }
+ else {
+    fail("Unable to create temporary directory.");
+  }
+}

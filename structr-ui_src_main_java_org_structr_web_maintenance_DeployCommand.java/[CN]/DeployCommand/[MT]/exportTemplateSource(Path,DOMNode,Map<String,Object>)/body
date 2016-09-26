@@ -1,0 +1,21 @@
+{
+  final Map<String,Object> properties=new LinkedHashMap<>();
+  String name=template.getProperty(AbstractNode.name);
+  if (name == null) {
+    name=template.getUuid();
+  }
+  configuration.put(name,properties);
+  exportConfiguration(template,properties);
+  final String content=template.getProperty(Template.content);
+  if (content != null) {
+    final Path pageFile=target.resolve(name + ".html");
+    try (final OutputStreamWriter writer=new OutputStreamWriter(new FileOutputStream(pageFile.toFile()))){
+      writer.write(content);
+      writer.flush();
+      writer.close();
+    }
+ catch (    IOException ioex) {
+      ioex.printStackTrace();
+    }
+  }
+}

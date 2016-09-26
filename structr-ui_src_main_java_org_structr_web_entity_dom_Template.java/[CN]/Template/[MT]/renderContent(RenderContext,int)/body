@@ -1,0 +1,35 @@
+{
+  if (EditMode.DEPLOYMENT.equals(renderContext.getEditMode(securityContext.getUser(false)))) {
+    final DOMNode _syncedNode=(DOMNode)getProperty(sharedComponent);
+    final AsyncBuffer out=renderContext.getBuffer();
+    if (depth > 0) {
+      out.append(DOMNode.indent(depth,renderContext));
+    }
+    out.append("<structr:template src=\"");
+    if (_syncedNode != null) {
+      final String name=_syncedNode.getProperty(AbstractNode.name);
+      out.append(name != null ? name : _syncedNode.getUuid());
+    }
+ else {
+      out.append(getUuid());
+    }
+    out.append("\"");
+    renderCustomAttributes(out,securityContext,renderContext);
+    out.append(">");
+    final List<DOMChildren> rels=getChildRelationships();
+    if (rels.isEmpty()) {
+      if (_syncedNode != null) {
+        rels.addAll(_syncedNode.getChildRelationships());
+      }
+    }
+    for (    final AbstractRelationship rel : rels) {
+      final DOMNode subNode=(DOMNode)rel.getTargetNode();
+      subNode.render(renderContext,depth + 1);
+    }
+    out.append(DOMNode.indent(depth,renderContext));
+    out.append("</structr:template>");
+  }
+ else {
+    super.renderContent(renderContext,depth);
+  }
+}

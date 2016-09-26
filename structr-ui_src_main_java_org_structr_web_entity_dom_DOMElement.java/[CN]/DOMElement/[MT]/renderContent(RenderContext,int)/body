@@ -12,55 +12,55 @@
   if (depth > 0 && !avoidWhitespace()) {
     out.append(indent(depth,renderContext));
   }
-  final DOMElement _syncedNode=(DOMElement)getProperty(sharedComponent);
-  if (_syncedNode != null && EditMode.DEPLOYMENT.equals(editMode)) {
-    out.append("<structr:template src=\"");
-    out.append(_syncedNode.getName());
-    out.append("\" />");
-  }
- else {
-    if (StringUtils.isNotBlank(_tag)) {
-      if (EditMode.DEPLOYMENT.equals(editMode)) {
-        if (renderDeploymentExportComments(out)) {
-          if (depth > 0 && !avoidWhitespace()) {
-            out.append(indent(depth,renderContext));
-          }
-        }
-      }
-      openingTag(out,_tag,editMode,renderContext,depth);
-      try {
-        if (lowercaseBodyName.equals(this.getTagName())) {
-          renderContext.setInBody(true);
-        }
-        List<DOMChildren> rels=getChildRelationships();
-        if (rels.isEmpty()) {
-          migrateSyncRels();
-          if (_syncedNode != null) {
-            rels.addAll(_syncedNode.getChildRelationships());
-          }
-        }
-        for (        final AbstractRelationship rel : rels) {
-          final DOMNode subNode=(DOMNode)rel.getTargetNode();
-          if (subNode instanceof DOMElement) {
-            anyChildNodeCreatesNewLine=(anyChildNodeCreatesNewLine || !(subNode.avoidWhitespace()));
-          }
-          subNode.render(renderContext,depth + 1);
-        }
-      }
- catch (      Throwable t) {
-        logger.log(Level.SEVERE,"Error while rendering node {0}: {1}",new java.lang.Object[]{getUuid(),t});
-        out.append("Error while rendering node ").append(getUuid()).append(": ").append(t.getMessage());
-        logger.log(Level.WARNING,"",t);
-      }
-      if (StringUtils.isNotBlank(_tag) && (!isVoid)) {
-        if (anyChildNodeCreatesNewLine) {
+  if (StringUtils.isNotBlank(_tag)) {
+    if (EditMode.DEPLOYMENT.equals(editMode)) {
+      if (renderDeploymentExportComments(out)) {
+        if (depth > 0 && !avoidWhitespace()) {
           out.append(indent(depth,renderContext));
         }
+      }
+    }
+    openingTag(out,_tag,editMode,renderContext,depth);
+    try {
+      if (lowercaseBodyName.equals(this.getTagName())) {
+        renderContext.setInBody(true);
+      }
+      final List<DOMChildren> rels=getChildRelationships();
+      if (rels.isEmpty()) {
+        migrateSyncRels();
+        final DOMElement _syncedNode=(DOMElement)getProperty(sharedComponent);
+        if (_syncedNode != null) {
+          rels.addAll(_syncedNode.getChildRelationships());
+        }
+      }
+      for (      final AbstractRelationship rel : rels) {
+        final DOMNode subNode=(DOMNode)rel.getTargetNode();
+        if (subNode instanceof DOMElement) {
+          anyChildNodeCreatesNewLine=(anyChildNodeCreatesNewLine || !(subNode.avoidWhitespace()));
+        }
+        subNode.render(renderContext,depth + 1);
+      }
+    }
+ catch (    Throwable t) {
+      logger.log(Level.SEVERE,"Error while rendering node {0}: {1}",new java.lang.Object[]{getUuid(),t});
+      out.append("Error while rendering node ").append(getUuid()).append(": ").append(t.getMessage());
+      logger.log(Level.WARNING,"",t);
+    }
+    if (StringUtils.isNotBlank(_tag) && (!isVoid)) {
+      final DOMElement _syncedNode=(DOMElement)getProperty(sharedComponent);
+      final boolean isTemplate=_syncedNode != null && EditMode.DEPLOYMENT.equals(editMode);
+      if (anyChildNodeCreatesNewLine || isTemplate) {
+        out.append(indent(depth,renderContext));
+      }
+      if (isTemplate) {
+        out.append("</structr:template>");
+      }
+ else {
         out.append("</").append(_tag).append(">");
       }
     }
-    if (localResult != null) {
-      renderContext.setResult(localResult);
-    }
+  }
+  if (localResult != null) {
+    renderContext.setResult(localResult);
   }
 }

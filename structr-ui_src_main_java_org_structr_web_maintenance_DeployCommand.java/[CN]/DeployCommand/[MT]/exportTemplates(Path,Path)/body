@@ -2,29 +2,19 @@
   final Map<String,Object> configuration=new LinkedHashMap<>();
   final App app=StructrApp.getInstance();
   try (final Tx tx=app.tx()){
+    for (    final Template template : app.nodeQuery(Template.class).getAsList()) {
+      if (template.inTrash()) {
+        continue;
+      }
+      exportTemplateSource(target,template,configuration);
+    }
     final ShadowDocument shadowDocument=app.nodeQuery(ShadowDocument.class).getFirst();
     if (shadowDocument != null) {
       for (      final DOMNode node : shadowDocument.getProperty(Page.elements)) {
-        if (node instanceof Template && node.isSynced()) {
-          final Map<String,Object> properties=new LinkedHashMap<>();
-          final String content=node.getProperty(Template.content);
-          final String name=node.getName();
-          if (name != null) {
-            configuration.put(name,properties);
-            exportConfiguration(node,properties);
-          }
-          if (content != null) {
-            final Path pageFile=target.resolve(name + ".html");
-            try (final OutputStreamWriter writer=new OutputStreamWriter(new FileOutputStream(pageFile.toFile()))){
-              writer.write(content);
-              writer.flush();
-              writer.close();
-            }
- catch (            IOException ioex) {
-              ioex.printStackTrace();
-            }
-          }
+        if (!(node instanceof Content) || node.inTrash() || node.getProperty(DOMNode.parent) != null) {
+          continue;
         }
+        exportTemplateSource(target,node,configuration);
       }
     }
     tx.success();

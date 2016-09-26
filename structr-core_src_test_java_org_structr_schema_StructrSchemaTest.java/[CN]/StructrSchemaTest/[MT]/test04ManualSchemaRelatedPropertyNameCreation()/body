@@ -1,0 +1,14 @@
+{
+  try {
+    try (final Tx tx=app.tx()){
+      final SchemaNode source=app.create(SchemaNode.class,"Source");
+      final SchemaNode target=app.create(SchemaNode.class,"Target");
+      app.create(SchemaRelationshipNode.class,new NodeAttribute(SchemaRelationshipNode.relationshipType,"link"),new NodeAttribute(SchemaRelationshipNode.sourceNode,source),new NodeAttribute(SchemaRelationshipNode.targetNode,target),new NodeAttribute(SchemaRelationshipNode.sourceMultiplicity,"1"),new NodeAttribute(SchemaRelationshipNode.targetMultiplicity,"*"));
+      tx.success();
+    }
+     checkSchemaString(StructrSchema.createFromDatabase(app).toString());
+  }
+ catch (  FrameworkException|URISyntaxException t) {
+    t.printStackTrace();
+  }
+}

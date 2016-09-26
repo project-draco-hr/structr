@@ -1,0 +1,23 @@
+{
+  System.out.println("########################################## checking");
+  System.out.println(source);
+  final Gson gson=new GsonBuilder().create();
+  final Map<String,Object> map=gson.fromJson(source,Map.class);
+  assertNotNull("Invalid schema serialization",map);
+  final Map<String,Object> defs=(Map)map.get("definitions");
+  assertNotNull("Invalid schema serialization",defs);
+  final Map<String,Object> src=(Map)defs.get("Source");
+  assertNotNull("Invalid schema serialization",src);
+  final Map<String,Object> srcp=(Map)src.get("properties");
+  assertNotNull("Invalid schema serialization",srcp);
+  final Map<String,Object> tgt=(Map)defs.get("Target");
+  assertNotNull("Invalid schema serialization",tgt);
+  final Map<String,Object> tgtp=(Map)tgt.get("properties");
+  assertNotNull("Invalid schema serialization",tgtp);
+  final Map<String,Object> lnk=(Map)defs.get("SourcelinkTarget");
+  assertNotNull("Invalid schema serialization",lnk);
+  assertTrue("Invalid schema serialization result",srcp.containsKey("linkTargets"));
+  assertTrue("Invalid schema serialization result",tgtp.containsKey("sourceLink"));
+  assertEquals("Invalid schema serialization result","sourceLink",lnk.get("sourceName"));
+  assertEquals("Invalid schema serialization result","linkTargets",lnk.get("targetName"));
+}

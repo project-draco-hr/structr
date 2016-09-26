@@ -1,34 +1,28 @@
 {
-  final PropertyMap map=new PropertyMap();
-  if (dataProperties != null) {
-    dataProperties.clear();
-  }
-  for (  Sync rel : getOutgoingRelationships(Sync.class)) {
-    final DOMElement syncedNode=(DOMElement)rel.getTargetNode();
-    map.clear();
-    for (    Property htmlProp : syncedNode.getHtmlAttributes()) {
-      map.put(htmlProp,getProperty(htmlProp));
-    }
-    map.put(name,getProperty(name));
-    syncedNode.setProperties(securityContext,map);
-  }
-  final Sync rel=getIncomingRelationship(Sync.class);
-  if (rel != null) {
-    final DOMElement otherNode=(DOMElement)rel.getSourceNode();
-    if (otherNode != null) {
+  if (super.onModification(securityContext,errorBuffer,modificationQueue)) {
+    final PropertyMap map=new PropertyMap();
+    for (    Sync rel : getOutgoingRelationships(Sync.class)) {
+      final DOMElement syncedNode=(DOMElement)rel.getTargetNode();
       map.clear();
-      for (      Property htmlProp : otherNode.getHtmlAttributes()) {
+      for (      Property htmlProp : syncedNode.getHtmlAttributes()) {
         map.put(htmlProp,getProperty(htmlProp));
       }
       map.put(name,getProperty(name));
-      otherNode.setProperties(securityContext,map);
+      syncedNode.setProperties(securityContext,map);
     }
+    final Sync rel=getIncomingRelationship(Sync.class);
+    if (rel != null) {
+      final DOMElement otherNode=(DOMElement)rel.getSourceNode();
+      if (otherNode != null) {
+        map.clear();
+        for (        Property htmlProp : otherNode.getHtmlAttributes()) {
+          map.put(htmlProp,getProperty(htmlProp));
+        }
+        map.put(name,getProperty(name));
+        otherNode.setProperties(securityContext,map);
+      }
+    }
+    return true;
   }
-  try {
-    increasePageVersion();
-  }
- catch (  FrameworkException ex) {
-    logger.log(Level.WARNING,"Updating page version failed",ex);
-  }
-  return true;
+  return false;
 }

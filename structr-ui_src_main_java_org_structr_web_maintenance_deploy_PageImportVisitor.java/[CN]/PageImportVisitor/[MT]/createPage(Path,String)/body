@@ -2,7 +2,7 @@
   final String name=StringUtils.substringBeforeLast(fileName,".html");
   final PropertyMap properties=getPropertiesForPage(name);
   final Page existingPage=getExistingPage(name);
-  try (final Tx tx=app.tx()){
+  try (final Tx tx=app.tx(false,false,false)){
     if (existingPage != null) {
       deletePage(app,name);
     }
@@ -29,11 +29,11 @@
       boolean visibleToPublic=get(properties,GraphObject.visibleToPublicUsers,false);
       boolean visibleToAuth=get(properties,GraphObject.visibleToPublicUsers,false);
       final Importer importer=new Importer(securityContext,src,null,name,visibleToPublic,visibleToAuth);
+      importer.setIsDeployment(true);
       final boolean parseOk=importer.parse(true);
       if (parseOk) {
         logger.log(Level.INFO,"Importing page {0} from {1}..",new Object[]{name,fileName});
         importer.setCommentHandler(new DeploymentCommentHandler());
-        importer.setIsDeployment(true);
         final Page newPage=app.create(Page.class,name);
         importer.createChildNodes(newPage,newPage);
         if (properties != null) {

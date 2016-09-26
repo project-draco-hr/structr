@@ -1,9 +1,17 @@
 {
   final Map<String,Object> properties=new LinkedHashMap<>();
   final String name=file.getName();
-  final Path path=target.resolve(name);
   final Path src=file.getFileOnDisk().toPath();
-  Files.copy(src,path);
+  Path path=target.resolve(name);
+  int i=0;
+  while (Files.exists(path)) {
+    path=target.resolve(name + i++);
+  }
+  try {
+    Files.copy(src,path);
+  }
+ catch (  IOException ioex) {
+  }
   exportFileConfiguration(file,properties);
   if (!properties.isEmpty()) {
     config.put(file.getPath(),properties);

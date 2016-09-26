@@ -26,8 +26,12 @@
     for (    final Property p : rawProps) {
       String htmlName="data-structr-meta-" + CaseHelper.toUnderscore(p.jsonName(),false).replaceAll("_","-");
       Object value=getProperty(p);
-      if ((p instanceof BooleanProperty && (boolean)value) || (!(p instanceof BooleanProperty) && value != null && StringUtils.isNotBlank(value.toString()))) {
-        out.append(" ").append(htmlName).append("=\"").append(value.toString()).append("\"");
+      if (value != null) {
+        final boolean isBoolean=p instanceof BooleanProperty;
+        final String stringValue=value.toString();
+        if ((isBoolean && "true".equals(stringValue)) || (!isBoolean && StringUtils.isNotBlank(stringValue))) {
+          out.append(" ").append(htmlName).append("=\"").append(escapeForHtmlAttributes(stringValue)).append("\"");
+        }
       }
     }
   }

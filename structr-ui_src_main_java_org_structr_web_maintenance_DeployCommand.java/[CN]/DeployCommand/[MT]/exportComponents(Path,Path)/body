@@ -5,24 +5,26 @@
     final ShadowDocument shadowDocument=app.nodeQuery(ShadowDocument.class).getFirst();
     if (shadowDocument != null) {
       for (      final DOMNode node : shadowDocument.getProperty(Page.elements)) {
-        if (node.isSynced()) {
-          final Map<String,Object> properties=new LinkedHashMap<>();
-          final String content=node.getContent(RenderContext.EditMode.DEPLOYMENT);
-          final String name=node.getName();
-          if (name != null) {
-            configuration.put(name,properties);
-            exportConfiguration(node,properties);
+        if (node instanceof Content || node.inTrash() || node.getProperty(DOMNode.parent) != null) {
+          continue;
+        }
+        final Map<String,Object> properties=new LinkedHashMap<>();
+        String name=node.getProperty(AbstractNode.name);
+        if (name == null) {
+          name=node.getUuid();
+        }
+        configuration.put(name,properties);
+        exportConfiguration(node,properties);
+        final String content=node.getContent(RenderContext.EditMode.DEPLOYMENT);
+        if (content != null) {
+          final Path pageFile=target.resolve(name + ".html");
+          try (final OutputStreamWriter writer=new OutputStreamWriter(new FileOutputStream(pageFile.toFile()))){
+            writer.write(content);
+            writer.flush();
+            writer.close();
           }
-          if (content != null) {
-            final Path pageFile=target.resolve(name + ".html");
-            try (final OutputStreamWriter writer=new OutputStreamWriter(new FileOutputStream(pageFile.toFile()))){
-              writer.write(content);
-              writer.flush();
-              writer.close();
-            }
- catch (            IOException ioex) {
-              ioex.printStackTrace();
-            }
+ catch (          IOException ioex) {
+            ioex.printStackTrace();
           }
         }
       }

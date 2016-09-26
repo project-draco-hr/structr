@@ -9,15 +9,15 @@
   final Page _page=this;
   DOMElement element;
   try {
-    final Class entityClass=SchemaHelper.getEntityClassForRawType(elementType);
+    final Class entityClass=Class.forName("org.structr.web.entity.html." + elementType);
     if (entityClass != null) {
       element=(DOMElement)app.create(entityClass,new NodeAttribute(DOMElement.tag,tag));
       element.doAdopt(_page);
       return element;
     }
   }
- catch (  FrameworkException ex) {
-    logger.log(Level.SEVERE,null,ex);
+ catch (  Throwable t) {
+    logger.log(Level.SEVERE,"Unable to instantiate element of type " + elementType,t);
   }
   return null;
 }

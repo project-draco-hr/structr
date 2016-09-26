@@ -127,7 +127,7 @@
               }
             }
  else             if (key.startsWith(DATA_STRUCTR_PREFIX)) {
-              PropertyKey propertyKey=config.getPropertyKeyForJSONName(newNode.getClass(),key);
+              final PropertyKey propertyKey=config.getPropertyKeyForJSONName(newNode.getClass(),key);
               if (propertyKey != null) {
                 final PropertyConverter inputConverter=propertyKey.inputConverter(securityContext);
                 if (value != null && inputConverter != null) {
@@ -136,6 +136,12 @@
  else {
                   newNode.setProperty(propertyKey,value);
                 }
+              }
+            }
+ else {
+              final PropertyKey propertyKey=new StringProperty(key);
+              if (value != null) {
+                newNode.setProperty(propertyKey,value);
               }
             }
           }
@@ -183,6 +189,7 @@
         if (commentHandler.handleComment(page,newNode,lastComment)) {
           if (lastCommentNode != null) {
             parent.removeChild(lastCommentNode);
+            app.delete(lastCommentNode);
           }
         }
         lastCommentNode=null;

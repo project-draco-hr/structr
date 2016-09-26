@@ -2,7 +2,7 @@
   final String name=StringUtils.substringBeforeLast(fileName,".html");
   final PropertyMap properties=getPropertiesForComponent(name);
   final DOMNode existingComponent=getExistingComponent(name);
-  try (final Tx tx=app.tx()){
+  try (final Tx tx=app.tx(false,false,false)){
     if (existingComponent != null) {
       deleteComponent(app,name);
     }
@@ -13,7 +13,7 @@
     importer.setIsDeployment(true);
     final boolean parseOk=importer.parse(false);
     if (parseOk) {
-      logger.log(Level.INFO,"Importing page {0} from {1}..",new Object[]{name,fileName});
+      logger.log(Level.INFO,"Importing component {0} from {1}..",new Object[]{name,fileName});
       importer.setCommentHandler(new DeploymentCommentHandler());
       final ShadowDocument shadowDocument=CreateComponentCommand.getOrCreateHiddenDocument();
       final DOMNode rootElement=importer.createComponentChildNodes(shadowDocument);

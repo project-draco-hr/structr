@@ -1,0 +1,12 @@
+{
+  try {
+    final JsonSchema schema=StructrSchema.newInstance(URI.create(app.getInstanceId()));
+    final JsonObjectType source=schema.addType("Source");
+    final JsonObjectType target=schema.addType("Target");
+    source.relate(target,"link",Relation.Cardinality.OneToMany,"sourceLink","linkTargets");
+    checkSchemaString(schema.toString());
+  }
+ catch (  FrameworkException|URISyntaxException t) {
+    t.printStackTrace();
+  }
+}

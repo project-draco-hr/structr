@@ -11,7 +11,11 @@
      if (inputStream != null) {
       final FulltextTokenizer tokenizer=new FulltextTokenizer(fileName);
       try (final InputStream is=inputStream){
-        final AutoDetectParser parser=new AutoDetectParser();
+        Detector detector=new DefaultDetector(MimeTypes.getDefaultMimeTypes());
+        final AutoDetectParser parser=new AutoDetectParser(detector);
+        final Map<MediaType,Parser> customParsers=new HashMap<>();
+        customParsers.put(MediaType.application("pdf"),new PDFParser());
+        parser.setParsers(customParsers);
         parser.parse(is,new BodyContentHandler(tokenizer),new Metadata());
         parsingSuccessful=true;
       }
@@ -26,11 +30,11 @@
             if (ownerName != null) {
               tokenizer.write(ownerName);
             }
-            final String eMail=_owner.getProperty(User.eMail);
+            final String eMail=_owner.getProperty(Person.eMail);
             if (eMail != null) {
               tokenizer.write(eMail);
             }
-            final String twitterName=_owner.getProperty(User.twitterName);
+            final String twitterName=_owner.getProperty(Person.twitterName);
             if (twitterName != null) {
               tokenizer.write(twitterName);
             }
@@ -69,5 +73,6 @@
   }
  catch (  final Throwable t) {
     logger.log(Level.WARNING,"Indexing of {0} failed: {1}",new Object[]{fileName,t.getMessage()});
+    t.printStackTrace();
   }
 }

@@ -1,21 +1,11 @@
 {
-  final HttpClientParams params=new HttpClientParams(HttpClientParams.getDefaultParams());
-  final HttpClient client=new HttpClient(params);
-  final HeadMethod headMethod=new HeadMethod(requestUrl);
-  if (username != null && password != null) {
-    Credentials defaultcreds=new UsernamePasswordCredentials(username,password);
-    client.getState().setCredentials(AuthScope.ANY,defaultcreds);
-    client.getParams().setAuthenticationPreemptive(true);
-    headMethod.setDoAuthentication(true);
-  }
-  headMethod.addRequestHeader("Connection","close");
-  headMethod.setFollowRedirects(false);
-  for (  final Map.Entry<String,String> header : ctx.getHeaders().entrySet()) {
-    headMethod.addRequestHeader(header.getKey(),header.getValue());
-  }
-  client.executeMethod(headMethod);
+  final Map<String,String> headers=HttpHelper.head(requestUrl,password,username,Collections.EMPTY_MAP);
   final GraphObjectMap response=new GraphObjectMap();
-  response.setProperty(new IntProperty("status"),headMethod.getStatusCode());
-  response.setProperty(new StringProperty("headers"),extractHeaders(headMethod.getResponseHeaders()));
-  return response;
+  response.setProperty(new IntProperty("status"),headers.get("status"));
+  headers.remove("status");
+  final GraphObjectMap map=new GraphObjectMap();
+  for (  final Entry<String,String> entry : headers.entrySet()) {
+    map.put(new StringProperty(entry.getKey()),entry.getValue());
+  }
+  return map;
 }

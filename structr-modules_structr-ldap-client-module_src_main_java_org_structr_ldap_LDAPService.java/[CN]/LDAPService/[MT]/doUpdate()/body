@@ -4,7 +4,7 @@
   if (connection != null) {
     connection.setTimeOut(0);
     if (connection.connect()) {
-      logger.log(Level.INFO,"Updating user/group information from LDAP server {0}:{1}..",new Object[]{host,port});
+      logger.info("Updating user/group information from LDAP server {}:{}..",new Object[]{host,port});
       if (StringUtils.isNotBlank(binddn) && StringUtils.isNotBlank(secret)) {
         connection.bind(binddn,secret);
       }
@@ -25,12 +25,12 @@
               user.initializeFrom(userEntry);
             }
  else {
-              logger.log(Level.INFO,"User {0} doesn't exist in LDAP directory, deleting.",user);
+              logger.info("User {} doesn't exist in LDAP directory, deleting.",user);
               app.delete(user);
             }
           }
  else {
-            logger.log(Level.WARNING,"User {0} doesn't have an LDAP distinguished name, ignoring.",user);
+            logger.warn("User {} doesn't have an LDAP distinguished name, ignoring.",user);
           }
         }
         tx.success();
@@ -39,7 +39,7 @@
       connection.close();
     }
  else {
-      logger.log(Level.INFO,"Connection to LDAP server {0} failed",host);
+      logger.info("Connection to LDAP server {} failed",host);
     }
   }
 }

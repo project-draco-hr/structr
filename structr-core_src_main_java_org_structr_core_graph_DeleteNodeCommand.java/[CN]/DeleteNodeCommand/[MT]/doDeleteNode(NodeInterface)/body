@@ -1,13 +1,13 @@
 {
   try {
     if (!deletedNodes.contains(node) && node.getUuid() == null) {
-      logger.log(Level.WARNING,"Will not delete node which has no UUID, dumping stack.");
+      logger.warn("Will not delete node which has no UUID, dumping stack.");
       Thread.dumpStack();
       return null;
     }
   }
  catch (  java.lang.IllegalStateException ise) {
-    logger.log(Level.WARNING,"Trying to delete a node which is already deleted",ise.getMessage());
+    logger.warn("Trying to delete a node which is already deleted",ise.getMessage());
     return null;
   }
 catch (  org.structr.api.NotFoundException nfex) {
@@ -60,7 +60,7 @@ catch (  org.structr.api.NotFoundException nfex) {
     }
   }
  catch (  Throwable t) {
-    logger.log(Level.FINE,t,LogMessageSupplier.create("Exception while deleting node: {0}",node));
+    logger.debug("Exception while deleting node: {}",node);
   }
   return null;
 }

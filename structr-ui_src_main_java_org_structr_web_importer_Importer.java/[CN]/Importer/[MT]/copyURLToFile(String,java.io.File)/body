@@ -3,7 +3,7 @@
   final HttpMethod get=new GetMethod();
   get.setURI(new URI(uri,false));
   get.addRequestHeader("User-Agent","curl/7.35.0");
-  logger.log(Level.INFO,"Downloading from {0}",uri);
+  logger.info("Downloading from {}",uri);
   final int statusCode=client.executeMethod(get);
   if (statusCode == 200) {
     try (final InputStream is=get.getResponseBodyAsStream()){
@@ -14,6 +14,6 @@
    }
  else {
     System.out.println("response body: " + new String(get.getResponseBody(),"utf-8"));
-    logger.log(Level.WARNING,"Unable to create file from URI {0}: status code was {1}",new Object[]{uri,statusCode});
+    logger.warn("Unable to create file from URI {}: status code was {}",new Object[]{uri,statusCode});
   }
 }

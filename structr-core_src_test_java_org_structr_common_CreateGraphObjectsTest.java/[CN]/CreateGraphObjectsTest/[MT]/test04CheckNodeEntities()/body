@@ -7,7 +7,7 @@
       entityList=getClasses("org.structr.core.entity");
     }
  catch (    IOException|ClassNotFoundException ex) {
-      logger.log(Level.SEVERE,null,ex);
+      logger.error("",ex);
     }
     assertTrue(entityList.contains(AbstractNode.class));
     assertTrue(entityList.contains(GenericNode.class));
@@ -44,7 +44,7 @@
           props.put(Location.latitude,12.34);
           props.put(Location.longitude,56.78);
         }
-        logger.log(Level.INFO,"Creating node of type {0}",type);
+        logger.info("Creating node of type {}",type);
         NodeInterface node=app.create(type,props);
         assertTrue(type.getSimpleName().equals(node.getProperty(AbstractNode.type)));
         if (type.equals(ResourceAccess.class)) {
@@ -56,8 +56,8 @@
     tx.success();
   }
  catch (  FrameworkException ex) {
-    logger.log(Level.SEVERE,ex.toString());
-    logger.log(Level.WARNING,"",ex);
+    logger.error(ex.toString());
+    logger.warn("",ex);
     fail("Unexpected exception");
   }
 }

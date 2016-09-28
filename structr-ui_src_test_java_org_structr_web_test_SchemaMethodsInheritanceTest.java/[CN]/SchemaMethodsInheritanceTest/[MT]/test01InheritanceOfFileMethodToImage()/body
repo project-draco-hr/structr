@@ -5,7 +5,7 @@
     tx.success();
   }
  catch (  Exception ex) {
-    logger.log(Level.SEVERE,null,ex);
+    logger.error("",ex);
   }
   try (final Tx tx=app.tx()){
     SchemaNode fileNodeDef=app.nodeQuery(SchemaNode.class).andName("File").getFirst();
@@ -15,7 +15,7 @@
     tx.success();
   }
  catch (  Exception ex) {
-    logger.log(Level.SEVERE,null,ex);
+    logger.error("",ex);
   }
   FileBase testFile=null;
   try (final Tx tx=app.tx()){
@@ -24,14 +24,14 @@
     tx.success();
   }
  catch (  Exception ex) {
-    logger.log(Level.SEVERE,null,ex);
+    logger.error("",ex);
   }
   try (final Tx tx=app.tx()){
     RestAssured.given().contentType("application/json; charset=UTF-8").filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(200)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(201)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(400)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(404)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(422)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(500)).headers("X-User",ADMIN_USERNAME,"X-Password",ADMIN_PASSWORD).body("{}").expect().statusCode(200).when().post("/File/" + testFile.getUuid() + "/testFileMethod");
     tx.success();
   }
  catch (  FrameworkException ex) {
-    logger.log(Level.SEVERE,ex.toString());
+    logger.error(ex.toString());
     fail("Unexpected exception");
   }
 }

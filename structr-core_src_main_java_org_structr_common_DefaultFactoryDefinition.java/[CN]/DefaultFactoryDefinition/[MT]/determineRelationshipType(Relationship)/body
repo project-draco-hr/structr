@@ -8,12 +8,12 @@
   final String relType=relationship.getType().name();
   final Class entityType=getClassForCombinedType(sourceType,relType,targetType);
   if (entityType != null) {
-    logger.log(Level.FINE,"Class for assembled combined {0}",entityType.getName());
+    logger.debug("Class for assembled combined {}",entityType.getName());
     return entityType;
   }
   if (relationship.hasProperty(type)) {
     Object obj=relationship.getProperty(type);
-    logger.log(Level.FINEST,"Type property: {0}",obj);
+    logger.debug("Type property: {}",obj);
     if (obj != null) {
       Class relationClass=StructrApp.getConfiguration().getRelationshipEntityClass(obj.toString());
       if (relationClass != null) {
@@ -25,7 +25,7 @@
   final String combinedTypeName="combinedType";
   if (relationship.hasProperty(combinedTypeName)) {
     Object obj=relationship.getProperty(combinedTypeName);
-    logger.log(Level.FINE,"Combined type property: {0}",obj);
+    logger.debug("Combined type property: {}",obj);
     if (obj != null) {
       Class classForCombinedType=getClassForCombinedType(obj.toString());
       if (classForCombinedType != null) {

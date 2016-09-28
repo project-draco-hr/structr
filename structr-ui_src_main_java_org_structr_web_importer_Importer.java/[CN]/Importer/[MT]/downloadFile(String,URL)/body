@@ -13,39 +13,39 @@
   URL downloadUrl;
   try {
     downloadUrl=new URL(base,downloadAddress);
-    logger.log(Level.INFO,"Starting download from {0}",downloadUrl);
+    logger.info("Starting download from {}",downloadUrl);
     copyURLToFile(downloadUrl.toString(),fileOnDisk);
   }
  catch (  IOException ioe) {
     if (originalUrl == null || address == null) {
-      logger.log(Level.INFO,"Cannot download from {0} without base address",downloadAddress);
+      logger.info("Cannot download from {} without base address",downloadAddress);
       return null;
     }
-    logger.log(Level.WARNING,ioe,LogMessageSupplier.create("Unable to download from {0} {1}",new Object[]{originalUrl,downloadAddress}));
+    logger.warn("Unable to download from {} {}",new Object[]{originalUrl,downloadAddress});
     try {
       if (address.endsWith("/")) {
-        logger.log(Level.INFO,"Starting download from alternative URL {0} {1} {2}",new Object[]{originalUrl,address,downloadAddress});
+        logger.info("Starting download from alternative URL {} {} {}",new Object[]{originalUrl,address,downloadAddress});
         downloadUrl=new URL(new URL(originalUrl,address),downloadAddress);
       }
  else {
-        logger.log(Level.INFO,"Starting download from alternative URL {0} {1} {2}",new Object[]{originalUrl,address.concat("/"),downloadAddress});
+        logger.info("Starting download from alternative URL {} {} {}",new Object[]{originalUrl,address.concat("/"),downloadAddress});
         downloadUrl=new URL(new URL(originalUrl,address.concat("/")),downloadAddress);
       }
       copyURLToFile(downloadUrl.toString(),fileOnDisk);
     }
  catch (    MalformedURLException ex) {
-      logger.log(Level.SEVERE,ex,LogMessageSupplier.create("Could not resolve address {0}",address.concat("/")));
+      logger.error("Could not resolve address {}",address.concat("/"));
       return null;
     }
 catch (    IOException ex) {
-      logger.log(Level.WARNING,ex,LogMessageSupplier.create("Unable to download from {0}",address.concat("/")));
+      logger.warn("Unable to download from {}",address.concat("/"));
       return null;
     }
-    logger.log(Level.INFO,"Starting download from alternative URL {0}",downloadUrl);
+    logger.info("Starting download from alternative URL {}",downloadUrl);
   }
   final String fileName=PathHelper.getName(downloadAddress);
   if (StringUtils.isBlank(fileName)) {
-    logger.log(Level.WARNING,"Can't figure out filename from download address {0}, aborting.",downloadAddress);
+    logger.warn("Can't figure out filename from download address {}, aborting.",downloadAddress);
     return null;
   }
   try {
@@ -54,10 +54,10 @@ catch (    IOException ex) {
     checksum=FileUtils.checksumCRC32(fileOnDisk);
   }
  catch (  IOException ioe) {
-    logger.log(Level.WARNING,"Unable to determine MIME type, size or checksum of {0}",fileOnDisk);
+    logger.warn("Unable to determine MIME type, size or checksum of {}",fileOnDisk);
     return null;
   }
-  logger.log(Level.INFO,"Download URL: {0}, address: {1}, cleaned address: {2}, filename: {3}",new Object[]{downloadUrl,address,StringUtils.substringBeforeLast(address,"/"),fileName});
+  logger.info("Download URL: {}, address: {}, cleaned address: {}, filename: {}",new Object[]{downloadUrl,address,StringUtils.substringBeforeLast(address,"/"),fileName});
   String relativePath=StringUtils.substringAfter(downloadUrl.toString(),StringUtils.substringBeforeLast(address,"/"));
   if (StringUtils.isBlank(relativePath)) {
     relativePath=downloadAddress;
@@ -78,7 +78,7 @@ catch (    IOException ex) {
  else {
     path=StringUtils.substringBefore(relativePath,fileName);
   }
-  logger.log(Level.INFO,"Relative path: {0}, final path: {1}",new Object[]{relativePath,path});
+  logger.info("Relative path: {}, final path: {}",new Object[]{relativePath,path});
   if (contentType.equals("text/plain")) {
     contentType=StringUtils.defaultIfBlank(contentTypeForExtension.get(StringUtils.substringAfterLast(fileName,".")),"text/plain");
   }
@@ -104,7 +104,7 @@ catch (    IOException ex) {
     return fileNode;
   }
  catch (  final FrameworkException|IOException ex) {
-    logger.log(Level.WARNING,"Could not create file node.",ex);
+    logger.warn("Could not create file node.",ex);
   }
   return null;
 }

@@ -9,14 +9,14 @@
     byte[] data=null;
     if (rawData != null) {
       if (rawData instanceof String) {
-        logger.log(Level.FINEST,"Raw data: {0}",rawData);
+        logger.debug("Raw data: {}",rawData);
         data=Base64.decode(((String)rawData));
-        logger.log(Level.FINEST,"Decoded data: {0}",data);
+        logger.debug("Decoded data: {}",data);
       }
     }
     final FileBase file=(FileBase)getNode(uuid);
     if (!file.isGranted(Permission.write,securityContext)) {
-      logger.log(Level.WARNING,"No write permission for {0} on {1}",new Object[]{getWebSocket().getCurrentUser().toString(),file.toString()});
+      logger.warn("No write permission for {} on {}",new Object[]{getWebSocket().getCurrentUser().toString(),file.toString()});
       getWebSocket().send(MessageBuilder.status().message("No write permission").code(400).build(),true);
       return;
     }
@@ -30,7 +30,7 @@
       file.setProperty(FileBase.size,size);
       file.increaseVersion();
       getWebSocket().removeFileUploadHandler(uuid);
-      logger.log(Level.FINE,"File upload finished. Checksum: {0}, size: {1}",new Object[]{checksum,size});
+      logger.debug("File upload finished. Checksum: {}, size: {}",new Object[]{checksum,size});
     }
     final long currentSize=(long)(sequenceNumber * chunkSize) + data.length;
     getWebSocket().send(MessageBuilder.status().code(200).message("{\"id\":\"" + file.getUuid() + "\", \"name\":\""+ file.getName()+ "\",\"size\":"+ currentSize+ "}").build(),true);

@@ -13,16 +13,16 @@
       tx.success();
     }
  catch (    FrameworkException fex) {
-      logger.log(Level.WARNING,"",fex);
+      logger.warn("",fex);
     }
   }
  else {
-    logger.log(Level.WARNING,"Cannot start Structr shell, no username set!");
+    logger.warn("Cannot start Structr shell, no username set!");
     return;
   }
   if (isInteractive()) {
     if (user == null) {
-      logger.log(Level.WARNING,"Cannot start Structr shell, user not found for name {0}!",userName);
+      logger.warn("Cannot start Structr shell, user not found for name {}!",userName);
       return;
     }
     final String terminalType=env.getEnv().get("TERM");
@@ -34,10 +34,10 @@ case "vt220":
         term=new XTermTerminalEmulator(in,out,this);
       break;
 default :
-    logger.log(Level.WARNING,"Unsupported terminal type {0}, aborting.",terminalType);
+    logger.warn("Unsupported terminal type {}, aborting.",terminalType);
   break;
 }
-logger.log(Level.WARNING,"No terminal type provided, aborting.",terminalType);
+logger.warn("No terminal type provided, aborting.",terminalType);
 }
 if (term != null) {
 term.start();

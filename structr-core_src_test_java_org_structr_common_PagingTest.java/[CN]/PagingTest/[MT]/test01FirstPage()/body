@@ -11,15 +11,15 @@
       int pageSize=10;
       int page=1;
       result=app.nodeQuery(type).includeDeletedAndHidden().sort(sortKey).order(sortDesc).page(page).pageSize(pageSize).getResult();
-      logger.log(Level.INFO,"Raw result size: {0}, expected: {1}",new Object[]{result.getRawResultCount(),number});
+      logger.info("Raw result size: {}, expected: {}",new Object[]{result.getRawResultCount(),number});
       assertTrue(result.getRawResultCount() == number);
-      logger.log(Level.INFO,"Result size: {0}, expected: {1}",new Object[]{result.size(),pageSize});
+      logger.info("Result size: {}, expected: {}",new Object[]{result.size(),pageSize});
       assertTrue(result.size() == pageSize);
     }
    }
  catch (  FrameworkException ex) {
-    logger.log(Level.WARNING,"",ex);
-    logger.log(Level.SEVERE,ex.toString());
+    logger.warn("",ex);
+    logger.error(ex.toString());
     fail("Unexpected exception");
   }
 }

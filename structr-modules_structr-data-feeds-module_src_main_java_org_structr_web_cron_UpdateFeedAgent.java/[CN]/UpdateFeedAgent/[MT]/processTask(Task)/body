@@ -1,9 +1,9 @@
 {
-  logger.log(Level.FINE,"Processing task {0}",task.getClass().getName());
+  logger.debug("Processing task {}",task.getClass().getName());
   final App app=StructrApp.getInstance();
   try (final Tx tx=app.tx(true,true,false)){
     for (    DataFeed feed : (List<T>)task.getNodes()) {
-      logger.log(Level.FINE,"Updating data feed {0} if due",feed.getProperty(DataFeed.name));
+      logger.debug("Updating data feed {} if due",feed.getProperty(DataFeed.name));
       feed.updateIfDue();
     }
     tx.success();

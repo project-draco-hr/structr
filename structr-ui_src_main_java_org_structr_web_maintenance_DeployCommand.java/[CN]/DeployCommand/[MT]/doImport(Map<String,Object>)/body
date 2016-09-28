@@ -16,88 +16,88 @@
   }
   final Path usersConf=source.resolve("security/users.json");
   if (Files.exists(usersConf)) {
-    logger.log(Level.INFO,"Reading {0}..",usersConf);
+    logger.info("Reading {}..",usersConf);
     importMapData(User.class,readConfigMap(usersConf));
   }
   final Path grantsConf=source.resolve("security/grants.json");
   if (Files.exists(grantsConf)) {
-    logger.log(Level.INFO,"Reading {0}..",grantsConf);
+    logger.info("Reading {}..",grantsConf);
     importListData(ResourceAccess.class,readConfigList(grantsConf));
   }
   final Path filesConfFile=source.resolve("files.json");
   if (Files.exists(filesConfFile)) {
-    logger.log(Level.INFO,"Reading {0}..",filesConfFile);
+    logger.info("Reading {}..",filesConfFile);
     filesConf.putAll(readConfigMap(filesConfFile));
   }
   final Path pagesConfFile=source.resolve("pages.json");
   if (Files.exists(pagesConfFile)) {
-    logger.log(Level.INFO,"Reading {0}..",pagesConfFile);
+    logger.info("Reading {}..",pagesConfFile);
     pagesConf.putAll(readConfigMap(pagesConfFile));
   }
   final Path componentsConfFile=source.resolve("components.json");
   if (Files.exists(componentsConfFile)) {
-    logger.log(Level.INFO,"Reading {0}..",componentsConfFile);
+    logger.info("Reading {}..",componentsConfFile);
     componentsConf.putAll(readConfigMap(componentsConfFile));
   }
   final Path templatesConfFile=source.resolve("templates.json");
   if (Files.exists(templatesConfFile)) {
-    logger.log(Level.INFO,"Reading {0}..",templatesConfFile);
+    logger.info("Reading {}..",templatesConfFile);
     templatesConf.putAll(readConfigMap(templatesConfFile));
   }
   final Path schema=source.resolve("schema");
   if (Files.exists(schema)) {
     try {
-      logger.log(Level.INFO,"Importing data from schema/ directory..");
+      logger.info("Importing data from schema/ directory..");
       Files.walkFileTree(schema,new SchemaImportVisitor(schema));
     }
  catch (    IOException ioex) {
-      logger.log(Level.WARNING,"Exception while importing schema",ioex);
+      logger.warn("Exception while importing schema",ioex);
     }
   }
   final Path files=source.resolve("files");
   if (Files.exists(files)) {
     try {
-      logger.log(Level.INFO,"Importing files...");
+      logger.info("Importing files...");
       Files.walkFileTree(files,new FileImportVisitor(files,filesConf));
     }
  catch (    IOException ioex) {
-      logger.log(Level.WARNING,"Exception while importing files",ioex);
+      logger.warn("Exception while importing files",ioex);
     }
   }
   final Path templates=source.resolve("templates");
   if (Files.exists(templates)) {
     try {
-      logger.log(Level.INFO,"Importing templates..");
+      logger.info("Importing templates..");
       Files.walkFileTree(templates,new TemplateImportVisitor(templatesConf));
     }
  catch (    IOException ioex) {
-      logger.log(Level.WARNING,"Exception while importing templates",ioex);
+      logger.warn("Exception while importing templates",ioex);
     }
   }
   final Path components=source.resolve("components");
   if (Files.exists(components)) {
     try {
-      logger.log(Level.INFO,"Importing shared components..");
+      logger.info("Importing shared components..");
       Files.walkFileTree(components,new ComponentImportVisitor(componentsConf));
     }
  catch (    IOException ioex) {
-      logger.log(Level.WARNING,"Exception while importing shared components",ioex);
+      logger.warn("Exception while importing shared components",ioex);
     }
   }
   final Path pages=source.resolve("pages");
   if (Files.exists(pages)) {
     try {
-      logger.log(Level.INFO,"Importing pages..");
+      logger.info("Importing pages..");
       Files.walkFileTree(pages,new PageImportVisitor(pages,pagesConf));
     }
  catch (    IOException ioex) {
-      logger.log(Level.WARNING,"Exception while importing pages",ioex);
+      logger.warn("Exception while importing pages",ioex);
     }
   }
   final Path conf=source.resolve("deploy.conf");
   if (Files.exists(conf)) {
     try (final Tx tx=StructrApp.getInstance().tx()){
-      logger.log(Level.INFO,"Applying configuration from {0}..",conf);
+      logger.info("Applying configuration from {}..",conf);
       final String confSource=new String(Files.readAllBytes(conf),Charset.forName("utf-8"));
       Scripting.evaluate(new ActionContext(SecurityContext.getSuperUserInstance()),null,confSource.trim());
       tx.success();
@@ -106,5 +106,5 @@
       t.printStackTrace();
     }
   }
-  logger.log(Level.INFO,"Import from {0} done.",source.toString());
+  logger.info("Import from {} done.",source.toString());
 }

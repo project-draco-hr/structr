@@ -2,7 +2,7 @@
   final Map<String,Object> nodeData=webSocketData.getNodeData();
   final String method=(String)nodeData.get("method");
   if (method == null || !(method.equals("POST") || method.equals("PUT"))) {
-    logger.log(Level.WARNING,"Method not supported: {0}",method);
+    logger.warn("Method not supported: {}",method);
     getWebSocket().send(MessageBuilder.wrappedRest().code(422).message("Method not supported: " + method).build(),true);
     return;
   }
@@ -11,7 +11,7 @@
     resourceProvider=UiResourceProvider.class.newInstance();
   }
  catch (  Throwable t) {
-    logger.log(Level.SEVERE,"Couldn't establish a resource provider",t);
+    logger.error("Couldn't establish a resource provider",t);
     getWebSocket().send(MessageBuilder.wrappedRest().code(422).message("Couldn't establish a resource provider").build(),true);
     return;
   }
@@ -55,7 +55,7 @@
     resource=ResourceHelper.applyViewTransformation(wrappedRequest,socket.getSecurityContext(),ResourceHelper.optimizeNestedResourceChain(socket.getSecurityContext(),wrappedRequest,resourceMap,fakePropertyView),fakePropertyView);
   }
  catch (  IllegalPathException|NotFoundException e) {
-    logger.log(Level.WARNING,"Illegal path for REST query");
+    logger.warn("Illegal path for REST query");
     getWebSocket().send(MessageBuilder.wrappedRest().code(422).message("Illegal path for REST query").build(),true);
     return;
   }

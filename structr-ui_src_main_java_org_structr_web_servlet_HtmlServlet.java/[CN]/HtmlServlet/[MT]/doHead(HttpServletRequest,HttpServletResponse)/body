@@ -17,7 +17,7 @@
       response.setCharacterEncoding("UTF-8");
       response.setContentLength(0);
       boolean dontCache=false;
-      logger.log(Level.FINE,"Path info {0}",path);
+      logger.debug("Path info {}",path);
       if (response.getStatus() == 302) {
         tx.success();
         return;
@@ -34,7 +34,7 @@
       String[] uriParts=PathHelper.getParts(path);
       if ((uriParts == null) || (uriParts.length == 0)) {
         rootElement=findIndexPage(securityContext,pages,edit);
-        logger.log(Level.FINE,"No path supplied, trying to find index page");
+        logger.debug("No path supplied, trying to find index page");
       }
  else {
         if (rootElement == null) {
@@ -145,11 +145,11 @@ response.getOutputStream().close();
 tx.success();
 }
  catch (Throwable fex) {
-logger.log(Level.SEVERE,"Exception while processing request",fex);
+logger.error("Exception while processing request",fex);
 }
 }
  catch (FrameworkException t) {
-logger.log(Level.SEVERE,"Exception while processing request",t);
+logger.error("Exception while processing request",t);
 UiAuthenticator.writeInternalServerError(response);
 }
 }

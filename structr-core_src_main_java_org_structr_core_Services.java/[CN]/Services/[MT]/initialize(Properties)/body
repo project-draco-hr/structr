@@ -4,7 +4,7 @@
   configuredServiceNames=properties.getProperty(Services.CONFIGURED_SERVICES);
   configuredServiceClasses.addAll(Arrays.asList(configuredServiceNames.split("[ ,]+")));
   getConfigurationProvider();
-  logger.log(Level.INFO,"Starting services");
+  logger.info("Starting services");
   for (  final String serviceClassName : configuredServiceClasses) {
     Class serviceClass=getServiceClassForName(serviceClassName);
     if (serviceClass != null) {
@@ -14,17 +14,17 @@
           service.initialized();
         }
  else {
-          logger.log(Level.WARNING,"Service {0} was not started!",serviceClassName);
+          logger.warn("Service {} was not started!",serviceClassName);
         }
       }
  catch (      Throwable t) {
-        logger.log(Level.WARNING,t,LogMessageSupplier.create("Exception while registering service {0}",serviceClassName));
+        logger.warn("Exception while registering service {}",serviceClassName);
       }
     }
   }
-  logger.log(Level.INFO,"{0} service(s) processed",serviceCache.size());
+  logger.info("{} service(s) processed",serviceCache.size());
   registeredServiceClasses.clear();
-  logger.log(Level.INFO,"Registering shutdown hook.");
+  logger.info("Registering shutdown hook.");
   Runtime.getRuntime().addShutdownHook(new Thread(){
     @Override public void run(){
       shutdown();
@@ -41,7 +41,7 @@
           permissionsForOwnerlessNodes.add(val);
         }
  else {
-          logger.log(Level.WARNING,"Invalid permisson {0}, ignoring.",trimmed);
+          logger.warn("Invalid permisson {}, ignoring.",trimmed);
         }
       }
     }
@@ -66,7 +66,7 @@
 ).get();
   }
  catch (  Throwable t) {
-    logger.log(Level.WARNING,"Exception while executing post-initialization tasks",t);
+    logger.warn("Exception while executing post-initialization tasks",t);
   }
   System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.ms").format(new Date()) + "  ---------------- Initialization complete ----------------");
   initializationDone=true;

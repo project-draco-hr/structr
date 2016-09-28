@@ -40,19 +40,19 @@
     response.getWriter().println();
   }
 catch (  JsonSyntaxException jsex) {
-    logger.log(Level.WARNING,"JsonSyntaxException in DELETE",jsex);
+    logger.warn("JsonSyntaxException in DELETE",jsex);
     int code=HttpServletResponse.SC_BAD_REQUEST;
     response.setStatus(code);
     response.getWriter().append(RestMethodResult.jsonError(code,"JsonSyntaxException in DELETE: " + jsex.getMessage()));
   }
 catch (  JsonParseException jpex) {
-    logger.log(Level.WARNING,"JsonParseException in DELETE",jpex);
+    logger.warn("JsonParseException in DELETE",jpex);
     int code=HttpServletResponse.SC_BAD_REQUEST;
     response.setStatus(code);
     response.getWriter().append(RestMethodResult.jsonError(code,"JsonSyntaxException in DELETE: " + jpex.getMessage()));
   }
 catch (  Throwable t) {
-    logger.log(Level.WARNING,"Exception in DELETE",t);
+    logger.warn("Exception in DELETE",t);
     int code=HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
     response.setStatus(code);
     response.getWriter().append(RestMethodResult.jsonError(code,"JsonSyntaxException in DELETE: " + t.getMessage()));
@@ -62,7 +62,7 @@ catch (  Throwable t) {
       response.getWriter().close();
     }
  catch (    IOException t) {
-      logger.log(Level.WARNING,"Unable to flush and close response: {0}",t.getMessage());
+      logger.warn("Unable to flush and close response: {}",t.getMessage());
     }
   }
 }

@@ -48,7 +48,7 @@
         final Iterator<String> wordIterator=tokenizer.getWords().iterator();
         final Node node=file.getNode();
         final Set<String> indexedWords=new TreeSet<>();
-        logger.log(Level.INFO,"Indexing {0}..",fileName);
+        logger.info("Indexing {}..",fileName);
         while (wordIterator.hasNext()) {
           try (Tx tx=StructrApp.getInstance().tx()){
             fulltextIndex.remove(node,indexKeyName);
@@ -67,12 +67,12 @@
           file.setProperty(Indexable.indexedWords,(String[])indexedWords.toArray(new String[indexedWords.size()]));
           tx.success();
         }
-         logger.log(Level.INFO,"Indexing of {0} finished, {1} words extracted",new Object[]{fileName,tokenizer.getWordCount()});
+         logger.info("Indexing of {} finished, {} words extracted",new Object[]{fileName,tokenizer.getWordCount()});
       }
     }
   }
  catch (  final Throwable t) {
-    logger.log(Level.WARNING,"Indexing of {0} failed: {1}",new Object[]{fileName,t.getMessage()});
+    logger.warn("Indexing of {} failed: {}",new Object[]{fileName,t.getMessage()});
     t.printStackTrace();
   }
 }

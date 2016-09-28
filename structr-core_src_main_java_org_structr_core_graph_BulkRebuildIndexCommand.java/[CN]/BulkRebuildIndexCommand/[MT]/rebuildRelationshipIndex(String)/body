@@ -7,25 +7,25 @@
     tx.success();
   }
  catch (  FrameworkException fex) {
-    logger.log(Level.WARNING,"Exception while creating all relationships iterator.",fex);
+    logger.warn("Exception while creating all relationships iterator.",fex);
   }
   if (relType == null) {
-    logger.log(Level.INFO,"Relationship type not set, starting (re-)indexing all relationships");
+    logger.info("Relationship type not set, starting (re-)indexing all relationships");
   }
  else {
-    logger.log(Level.INFO,"Starting (re-)indexing all relationships of type {0}",new Object[]{relType});
+    logger.info("Starting (re-)indexing all relationships of type {}",new Object[]{relType});
   }
   long count=NodeServiceCommand.bulkGraphOperation(securityContext,relIterator,1000,"RebuildRelIndex",new BulkGraphOperation<AbstractRelationship>(){
     @Override public void handleGraphObject(    SecurityContext securityContext,    AbstractRelationship rel){
       rel.updateInIndex();
     }
     @Override public void handleThrowable(    SecurityContext securityContext,    Throwable t,    AbstractRelationship rel){
-      logger.log(Level.WARNING,"Unable to index relationship {0}: {1}",new Object[]{rel,t.getMessage()});
+      logger.warn("Unable to index relationship {}: {}",new Object[]{rel,t.getMessage()});
     }
     @Override public void handleTransactionFailure(    SecurityContext securityContext,    Throwable t){
-      logger.log(Level.WARNING,"Unable to index relationship: {0}",t.getMessage());
+      logger.warn("Unable to index relationship: {}",t.getMessage());
     }
   }
 );
-  logger.log(Level.INFO,"Done with (re-)indexing {0} relationships",count);
+  logger.info("Done with (re-)indexing {} relationships",count);
 }

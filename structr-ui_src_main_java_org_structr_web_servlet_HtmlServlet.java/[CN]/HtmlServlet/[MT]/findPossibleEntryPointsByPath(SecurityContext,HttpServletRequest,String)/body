@@ -4,14 +4,14 @@
     return possibleEntryPoints;
   }
   if (path.length() > 0) {
-    logger.log(Level.FINE,"Requested path: {0}",path);
+    logger.debug("Requested path: {}",path);
     final Query pageQuery=StructrApp.getInstance(securityContext).nodeQuery();
     pageQuery.and(Page.path,path).andType(Page.class);
     final Result pages=pageQuery.getResult();
     final Query fileQuery=StructrApp.getInstance(securityContext).nodeQuery();
     fileQuery.and(AbstractFile.path,path).andTypes(File.class);
     final Result files=fileQuery.getResult();
-    logger.log(Level.FINE,"Found {0} pages and {1} files/folders",new Object[]{pages.size(),files.size()});
+    logger.debug("Found {} pages and {} files/folders",new Object[]{pages.size(),files.size()});
     final List<Linkable> linkables=(List<Linkable>)pages.getResults();
     linkables.addAll(files.getResults());
     request.setAttribute(POSSIBLE_ENTRY_POINTS_KEY,linkables);

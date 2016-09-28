@@ -12,16 +12,16 @@
     try (final Tx tx=StructrApp.getInstance().tx()){
       if (Boolean.TRUE.equals(allNodes)) {
         nodeIterator=Iterables.map(nodeFactory,Iterables.filter(new StructrAndSpatialPredicate(false,false,true),graphDb.getAllNodes())).iterator();
-        logger.log(Level.INFO,"Start setting UUID on all nodes");
+        logger.info("Start setting UUID on all nodes");
       }
  else {
         nodeIterator=Iterables.filter(new TypePredicate<>(nodeType),Iterables.map(nodeFactory,Iterables.filter(new StructrAndSpatialPredicate(false,false,true),graphDb.getAllNodes()))).iterator();
-        logger.log(Level.INFO,"Start setting UUID on nodes of type {0}",new Object[]{nodeType});
+        logger.info("Start setting UUID on nodes of type {}",new Object[]{nodeType});
       }
       tx.success();
     }
  catch (    FrameworkException fex) {
-      logger.log(Level.WARNING,"Exception while creating all nodes iterator.",fex);
+      logger.warn("Exception while creating all nodes iterator.",fex);
     }
     final long count=bulkGraphOperation(securityContext,nodeIterator,1000,"SetNodeUuid",new BulkGraphOperation<AbstractNode>(){
       @Override public void handleGraphObject(      final SecurityContext securityContext,      final AbstractNode node){
@@ -30,16 +30,16 @@
           node.setProperty(GraphObject.id,NodeServiceCommand.getNextUuid());
         }
  catch (        FrameworkException fex) {
-          logger.log(Level.WARNING,"Unable to set UUID of node {0}: {1}",new Object[]{node,fex.getMessage()});
+          logger.warn("Unable to set UUID of node {}: {}",new Object[]{node,fex.getMessage()});
           fex.printStackTrace();
         }
       }
       @Override public void handleThrowable(      SecurityContext securityContext,      Throwable t,      AbstractNode node){
-        logger.log(Level.WARNING,"Unable to set UUID of node {0}: {1}",new Object[]{node,t.getMessage()});
+        logger.warn("Unable to set UUID of node {}: {}",new Object[]{node,t.getMessage()});
         t.printStackTrace();
       }
       @Override public void handleTransactionFailure(      SecurityContext securityContext,      Throwable t){
-        logger.log(Level.WARNING,"Unable to set UUID on node: {0}",t.getMessage());
+        logger.warn("Unable to set UUID on node: {}",t.getMessage());
         t.printStackTrace();
       }
       @Override public boolean doValidation(){
@@ -47,7 +47,7 @@
       }
     }
 );
-    logger.log(Level.INFO,"Done with setting UUID on {0} nodes",count);
+    logger.info("Done with setting UUID on {} nodes",count);
     return;
   }
   if (relType != null || Boolean.TRUE.equals(allRels)) {
@@ -55,16 +55,16 @@
     try (final Tx tx=StructrApp.getInstance().tx()){
       if (Boolean.TRUE.equals(allRels)) {
         relIterator=Iterables.map(relFactory,Iterables.filter(new StructrAndSpatialPredicate(false,false,true),graphDb.getAllRelationships())).iterator();
-        logger.log(Level.INFO,"Start setting UUID on all rels",new Object[]{relType});
+        logger.info("Start setting UUID on all rels",new Object[]{relType});
       }
  else {
         relIterator=Iterables.filter(new TypePredicate<>(relType),Iterables.map(relFactory,Iterables.filter(new StructrAndSpatialPredicate(false,false,true),graphDb.getAllRelationships()))).iterator();
-        logger.log(Level.INFO,"Start setting UUID on rels of type {0}",new Object[]{relType});
+        logger.info("Start setting UUID on rels of type {}",new Object[]{relType});
       }
       tx.success();
     }
  catch (    FrameworkException fex) {
-      logger.log(Level.WARNING,"Exception while creating all nodes iterator.",fex);
+      logger.warn("Exception while creating all nodes iterator.",fex);
     }
     final long count=bulkGraphOperation(securityContext,relIterator,1000,"SetRelationshipUuid",new BulkGraphOperation<AbstractRelationship>(){
       @Override public void handleGraphObject(      SecurityContext securityContext,      AbstractRelationship rel){
@@ -73,22 +73,22 @@
           rel.setProperty(GraphObject.id,NodeServiceCommand.getNextUuid());
         }
  catch (        FrameworkException fex) {
-          logger.log(Level.WARNING,"Unable to set UUID of relationship {0}: {1}",new Object[]{rel,fex.getMessage()});
+          logger.warn("Unable to set UUID of relationship {}: {}",new Object[]{rel,fex.getMessage()});
         }
       }
       @Override public void handleThrowable(      SecurityContext securityContext,      Throwable t,      AbstractRelationship rel){
-        logger.log(Level.WARNING,"Unable to set UUID of relationship {0}: {1}",new Object[]{rel,t.getMessage()});
+        logger.warn("Unable to set UUID of relationship {}: {}",new Object[]{rel,t.getMessage()});
       }
       @Override public void handleTransactionFailure(      SecurityContext securityContext,      Throwable t){
-        logger.log(Level.WARNING,"Unable to set UUID on relationship: {0}",t.getMessage());
+        logger.warn("Unable to set UUID on relationship: {}",t.getMessage());
       }
       @Override public boolean doValidation(){
         return false;
       }
     }
 );
-    logger.log(Level.INFO,"Done with setting UUID on {0} relationships",count);
+    logger.info("Done with setting UUID on {} relationships",count);
     return;
   }
-  logger.log(Level.INFO,"Unable to determine entity type to set UUID.");
+  logger.info("Unable to determine entity type to set UUID.");
 }

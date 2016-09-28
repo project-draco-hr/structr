@@ -10,7 +10,7 @@
     final Importer pageImporter=new Importer(securityContext,code,address,name,publicVisible,authVisible);
     final boolean parseOk=pageImporter.parse();
     if (parseOk) {
-      logger.log(Level.INFO,"Sucessfully parsed {0}",address);
+      logger.info("Sucessfully parsed {}",address);
       getWebSocket().send(MessageBuilder.status().code(200).message("Sucessfully parsed address " + address).build(),true);
       String pageId=pageImporter.readPage().getUuid();
       Map<String,Object> resultData=new HashMap();
@@ -25,7 +25,7 @@
     }
   }
  catch (  FrameworkException fex) {
-    logger.log(Level.WARNING,"Error while importing content",fex);
+    logger.warn("Error while importing content",fex);
     getWebSocket().send(MessageBuilder.status().code(fex.getStatus()).message(fex.getMessage()).build(),true);
   }
 }

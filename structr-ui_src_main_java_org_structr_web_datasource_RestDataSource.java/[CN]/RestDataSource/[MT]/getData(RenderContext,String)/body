@@ -7,7 +7,7 @@
       resourceProvider=UiResourceProvider.class.newInstance();
     }
  catch (    Throwable t) {
-      logger.log(Level.SEVERE,"Couldn't establish a resource provider",t);
+      logger.error("Couldn't establish a resource provider",t);
       return Collections.EMPTY_LIST;
     }
   }
@@ -58,7 +58,7 @@
     resource=ResourceHelper.applyViewTransformation(wrappedRequest,securityContext,ResourceHelper.optimizeNestedResourceChain(securityContext,wrappedRequest,resourceMap,propertyView),propertyView);
   }
  catch (  IllegalPathException|NotFoundException e) {
-    logger.log(Level.WARNING,"Illegal path for REST query: {0}",restQuery);
+    logger.warn("Illegal path for REST query: {}",restQuery);
   }
   securityContext.setRequest(origRequest);
   if (resource == null) {
@@ -86,7 +86,7 @@
     result=resource.doGet(sortKey,sortDescending,pageSize,page,offsetId);
   }
  catch (  NotFoundException nfe) {
-    logger.log(Level.WARNING,"No result from internal REST query: {0}",restQuery);
+    logger.warn("No result from internal REST query: {}",restQuery);
   }
   result.setIsCollection(resource.isCollectionResource());
   result.setIsPrimitiveArray(resource.isPrimitiveArray());

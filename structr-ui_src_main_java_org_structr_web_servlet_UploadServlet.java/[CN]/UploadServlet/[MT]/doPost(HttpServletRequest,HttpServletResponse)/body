@@ -7,7 +7,7 @@
     }
   }
  catch (  IOException ioex) {
-    logger.log(Level.WARNING,"Unable to send response",ioex);
+    logger.warn("Unable to send response",ioex);
   }
   SecurityContext securityContext=null;
   try (final Tx tx=StructrApp.getInstance().tx()){
@@ -22,13 +22,13 @@
     tx.success();
   }
  catch (  FrameworkException fex) {
-    logger.log(Level.WARNING,"Unable to examine request",fex);
+    logger.warn("Unable to examine request",fex);
   }
 catch (  IOException ioex) {
-    logger.log(Level.WARNING,"Unable to send response",ioex);
+    logger.warn("Unable to send response",ioex);
   }
   if (securityContext == null) {
-    logger.log(Level.WARNING,"No SecurityContext, aborting.");
+    logger.warn("No SecurityContext, aborting.");
     return;
   }
   try {
@@ -79,7 +79,7 @@ catch (  IOException ioex) {
  else             if (isVideo) {
               cls=SchemaHelper.getEntityClassForRawType("VideoFile");
               if (cls == null) {
-                logger.log(Level.WARNING,"Unable to create entity of type VideoFile, class is not defined.");
+                logger.warn("Unable to create entity of type VideoFile, class is not defined.");
               }
             }
  else {
@@ -120,13 +120,13 @@ catch (  IOException ioex) {
           }
         }
  catch (        IOException ex) {
-          logger.log(Level.WARNING,"Could not upload file",ex);
+          logger.warn("Could not upload file",ex);
         }
       }
     }
   }
  catch (  Throwable t) {
-    logger.log(Level.SEVERE,"Exception while processing request",t);
+    logger.error("Exception while processing request",t);
     UiAuthenticator.writeInternalServerError(response);
   }
 }

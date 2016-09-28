@@ -6,14 +6,14 @@
     final App app=StructrApp.getInstance(securityContext);
     try (final Tx tx=app.tx()){
       if (!(obj.isGranted(Permission.delete,getWebSocket().getSecurityContext()))) {
-        logger.log(Level.WARNING,"No delete permission for {0} on {1}",new Object[]{getWebSocket().getCurrentUser().toString(),obj.toString()});
+        logger.warn("No delete permission for {} on {}",new Object[]{getWebSocket().getCurrentUser().toString(),obj.toString()});
         getWebSocket().send(MessageBuilder.status().message("No delete permission").code(400).build(),true);
         tx.success();
         return;
       }
     }
  catch (    FrameworkException ex) {
-      logger.log(Level.WARNING,"",ex);
+      logger.warn("",ex);
     }
     if (Boolean.TRUE.equals(recursive)) {
       try {
@@ -31,11 +31,11 @@
         }
       }
  catch (      FrameworkException fex) {
-        logger.log(Level.WARNING,"Exception occured",fex);
+        logger.warn("Exception occured",fex);
         getWebSocket().send(MessageBuilder.status().code(fex.getStatus()).message(fex.getMessage()).build(),true);
       }
 catch (      DOMException dex) {
-        logger.log(Level.WARNING,"DOMException occured.",dex);
+        logger.warn("DOMException occured.",dex);
         getWebSocket().send(MessageBuilder.status().code(422).message(dex.getMessage()).build(),true);
       }
     }
@@ -43,7 +43,7 @@ catch (      DOMException dex) {
       app.delete(obj);
     }
  catch (    FrameworkException fex) {
-      logger.log(Level.WARNING,"Unable to delete node(s)",fex);
+      logger.warn("Unable to delete node(s)",fex);
     }
   }
  else {

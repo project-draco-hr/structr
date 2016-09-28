@@ -15,7 +15,7 @@
           result=Arrays.asList(obj);
         }
         long t1=System.nanoTime() - t0;
-        logger.log(Level.FINE,"get(): {0} ns, {1} results",new Object[]{t1,result.size()});
+        logger.debug("get(): {} ns, {} results",new Object[]{t1,result.size()});
       }
  else {
         result=Collections.EMPTY_LIST;
@@ -23,22 +23,22 @@
           long t0=System.nanoTime();
           result=StructrApp.getInstance().nodeQuery().and(key,value).getAsList();
           long t1=System.nanoTime() - t0;
-          logger.log(Level.FINE,"instanceOf NodeInterface => nodeQuery: {0} ns, {1} result(s)",new Object[]{t1,result.size()});
+          logger.debug("instanceOf NodeInterface => nodeQuery: {} ns, {} result(s)",new Object[]{t1,result.size()});
         }
  else         if (object instanceof RelationshipInterface) {
           long t0=System.nanoTime();
           result=StructrApp.getInstance().relationshipQuery().and(key,value).getAsList();
           long t1=System.nanoTime() - t0;
-          logger.log(Level.FINE,"instanceOf RelationshipInterface => nodeQuery: {0} ns, {1} result(s)",new Object[]{t1,result.size()});
+          logger.debug("instanceOf RelationshipInterface => nodeQuery: {} ns, {} result(s)",new Object[]{t1,result.size()});
         }
  else {
-          logger.log(Level.SEVERE,"GraphObject is neither NodeInterface nor RelationshipInterface");
+          logger.error("GraphObject is neither NodeInterface nor RelationshipInterface");
         }
       }
       nodeExists=!result.isEmpty();
     }
  catch (    FrameworkException fex) {
-      logger.log(Level.WARNING,"Unable to fetch list of nodes for uniqueness check",fex);
+      logger.warn("Unable to fetch list of nodes for uniqueness check",fex);
     }
     if (nodeExists) {
       for (      final GraphObject foundNode : result) {

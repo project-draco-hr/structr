@@ -1,5 +1,5 @@
 {
-  logger.log(Level.INFO,"Requested path: {0}",requestedPath);
+  logger.info("Requested path: {}",requestedPath);
   try (Tx tx=StructrApp.getInstance(securityContext).tx()){
     if (StringUtils.isBlank(requestedPath) || "/".equals(requestedPath)) {
       return getHomeDirectory();
@@ -13,13 +13,13 @@
     }
     if (!requestedPath.startsWith("/")) {
       String basePath=cur.getAbsolutePath();
-      logger.log(Level.INFO,"Base path: {0}",basePath);
+      logger.info("Base path: {}",basePath);
       while (requestedPath.startsWith("..")) {
         requestedPath=StringUtils.stripStart(StringUtils.stripStart(requestedPath,".."),"/");
         basePath=StringUtils.substringBeforeLast(basePath,"/");
       }
       requestedPath=StringUtils.stripEnd(basePath.equals("/") ? "/".concat(requestedPath) : basePath.concat("/").concat(requestedPath),"/");
-      logger.log(Level.INFO,"Base path: {0}, requestedPath: {1}",new Object[]{basePath,requestedPath});
+      logger.info("Base path: {}, requestedPath: {}",new Object[]{basePath,requestedPath});
     }
     AbstractFile file=FileHelper.getFileByAbsolutePath(SecurityContext.getSuperUserInstance(),requestedPath);
     if (file != null) {
@@ -37,12 +37,12 @@
       tx.success();
       return new FtpFilePageWrapper(page);
     }
-    logger.log(Level.WARNING,"No existing file found: {0}",requestedPath);
+    logger.warn("No existing file found: {}",requestedPath);
     tx.success();
     return new FileOrFolder(requestedPath,user);
   }
  catch (  FrameworkException fex) {
-    logger.log(Level.SEVERE,"Error in getFile()",fex);
+    logger.error("Error in getFile()",fex);
   }
   return null;
 }

@@ -7,7 +7,7 @@
     List<AbstractNode> filteredResults=new LinkedList();
     List<AbstractNode> resultList=result.getResults();
     if (result.isEmpty()) {
-      logger.log(Level.WARNING,"No shadow document found, creating one.");
+      logger.warn("No shadow document found, creating one.");
       resultList.add(CreateComponentCommand.getOrCreateHiddenDocument());
     }
     ShadowDocument doc=(ShadowDocument)resultList.get(0);
@@ -45,7 +45,7 @@
     getWebSocket().send(webSocketData,true);
   }
  catch (  FrameworkException fex) {
-    logger.log(Level.WARNING,"Exception occured",fex);
+    logger.warn("Exception occured",fex);
     getWebSocket().send(MessageBuilder.status().code(fex.getStatus()).message(fex.getMessage()).build(),true);
   }
 }

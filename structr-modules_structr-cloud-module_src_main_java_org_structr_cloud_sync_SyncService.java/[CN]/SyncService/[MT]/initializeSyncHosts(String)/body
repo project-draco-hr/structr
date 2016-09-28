@@ -15,7 +15,7 @@
           if (syncTimestamp != 0L) {
             lastSyncString="last sync was " + dateFormat.format(syncTimestamp);
           }
-          logger.log(Level.INFO,"Determined instance ID of {0} to be {1}, {2}.",new Object[]{host,slaveId,lastSyncString});
+          logger.info("Determined instance ID of {} to be {}, {}.",new Object[]{host,slaveId,lastSyncString});
           host.setReplicationStatus(status);
         }
  else {
@@ -27,11 +27,11 @@
       }
     }
  catch (    Throwable t) {
-      logger.log(Level.WARNING,"",t);
+      logger.warn("",t);
       reachable=false;
     }
     if (!reachable) {
-      logger.log(Level.WARNING,"Synchronization slave {0} not reachable, removing from list.",host);
+      logger.warn("Synchronization slave {} not reachable, removing from list.",host);
       it.remove();
     }
   }
@@ -40,7 +40,7 @@
   if (numSyncHosts < requiredSyncCount) {
     throw new IllegalStateException("synchronization policy requires at least " + requiredSyncCount + " hosts, but only "+ numSyncHosts+ " are reachable.");
   }
-  logger.log(Level.INFO,"Synchronization to {0} host{1} required.",new Object[]{requiredSyncCount,requiredSyncCount == 1 ? "" : "s"});
+  logger.info("Synchronization to {} host{} required.",new Object[]{requiredSyncCount,requiredSyncCount == 1 ? "" : "s"});
   for (  final SyncHostInfo host : syncHosts) {
     checkAndInitializeSyncHost(host);
   }

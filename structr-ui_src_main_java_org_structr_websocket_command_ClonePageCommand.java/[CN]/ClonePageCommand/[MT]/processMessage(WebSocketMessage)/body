@@ -25,16 +25,16 @@
       }
     }
  catch (    FrameworkException fex) {
-      logger.log(Level.WARNING,"Could not create node.",fex);
+      logger.warn("Could not create node.",fex);
       getWebSocket().send(MessageBuilder.status().code(fex.getStatus()).message(fex.getMessage()).build(),true);
     }
 catch (    DOMException dex) {
-      logger.log(Level.WARNING,"Could not create node.",dex);
+      logger.warn("Could not create node.",dex);
       getWebSocket().send(MessageBuilder.status().code(422).message(dex.getMessage()).build(),true);
     }
   }
  else {
-    logger.log(Level.WARNING,"Node with uuid {0} not found.",webSocketData.getId());
+    logger.warn("Node with uuid {} not found.",webSocketData.getId());
     getWebSocket().send(MessageBuilder.status().code(404).build(),true);
   }
 }

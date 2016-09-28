@@ -5,7 +5,7 @@
     tx.success();
   }
  catch (  FrameworkException t) {
-    logger.log(Level.WARNING,"",t);
+    logger.warn("",t);
   }
   message.setSessionValid(isAuthenticated);
   if (clearSessionId) {
@@ -17,8 +17,8 @@
   }
   try (final Tx tx=StructrApp.getInstance(securityContext).tx()){
     final String msg=gson.toJson(message,WebSocketMessage.class);
-    logger.log(Level.FINE,"################### Private message: {0}",message.getCommand());
-    logger.log(Level.FINEST,"############################################################ SENDING \n{0}",msg);
+    logger.debug("################### Private message: {}",message.getCommand());
+    logger.debug("############################################################ SENDING \n{}",msg);
     if (securityContext != null) {
       securityContext.clearCustomView();
     }
@@ -26,6 +26,6 @@
     tx.success();
   }
  catch (  Throwable t) {
-    logger.log(Level.FINE,"Unable to send websocket message to remote client");
+    logger.debug("Unable to send websocket message to remote client");
   }
 }

@@ -9,13 +9,13 @@
     tx.success();
   }
  catch (  FrameworkException fex) {
-    logger.log(Level.WARNING,"Exception while creating all nodes iterator.",fex);
+    logger.warn("Exception while creating all nodes iterator.",fex);
   }
   if (entityType == null) {
-    logger.log(Level.INFO,"Node type not set or no entity class found. Starting creation of labels for all nodes.");
+    logger.info("Node type not set or no entity class found. Starting creation of labels for all nodes.");
   }
  else {
-    logger.log(Level.INFO,"Starting creation of labels for all nodes of type {0}",entityType);
+    logger.info("Starting creation of labels for all nodes of type {}",entityType);
   }
   final long count=NodeServiceCommand.bulkGraphOperation(securityContext,nodeIterator,10000,"CreateLabels",new BulkGraphOperation<AbstractNode>(){
     @Override public void handleGraphObject(    SecurityContext securityContext,    AbstractNode node){
@@ -44,12 +44,12 @@
       }
     }
     @Override public void handleThrowable(    SecurityContext securityContext,    Throwable t,    AbstractNode node){
-      logger.log(Level.WARNING,"Unable to create labels for node {0}: {1}",new Object[]{node,t.getMessage()});
+      logger.warn("Unable to create labels for node {}: {}",new Object[]{node,t.getMessage()});
     }
     @Override public void handleTransactionFailure(    SecurityContext securityContext,    Throwable t){
-      logger.log(Level.WARNING,"Unable to create labels for node: {0}",t.getMessage());
+      logger.warn("Unable to create labels for node: {}",t.getMessage());
     }
   }
 );
-  logger.log(Level.INFO,"Done with creating labels on {0} nodes",count);
+  logger.info("Done with creating labels on {} nodes",count);
 }

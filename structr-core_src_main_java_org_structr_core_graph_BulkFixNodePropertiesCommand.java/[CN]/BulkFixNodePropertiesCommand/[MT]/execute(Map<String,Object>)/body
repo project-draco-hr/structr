@@ -10,7 +10,7 @@
         tx.success();
       }
        if (type != null) {
-        logger.log(Level.INFO,"Trying to fix properties of all {0} nodes",type.getSimpleName());
+        logger.info("Trying to fix properties of all {} nodes",type.getSimpleName());
         long nodeCount=NodeServiceCommand.bulkGraphOperation(securityContext,nodeIterator,100,"FixNodeProperties",new BulkGraphOperation<AbstractNode>(){
           private void fixProperty(          AbstractNode node,          Property propertyToFix){
             Node databaseNode=node.getNode();
@@ -30,12 +30,12 @@
                       databaseNode.setProperty(databaseName,correctedValue);
                     }
  catch (                    Throwable t) {
-                      logger.log(Level.WARNING,"Unable to fix property {0} of {1} with UUID {2} which is of type {3}",new Object[]{propertyToFix.dbName(),type.getSimpleName(),node.getUuid(),databaseValue != null ? databaseValue.getClass() : "null"});
+                      logger.warn("Unable to fix property {} of {} with UUID {} which is of type {}",new Object[]{propertyToFix.dbName(),type.getSimpleName(),node.getUuid(),databaseValue != null ? databaseValue.getClass() : "null"});
                     }
                   }
                 }
 catch (                Throwable t) {
-                  logger.log(Level.WARNING,"",t);
+                  logger.warn("",t);
                 }
               }
             }
@@ -59,10 +59,10 @@ catch (                Throwable t) {
           }
         }
 );
-        logger.log(Level.INFO,"Fixed {0} nodes",nodeCount);
+        logger.info("Fixed {} nodes",nodeCount);
         return;
       }
     }
   }
-  logger.log(Level.INFO,"Unable to determine property and/or entity type to fix.");
+  logger.info("Unable to determine property and/or entity type to fix.");
 }

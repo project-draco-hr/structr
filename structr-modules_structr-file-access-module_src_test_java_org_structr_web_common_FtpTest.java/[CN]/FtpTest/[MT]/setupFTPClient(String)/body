@@ -2,7 +2,7 @@
   FTPClient ftp=new FTPClient();
   try {
     ftp.connect("localhost",ftpPort);
-    logger.log(Level.INFO,"Reply from FTP server:",ftp.getReplyString());
+    logger.info("Reply from FTP server:",ftp.getReplyString());
     int reply=ftp.getReplyCode();
     assertTrue(FTPReply.isPositiveCompletion(reply));
     String password="ftpuserpw1";
@@ -11,16 +11,16 @@
       tx.success();
     }
  catch (    FrameworkException fex) {
-      logger.log(Level.SEVERE,"Unable to create FTP user",fex);
+      logger.error("Unable to create FTP user",fex);
     }
     boolean loginSuccess=ftp.login(username,password);
-    logger.log(Level.INFO,"Try to login as " + username + "/"+ password+ ": ",loginSuccess);
+    logger.info("Try to login as " + username + "/"+ password+ ": ",loginSuccess);
     assertTrue(loginSuccess);
     reply=ftp.getReplyCode();
     assertEquals(FTPReply.USER_LOGGED_IN,reply);
   }
  catch (  IOException ex) {
-    logger.log(Level.SEVERE,"Error in FTP test",ex);
+    logger.error("Error in FTP test",ex);
     fail("Unexpected exception: " + ex.getMessage());
   }
   return ftp;

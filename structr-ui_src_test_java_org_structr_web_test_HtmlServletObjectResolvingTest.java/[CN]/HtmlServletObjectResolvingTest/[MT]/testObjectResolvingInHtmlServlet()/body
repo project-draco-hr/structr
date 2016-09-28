@@ -17,14 +17,14 @@
         body.appendChild(textNode);
       }
  catch (      DOMException dex) {
-        logger.log(Level.WARNING,"",dex);
+        logger.warn("",dex);
         throw new FrameworkException(422,dex.getMessage());
       }
     }
     tx.success();
   }
  catch (  FrameworkException fex) {
-    logger.log(Level.WARNING,"",fex);
+    logger.warn("",fex);
   }
   RestAssured.basePath="/structr/html";
   RestAssured.given().header("X-User","superadmin").header("X-Password","sehrgeheim").filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(200)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(201)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(400)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(401)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(403)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(404)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(422)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(500)).expect().response().contentType("text/html").statusCode(200).body(Matchers.containsString(testObjectIDs.get(0))).when().get("/testPage/123");

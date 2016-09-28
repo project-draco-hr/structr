@@ -5,7 +5,7 @@
     tx.success();
   }
  catch (  Exception ex) {
-    logger.log(Level.SEVERE,null,ex);
+    logger.error("",ex);
   }
   try (final Tx tx=app.tx()){
     SchemaNode fileNodeDef=app.nodeQuery(SchemaNode.class).andName("File").getFirst();
@@ -16,14 +16,14 @@
     tx.success();
   }
  catch (  Exception ex) {
-    logger.log(Level.SEVERE,null,ex);
+    logger.error("",ex);
   }
   try (final Tx tx=app.tx()){
     RestAssured.given().contentType("application/json; charset=UTF-8").filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(200)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(201)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(400)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(404)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(422)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(500)).headers("X-User",ADMIN_USERNAME,"X-Password",ADMIN_PASSWORD).expect().statusCode(200).body("result",hasSize(31)).body("result[30].jsonName",equalTo("testFile")).body("result[30].declaringClass",equalTo("_FileHelper")).when().get("/_schema/File/ui");
     tx.success();
   }
  catch (  FrameworkException ex) {
-    logger.log(Level.SEVERE,ex.toString());
+    logger.error(ex.toString());
     fail("Unexpected exception");
   }
   try (final Tx tx=app.tx()){
@@ -31,7 +31,7 @@
     tx.success();
   }
  catch (  FrameworkException ex) {
-    logger.log(Level.SEVERE,ex.toString());
+    logger.error(ex.toString());
     fail("Unexpected exception");
   }
 }

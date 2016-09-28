@@ -39,14 +39,14 @@
           item.setProperty(FeedItem.contents,itemContents);
           item.setProperty(FeedItem.enclosures,itemEnclosures);
           newItems.add(item);
-          logger.log(Level.FINE,"Created new item: {0} ({1}) ",new Object[]{item.getProperty(FeedItem.name),item.getProperty(FeedItem.pubDate)});
+          logger.debug("Created new item: {} ({}) ",new Object[]{item.getProperty(FeedItem.name),item.getProperty(FeedItem.pubDate)});
         }
       }
       setProperty(items,newItems);
       setProperty(lastUpdated,new Date());
     }
  catch (    IllegalArgumentException|IOException|FetcherException|FeedException|FrameworkException ex) {
-      logger.log(Level.SEVERE,"Error while updating feed",ex);
+      logger.error("Error while updating feed",ex);
     }
   }
   if (cleanUp) {

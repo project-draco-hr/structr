@@ -90,11 +90,11 @@
                   }
                 }
  else {
-                  logger.log(Level.SEVERE,"Invalid property key for value {0}, ignoring",obj);
+                  logger.error("Invalid property key for value {}, ignoring",obj);
                 }
               }
  else {
-                logger.log(Level.WARNING,"No current object to store property in.");
+                logger.warn("No current object to store property in.");
               }
               currentKey=null;
             }
@@ -126,7 +126,7 @@
           entity.addToIndex();
         }
       }
-      logger.log(Level.INFO,"Imported {0} nodes and {1} rels, committing transaction..",new Object[]{totalNodeCount,totalRelCount});
+      logger.info("Imported {} nodes and {} rels, committing transaction..",new Object[]{totalNodeCount,totalRelCount});
       tx.success();
     }
    }
@@ -136,11 +136,11 @@
     tx.success();
   }
  catch (  FrameworkException fex) {
-    logger.log(Level.WARNING,"",fex);
+    logger.warn("",fex);
   }
   app.command(BulkCreateLabelsCommand.class).execute(Collections.emptyMap());
   double t1=System.nanoTime();
   double time=((t1 - t0) / 1000000000.0);
   DecimalFormat decimalFormat=new DecimalFormat("0.000000000",DecimalFormatSymbols.getInstance(Locale.ENGLISH));
-  logger.log(Level.INFO,"Import done in {0} s",decimalFormat.format(time));
+  logger.info("Import done in {} s",decimalFormat.format(time));
 }

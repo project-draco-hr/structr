@@ -2,19 +2,19 @@
   this.databasePath=config.getProperty(Structr.DATABASE_PATH);
   final int relationshipCacheSize=Integer.valueOf(config.getProperty(RELATIONSHIP_CACHE_SIZE,"10000"));
   if (relationshipCacheSize > 0) {
-    logger.log(Level.INFO,"Relationship cache size set to {0}",relationshipCacheSize);
+    logger.info("Relationship cache size set to {}",relationshipCacheSize);
     relationshipCache=new FixedSizeCache<>(relationshipCacheSize);
   }
  else {
-    logger.log(Level.INFO,"Relationship cache disabled.");
+    logger.info("Relationship cache disabled.");
   }
   final int nodeCacheSize=Integer.valueOf(config.getProperty(NODE_CACHE_SIZE,"10000"));
   if (nodeCacheSize > 0) {
-    logger.log(Level.INFO,"Node cache size set to {0}",nodeCacheSize);
+    logger.info("Node cache size set to {}",nodeCacheSize);
     nodeCache=new FixedSizeCache<>(nodeCacheSize);
   }
  else {
-    logger.log(Level.INFO,"Node cache disabled.");
+    logger.info("Node cache disabled.");
   }
   final File confFile=new File(databasePath + "/neo4j.conf");
   final GraphDatabaseBuilder builder=new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(databasePath);
@@ -24,6 +24,6 @@
   builder.setConfig(ShellSettings.remote_shell_enabled,config.getProperty(NEO4J_SHELL_ENABLED,"false"));
   builder.setConfig(ShellSettings.remote_shell_port,config.getProperty(NEO4J_SHELL_PORT,"1337"));
   builder.setConfig(GraphDatabaseSettings.pagecache_memory,config.getProperty(NEO4J_PAGE_CACHE_MEMORY,"64m"));
-  logger.log(Level.INFO,"Initializing database ({0}) ...",databasePath);
+  logger.info("Initializing database ({}) ...",databasePath);
   graphDb=builder.newGraphDatabase();
 }

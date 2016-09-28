@@ -5,12 +5,12 @@
   String permission=(String)webSocketData.getNodeData().get("permission");
   String action=(String)webSocketData.getNodeData().get("action");
   if (principalId == null) {
-    logger.log(Level.SEVERE,"This command needs a principalId");
+    logger.error("This command needs a principalId");
     getWebSocket().send(MessageBuilder.status().code(400).build(),true);
   }
   Principal principal=(Principal)getNode(principalId);
   if (principal == null) {
-    logger.log(Level.SEVERE,"No principal found with id {0}",new Object[]{principalId});
+    logger.error("No principal found with id {}",new Object[]{principalId});
     getWebSocket().send(MessageBuilder.status().code(400).build(),true);
   }
   webSocketData.getNodeData().remove("recursive");
@@ -18,7 +18,7 @@
     final App app=StructrApp.getInstance(getWebSocket().getSecurityContext());
     try (final Tx tx=app.tx()){
       if (!((AbstractNode)obj).isGranted(Permission.accessControl,getWebSocket().getSecurityContext())) {
-        logger.log(Level.WARNING,"No access control permission for {0} on {1}",new Object[]{getWebSocket().getCurrentUser().toString(),obj.toString()});
+        logger.warn("No access control permission for {} on {}",new Object[]{getWebSocket().getCurrentUser().toString(),obj.toString()});
         getWebSocket().send(MessageBuilder.status().message("No access control permission").code(400).build(),true);
         tx.success();
         return;
@@ -26,7 +26,7 @@
       tx.success();
     }
  catch (    FrameworkException ex) {
-      logger.log(Level.WARNING,"",ex);
+      logger.warn("",ex);
     }
     try {
       setPermission(app,obj,principal,action,Permissions.valueOf(permission),rec);
@@ -37,12 +37,12 @@
       getWebSocket().send(webSocketData,true);
     }
  catch (    FrameworkException ex) {
-      logger.log(Level.SEVERE,"Unable to set permissions: {0}",((FrameworkException)ex).toString());
+      logger.error("Unable to set permissions: {}",((FrameworkException)ex).toString());
       getWebSocket().send(MessageBuilder.status().code(400).build(),true);
     }
   }
  else {
-    logger.log(Level.WARNING,"Graph object with uuid {0} not found.",webSocketData.getId());
+    logger.warn("Graph object with uuid {} not found.",webSocketData.getId());
     getWebSocket().send(MessageBuilder.status().code(404).build(),true);
   }
 }

@@ -19,12 +19,12 @@
   final String mainClassName=(String)finalConfig.get(MAIN_CLASS);
   Class mainClass=null;
   if (mainClassName != null) {
-    logger.log(Level.INFO,"Running main class {0}",new Object[]{mainClassName});
+    logger.info("Running main class {}",new Object[]{mainClassName});
     try {
       mainClass=Class.forName(mainClassName);
     }
  catch (    ClassNotFoundException ex) {
-      logger.log(Level.WARNING,"Did not find class for main class from config " + mainClassName,ex);
+      logger.warn("Did not find class for main class from config " + mainClassName,ex);
     }
   }
   String sourceJarName=(mainClass != null ? mainClass : getClass()).getProtectionDomain().getCodeSource().getLocation().toString();
@@ -44,7 +44,7 @@
   requestHeaderSize=Services.parseInt(System.getProperty("requestHeaderSize"),8192);
   async=Services.parseBoolean(finalConfig.getProperty(ASYNC),true);
   if (async) {
-    logger.log(Level.INFO,"Running in asynchronous mode");
+    logger.info("Running in asynchronous mode");
   }
   final String keyStorePath=finalConfig.getProperty(APPLICATION_KEYSTORE_PATH);
   final String keyStorePassword=finalConfig.getProperty(APPLICATION_KEYSTORE_PASSWORD);
@@ -72,7 +72,7 @@
     servletContext.setBaseResource(new ResourceCollection(Resource.newResource(basePath),JarResource.newJarResource(Resource.newResource(sourceJarName))));
   }
  catch (  Throwable t) {
-    logger.log(Level.WARNING,"Base resource {0} not usable: {1}",new Object[]{basePath,t.getMessage()});
+    logger.warn("Base resource {} not usable: {}",new Object[]{basePath,t.getMessage()});
   }
   servletContext.addServlet("org.eclipse.jetty.servlet.DefaultServlet","/");
   servletContext.setInitParameter("org.eclipse.jetty.servlet.Default.dirAllowed","false");
@@ -86,14 +86,14 @@
     cmisBrowserHolder.setInitParameter("cmisVersion","1.1");
   }
  catch (  Throwable t) {
-    logger.log(Level.WARNING,"",t);
+    logger.warn("",t);
   }
   hashSessionManager=new HashSessionManager();
   try {
     hashSessionManager.setStoreDirectory(new File(baseDir + "/sessions"));
   }
  catch (  IOException ex) {
-    logger.log(Level.WARNING,"Could not set custom session manager with session store directory {0}/sessions",baseDir);
+    logger.warn("Could not set custom session manager with session store directory {}/sessions",baseDir);
   }
   servletContext.getSessionHandler().setSessionManager(hashSessionManager);
   if (enableRewriteFilter) {
@@ -138,7 +138,7 @@
         FileUtils.writeLines(logbackConfFile,"UTF-8",config);
       }
  catch (      IOException ioex) {
-        logger.log(Level.WARNING,"Unable to write logback configuration.",ioex);
+        logger.warn("Unable to write logback configuration.",ioex);
       }
     }
     final FilterHolder loggingFilter=new FilterHolder(TeeFilter.class);
@@ -170,7 +170,7 @@
     final ServletHolder servletHolder=servlet.getValue();
     final String path=servlet.getKey();
     servletHolder.setInitOrder(position++);
-    logger.log(Level.INFO,"Adding servlet {0} for {1}",new Object[]{servletHolder,path});
+    logger.info("Adding servlet {} for {}",new Object[]{servletHolder,path});
     servletContext.addServlet(servletHolder,path);
   }
   contexts.addHandler(servletContext);
@@ -185,7 +185,7 @@
     connectors.add(httpConnector);
   }
  else {
-    logger.log(Level.WARNING,"Unable to configure HTTP server port, please make sure that {0} and {1} are set correctly in structr.conf.",new Object[]{APPLICATION_HOST,APPLICATION_HTTP_PORT});
+    logger.warn("Unable to configure HTTP server port, please make sure that {} and {} are set correctly in structr.conf.",new Object[]{APPLICATION_HOST,APPLICATION_HTTP_PORT});
   }
   if (enableHttps) {
     if (httpsPort > -1 && keyStorePath != null && !keyStorePath.isEmpty() && keyStorePassword != null) {
@@ -202,14 +202,14 @@
       connectors.add(https);
     }
  else {
-      logger.log(Level.WARNING,"Unable to configure SSL, please make sure that {0}, {1} and {2} are set correctly in structr.conf.",new Object[]{APPLICATION_HTTPS_PORT,APPLICATION_KEYSTORE_PATH,APPLICATION_KEYSTORE_PASSWORD});
+      logger.warn("Unable to configure SSL, please make sure that {}, {} and {} are set correctly in structr.conf.",new Object[]{APPLICATION_HTTPS_PORT,APPLICATION_KEYSTORE_PATH,APPLICATION_KEYSTORE_PASSWORD});
     }
   }
   if (!connectors.isEmpty()) {
     server.setConnectors(connectors.toArray(new Connector[0]));
   }
  else {
-    logger.log(Level.SEVERE,"No connectors configured, aborting.");
+    logger.error("No connectors configured, aborting.");
     System.exit(0);
   }
   server.setStopTimeout(1000);

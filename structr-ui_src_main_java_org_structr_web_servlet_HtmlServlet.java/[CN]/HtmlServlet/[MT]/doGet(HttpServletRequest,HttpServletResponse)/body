@@ -22,7 +22,7 @@
       request.setCharacterEncoding("UTF-8");
       response.setCharacterEncoding("UTF-8");
       boolean dontCache=false;
-      logger.log(Level.FINE,"Path info {0}",path);
+      logger.debug("Path info {}",path);
       if (response.getStatus() == 302) {
         tx.success();
         return;
@@ -39,7 +39,7 @@
       final String[] uriParts=PathHelper.getParts(path);
       if ((uriParts == null) || (uriParts.length == 0)) {
         rootElement=findIndexPage(securityContext,pages,edit);
-        logger.log(Level.FINE,"No path supplied, trying to find index page");
+        logger.debug("No path supplied, trying to find index page");
       }
  else {
         if (rootElement == null) {
@@ -153,14 +153,14 @@ threadPool.submit(new Runnable(){
       tx.success();
     }
  catch (    Throwable t) {
-      logger.log(Level.WARNING,"",t);
+      logger.warn("",t);
       final String errorMsg=t.getMessage();
       try {
         response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,errorMsg);
         finished.set(true);
       }
  catch (      IOException ex) {
-        logger.log(Level.WARNING,"",ex);
+        logger.warn("",ex);
       }
     }
   }
@@ -191,11 +191,11 @@ synchronized (queue) {
       }
     }
  catch (    Throwable t) {
-      logger.log(Level.WARNING,"",t);
+      logger.warn("",t);
     }
   }
   @Override public void onError(  Throwable t){
-    logger.log(Level.WARNING,"",t);
+    logger.warn("",t);
   }
 }
 );
@@ -210,7 +210,7 @@ try {
   response.getOutputStream().close();
 }
  catch (IOException ioex) {
-  logger.log(Level.WARNING,"",ioex);
+  logger.warn("",ioex);
 }
 }
 }
@@ -218,11 +218,11 @@ try {
 tx.success();
 }
  catch (FrameworkException fex) {
-logger.log(Level.SEVERE,"Exception while processing request",fex);
+logger.error("Exception while processing request",fex);
 }
 }
  catch (IOException|FrameworkException t) {
-logger.log(Level.SEVERE,"Exception while processing request",t);
+logger.error("Exception while processing request",t);
 UiAuthenticator.writeInternalServerError(response);
 }
 }

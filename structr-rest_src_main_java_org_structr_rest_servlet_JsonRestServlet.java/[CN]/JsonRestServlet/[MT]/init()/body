@@ -3,14 +3,14 @@
     indentJson=Boolean.parseBoolean(StructrApp.getConfigurationValue(Services.JSON_INDENTATION,"true"));
   }
  catch (  Throwable t) {
-    logger.log(Level.WARNING,"Unable to parse value for {0}: {1}",new Object[]{Services.JSON_INDENTATION,t.getMessage()});
+    logger.warn("Unable to parse value for {}: {}",new Object[]{Services.JSON_INDENTATION,t.getMessage()});
   }
   final ResourceProvider provider=config.getResourceProvider();
   if (provider != null) {
     resourceMap.putAll(provider.getResources());
   }
  else {
-    logger.log(Level.SEVERE,"Unable to initialize JsonRestServlet, no resource provider found. Please check structr.conf for a valid resource provider class.");
+    logger.error("Unable to initialize JsonRestServlet, no resource provider found. Please check structr.conf for a valid resource provider class.");
   }
   this.propertyView=new ThreadLocalPropertyView();
   this.gson=new ThreadLocalGson(propertyView,config.getOutputNestingDepth());

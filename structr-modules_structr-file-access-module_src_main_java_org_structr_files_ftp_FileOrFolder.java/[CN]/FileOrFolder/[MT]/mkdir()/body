@@ -1,10 +1,10 @@
 {
   final App app=StructrApp.getInstance();
   try (final Tx tx=app.tx()){
-    logger.log(Level.INFO,"mkdir() Folder");
+    logger.info("mkdir() Folder");
     AbstractFile existing=FileHelper.getFileByAbsolutePath(SecurityContext.getSuperUserInstance(),newPath);
     if (existing != null) {
-      logger.log(Level.WARNING,"File {0} already exists.",newPath);
+      logger.warn("File {} already exists.",newPath);
       return false;
     }
     final Folder parentFolder=(Folder)FileHelper.getFileByAbsolutePath(SecurityContext.getSuperUserInstance(),StringUtils.substringBeforeLast(newPath,"/"));
@@ -15,14 +15,14 @@
       }
     }
  catch (    FrameworkException ex) {
-      logger.log(Level.SEVERE,null,ex);
+      logger.error("",ex);
       return false;
     }
     tx.success();
     return true;
   }
  catch (  FrameworkException ex) {
-    logger.log(Level.SEVERE,null,ex);
+    logger.error("",ex);
     return false;
   }
 }

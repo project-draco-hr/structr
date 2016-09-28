@@ -12,7 +12,7 @@
         sig=grant.getResourceSignature();
       }
  catch (      NotFoundException nfe) {
-        logger.log(Level.FINE,"Unable to get signature from grant");
+        logger.debug("Unable to get signature from grant");
         continue;
       }
       final String[] parts=StringUtils.split(sig,"/");
@@ -25,12 +25,12 @@
         }
       }
       if (!foundAllParts) {
-        logger.log(Level.INFO,"Did not find all parts of signature, will be removed: {0}, ",new Object[]{sig});
+        logger.info("Did not find all parts of signature, will be removed: {}, ",new Object[]{sig});
         removeDynamicGrants(sig);
       }
     }
   }
  catch (  Throwable t) {
-    logger.log(Level.WARNING,"",t);
+    logger.warn("",t);
   }
 }

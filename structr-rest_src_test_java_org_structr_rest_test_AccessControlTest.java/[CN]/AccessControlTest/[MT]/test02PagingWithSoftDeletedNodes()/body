@@ -21,7 +21,7 @@
     tx.success();
   }
  catch (  FrameworkException ex) {
-    logger.log(Level.WARNING,"",ex);
+    logger.warn("",ex);
     fail(ex.getMessage());
   }
   RestAssured.given().contentType("application/json; charset=UTF-8").filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(200)).header("X-User","user2").header("X-Password","user2").expect().statusCode(200).body("result",hasSize(1)).body("result_count",equalTo(3)).when().get("/test_ones?sort=name&pageSize=1&page=1");

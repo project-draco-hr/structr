@@ -4,7 +4,7 @@
   try (final Tx tx=app.tx()){
     final List<JavaScriptSource> jsFiles=app.nodeQuery(JavaScriptSource.class).and(JavaScriptSource.name,fileName).and(JavaScriptSource.useAsJavascriptLibrary,true).getAsList();
     if (jsFiles.isEmpty()) {
-      logger.log(Level.WARNING,"No JavaScript library found with fileName: {0}",fileName);
+      logger.warn("No JavaScript library found with fileName: {}",fileName);
     }
     for (    final JavaScriptSource jsLibraryFile : jsFiles) {
       final String contentType=jsLibraryFile.getContentType();
@@ -14,17 +14,17 @@
           buf.append(jsLibraryFile.getJavascriptLibraryCode());
         }
  else {
-          logger.log(Level.INFO,"Ignoring file {0} for use as a Javascript library, content type {1} not allowed. Use text/javascript or application/javascript.",new Object[]{jsLibraryFile.getName(),contentType});
+          logger.info("Ignoring file {} for use as a Javascript library, content type {} not allowed. Use text/javascript or application/javascript.",new Object[]{jsLibraryFile.getName(),contentType});
         }
       }
  else {
-        logger.log(Level.INFO,"Ignoring file {0} for use as a Javascript library, content type not set. Use text/javascript or application/javascript.",new Object[]{jsLibraryFile.getName(),contentType});
+        logger.info("Ignoring file {} for use as a Javascript library, content type not set. Use text/javascript or application/javascript.",new Object[]{jsLibraryFile.getName(),contentType});
       }
     }
     tx.success();
   }
  catch (  FrameworkException fex) {
-    logger.log(Level.WARNING,"",fex);
+    logger.warn("",fex);
   }
   return buf.toString();
 }

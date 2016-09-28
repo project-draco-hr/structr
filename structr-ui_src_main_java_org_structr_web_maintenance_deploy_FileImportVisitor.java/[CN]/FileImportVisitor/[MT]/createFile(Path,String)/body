@@ -8,12 +8,12 @@
       final Long checksumOfExistingFile=existing.getChecksum();
       final Long checksumOfNewFile=FileHelper.getChecksum(file.toFile());
       if (checksumOfExistingFile != null && checksumOfNewFile != null && checksumOfExistingFile.equals(checksumOfNewFile)) {
-        logger.log(Level.INFO,"{0} is unmodified, skipping import.",fullPath);
+        logger.info("{} is unmodified, skipping import.",fullPath);
         return;
       }
       app.delete(existing);
     }
-    logger.log(Level.INFO,"Importing {0}..",fullPath);
+    logger.info("Importing {}..",fullPath);
     try (final FileInputStream fis=new FileInputStream(file.toFile())){
       final FileBase newFile=FileHelper.createFile(securityContext,fis,null,File.class,fileName);
       final String contentType=newFile.getContentType();

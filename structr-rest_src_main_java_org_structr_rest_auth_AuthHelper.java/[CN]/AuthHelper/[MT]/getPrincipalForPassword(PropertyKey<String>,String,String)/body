@@ -10,16 +10,16 @@
     try {
       principal=StructrApp.getInstance().nodeQuery(Principal.class).and().or(key,value).or(AbstractUser.name,value).getFirst();
       if (principal == null) {
-        logger.log(Level.INFO,"No principal found for {0} {1}",new Object[]{key.dbName(),value});
+        logger.info("No principal found for {} {}",new Object[]{key.dbName(),value});
         errorMsg=STANDARD_ERROR_MSG;
       }
  else {
         if (principal.getProperty(Principal.blocked)) {
-          logger.log(Level.INFO,"Principal {0} is blocked",principal);
+          logger.info("Principal {} is blocked",principal);
           errorMsg=STANDARD_ERROR_MSG;
         }
         if (StringUtils.isEmpty(password)) {
-          logger.log(Level.INFO,"Empty password for principal {0}",principal);
+          logger.info("Empty password for principal {}",principal);
           errorMsg="Empty password, should never happen here!";
         }
  else {
@@ -30,7 +30,7 @@
       }
     }
  catch (    FrameworkException fex) {
-      logger.log(Level.WARNING,"",fex);
+      logger.warn("",fex);
     }
   }
   if (errorMsg != null) {

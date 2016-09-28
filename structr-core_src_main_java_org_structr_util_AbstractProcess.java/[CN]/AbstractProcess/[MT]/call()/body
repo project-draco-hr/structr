@@ -5,7 +5,7 @@
     if (commandLine != null) {
       cmd=commandLine.toString();
       String[] args={"/bin/sh","-c",cmd};
-      logger.log(Level.INFO,"Executing {0}",cmd);
+      logger.info("Executing {}",cmd);
       Process proc=Runtime.getRuntime().exec(args);
       stdOut=new StreamReader(proc.getInputStream(),running);
       stdErr=new StreamReader(proc.getErrorStream(),running);
@@ -15,11 +15,11 @@
     }
   }
  catch (  IOException|InterruptedException ex) {
-    logger.log(Level.WARNING,"",ex);
+    logger.warn("",ex);
   }
   running.set(false);
   if (exitCode != 0) {
-    logger.log(Level.WARNING,"Process {0} exited with exit code {1}, error stream:\n{2}\n",new Object[]{cmd,exitCode,stdErr.getBuffer()});
+    logger.warn("Process {} exited with exit code {}, error stream:\n{}\n",new Object[]{cmd,exitCode,stdErr.getBuffer()});
   }
   return processExited(exitCode);
 }

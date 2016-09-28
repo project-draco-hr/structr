@@ -5,26 +5,26 @@
   final File configTemplateFile=new File(configTemplateFileName);
   final File configFile=new File(configFileName);
   if (!configFile.exists() && !configTemplateFile.exists()) {
-    logger.log(Level.SEVERE,"Unable to create config file, {0} and {1} do not exist, aborting. Please create a {0} configuration file and try again.",new Object[]{configFileName,configTemplateFileName});
+    logger.error("Unable to create config file, {} and {} do not exist, aborting. Please create a {} configuration file and try again.",new Object[]{configFileName,configTemplateFileName});
     System.exit(1);
   }
   if (!configFile.exists() && configTemplateFile.exists()) {
-    logger.log(Level.WARNING,"Configuration file {0} not found, copying from template {1}. Please adapt newly created {0} to your needs.",new Object[]{configFileName,configTemplateFileName});
+    logger.warn("Configuration file {} not found, copying from template {}. Please adapt newly created {} to your needs.",new Object[]{configFileName,configTemplateFileName});
     try {
       Files.copy(configTemplateFile.toPath(),configFile.toPath());
     }
  catch (    IOException ioex) {
-      logger.log(Level.SEVERE,"Unable to create config file, copying of template failed.",ioex);
+      logger.error("Unable to create config file, copying of template failed.",ioex);
       System.exit(1);
     }
   }
-  logger.log(Level.INFO,"Reading {0}..",configFileName);
+  logger.info("Reading {}..",configFileName);
   try {
     PropertiesConfiguration.setDefaultListDelimiter('\0');
     StructrServices.loadConfiguration(config,new PropertiesConfiguration(configFileName));
   }
  catch (  ConfigurationException ex) {
-    logger.log(Level.SEVERE,null,ex);
+    logger.error("",ex);
   }
   StructrServices.mergeConfiguration(config,structrConf);
   initialize(config);

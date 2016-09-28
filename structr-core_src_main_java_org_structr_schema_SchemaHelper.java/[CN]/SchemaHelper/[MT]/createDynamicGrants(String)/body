@@ -6,23 +6,23 @@
     ResourceAccess grant=app.nodeQuery(ResourceAccess.class).and(ResourceAccess.signature,signature).getFirst();
     if (grant == null) {
       grants.add(app.create(DynamicResourceAccess.class,new NodeAttribute(DynamicResourceAccess.signature,signature),new NodeAttribute(DynamicResourceAccess.flags,initialFlagsValue)));
-      logger.log(Level.INFO,"New signature created: {0}",new Object[]{(signature)});
+      logger.info("New signature created: {}",new Object[]{(signature)});
     }
     final String schemaSig=schemaResourceSignature(signature);
     ResourceAccess schemaGrant=app.nodeQuery(ResourceAccess.class).and(ResourceAccess.signature,schemaSig).getFirst();
     if (schemaGrant == null) {
       grants.add(app.create(DynamicResourceAccess.class,new NodeAttribute(DynamicResourceAccess.signature,schemaSig),new NodeAttribute(DynamicResourceAccess.flags,initialFlagsValue)));
-      logger.log(Level.INFO,"New signature created: {0}",new Object[]{schemaSig});
+      logger.info("New signature created: {}",new Object[]{schemaSig});
     }
     final String uiSig=uiViewResourceSignature(signature);
     ResourceAccess uiViewGrant=app.nodeQuery(ResourceAccess.class).and(ResourceAccess.signature,uiSig).getFirst();
     if (uiViewGrant == null) {
       grants.add(app.create(DynamicResourceAccess.class,new NodeAttribute(DynamicResourceAccess.signature,uiSig),new NodeAttribute(DynamicResourceAccess.flags,initialFlagsValue)));
-      logger.log(Level.INFO,"New signature created: {0}",new Object[]{uiSig});
+      logger.info("New signature created: {}",new Object[]{uiSig});
     }
   }
  catch (  Throwable t) {
-    logger.log(Level.WARNING,"",t);
+    logger.warn("",t);
   }
   return grants;
 }

@@ -1,8 +1,8 @@
 {
-  logger.log(Level.INFO,"x");
+  logger.info("x");
   return new FileSystemProvider(){
     @Override public OutputStream newOutputStream(    Path path,    OpenOption... options) throws IOException {
-      logger.log(Level.INFO,"x");
+      logger.info("x");
       OutputStream os=null;
       FileBase actualFile=(FileBase)((StructrSSHFile)path).getActualFile();
       try (final Tx tx=StructrApp.getInstance(securityContext).tx()){
@@ -15,13 +15,13 @@
         tx.success();
       }
  catch (      FrameworkException fex) {
-        logger.log(Level.WARNING,"",fex);
+        logger.warn("",fex);
         throw new IOException(fex);
       }
       return os;
     }
     @Override public InputStream newInputStream(    Path path,    OpenOption... options) throws IOException {
-      logger.log(Level.INFO,"x");
+      logger.info("x");
       InputStream inputStream=null;
       try (final Tx tx=StructrApp.getInstance(securityContext).tx()){
         final FileBase fileNode=(FileBase)((StructrSSHFile)path).getActualFile();
@@ -29,29 +29,29 @@
         tx.success();
       }
  catch (      FrameworkException fex) {
-        logger.log(Level.WARNING,"",fex);
+        logger.warn("",fex);
         throw new IOException(fex);
       }
       return inputStream;
     }
     @Override public String getScheme(){
-      logger.log(Level.INFO,"Method not implemented yet");
+      logger.info("Method not implemented yet");
       return null;
     }
     @Override public FileSystem newFileSystem(    URI uri,    Map<String,?> env) throws IOException {
-      logger.log(Level.INFO,"Method not implemented yet");
+      logger.info("Method not implemented yet");
       return null;
     }
     @Override public FileSystem getFileSystem(    URI uri){
-      logger.log(Level.INFO,"Method not implemented yet");
+      logger.info("Method not implemented yet");
       return null;
     }
     @Override public Path getPath(    URI uri){
-      logger.log(Level.INFO,"Method not implemented yet");
+      logger.info("Method not implemented yet");
       return null;
     }
     @Override public SeekableByteChannel newByteChannel(    Path path,    Set<? extends OpenOption> options,    FileAttribute<?>... attrs) throws IOException {
-      logger.log(Level.INFO,"x");
+      logger.info("x");
       SeekableByteChannel channel=null;
       final FileBase fileNode=(FileBase)((StructrSSHFile)path).getActualFile();
       if (fileNode != null) {
@@ -61,14 +61,14 @@
           tx.success();
         }
  catch (        FrameworkException fex) {
-          logger.log(Level.SEVERE,"",fex);
+          logger.error("",fex);
           throw new IOException(fex);
         }
       }
       return channel;
     }
     @Override public DirectoryStream<Path> newDirectoryStream(    Path dir,    DirectoryStream.Filter<? super Path> filter) throws IOException {
-      logger.log(Level.INFO,"x");
+      logger.info("x");
       return new DirectoryStream(){
         boolean closed=false;
         @Override public Iterator iterator(){
@@ -86,7 +86,7 @@
               tx.success();
             }
  catch (            FrameworkException fex) {
-              logger.log(Level.WARNING,"",fex);
+              logger.warn("",fex);
             }
             return files.iterator();
           }
@@ -99,7 +99,7 @@
 ;
     }
     @Override public void createDirectory(    Path dir,    FileAttribute<?>... attrs) throws IOException {
-      logger.log(Level.INFO,"x");
+      logger.info("x");
       final StructrSSHFile parent=(StructrSSHFile)dir.getParent();
       final App app=StructrApp.getInstance(securityContext);
       final String name=dir.getFileName().toString();
@@ -109,36 +109,36 @@
         tx.success();
       }
  catch (      FrameworkException fex) {
-        logger.log(Level.WARNING,"",fex);
+        logger.warn("",fex);
         throw new IOException(fex);
       }
     }
     @Override public void delete(    Path path) throws IOException {
-      logger.log(Level.INFO,"Method not implemented yet");
+      logger.info("Method not implemented yet");
     }
     @Override public void copy(    Path source,    Path target,    CopyOption... options) throws IOException {
-      logger.log(Level.INFO,"Method not implemented yet");
+      logger.info("Method not implemented yet");
     }
     @Override public void move(    Path source,    Path target,    CopyOption... options) throws IOException {
-      logger.log(Level.INFO,"Method not implemented yet");
+      logger.info("Method not implemented yet");
     }
     @Override public boolean isSameFile(    Path path,    Path path2) throws IOException {
-      logger.log(Level.INFO,"x");
+      logger.info("x");
       return path != null && path.equals(path);
     }
     @Override public boolean isHidden(    Path path) throws IOException {
-      logger.log(Level.INFO,"Method not implemented yet");
+      logger.info("Method not implemented yet");
       return false;
     }
     @Override public FileStore getFileStore(    Path path) throws IOException {
-      logger.log(Level.INFO,"Method not implemented yet");
+      logger.info("Method not implemented yet");
       return null;
     }
     @Override public void checkAccess(    Path path,    AccessMode... modes) throws IOException {
-      logger.log(Level.INFO,"Checking access",new Object[]{path,modes});
+      logger.info("Checking access",new Object[]{path,modes});
     }
     @Override public <V extends FileAttributeView>V getFileAttributeView(    final Path path,    final Class<V> type,    final LinkOption... options){
-      logger.log(Level.INFO,"x");
+      logger.info("x");
       return (V)new PosixFileAttributeView(){
         @Override public String name(){
           return "posix";
@@ -147,26 +147,26 @@
           return new StructrPosixFileAttributes((StructrSSHFile)path);
         }
         @Override public void setPermissions(        Set<PosixFilePermission> set) throws IOException {
-          logger.log(Level.INFO,"Method not implemented yet");
+          logger.info("Method not implemented yet");
         }
         @Override public void setGroup(        GroupPrincipal gp) throws IOException {
-          logger.log(Level.INFO,"Method not implemented yet");
+          logger.info("Method not implemented yet");
         }
         @Override public void setTimes(        FileTime ft,        FileTime ft1,        FileTime ft2) throws IOException {
-          logger.log(Level.INFO,"Method not implemented yet");
+          logger.info("Method not implemented yet");
         }
         @Override public UserPrincipal getOwner() throws IOException {
-          logger.log(Level.INFO,"Method not implemented yet");
+          logger.info("Method not implemented yet");
           return null;
         }
         @Override public void setOwner(        UserPrincipal up) throws IOException {
-          logger.log(Level.INFO,"Method not implemented yet");
+          logger.info("Method not implemented yet");
         }
       }
 ;
     }
     @Override public <A extends BasicFileAttributes>A readAttributes(    Path path,    Class<A> type,    LinkOption... options) throws IOException {
-      logger.log(Level.INFO,"x");
+      logger.info("x");
       if (path != null) {
         if (path instanceof StructrSSHFile) {
           final StructrSSHFile sshFile=(StructrSSHFile)path;
@@ -183,11 +183,11 @@
       return Collections.EMPTY_MAP;
     }
     @Override public void setAttribute(    Path path,    String attribute,    Object value,    LinkOption... options) throws IOException {
-      logger.log(Level.INFO,"Method not implemented yet");
+      logger.info("Method not implemented yet");
       ;
     }
     private AbstractFile create(    final Path path) throws IOException {
-      logger.log(Level.INFO,"x");
+      logger.info("x");
       final StructrSSHFile parent=(StructrSSHFile)path.getParent();
       AbstractFile newFile=null;
       final App app=StructrApp.getInstance(securityContext);
@@ -198,7 +198,7 @@
         tx.success();
       }
  catch (      FrameworkException fex) {
-        logger.log(Level.WARNING,"",fex);
+        logger.warn("",fex);
         throw new IOException(fex);
       }
       return newFile;

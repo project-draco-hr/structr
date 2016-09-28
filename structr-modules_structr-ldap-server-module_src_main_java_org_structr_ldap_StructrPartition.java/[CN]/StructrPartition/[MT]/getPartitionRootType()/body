@@ -5,7 +5,7 @@
     keyBuilder.append(LDAPServerService.LDAP_PARTITION_ROOT_TYPE_SUFFIX);
     final String rootTypeName=StructrApp.getConfigurationValue(keyBuilder.toString());
     if (rootTypeName == null) {
-      logger.log(Level.INFO,"No LDAP root node type specified for partition {0}, using default (LDAPNodeImpl). This default can be changed by setting a value for {1} in structr.conf",new Object[]{id,keyBuilder.toString()});
+      logger.info("No LDAP root node type specified for partition {}, using default (LDAPNodeImpl). This default can be changed by setting a value for {} in structr.conf",new Object[]{id,keyBuilder.toString()});
       rootType=LDAPNodeImpl.class;
     }
  else {
@@ -13,7 +13,7 @@
         this.rootType=(Class<? extends LDAPNode>)Class.forName(rootTypeName);
       }
  catch (      ClassNotFoundException ex) {
-        logger.log(Level.WARNING,"Unable to instantiate LDAP root node class {0}, falling back to default. {1}",new Object[]{rootTypeName,ex.getMessage()});
+        logger.warn("Unable to instantiate LDAP root node class {}, falling back to default. {}",new Object[]{rootTypeName,ex.getMessage()});
       }
       if (rootType == null) {
         rootType=LDAPNodeImpl.class;

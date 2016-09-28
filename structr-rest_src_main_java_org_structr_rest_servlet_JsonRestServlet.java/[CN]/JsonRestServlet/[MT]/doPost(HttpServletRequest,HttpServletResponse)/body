@@ -81,25 +81,25 @@
     response.getWriter().println();
   }
 catch (  JsonSyntaxException jsex) {
-    logger.log(Level.WARNING,"POST: Invalid JSON syntax",jsex.getMessage());
+    logger.warn("POST: Invalid JSON syntax",jsex.getMessage());
     int code=HttpServletResponse.SC_BAD_REQUEST;
     response.setStatus(code);
     response.getWriter().append(RestMethodResult.jsonError(code,"JsonSyntaxException in POST: " + jsex.getMessage()));
   }
 catch (  JsonParseException jpex) {
-    logger.log(Level.WARNING,"Unable to parse JSON string",jpex.getMessage());
+    logger.warn("Unable to parse JSON string",jpex.getMessage());
     int code=HttpServletResponse.SC_BAD_REQUEST;
     response.setStatus(code);
     response.getWriter().append(RestMethodResult.jsonError(code,"JsonParseException in POST: " + jpex.getMessage()));
   }
 catch (  UnsupportedOperationException uoe) {
-    logger.log(Level.WARNING,"POST not supported");
+    logger.warn("POST not supported");
     int code=HttpServletResponse.SC_BAD_REQUEST;
     response.setStatus(code);
     response.getWriter().append(RestMethodResult.jsonError(code,"POST not supported: " + uoe.getMessage()));
   }
 catch (  Throwable t) {
-    logger.log(Level.WARNING,"Exception in POST",t);
+    logger.warn("Exception in POST",t);
     int code=HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
     response.setStatus(code);
     response.getWriter().append(RestMethodResult.jsonError(code,"JsonSyntaxException in POST: " + t.getMessage()));
@@ -109,7 +109,7 @@ catch (  Throwable t) {
       response.getWriter().close();
     }
  catch (    Throwable t) {
-      logger.log(Level.WARNING,"Unable to flush and close response: {0}",t.getMessage());
+      logger.warn("Unable to flush and close response: {}",t.getMessage());
     }
   }
 }

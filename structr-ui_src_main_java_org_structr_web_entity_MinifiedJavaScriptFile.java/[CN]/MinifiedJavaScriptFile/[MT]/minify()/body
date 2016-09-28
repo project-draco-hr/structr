@@ -1,5 +1,5 @@
 {
-  logger.log(Level.INFO,"Running minify: {0}",this.getUuid());
+  logger.info("Running minify: {}",this.getUuid());
   final Compiler compiler=new Compiler();
   final CompilerOptions options=new CompilerOptions();
   final CompilationLevel selectedLevel=getProperty(optimizationLevel);
@@ -8,12 +8,16 @@
     @Override public void println(    CheckLevel level,    JSError error){
     }
     @Override protected void printSummary(){
-      final Level level=(getErrorCount() + getWarningCount() == 0) ? Level.INFO : Level.WARNING;
       if (getTypedPercent() > 0) {
-        logger.log(level,SimpleFormat.format("%d error(s), %d warning(s), %.1f%% typed",getErrorCount(),getWarningCount(),getTypedPercent()));
+        if (getErrorCount() + getWarningCount() == 0) {
+          logger.info(SimpleFormat.format("%d error(s), %d warning(s), %.1f%% typed",getErrorCount(),getWarningCount(),getTypedPercent()));
+        }
+ else {
+          logger.warn(SimpleFormat.format("%d error(s), %d warning(s), %.1f%% typed",getErrorCount(),getWarningCount(),getTypedPercent()));
+        }
       }
  else       if (getErrorCount() + getWarningCount() > 0) {
-        logger.log(level,SimpleFormat.format("%d error(s), %d warning(s)",getErrorCount(),getWarningCount()));
+        logger.warn(SimpleFormat.format("%d error(s), %d warning(s)",getErrorCount(),getWarningCount()));
       }
     }
   }

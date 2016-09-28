@@ -3,7 +3,7 @@
   final Thumbnail tn=new Thumbnail();
   try (final InputStream in=originalImage.getInputStream()){
     if (in == null) {
-      logger.log(Level.FINE,"InputStream of original image {0} ({1}) is null",new Object[]{originalImage.getName(),originalImage.getId()});
+      logger.debug("InputStream of original image {} ({}) is null",new Object[]{originalImage.getName(),originalImage.getId()});
       return null;
     }
     final long start=System.nanoTime();
@@ -31,7 +31,7 @@
         if (crop) {
           final int offsetX=Math.abs(maxWidth - destWidth) / 2;
           final int offsetY=Math.abs(maxHeight - destHeight) / 2;
-          logger.log(Level.FINE,"Offset and Size (x,y,w,h): {0},{1},{2},{3}",new Object[]{offsetX,offsetY,maxWidth,maxHeight});
+          logger.debug("Offset and Size (x,y,w,h): {},{},{},{}",new Object[]{offsetX,offsetY,maxWidth,maxHeight});
           result=resampled.getSubimage(offsetX,offsetY,maxWidth,maxHeight);
           tn.setWidth(maxWidth);
           tn.setHeight(maxHeight);
@@ -50,17 +50,17 @@
       }
     }
  else {
-      logger.log(Level.FINE,"Thumbnail could not be created");
+      logger.debug("Thumbnail could not be created");
       return null;
     }
     final long end=System.nanoTime();
     final long time=(end - start) / 1000000;
-    logger.log(Level.FINE,"Thumbnail created. Reading, scaling and writing took {0} ms",time);
+    logger.debug("Thumbnail created. Reading, scaling and writing took {} ms",time);
     tn.setBytes(baos.toByteArray());
     return tn;
   }
  catch (  Throwable t) {
-    logger.log(Level.WARNING,"Unable to create thumbnail for image with ID {0}.",originalImage.getUuid());
+    logger.warn("Unable to create thumbnail for image with ID {}.",originalImage.getUuid());
   }
   return null;
 }

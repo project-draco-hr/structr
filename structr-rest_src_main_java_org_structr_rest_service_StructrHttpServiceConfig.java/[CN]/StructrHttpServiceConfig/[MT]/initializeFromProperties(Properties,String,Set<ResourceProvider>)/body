@@ -12,7 +12,7 @@
   final String defaultPropertyKeyValue=properties.getProperty(defaultPropertyKeyName);
   final String outputDepthValue=properties.getProperty(nestingDepthKeyName);
   if (StringUtils.isBlank(resourceProviderValue)) {
-    logger.log(Level.SEVERE,"Missing resource provider key {0}.resourceprovider in configuration file.",servletName);
+    logger.error("Missing resource provider key {}.resourceprovider in configuration file.",servletName);
     throw new IllegalStateException("No resource provider set for servlet " + servletName);
   }
  else {
@@ -22,17 +22,17 @@
       resourceProviders.add(resourceProvider);
     }
  else {
-      logger.log(Level.SEVERE,"Unable to initialize resource provider for servlet {0}, no resource provider found. Please check structr.conf for a valid resource provider class.",servletName);
+      logger.error("Unable to initialize resource provider for servlet {}, no resource provider found. Please check structr.conf for a valid resource provider class.",servletName);
       throw new IllegalStateException("No resource provider available for servlet " + servletName);
     }
   }
   if (StringUtils.isBlank(authenticatorValue)) {
-    logger.log(Level.SEVERE,"Missing authenticator key {0}.authenticator in configuration file.",servletName);
+    logger.error("Missing authenticator key {}.authenticator in configuration file.",servletName);
   }
  else {
     authenticatorClass=loadClass(authenticatorValue);
     if (authenticatorClass == null) {
-      logger.log(Level.SEVERE,"Unable	 to instantiate authenticator {0}",authenticatorValue);
+      logger.error("Unable	 to instantiate authenticator {}",authenticatorValue);
     }
   }
   if (StringUtils.isNotBlank(userAutoCreateValue)) {

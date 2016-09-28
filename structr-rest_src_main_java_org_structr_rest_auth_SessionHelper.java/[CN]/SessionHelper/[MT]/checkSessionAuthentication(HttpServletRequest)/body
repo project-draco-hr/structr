@@ -26,12 +26,12 @@
   }
   if (sessionValid) {
     final Principal user=AuthHelper.getPrincipalForSessionId(session.getId());
-    logger.log(Level.FINE,"Valid session found: {0}, last accessed {1}, authenticated with user {2}",new Object[]{session,session.getLastAccessedTime(),user});
+    logger.debug("Valid session found: {}, last accessed {}, authenticated with user {}",new Object[]{session,session.getLastAccessedTime(),user});
     return user;
   }
  else {
     final Principal user=AuthHelper.getPrincipalForSessionId(requestedSessionId);
-    logger.log(Level.FINE,"Invalid session: {0}, last accessed {1}, authenticated with user {2}",new Object[]{session,(session != null ? session.getLastAccessedTime() : ""),user});
+    logger.debug("Invalid session: {}, last accessed {}, authenticated with user {}",new Object[]{session,(session != null ? session.getLastAccessedTime() : ""),user});
     if (user != null) {
       AuthHelper.doLogout(request,user);
     }

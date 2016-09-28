@@ -1,6 +1,6 @@
 {
   try (Tx tx=StructrApp.getInstance(securityContext).tx()){
-    logger.log(Level.INFO,"move()");
+    logger.info("move()");
     final AbstractStructrFtpFile targetFile=(AbstractStructrFtpFile)target;
     final String path=targetFile instanceof StructrFtpFile ? "/" : targetFile.getAbsolutePath();
     try {
@@ -21,14 +21,14 @@
       }
     }
  catch (    FrameworkException ex) {
-      logger.log(Level.SEVERE,"Could not move ftp file",ex);
+      logger.error("Could not move ftp file",ex);
       return false;
     }
     tx.success();
     return true;
   }
  catch (  FrameworkException ex) {
-    logger.log(Level.SEVERE,null,ex);
+    logger.error("",ex);
   }
   return false;
 }

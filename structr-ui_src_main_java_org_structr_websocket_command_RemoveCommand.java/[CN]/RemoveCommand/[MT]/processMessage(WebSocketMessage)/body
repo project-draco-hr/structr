@@ -12,7 +12,7 @@
           domNode.setProperty(DOMNode.pageId,null);
         }
  catch (        DOMException|FrameworkException ex) {
-          logger.log(Level.SEVERE,"Could not remove node from page " + domNode,ex);
+          logger.error("Could not remove node from page " + domNode,ex);
           getWebSocket().send(MessageBuilder.status().code(422).message(ex.getMessage()).build(),true);
         }
       }
@@ -26,7 +26,7 @@
           }
         }
  catch (        Throwable t) {
-          logger.log(Level.SEVERE,"Could not delete relationship",t);
+          logger.error("Could not delete relationship",t);
           getWebSocket().send(MessageBuilder.status().code(400).message("Error in RemoveCommand: " + t.getMessage()).build(),true);
         }
       }

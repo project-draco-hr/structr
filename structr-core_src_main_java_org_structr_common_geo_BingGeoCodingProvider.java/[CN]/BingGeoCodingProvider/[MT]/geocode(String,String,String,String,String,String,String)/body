@@ -20,7 +20,7 @@
     urlBuffer.append("&maxResults=1");
     String url=urlBuffer.toString();
     try {
-      logger.log(Level.INFO,"Using url {0}",url);
+      logger.info("Using url {}",url);
       URL mapsUrl=new URL(urlBuffer.toString());
       HttpURLConnection connection=(HttpURLConnection)mapsUrl.openConnection();
       connection.connect();
@@ -75,17 +75,17 @@
           return new BingGeoCodingResult(address,data);
         }
  else {
-          logger.log(Level.WARNING,"Geocoding result did not contain location information:\n{0}",xmlDoc.asXML());
+          logger.warn("Geocoding result did not contain location information:\n{}",xmlDoc.asXML());
         }
       }
     }
  catch (    DocumentException dex) {
-      logger.log(Level.WARNING,"Unable to use Bing geocoding provider: {0}",dex.getMessage());
+      logger.warn("Unable to use Bing geocoding provider: {}",dex.getMessage());
       throw new IOException(dex);
     }
   }
  else {
-    logger.log(Level.WARNING,"Unable to use Bing geocoding provider, missing API key. Please supply API key in structr.conf using the key geocoding.apikey.");
+    logger.warn("Unable to use Bing geocoding provider, missing API key. Please supply API key in structr.conf using the key geocoding.apikey.");
   }
   return null;
 }

@@ -8,19 +8,19 @@
     if (!files.exists()) {
       files.mkdir();
     }
-    logger.log(Level.INFO,"Database ready.");
+    logger.info("Database ready.");
     try (final Transaction tx=graphDb.beginTx()){
       nodeIndex=graphDb.nodeIndex();
       relIndex=graphDb.relationshipIndex();
       tx.success();
     }
  catch (    Throwable t) {
-      logger.log(Level.WARNING,"Error while initializing indexes.",t);
+      logger.warn("Error while initializing indexes.",t);
     }
     isInitialized=true;
     final boolean firstInitialization=graphDb.getGlobalProperties().getProperty("initialized") == null;
     if (graphDb.needsIndexRebuild() || firstInitialization) {
-      logger.log(Level.INFO,"Scheduling index rebuild to happen after startup..");
+      logger.info("Scheduling index rebuild to happen after startup..");
       services.registerInitializationCallback(new InitializationCallback(){
         @Override public void initializationDone(){
           Services.getInstance().command(SecurityContext.getSuperUserInstance(),BulkRebuildIndexCommand.class).execute(Collections.EMPTY_MAP);

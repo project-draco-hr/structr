@@ -1,9 +1,9 @@
 {
   if (data == null) {
-    logger.log(Level.WARNING,"Empty text message received.");
+    logger.warn("Empty text message received.");
     return;
   }
-  logger.log(Level.FINE,"############################################################ RECEIVED \n{0}",data.substring(0,Math.min(data.length(),1000)));
+  logger.debug("############################################################ RECEIVED \n{}",data.substring(0,Math.min(data.length(),1000)));
   final WebSocketMessage webSocketData=gson.fromJson(data,WebSocketMessage.class);
   final App app=StructrApp.getInstance(securityContext);
   final String command=webSocketData.getCommand();
@@ -21,7 +21,7 @@
       tx.success();
     }
  catch (    FrameworkException t) {
-      logger.log(Level.WARNING,"Unable to parse message.",t);
+      logger.warn("Unable to parse message.",t);
     }
     try {
       AbstractCommand abstractCommand=(AbstractCommand)type.newInstance();
@@ -55,13 +55,13 @@
         tx.success();
       }
  catch (      FrameworkException fex) {
-        logger.log(Level.WARNING,"",fex);
+        logger.warn("",fex);
       }
       return;
     }
   }
  else {
-    logger.log(Level.WARNING,"Unknown command {0}",command);
+    logger.warn("Unknown command {}",command);
     send(MessageBuilder.status().code(400).message("Unknown command").build(),true);
     return;
   }

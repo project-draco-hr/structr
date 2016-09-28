@@ -4,11 +4,11 @@
     query.includeDeletedAndHidden();
   }
   final Result result=query.getResult();
-  logger.log(Level.INFO,"===================================================\nRaw result size: {0}, expected: {1} (page size: {2}, page: {3})",new Object[]{result.getRawResultCount(),number,pageSize,page});
+  logger.info("===================================================\nRaw result size: {}, expected: {} (page size: {}, page: {})",new Object[]{result.getRawResultCount(),number,pageSize,page});
   assertTrue(result.getRawResultCount() == ((pageSize == 0 || page == 0) ? 0 : number));
   long expectedResultCount=(pageSize == 0 || page == 0) ? 0 : Math.min(number,pageSize);
   int startIndex=(Math.max(page,1) - 1) * pageSize;
-  logger.log(Level.INFO,"Result size: {0}, expected: {1}, start index: {2}",new Object[]{result.size(),expectedResultCount,startIndex});
+  logger.info("Result size: {}, expected: {}, start index: {}",new Object[]{result.size(),expectedResultCount,startIndex});
   assertTrue(result.size() == expectedResultCount);
   for (int j=0; j < expectedResultCount; j++) {
     String expectedName="TestOne-" + (offset + j + startIndex);

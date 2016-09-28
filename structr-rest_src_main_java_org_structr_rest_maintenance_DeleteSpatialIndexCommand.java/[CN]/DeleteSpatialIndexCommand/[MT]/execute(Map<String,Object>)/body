@@ -13,7 +13,7 @@
   final App app=StructrApp.getInstance(securityContext);
   try (final Tx tx=app.tx()){
     for (    Node node : toDelete) {
-      logger.log(Level.INFO,"Deleting node {0}",node);
+      logger.info("Deleting node {}",node);
       try {
         for (        Relationship rel : node.getRelationships()) {
           rel.delete();
@@ -21,7 +21,7 @@
         node.delete();
       }
  catch (      Throwable t) {
-        logger.log(Level.WARNING,"",t);
+        logger.warn("",t);
       }
     }
     tx.success();

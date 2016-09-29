@@ -1,0 +1,18 @@
+{
+  String content="";
+  try {
+    final URI url=URI.create(address);
+    final HttpGet req=new HttpGet(url);
+    configure(req,username,password,proxyUrl,proxyUsername,proxyPassword,cookie,headers,true);
+    final CloseableHttpResponse resp=client.execute(req);
+    content=IOUtils.toString(resp.getEntity().getContent(),charset(resp));
+    if (content.charAt(0) == 65279) {
+      content=content.substring(1);
+    }
+  }
+ catch (  final Throwable t) {
+    logger.error("Unable to fetch content from address {}, {}",new Object[]{address,t});
+    return t.toString();
+  }
+  return content;
+}

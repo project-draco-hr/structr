@@ -9,10 +9,12 @@
     proxyPassword=Services.getBaseConfiguration().getProperty(Services.APPLICATION_PROXY_HTTP_PASSWORD);
   }
   HttpHost proxy=null;
-  CredentialsProvider credsProvider=null;
+  final CredentialsProvider credsProvider=new BasicCredentialsProvider();
+  if (StringUtils.isNoneBlank(username,password)) {
+    credsProvider.setCredentials(new AuthScope(new HttpHost(req.getURI().getHost())),new UsernamePasswordCredentials(username,password));
+  }
   if (StringUtils.isNotBlank(proxyUrl)) {
     proxy=HttpHost.create(proxyUrl);
-    credsProvider=new BasicCredentialsProvider();
     if (StringUtils.isNoneBlank(proxyUsername,proxyPassword)) {
       credsProvider.setCredentials(new AuthScope(proxy),new UsernamePasswordCredentials(proxyUsername,proxyPassword));
     }

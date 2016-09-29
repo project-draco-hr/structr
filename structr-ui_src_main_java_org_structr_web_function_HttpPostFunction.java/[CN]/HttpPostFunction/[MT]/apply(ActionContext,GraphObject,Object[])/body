@@ -10,35 +10,29 @@
     if (sources.length >= 4 && sources[3] != null) {
       charset=sources[3].toString();
     }
-    final HttpClientParams params=new HttpClientParams(HttpClientParams.getDefaultParams());
-    final HttpClient client=new HttpClient(params);
-    final PostMethod postMethod=new PostMethod(uri);
-    for (    final Map.Entry<String,String> header : ctx.getHeaders().entrySet()) {
-      postMethod.addRequestHeader(header.getKey(),header.getValue());
+    final Map<String,String> responseData=HttpHelper.post(uri,body,null,null,ctx.getHeaders());
+    final int statusCode=Integer.parseInt(responseData.get("status"));
+    responseData.remove("status");
+    final String responseBody=responseData.get("body");
+    responseData.remove("body");
+    final GraphObjectMap response=new GraphObjectMap();
+    if ("application/json".equals(contentType)) {
+      final FromJsonFunction fromJsonFunction=new FromJsonFunction();
+      response.setProperty(new StringProperty("body"),fromJsonFunction.apply(ctx,entity,new Object[]{responseBody}));
     }
-    try {
-      postMethod.setRequestEntity(new StringRequestEntity(body,contentType,charset));
-      final int statusCode=client.executeMethod(postMethod);
-      final String responseBody=postMethod.getResponseBodyAsString();
-      final GraphObjectMap response=new GraphObjectMap();
-      if ("application/json".equals(contentType)) {
-        final FromJsonFunction fromJsonFunction=new FromJsonFunction();
-        response.setProperty(new StringProperty("body"),fromJsonFunction.apply(ctx,entity,new Object[]{responseBody}));
-      }
  else {
-        response.setProperty(new StringProperty("body"),responseBody);
-      }
-      response.setProperty(new IntProperty("status"),statusCode);
-      response.setProperty(new StringProperty("headers"),extractHeaders(postMethod.getResponseHeaders()));
-      return response;
+      response.setProperty(new StringProperty("body"),responseBody);
     }
- catch (    IOException ioex) {
-      logException(entity,ioex,sources);
+    response.setProperty(new IntProperty("status"),statusCode);
+    final GraphObjectMap map=new GraphObjectMap();
+    for (    final Map.Entry<String,String> entry : responseData.entrySet()) {
+      map.put(new StringProperty(entry.getKey()),entry.getValue());
     }
+    response.setProperty(new StringProperty("headers"),map);
+    return response;
   }
  else {
     logParameterError(entity,sources,ctx.isJavaScriptContext());
     return usage(ctx.isJavaScriptContext());
   }
-  return null;
 }

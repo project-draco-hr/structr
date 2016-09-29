@@ -1,19 +1,24 @@
 {
-  final HttpClient client=getHttpClient();
-  final HttpMethod get=new GetMethod();
-  get.setURI(new URI(uri,false));
-  get.addRequestHeader("User-Agent","curl/7.35.0");
-  logger.info("Downloading from {}",uri);
-  final int statusCode=client.executeMethod(get);
+  final URI url=URI.create(address);
+  final HttpGet req=new HttpGet(url);
+  req.addHeader("User-Agent","curl/7.35.0");
+  logger.info("Downloading from {}",address);
+  final CloseableHttpClient client=HttpClients.custom().setDefaultConnectionConfig(ConnectionConfig.DEFAULT).setUserAgent("curl/7.35.0").build();
+  final CloseableHttpResponse resp=client.execute(req);
+  final int statusCode=resp.getStatusLine().getStatusCode();
   if (statusCode == 200) {
-    try (final InputStream is=get.getResponseBodyAsStream()){
+    try (final InputStream is=resp.getEntity().getContent()){
       try (final OutputStream os=new FileOutputStream(fileOnDisk)){
         IOUtils.copy(is,os);
       }
      }
    }
  else {
-    System.out.println("response body: " + new String(get.getResponseBody(),"utf-8"));
-    logger.warn("Unable to create file from URI {}: status code was {}",new Object[]{uri,statusCode});
+    String content=IOUtils.toString(resp.getEntity().getContent(),HttpHelper.charset(resp));
+    if (content.charAt(0) == 65279) {
+      content=content.substring(1);
+    }
+    System.out.println("Response body: " + content);
+    logger.warn("Unable to create file from URI {}: status code was {}",new Object[]{address,statusCode});
   }
 }

@@ -1,3 +1,6 @@
 {
-  return (super.isValid(errorBuffer) && nonEmpty(AbstractFile.name,errorBuffer));
+  boolean valid=true;
+  valid&=(super.isValid(errorBuffer) && nonEmpty(AbstractFile.name,errorBuffer));
+  valid&=ValidationHelper.checkStringMatchesRegex(this,name,"[^\\/\\x00]+",errorBuffer);
+  return valid;
 }

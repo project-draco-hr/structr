@@ -1,0 +1,39 @@
+{
+  try {
+    FileBase test1=null;
+    try (final Tx tx=app.tx()){
+      test1=createTestNode(File.class,new NodeAttribute<>(AbstractNode.name,"aaaaa"));
+      createTestNode(File.class,new NodeAttribute<>(AbstractNode.name,"bbbbb"));
+      createTestNode(File.class,new NodeAttribute<>(AbstractNode.name,"ccccc"));
+      createTestNode(File.class,new NodeAttribute<>(AbstractNode.name,"ddddd"));
+      createTestNode(File.class,new NodeAttribute<>(AbstractNode.name,"eeeee"));
+      tx.success();
+    }
+     try (final Tx tx=app.tx()){
+      final List<FileBase> files=app.nodeQuery(FileBase.class).sort(File.path).getAsList();
+      assertEquals("Invalid indexing sort result","aaaaa",files.get(0).getName());
+      assertEquals("Invalid indexing sort result","bbbbb",files.get(1).getName());
+      assertEquals("Invalid indexing sort result","ccccc",files.get(2).getName());
+      assertEquals("Invalid indexing sort result","ddddd",files.get(3).getName());
+      assertEquals("Invalid indexing sort result","eeeee",files.get(4).getName());
+      tx.success();
+    }
+     try (final Tx tx=app.tx()){
+      test1.setProperty(AbstractNode.name,"zzzzz");
+      tx.success();
+    }
+     try (final Tx tx=app.tx()){
+      final List<FileBase> files=app.nodeQuery(FileBase.class).sort(File.path).getAsList();
+      assertEquals("Invalid indexing sort result","bbbbb",files.get(0).getName());
+      assertEquals("Invalid indexing sort result","ccccc",files.get(1).getName());
+      assertEquals("Invalid indexing sort result","ddddd",files.get(2).getName());
+      assertEquals("Invalid indexing sort result","eeeee",files.get(3).getName());
+      assertEquals("Invalid indexing sort result","zzzzz",files.get(4).getName());
+      tx.success();
+    }
+   }
+ catch (  FrameworkException ex) {
+    logger.error(ex.toString());
+    fail("Unexpected exception");
+  }
+}

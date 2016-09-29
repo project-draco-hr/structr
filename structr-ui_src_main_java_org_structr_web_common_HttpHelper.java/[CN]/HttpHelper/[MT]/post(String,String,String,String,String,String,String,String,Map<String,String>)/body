@@ -7,12 +7,7 @@
     configure(req,username,password,proxyUrl,proxyUsername,proxyPassword,cookie,headers,true);
     req.setEntity(new StringEntity(requestBody));
     final CloseableHttpResponse response=client.execute(req);
-    final Header contentType=response.getFirstHeader("Content-Type");
-    String charset=StringUtils.substringAfterLast(contentType.getValue(),"; charset=");
-    if (StringUtils.isBlank(charset)) {
-      charset="UTF-8";
-    }
-    String content=IOUtils.toString(response.getEntity().getContent(),charset);
+    String content=IOUtils.toString(response.getEntity().getContent(),charset(response));
     if (content.charAt(0) == 65279) {
       content=content.substring(1);
     }

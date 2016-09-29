@@ -4,11 +4,6 @@
     final HttpGet req=new HttpGet(url);
     configure(req,username,password,proxyUrl,proxyUsername,proxyPassword,cookie,headers,true);
     final CloseableHttpResponse resp=client.execute(req);
-    final Header contentType=resp.getFirstHeader("Content-Type");
-    String charset=StringUtils.substringAfterLast(contentType.getValue(),"; charset=");
-    if (StringUtils.isBlank(charset)) {
-      charset="UTF-8";
-    }
     return resp.getEntity().getContent();
   }
  catch (  final Throwable t) {

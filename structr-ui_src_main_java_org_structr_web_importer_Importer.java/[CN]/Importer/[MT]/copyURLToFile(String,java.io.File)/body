@@ -14,12 +14,7 @@
      }
    }
  else {
-    final Header contentType=resp.getFirstHeader("Content-Type");
-    String charset=StringUtils.substringAfterLast(contentType.getValue(),"; charset=");
-    if (StringUtils.isBlank(charset)) {
-      charset="UTF-8";
-    }
-    String content=IOUtils.toString(resp.getEntity().getContent(),charset);
+    String content=IOUtils.toString(resp.getEntity().getContent(),HttpHelper.charset(resp));
     if (content.charAt(0) == 65279) {
       content=content.substring(1);
     }

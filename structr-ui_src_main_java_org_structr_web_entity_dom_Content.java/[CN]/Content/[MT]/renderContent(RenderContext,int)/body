@@ -2,7 +2,7 @@
   try {
     final EditMode edit=renderContext.getEditMode(securityContext.getUser(false));
     if (EditMode.DEPLOYMENT.equals(edit)) {
-      renderContext.getBuffer().append(getProperty(Content.content));
+      renderContext.getBuffer().append(escapeForHtmlAttributes(getProperty(Content.content)));
       return;
     }
     if (isDeleted() || isHidden() || !displayForLocale(renderContext)|| !displayForConditions(renderContext)) {

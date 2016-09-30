@@ -1,0 +1,17 @@
+{
+  if (arrayHasLengthAndAllElementsNotNull(sources,1)) {
+    final String script=sources[0].toString();
+    ScriptEngineManager manager=new ScriptEngineManager();
+    ScriptEngine engine=manager.getEngineByName("Renjin");
+    if (engine == null) {
+      throw new RuntimeException("Renjin Script Engine not found on the classpath.");
+    }
+    try {
+      return engine.eval(script);
+    }
+ catch (    final ScriptException e) {
+      logger.error("Error while executing R script: {}",new Object[]{script,e});
+    }
+  }
+  return null;
+}

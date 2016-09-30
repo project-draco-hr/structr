@@ -1,0 +1,38 @@
+{
+  final SecurityContext securityContext=getWebSocket().getSecurityContext();
+  final Query query=StructrApp.getInstance(securityContext).nodeQuery(AbstractFile.class).sort(AbstractFile.path);
+  try {
+    AbstractFile lastFile;
+    String lastFilepath;
+    boolean lastWasDupe=false;
+    final ArrayList<GraphObject> filesWithSamePath=new ArrayList<>();
+    final Iterator it=query.getAsList().iterator();
+    if (it.hasNext()) {
+      lastFile=(AbstractFile)it.next();
+      lastFilepath=lastFile.getProperty(AbstractFile.path);
+      while (it.hasNext()) {
+        AbstractFile file=(AbstractFile)it.next();
+        final String currentFilepath=file.getProperty(AbstractFile.path);
+        if (lastFilepath.equals(currentFilepath)) {
+          if (!lastWasDupe) {
+            filesWithSamePath.add(lastFile);
+          }
+          filesWithSamePath.add(file);
+          lastWasDupe=true;
+        }
+ else {
+          lastFilepath=currentFilepath;
+          lastWasDupe=false;
+        }
+        lastFile=file;
+      }
+    }
+    webSocketData.setResult(filesWithSamePath);
+    webSocketData.setRawResultCount(filesWithSamePath.size());
+    getWebSocket().send(webSocketData,true);
+  }
+ catch (  FrameworkException fex) {
+    logger.log(Level.WARNING,"Exception occured",fex);
+    getWebSocket().send(MessageBuilder.status().code(fex.getStatus()).message(fex.getMessage()).build(),true);
+  }
+}

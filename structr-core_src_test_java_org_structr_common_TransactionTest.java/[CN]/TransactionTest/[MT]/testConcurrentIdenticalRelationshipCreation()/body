@@ -1,0 +1,19 @@
+{
+  try {
+    final ExecutorService service=Executors.newCachedThreadPool();
+    final TestSix source=createTestNode(TestSix.class);
+    final TestOne target=createTestNode(TestOne.class);
+    final Future one=service.submit(new RelationshipCreator(source,target));
+    final Future two=service.submit(new RelationshipCreator(source,target));
+    one.get();
+    two.get();
+    try (final Tx tx=app.tx()){
+      final List<TestOne> list=source.getProperty(TestSix.oneToManyTestOnes);
+      assertEquals("Invalid concurrent identical relationship creation result",1,list.size());
+      tx.success();
+    }
+   }
+ catch (  ExecutionException|InterruptedException|FrameworkException fex) {
+    fex.printStackTrace();
+  }
+}

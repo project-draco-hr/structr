@@ -1,5 +1,5 @@
 {
-  final App app=StructrApp.getInstance();
+  final App app=StructrApp.getInstance(securityContext);
   try (final Tx tx=app.tx()){
     logger.info("mkdir() Folder");
     AbstractFile existing=FileHelper.getFileByAbsolutePath(SecurityContext.getSuperUserInstance(),newPath);
@@ -7,9 +7,9 @@
       logger.warn("File {} already exists.",newPath);
       return false;
     }
-    final Folder parentFolder=(Folder)FileHelper.getFileByAbsolutePath(SecurityContext.getSuperUserInstance(),StringUtils.substringBeforeLast(newPath,"/"));
+    final Folder parentFolder=(Folder)FileHelper.getFileByAbsolutePath(securityContext,StringUtils.substringBeforeLast(newPath,"/"));
     try {
-      Folder newFolder=(Folder)StructrApp.getInstance().command(CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.type,Folder.class.getSimpleName()),new NodeAttribute(AbstractNode.owner,owner.getStructrUser()),new NodeAttribute(AbstractNode.name,getName()));
+      Folder newFolder=(Folder)app.command(CreateNodeCommand.class).execute(new NodeAttribute(AbstractNode.type,Folder.class.getSimpleName()),new NodeAttribute(AbstractNode.owner,owner.getStructrUser()),new NodeAttribute(AbstractNode.name,getName()));
       if (parentFolder != null) {
         newFolder.setProperty(AbstractFile.parent,parentFolder);
       }

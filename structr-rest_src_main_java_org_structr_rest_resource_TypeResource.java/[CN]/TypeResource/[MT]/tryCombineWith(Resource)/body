@@ -5,5 +5,9 @@
  else   if (next instanceof TypeResource) {
     throw new IllegalPathException("Cannot apply a second type resource to this type resource");
   }
+ else   if (next instanceof SchemaMethodResource) {
+    ((SchemaMethodResource)next).wrapResource(this);
+    return next;
+  }
   return super.tryCombineWith(next);
 }

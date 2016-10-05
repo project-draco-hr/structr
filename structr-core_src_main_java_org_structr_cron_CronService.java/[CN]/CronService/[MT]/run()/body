@@ -20,15 +20,20 @@
     }
     for (    CronEntry entry : cronEntries) {
       if (entry.getDelayToNextExecutionInMillis() < GRANULARITY_UNIT.toMillis(GRANULARITY)) {
-        String taskClassName=entry.getName();
+        final String taskClassName=entry.getName();
+        final Class taskClass=instantiate(taskClassName);
         try {
-          Class taskClass=Class.forName(taskClassName);
-          Task task=(Task)taskClass.newInstance();
-          logger.debug("Starting task {}",taskClassName);
-          StructrApp.getInstance().processTasks(task);
+          if (taskClass != null) {
+            Task task=(Task)taskClass.newInstance();
+            logger.debug("Starting task {}",taskClassName);
+            StructrApp.getInstance().processTasks(task);
+          }
+ else {
+            Actions.call(taskClassName,Collections.EMPTY_MAP);
+          }
         }
  catch (        Throwable t) {
-          logger.warn("Could not start task {}: {}",new Object[]{taskClassName,t.getMessage()});
+          logger.warn("Exception while executing cron task {}: {}",taskClassName,t.getMessage());
         }
       }
     }

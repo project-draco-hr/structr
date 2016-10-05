@@ -10,6 +10,8 @@
     logger.warn("Unable to send response",ioex);
   }
   SecurityContext securityContext=null;
+  String redirectUrl=null;
+  boolean appendUuidOnRedirect=false;
   try (final Tx tx=StructrApp.getInstance().tx()){
     try {
       securityContext=getConfig().getAuthenticator().initializeAndExamineRequest(request,response);
@@ -58,7 +60,16 @@ catch (  IOException ioex) {
     while (fileItemsIterator.hasNext()) {
       final FileItem item=fileItemsIterator.next();
       if (item.isFormField()) {
-        params.put(item.getFieldName(),item.getString());
+        final String fieldName=item.getFieldName();
+        if (REDIRECT_AFTER_UPLOAD_PARAMETER.equals(fieldName)) {
+          redirectUrl=item.getString();
+        }
+ else         if (APPEND_UUID_ON_REDIRECT.equals(fieldName)) {
+          appendUuidOnRedirect="true".equalsIgnoreCase(item.getString());
+        }
+ else {
+          params.put(item.getFieldName(),item.getString());
+        }
       }
  else {
         try {
@@ -116,7 +127,17 @@ catch (  IOException ioex) {
           }
           if (newFile != null) {
             newFile.notifyUploadCompletion();
-            out.write(uuid);
+            if (StringUtils.isNotBlank(redirectUrl)) {
+              if (appendUuidOnRedirect) {
+                response.sendRedirect(redirectUrl + uuid);
+              }
+ else {
+                response.sendRedirect(redirectUrl);
+              }
+            }
+ else {
+              out.write(uuid);
+            }
           }
         }
  catch (        IOException ex) {

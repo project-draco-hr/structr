@@ -1,12 +1,3 @@
 {
-  final Object obj=Actions.execute(securityContext,entity,"${" + source + "}",propertySet);
-  RestMethodResult result=null;
-  if (obj instanceof RestMethodResult) {
-    result=(RestMethodResult)obj;
-  }
- else {
-    result=new RestMethodResult(200);
-    SchemaMethodResource.unwrapTo(obj,result);
-  }
-  return result;
+  return SchemaMethodResource.wrapInResult(Actions.execute(securityContext,entity,"${" + source + "}",propertySet));
 }

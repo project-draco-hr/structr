@@ -26,7 +26,10 @@
     }
   }
  else {
-    result=invokeMethod(typedIdResource,propertySet,typeResource.getRawType());
+    final Class entityType=typedIdResource.getTypeResource().getEntityClass();
+    final String methodName=typeResource.getRawType();
+    final String source=SchemaMethodResource.findMethodSource(entityType,methodName);
+    result=SchemaMethodResource.invoke(securityContext,typedIdResource.getEntity(),source,propertySet);
   }
   if (result == null) {
     throw new IllegalPathException("Illegal path");

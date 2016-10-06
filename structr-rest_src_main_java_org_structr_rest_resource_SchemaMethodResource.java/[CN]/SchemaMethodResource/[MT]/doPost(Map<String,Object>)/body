@@ -1,30 +1,14 @@
 {
   final App app=StructrApp.getInstance(securityContext);
   RestMethodResult result=null;
-  try (final Tx tx=app.tx()){
-    final SchemaNode schemaNode=app.nodeQuery(SchemaNode.class).andName(method.getDeclaringClass().getSimpleName()).getFirst();
-    if (schemaNode != null) {
-      final SchemaMethod schemaMethod=app.nodeQuery(SchemaMethod.class).and(SchemaMethod.name,method.getName()).and(SchemaMethod.schemaNode,schemaNode).getFirst();
-      if (schemaMethod != null) {
-        final String source=schemaMethod.getProperty(SchemaMethod.source);
-        if (StringUtils.isNotBlank(source)) {
-          final Object obj=Actions.execute(securityContext,null,"${" + source + "}",propertySet);
-          if (obj instanceof RestMethodResult) {
-            result=(RestMethodResult)obj;
-          }
- else {
-            result=new RestMethodResult(200);
-            StaticRelationshipResource.unwrapTo(obj,result);
-          }
-        }
-      }
+  if (source != null) {
+    try (final Tx tx=app.tx()){
+      result=SchemaMethodResource.invoke(securityContext,null,source,propertySet);
+      tx.success();
     }
-    tx.success();
-  }
-   if (result != null) {
-    return result;
-  }
- else {
+   }
+  if (result == null) {
     throw new IllegalPathException("Type and method name do not match the given path.");
   }
+  return result;
 }

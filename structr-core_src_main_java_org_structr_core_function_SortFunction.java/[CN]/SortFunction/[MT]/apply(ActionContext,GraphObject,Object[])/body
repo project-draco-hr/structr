@@ -1,8 +1,14 @@
 {
-  if (arrayHasMinLengthAndMaxLengthAndAllElementsNotNull(sources,2,3)) {
-    if (sources[0] instanceof List && sources[1] instanceof String) {
+  if (sources == null || sources.length == 0) {
+    return null;
+  }
+  String sortKey="name";
+  if (sources.length > 1 && sources[1] instanceof String) {
+    sortKey=(String)sources[1];
+  }
+  if (sources.length >= 1) {
+    if (sources[0] instanceof List) {
       final List list=(List)sources[0];
-      final String sortKey=sources[1].toString();
       final Iterator iterator=list.iterator();
       if (iterator.hasNext()) {
         final Object firstElement=iterator.next();
@@ -15,6 +21,11 @@
             Collections.sort(sortCollection,new GraphObjectComparator(key,descending));
             return sortCollection;
           }
+        }
+ else         if (firstElement instanceof String) {
+          final String[] stringArray=(String[])list.toArray(new String[list.size()]);
+          Arrays.sort(stringArray);
+          return Arrays.asList(stringArray);
         }
       }
     }

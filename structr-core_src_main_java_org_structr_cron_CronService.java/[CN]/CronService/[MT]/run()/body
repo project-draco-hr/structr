@@ -29,8 +29,11 @@
             StructrApp.getInstance().processTasks(task);
           }
  else {
-            Actions.call(taskClassName,Collections.EMPTY_MAP);
-          }
+            try (final Tx tx=StructrApp.getInstance().tx()){
+              Actions.call(taskClassName,Collections.EMPTY_MAP);
+              tx.success();
+            }
+           }
         }
  catch (        Throwable t) {
           logger.warn("Exception while executing cron task {}: {}",taskClassName,t.getMessage());

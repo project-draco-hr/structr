@@ -1,0 +1,29 @@
+{
+  final String customTypeName="FooFile";
+  final String schemaMethodName="testFooFileMethod";
+  try (final Tx tx=app.tx()){
+    SchemaNode fooFileDef=app.create(SchemaNode.class,customTypeName);
+    SchemaMethod testFooFileMethod=app.create(SchemaMethod.class,schemaMethodName);
+    testFooFileMethod.setProperty(SchemaMethod.source,"()");
+    testFooFileMethod.setProperty(SchemaMethod.schemaNode,fooFileDef);
+    tx.success();
+  }
+ catch (  Exception ex) {
+    logger.error("",ex);
+  }
+  try (final Tx tx=app.tx()){
+    createAdminUser();
+    tx.success();
+  }
+ catch (  Exception ex) {
+    logger.error("",ex);
+  }
+  try (final Tx tx=app.tx()){
+    RestAssured.given().contentType("application/json; charset=UTF-8").filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(200)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(201)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(400)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(404)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(422)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(500)).headers("X-User",ADMIN_USERNAME,"X-Password",ADMIN_PASSWORD).body("{}").expect().statusCode(200).when().post(customTypeName + "/" + schemaMethodName);
+    tx.success();
+  }
+ catch (  FrameworkException ex) {
+    logger.error(ex.toString());
+    fail("Unexpected exception");
+  }
+}

@@ -1,5 +1,6 @@
 {
   final GraphObject sourceNode=typedIdResource.getEntity();
+  RestMethodResult result=null;
   if (sourceNode != null && propertyKey != null && propertyKey instanceof RelationProperty) {
     final RelationProperty relationProperty=(RelationProperty)propertyKey;
     final Class sourceNodeType=sourceNode.getClass();
@@ -19,26 +20,18 @@
       }
     }
     if (newNode != null) {
-      final RestMethodResult result=new RestMethodResult(HttpServletResponse.SC_CREATED);
+      result=new RestMethodResult(HttpServletResponse.SC_CREATED);
       result.addHeader("Location",buildLocationHeader(newNode));
       return result;
     }
   }
  else {
-    final GraphObject entity=typedIdResource.getIdResource().getEntity();
-    final Class entityType=typedIdResource.getEntityClass();
-    final String methodName=typeResource.getRawType();
-    if (entity != null && entityType != null && methodName != null) {
-      final Object obj=entity.invokeMethod(methodName,propertySet,true);
-      if (obj instanceof RestMethodResult) {
-        return (RestMethodResult)obj;
-      }
- else {
-        final RestMethodResult result=new RestMethodResult(200);
-        unwrapTo(obj,result);
-        return result;
-      }
-    }
+    result=invokeMethod(typedIdResource,propertySet,typeResource.getRawType());
   }
-  throw new IllegalPathException("Illegal path");
+  if (result == null) {
+    throw new IllegalPathException("Illegal path");
+  }
+ else {
+    return result;
+  }
 }

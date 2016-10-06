@@ -1,0 +1,16 @@
+{
+  final GraphObject entity=typedIdResource.getIdResource().getEntity();
+  final Class entityType=typedIdResource.getEntityClass();
+  if (entity != null && entityType != null && methodName != null) {
+    final Object obj=entity.invokeMethod(methodName,propertySet,true);
+    if (obj instanceof RestMethodResult) {
+      return (RestMethodResult)obj;
+    }
+ else {
+      final RestMethodResult result=new RestMethodResult(200);
+      unwrapTo(obj,result);
+      return result;
+    }
+  }
+  return null;
+}

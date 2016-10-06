@@ -1,0 +1,31 @@
+{
+  final String builtinTypeName="File";
+  final String schemaMethodName="testFileMethod";
+  User admin=null;
+  try (final Tx tx=app.tx()){
+    admin=createAdminUser();
+    tx.success();
+  }
+ catch (  Exception ex) {
+    logger.error("",ex);
+  }
+  try (final Tx tx=app.tx()){
+    SchemaNode fileNodeDef=app.nodeQuery(SchemaNode.class).andName(builtinTypeName).getFirst();
+    SchemaMethod testFileMethod=app.create(SchemaMethod.class,schemaMethodName);
+    testFileMethod.setProperty(SchemaMethod.source,"()");
+    testFileMethod.setProperty(SchemaMethod.schemaNode,fileNodeDef);
+    tx.success();
+  }
+ catch (  Exception ex) {
+    logger.error("",ex);
+  }
+  String id=createEntityAsAdmin("Image","{'name': 'Test Image'}");
+  try (final Tx tx=app.tx()){
+    RestAssured.given().contentType("application/json; charset=UTF-8").filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(200)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(201)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(400)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(404)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(422)).filter(ResponseLoggingFilter.logResponseIfStatusCodeIs(500)).headers("X-User",ADMIN_USERNAME,"X-Password",ADMIN_PASSWORD).body("{}").expect().statusCode(200).when().post("/Image/" + id + "/"+ schemaMethodName);
+    tx.success();
+  }
+ catch (  FrameworkException ex) {
+    logger.error(ex.toString());
+    fail("Unexpected exception");
+  }
+}

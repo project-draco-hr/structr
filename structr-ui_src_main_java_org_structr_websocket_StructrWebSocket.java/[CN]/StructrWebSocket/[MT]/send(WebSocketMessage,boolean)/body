@@ -16,6 +16,9 @@
     message.setCode(403);
   }
   try (final Tx tx=StructrApp.getInstance(securityContext).tx()){
+    if (message.getCode() == 0) {
+      message.setCode(200);
+    }
     final String msg=gson.toJson(message,WebSocketMessage.class);
     logger.debug("################### Private message: {}",message.getCommand());
     logger.debug("############################################################ SENDING \n{}",msg);

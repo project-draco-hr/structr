@@ -5,12 +5,14 @@
     if (modificationEvent.isDeleted()) {
       final WebSocketMessage message=createMessage("DELETE",callbackId);
       message.setId(modificationEvent.getRemovedProperties().get(GraphObject.id));
+      message.setCode(200);
       return message;
     }
     if (modificationEvent.isCreated()) {
       final WebSocketMessage message=createMessage("CREATE",callbackId);
       message.setGraphObject(node);
       message.setResult(Arrays.asList(new GraphObject[]{node}));
+      message.setCode(201);
       return message;
     }
     if (modificationEvent.isModified()) {
@@ -21,6 +23,7 @@
       message.getModifiedProperties().addAll(modificationEvent.getModifiedProperties().keySet());
       message.getRemovedProperties().addAll(modificationEvent.getRemovedProperties().keySet());
       message.setNodeData(modificationEvent.getData(securityContext));
+      message.setCode(200);
       return message;
     }
   }
@@ -32,6 +35,7 @@
         final WebSocketMessage message=createMessage("REMOVE_CHILD",callbackId);
         message.setNodeData("parentId",relationship.getSourceNodeId());
         message.setId(relationship.getTargetNodeId());
+        message.setCode(200);
         return message;
       }
       if (modificationEvent.isCreated()) {
@@ -41,6 +45,7 @@
         message.setResult(Arrays.asList(new GraphObject[]{endNode}));
         message.setId(endNode.getUuid());
         message.setNodeData("parentId",startNode.getUuid());
+        message.setCode(200);
         message.setCommand("APPEND_CHILD");
         if (endNode instanceof DOMNode) {
           org.w3c.dom.Node refNode=((DOMNode)endNode).getNextSibling();
@@ -59,6 +64,7 @@
     if (modificationEvent.isDeleted()) {
       final WebSocketMessage message=createMessage("DELETE",callbackId);
       message.setId(modificationEvent.getRemovedProperties().get(GraphObject.id));
+      message.setCode(200);
       return message;
     }
     if (modificationEvent.isModified()) {
@@ -68,6 +74,7 @@
       message.setNodeData(modificationEvent.getData(securityContext));
       message.setGraphObject(relationship);
       message.setId(relationship.getUuid());
+      message.setCode(200);
       final PropertyMap relProperties=relationship.getProperties();
       final Map<String,Object> properties=PropertyMap.javaTypeToInputType(securityContext,relationship.getClass(),relProperties);
       message.setRelData(properties);

@@ -1,0 +1,22 @@
+{
+  try (final Tx tx=app.tx()){
+    final PropertyMap properties=new PropertyMap();
+    properties.put(TestSix.name,"name");
+    properties.put(TestSix.oneToOneTestThree,null);
+    app.create(TestSix.class,properties);
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fail("Unexpected exception");
+  }
+  try (final Tx tx=app.tx()){
+    final TestSix test=app.nodeQuery(TestSix.class).getFirst();
+    assertNotNull("Invalid simple object creation result",test);
+    assertEquals("Invalid simple object creation result","name",test.getProperty(AbstractNode.name));
+    assertEquals("Invalid simple object creation result",null,test.getProperty(TestSix.oneToOneTestThree));
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fail("Unexpected exception");
+  }
+}

@@ -1,0 +1,21 @@
+{
+  final ScriptEngineManager manager=new ScriptEngineManager();
+  final ScriptEngine engine=manager.getEngineByName(engineName);
+  if (engine == null) {
+    throw new RuntimeException(engineName + " script engine could not be initialized. Check class path.");
+  }
+  final ScriptContext scriptContext=engine.getContext();
+  final Bindings bindings=new StructrScriptBindings(actionContext,entity);
+  scriptContext.setBindings(bindings,ScriptContext.GLOBAL_SCOPE);
+  StringWriter output=new StringWriter();
+  scriptContext.setWriter(output);
+  try {
+    engine.eval(script);
+    Object extractedValue=output.toString();
+    return extractedValue;
+  }
+ catch (  final ScriptException e) {
+    logger.error("Error while processing " + engineName + " script: {}",new Object[]{script,e});
+  }
+  return null;
+}

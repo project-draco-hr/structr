@@ -1,10 +1,8 @@
 {
-  final String source="${python{print \"Hello World from Python!\"}}";
   try (final Tx tx=app.tx()){
-    final ActionContext ctx=new ActionContext(securityContext);
-    final Object result=Scripting.evaluate(ctx,null,source);
-    assertEquals("Invalid python scripting evaluation result","Hello World from Python!\n",result);
-    System.out.println(result);
+    final TestUser testUser=createTestNode(TestUser.class,"testuser");
+    final ActionContext ctx=new ActionContext(SecurityContext.getInstance(testUser,AccessMode.Backend));
+    System.out.println(Scripting.evaluate(ctx,null,"${python{print(Structr.get('me').id)}}"));
     tx.success();
   }
  catch (  FrameworkException fex) {

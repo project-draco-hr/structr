@@ -1,0 +1,47 @@
+{
+  final Map<String,Object> data=webSocketData.getNodeData();
+  final String mode=(String)data.get("mode");
+  final String fileId=(String)data.get("id");
+  final Principal currentUser=webSocket.getCurrentUser();
+  if (mode == null) {
+    getWebSocket().send(MessageBuilder.status().code(422).message("Favorites Command: No mode given. Valid modes: add, remove").build(),true);
+  }
+ else   if (fileId == null) {
+    getWebSocket().send(MessageBuilder.status().code(422).message("Favorites Command: No file id given").build(),true);
+  }
+ else {
+    final App app=StructrApp.getInstance(webSocket.getSecurityContext());
+    try (final Tx tx=app.tx()){
+      final GraphObject file=app.get(fileId);
+      if (file != null && file instanceof FileBase) {
+switch (mode) {
+case "add":
+{
+            final List<FileBase> favorites=currentUser.getProperty(User.favoriteFiles);
+            favorites.add((FileBase)file);
+            currentUser.setProperty(User.favoriteFiles,favorites);
+            getWebSocket().send(MessageBuilder.finished().callback(callback).build(),true);
+            break;
+          }
+case "remove":
+{
+          final List<FileBase> favorites=currentUser.getProperty(User.favoriteFiles);
+          favorites.remove((FileBase)file);
+          currentUser.setProperty(User.favoriteFiles,favorites);
+          getWebSocket().send(MessageBuilder.finished().callback(callback).build(),true);
+          break;
+        }
+default :
+      getWebSocket().send(MessageBuilder.status().code(422).message("Favorites Command: Invalid mode '" + mode + "'. Valid modes: add, remove").build(),true);
+  }
+}
+ else {
+  getWebSocket().send(MessageBuilder.status().code(422).message("Favorites Command: File with id '" + fileId + "'does not exist!").build(),true);
+}
+tx.success();
+}
+ catch (FrameworkException fex) {
+getWebSocket().send(MessageBuilder.status().code(422).message("Favorites Command: File with id '" + fileId + "'does not exist!").build(),true);
+}
+}
+}

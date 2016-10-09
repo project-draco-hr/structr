@@ -1,0 +1,11 @@
+{
+  try (final Tx tx=app.tx()){
+    final ActionContext ctx=new ActionContext(securityContext);
+    assertEquals("Invalid PHP scripting evaluation result","??? Hello World from PHP!",Scripting.evaluate(ctx,null,"${quercus{<?\necho \"??? Hello World from PHP!\";\n#phpinfo();\n?>}}"));
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    logger.warn("",fex);
+    fail("Unexpected exception.");
+  }
+}

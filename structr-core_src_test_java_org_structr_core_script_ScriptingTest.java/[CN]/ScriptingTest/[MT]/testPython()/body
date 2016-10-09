@@ -1,0 +1,14 @@
+{
+  final String source="${python{print \"Hello World from Python!\"}}";
+  try (final Tx tx=app.tx()){
+    final ActionContext ctx=new ActionContext(securityContext);
+    final Object result=Scripting.evaluate(ctx,null,source);
+    assertEquals("Invalid python scripting evaluation result","Hello World from Python!\n",result);
+    System.out.println(result);
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    logger.warn("",fex);
+    fail("Unexpected exception.");
+  }
+}

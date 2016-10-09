@@ -1,0 +1,12 @@
+{
+  try (final Tx tx=app.tx()){
+    final ActionContext ctx=new ActionContext(securityContext);
+    final Object result=Scripting.evaluate(ctx,null,"${Renjin{print(\"Hello World from R!\")}}");
+    assertEquals("Invalid R scripting evaluation result","[1] \"Hello World from R!\"\n",result);
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    logger.warn("",fex);
+    fail("Unexpected exception.");
+  }
+}

@@ -1,0 +1,12 @@
+{
+  try (final Tx tx=app.tx()){
+    final TestUser testUser=createTestNode(TestUser.class,"testuser");
+    final ActionContext ctx=new ActionContext(SecurityContext.getInstance(testUser,AccessMode.Backend));
+    System.out.println(Scripting.evaluate(ctx,null,"${python{print(Structr.get('me').id)}}"));
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    logger.warn("",fex);
+    fail("Unexpected exception.");
+  }
+}

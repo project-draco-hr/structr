@@ -1,5 +1,13 @@
 {
+  final Authenticator auth=getConfig().getAuthenticator();
+  SecurityContext securityContext;
   try {
+    try (final Tx tx=StructrApp.getInstance().tx()){
+      securityContext=auth.initializeAndExamineRequest(request,response);
+      tx.success();
+    }
+     securityContext.setAccessMode(AccessMode.Frontend);
+    final Principal user=securityContext.getCachedUser();
     final ServletOutputStream out=response.getOutputStream();
     String address=request.getParameter("url");
     final URI url=URI.create(address);
@@ -7,6 +15,11 @@
     String proxyUsername=request.getParameter("proxyUsername");
     String proxyPassword=request.getParameter("proxyPassword");
     String cookie=request.getParameter("cookie");
+    if (user != null && StringUtils.isBlank(proxyUrl)) {
+      proxyUrl=user.getProperty(User.proxyUrl);
+      proxyUsername=user.getProperty(User.proxyUsername);
+      proxyPassword=user.getProperty(User.proxyPassword);
+    }
     final String content=HttpHelper.get(address,proxyUrl,proxyUsername,proxyPassword,cookie,Collections.EMPTY_MAP).replace("<head>","<head>\n  <base href=\"" + url + "\">");
     IOUtils.write(content,out);
   }

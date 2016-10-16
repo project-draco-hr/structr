@@ -1,13 +1,13 @@
 {
   final Authenticator auth=getConfig().getAuthenticator();
   SecurityContext securityContext;
+  String content;
   try {
     try (final Tx tx=StructrApp.getInstance().tx()){
       securityContext=auth.initializeAndExamineRequest(request,response);
       tx.success();
     }
      securityContext.setAccessMode(AccessMode.Frontend);
-    final ServletOutputStream out=response.getOutputStream();
     String address=request.getParameter("url");
     final URI url=URI.create(address);
     String proxyUrl=request.getParameter("proxyUrl");
@@ -22,11 +22,17 @@
       proxyUsername=user.getProperty(User.proxyUsername);
       proxyPassword=user.getProperty(User.proxyPassword);
     }
-    final String content=HttpHelper.get(address,authUsername,authPassword,proxyUrl,proxyUsername,proxyPassword,cookie,Collections.EMPTY_MAP).replace("<head>","<head>\n  <base href=\"" + url + "\">");
-    IOUtils.write(content,out);
+    content=HttpHelper.get(address,authUsername,authPassword,proxyUrl,proxyUsername,proxyPassword,cookie,Collections.EMPTY_MAP).replace("<head>","<head>\n  <base href=\"" + url + "\">");
   }
  catch (  Throwable t) {
     logger.error("Exception while processing request",t);
-    UiAuthenticator.writeInternalServerError(response);
+    content=errorPage(t);
+  }
+  try {
+    final ServletOutputStream out=response.getOutputStream();
+    IOUtils.write(content,out);
+  }
+ catch (  IOException ex) {
+    logger.error("Could not write to response",ex);
   }
 }

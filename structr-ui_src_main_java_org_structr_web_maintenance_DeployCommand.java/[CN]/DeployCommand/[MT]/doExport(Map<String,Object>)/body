@@ -1,5 +1,8 @@
 {
   final String path=(String)attributes.get("target");
+  if (StringUtils.isBlank(path)) {
+    throw new FrameworkException(422,"Please provide 'target' attribute for deployment target directory path.");
+  }
   final Path target=Paths.get(path);
   if (Files.exists(target)) {
     throw new FrameworkException(422,"Target directory already exists, aborting.");

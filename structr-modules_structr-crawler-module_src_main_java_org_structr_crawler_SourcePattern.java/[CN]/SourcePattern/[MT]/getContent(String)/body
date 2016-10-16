@@ -3,10 +3,12 @@
   String proxyUrl=site.getProperty(SourceSite.proxyUrl);
   String proxyUsername=site.getProperty(SourceSite.proxyUsername);
   String proxyPassword=site.getProperty(SourceSite.proxyPassword);
-  if (StringUtils.isBlank(proxyUrl)) {
-    proxyUrl=((User)securityContext.getCachedUser()).getProperty(User.proxyUrl);
-    proxyUsername=((User)securityContext.getCachedUser()).getProperty(User.proxyUsername);
-    proxyPassword=((User)securityContext.getCachedUser()).getProperty(User.proxyPassword);
+  Principal user=securityContext.getCachedUser();
+  if (user != null & StringUtils.isBlank(proxyUrl)) {
+    proxyUrl=user.getProperty(Principal.proxyUrl);
+    proxyUsername=user.getProperty(Principal.proxyUsername);
+    proxyPassword=user.getProperty(Principal.proxyPassword);
   }
+  final String cookie=site.getProperty(SourceSite.cookie);
   return HttpHelper.get(urlString,proxyUrl,proxyUsername,proxyPassword,cookie,Collections.EMPTY_MAP).replace("<head>","<head>\n  <base href=\"" + urlString + "\">");
 }

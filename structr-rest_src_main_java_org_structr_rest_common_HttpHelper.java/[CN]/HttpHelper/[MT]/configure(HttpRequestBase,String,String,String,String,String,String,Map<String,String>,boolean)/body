@@ -1,0 +1,42 @@
+{
+  if (StringUtils.isBlank(proxyUrlParameter)) {
+    proxyUrl=Services.getBaseConfiguration().getProperty(Services.APPLICATION_PROXY_HTTP_URL);
+  }
+ else {
+    proxyUrl=proxyUrlParameter;
+  }
+  if (StringUtils.isBlank(proxyUsernameParameter)) {
+    proxyUsername=Services.getBaseConfiguration().getProperty(Services.APPLICATION_PROXY_HTTP_USERNAME);
+  }
+ else {
+    proxyUsername=proxyUsernameParameter;
+  }
+  if (StringUtils.isBlank(proxyPasswordParameter)) {
+    proxyPassword=Services.getBaseConfiguration().getProperty(Services.APPLICATION_PROXY_HTTP_PASSWORD);
+  }
+ else {
+    proxyPassword=proxyPasswordParameter;
+  }
+  HttpHost proxy=null;
+  final CredentialsProvider credsProvider=new BasicCredentialsProvider();
+  if (StringUtils.isNoneBlank(username,password)) {
+    credsProvider.setCredentials(new AuthScope(new HttpHost(req.getURI().getHost())),new UsernamePasswordCredentials(username,password));
+  }
+  if (StringUtils.isNotBlank(proxyUrl)) {
+    proxy=HttpHost.create(proxyUrl);
+    if (StringUtils.isNoneBlank(proxyUsername,proxyPassword)) {
+      credsProvider.setCredentials(new AuthScope(proxy),new UsernamePasswordCredentials(proxyUsername,proxyPassword));
+    }
+  }
+  client=HttpClients.custom().setDefaultConnectionConfig(ConnectionConfig.DEFAULT).setUserAgent("curl/7.35.0").setDefaultCredentialsProvider(credsProvider).build();
+  reqConfig=RequestConfig.custom().setProxy(proxy).setRedirectsEnabled(followRedirects).setCookieSpec(CookieSpecs.DEFAULT).build();
+  req.setConfig(reqConfig);
+  if (StringUtils.isNotBlank(cookie)) {
+    req.addHeader("Cookie",cookie);
+    req.getParams().setParameter("http.protocol.single-cookie-header",true);
+  }
+  req.addHeader("Connection","close");
+  for (  final Map.Entry<String,String> header : headers.entrySet()) {
+    req.addHeader(header.getKey(),header.getValue());
+  }
+}

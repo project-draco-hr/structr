@@ -1,0 +1,17 @@
+{
+  if (super.onModification(securityContext,errorBuffer,modificationQueue)) {
+    if (!isThumbnail() && modificationQueue.getSynchronizationKeys().contains("Image.name")) {
+      final String newImageName=getName();
+      for (      Image tn : getThumbnails()) {
+        final String expectedThumbnailName=getThumbnailName(newImageName,tn.getWidth(),tn.getHeight());
+        final String currentThumbnailName=tn.getName();
+        if (!expectedThumbnailName.equals(currentThumbnailName)) {
+          logger.debug("Auto-renaming Thumbnail({}) from '{}' to '{}'",tn.getUuid(),currentThumbnailName,expectedThumbnailName);
+          tn.setProperty(AbstractNode.name,expectedThumbnailName);
+        }
+      }
+    }
+    return true;
+  }
+  return false;
+}

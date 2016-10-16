@@ -1,0 +1,27 @@
+{
+  final Context scriptingContext=Context.enter();
+  init(scriptingContext);
+  try {
+    Object extractedValue=scriptingContext.evaluateString(scope,line,"interactive script, line ",1,null);
+    if (scriptable.hasException()) {
+      throw scriptable.getException();
+    }
+    final String output=actionContext.getOutput();
+    if (output != null && !output.isEmpty()) {
+      extractedValue=output;
+    }
+    if (extractedValue == null) {
+      return "null";
+    }
+    return extractedValue.toString();
+  }
+ catch (  final FrameworkException fex) {
+    throw fex;
+  }
+catch (  final Throwable t) {
+    throw new FrameworkException(422,t.getMessage());
+  }
+ finally {
+    Context.exit();
+  }
+}

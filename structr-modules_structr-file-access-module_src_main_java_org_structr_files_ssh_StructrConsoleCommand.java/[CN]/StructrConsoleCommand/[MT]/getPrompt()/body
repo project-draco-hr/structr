@@ -1,0 +1,36 @@
+{
+  final StringBuilder buf=new StringBuilder();
+  if (insideOfSomething()) {
+    int indent=0;
+    if ((inSingleQuotes % 2) != 0) {
+      buf.append("'");
+      indent++;
+    }
+    if ((inDoubleQuotes % 2) != 0) {
+      buf.append("\"");
+      indent++;
+    }
+    if (inArray > 0) {
+      buf.append("[");
+      indent++;
+    }
+    if (inBraces > 0) {
+      buf.append("(");
+      indent++;
+    }
+    if (inBlock > 0) {
+      buf.append("{");
+      indent++;
+    }
+    for (int i=0; i < indent; i++) {
+      buf.append("    ");
+    }
+  }
+ else {
+    buf.append("\u001b[1m");
+    buf.append("Structr >");
+    buf.append("\u001b[0m");
+    buf.append(" ");
+  }
+  return buf.toString();
+}

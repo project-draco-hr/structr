@@ -1,0 +1,54 @@
+{
+  env.addSignalListener(this);
+  final String userName=env.getEnv().get("USER");
+  if (userName != null) {
+    final App app=StructrApp.getInstance();
+    try (final Tx tx=app.tx()){
+      user=app.nodeQuery(User.class).andName(userName).getFirst();
+      tx.success();
+    }
+ catch (    FrameworkException fex) {
+      logger.warn("",fex);
+    }
+  }
+ else {
+    logger.warn("Cannot start Structr shell, no username set!");
+    return;
+  }
+  if (isInteractive()) {
+    if (user == null) {
+      logger.warn("Cannot start Structr shell, user not found for name {}!",userName);
+      return;
+    }
+    final String terminalType=env.getEnv().get("TERM");
+    if (terminalType != null) {
+switch (terminalType) {
+case "xterm":
+case "vt100":
+case "vt220":
+        term=new XTermTerminalEmulator(in,out,this);
+      break;
+default :
+    logger.warn("Unsupported terminal type {}, aborting.",terminalType);
+  break;
+}
+logger.warn("No terminal type provided, aborting.",terminalType);
+}
+if (term != null) {
+term.start();
+term.print("Welcome to the ");
+term.setBold(true);
+term.print("Structr");
+term.print(" 2.1 JavaScript console");
+term.setBold(false);
+term.println();
+displayPrompt();
+}
+ else {
+callback.onExit(1);
+}
+}
+ else {
+term=new XTermTerminalEmulator(in,out,this);
+}
+}

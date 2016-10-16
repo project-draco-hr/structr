@@ -1,0 +1,28 @@
+{
+  if (StringUtils.isNotBlank(line)) {
+    if (insideOfSomething()) {
+      buf.append(line);
+      buf.append("\n");
+    }
+ else {
+      buf.append(line);
+    }
+    checkForBlockChars(line.trim());
+    if (!insideOfSomething()) {
+      commandHistory.add(buf.toString());
+      try (final Tx tx=StructrApp.getInstance(console.getSecurityContext()).tx()){
+        term.println(console.run(buf.toString()));
+        tx.success();
+      }
+ catch (      FrameworkException fex) {
+        term.println(fex.getMessage());
+      }
+      buf.setLength(0);
+      inSingleQuotes=0;
+      inDoubleQuotes=0;
+      inBraces=0;
+      inBlock=0;
+      inArray=0;
+    }
+  }
+}

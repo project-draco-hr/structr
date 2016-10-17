@@ -1,28 +1,25 @@
 {
-  for (  final Sync rel : getOutgoingRelationships(Sync.class)) {
-    final Content syncedNode=(Content)rel.getTargetNode();
-    final PropertyMap map=new PropertyMap();
-    map.put(content,getProperty(content));
-    map.put(contentType,getProperty(contentType));
-    map.put(name,getProperty(name));
-    syncedNode.setProperties(securityContext,map);
-  }
-  final Sync rel=getIncomingRelationship(Sync.class);
-  if (rel != null) {
-    final Content otherNode=(Content)rel.getSourceNode();
-    if (otherNode != null) {
+  if (super.onModification(securityContext,errorBuffer,modificationQueue)) {
+    for (    final Sync rel : getOutgoingRelationships(Sync.class)) {
+      final Content syncedNode=(Content)rel.getTargetNode();
       final PropertyMap map=new PropertyMap();
       map.put(content,getProperty(content));
       map.put(contentType,getProperty(contentType));
       map.put(name,getProperty(name));
-      otherNode.setProperties(otherNode.getSecurityContext(),map);
+      syncedNode.setProperties(securityContext,map);
     }
+    final Sync rel=getIncomingRelationship(Sync.class);
+    if (rel != null) {
+      final Content otherNode=(Content)rel.getSourceNode();
+      if (otherNode != null) {
+        final PropertyMap map=new PropertyMap();
+        map.put(content,getProperty(content));
+        map.put(contentType,getProperty(contentType));
+        map.put(name,getProperty(name));
+        otherNode.setProperties(otherNode.getSecurityContext(),map);
+      }
+    }
+    return true;
   }
-  try {
-    increasePageVersion();
-  }
- catch (  FrameworkException ex) {
-    logger.warn("Updating page version failed",ex);
-  }
-  return true;
+  return false;
 }

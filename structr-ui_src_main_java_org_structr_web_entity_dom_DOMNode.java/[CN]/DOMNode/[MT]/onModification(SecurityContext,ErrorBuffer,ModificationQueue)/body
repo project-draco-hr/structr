@@ -1,12 +1,15 @@
 {
-  if (dataProperties != null) {
-    dataProperties.clear();
+  if (super.onModification(securityContext,errorBuffer,modificationQueue)) {
+    if (dataProperties != null) {
+      dataProperties.clear();
+    }
+    try {
+      increasePageVersion();
+    }
+ catch (    FrameworkException ex) {
+      logger.warn("Updating page version failed",ex);
+    }
+    return checkName(errorBuffer);
   }
-  try {
-    increasePageVersion();
-  }
- catch (  FrameworkException ex) {
-    logger.warn("Updating page version failed",ex);
-  }
-  return isValid(errorBuffer);
+  return false;
 }

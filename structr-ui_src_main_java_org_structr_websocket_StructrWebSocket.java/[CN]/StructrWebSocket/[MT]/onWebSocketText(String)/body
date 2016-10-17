@@ -52,10 +52,10 @@
       }
     }
  catch (    FrameworkException|InstantiationException|IllegalAccessException t) {
-      t.printStackTrace(System.out);
       try (final Tx tx=app.tx()){
         if (t instanceof FrameworkException) {
-          send(MessageBuilder.status().message(t.toString()).jsonErrorObject(((FrameworkException)t).toJSON()).build(),true);
+          final FrameworkException fex=(FrameworkException)t;
+          send(MessageBuilder.status().code(fex.getStatus()).message(fex.toString()).jsonErrorObject(fex.toJSON()).build(),true);
         }
  else {
           send(MessageBuilder.status().code(400).message(t.toString()).build(),true);

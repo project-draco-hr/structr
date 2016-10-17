@@ -1,0 +1,14 @@
+{
+  final SourceSite site=getSite();
+  String proxyUrl=site.getProperty(SourceSite.proxyUrl);
+  String proxyUsername=site.getProperty(SourceSite.proxyUsername);
+  String proxyPassword=site.getProperty(SourceSite.proxyPassword);
+  Principal user=securityContext.getCachedUser();
+  if (user != null & StringUtils.isBlank(proxyUrl)) {
+    proxyUrl=user.getProperty(Principal.proxyUrl);
+    proxyUsername=user.getProperty(Principal.proxyUsername);
+    proxyPassword=user.getProperty(Principal.proxyPassword);
+  }
+  final String cookie=site.getProperty(SourceSite.cookie);
+  return HttpHelper.get(urlString,proxyUrl,proxyUsername,proxyPassword,cookie,Collections.EMPTY_MAP).replace("<head>","<head>\n  <base href=\"" + urlString + "\">");
+}

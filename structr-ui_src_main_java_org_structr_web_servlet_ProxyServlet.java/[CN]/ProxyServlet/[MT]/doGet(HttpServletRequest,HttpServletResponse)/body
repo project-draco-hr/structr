@@ -1,17 +1,38 @@
 {
+  final Authenticator auth=getConfig().getAuthenticator();
+  SecurityContext securityContext;
+  String content;
   try {
-    final ServletOutputStream out=response.getOutputStream();
+    try (final Tx tx=StructrApp.getInstance().tx()){
+      securityContext=auth.initializeAndExamineRequest(request,response);
+      tx.success();
+    }
+     securityContext.setAccessMode(AccessMode.Frontend);
     String address=request.getParameter("url");
     final URI url=URI.create(address);
     String proxyUrl=request.getParameter("proxyUrl");
     String proxyUsername=request.getParameter("proxyUsername");
     String proxyPassword=request.getParameter("proxyPassword");
+    String authUsername=request.getParameter("authUsername");
+    String authPassword=request.getParameter("authPassword");
     String cookie=request.getParameter("cookie");
-    final String content=HttpHelper.get(address,proxyUrl,proxyUsername,proxyPassword,cookie,Collections.EMPTY_MAP).replace("<head>","<head>\n  <base href=\"" + url + "\">");
-    IOUtils.write(content,out);
+    final Principal user=securityContext.getCachedUser();
+    if (user != null && StringUtils.isBlank(proxyUrl)) {
+      proxyUrl=user.getProperty(User.proxyUrl);
+      proxyUsername=user.getProperty(User.proxyUsername);
+      proxyPassword=user.getProperty(User.proxyPassword);
+    }
+    content=HttpHelper.get(address,authUsername,authPassword,proxyUrl,proxyUsername,proxyPassword,cookie,Collections.EMPTY_MAP).replace("<head>","<head>\n  <base href=\"" + url + "\">");
   }
  catch (  Throwable t) {
     logger.error("Exception while processing request",t);
-    UiAuthenticator.writeInternalServerError(response);
+    content=errorPage(t);
+  }
+  try {
+    final ServletOutputStream out=response.getOutputStream();
+    IOUtils.write(content,out);
+  }
+ catch (  IOException ex) {
+    logger.error("Could not write to response",ex);
   }
 }

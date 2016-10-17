@@ -1,6 +1,6 @@
 {
   if (StringUtils.isNotBlank(line)) {
-    if (insideOfSomething()) {
+    if (insideOfBlockOrStructure()) {
       buf.append(line);
       buf.append("\n");
     }
@@ -8,21 +8,25 @@
       buf.append(line);
     }
     checkForBlockChars(line.trim());
-    if (!insideOfSomething()) {
+    if (!insideOfBlockOrStructure()) {
       commandHistory.add(buf.toString());
       try (final Tx tx=StructrApp.getInstance(console.getSecurityContext()).tx()){
-        term.println(console.run(buf.toString()));
+        final String cmd=buf.toString();
+        final String ret=console.run(cmd);
+        term.println(ret);
         tx.success();
       }
- catch (      FrameworkException fex) {
-        term.println(fex.getMessage());
+ catch (      Throwable t) {
+        final String message=t.getMessage();
+        if (message != null) {
+          term.println(message);
+        }
+ else {
+          t.printStackTrace();
+          term.println(t.getClass().getSimpleName() + " encountered.");
+        }
       }
-      buf.setLength(0);
-      inSingleQuotes=0;
-      inDoubleQuotes=0;
-      inBraces=0;
-      inBlock=0;
-      inArray=0;
+      clearBlockStatus();
     }
   }
 }

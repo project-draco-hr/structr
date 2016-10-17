@@ -1,0 +1,26 @@
+{
+  final StringBuilder buf=new StringBuilder("\r\n");
+  final String command=getParameter(parameters,1);
+  if (command != null) {
+    final Principal user=securityContext.getUser(false);
+    if (user != null && user.isAdmin()) {
+      final DeployCommand cmd=StructrApp.getInstance(securityContext).command(DeployCommand.class);
+      cmd.setLogBuffer(writable);
+switch (command) {
+case "import":
+        cmd.execute(toMap("mode","import","source",getParameter(parameters,2)));
+      break;
+case "export":
+    cmd.execute(toMap("mode","export","target",getParameter(parameters,2)));
+  break;
+}
+}
+ else {
+buf.append("You must be admin user to use this command.");
+}
+}
+ else {
+buf.append("Missing command, must be one of 'export' or 'import'.");
+}
+return buf.toString();
+}

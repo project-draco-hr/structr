@@ -1,0 +1,46 @@
+{
+  final Console console=new Console(securityContext,Collections.emptyMap());
+  Principal admin=null;
+  try {
+    assertEquals("Invalid console execution result","\r\nMode set to 'AdminShell'. Type 'help' to get a list of commands.\r\n",console.run("Console.setMode('shell')"));
+    assertEquals("Invalid console execution result","\r\n\r\n",console.run("user list"));
+    assertEquals("Invalid console execution result","\r\nUser created.\r\n",console.run("user add tester tester@test.de"));
+    assertEquals("Invalid console execution result","\r\nUser created.\r\n",console.run("user add admin admin@localhost isAdmin"));
+    assertEquals("Invalid console execution result","\r\nUser created.\r\n",console.run("user add root isAdmin"));
+    try (final Tx tx=app.tx()){
+      final User user=app.nodeQuery(User.class).andName("tester").getFirst();
+      assertNotNull("Invalid console execution result",user);
+      assertEquals("Invalid console execution result","tester",user.getProperty(User.name));
+      assertEquals("Invalid console execution result","tester@test.de",user.getProperty(User.eMail));
+      assertEquals("Invalid console execution result",Boolean.FALSE,user.getProperty(User.isAdmin));
+      tx.success();
+    }
+     assertEquals("Invalid console execution result","\r\nadmin, root, tester\r\n",console.run("user list"));
+    assertEquals("Invalid console execution result","\r\nUser deleted.\r\n",console.run("user delete tester"));
+    assertEquals("Invalid console execution result","\r\nadmin, root\r\n",console.run("user list"));
+    try (final Tx tx=app.tx()){
+      final User root=app.nodeQuery(User.class).andName("root").getFirst();
+      assertNotNull("Invalid console execution result",root);
+      assertEquals("Invalid console execution result","root",root.getProperty(User.name));
+      assertEquals("Invalid console execution result",Boolean.TRUE,root.getProperty(User.isAdmin));
+      tx.success();
+    }
+     try (final Tx tx=app.tx()){
+      admin=app.nodeQuery(User.class).andName("admin").getFirst();
+      assertNotNull("Invalid console execution result",admin);
+      assertEquals("Invalid console execution result","admin",admin.getProperty(User.name));
+      assertEquals("Invalid console execution result","admin@localhost",admin.getProperty(User.eMail));
+      assertEquals("Invalid console execution result",Boolean.TRUE,admin.getProperty(User.isAdmin));
+      final Folder folder=app.create(Folder.class,"folder");
+      folder.setProperty(Folder.owner,admin);
+      tx.success();
+    }
+     final String idHash=admin.getUuid().substring(7,11);
+    assertEquals("Invalid console execution result","\r\nUser 'admin' has owned nodes, please confirm deletion with 'user delete admin " + idHash + "'.\r\n",console.run("user delete admin"));
+    assertEquals("Invalid console execution result","\r\nUser deleted.\r\n",console.run("user delete admin " + idHash));
+    assertEquals("Invalid console execution result","\r\nroot\r\n",console.run("user list"));
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+  }
+}

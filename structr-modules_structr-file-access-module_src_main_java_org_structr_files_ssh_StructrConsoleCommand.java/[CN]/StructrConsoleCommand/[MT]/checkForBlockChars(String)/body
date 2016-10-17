@@ -2,28 +2,46 @@
   for (  final char c : line.toCharArray()) {
 switch (c) {
 case '{':
-      inBlock++;
-    break;
+      lastBlockChars.append("{");
+    inBlock++;
+  break;
 case '}':
-  inBlock--;
+lastBlockChars.setLength(lastBlockChars.length() - 1);
+inBlock--;
 break;
 case '[':
+lastBlockChars.append("[");
 inArray++;
 break;
 case ']':
+lastBlockChars.setLength(lastBlockChars.length() - 1);
 inArray--;
 break;
 case '(':
+lastBlockChars.append("(");
 inBraces++;
 break;
 case ')':
+lastBlockChars.setLength(lastBlockChars.length() - 1);
 inBraces--;
 break;
 case '"':
 inDoubleQuotes++;
+if ((inDoubleQuotes % 2) == 0) {
+lastBlockChars.setLength(lastBlockChars.length() - 1);
+}
+ else {
+lastBlockChars.append("\"");
+}
 break;
 case '\'':
 inSingleQuotes++;
+if ((inSingleQuotes % 2) == 0) {
+lastBlockChars.setLength(lastBlockChars.length() - 1);
+}
+ else {
+lastBlockChars.append("'");
+}
 break;
 }
 }

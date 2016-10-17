@@ -1,0 +1,31 @@
+{
+  if (line.startsWith("Console.setMode('javascript')") || line.startsWith("Console.setMode(\"javascript\")")) {
+    mode=ConsoleMode.javascript;
+    return "\r\nMode set to 'JavaScript'.\r\n";
+  }
+ else   if (line.startsWith("Console.setMode('cypher')") || line.startsWith("Console.setMode(\"cypher\")")) {
+    mode=ConsoleMode.cypher;
+    return "\r\nMode set to 'Cypher'.\r\n";
+  }
+ else   if (line.startsWith("Console.setMode('structr')") || line.startsWith("Console.setMode(\"structr\")")) {
+    mode=ConsoleMode.structrscript;
+    return "\r\nMode set to 'StructrScript'.\r\n";
+  }
+ else   if (line.startsWith("Console.setMode('shell')") || line.startsWith("Console.setMode(\"shell\")")) {
+    mode=ConsoleMode.adminshell;
+    return "\r\nMode set to 'AdminShell'. Type 'help' to get a list of commands.\r\n";
+  }
+ else {
+switch (mode) {
+case cypher:
+      return runCypher(line);
+case javascript:
+    return runJavascript(line);
+case structrscript:
+  return runStructrScript(line);
+case adminshell:
+return runAdminShell(line);
+}
+}
+return null;
+}

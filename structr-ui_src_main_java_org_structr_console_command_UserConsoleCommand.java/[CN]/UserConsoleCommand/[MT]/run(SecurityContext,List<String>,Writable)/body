@@ -1,0 +1,30 @@
+{
+  final StringBuilder buf=new StringBuilder("\r\n");
+  final String command=getParameter(parameters,1);
+  if (command != null) {
+    final Principal user=securityContext.getUser(false);
+    if (user != null && user.isAdmin()) {
+switch (command) {
+case "list":
+        handleList(securityContext,buf);
+      break;
+case "add":
+    handleAdd(securityContext,buf,getParameter(parameters,2),getParameter(parameters,3),getParameter(parameters,4));
+  break;
+case "delete":
+handleDelete(securityContext,buf,getParameter(parameters,2),getParameter(parameters,3));
+break;
+case "password":
+handlePwd(securityContext,buf,getParameter(parameters,2),getParameter(parameters,3));
+break;
+}
+}
+ else {
+buf.append("You must be admin user to use this command.");
+}
+}
+ else {
+buf.append("Missing command, must be one of 'list', 'add', 'delete' or 'password'.");
+}
+return buf.toString();
+}

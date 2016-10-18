@@ -188,7 +188,12 @@
       if (processComment && commentHandler != null && StringUtils.isNotBlank(lastComment)) {
         if (commentHandler.handleComment(page,newNode,lastComment)) {
           if (lastCommentNode != null) {
-            parent.removeChild(lastCommentNode);
+            if (rootElement == lastCommentNode) {
+              rootElement=null;
+            }
+            if (parent != null) {
+              parent.removeChild(lastCommentNode);
+            }
             app.delete(lastCommentNode);
           }
         }

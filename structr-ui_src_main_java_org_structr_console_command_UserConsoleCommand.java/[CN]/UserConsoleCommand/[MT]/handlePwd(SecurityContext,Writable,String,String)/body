@@ -1,0 +1,28 @@
+{
+  if (StringUtils.isEmpty(name)) {
+    throw new FrameworkException(422,"Missing user name for password command.");
+  }
+  final Class<? extends NodeInterface> type=StructrApp.getConfiguration().getNodeEntityClass("User");
+  final App app=StructrApp.getInstance(securityContext);
+  if (type != null) {
+    try (final Tx tx=app.tx()){
+      final NodeInterface user=app.nodeQuery(type).andName(name).getFirst();
+      if (user != null) {
+        if (StringUtils.isNotBlank(password)) {
+          user.setProperty(Principal.password,password);
+          writable.println("Password changed.");
+        }
+ else {
+          throw new FrameworkException(422,"Will not set empty password");
+        }
+      }
+ else {
+        throw new FrameworkException(422,"User " + name + " not found.");
+      }
+      tx.success();
+    }
+   }
+ else {
+    throw new FrameworkException(422,"Cannot change password, no User class found.");
+  }
+}

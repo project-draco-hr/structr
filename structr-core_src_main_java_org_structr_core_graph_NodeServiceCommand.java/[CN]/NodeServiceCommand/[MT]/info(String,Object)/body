@@ -1,0 +1,19 @@
+{
+  if (logWritable != null) {
+    String logMessage=msg;
+    for (    final Object obj : data) {
+      if (obj != null) {
+        logMessage=logMessage.replaceFirst("\\{\\}",obj.toString());
+      }
+    }
+    try {
+      logWritable.println(logMessage);
+      logWritable.flush();
+    }
+ catch (    IOException ignore) {
+    }
+  }
+ else {
+    logger.info(msg,data);
+  }
+}

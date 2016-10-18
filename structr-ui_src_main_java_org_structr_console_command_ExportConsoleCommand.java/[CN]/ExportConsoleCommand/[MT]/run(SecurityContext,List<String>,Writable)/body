@@ -1,5 +1,4 @@
 {
-  final StringBuilder buf=new StringBuilder("\r\n");
   final Principal user=securityContext.getUser(false);
   if (user != null && user.isAdmin()) {
     final DeployCommand cmd=StructrApp.getInstance(securityContext).command(DeployCommand.class);
@@ -7,7 +6,6 @@
     cmd.execute(toMap("mode","export","target",getParameter(parameters,1)));
   }
  else {
-    buf.append("You must be admin user to use this command.");
+    writable.println("You must be admin user to use this command.");
   }
-  return buf.toString();
 }

@@ -1,0 +1,23 @@
+{
+  if (StringUtils.isEmpty(name)) {
+    throw new FrameworkException(422,"Missing user name for add command.");
+  }
+  final App app=StructrApp.getInstance(securityContext);
+  final Class type=StructrApp.getConfiguration().getNodeEntityClass("User");
+  if (type != null) {
+    try (final Tx tx=app.tx()){
+      final NodeInterface user=app.create(type,new NodeAttribute<>(AbstractNode.name,name));
+      if (eMail != null && !"isAdmin".equals(eMail)) {
+        user.setProperty(Person.eMail,eMail);
+      }
+      if ("isAdmin".equals(eMail) || "isAdmin".equals(isAdmin)) {
+        user.setProperty(Principal.isAdmin,true);
+      }
+      writable.println("User created.");
+      tx.success();
+    }
+   }
+ else {
+    throw new FrameworkException(422,"Cannot create user, no User class found.");
+  }
+}

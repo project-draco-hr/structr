@@ -1,0 +1,15 @@
+{
+  final List<String> parts=splitAnClean(line);
+  if (!parts.isEmpty()) {
+    final ConsoleCommand cmd=ConsoleCommand.getCommand(parts.get(0));
+    if (cmd != null) {
+      cmd.run(actionContext.getSecurityContext(),parts,writable);
+    }
+ else {
+      writable.println("Unknown command '" + line + "'.");
+    }
+  }
+ else {
+    writable.println("Syntax error.");
+  }
+}

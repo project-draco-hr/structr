@@ -1,0 +1,27 @@
+{
+  final Class<NodeInterface> type=StructrApp.getConfiguration().getNodeEntityClass("User");
+  final App app=StructrApp.getInstance(securityContext);
+  if (type != null) {
+    try (final Tx tx=app.tx()){
+      final List<NodeInterface> users=app.nodeQuery(type).getAsList();
+      for (final Iterator<NodeInterface> it=users.iterator(); it.hasNext(); ) {
+        final NodeInterface user=it.next();
+        final String name=user.getProperty(AbstractNode.name);
+        if (name != null) {
+          writable.print(name);
+        }
+ else {
+          writable.print(user.getUuid());
+        }
+        if (it.hasNext()) {
+          writable.print(", ");
+        }
+      }
+      writable.println();
+      tx.success();
+    }
+   }
+ else {
+    throw new FrameworkException(422,"Cannot list users, no User class found.");
+  }
+}

@@ -25,20 +25,22 @@
       if (lowercaseBodyName.equals(this.getTagName())) {
         renderContext.setInBody(true);
       }
-      final List<DOMChildren> rels=getChildRelationships();
-      if (rels.isEmpty()) {
-        migrateSyncRels();
-        final DOMElement _syncedNode=(DOMElement)getProperty(sharedComponent);
-        if (_syncedNode != null) {
-          rels.addAll(_syncedNode.getChildRelationships());
+      if (getProperty(sharedComponent) == null || !EditMode.DEPLOYMENT.equals(editMode)) {
+        final List<DOMChildren> rels=getChildRelationships();
+        if (rels.isEmpty()) {
+          migrateSyncRels();
+          final DOMElement _syncedNode=(DOMElement)getProperty(sharedComponent);
+          if (_syncedNode != null) {
+            rels.addAll(_syncedNode.getChildRelationships());
+          }
         }
-      }
-      for (      final AbstractRelationship rel : rels) {
-        final DOMNode subNode=(DOMNode)rel.getTargetNode();
-        if (subNode instanceof DOMElement) {
-          anyChildNodeCreatesNewLine=(anyChildNodeCreatesNewLine || !(subNode.avoidWhitespace()));
+        for (        final AbstractRelationship rel : rels) {
+          final DOMNode subNode=(DOMNode)rel.getTargetNode();
+          if (subNode instanceof DOMElement) {
+            anyChildNodeCreatesNewLine=(anyChildNodeCreatesNewLine || !(subNode.avoidWhitespace()));
+          }
+          subNode.render(renderContext,depth + 1);
         }
-        subNode.render(renderContext,depth + 1);
       }
     }
  catch (    Throwable t) {
@@ -52,7 +54,10 @@
       if (anyChildNodeCreatesNewLine || isTemplate) {
         out.append(indent(depth,renderContext));
       }
-      if (isTemplate) {
+      if (_syncedNode != null && EditMode.DEPLOYMENT.equals(editMode)) {
+        out.append("</structr:component>");
+      }
+ else       if (isTemplate) {
         out.append("</structr:template>");
       }
  else {

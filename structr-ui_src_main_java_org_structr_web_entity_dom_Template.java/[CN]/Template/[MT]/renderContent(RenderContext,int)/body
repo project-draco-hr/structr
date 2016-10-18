@@ -5,7 +5,12 @@
     if (depth > 0) {
       out.append(DOMNode.indent(depth,renderContext));
     }
-    out.append("<structr:template src=\"");
+    if (_syncedNode == null) {
+      out.append("<structr:template src=\"");
+    }
+ else {
+      out.append("<structr:component src=\"");
+    }
     if (_syncedNode != null) {
       final String _name=_syncedNode.getProperty(AbstractNode.name);
       out.append(_name != null ? _name : _syncedNode.getUuid());
@@ -28,7 +33,12 @@
       subNode.render(renderContext,depth + 1);
     }
     out.append(DOMNode.indent(depth,renderContext));
-    out.append("</structr:template>");
+    if (_syncedNode == null) {
+      out.append("</structr:template>");
+    }
+ else {
+      out.append("</structr:component>");
+    }
   }
  else {
     super.renderContent(renderContext,depth);

@@ -73,11 +73,12 @@
  else     if ("structr:template".equals(tag)) {
       final String src=node.attr("src");
       if (src != null) {
-        final DOMNode component=Importer.findSharedComponentByName(src);
-        if (component != null) {
-          newNode=(DOMNode)component.cloneNode(false);
-          newNode.setProperty(DOMNode.sharedComponent,component);
-          newNode.setProperty(DOMNode.ownerDocument,page);
+        final DOMNode template=Importer.findTemplateByName(src);
+        if (template != null) {
+          newNode=template;
+          if (page != null) {
+            newNode.setProperty(DOMNode.ownerDocument,page);
+          }
         }
  else {
           logger.warn("Unable to find shared component {}, template ignored!",src);
@@ -87,11 +88,28 @@
         logger.warn("Invalid template definition, missing src attribute!");
       }
     }
+ else     if ("structr:component".equals(tag)) {
+      final String src=node.attr("src");
+      if (src != null) {
+        final DOMNode component=Importer.findSharedComponentByName(src);
+        if (component != null) {
+          newNode=(DOMNode)component.cloneNode(false);
+          newNode.setProperty(DOMNode.sharedComponent,component);
+          newNode.setProperty(DOMNode.ownerDocument,page);
+        }
+ else {
+          logger.warn("Unable to find shared component {} - ignored!",src);
+        }
+      }
+ else {
+        logger.warn("Invalid component definition, missing src attribute!");
+      }
+    }
  else {
       newNode=(org.structr.web.entity.dom.DOMElement)page.createElement(tag);
     }
     if (newNode != null) {
-      if (rootElement == null) {
+      if (rootElement == null && !(newNode instanceof org.structr.web.entity.dom.Comment)) {
         rootElement=newNode;
       }
       newNode.setProperty(AbstractNode.visibleToPublicUsers,publicVisible);
@@ -188,7 +206,9 @@
       if (processComment && commentHandler != null && StringUtils.isNotBlank(lastComment)) {
         if (commentHandler.handleComment(page,newNode,lastComment)) {
           if (lastCommentNode != null) {
-            parent.removeChild(lastCommentNode);
+            if (parent != null) {
+              parent.removeChild(lastCommentNode);
+            }
             app.delete(lastCommentNode);
           }
         }

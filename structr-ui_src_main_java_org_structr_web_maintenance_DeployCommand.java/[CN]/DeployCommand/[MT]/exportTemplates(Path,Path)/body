@@ -3,19 +3,10 @@
   final App app=StructrApp.getInstance();
   try (final Tx tx=app.tx()){
     for (    final Template template : app.nodeQuery(Template.class).getAsList()) {
-      if (template.inTrash()) {
+      if (template.inTrash() || template.getProperty(DOMNode.sharedComponent) != null) {
         continue;
       }
       exportTemplateSource(target,template,configuration);
-    }
-    final ShadowDocument shadowDocument=app.nodeQuery(ShadowDocument.class).getFirst();
-    if (shadowDocument != null) {
-      for (      final DOMNode node : shadowDocument.getProperty(Page.elements)) {
-        if (!(node instanceof Content) || node.inTrash() || node.getProperty(DOMNode.parent) != null) {
-          continue;
-        }
-        exportTemplateSource(target,node,configuration);
-      }
     }
     tx.success();
   }

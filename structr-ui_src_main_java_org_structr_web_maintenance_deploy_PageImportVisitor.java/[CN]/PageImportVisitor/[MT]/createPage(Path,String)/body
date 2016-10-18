@@ -8,11 +8,11 @@
     }
     final String src=new String(Files.readAllBytes(file),Charset.forName("UTF-8"));
     final String contentType=get(properties,Page.contentType,"text/html");
+    boolean visibleToPublic=get(properties,GraphObject.visibleToPublicUsers,false);
+    boolean visibleToAuth=get(properties,GraphObject.visibleToAuthenticatedUsers,false);
+    final Importer importer=new Importer(securityContext,src,null,name,visibleToPublic,visibleToAuth);
+    importer.setIsDeployment(true);
     if (StringUtils.startsWithIgnoreCase(src,DoctypeString) && "text/html".equals(contentType)) {
-      boolean visibleToPublic=get(properties,GraphObject.visibleToPublicUsers,false);
-      boolean visibleToAuth=get(properties,GraphObject.visibleToAuthenticatedUsers,false);
-      final Importer importer=new Importer(securityContext,src,null,name,visibleToPublic,visibleToAuth);
-      importer.setIsDeployment(true);
       final boolean parseOk=importer.parse();
       if (parseOk) {
         logger.info("Importing page {} from {}..",new Object[]{name,fileName});
@@ -25,10 +25,6 @@
       }
     }
  else {
-      boolean visibleToPublic=get(properties,GraphObject.visibleToPublicUsers,false);
-      boolean visibleToAuth=get(properties,GraphObject.visibleToAuthenticatedUsers,false);
-      final Importer importer=new Importer(securityContext,src,null,name,visibleToPublic,visibleToAuth);
-      importer.setIsDeployment(true);
       final boolean parseOk=importer.parse(true);
       if (parseOk) {
         logger.info("Importing page {} from {}..",new Object[]{name,fileName});

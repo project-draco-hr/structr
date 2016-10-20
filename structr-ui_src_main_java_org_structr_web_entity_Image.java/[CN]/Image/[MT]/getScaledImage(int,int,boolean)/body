@@ -53,7 +53,7 @@
           thumbnail=ImageHelper.createImage(securityContext,data,"image/" + Thumbnail.FORMAT,Image.class,thumbnailName,true);
         }
  catch (        IOException ex) {
-          logger.warn("Could not create thumbnail image",ex);
+          logger.warn("Could not create thumbnail image for " + getUuid(),ex);
         }
         if (thumbnail != null && data != null) {
           final PropertyMap relProperties=new PropertyMap();
@@ -78,13 +78,13 @@
         }
       }
  else {
-        logger.debug("Could not create thumbnail for image {} ({})",new Object[]{getName(),getUuid()});
+        logger.debug("Could not create thumbnail for image {} ({})",getName(),getUuid());
       }
       originalImage.unlockSystemPropertiesOnce();
       originalImage.removeProperty(Image.isCreatingThumb);
     }
  catch (    FrameworkException fex) {
-      logger.warn("Unable to create thumbnail",fex);
+      logger.warn("Unable to create thumbnail for " + getUuid(),fex);
     }
   }
   return thumbnail;

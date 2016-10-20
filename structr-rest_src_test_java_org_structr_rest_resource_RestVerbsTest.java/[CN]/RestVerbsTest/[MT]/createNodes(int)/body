@@ -1,0 +1,15 @@
+{
+  try (final Tx tx=app.tx()){
+    final List<TestOne> nodes=createTestNodes(TestOne.class,100);
+    int i=0;
+    for (    final TestOne node : nodes) {
+      node.setProperty(AbstractNode.name,"node" + StringUtils.leftPad(Integer.toString(i++),3,"0"));
+    }
+    tx.success();
+    return nodes;
+  }
+ catch (  FrameworkException fex) {
+    fail("Unexpected exception.");
+  }
+  return null;
+}

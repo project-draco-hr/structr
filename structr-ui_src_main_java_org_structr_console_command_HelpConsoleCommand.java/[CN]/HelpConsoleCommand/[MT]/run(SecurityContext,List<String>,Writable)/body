@@ -1,26 +1,20 @@
 {
-  final StringBuilder buf=new StringBuilder("\r\n");
   if (parameters.size() > 1) {
     final String key=parameters.get(1);
     final ConsoleCommand cmd=ConsoleCommand.getCommand(key);
     if (cmd != null) {
-      buf.append(cmd.detailHelp());
-      buf.append("\r\n");
+      cmd.detailHelp(writable);
     }
  else {
-      buf.append("Unknown command '");
-      buf.append(key);
-      buf.append("'");
+      writable.println("Unknown command '" + key + "'.");
     }
   }
  else {
     for (    final String key : ConsoleCommand.commandNames()) {
       final ConsoleCommand cmd=ConsoleCommand.getCommand(key);
-      buf.append(StringUtils.rightPad(key,10));
-      buf.append(" - ");
-      buf.append(cmd.commandHelp());
-      buf.append("\r\n");
+      writable.print(StringUtils.rightPad(key,10));
+      writable.print(" - ");
+      cmd.commandHelp(writable);
     }
   }
-  return buf.toString();
 }

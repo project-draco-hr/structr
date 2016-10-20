@@ -1,8 +1,9 @@
 {
+  final GraphGistImporter importer=app.command(GraphGistImporter.class);
   final String source="== Test setup\n" + "\n" + "[source, cypher]\n"+ "----\n"+ "CREATE (c:Company { name: 'Company 1', comp_id: '12345', string_name: 'company1', year: 2013, month: 6, day: 7, status: 'test'})\n"+ "CREATE (p:Company { name: 'Company 2'})\n"+ "----\n";
-  final List<String> sourceLines=GraphGistImporter.extractSources(new ByteArrayInputStream(source.getBytes(Charset.forName("utf-8"))));
-  GraphGistImporter.importCypher(sourceLines);
-  GraphGistImporter.analyzeSchema();
+  final List<String> sourceLines=importer.extractSources(new ByteArrayInputStream(source.getBytes(Charset.forName("utf-8"))));
+  importer.importCypher(sourceLines);
+  importer.analyzeSchema();
   try (final Tx tx=app.tx()){
     final SchemaNode schemaNode=app.nodeQuery(SchemaNode.class).andName("Company").getFirst();
     final List<SchemaProperty> properties=schemaNode.getProperty(SchemaNode.schemaProperties);

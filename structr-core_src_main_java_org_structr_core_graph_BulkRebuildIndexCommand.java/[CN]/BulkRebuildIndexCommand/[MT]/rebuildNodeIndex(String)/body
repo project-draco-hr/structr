@@ -10,12 +10,12 @@
     logger.warn("Exception while creating all nodes iterator.",fex);
   }
   if (entityType == null) {
-    logger.info("Node type not set or no entity class found. Starting (re-)indexing all nodes");
+    info("Node type not set or no entity class found. Starting (re-)indexing all nodes");
   }
  else {
-    logger.info("Starting (re-)indexing all nodes of type {}",entityType);
+    info("Starting (re-)indexing all nodes of type {}",entityType);
   }
-  long count=NodeServiceCommand.bulkGraphOperation(securityContext,nodeIterator,1000,"RebuildNodeIndex",new BulkGraphOperation<AbstractNode>(){
+  long count=bulkGraphOperation(securityContext,nodeIterator,1000,"RebuildNodeIndex",new BulkGraphOperation<AbstractNode>(){
     @Override public void handleGraphObject(    SecurityContext securityContext,    AbstractNode node){
       node.updateInIndex();
     }
@@ -27,5 +27,5 @@
     }
   }
 );
-  logger.info("Done with (re-)indexing {} nodes",count);
+  info("Done with (re-)indexing {} nodes",count);
 }

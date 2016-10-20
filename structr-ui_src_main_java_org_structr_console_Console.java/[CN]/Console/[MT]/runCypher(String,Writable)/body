@@ -1,0 +1,17 @@
+{
+  final App app=StructrApp.getInstance(actionContext.getSecurityContext());
+  final long t0=System.currentTimeMillis();
+  final List<GraphObject> result=app.cypher(line,Collections.emptyMap());
+  final long t1=System.currentTimeMillis();
+  final int size=result.size();
+  writable.print("Query returned ",size," objects in ",(t1 - t0)," ms.");
+  writable.println();
+  writable.println();
+  if (size <= 10) {
+    writable.print(Functions.get("to_json").apply(actionContext,null,new Object[]{result}));
+  }
+ else {
+    writable.print("Too many results (> 10), please use LIMIT to reduce the result count of your Cypher query.");
+  }
+  writable.println();
+}

@@ -10,12 +10,12 @@
     logger.warn("Exception while creating all relationships iterator.",fex);
   }
   if (relType == null) {
-    logger.info("Relationship type not set, starting (re-)indexing all relationships");
+    info("Relationship type not set, starting (re-)indexing all relationships");
   }
  else {
-    logger.info("Starting (re-)indexing all relationships of type {}",new Object[]{relType});
+    info("Starting (re-)indexing all relationships of type {}",new Object[]{relType});
   }
-  long count=NodeServiceCommand.bulkGraphOperation(securityContext,relIterator,1000,"RebuildRelIndex",new BulkGraphOperation<AbstractRelationship>(){
+  long count=bulkGraphOperation(securityContext,relIterator,1000,"RebuildRelIndex",new BulkGraphOperation<AbstractRelationship>(){
     @Override public void handleGraphObject(    SecurityContext securityContext,    AbstractRelationship rel){
       rel.updateInIndex();
     }
@@ -27,5 +27,5 @@
     }
   }
 );
-  logger.info("Done with (re-)indexing {} relationships",count);
+  info("Done with (re-)indexing {} relationships",count);
 }

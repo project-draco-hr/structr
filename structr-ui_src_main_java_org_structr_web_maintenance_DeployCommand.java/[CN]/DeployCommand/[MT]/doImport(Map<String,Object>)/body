@@ -16,38 +16,38 @@
   }
   final Path usersConf=source.resolve("security/users.json");
   if (Files.exists(usersConf)) {
-    log("Reading {}..",usersConf);
+    info("Reading {}..",usersConf);
     importMapData(User.class,readConfigMap(usersConf));
   }
   final Path grantsConf=source.resolve("security/grants.json");
   if (Files.exists(grantsConf)) {
-    log("Reading {}..",grantsConf);
+    info("Reading {}..",grantsConf);
     importListData(ResourceAccess.class,readConfigList(grantsConf));
   }
   final Path filesConfFile=source.resolve("files.json");
   if (Files.exists(filesConfFile)) {
-    log("Reading {}..",filesConfFile);
+    info("Reading {}..",filesConfFile);
     filesConf.putAll(readConfigMap(filesConfFile));
   }
   final Path pagesConfFile=source.resolve("pages.json");
   if (Files.exists(pagesConfFile)) {
-    log("Reading {}..",pagesConfFile);
+    info("Reading {}..",pagesConfFile);
     pagesConf.putAll(readConfigMap(pagesConfFile));
   }
   final Path componentsConfFile=source.resolve("components.json");
   if (Files.exists(componentsConfFile)) {
-    log("Reading {}..",componentsConfFile);
+    info("Reading {}..",componentsConfFile);
     componentsConf.putAll(readConfigMap(componentsConfFile));
   }
   final Path templatesConfFile=source.resolve("templates.json");
   if (Files.exists(templatesConfFile)) {
-    log("Reading {}..",templatesConfFile);
+    info("Reading {}..",templatesConfFile);
     templatesConf.putAll(readConfigMap(templatesConfFile));
   }
   final Path schema=source.resolve("schema");
   if (Files.exists(schema)) {
     try {
-      log("Importing data from schema/ directory..");
+      info("Importing data from schema/ directory..");
       Files.walkFileTree(schema,new SchemaImportVisitor(schema));
     }
  catch (    IOException ioex) {
@@ -57,7 +57,7 @@
   final Path files=source.resolve("files");
   if (Files.exists(files)) {
     try {
-      log("Importing files...");
+      info("Importing files...");
       Files.walkFileTree(files,new FileImportVisitor(files,filesConf));
     }
  catch (    IOException ioex) {
@@ -67,7 +67,7 @@
   final Path templates=source.resolve("templates");
   if (Files.exists(templates)) {
     try {
-      log("Importing templates..");
+      info("Importing templates..");
       Files.walkFileTree(templates,new TemplateImportVisitor(templatesConf));
     }
  catch (    IOException ioex) {
@@ -77,7 +77,7 @@
   final Path components=source.resolve("components");
   if (Files.exists(components)) {
     try {
-      log("Importing shared components..");
+      info("Importing shared components..");
       Files.walkFileTree(components,new ComponentImportVisitor(componentsConf));
     }
  catch (    IOException ioex) {
@@ -87,7 +87,7 @@
   final Path pages=source.resolve("pages");
   if (Files.exists(pages)) {
     try {
-      log("Importing pages..");
+      info("Importing pages..");
       Files.walkFileTree(pages,new PageImportVisitor(pages,pagesConf));
     }
  catch (    IOException ioex) {
@@ -97,7 +97,7 @@
   final Path conf=source.resolve("deploy.conf");
   if (Files.exists(conf)) {
     try (final Tx tx=StructrApp.getInstance().tx()){
-      log("Applying configuration from {}..",conf);
+      info("Applying configuration from {}..",conf);
       final String confSource=new String(Files.readAllBytes(conf),Charset.forName("utf-8"));
       Scripting.evaluate(new ActionContext(SecurityContext.getSuperUserInstance()),null,confSource.trim());
       tx.success();
@@ -106,5 +106,5 @@
       t.printStackTrace();
     }
   }
-  log("Import from {} done.",source.toString());
+  info("Import from {} done.",source.toString());
 }

@@ -1,0 +1,15 @@
+{
+  if (!isThumbnail()) {
+    final List<Image> thumbnails=getThumbnails();
+    for (    final Map.Entry<PropertyKey,Object> attr : properties.entrySet()) {
+      final PropertyKey key=attr.getKey();
+      final Object value=attr.getValue();
+      for (      Image tn : thumbnails) {
+        if (visibleToPublicUsers.equals(key) || visibleToAuthenticatedUsers.equals(key) || visibilityStartDate.equals(key)|| visibilityEndDate.equals(key)|| owner.equals(key)) {
+          tn.setProperty(key,value);
+        }
+      }
+    }
+  }
+  super.setProperties(securityContext,properties);
+}

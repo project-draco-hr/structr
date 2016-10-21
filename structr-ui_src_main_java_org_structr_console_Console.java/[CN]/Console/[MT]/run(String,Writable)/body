@@ -7,13 +7,17 @@
     mode=ConsoleMode.cypher;
     output.println("Mode set to 'Cypher'.");
   }
- else   if (line.startsWith("Console.setMode('structr')") || line.startsWith("Console.setMode(\"structr\")")) {
+ else   if (line.startsWith("Console.setMode('structrscript')") || line.startsWith("Console.setMode(\"structrscript\")")) {
     mode=ConsoleMode.structrscript;
     output.println("Mode set to 'StructrScript'.");
   }
- else   if (line.startsWith("Console.setMode('shell')") || line.startsWith("Console.setMode(\"shell\")")) {
-    mode=ConsoleMode.adminshell;
+ else   if (line.startsWith("Console.setMode('admin')") || line.startsWith("Console.setMode(\"admin\")")) {
+    mode=ConsoleMode.admin;
     output.println("Mode set to 'AdminShell'. Type 'help' to get a list of commands.");
+  }
+ else   if (line.startsWith("Console.setMode('rest')") || line.startsWith("Console.setMode(\"rest\")")) {
+    mode=ConsoleMode.rest;
+    output.println("Mode set to 'REST'. Type 'help' to get a list of commands.");
   }
  else {
 switch (mode) {
@@ -26,8 +30,11 @@ break;
 case structrscript:
 runStructrScript(line,output);
 break;
-case adminshell:
+case admin:
 runAdminShell(line,output);
+break;
+case rest:
+RestCommand.run(this,line,output);
 break;
 }
 }

@@ -1,0 +1,25 @@
+{
+  final Principal principal=actionContext.getSecurityContext().getUser(false);
+  final StringBuilder buf=new StringBuilder();
+switch (mode) {
+case cypher:
+case javascript:
+case structrscript:
+case admin:
+    if (principal != null) {
+      buf.append(principal.getName());
+    }
+  break;
+case rest:
+if (username != null) {
+  buf.append(username);
+}
+ else {
+  buf.append("anonymous");
+}
+break;
+}
+buf.append("@");
+buf.append("Structr");
+return buf.toString();
+}

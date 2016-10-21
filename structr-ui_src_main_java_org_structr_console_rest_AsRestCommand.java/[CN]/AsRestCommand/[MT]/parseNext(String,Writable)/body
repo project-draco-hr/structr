@@ -1,0 +1,22 @@
+{
+  final String trimmed=line.trim();
+  final String userString=StringUtils.substringBefore(trimmed," ");
+  final String remaining=StringUtils.substringAfter(trimmed," ");
+  if (StringUtils.isNoneBlank(userString,remaining)) {
+    command=RestCommand.parse(remaining,writable);
+    if (command != null) {
+      final String[] parts=userString.split("[:]+");
+      if (parts.length == 2) {
+        command.authenticate(parts[0],parts[1]);
+        return true;
+      }
+ else {
+        writable.println("Syntax error, user string must be <username>:<password>.");
+      }
+    }
+  }
+ else {
+    writable.println("Syntax error, user string must be <username>:<password>.");
+  }
+  return false;
+}

@@ -2,7 +2,7 @@
   final Console console=new Console(securityContext,Collections.emptyMap());
   Principal admin=null;
   try {
-    assertEquals("Invalid console execution result","Mode set to 'AdminShell'. Type 'help' to get a list of commands.\r\n",console.runForTest("Console.setMode('shell')"));
+    assertEquals("Invalid console execution result","Mode set to 'AdminShell'. Type 'help' to get a list of commands.\r\n",console.runForTest("Console.setMode('" + ConsoleMode.admin.name() + "')"));
     assertEquals("Invalid console execution result","\r\n",console.runForTest("user list"));
     assertEquals("Invalid console execution result","User created.\r\n",console.runForTest("user add tester tester@test.de"));
     assertEquals("Invalid console execution result","User created.\r\n",console.runForTest("user add admin admin@localhost isAdmin"));
@@ -42,5 +42,6 @@
   }
  catch (  FrameworkException fex) {
     fex.printStackTrace();
+    fail("Unexpected exception.");
   }
 }

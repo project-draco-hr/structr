@@ -1,0 +1,64 @@
+{
+  final StringBuilder buf=new StringBuilder();
+  boolean singleQuotes=false;
+  boolean doubleQuotes=false;
+  boolean escaped=false;
+  for (  final char c : line.toCharArray()) {
+    if (uri == null) {
+switch (c) {
+case '\\':
+        escaped=!escaped;
+case '"':
+      if (escaped) {
+        buf.append(c);
+      }
+ else {
+        doubleQuotes=!doubleQuotes;
+      }
+    break;
+case '\'':
+  if (escaped) {
+    buf.append(c);
+  }
+ else {
+    singleQuotes=!singleQuotes;
+  }
+break;
+case ' ':
+case '\t':
+case '\n':
+if (escaped) {
+buf.append(c);
+}
+ else {
+if (!singleQuotes && !doubleQuotes && uri == null) {
+  uri=buf.toString();
+  buf.setLength(0);
+}
+ else {
+  buf.append(c);
+}
+}
+break;
+default :
+buf.append(c);
+}
+}
+ else {
+buf.append(c);
+}
+}
+if (singleQuotes || doubleQuotes) {
+writable.println("Mismatched ",(doubleQuotes ? "double" : singleQuotes ? "single" : "")," quotes.");
+return false;
+}
+ else {
+if (uri == null) {
+this.uri=buf.toString();
+}
+ else {
+this.body=buf.toString();
+}
+}
+return true;
+}

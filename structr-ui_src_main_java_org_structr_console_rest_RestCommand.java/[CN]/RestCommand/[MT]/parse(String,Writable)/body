@@ -1,0 +1,17 @@
+{
+  final String trimmed=line.trim();
+  final String firstWord=StringUtils.substringBefore(trimmed," ");
+  final String remaining=StringUtils.substringAfter(trimmed," ");
+  if (StringUtils.isNotBlank(firstWord)) {
+    final RestCommand cmd=getCommand(firstWord);
+    if (cmd != null) {
+      if (StringUtils.isBlank(remaining) || cmd.parseNext(remaining,writable)) {
+        return cmd;
+      }
+    }
+ else {
+      writable.println("Unknown command '" + firstWord + "'.");
+    }
+  }
+  return null;
+}

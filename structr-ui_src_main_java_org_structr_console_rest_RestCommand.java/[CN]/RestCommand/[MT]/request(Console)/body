@@ -1,0 +1,15 @@
+{
+  final RequestSpecification req=RestAssured.given();
+  final String usernameFromAuth=console.getUsername();
+  final String passwordFromAuth=console.getPassword();
+  req.accept(ContentType.JSON);
+  if (StringUtils.isNoneBlank(username,password)) {
+    req.header("X-User",username);
+    req.header("X-Password",password);
+  }
+ else   if (StringUtils.isNoneBlank(usernameFromAuth,passwordFromAuth)) {
+    req.header("X-User",usernameFromAuth);
+    req.header("X-Password",passwordFromAuth);
+  }
+  return req;
+}

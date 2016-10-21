@@ -1,0 +1,14 @@
+{
+  final String requestUrl="http://localhost:8082/structr/rest/" + uri;
+  final String trimmed=body != null ? body.trim() : null;
+  final Response response=request(console).get(requestUrl);
+  if (trimmed != null && trimmed.startsWith("return ")) {
+    final Object value=response.jsonPath().get(trimmed.substring(7));
+    writable.println(value);
+  }
+ else {
+    writable.println("GET ",requestUrl);
+    writable.println(response.getStatusLine());
+    writable.print(response.asString());
+  }
+}

@@ -1,0 +1,19 @@
+{
+  if (subCommand != null) {
+    final RestCommand cmd=RestCommand.getCommand(subCommand);
+    if (subCommand != null) {
+      cmd.detailHelp(writable);
+    }
+ else {
+      writable.println("Unknown command '" + subCommand + "'.");
+    }
+  }
+ else {
+    for (    final String key : RestCommand.commandNames()) {
+      final RestCommand cmd=RestCommand.getCommand(key);
+      writable.print(StringUtils.rightPad(key,10));
+      writable.print(" - ");
+      cmd.commandHelp(writable);
+    }
+  }
+}

@@ -21,41 +21,37 @@
   }
   final String terminalType=env.getEnv().get("TERM");
   if (terminalType != null) {
-switch (terminalType) {
-case "xterm":
-case "vt100":
-case "vt220":
+    if (terminalType.startsWith("xterm") || terminalType.startsWith("vt100") || terminalType.startsWith("vt220")) {
       term=new XTermTerminalEmulator(in,out,this);
-    break;
-default :
-  logger.warn("Unsupported terminal type {}, aborting.",terminalType);
-break;
-}
-logger.warn("No terminal type provided, aborting.",terminalType);
-}
-if (term != null) {
-term.start();
-term.print("Welcome to the ");
-term.setBold(true);
-term.print("Structr 2.1");
-term.setBold(false);
-term.print(" JavaScript console. Use the <tab> key to switch modes.");
-term.println();
-displayPrompt();
-}
+    }
  else {
-final OutputStreamWritable writable=new OutputStreamWritable(out);
-if (command != null) {
-try {
-this.console.run(command,writable);
-}
- catch (FrameworkException fex) {
-writable.println(fex.getMessage());
-}
-}
+      logger.warn("Unsupported terminal type {}, aborting.",terminalType);
+    }
+    logger.warn("No terminal type provided, aborting.",terminalType);
+  }
+  if (term != null) {
+    term.start();
+    term.print("Welcome to the ");
+    term.setBold(true);
+    term.print("Structr 2.1");
+    term.setBold(false);
+    term.print(" JavaScript console. Use the <tab> key to switch modes.");
+    term.println();
+    displayPrompt();
+  }
  else {
-writable.println("No command specified, aborting.");
-}
-callback.onExit(1);
-}
+    final OutputStreamWritable writable=new OutputStreamWritable(out);
+    if (command != null) {
+      try {
+        this.console.run(command,writable);
+      }
+ catch (      FrameworkException fex) {
+        writable.println(fex.getMessage());
+      }
+    }
+ else {
+      writable.println("No command specified, aborting.");
+    }
+    callback.onExit(1);
+  }
 }

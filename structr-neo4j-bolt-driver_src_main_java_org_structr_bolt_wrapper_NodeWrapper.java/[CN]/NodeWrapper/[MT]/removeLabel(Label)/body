@@ -2,7 +2,7 @@
   assertNotStale();
   final SessionTransaction tx=db.getCurrentTransaction();
   final Map<String,Object> map=new HashMap<>();
-  map.put("id",entity.id());
-  entity=tx.getNode("MATCH (n) WHERE ID(n) = {id} REMOVE n:" + label.name() + " RETURN n",map);
+  map.put("id",id);
+  tx.set("MATCH (n) WHERE ID(n) = {id} REMOVE n:" + label.name(),map);
   tx.modified(this);
 }

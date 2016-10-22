@@ -1,7 +1,10 @@
 {
   assertNotStale();
+  final SessionTransaction tx=db.getCurrentTransaction();
+  final Map<String,Object> map=new HashMap<>();
   final List<Label> result=new LinkedList<>();
-  for (  final String label : entity.labels()) {
+  map.put("id",id);
+  for (  final String label : tx.getStrings("MATCH (n) WHERE ID(n) = {id} RETURN LABELS(n)",map)) {
     result.add(db.forName(Label.class,label));
   }
   return result;

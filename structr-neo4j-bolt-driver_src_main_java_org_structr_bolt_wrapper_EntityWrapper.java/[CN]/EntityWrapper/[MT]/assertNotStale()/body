@@ -3,9 +3,10 @@
     invalidate();
     final SessionTransaction tx=db.getCurrentTransaction();
     final Map<String,Object> map=new HashMap<>();
-    map.put("id",entity.id());
+    map.put("id",id);
     try {
-      entity=(T)tx.getEntity(getQueryPrefix() + " WHERE ID(n) = {id} RETURN n",map);
+      data.clear();
+      update(tx.getEntity(getQueryPrefix() + " WHERE ID(n) = {id} RETURN n",map).asMap());
     }
  catch (    NoSuchRecordException nex) {
       throw new NotFoundException(nex);

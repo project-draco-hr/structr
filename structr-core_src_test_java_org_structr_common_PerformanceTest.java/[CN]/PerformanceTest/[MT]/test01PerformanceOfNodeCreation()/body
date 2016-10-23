@@ -3,10 +3,14 @@
   final long t0=System.currentTimeMillis();
   final long number=1000;
   try {
+    final App app=StructrApp.getInstance();
     try (final Tx tx=app.tx()){
+      final long t1=System.currentTimeMillis();
       for (int i=0; i < number; i++) {
-        nodes.add(createTestNode(TestOne.class,new NodeAttribute(TestOne.name,"TestOne" + i),new NodeAttribute(TestOne.aBoolean,true),new NodeAttribute(TestOne.aDate,new Date()),new NodeAttribute(TestOne.aDouble,1.234),new NodeAttribute(TestOne.aLong,12345L),new NodeAttribute(TestOne.anEnum,TestOne.Status.One),new NodeAttribute(TestOne.anInt,123)));
+        nodes.add(app.create(TestOne.class,new NodeAttribute(TestOne.name,"TestOne" + i),new NodeAttribute(TestOne.aBoolean,true),new NodeAttribute(TestOne.aDate,new Date()),new NodeAttribute(TestOne.aDouble,1.234),new NodeAttribute(TestOne.aLong,12345L),new NodeAttribute(TestOne.anEnum,TestOne.Status.One),new NodeAttribute(TestOne.anInt,123)));
       }
+      final long t2=System.currentTimeMillis();
+      System.out.println((t2 - t1) + " ms");
       tx.success();
     }
    }
@@ -19,6 +23,6 @@
   DecimalFormat decimalFormat=new DecimalFormat("0.000000000",DecimalFormatSymbols.getInstance(Locale.ENGLISH));
   Double time=(t1 - t0) / 1000.0;
   Double rate=number / ((t1 - t0) / 1000.0);
-  logger.info("Created {} nodes in {} seconds ({} per s)",new Object[]{number,decimalFormat.format(time),decimalFormat.format(rate)});
+  logger.info("Created {} nodes in {} seconds ({} per s)",number,decimalFormat.format(time),decimalFormat.format(rate));
   assertTrue("Creation rate of nodes too low, expected > 100, was " + rate,rate > 100);
 }

@@ -10,7 +10,7 @@
       tx.success();
     }
      assertNotNull(rel);
-    DatabaseService graphDb=graphDbCommand.execute();
+    DatabaseService graphDb=app.command(GraphDatabaseCommand.class).execute();
     try (final Tx tx=app.tx()){
       NativeResult<Relationship> result=graphDb.execute("start n = node(*) match (n)<-[r:ONE_TO_ONE]-() return r");
       final Iterator<Relationship> rels=result.columnAs("r");

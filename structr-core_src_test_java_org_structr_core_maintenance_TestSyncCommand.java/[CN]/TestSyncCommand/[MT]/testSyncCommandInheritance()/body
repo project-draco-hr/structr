@@ -14,16 +14,16 @@
         assertEquals("Third label has to be AccessControllable",Iterables.toList(labels).get(2).name(),"AccessControllable");
         assertEquals("Fourth label has to be CMISInfo",Iterables.toList(labels).get(3).name(),"CMISInfo");
         assertEquals("Firth label has to be CMISItemInfo",Iterables.toList(labels).get(4).name(),"CMISItemInfo");
-        assertEquals("Sixth label has to be TestEleven",Iterables.toList(labels).get(5).name(),"TestEleven");
-        assertEquals("Seventh label has to be TestOne",Iterables.toList(labels).get(6).name(),"TestOne");
+        assertEquals("Sixth label has to be TestOne",Iterables.toList(labels).get(5).name(),"TestOne");
+        assertEquals("Seventh label has to be TestEleven",Iterables.toList(labels).get(6).name(),"TestEleven");
       }
       tx.success();
     }
      app.command(SyncCommand.class).execute(toMap("mode","export","file",EXPORT_FILENAME));
     final Path exportFile=Paths.get(EXPORT_FILENAME);
     assertTrue("Export file doesn't exist!",Files.exists(exportFile));
-    this.tearDown();
-    this.setUp();
+    stopSystem();
+    startSystem(Collections.emptyMap());
     app.command(SyncCommand.class).execute(toMap("mode","import","file",EXPORT_FILENAME));
     final DatabaseService db=app.getDatabaseService();
     try (final Tx tx=app.tx()){

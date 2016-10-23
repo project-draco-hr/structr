@@ -2,10 +2,10 @@
   try {
     final TestOne test=createTestNode(TestOne.class);
     final ExecutorService executor=Executors.newCachedThreadPool();
-    final List<TestRunner> tests=new LinkedList<>();
+    final List<FailingTestRunner> tests=new LinkedList<>();
     final List<Future> futures=new LinkedList<>();
     for (int i=0; i < 25; i++) {
-      final TestRunner runner=new TestRunner(app,test);
+      final FailingTestRunner runner=new FailingTestRunner(app,test);
       futures.add(executor.submit(runner));
       tests.add(runner);
     }
@@ -14,7 +14,7 @@
       System.out.print(".");
     }
     System.out.println();
-    for (    final TestRunner runner : tests) {
+    for (    final FailingTestRunner runner : tests) {
       assertTrue("Could not validate transaction isolation",runner.success());
     }
   }

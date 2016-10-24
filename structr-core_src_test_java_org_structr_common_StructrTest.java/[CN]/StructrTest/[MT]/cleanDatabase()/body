@@ -8,20 +8,4 @@
  catch (  FrameworkException fex) {
     logger.error("Exception while trying to clean database: {}",fex);
   }
-  try (final Tx tx=app.tx()){
-    for (    final RelationshipInterface rel : app.relationshipQuery().getAsList()) {
-      app.delete(rel);
-    }
-    tx.success();
-  }
- catch (  FrameworkException fex) {
-    logger.error("Exception while trying to clean database: {}",fex);
-  }
-  try (final Tx tx=app.tx()){
-    app.cypher("MATCH (n)-[r]-(m) DELETE n, r, m",Collections.emptyMap());
-    tx.success();
-  }
- catch (  FrameworkException fex) {
-    logger.error("Exception while trying to clean database: {}",fex);
-  }
 }

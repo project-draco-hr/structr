@@ -1,0 +1,11 @@
+{
+  try (final Tx tx=app.tx()){
+    for (    final NodeInterface node : app.nodeQuery().getAsList()) {
+      app.delete(node);
+    }
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    logger.error("Exception while trying to clean database: {}",fex);
+  }
+}

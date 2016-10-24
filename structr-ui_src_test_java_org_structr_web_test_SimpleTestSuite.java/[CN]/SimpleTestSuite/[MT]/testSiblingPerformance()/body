@@ -1,0 +1,38 @@
+{
+  try (final Tx tx=app.tx()){
+    final org.w3c.dom.Document document=getDocument();
+    assertNotNull(document);
+    final Element div=document.createElement("div");
+    assertNotNull(div);
+    try {
+      app.command(DummyNodeServiceCommand.class).bulkTransaction(securityContext,1000,new StructrTransaction(){
+        @Override public Object execute() throws FrameworkException {
+          div.appendChild(document.createTextNode("test"));
+          return null;
+        }
+      }
+,new Predicate<Long>(){
+        @Override public boolean accept(        Long obj){
+          return obj.longValue() > 100;
+        }
+      }
+);
+    }
+ catch (    Throwable t) {
+      fail("Unexpected exception: " + t.getMessage());
+    }
+    long t0=System.currentTimeMillis();
+    Node it=div.getFirstChild();
+    while (it != null) {
+      it=it.getNextSibling();
+    }
+    long t1=System.currentTimeMillis();
+    long duration=t1 - t0;
+    assertTrue("Iteration of 100 nodes via getNextSibling should not take longer than 50ms, took " + duration + "!",duration < 50);
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    logger.warn("",fex);
+    fail("Unexpected exception");
+  }
+}

@@ -1,0 +1,24 @@
+{
+  try {
+    Class type=TestOne.class;
+    int number=1000;
+    final List<NodeInterface> nodes=this.createTestNodes(type,number);
+    Collections.shuffle(nodes,new Random(System.nanoTime()));
+    try (final Tx tx=app.tx()){
+      long t0=System.currentTimeMillis();
+      Result<? extends GraphObject> result=app.nodeQuery(NodeInterface.class).getResult();
+      long t1=System.currentTimeMillis();
+      logger.info("Query with inexact type took {} ms",t1 - t0);
+      assertEquals(1006,result.size());
+      result=app.nodeQuery(NodeInterface.class).getResult();
+      long t2=System.currentTimeMillis();
+      logger.info("Query with exact type took {} ms",t2 - t1);
+      assertEquals(1006,result.size());
+      tx.success();
+    }
+   }
+ catch (  FrameworkException ex) {
+    logger.error(ex.toString());
+    fail("Unexpected exception");
+  }
+}

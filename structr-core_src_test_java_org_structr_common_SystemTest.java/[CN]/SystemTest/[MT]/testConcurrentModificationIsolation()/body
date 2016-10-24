@@ -1,0 +1,42 @@
+{
+  final ExecutorService service=Executors.newCachedThreadPool();
+  final List<Future> futures=new LinkedList<>();
+  final int count=20;
+  final int num=20;
+  try (final Tx tx=app.tx()){
+    final SchemaNode createTestType=createTestNode(SchemaNode.class,"CreateTest");
+    final SchemaProperty prop=createTestNode(SchemaProperty.class,new NodeAttribute(SchemaProperty.schemaNode,createTestType),new NodeAttribute(SchemaProperty.name,"name"),new NodeAttribute(SchemaProperty.propertyType,"String"),new NodeAttribute(SchemaProperty.unique,true),new NodeAttribute(SchemaProperty.notNull,true));
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    logger.warn("",fex);
+    fail("Unexpected exception.");
+  }
+  final Class type=StructrApp.getConfiguration().getNodeEntityClass("CreateTest");
+  for (int i=0; i < count; i++) {
+    futures.add(service.submit(new Worker<>(app,type,num)));
+  }
+  for (  final Future future : futures) {
+    try {
+      future.get();
+    }
+ catch (    Throwable t) {
+    }
+  }
+  try (final Tx tx=app.tx()){
+    final List<NodeInterface> tests=app.nodeQuery(type).sort(AbstractNode.name).getAsList();
+    int i=0;
+    assertEquals("Invalid result size for concurrent modification test",count * num,tests.size());
+    for (    final NodeInterface one : tests) {
+      final String name="Test" + StringUtils.leftPad(Integer.toString(i++),3,"0");
+      assertEquals("Invalid detail result for concurrent modification test",name,one.getName());
+      assertEquals("Invalid detail result for concurrent modification test",one.getName(),one.getProperty(TestOne.aString));
+    }
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    logger.warn("",fex);
+    fail("Unexpected exception.");
+  }
+  service.shutdownNow();
+}

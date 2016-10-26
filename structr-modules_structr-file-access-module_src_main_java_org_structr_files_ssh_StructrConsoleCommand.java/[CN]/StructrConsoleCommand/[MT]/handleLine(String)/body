@@ -1,36 +1,46 @@
 {
-  term.flush();
-  if (StringUtils.isNotBlank(line)) {
-    if (insideOfBlockOrStructure()) {
-      buf.append(line);
-      buf.append("\r\n");
-    }
+  try {
+    term.flush();
+    if (StringUtils.isNotBlank(line)) {
+      if (insideOfBlockOrStructure()) {
+        buf.append(line);
+        buf.append("\r\n");
+      }
  else {
-      buf.append(line);
-    }
-    if ("exit".equals(line) || "quit".equals(line)) {
-      term.stopEmulator();
-    }
+        buf.append(line);
+      }
+      if ("exit".equals(line) || "quit".equals(line)) {
+        term.stopEmulator();
+      }
  else {
-      checkForBlockChars(line.trim());
-      if (!insideOfBlockOrStructure()) {
-        commandHistory.add(buf.toString());
-        try (final Tx tx=StructrApp.getInstance(console.getSecurityContext()).tx()){
-          console.run(buf.toString(),term);
-          tx.success();
-        }
- catch (        Throwable t) {
-          final String message=t.getMessage();
-          if (message != null) {
-            term.println(message);
+        checkForBlockChars(line.trim());
+        if (!insideOfBlockOrStructure()) {
+          final String command=buf.toString();
+          clearBlockStatus();
+          commandHistory.add(command);
+          try (final Tx tx=StructrApp.getInstance(console.getSecurityContext()).tx()){
+            console.run(command,term);
+            tx.success();
           }
+ catch (          Throwable t) {
+            final String message=t.getMessage();
+            if (message != null) {
+              term.println(message);
+            }
  else {
-            t.printStackTrace();
-            term.println(t.getClass().getSimpleName() + " encountered.");
+              t.printStackTrace();
+              term.println(t.getClass().getSimpleName() + " encountered.");
+            }
           }
         }
-        clearBlockStatus();
       }
     }
+  }
+ catch (  Throwable t) {
+    t.printStackTrace();
+    term.println(t.getClass().getSimpleName() + " encountered.");
+  }
+ finally {
+    term.flush();
   }
 }

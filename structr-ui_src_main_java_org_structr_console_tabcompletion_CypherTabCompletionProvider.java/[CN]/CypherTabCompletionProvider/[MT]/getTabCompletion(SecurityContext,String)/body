@@ -1,0 +1,15 @@
+{
+  final List<TabCompletionResult> results=new LinkedList<>();
+  final String token=getToken(line," ");
+  results.addAll(getCaseInsensitiveResultsForCollection(words,token," "));
+  results.addAll(getTabCompletionForUUIDs(securityContext,token,""));
+  final Matcher nodeMatcher=nodePattern.matcher(token);
+  if (nodeMatcher.matches()) {
+    final Set<String> keys=getNodeTypes();
+    final String subtoken=StringUtils.substringAfterLast(token,":");
+    final String suffix="";
+    results.addAll(getExactResultsForCollection(keys,subtoken,suffix));
+  }
+  Collections.sort(results);
+  return results;
+}

@@ -1,0 +1,11 @@
+{
+  try (final Tx tx=app.tx()){
+    app.create(SchemaNode.class,new NodeAttribute<>(AbstractNode.name,typeName),new NodeAttribute<>(new StringProperty("_" + keyName),keyType));
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+    fail("Unexpected exception.");
+  }
+  return StructrApp.getConfiguration().getNodeEntityClass(typeName);
+}

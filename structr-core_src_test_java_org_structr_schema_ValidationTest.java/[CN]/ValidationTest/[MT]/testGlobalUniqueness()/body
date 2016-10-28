@@ -1,0 +1,35 @@
+{
+  try (final Tx tx=app.tx()){
+    app.create(SchemaNode.class,new NodeAttribute<>(AbstractNode.name,"Test"));
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fail("Unexpected exception.");
+  }
+  final Class testType=StructrApp.getConfiguration().getNodeEntityClass("Test");
+  if (testType != null) {
+    String uuid=null;
+    try (final Tx tx=app.tx()){
+      uuid=app.create(testType,new NodeAttribute<>(GraphObject.id,"00000000000000000000000000000000")).getUuid();
+      tx.success();
+    }
+ catch (    FrameworkException fex) {
+      fail("Unexpected exception.");
+    }
+    for (int i=0; i < 5; i++) {
+      try (final Tx tx=app.tx()){
+        app.create(testType,new NodeAttribute<>(GraphObject.id,"00000000000000000000000000000000"));
+        tx.success();
+        fail("UUID uniqueness constraint violated!");
+      }
+ catch (      FrameworkException fex) {
+        final ErrorToken token=fex.getErrorBuffer().getErrorTokens().get(0);
+        assertEquals("Invalid UUID uniqueness validation result",422,fex.getStatus());
+        assertEquals("Invalid UUID uniqueness validation result","id",token.getProperty());
+        assertEquals("Invalid UUID uniqueness validation result","Test",token.getType());
+        assertEquals("Invalid UUID uniqueness validation result","already_taken",token.getToken());
+        assertEquals("Invalid UUID uniqueness validation result",uuid,token.getDetail());
+      }
+    }
+  }
+}

@@ -2,11 +2,11 @@
   if (!validators.isEmpty()) {
     src.append("\n\t@Override\n");
     src.append("\tpublic boolean isValid(final ErrorBuffer errorBuffer) {\n\n");
-    src.append("\t\tboolean error = !super.isValid(errorBuffer);\n\n");
+    src.append("\t\tboolean valid = super.isValid(errorBuffer);\n\n");
     for (    final Validator validator : validators) {
-      src.append("\t\terror |= ").append(validator.getSource("this",true)).append(";\n");
+      src.append("\t\tvalid &= ").append(validator.getSource("this",true)).append(";\n");
     }
-    src.append("\n\t\treturn !error;\n");
+    src.append("\n\t\treturn valid;\n");
     src.append("\t}\n");
   }
 }

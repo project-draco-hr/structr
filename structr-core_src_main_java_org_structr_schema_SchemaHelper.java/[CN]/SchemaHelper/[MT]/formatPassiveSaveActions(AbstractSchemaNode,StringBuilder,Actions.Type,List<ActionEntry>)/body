@@ -5,7 +5,7 @@
   src.append("(");
   src.append(type.getSignature());
   src.append(") throws FrameworkException {\n\n");
-  src.append("\t\tboolean error = !super.");
+  src.append("\t\tboolean valid = super.");
   src.append(type.getMethod());
   src.append("(");
   src.append(type.getParameters());
@@ -13,13 +13,9 @@
   for (  final StructrModule module : StructrApp.getConfiguration().getModules().values()) {
     module.insertSaveAction(schemaNode,src,type);
   }
-  if (!actionList.isEmpty()) {
-    for (    final ActionEntry action : actionList) {
-      src.append("\t\tif (!error) {\n");
-      src.append("\t\t\terror |= ").append(action.getSource("this")).append(";\n");
-      src.append("\t\t}\n");
-    }
+  for (  final ActionEntry action : actionList) {
+    src.append("\t\t").append(action.getSource("this")).append(";\n");
   }
-  src.append("\n\t\treturn !error;\n");
+  src.append("\n\t\treturn valid;\n");
   src.append("\t}\n");
 }

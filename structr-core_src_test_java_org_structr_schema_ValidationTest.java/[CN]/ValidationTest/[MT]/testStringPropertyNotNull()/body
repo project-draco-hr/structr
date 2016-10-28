@@ -1,0 +1,30 @@
+{
+  try (final Tx tx=app.tx()){
+    app.create(SchemaNode.class,new NodeAttribute<>(AbstractNode.name,"Test"),new NodeAttribute<>(new StringProperty("_nonempty"),"+String"));
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+    fail("Unexpected exception.");
+  }
+  final Class testType=StructrApp.getConfiguration().getNodeEntityClass("Test");
+  if (testType != null) {
+    final PropertyKey key=StructrApp.getConfiguration().getPropertyKeyForJSONName(testType,"nonempty");
+    if (key != null) {
+      try (final Tx tx=app.tx()){
+        app.create(testType,new NodeAttribute<>(key,null));
+        tx.success();
+        fail("Not empty constraint violated!");
+      }
+ catch (      FrameworkException fex) {
+        final List<ErrorToken> tokens=fex.getErrorBuffer().getErrorTokens();
+        final ErrorToken token=tokens.get(0);
+        assertEquals("Invalid uniqueness validation result",1,tokens.size());
+        assertEquals("Invalid uniqueness validation result",422,fex.getStatus());
+        assertEquals("Invalid uniqueness validation result","nonempty",token.getProperty());
+        assertEquals("Invalid uniqueness validation result","Test",token.getType());
+        assertEquals("Invalid uniqueness validation result","must_not_be_empty",token.getToken());
+      }
+    }
+  }
+}

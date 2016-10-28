@@ -1,0 +1,24 @@
+{
+  final String keyName="unique";
+  final Class<NodeInterface> testType=createTypeWithProperty("Test",keyName,"Double!");
+  final PropertyKey key=StructrApp.getConfiguration().getPropertyKeyForJSONName(testType,keyName);
+  String uuid=null;
+  if (key != null) {
+    try (final Tx tx=app.tx()){
+      uuid=app.create(testType,new NodeAttribute<>(key,0.123)).getUuid();
+      app.create(testType,new NodeAttribute<>(key,0.123));
+      tx.success();
+      fail("Double property uniqueness constraint violated!");
+    }
+ catch (    FrameworkException fex) {
+      final List<ErrorToken> tokens=fex.getErrorBuffer().getErrorTokens();
+      final ErrorToken token=tokens.get(0);
+      assertEquals("Invalid double validation result",1,tokens.size());
+      assertEquals("Invalid double validation result",422,fex.getStatus());
+      assertEquals("Invalid double validation result",keyName,token.getProperty());
+      assertEquals("Invalid double validation result","Test",token.getType());
+      assertEquals("Invalid double validation result","already_taken",token.getToken());
+      assertEquals("Invalid double validation result",uuid,token.getDetail());
+    }
+  }
+}

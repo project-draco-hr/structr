@@ -1,0 +1,10 @@
+{
+  try (final Tx tx=app.tx()){
+    app.create(type,new NodeAttribute<>(key,value));
+    tx.success();
+    fail("Property range constraint violated!");
+  }
+ catch (  FrameworkException fex) {
+    checkException(fex,1,422,"Test","range1","must_be_in_range");
+  }
+}

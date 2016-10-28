@@ -1,12 +1,13 @@
 {
   long t0=System.currentTimeMillis();
   boolean hasModifications=true;
-  boolean valid=true;
   while (hasModifications) {
     hasModifications=false;
     for (    GraphObjectModificationState state : modifications.values()) {
       if (state.wasModified()) {
-        valid&=state.doInnerCallback(this,securityContext,errorBuffer);
+        if (!state.doInnerCallback(this,securityContext,errorBuffer)) {
+          return false;
+        }
         hasModifications=true;
       }
     }
@@ -15,5 +16,5 @@
   if (t > 1000) {
     logger.info("{} ms",t);
   }
-  return valid;
+  return true;
 }

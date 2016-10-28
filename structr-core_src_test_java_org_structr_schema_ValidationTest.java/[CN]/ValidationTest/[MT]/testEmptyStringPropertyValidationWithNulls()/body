@@ -1,0 +1,25 @@
+{
+  try (final Tx tx=app.tx()){
+    app.create(SchemaNode.class,new NodeAttribute<>(AbstractNode.name,"Test"),new NodeAttribute<>(new StringProperty("_testUnique"),"String!"));
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+    fail("Unexpected exception.");
+  }
+  final Class testType=StructrApp.getConfiguration().getNodeEntityClass("Test");
+  if (testType != null) {
+    final PropertyKey key=StructrApp.getConfiguration().getPropertyKeyForJSONName(testType,"testUnique");
+    if (key != null) {
+      String uuid=null;
+      try (final Tx tx=app.tx()){
+        uuid=app.create(testType,new NodeAttribute<>(key,null)).getUuid();
+        app.create(testType,new NodeAttribute<>(key,null));
+        tx.success();
+      }
+ catch (      FrameworkException fex) {
+        fail("Invalid uniqueness constraint validation for null values!");
+      }
+    }
+  }
+}

@@ -1,16 +1,26 @@
 {
+  final boolean isString=predicate.getType().equals(String.class);
   final Object value=getReadValue(predicate.getValue());
   final String name=predicate.getName();
   checkOccur(query,predicate.getOccurrence(),isFirst);
-  if (!predicate.getType().equals(String.class) || predicate.isExactMatch()) {
-    query.addSimpleParameter(name,value != null ? "=" : "is",value);
+  if (predicate.isExactMatch() || !isString) {
+    if (isString && value == null) {
+      query.addSimpleParameter(name,"is",null);
+      query.or();
+      query.addSimpleParameter(name,"=","");
+    }
+ else {
+      query.addSimpleParameter(name,value != null ? "=" : "is",value);
+    }
   }
  else {
-    if (value != null) {
+    if (value != null && isString) {
       query.addSimpleParameter(name,"=~","(?i).*" + escape(value) + ".*");
     }
  else {
       query.addSimpleParameter(name,"is",null);
+      query.or();
+      query.addSimpleParameter(name,"=","");
     }
   }
   return true;

@@ -1,7 +1,8 @@
 {
-  boolean valid=true;
   for (  final TransactionPostProcess process : postProcesses.values()) {
-    valid&=process.execute(securityContext,errorBuffer);
+    if (!process.execute(securityContext,errorBuffer)) {
+      return false;
+    }
   }
-  return valid;
+  return true;
 }

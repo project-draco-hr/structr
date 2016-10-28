@@ -1,0 +1,16 @@
+{
+  final String keyName="notNull";
+  final Class<NodeInterface> testType=createTypeWithProperty("Test",keyName,"+Boolean");
+  final PropertyKey key=StructrApp.getConfiguration().getPropertyKeyForJSONName(testType,keyName);
+  if (key != null) {
+    try (final Tx tx=app.tx()){
+      app.create(testType,new NodeAttribute<>(key,null));
+      app.create(testType,new NodeAttribute<>(key,true));
+      app.create(testType,new NodeAttribute<>(key,false));
+      tx.success();
+    }
+ catch (    FrameworkException fex) {
+      fail("Unexpected array property validation exception.");
+    }
+  }
+}

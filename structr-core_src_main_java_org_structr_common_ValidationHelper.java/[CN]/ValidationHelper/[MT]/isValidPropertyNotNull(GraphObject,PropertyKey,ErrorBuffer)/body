@@ -1,0 +1,20 @@
+{
+  final String type=node.getType();
+  if (key == null) {
+    errorBuffer.add(new EmptyPropertyToken(type,UnknownType));
+    return false;
+  }
+  final Object value=node.getProperty(key);
+  if (value != null) {
+    if (value instanceof Iterable) {
+      if (((Iterable)value).iterator().hasNext()) {
+        return true;
+      }
+    }
+ else {
+      return true;
+    }
+  }
+  errorBuffer.add(new EmptyPropertyToken(type,key));
+  return false;
+}

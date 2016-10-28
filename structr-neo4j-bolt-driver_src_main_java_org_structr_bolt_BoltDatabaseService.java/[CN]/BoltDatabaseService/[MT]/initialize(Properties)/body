@@ -9,6 +9,7 @@
   final String confPath=databasePath + "/neo4j.conf";
   final File confFile=new File(confPath);
   boolean tryAgain=true;
+  new File(databasePath).mkdirs();
   if (!"remote".equals(driverMode)) {
     final GraphDatabaseBuilder builder=new GraphDatabaseFactory().newEmbeddedDatabaseBuilder(new File(databasePath)).setConfig(GraphDatabaseSettings.allow_store_upgrade,"true").setConfig("dbms.allow_format_migration","true").setConfig(bolt.enabled,"true").setConfig(bolt.address,url);
     if (confFile.exists()) {

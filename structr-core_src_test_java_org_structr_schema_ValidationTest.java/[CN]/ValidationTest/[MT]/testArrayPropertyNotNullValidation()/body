@@ -1,0 +1,19 @@
+{
+  final String keyName="stringArray";
+  final Class testType=createTypeWithProperty("Test",keyName,"+String[]");
+  final PropertyKey key=StructrApp.getConfiguration().getPropertyKeyForJSONName(testType,keyName);
+  if (key != null) {
+    try (final Tx tx=app.tx()){
+      app.create(testType,new NodeAttribute<>(key,null));
+      tx.success();
+      fail("Array property validation failed!");
+    }
+ catch (    FrameworkException fex) {
+      final ErrorToken token=fex.getErrorBuffer().getErrorTokens().get(0);
+      assertEquals("Invalid uniqueness validation result",422,fex.getStatus());
+      assertEquals("Invalid uniqueness validation result",keyName,token.getProperty());
+      assertEquals("Invalid uniqueness validation result","Test",token.getType());
+      assertEquals("Invalid uniqueness validation result","must_not_be_empty",token.getToken());
+    }
+  }
+}

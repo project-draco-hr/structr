@@ -1,0 +1,33 @@
+{
+  try (final Tx tx=app.tx()){
+    app.create(SchemaNode.class,new NodeAttribute<>(AbstractNode.name,"Test"),new NodeAttribute<>(new StringProperty("_testUnique"),"String!"));
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+    fail("Unexpected exception.");
+  }
+  final Class testType=StructrApp.getConfiguration().getNodeEntityClass("Test");
+  if (testType != null) {
+    final PropertyKey key=StructrApp.getConfiguration().getPropertyKeyForJSONName(testType,"testUnique");
+    if (key != null) {
+      String uuid=null;
+      try (final Tx tx=app.tx()){
+        uuid=app.create(testType,new NodeAttribute<>(key,"")).getUuid();
+        app.create(testType,new NodeAttribute<>(key,""));
+        tx.success();
+        fail("Uniqueness constraint violated!");
+      }
+ catch (      FrameworkException fex) {
+        final List<ErrorToken> tokens=fex.getErrorBuffer().getErrorTokens();
+        final ErrorToken token=tokens.get(0);
+        assertEquals("Invalid uniqueness validation result",1,tokens.size());
+        assertEquals("Invalid uniqueness validation result",422,fex.getStatus());
+        assertEquals("Invalid uniqueness validation result","testUnique",token.getProperty());
+        assertEquals("Invalid uniqueness validation result","Test",token.getType());
+        assertEquals("Invalid uniqueness validation result","already_taken",token.getToken());
+        assertEquals("Invalid uniqueness validation result",uuid,token.getDetail());
+      }
+    }
+  }
+}

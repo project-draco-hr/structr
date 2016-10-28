@@ -1,0 +1,21 @@
+{
+  final String keyName="regex";
+  final Class testType=createTypeWithProperty("Test",keyName,"String([a-zA-Z0-9]+)");
+  final PropertyKey key=StructrApp.getConfiguration().getPropertyKeyForJSONName(testType,keyName);
+  if (key != null) {
+    try (final Tx tx=app.tx()){
+      app.create(testType,new NodeAttribute<>(key,"abcdefg_"));
+      tx.success();
+      fail("Regex constraint violated!");
+    }
+ catch (    FrameworkException fex) {
+      final List<ErrorToken> tokens=fex.getErrorBuffer().getErrorTokens();
+      final ErrorToken token=tokens.get(0);
+      assertEquals("Invalid uniqueness validation result",1,tokens.size());
+      assertEquals("Invalid regex validation result",422,fex.getStatus());
+      assertEquals("Invalid regex validation result","regex",token.getProperty());
+      assertEquals("Invalid regex validation result","Test",token.getType());
+      assertEquals("Invalid regex validation result","must_match",token.getToken());
+    }
+  }
+}

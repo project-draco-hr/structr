@@ -4,7 +4,7 @@
     app.command(SyncCommand.class).execute(toMap("mode","export","file",EXPORT_FILENAME));
     final Path exportFile=Paths.get(EXPORT_FILENAME);
     assertTrue("Export file doesn't exist!",Files.exists(exportFile));
-    app.command(ClearDatabase.class).execute();
+    cleanDatabase();
     app.command(SyncCommand.class).execute(toMap("mode","import","file",EXPORT_FILENAME,"batchSize",20L));
     try (final Tx tx=app.tx()){
       assertEquals(100,app.nodeQuery(TestOne.class).getResult().size());

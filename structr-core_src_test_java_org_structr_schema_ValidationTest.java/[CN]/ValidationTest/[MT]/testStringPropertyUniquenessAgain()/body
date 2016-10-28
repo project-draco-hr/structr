@@ -1,0 +1,47 @@
+{
+  try (final Tx tx=app.tx()){
+    app.create(SchemaNode.class,new NodeAttribute<>(AbstractNode.name,"Test"),new NodeAttribute<>(new StringProperty("_testUnique"),"String!"));
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fex.printStackTrace();
+    fail("Unexpected exception.");
+  }
+  final Class testType=StructrApp.getConfiguration().getNodeEntityClass("Test");
+  if (testType != null) {
+    final PropertyKey key=StructrApp.getConfiguration().getPropertyKeyForJSONName(testType,"testUnique");
+    if (key != null) {
+      final Random random=new Random();
+      try (final Tx tx=app.tx()){
+        app.create(testType,new NodeAttribute<>(AbstractNode.name,"unique06"),new NodeAttribute<>(key,"unique00"));
+        app.create(testType,new NodeAttribute<>(AbstractNode.name,"unique05"),new NodeAttribute<>(key,"unique01"));
+        app.create(testType,new NodeAttribute<>(AbstractNode.name,"unique04"),new NodeAttribute<>(key,"unique02"));
+        app.create(testType,new NodeAttribute<>(AbstractNode.name,"unique03"),new NodeAttribute<>(key,"unique03"));
+        app.create(testType,new NodeAttribute<>(AbstractNode.name,"unique02"),new NodeAttribute<>(key,"unique04"));
+        app.create(testType,new NodeAttribute<>(AbstractNode.name,"unique01"),new NodeAttribute<>(key,"unique05"));
+        app.create(testType,new NodeAttribute<>(AbstractNode.name,"unique00"),new NodeAttribute<>(key,"unique06"));
+        tx.success();
+      }
+ catch (      FrameworkException fex) {
+        fex.printStackTrace();
+        fail("Unexpected exception.");
+      }
+      for (int i=0; i < 5; i++) {
+        try (final Tx tx=app.tx()){
+          app.create(testType,new NodeAttribute<>(key,"unique0" + random.nextInt(7)));
+          tx.success();
+          fail("Uniqueness constraint violated!");
+        }
+ catch (        FrameworkException fex) {
+          final List<ErrorToken> tokens=fex.getErrorBuffer().getErrorTokens();
+          final ErrorToken token=tokens.get(0);
+          assertEquals("Invalid uniqueness validation result",1,tokens.size());
+          assertEquals("Invalid uniqueness validation result",422,fex.getStatus());
+          assertEquals("Invalid uniqueness validation result","testUnique",token.getProperty());
+          assertEquals("Invalid uniqueness validation result","Test",token.getType());
+          assertEquals("Invalid uniqueness validation result","already_taken",token.getToken());
+        }
+      }
+    }
+  }
+}

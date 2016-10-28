@@ -1,0 +1,24 @@
+{
+  final String keyName="unique";
+  final Class<NodeInterface> testType=createTypeWithProperty("Test",keyName,"Long!");
+  final PropertyKey key=StructrApp.getConfiguration().getPropertyKeyForJSONName(testType,keyName);
+  String uuid=null;
+  if (key != null) {
+    try (final Tx tx=app.tx()){
+      uuid=app.create(testType,new NodeAttribute<>(key,42000000000L)).getUuid();
+      app.create(testType,new NodeAttribute<>(key,42000000000L));
+      tx.success();
+      fail("Long property uniqueness constraint violated!");
+    }
+ catch (    FrameworkException fex) {
+      final List<ErrorToken> tokens=fex.getErrorBuffer().getErrorTokens();
+      final ErrorToken token=tokens.get(0);
+      assertEquals("Invalid long validation result",1,tokens.size());
+      assertEquals("Invalid long validation result",422,fex.getStatus());
+      assertEquals("Invalid long validation result",keyName,token.getProperty());
+      assertEquals("Invalid long validation result","Test",token.getType());
+      assertEquals("Invalid long validation result","already_taken",token.getToken());
+      assertEquals("Invalid long validation result",uuid,token.getDetail());
+    }
+  }
+}

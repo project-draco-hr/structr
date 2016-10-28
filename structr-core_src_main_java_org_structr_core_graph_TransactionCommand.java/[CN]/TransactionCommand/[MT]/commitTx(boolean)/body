@@ -6,15 +6,9 @@
     for (    final StructrTransactionListener listener : listeners) {
       listener.beforeCommit(securityContext,modificationQueue.getModificationEvents(),tx.getSource());
     }
-    if (doValidation) {
-      if (!modificationQueue.doInnerCallbacks(securityContext,errorBuffer)) {
-        tx.failure();
-        throw new FrameworkException(422,"Unable to commit transaction, validation failed",errorBuffer);
-      }
-      if (!modificationQueue.doPostProcessing(securityContext,errorBuffer)) {
-        tx.failure();
-        throw new FrameworkException(422,"Unable to commit transaction, transaction post processing failed",errorBuffer);
-      }
+    if (!modificationQueue.doInnerCallbacks(securityContext,errorBuffer)) {
+      tx.failure();
+      throw new FrameworkException(422,"Unable to commit transaction, validation failed",errorBuffer);
     }
     Set<String> synchronizationKeys=modificationQueue.getSynchronizationKeys();
     try {
@@ -23,15 +17,19 @@
  catch (    InterruptedException iex) {
       return;
     }
-    if (!modificationQueue.doValidation(securityContext,errorBuffer,doValidation)) {
+    if (doValidation && !modificationQueue.doValidation(securityContext,errorBuffer,doValidation)) {
       tx.failure();
       throw new FrameworkException(422,"Unable to commit transaction, validation failed",errorBuffer);
+    }
+    if (!modificationQueue.doPostProcessing(securityContext,errorBuffer)) {
+      tx.failure();
+      throw new FrameworkException(422,"Unable to commit transaction, transaction post processing failed",errorBuffer);
     }
     try {
       tx.success();
     }
  catch (    Throwable t) {
-      logger.warn("",t);
+      logger.error("Unable to commit transaction",t);
     }
   }
 }

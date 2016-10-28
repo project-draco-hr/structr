@@ -1,0 +1,36 @@
+{
+  final Class<NodeInterface> testType=createTypeWithProperty("Test","range1","+Double([1,5])");
+  final PropertyKey range1=StructrApp.getConfiguration().getPropertyKeyForJSONName(testType,"range1");
+  checkRangeSuccess(testType,range1,1.0);
+  checkRangeSuccess(testType,range1,1.00001);
+  checkRangeSuccess(testType,range1,1.1);
+  checkRangeSuccess(testType,range1,2.2);
+  checkRangeSuccess(testType,range1,3.3);
+  checkRangeSuccess(testType,range1,4.4);
+  checkRangeSuccess(testType,range1,4.999999);
+  checkRangeSuccess(testType,range1,5.0);
+  try {
+    checkRangeError(testType,range1,-0.00001);
+  }
+ catch (  FrameworkException fex) {
+    checkException(fex,1,422,"Test","range1","must_be_in_range");
+  }
+  try {
+    checkRangeError(testType,range1,0.00001);
+  }
+ catch (  FrameworkException fex) {
+    checkException(fex,1,422,"Test","range1","must_be_in_range");
+  }
+  try {
+    checkRangeError(testType,range1,0.51);
+  }
+ catch (  FrameworkException fex) {
+    checkException(fex,1,422,"Test","range1","must_be_in_range");
+  }
+  try {
+    checkRangeError(testType,range1,5.00000001);
+  }
+ catch (  FrameworkException fex) {
+    checkException(fex,1,422,"Test","range1","must_be_in_range");
+  }
+}

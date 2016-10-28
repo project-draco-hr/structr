@@ -1,0 +1,25 @@
+{
+  final String keyName="unique";
+  final Class<NodeInterface> testType=createTypeWithProperty("Test",keyName,"Boolean!");
+  final PropertyKey key=StructrApp.getConfiguration().getPropertyKeyForJSONName(testType,keyName);
+  String uuid=null;
+  if (key != null) {
+    try (final Tx tx=app.tx()){
+      uuid=app.create(testType,new NodeAttribute<>(key,true)).getUuid();
+      app.create(testType,new NodeAttribute<>(key,false));
+      app.create(testType,new NodeAttribute<>(key,true));
+      tx.success();
+      fail("Array property uniqueness constraint violated!");
+    }
+ catch (    FrameworkException fex) {
+      final List<ErrorToken> tokens=fex.getErrorBuffer().getErrorTokens();
+      final ErrorToken token=tokens.get(0);
+      assertEquals("Invalid uniqueness validation result",1,tokens.size());
+      assertEquals("Invalid uniqueness validation result",422,fex.getStatus());
+      assertEquals("Invalid uniqueness validation result",keyName,token.getProperty());
+      assertEquals("Invalid uniqueness validation result","Test",token.getType());
+      assertEquals("Invalid uniqueness validation result","already_taken",token.getToken());
+      assertEquals("Invalid uniqueness validation result",uuid,token.getDetail());
+    }
+  }
+}

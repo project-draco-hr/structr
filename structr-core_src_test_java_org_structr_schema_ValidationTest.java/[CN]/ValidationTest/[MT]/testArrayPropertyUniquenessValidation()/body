@@ -1,0 +1,35 @@
+{
+  final String keyName="stringArray";
+  final Class<NodeInterface> testType=createTypeWithProperty("Test",keyName,"String[]!");
+  final PropertyKey key=StructrApp.getConfiguration().getPropertyKeyForJSONName(testType,keyName);
+  String uuid1=null;
+  String uuid2=null;
+  if (key != null) {
+    try (final Tx tx=app.tx()){
+      uuid1=app.create(testType,new NodeAttribute<>(key,new String[]{"one","two"})).getUuid();
+      uuid2=app.create(testType,new NodeAttribute<>(key,new String[]{"one","two"})).getUuid();
+      tx.success();
+      fail("Array property validation failed!");
+    }
+ catch (    FrameworkException fex) {
+      final List<ErrorToken> tokens=fex.getErrorBuffer().getErrorTokens();
+      final ErrorToken token=tokens.get(0);
+      assertEquals("Invalid uniqueness validation result",1,tokens.size());
+      assertEquals("Invalid uniqueness validation result",422,fex.getStatus());
+      assertEquals("Invalid uniqueness validation result",keyName,token.getProperty());
+      assertEquals("Invalid uniqueness validation result","Test",token.getType());
+      assertEquals("Invalid uniqueness validation result","already_taken",token.getToken());
+      assertEquals("Invalid uniqueness validation result",uuid1,token.getDetail());
+    }
+    removeInstances(testType);
+    try (final Tx tx=app.tx()){
+      app.create(testType,new NodeAttribute<>(key,new String[]{"one"}));
+      app.create(testType,new NodeAttribute<>(key,new String[]{"one","two"}));
+      app.create(testType,new NodeAttribute<>(key,new String[]{"one","two","three"}));
+      tx.success();
+    }
+ catch (    FrameworkException fex) {
+      fail("Array property validation error!");
+    }
+  }
+}

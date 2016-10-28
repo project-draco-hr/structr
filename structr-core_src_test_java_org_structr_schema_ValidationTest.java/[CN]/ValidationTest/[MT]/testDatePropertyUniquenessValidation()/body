@@ -1,0 +1,25 @@
+{
+  final String keyName="unique";
+  final Class<NodeInterface> testType=createTypeWithProperty("Test",keyName,"Date!");
+  final PropertyKey key=StructrApp.getConfiguration().getPropertyKeyForJSONName(testType,keyName);
+  final Date date=new Date();
+  String uuid=null;
+  if (key != null) {
+    try (final Tx tx=app.tx()){
+      uuid=app.create(testType,new NodeAttribute<>(key,date)).getUuid();
+      app.create(testType,new NodeAttribute<>(key,date));
+      tx.success();
+      fail("Date property uniqueness constraint violated!");
+    }
+ catch (    FrameworkException fex) {
+      final List<ErrorToken> tokens=fex.getErrorBuffer().getErrorTokens();
+      final ErrorToken token=tokens.get(0);
+      assertEquals("Invalid date validation result",1,tokens.size());
+      assertEquals("Invalid date validation result",422,fex.getStatus());
+      assertEquals("Invalid date validation result",keyName,token.getProperty());
+      assertEquals("Invalid date validation result","Test",token.getType());
+      assertEquals("Invalid date validation result","already_taken",token.getToken());
+      assertEquals("Invalid date validation result",uuid,token.getDetail());
+    }
+  }
+}

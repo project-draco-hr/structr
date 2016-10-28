@@ -1,0 +1,24 @@
+{
+  final String keyName="unique";
+  final Class<NodeInterface> testType=createTypeWithProperty("Test",keyName,"Integer!");
+  final PropertyKey key=StructrApp.getConfiguration().getPropertyKeyForJSONName(testType,keyName);
+  String uuid=null;
+  if (key != null) {
+    try (final Tx tx=app.tx()){
+      uuid=app.create(testType,new NodeAttribute<>(key,42)).getUuid();
+      app.create(testType,new NodeAttribute<>(key,42));
+      tx.success();
+      fail("Int property uniqueness constraint violated!");
+    }
+ catch (    FrameworkException fex) {
+      final List<ErrorToken> tokens=fex.getErrorBuffer().getErrorTokens();
+      final ErrorToken token=tokens.get(0);
+      assertEquals("Invalid int validation result",1,tokens.size());
+      assertEquals("Invalid int validation result",422,fex.getStatus());
+      assertEquals("Invalid int validation result",keyName,token.getProperty());
+      assertEquals("Invalid int validation result","Test",token.getType());
+      assertEquals("Invalid int validation result","already_taken",token.getToken());
+      assertEquals("Invalid int validation result",uuid,token.getDetail());
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  final String keyName="notnull";
+  final Class<NodeInterface> testType=createTypeWithProperty("Test",keyName,"+Double");
+  final PropertyKey key=StructrApp.getConfiguration().getPropertyKeyForJSONName(testType,keyName);
+  if (key != null) {
+    try (final Tx tx=app.tx()){
+      app.create(testType,new NodeAttribute<>(key,null));
+      tx.success();
+      fail("Double property not null constraint violated!");
+    }
+ catch (    FrameworkException fex) {
+      final List<ErrorToken> tokens=fex.getErrorBuffer().getErrorTokens();
+      final ErrorToken token=tokens.get(0);
+      assertEquals("Invalid double validation result",1,tokens.size());
+      assertEquals("Invalid double validation result",422,fex.getStatus());
+      assertEquals("Invalid double validation result",keyName,token.getProperty());
+      assertEquals("Invalid double validation result","Test",token.getType());
+      assertEquals("Invalid double validation result","must_not_be_empty",token.getToken());
+    }
+  }
+}

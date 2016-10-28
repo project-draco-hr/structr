@@ -2,14 +2,10 @@
   src.append("\tpublic static boolean ");
   src.append(type.getMethod());
   src.append("(final AbstractNode obj, final SecurityContext securityContext, final ErrorBuffer errorBuffer) throws FrameworkException {\n\n");
-  src.append("\t\tboolean error = !obj.isValid(errorBuffer);\n\n");
-  if (!actionList.isEmpty()) {
-    for (    final ActionEntry action : actionList) {
-      src.append("\t\tif (!error) {\n");
-      src.append("\t\t\terror |= ").append(action.getSource("obj")).append(";\n");
-      src.append("\t\t}\n");
-    }
+  src.append("\t\tboolean valid = obj.isValid(errorBuffer);\n\n");
+  for (  final ActionEntry action : actionList) {
+    src.append("\t\t").append(action.getSource("obj")).append(";\n");
   }
-  src.append("\n\t\treturn !error;\n");
+  src.append("\n\t\treturn valid;\n");
   src.append("\t}\n\n");
 }

@@ -1,0 +1,28 @@
+{
+  if (key != null) {
+    List<? extends GraphObject> result=null;
+    final Object value=object.getProperty(key);
+    try {
+      if (object instanceof NodeInterface) {
+        result=StructrApp.getInstance().nodeQuery().and(key,value).sortDescending(GraphObject.createdDate).getAsList();
+      }
+ else       if (object instanceof RelationshipInterface) {
+        result=StructrApp.getInstance().relationshipQuery().and(key,value).sortDescending(GraphObject.createdDate).getAsList();
+      }
+ else {
+        logger.error("GraphObject is neither NodeInterface nor RelationshipInterface");
+        return false;
+      }
+    }
+ catch (    FrameworkException fex) {
+      logger.warn("Unable to fetch list of nodes for uniqueness check",fex);
+    }
+    for (    final GraphObject foundNode : result) {
+      if (foundNode.getId() != object.getId()) {
+        errorBuffer.add(new UniqueToken(object.getType(),key,object.getUuid()));
+        return false;
+      }
+    }
+  }
+  return true;
+}

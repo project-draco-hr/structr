@@ -1,0 +1,73 @@
+{
+  try (final Tx tx=app.tx()){
+    app.create(SchemaNode.class,"lowercase");
+    tx.success();
+    fail("SchemaNode name constraint violation!");
+  }
+ catch (  FrameworkException fex) {
+    final List<ErrorToken> tokens=fex.getErrorBuffer().getErrorTokens();
+    final ErrorToken token=tokens.get(0);
+    assertEquals("Invalid uniqueness validation result",1,tokens.size());
+    assertEquals("Invalid constraint violation error token",422,fex.getStatus());
+    assertEquals("Invalid constraint violation error token","name",token.getProperty());
+    assertEquals("Invalid constraint violation error token","SchemaNode",token.getType());
+    assertEquals("Invalid constraint violation error token","must_match",token.getToken());
+  }
+  try (final Tx tx=app.tx()){
+    app.create(SchemaNode.class,"7NumberAsFirstChar");
+    tx.success();
+    fail("SchemaNode name constraint violation!");
+  }
+ catch (  FrameworkException fex) {
+    final List<ErrorToken> tokens=fex.getErrorBuffer().getErrorTokens();
+    final ErrorToken token=tokens.get(0);
+    assertEquals("Invalid uniqueness validation result",1,tokens.size());
+    assertEquals("Invalid constraint violation error token",422,fex.getStatus());
+    assertEquals("Invalid constraint violation error token","name",token.getProperty());
+    assertEquals("Invalid constraint violation error token","SchemaNode",token.getType());
+    assertEquals("Invalid constraint violation error token","must_match",token.getToken());
+  }
+  try (final Tx tx=app.tx()){
+    app.create(SchemaNode.class,"7Number");
+    tx.success();
+    fail("SchemaNode name constraint violation!");
+  }
+ catch (  FrameworkException fex) {
+    final List<ErrorToken> tokens=fex.getErrorBuffer().getErrorTokens();
+    final ErrorToken token=tokens.get(0);
+    assertEquals("Invalid uniqueness validation result",1,tokens.size());
+    assertEquals("Invalid constraint violation error token",422,fex.getStatus());
+    assertEquals("Invalid constraint violation error token","name",token.getProperty());
+    assertEquals("Invalid constraint violation error token","SchemaNode",token.getType());
+    assertEquals("Invalid constraint violation error token","must_match",token.getToken());
+  }
+  try (final Tx tx=app.tx()){
+    app.create(SchemaNode.class,"7Number");
+    tx.success();
+    fail("SchemaNode name constraint violation!");
+  }
+ catch (  FrameworkException fex) {
+    final List<ErrorToken> tokens=fex.getErrorBuffer().getErrorTokens();
+    final ErrorToken token=tokens.get(0);
+    assertEquals("Invalid uniqueness validation result",1,tokens.size());
+    assertEquals("Invalid constraint violation error token",422,fex.getStatus());
+    assertEquals("Invalid constraint violation error token","name",token.getProperty());
+    assertEquals("Invalid constraint violation error token","SchemaNode",token.getType());
+    assertEquals("Invalid constraint violation error token","must_match",token.getToken());
+  }
+  try (final Tx tx=app.tx()){
+    app.create(SchemaNode.class,"Valid");
+    app.create(SchemaNode.class,"Valid");
+    tx.success();
+    fail("SchemaNode uniqueness constraint violation!");
+  }
+ catch (  FrameworkException fex) {
+    final List<ErrorToken> tokens=fex.getErrorBuffer().getErrorTokens();
+    final ErrorToken token=tokens.get(0);
+    assertEquals("Invalid uniqueness validation result",1,tokens.size());
+    assertEquals("Invalid constraint violation error token",422,fex.getStatus());
+    assertEquals("Invalid constraint violation error token","name",token.getProperty());
+    assertEquals("Invalid constraint violation error token","SchemaNode",token.getType());
+    assertEquals("Invalid constraint violation error token","already_taken",token.getToken());
+  }
+}

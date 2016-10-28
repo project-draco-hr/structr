@@ -1,0 +1,125 @@
+{
+  try (final Tx tx=app.tx()){
+    app.create(TestOne.class,new NodeAttribute<>(GraphObject.id,"1234567890123456789012345678901"));
+    tx.success();
+    fail("UUID format constraint violated!");
+  }
+ catch (  FrameworkException fex) {
+    final List<ErrorToken> tokens=fex.getErrorBuffer().getErrorTokens();
+    final ErrorToken token=tokens.get(0);
+    assertEquals("Invalid uniqueness validation result",1,tokens.size());
+    assertEquals("Invalid UUID uniqueness validation result",422,fex.getStatus());
+    assertEquals("Invalid UUID uniqueness validation result","id",token.getProperty());
+    assertEquals("Invalid UUID uniqueness validation result","TestOne",token.getType());
+    assertEquals("Invalid UUID uniqueness validation result","must_match",token.getToken());
+  }
+  try (final Tx tx=app.tx()){
+    app.create(TestOne.class,new NodeAttribute<>(GraphObject.id,"123456789012345678901234567890123"));
+    tx.success();
+    fail("UUID format constraint violated!");
+  }
+ catch (  FrameworkException fex) {
+    final List<ErrorToken> tokens=fex.getErrorBuffer().getErrorTokens();
+    final ErrorToken token=tokens.get(0);
+    assertEquals("Invalid uniqueness validation result",1,tokens.size());
+    assertEquals("Invalid UUID uniqueness validation result",422,fex.getStatus());
+    assertEquals("Invalid UUID uniqueness validation result","id",token.getProperty());
+    assertEquals("Invalid UUID uniqueness validation result","TestOne",token.getType());
+    assertEquals("Invalid UUID uniqueness validation result","must_match",token.getToken());
+  }
+  try (final Tx tx=app.tx()){
+    app.create(TestOne.class,new NodeAttribute<>(GraphObject.id,"1234567890123456789012345678901234567890"));
+    tx.success();
+    fail("UUID format constraint violated!");
+  }
+ catch (  FrameworkException fex) {
+    final List<ErrorToken> tokens=fex.getErrorBuffer().getErrorTokens();
+    final ErrorToken token=tokens.get(0);
+    assertEquals("Invalid uniqueness validation result",1,tokens.size());
+    assertEquals("Invalid UUID uniqueness validation result",422,fex.getStatus());
+    assertEquals("Invalid UUID uniqueness validation result","id",token.getProperty());
+    assertEquals("Invalid UUID uniqueness validation result","TestOne",token.getType());
+    assertEquals("Invalid UUID uniqueness validation result","must_match",token.getToken());
+  }
+  try (final Tx tx=app.tx()){
+    app.create(TestOne.class,new NodeAttribute<>(GraphObject.id,"123456789012345678g0123456789012"));
+    tx.success();
+    fail("UUID format constraint violated!");
+  }
+ catch (  FrameworkException fex) {
+    final List<ErrorToken> tokens=fex.getErrorBuffer().getErrorTokens();
+    final ErrorToken token=tokens.get(0);
+    assertEquals("Invalid uniqueness validation result",1,tokens.size());
+    assertEquals("Invalid UUID uniqueness validation result",422,fex.getStatus());
+    assertEquals("Invalid UUID uniqueness validation result","id",token.getProperty());
+    assertEquals("Invalid UUID uniqueness validation result","TestOne",token.getType());
+    assertEquals("Invalid UUID uniqueness validation result","must_match",token.getToken());
+  }
+  try (final Tx tx=app.tx()){
+    app.create(TestOne.class,new NodeAttribute<>(GraphObject.id,"!bcdefabcdefabcdefabcdefabcdefab"));
+    tx.success();
+    fail("UUID format constraint violated!");
+  }
+ catch (  FrameworkException fex) {
+    final List<ErrorToken> tokens=fex.getErrorBuffer().getErrorTokens();
+    final ErrorToken token=tokens.get(0);
+    assertEquals("Invalid uniqueness validation result",1,tokens.size());
+    assertEquals("Invalid UUID uniqueness validation result",422,fex.getStatus());
+    assertEquals("Invalid UUID uniqueness validation result","id",token.getProperty());
+    assertEquals("Invalid UUID uniqueness validation result","TestOne",token.getType());
+    assertEquals("Invalid UUID uniqueness validation result","must_match",token.getToken());
+  }
+  try (final Tx tx=app.tx()){
+    app.create(TestOne.class,new NodeAttribute<>(GraphObject.id,"sdfkgjh34t"));
+    tx.success();
+    fail("UUID format constraint violated!");
+  }
+ catch (  FrameworkException fex) {
+    final List<ErrorToken> tokens=fex.getErrorBuffer().getErrorTokens();
+    final ErrorToken token=tokens.get(0);
+    assertEquals("Invalid uniqueness validation result",1,tokens.size());
+    assertEquals("Invalid UUID uniqueness validation result",422,fex.getStatus());
+    assertEquals("Invalid UUID uniqueness validation result","id",token.getProperty());
+    assertEquals("Invalid UUID uniqueness validation result","TestOne",token.getType());
+    assertEquals("Invalid UUID uniqueness validation result","must_match",token.getToken());
+  }
+  try (final Tx tx=app.tx()){
+    app.create(TestOne.class,new NodeAttribute<>(GraphObject.id,"abcdef1234567890ABCDEF1234567890"));
+    tx.success();
+  }
+ catch (  FrameworkException fex) {
+    fail("UUID validation failed for valid result.");
+  }
+  try (final Tx tx=app.tx()){
+    app.create(TestOne.class,new NodeAttribute<>(GraphObject.id,"xy-"));
+    tx.success();
+    fail("UUID format constraint violated!");
+  }
+ catch (  FrameworkException fex) {
+    final List<ErrorToken> tokens=fex.getErrorBuffer().getErrorTokens();
+    final ErrorToken token=tokens.get(0);
+    assertEquals("Invalid uniqueness validation result",1,tokens.size());
+    assertEquals("Invalid UUID uniqueness validation result",422,fex.getStatus());
+    assertEquals("Invalid UUID uniqueness validation result","id",token.getProperty());
+    assertEquals("Invalid UUID uniqueness validation result","TestOne",token.getType());
+    assertEquals("Invalid UUID uniqueness validation result","must_match",token.getToken());
+  }
+  try (final Tx tx=app.tx()){
+    app.create(TestOne.class,new NodeAttribute<>(GraphObject.id,""));
+    tx.success();
+    fail("UUID not empty constraint violated!");
+  }
+ catch (  FrameworkException fex) {
+    final List<ErrorToken> tokens=fex.getErrorBuffer().getErrorTokens();
+    final ErrorToken token1=tokens.get(0);
+    final ErrorToken token2=tokens.get(1);
+    assertEquals("Invalid uniqueness validation result",2,tokens.size());
+    assertEquals("Invalid UUID uniqueness validation result",422,fex.getStatus());
+    assertEquals("Invalid UUID uniqueness validation result","id",token1.getProperty());
+    assertEquals("Invalid UUID uniqueness validation result","TestOne",token1.getType());
+    assertEquals("Invalid UUID uniqueness validation result","must_not_be_empty",token1.getToken());
+    assertEquals("Invalid UUID uniqueness validation result","id",token2.getProperty());
+    assertEquals("Invalid UUID uniqueness validation result","TestOne",token2.getType());
+    assertEquals("Invalid UUID uniqueness validation result","must_match",token2.getToken());
+  }
+}

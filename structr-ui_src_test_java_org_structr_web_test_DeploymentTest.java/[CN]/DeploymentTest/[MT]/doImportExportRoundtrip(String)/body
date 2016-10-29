@@ -11,6 +11,8 @@
       }
        final Map<String,Object> initialImportParams=new HashMap<>();
       initialImportParams.put("source",tmp.toString());
+      System.out.println("############################################");
+      System.out.println(source);
       app.command(DeployCommand.class).execute(initialImportParams);
       Files.walkFileTree(tmp,new DeletingFileVisitor());
       final Map<String,Object> firstExportParams=new HashMap<>();
@@ -18,6 +20,8 @@
       firstExportParams.put("target",tmp.toString());
       app.command(DeployCommand.class).execute(firstExportParams);
       final String firstExportedSource=new String(Files.readAllBytes(pages.resolve("test.html")),Charset.forName("utf-8")).trim();
+      System.out.println("############################################");
+      System.out.println(firstExportedSource);
       final Map<String,Object> secondImportParams=new HashMap<>();
       secondImportParams.put("source",tmp.toString());
       app.command(DeployCommand.class).execute(secondImportParams);
@@ -27,6 +31,8 @@
       secondExportParams.put("target",tmp.toString());
       app.command(DeployCommand.class).execute(secondExportParams);
       final String secondExportedSource=new String(Files.readAllBytes(pages.resolve("test.html")),Charset.forName("utf-8")).trim();
+      System.out.println("############################################");
+      System.out.println(secondExportedSource);
       assertEquals("Invalid import/export roundtrip for DeployCommand from source to first export",source,firstExportedSource);
       assertEquals("Invalid import/export roundtrip for DeployCommand from first to second export",firstExportedSource,secondExportedSource);
       assertEquals("Invalid import/export roundtrip for DeployCommand from second export to source",secondExportedSource,source);

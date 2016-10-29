@@ -1,0 +1,30 @@
+{
+  classPath=System.getProperty("java.class.path");
+  instanceName=StructrApp.getConfigurationValue(Services.APPLICATION_INSTANCE_NAME,"");
+  instanceStage=StructrApp.getConfigurationValue(Services.APPLICATION_INSTANCE_STAGE,"");
+  final Pattern outerPattern=Pattern.compile("(structr-.+?(?=.jar))");
+  final Matcher outerMatcher=outerPattern.matcher(classPath);
+  while (outerMatcher.find()) {
+    final String group=outerMatcher.group();
+    final Pattern innerPattern=Pattern.compile("(structr-core|structr-rest|structr-ui)-([^-]*(?:-SNAPSHOT){0,1})-{0,1}(?:([0-9]{0,12})\\.{0,1}([0-9a-f]{0,5})).*");
+    final Matcher innerMatcher=innerPattern.matcher(group);
+    final Map<String,String> module=new HashMap<>();
+    if (innerMatcher.matches()) {
+      module.put("version",innerMatcher.group(2));
+      module.put("date",innerMatcher.group(3));
+      module.put("build",innerMatcher.group(4));
+      components.put(innerMatcher.group(1),module);
+    }
+  }
+  for (  final StructrModule module : StructrApp.getConfiguration().getModules().values()) {
+    final Map<String,Object> map=new LinkedHashMap<>();
+    map.put("source",module.getClass().getProtectionDomain().getCodeSource().getLocation().getPath());
+    if (module.getDependencies() != null) {
+      map.put("dependencies",module.getDependencies());
+    }
+    if (module.getFeatures() != null) {
+      map.put("features",module.getFeatures());
+    }
+    modules.put(module.getName(),map);
+  }
+}

@@ -1,0 +1,30 @@
+{
+  final String sessionId=webSocketData.getSessionId();
+  logger.debug("CONSOLE received from session {}",sessionId);
+  final String line=(String)webSocketData.getNodeData().get("line");
+  final Boolean completion=(Boolean)webSocketData.getNodeData().get("completion");
+  final SecurityContext securityContext=getWebSocket().getSecurityContext();
+  if (console == null) {
+    console=new Console(securityContext,null);
+  }
+  ByteArrayOutputStream out=new ByteArrayOutputStream();
+  OutputStreamWritable writeable=new OutputStreamWritable(out);
+  try {
+    if (Boolean.TRUE.equals(completion)) {
+      final List<TabCompletionResult> tabCompletionResult=console.getTabCompletion(line);
+      final JsonArray commands=new JsonArray();
+      for (      final TabCompletionResult res : tabCompletionResult) {
+        commands.add(new JsonPrimitive(res.getCommand()));
+      }
+      getWebSocket().send(MessageBuilder.forName(getCommand()).callback(webSocketData.getCallback()).data("commands",commands).data("prompt",console.getPrompt()).data("mode",console.getMode()).data("versionInfo",VersionHelper.getFullVersionInfo()).message(out.toString("UTF-8")).build(),true);
+    }
+ else {
+      console.run(line,writeable);
+      getWebSocket().send(MessageBuilder.forName(getCommand()).callback(webSocketData.getCallback()).data("prompt",console.getPrompt()).data("mode",console.getMode()).data("versionInfo",VersionHelper.getFullVersionInfo()).message(out.toString("UTF-8")).build(),true);
+    }
+  }
+ catch (  Exception ex) {
+    logger.debug("Error while executing console line {}",line,ex);
+    getWebSocket().send(MessageBuilder.forName(getCommand()).callback(webSocketData.getCallback()).data("prompt",console.getPrompt()).data("mode",console.getMode()).data("versionInfo",VersionHelper.getFullVersionInfo()).message(ex.getMessage()).build(),true);
+  }
+}
